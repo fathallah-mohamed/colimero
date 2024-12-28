@@ -13,6 +13,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -38,21 +39,32 @@ export default function Login() {
     if (isLoading) return;
     
     setIsLoading(true);
+    setError("");
 
     try {
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
       if (!trimmedEmail || !trimmedPassword) {
-        throw new Error("Veuillez remplir tous les champs");
+        setError("Veuillez remplir tous les champs");
+        return;
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: trimmedPassword,
       });
 
-      if (error) throw error;
+      if (signInError) {
+        if (signInError.message === "Invalid login credentials") {
+          setError("Email ou mot de passe incorrect");
+        } else if (signInError.message.includes("Email not confirmed")) {
+          setError("Veuillez confirmer votre email avant de vous connecter");
+        } else {
+          setError(signInError.message);
+        }
+        return;
+      }
 
       toast({
         title: "Connexion réussie",
@@ -61,22 +73,7 @@ export default function Login() {
 
     } catch (error: any) {
       console.error("Login error:", error);
-      
-      let errorMessage = "Une erreur est survenue lors de la connexion";
-      
-      if (error.message === "Veuillez remplir tous les champs") {
-        errorMessage = error.message;
-      } else if (error.message?.includes("Invalid login credentials")) {
-        errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message?.includes("Email not confirmed")) {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      }
-
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: errorMessage,
-      });
+      setError("Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
     }
@@ -90,6 +87,12 @@ export default function Login() {
           <h1 className="text-2xl font-bold text-center mb-6">Connexion</h1>
           
           <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
