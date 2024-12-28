@@ -38,10 +38,10 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
       if (userType === 'carrier') {
         toast({
           title: "Connexion réussie",
-          description: "En tant que transporteur, vous ne pouvez pas réserver de tournée. Vous allez être redirigé vers vos tournées.",
+          description: "En tant que transporteur, vous ne pouvez pas réserver de tournée. Vous allez être redirigé vers la page d'envoi de colis.",
           variant: "default",
         });
-        navigate('/mes-tournees');
+        navigate('/envoyer-un-colis');
       } else {
         toast({
           title: "Connexion réussie",
