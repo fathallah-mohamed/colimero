@@ -41,27 +41,22 @@ export default function Login() {
     setIsLoading(true);
     setError("");
 
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
+      setError("Veuillez remplir tous les champs");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const trimmedEmail = email.trim().toLowerCase();
-      const trimmedPassword = password.trim();
-
-      if (!trimmedEmail || !trimmedPassword) {
-        setError("Veuillez remplir tous les champs");
-        setIsLoading(false);
-        return;
-      }
-
-      console.log("Attempting login with:", { email: trimmedEmail });
-
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: trimmedPassword,
       });
 
       if (signInError) {
-        console.error("Sign in error:", signInError);
-        
-        // Handle specific error cases
         if (signInError.message === "Invalid login credentials") {
           setError("Email ou mot de passe incorrect. Pour les tests, utilisez: fakhri2@transport.com / password123");
         } else if (signInError.message.includes("Email not confirmed")) {
@@ -71,8 +66,6 @@ export default function Login() {
         }
         return;
       }
-
-      console.log("Login successful:", data);
 
       toast({
         title: "Connexion réussie",
