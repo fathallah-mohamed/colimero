@@ -41,28 +41,19 @@ export default function Login() {
     setIsLoading(true);
     setError("");
 
-    const trimmedEmail = email.trim().toLowerCase();
-    const trimmedPassword = password.trim();
-
-    if (!trimmedEmail || !trimmedPassword) {
-      setError("Veuillez remplir tous les champs");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      console.log("Attempting login with:", trimmedEmail); // Debug log
+      console.log("Starting login attempt with email:", email);
       
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password: trimmedPassword,
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
       });
 
       if (signInError) {
-        console.error("Login error:", signInError); // Debug log
+        console.error("Login error:", signInError);
         
         if (signInError.message === "Invalid login credentials") {
-          setError("Email ou mot de passe incorrect. Pour les tests, utilisez: fakhri2@transport.com / password123");
+          setError("Email ou mot de passe incorrect");
         } else if (signInError.message.includes("Email not confirmed")) {
           setError("Veuillez confirmer votre email avant de vous connecter");
         } else {
@@ -71,7 +62,7 @@ export default function Login() {
         return;
       }
 
-      console.log("Login successful:", data); // Debug log
+      console.log("Login successful:", data);
 
       toast({
         title: "Connexion réussie",
@@ -79,7 +70,7 @@ export default function Login() {
       });
 
     } catch (error: any) {
-      console.error("Unexpected error:", error); // Debug log
+      console.error("Unexpected error:", error);
       setError("Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
@@ -146,7 +137,7 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Add test credentials hint */}
+          {/* Test credentials hint */}
           <div className="mt-4 p-4 bg-blue-50 rounded-md text-sm text-blue-600">
             <p className="font-medium">Identifiants de test :</p>
             <p>Email : fakhri2@transport.com</p>
