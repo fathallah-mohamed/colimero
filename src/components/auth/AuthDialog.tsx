@@ -5,7 +5,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
@@ -29,13 +28,6 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
             <DialogTitle className="text-2xl font-bold">
               {view === "login" ? "Connexion requise" : "Créer un compte client"}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              className="h-6 w-6 p-0"
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
           <p className="text-lg text-gray-600">
             {view === "login" 

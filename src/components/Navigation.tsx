@@ -36,7 +36,6 @@ export default function Navigation() {
   };
 
   const menuItems = [
-    { name: "Accueil", href: "/" },
     { name: "Planifier une tournée", href: "/planifier-une-tournee", highlight: true },
     { name: "Envoyer un colis", href: "/envoyer-un-colis", highlight: true },
     { name: "Transporteurs", href: "/nos-transporteurs" },
