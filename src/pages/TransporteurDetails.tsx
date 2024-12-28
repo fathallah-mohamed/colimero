@@ -54,16 +54,15 @@ export default function TransporteurDetails() {
         firstName={transporteur.first_name}
       />
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <TransporteurLeftColumn
-            email={transporteur.email || ""}
-            phone={transporteur.phone || ""}
-            phoneSecondary={transporteur.phone_secondary}
-            address={transporteur.address || ""}
-            capacities={transporteur.carrier_capacities}
-            services={transporteur.carrier_services}
-          />
-        </div>
+        <TransporteurLeftColumn
+          email={transporteur.email || ""}
+          phone={transporteur.phone || ""}
+          phoneSecondary={transporteur.phone_secondary}
+          address={transporteur.address || ""}
+          capacities={transporteur.carrier_capacities}
+          services={transporteur.carrier_services}
+          transporteurName={transporteur.company_name || transporteur.first_name}
+        />
       </div>
     </TransporteurLayout>
   );
