@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +12,8 @@ export interface TransporteurToursProps {
 }
 
 export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
+  const navigate = useNavigate();
+
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Chargement...</div>;
   }
@@ -41,7 +44,10 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
+            onClick={() => tour.carriers?.id && navigate(`/nos-transporteurs/${tour.carriers.id}`)}
+          >
             {tour.carriers?.avatar_url ? (
               <img
                 src={tour.carriers.avatar_url}
