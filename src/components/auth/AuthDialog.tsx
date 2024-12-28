@@ -14,9 +14,10 @@ type View = "login" | "forgot-password";
 interface AuthDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
+export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogProps) {
   const [view, setView] = useState<View>("login");
 
   return (
@@ -37,7 +38,10 @@ export default function AuthDialog({ isOpen, onClose }: AuthDialogProps) {
 
         {view === "login" ? (
           <LoginForm
-            onSuccess={onClose}
+            onSuccess={() => {
+              onSuccess?.();
+              onClose();
+            }}
             onForgotPassword={() => setView("forgot-password")}
           />
         ) : (
