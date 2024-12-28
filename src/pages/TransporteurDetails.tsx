@@ -7,14 +7,12 @@ import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLe
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ContactForm } from "@/components/transporteur/ContactForm";
+import type { Tour } from "@/types/tour";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
 
-  const { data: transporteur, isLoading } = useQuery({
+  const { data: transporteur, isLoading: isLoadingTransporteur } = useQuery({
     queryKey: ["transporteur", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,7 +39,7 @@ export default function TransporteurDetails() {
     },
   });
 
-  const { data: publicTours } = useQuery({
+  const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
     queryKey: ["transporteur-tours", id, "public"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -55,12 +53,12 @@ export default function TransporteurDetails() {
       return data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
-      }));
+      })) as Tour[];
     },
     enabled: !!id,
   });
 
-  const { data: privateTours } = useQuery({
+  const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
     queryKey: ["transporteur-tours", id, "private"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -74,20 +72,18 @@ export default function TransporteurDetails() {
       return data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
-      }));
+      })) as Tour[];
     },
     enabled: !!id,
   });
 
-  if (isLoading) {
+  if (isLoadingTransporteur) {
     return <TransporteurLoading />;
   }
 
   if (!transporteur) {
     return <TransporteurNotFound />;
   }
-
-  const transporteurName = transporteur.company_name || transporteur.first_name;
 
   return (
     <TransporteurLayout>
@@ -97,7 +93,7 @@ export default function TransporteurDetails() {
         avatarUrl={transporteur.avatar_url}
         firstName={transporteur.first_name}
       />
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <TransporteurLeftColumn
           email={transporteur.email || ""}
           phone={transporteur.phone || ""}
@@ -105,28 +101,20 @@ export default function TransporteurDetails() {
           address={transporteur.address || ""}
           capacities={transporteur.carrier_capacities}
           services={transporteur.carrier_services}
-          transporteurName={transporteurName}
+          transporteurName={transporteur.company_name || transporteur.first_name}
         />
         <div className="grid md:grid-cols-2 gap-6">
-          <TransporteurTours tours={publicTours || []} type="public" />
-          <TransporteurTours tours={privateTours || []} type="private" />
+          <TransporteurTours 
+            tours={publicTours} 
+            type="public"
+            isLoading={isLoadingPublic}
+          />
+          <TransporteurTours 
+            tours={privateTours} 
+            type="private"
+            isLoading={isLoadingPrivate}
+          />
         </div>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button className="w-full max-w-md mx-auto block" size="lg">
-              Contacter {transporteurName}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:max-w-lg">
-            <SheetHeader>
-              <SheetTitle>Contacter {transporteurName}</SheetTitle>
-            </SheetHeader>
-            <ContactForm 
-              transporteurEmail={transporteur.email || ""} 
-              transporteurName={transporteurName} 
-            />
-          </SheetContent>
-        </Sheet>
       </div>
     </TransporteurLayout>
   );
