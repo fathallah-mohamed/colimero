@@ -27,8 +27,10 @@ export function TransporteurLeftColumn({
         phoneSecondary={phoneSecondary}
         address={address}
       />
-      <TransporteurServices services={services} />
-      <TransporteurCapacities capacities={capacities} />
+      <div className="grid grid-cols-2 gap-6">
+        <TransporteurServices services={services} />
+        <TransporteurCapacities capacities={capacities} />
+      </div>
     </div>
   );
 }
