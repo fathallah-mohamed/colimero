@@ -3,6 +3,16 @@ import { Star, Package, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface CarrierStats {
+  satisfaction_rate: number | null;
+  total_deliveries: number | null;
+  cities_covered: number | null;
+}
+
+interface AggregatedStats extends CarrierStats {
+  count: number;
+}
+
 export function TransporteurStats() {
   const { data: stats } = useQuery({
     queryKey: ["carrier-stats"],
@@ -14,7 +24,7 @@ export function TransporteurStats() {
       if (error) throw error;
 
       // Calculer les moyennes et totaux
-      const aggregatedStats = data.reduce(
+      const aggregatedStats = data.reduce<AggregatedStats>(
         (acc, curr) => ({
           satisfaction_rate: acc.satisfaction_rate + (curr.satisfaction_rate || 0),
           total_deliveries: acc.total_deliveries + (curr.total_deliveries || 0),
