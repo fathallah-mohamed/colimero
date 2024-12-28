@@ -37,20 +37,20 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
       });
 
-      if (error) {
-        throw error;
+      if (error) throw error;
+
+      if (data.user) {
+        toast({
+          title: "Connexion réussie",
+          description: "Vous allez être redirigé vers la page d'accueil",
+        });
+        navigate("/");
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Vous allez être redirigé vers la page d'accueil",
-      });
-
     } catch (error: any) {
       console.error("Erreur de connexion:", error);
       toast({
@@ -82,6 +82,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="exemple@email.com"
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -93,6 +94,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -109,6 +111,7 @@ export default function Login() {
             <button 
               onClick={() => navigate("/inscription")} 
               className="text-blue-500 hover:underline"
+              disabled={isLoading}
             >
               Créer un compte
             </button>
