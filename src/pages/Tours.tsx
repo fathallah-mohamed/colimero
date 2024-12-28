@@ -22,7 +22,10 @@ export default function Tours() {
           *,
           carriers (
             company_name,
-            avatar_url
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
           )
         `)
         .eq("departure_country", departureCountry)
@@ -110,7 +113,9 @@ export default function Tours() {
                         {format(new Date(tour.departure_date), "d MMMM", { locale: fr })}
                       </span>
                     </div>
-                    <span className="text-gray-600">{tour.carrier_capacities?.price_per_kg || 5}€/kg</span>
+                    <span className="text-gray-600">
+                      {tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 5}€/kg
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-2">
