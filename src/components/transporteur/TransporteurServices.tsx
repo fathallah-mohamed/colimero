@@ -32,7 +32,7 @@ export function TransporteurServices({ services }: TransporteurServicesProps) {
   if (!services?.length) {
     return (
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-6">Services</h2>
+        <h2 className="text-xl font-semibold mb-6">Services proposés</h2>
         <p className="text-center text-gray-500 py-4">
           Aucun service disponible
         </p>
