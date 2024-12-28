@@ -15,16 +15,16 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est déjà connecté
+    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+      if (session?.user) {
         navigate("/");
       }
     });
 
-    // Écouter les changements d'état de connexion
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
+      if (session?.user) {
         navigate("/");
       }
     });
@@ -37,12 +37,17 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      console.log("Attempting login with email:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) throw error;
+      console.log("Login response:", { data, error });
+
+      if (error) {
+        throw error;
+      }
 
       if (data.user) {
         toast({
@@ -50,15 +55,21 @@ export default function Login() {
           description: "Vous allez être redirigé vers la page d'accueil",
         });
         navigate("/");
+      } else {
+        throw new Error("No user data received");
       }
     } catch (error: any) {
-      console.error("Erreur de connexion:", error);
+      console.error("Login error details:", error);
+      
+      let errorMessage = "Une erreur est survenue lors de la connexion";
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      }
+
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: error.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : error.message,
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
