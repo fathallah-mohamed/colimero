@@ -1,15 +1,17 @@
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface TransporteurContactProps {
   email: string;
   phone: string;
-  phoneSecondary?: string;
+  phoneSecondary?: string | null;
+  address?: string;
 }
 
-export function TransporteurContact({ email, phone, phoneSecondary }: TransporteurContactProps) {
+export function TransporteurContact({ email, phone, phoneSecondary, address }: TransporteurContactProps) {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-xl font-semibold mb-6">Informations de contact</h2>
+    <Card className="p-6">
+      <h2 className="text-xl font-semibold mb-6">Contact</h2>
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
@@ -20,6 +22,7 @@ export function TransporteurContact({ email, phone, phoneSecondary }: Transporte
             <p className="text-gray-900">{email}</p>
           </div>
         </div>
+
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
             <Phone className="h-5 w-5 text-[#00B0F0]" />
@@ -27,20 +30,24 @@ export function TransporteurContact({ email, phone, phoneSecondary }: Transporte
           <div>
             <p className="text-sm text-gray-500">Téléphone</p>
             <p className="text-gray-900">{phone}</p>
+            {phoneSecondary && (
+              <p className="text-gray-600 text-sm">{phoneSecondary}</p>
+            )}
           </div>
         </div>
-        {phoneSecondary && (
+
+        {address && (
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-              <Phone className="h-5 w-5 text-[#00B0F0]" />
+              <MapPin className="h-5 w-5 text-[#00B0F0]" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Téléphone secondaire</p>
-              <p className="text-gray-900">{phoneSecondary}</p>
+              <p className="text-sm text-gray-500">Adresse</p>
+              <p className="text-gray-900">{address}</p>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

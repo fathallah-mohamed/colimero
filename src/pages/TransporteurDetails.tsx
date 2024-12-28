@@ -75,6 +75,7 @@ export default function TransporteurDetails() {
 
   const publicTours = transporteur.tours?.filter((tour) => tour.type === "public") || [];
   const privateTours = transporteur.tours?.filter((tour) => tour.type === "private") || [];
+  const carrierCapacity = transporteur.carrier_capacities?.[0];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -93,6 +94,7 @@ export default function TransporteurDetails() {
               email={transporteur.email || ""}
               phone={transporteur.phone || ""}
               phoneSecondary={transporteur.phone_secondary}
+              address={transporteur.address || ""}
             />
 
             <Card className="p-6">
@@ -105,7 +107,7 @@ export default function TransporteurDetails() {
                   <div>
                     <p className="text-sm text-gray-500">Capacité totale</p>
                     <p className="text-gray-900">
-                      {transporteur.carrier_capacities?.[0]?.total_capacity} kg
+                      {carrierCapacity?.total_capacity || 0} kg
                     </p>
                   </div>
                 </div>
@@ -116,7 +118,7 @@ export default function TransporteurDetails() {
                   <div>
                     <p className="text-sm text-gray-500">Prix par kilo</p>
                     <p className="text-gray-900">
-                      {transporteur.carrier_capacities?.[0]?.price_per_kg}€/kg
+                      {carrierCapacity?.price_per_kg || 0}€/kg
                     </p>
                   </div>
                 </div>
