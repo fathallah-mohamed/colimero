@@ -19,7 +19,6 @@ export interface Tour {
   departure_country: string;
   destination_country: string;
   carriers?: {
-    id: string;
     company_name: string;
     avatar_url: string | null;
     carrier_capacities: Array<{
