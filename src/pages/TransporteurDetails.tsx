@@ -3,9 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader";
 import { TransporteurContact } from "@/components/transporteur/TransporteurContact";
+import { TransporteurCapacities } from "@/components/transporteur/TransporteurCapacities";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Package, Truck, Scale, Home, Calendar } from "lucide-react";
+import { Package, Truck, Home, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -45,7 +46,7 @@ export default function TransporteurDetails() {
           )
         `)
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -97,33 +98,10 @@ export default function TransporteurDetails() {
               address={transporteur.address || ""}
             />
 
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Capacités et Tarifs</h2>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-                    <Scale className="h-5 w-5 text-[#00B0F0]" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Capacité totale</p>
-                    <p className="text-gray-900">
-                      {carrierCapacity?.total_capacity || 0} kg
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-                    <Scale className="h-5 w-5 text-[#00B0F0]" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Prix par kilo</p>
-                    <p className="text-gray-900">
-                      {carrierCapacity?.price_per_kg || 0}€/kg
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <TransporteurCapacities
+              totalCapacity={carrierCapacity?.total_capacity}
+              pricePerKg={carrierCapacity?.price_per_kg}
+            />
 
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Services</h2>
