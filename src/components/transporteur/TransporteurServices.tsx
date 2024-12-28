@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Package, Truck, Home, Sofa, Laptop, TShirt } from "lucide-react";
+import { Package, Truck, Home, Sofa, Laptop, Shirt } from "lucide-react";
 
 interface Service {
   id: string;
@@ -18,7 +18,7 @@ const SERVICE_ICONS: { [key: string]: any } = {
   'livraison_express': Truck,
   'livraison_domicile': Home,
   'electronique': Laptop,
-  'vetements': TShirt,
+  'vetements': Shirt,
 };
 
 const SERVICE_LABELS: { [key: string]: string } = {
