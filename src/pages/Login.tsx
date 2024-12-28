@@ -17,7 +17,6 @@ export default function Login() {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      console.log("Initial session check:", session);
       if (session?.user) {
         navigate("/");
       }
@@ -26,7 +25,6 @@ export default function Login() {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", { _event, session });
       if (session?.user) {
         navigate("/");
       }
@@ -37,35 +35,30 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
 
     try {
-      // Basic validation
-      if (!email || !password) {
-        throw new Error("Veuillez remplir tous les champs");
-      }
-
       const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
-      console.log("Attempting login with email:", trimmedEmail);
+      if (!trimmedEmail || !trimmedPassword) {
+        throw new Error("Veuillez remplir tous les champs");
+      }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: trimmedPassword,
       });
 
-      console.log("Auth response:", { data, error });
-
       if (error) throw error;
-      if (!data?.user) throw new Error("Aucune donnée utilisateur reçue");
 
       toast({
         title: "Connexion réussie",
         description: "Vous allez être redirigé vers la page d'accueil",
       });
 
-      navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
       
