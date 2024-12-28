@@ -25,6 +25,14 @@ export function TourFilters({
 }: TourFiltersProps) {
   const isMaghrebCountry = MAGHREB_COUNTRIES.includes(departureCountry);
 
+  const handleSwitch = () => {
+    // Only allow switching if it doesn't result in Maghreb-to-Maghreb
+    if (!MAGHREB_COUNTRIES.includes(destinationCountry)) {
+      onDepartureChange(destinationCountry);
+      onDestinationChange(departureCountry);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -46,9 +54,12 @@ export function TourFilters({
         </div>
 
         <div className="flex items-center justify-center pt-6">
-          <div className="bg-gray-100 p-2 rounded-full">
+          <button 
+            onClick={handleSwitch}
+            className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors"
+          >
             <ArrowLeftRight className="h-5 w-5 text-gray-500" />
-          </div>
+          </button>
         </div>
 
         <div className="flex-1">
