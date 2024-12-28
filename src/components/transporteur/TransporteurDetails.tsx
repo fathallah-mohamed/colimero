@@ -6,11 +6,13 @@ import { TransporteurLayout } from "@/components/transporteur/TransporteurLayout
 import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLeftColumn";
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
+import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import type { Tour } from "@/types/tour";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
 
-  const { data: transporteur, isLoading } = useQuery({
+  const { data: transporteur, isLoading: isLoadingTransporteur } = useQuery({
     queryKey: ["transporteur", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,7 +39,45 @@ export default function TransporteurDetails() {
     },
   });
 
-  if (isLoading) {
+  const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
+    queryKey: ["transporteur-tours", id, "public"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select("*")
+        .eq("carrier_id", id)
+        .eq("type", "public")
+        .gte("departure_date", new Date().toISOString());
+
+      if (error) throw error;
+      return data?.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+      })) as Tour[];
+    },
+    enabled: !!id,
+  });
+
+  const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
+    queryKey: ["transporteur-tours", id, "private"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select("*")
+        .eq("carrier_id", id)
+        .eq("type", "private")
+        .gte("departure_date", new Date().toISOString());
+
+      if (error) throw error;
+      return data?.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+      })) as Tour[];
+    },
+    enabled: !!id,
+  });
+
+  if (isLoadingTransporteur) {
     return <TransporteurLoading />;
   }
 
@@ -63,6 +103,10 @@ export default function TransporteurDetails() {
           services={transporteur.carrier_services}
           transporteurName={transporteur.company_name || transporteur.first_name}
         />
+        <div className="grid md:grid-cols-2 gap-6">
+          <TransporteurTours tours={publicTours} type="public" isLoading={isLoadingPublic} />
+          <TransporteurTours tours={privateTours} type="private" isLoading={isLoadingPrivate} />
+        </div>
       </div>
     </TransporteurLayout>
   );

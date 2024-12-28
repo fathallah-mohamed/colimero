@@ -12,7 +12,6 @@ export default function EnvoyerColis() {
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
 
-  // Séparer les requêtes pour les tournées publiques et privées
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, "public"],
     queryFn: async () => {
@@ -73,7 +72,6 @@ export default function EnvoyerColis() {
 
   const handleDepartureChange = (value: string) => {
     setDepartureCountry(value);
-    // Si le pays de départ est un pays du Maghreb, forcer la destination à la France
     if (["TN", "DZ", "MA"].includes(value)) {
       setDestinationCountry("FR");
     }
