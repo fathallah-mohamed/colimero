@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import type { Tour } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
@@ -33,7 +34,12 @@ export default function EnvoyerColis() {
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
-      return data;
+      
+      // Parse the route JSON into proper RouteStop array
+      return data.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+      })) as Tour[];
     },
   });
 
@@ -58,7 +64,12 @@ export default function EnvoyerColis() {
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
-      return data;
+      
+      // Parse the route JSON into proper RouteStop array
+      return data.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+      })) as Tour[];
     },
   });
 
