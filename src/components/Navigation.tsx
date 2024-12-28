@@ -1,10 +1,39 @@
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User } from "@supabase/supabase-js";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Vérifier l'état de connexion initial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Écouter les changements d'état de connexion
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   const menuItems = [
     { name: "Accueil", href: "/" },
@@ -49,9 +78,34 @@ export default function Navigation() {
                 {item.name}
               </Link>
             ))}
-            <Button asChild variant="outline" className="ml-4">
-              <Link to="/connexion">Se connecter</Link>
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">Mon compte</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mon compte transporteur</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profil">Profil</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/mes-tournees">Mes tournées</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/demandes-approbation">Demandes d'approbation</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild variant="outline" className="ml-4">
+                <Link to="/connexion">Se connecter</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -77,11 +131,43 @@ export default function Navigation() {
               {item.name}
             </Link>
           ))}
-          <div className="mt-4 px-3">
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/connexion">Se connecter</Link>
-            </Button>
-          </div>
+          {user ? (
+            <>
+              <Link
+                to="/profil"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Profil
+              </Link>
+              <Link
+                to="/mes-tournees"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Mes tournées
+              </Link>
+              <Link
+                to="/demandes-approbation"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Demandes d'approbation
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+              >
+                Déconnexion
+              </button>
+            </>
+          ) : (
+            <div className="mt-4 px-3">
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/connexion">Se connecter</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

@@ -13,6 +13,9 @@ import Blog from "./pages/Blog";
 import APropos from "./pages/APropos";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+import MesTournees from "./pages/MesTournees";
+import DemandesApprobation from "./pages/DemandesApprobation";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +36,9 @@ const App = () => (
           <Route path="/a-propos" element={<APropos />} />
           <Route path="/nous-contacter" element={<Contact />} />
           <Route path="/connexion" element={<Login />} />
+          <Route path="/profil" element={<Profile />} />
+          <Route path="/mes-tournees" element={<MesTournees />} />
+          <Route path="/demandes-approbation" element={<DemandesApprobation />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
