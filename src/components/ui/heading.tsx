@@ -1,28 +1,25 @@
-import { cn } from "@/lib/utils";
 import { HTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
 
 interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
-  gradient?: boolean;
 }
 
-export function Heading({
-  level = 1,
-  children,
-  className,
-  gradient,
-  ...props
-}: HeadingProps) {
+export function Heading({ level = 1, className, children, ...props }: HeadingProps) {
   const Component = `h${level}` as keyof JSX.IntrinsicElements;
-  
+
   return (
     <Component
       className={cn(
         "font-bold tracking-tight",
-        gradient && "bg-gradient-to-r from-[#2563EB] to-[#00B0F0] bg-clip-text text-transparent",
-        level === 1 && "text-3xl md:text-4xl",
-        level === 2 && "text-2xl md:text-3xl",
-        level === 3 && "text-xl md:text-2xl",
+        {
+          "text-4xl": level === 1,
+          "text-3xl": level === 2,
+          "text-2xl": level === 3,
+          "text-xl": level === 4,
+          "text-lg": level === 5,
+          "text-base": level === 6,
+        },
         className
       )}
       {...props}
