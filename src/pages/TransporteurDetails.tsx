@@ -126,7 +126,7 @@ export default function TransporteurDetails() {
             <ButtonCustom variant="outline">
               Voir les tournées
             </ButtonCustom>
-            <ButtonCustom>
+            <ButtonCustom variant="default">
               Contacter le transporteur
             </ButtonCustom>
           </div>

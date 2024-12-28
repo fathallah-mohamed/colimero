@@ -1,15 +1,15 @@
 import { Button as ShadcnButton } from "./button";
 import { cn } from "@/lib/utils";
-import { ButtonProps } from "@radix-ui/react-button";
-import { forwardRef } from "react";
+import { ButtonHTMLAttributes, forwardRef } from "react";
 
-export interface CustomButtonProps extends ButtonProps {
+export interface CustomButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'outline' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
+  children?: React.ReactNode;
 }
 
 const ButtonCustom = forwardRef<HTMLButtonElement, CustomButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
+  ({ className, variant, size, children, ...props }, ref) => {
     return (
       <ShadcnButton
         ref={ref}
@@ -26,7 +26,9 @@ const ButtonCustom = forwardRef<HTMLButtonElement, CustomButtonProps>(
         variant={variant}
         size={size}
         {...props}
-      />
+      >
+        {children}
+      </ShadcnButton>
     );
   }
 );

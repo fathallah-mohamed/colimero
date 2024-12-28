@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
+import { HTMLAttributes } from "react";
 
-interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
+interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
   gradient?: boolean;
 }
