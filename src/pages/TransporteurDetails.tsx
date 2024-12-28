@@ -6,6 +6,7 @@ import { TransporteurLayout } from "@/components/transporteur/TransporteurLayout
 import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLeftColumn";
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
+import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
@@ -37,6 +38,38 @@ export default function TransporteurDetails() {
     },
   });
 
+  const { data: publicTours } = useQuery({
+    queryKey: ["transporteur-tours", id, "public"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select("*")
+        .eq("carrier_id", id)
+        .eq("type", "public")
+        .gte("departure_date", new Date().toISOString());
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: privateTours } = useQuery({
+    queryKey: ["transporteur-tours", id, "private"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select("*")
+        .eq("carrier_id", id)
+        .eq("type", "private")
+        .gte("departure_date", new Date().toISOString());
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
   if (isLoading) {
     return <TransporteurLoading />;
   }
@@ -53,7 +86,7 @@ export default function TransporteurDetails() {
         avatarUrl={transporteur.avatar_url}
         firstName={transporteur.first_name}
       />
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         <TransporteurLeftColumn
           email={transporteur.email || ""}
           phone={transporteur.phone || ""}
@@ -63,6 +96,11 @@ export default function TransporteurDetails() {
           services={transporteur.carrier_services}
           transporteurName={transporteur.company_name || transporteur.first_name}
         />
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          <TransporteurTours tours={publicTours || []} type="public" />
+          <TransporteurTours tours={privateTours || []} type="private" />
+        </div>
       </div>
     </TransporteurLayout>
   );
