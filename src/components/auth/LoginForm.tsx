@@ -41,7 +41,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
           description: "En tant que transporteur, vous ne pouvez pas réserver de tournée. Vous allez être redirigé vers la page d'envoi de colis.",
           variant: "default",
         });
-        navigate('/envoyer-un-colis');
+        onSuccess?.();
       } else {
         toast({
           title: "Connexion réussie",
