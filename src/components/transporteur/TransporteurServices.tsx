@@ -12,20 +12,12 @@ interface TransporteurServicesProps {
   services: Service[];
 }
 
-const SERVICE_ICONS = {
-  livraison_express: Truck,
-  livraison_domicile: Home,
-  transport_standard: Package,
-  transport_volumineux: Sofa,
-  collecte_programmee: Calendar,
-};
-
-const SERVICE_NAMES = {
-  livraison_express: "Livraison Express",
-  livraison_domicile: "Livraison à domicile",
-  transport_standard: "Transport de colis standard",
-  transport_volumineux: "Transport d'objets volumineux",
-  collecte_programmee: "Collecte programmée",
+const ICON_COMPONENTS = {
+  truck: Truck,
+  home: Home,
+  package: Package,
+  sofa: Sofa,
+  calendar: Calendar,
 };
 
 export function TransporteurServices({ services }: TransporteurServicesProps) {
@@ -45,8 +37,7 @@ export function TransporteurServices({ services }: TransporteurServicesProps) {
       <h2 className="text-xl font-semibold mb-6">Services proposés</h2>
       <div className="space-y-6">
         {services.map((service) => {
-          const IconComponent = SERVICE_ICONS[service.service_type as keyof typeof SERVICE_ICONS] || Package;
-          const serviceName = SERVICE_NAMES[service.service_type as keyof typeof SERVICE_NAMES] || service.service_type;
+          const IconComponent = ICON_COMPONENTS[service.icon as keyof typeof ICON_COMPONENTS] || Package;
 
           return (
             <div key={service.id} className="flex items-start gap-4">
@@ -54,7 +45,7 @@ export function TransporteurServices({ services }: TransporteurServicesProps) {
                 <IconComponent className="h-6 w-6 text-[#00B0F0]" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{serviceName}</h3>
+                <h3 className="font-medium text-gray-900">{service.service_type}</h3>
                 {service.description && (
                   <p className="text-sm text-gray-600 mt-1">{service.description}</p>
                 )}
