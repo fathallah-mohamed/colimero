@@ -25,8 +25,8 @@ export default function Login() {
     
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", { event, session });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", { _event, session });
       if (session?.user) {
         navigate("/");
       }
@@ -49,10 +49,6 @@ export default function Login() {
       const trimmedPassword = password.trim();
 
       console.log("Attempting login with email:", trimmedEmail);
-
-      // First, check if the user exists
-      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers();
-      console.log("Users in database:", users);
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
