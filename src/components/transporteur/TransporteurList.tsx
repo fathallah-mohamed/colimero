@@ -109,7 +109,7 @@ export function TransporteurList() {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => navigate(`/transporteurs/${carrier.id}`)}
+                      onClick={() => navigate(`/nos-transporteurs/${carrier.id}`)}
                       className="text-blue-600 border-blue-600 hover:bg-blue-50"
                     >
                       Voir le profil
