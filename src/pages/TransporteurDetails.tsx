@@ -89,10 +89,6 @@ export default function TransporteurDetails() {
         firstName={transporteur.first_name}
       />
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        <div className="grid md:grid-cols-2 gap-6">
-          <TransporteurTours tours={publicTours || []} type="public" />
-          <TransporteurTours tours={privateTours || []} type="private" />
-        </div>
         <TransporteurLeftColumn
           email={transporteur.email || ""}
           phone={transporteur.phone || ""}
@@ -102,6 +98,10 @@ export default function TransporteurDetails() {
           services={transporteur.carrier_services}
           transporteurName={transporteurName}
         />
+        <div className="grid md:grid-cols-2 gap-6">
+          <TransporteurTours tours={publicTours || []} type="public" />
+          <TransporteurTours tours={privateTours || []} type="private" />
+        </div>
       </div>
     </TransporteurLayout>
   );
