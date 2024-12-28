@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Truck, Package, Clock, Home, Calendar, Sofa } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -9,6 +8,14 @@ const SERVICE_EMOJIS = {
   transport_standard: "📦",
   transport_volumineux: "🛋️",
   collecte_programmee: "📅",
+};
+
+const SERVICE_LABELS = {
+  livraison_express: "Livraison Express",
+  livraison_domicile: "Livraison à domicile",
+  transport_standard: "Transport de colis standard",
+  transport_volumineux: "Transport d'objets volumineux",
+  collecte_programmee: "Collecte programmée",
 };
 
 export default function Services() {
@@ -63,11 +70,7 @@ export default function Services() {
                   {SERVICE_EMOJIS[service.service_type as keyof typeof SERVICE_EMOJIS]}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {service.service_type === "livraison_express" && "Livraison Express"}
-                  {service.service_type === "livraison_domicile" && "Livraison à domicile"}
-                  {service.service_type === "transport_standard" && "Transport de colis standard"}
-                  {service.service_type === "transport_volumineux" && "Transport d'objets volumineux"}
-                  {service.service_type === "collecte_programmee" && "Collecte programmée"}
+                  {SERVICE_LABELS[service.service_type as keyof typeof SERVICE_LABELS]}
                 </h3>
                 <p className="text-gray-600">
                   {service.description}
