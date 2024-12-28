@@ -52,7 +52,10 @@ export default function TransporteurDetails() {
         .gte("departure_date", new Date().toISOString());
 
       if (error) throw error;
-      return data;
+      return data?.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+      }));
     },
     enabled: !!id,
   });
@@ -68,7 +71,10 @@ export default function TransporteurDetails() {
         .gte("departure_date", new Date().toISOString());
 
       if (error) throw error;
-      return data;
+      return data?.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+      }));
     },
     enabled: !!id,
   });

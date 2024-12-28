@@ -9,6 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { BookingForm } from "../booking/BookingForm";
 import { LoginForm } from "../auth/LoginForm";
+import { Json } from "@/integrations/supabase/types";
+
+interface RouteStop {
+  name: string;
+  location: string;
+  time: string;
+  type: 'pickup' | 'dropoff';
+}
 
 interface Tour {
   id: number;
@@ -17,7 +25,7 @@ interface Tour {
   destination_country: string;
   remaining_capacity: number;
   total_capacity: number;
-  route: any[];
+  route: RouteStop[];
 }
 
 interface TransporteurToursProps {
@@ -147,7 +155,7 @@ export function TransporteurTours({ tours, type }: TransporteurToursProps) {
           {selectedTour && (
             <BookingForm
               tourId={selectedTour.id}
-              pickupCity={selectedCity || selectedTour.route[0].name}
+              pickupCity={selectedCity || (selectedTour.route[0] as RouteStop).name}
               onSuccess={() => setShowBookingForm(false)}
               onCancel={() => setShowBookingForm(false)}
             />
