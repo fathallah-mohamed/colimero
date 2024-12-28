@@ -22,7 +22,7 @@ export default function TransporteurDetails() {
             price_per_kg,
             offers_home_delivery
           ),
-          carrier_services (
+          carrier_services!carrier_services_carrier_id_fkey (
             id,
             service_type,
             description,
@@ -90,9 +90,11 @@ export default function TransporteurDetails() {
               address={transporteur.address || ""}
             />
 
-            <TransporteurCapacities />
+            <TransporteurCapacities
+              capacities={transporteur.carrier_capacities}
+            />
 
-            <TransporteurServices services={transporteur.carrier_services} />
+            <TransporteurServices services={transporteur.carrier_services || []} />
           </div>
 
           {/* Colonne de droite */}

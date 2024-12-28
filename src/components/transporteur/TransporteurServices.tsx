@@ -12,6 +12,14 @@ interface TransporteurServicesProps {
   services: Service[];
 }
 
+const SERVICE_LABELS: { [key: string]: string } = {
+  'transport_standard': 'Transport standard',
+  'transport_volumineux': 'Transport volumineux',
+  'livraison_express': 'Livraison express',
+  'livraison_domicile': 'Livraison à domicile',
+  'collecte_programmee': 'Collecte programmée'
+};
+
 const ICON_COMPONENTS = {
   truck: Truck,
   home: Home,
@@ -38,6 +46,7 @@ export function TransporteurServices({ services }: TransporteurServicesProps) {
       <div className="space-y-6">
         {services.map((service) => {
           const IconComponent = ICON_COMPONENTS[service.icon as keyof typeof ICON_COMPONENTS] || Package;
+          const serviceLabel = SERVICE_LABELS[service.service_type] || service.service_type;
 
           return (
             <div key={service.id} className="flex items-start gap-4">
@@ -45,7 +54,7 @@ export function TransporteurServices({ services }: TransporteurServicesProps) {
                 <IconComponent className="h-6 w-6 text-[#00B0F0]" />
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{service.service_type}</h3>
+                <h3 className="font-medium text-gray-900">{serviceLabel}</h3>
                 {service.description && (
                   <p className="text-sm text-gray-600 mt-1">{service.description}</p>
                 )}
