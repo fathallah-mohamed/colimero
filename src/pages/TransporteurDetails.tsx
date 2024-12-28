@@ -10,11 +10,6 @@ import { Package, Truck, Home, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-interface CarrierService {
-  id: string;
-  service_type: string;
-}
-
 export default function TransporteurDetails() {
   const { id } = useParams();
 
@@ -29,10 +24,6 @@ export default function TransporteurDetails() {
             total_capacity,
             price_per_kg,
             offers_home_delivery
-          ),
-          carrier_services (
-            id,
-            service_type
           ),
           tours (
             id,
@@ -97,34 +88,6 @@ export default function TransporteurDetails() {
             <TransporteurCapacities
               capacities={transporteur.carrier_capacities}
             />
-
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Services</h2>
-              <div className="space-y-4">
-                {transporteur.carrier_services?.map((service: CarrierService) => (
-                  <div key={service.id} className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-                      {service.service_type === "express_delivery" ? (
-                        <Truck className="h-5 w-5 text-[#00B0F0]" />
-                      ) : service.service_type === "home_delivery" ? (
-                        <Home className="h-5 w-5 text-[#00B0F0]" />
-                      ) : (
-                        <Package className="h-5 w-5 text-[#00B0F0]" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-gray-900">
-                        {service.service_type === "express_delivery"
-                          ? "Livraison Express"
-                          : service.service_type === "home_delivery"
-                          ? "Livraison à domicile"
-                          : "Traitement spécial fragile"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </div>
         </div>
       </div>
