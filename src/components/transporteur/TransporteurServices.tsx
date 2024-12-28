@@ -42,19 +42,19 @@ export function TransporteurServices({ services }: TransporteurServicesProps) {
 
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-6">Services</h2>
-      <div className="space-y-4">
+      <h2 className="text-xl font-semibold mb-6">Services proposés</h2>
+      <div className="space-y-6">
         {services.map((service) => {
           const IconComponent = SERVICE_ICONS[service.service_type as keyof typeof SERVICE_ICONS] || Package;
           const serviceName = SERVICE_NAMES[service.service_type as keyof typeof SERVICE_NAMES] || service.service_type;
 
           return (
-            <div key={service.id} className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center flex-shrink-0">
-                <IconComponent className="h-5 w-5 text-[#00B0F0]" />
+            <div key={service.id} className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-xl bg-[#E5DEFF] flex items-center justify-center flex-shrink-0">
+                <IconComponent className="h-6 w-6 text-[#00B0F0]" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">{serviceName}</p>
+                <h3 className="font-medium text-gray-900">{serviceName}</h3>
                 {service.description && (
                   <p className="text-sm text-gray-600 mt-1">{service.description}</p>
                 )}
