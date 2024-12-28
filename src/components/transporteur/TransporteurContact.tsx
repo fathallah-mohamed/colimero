@@ -25,7 +25,12 @@ export function TransporteurContact({
           </div>
           <div>
             <p className="text-sm text-gray-500">Email</p>
-            <p className="text-gray-900">{email}</p>
+            <a 
+              href={`mailto:${email}`}
+              className="text-gray-900 hover:text-[#00B0F0] transition-colors"
+            >
+              {email}
+            </a>
           </div>
         </div>
         <div className="flex gap-3">
@@ -34,11 +39,17 @@ export function TransporteurContact({
           </div>
           <div>
             <p className="text-sm text-gray-500">Téléphone</p>
-            <a href={`tel:${phone}`} className="text-gray-900 hover:text-[#00B0F0] transition-colors">
+            <a 
+              href={`tel:${phone}`}
+              className="text-gray-900 hover:text-[#00B0F0] transition-colors"
+            >
               {phone}
             </a>
             {phoneSecondary && (
-              <a href={`tel:${phoneSecondary}`} className="block text-gray-600 text-sm hover:text-[#00B0F0] transition-colors">
+              <a 
+                href={`tel:${phoneSecondary}`}
+                className="block text-gray-900 hover:text-[#00B0F0] transition-colors"
+              >
                 {phoneSecondary}
               </a>
             )}
