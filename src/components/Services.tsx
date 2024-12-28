@@ -1,25 +1,30 @@
-import { Truck, Package, Clock, Shield } from "lucide-react";
+import { Truck, Package, Clock, Home, Calendar } from "lucide-react";
 
 const services = [
   {
-    name: "Livraison Express",
-    description: "Livraison rapide de vos colis en 3-5 jours ouvrés",
+    name: "Transport standard",
+    description: "Transport standard de vos colis",
     icon: Truck,
   },
   {
-    name: "Suivi en temps réel",
-    description: "Suivez votre colis à chaque étape de son voyage",
+    name: "Transport volumineux",
+    description: "Pour vos colis volumineux et lourds",
     icon: Package,
   },
   {
-    name: "Service 24/7",
-    description: "Support client disponible à tout moment",
+    name: "Livraison express",
+    description: "Livraison rapide garantie",
     icon: Clock,
   },
   {
-    name: "Assurance incluse",
-    description: "Tous vos envois sont assurés jusqu'à 500€",
-    icon: Shield,
+    name: "Livraison à domicile",
+    description: "Livraison directement chez vous",
+    icon: Home,
+  },
+  {
+    name: "Collecte programmée",
+    description: "Collecte à une date programmée",
+    icon: Calendar,
   },
 ];
 
@@ -36,7 +41,7 @@ export default function Services() {
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-7xl sm:mt-20 lg:mt-24">
-          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
             {services.map((service) => (
               <div key={service.name} className="relative flex flex-col items-center">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary">
