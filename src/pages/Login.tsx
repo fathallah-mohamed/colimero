@@ -47,15 +47,19 @@ export default function Login() {
 
       if (!trimmedEmail || !trimmedPassword) {
         setError("Veuillez remplir tous les champs");
+        setIsLoading(false);
         return;
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      console.log("Attempting login with:", { email: trimmedEmail }); // Debug log
+
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: trimmedPassword,
       });
 
       if (signInError) {
+        console.error("Sign in error:", signInError); // Debug log
         if (signInError.message === "Invalid login credentials") {
           setError("Email ou mot de passe incorrect");
         } else if (signInError.message.includes("Email not confirmed")) {
@@ -65,6 +69,8 @@ export default function Login() {
         }
         return;
       }
+
+      console.log("Login successful:", data); // Debug log
 
       toast({
         title: "Connexion réussie",
