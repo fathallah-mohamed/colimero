@@ -75,6 +75,8 @@ export default function Login() {
         errorMessage = error.message;
       } else if (error.message?.includes("Invalid login credentials")) {
         errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message?.includes("Email not confirmed")) {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
       }
 
       toast({
