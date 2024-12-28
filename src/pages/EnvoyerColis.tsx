@@ -7,12 +7,16 @@ import { ArrowLeftRight, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
   const [selectedStop, setSelectedStop] = useState<string | null>(null);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
 
   const { data: tours, isLoading } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, tourType],
@@ -39,35 +43,43 @@ export default function EnvoyerColis() {
     },
   });
 
+  const handleReservationClick = () => {
+    setLoginDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-center mb-8">Envoyer un colis</h1>
+        <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
 
         <div className="space-y-6">
           {/* Filtres */}
           <div className="flex items-center gap-2">
             <Select value={departureCountry} onValueChange={setDepartureCountry}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[160px] bg-white">
                 <SelectValue placeholder="Pays de départ" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="FR">France</SelectItem>
                 <SelectItem value="TN">Tunisie</SelectItem>
+                <SelectItem value="DZ">Algérie</SelectItem>
+                <SelectItem value="MA">Maroc</SelectItem>
               </SelectContent>
             </Select>
 
             <ArrowLeftRight className="h-5 w-5 text-gray-400" />
 
             <Select value={destinationCountry} onValueChange={setDestinationCountry}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[160px] bg-white">
                 <SelectValue placeholder="Pays de destination" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="TN">Tunisie</SelectItem>
                 <SelectItem value="FR">France</SelectItem>
+                <SelectItem value="DZ">Algérie</SelectItem>
+                <SelectItem value="MA">Maroc</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -183,7 +195,14 @@ export default function EnvoyerColis() {
                     {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
                   </div>
 
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                  <Button 
+                    className="w-full bg-blue-500 hover:bg-blue-600"
+                    onClick={() => {
+                      if (selectedStop?.startsWith(tour.id.toString())) {
+                        handleReservationClick();
+                      }
+                    }}
+                  >
                     {selectedStop?.startsWith(tour.id.toString()) ? "Réserver" : "Sélectionnez un point de collecte"}
                   </Button>
                 </div>
@@ -192,6 +211,35 @@ export default function EnvoyerColis() {
           </div>
         </div>
       </div>
+
+      {/* Dialog de connexion */}
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connexion requise</DialogTitle>
+            <DialogDescription>
+              Connectez-vous pour réserver cette tournée.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="exemple@email.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input id="password" type="password" />
+            </div>
+            <Button className="w-full bg-blue-500 hover:bg-blue-600">
+              Se connecter
+            </Button>
+            <div className="flex justify-between text-sm text-blue-500">
+              <button className="hover:underline">Mot de passe oublié ?</button>
+              <button className="hover:underline">Créer un compte</button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
