@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import type { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { EmailVerificationDialog } from "@/components/tour/EmailVerificationDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface TransporteurToursProps {
   tours: Tour[];
@@ -15,8 +17,10 @@ export interface TransporteurToursProps {
 
 export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedPoints, setSelectedPoints] = useState<Record<number, string>>({});
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isEmailVerificationOpen, setIsEmailVerificationOpen] = useState(false);
   const [currentTourId, setCurrentTourId] = useState<number | null>(null);
 
   if (isLoading) {
@@ -40,7 +44,20 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
   const handleReservation = (tourId: number) => {
     setCurrentTourId(tourId);
-    setIsAuthOpen(true);
+    if (type === "private") {
+      setIsEmailVerificationOpen(true);
+    } else {
+      setIsAuthOpen(true);
+    }
+  };
+
+  const handleEmailVerification = (email: string) => {
+    // Ici vous pouvez ajouter la logique de vérification d'email
+    toast({
+      title: "Email vérifié",
+      description: "Nous vous contacterons prochainement pour finaliser votre réservation.",
+    });
+    setIsEmailVerificationOpen(false);
   };
 
   const handleAuthSuccess = () => {
@@ -155,6 +172,12 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
         isOpen={isAuthOpen} 
         onClose={() => setIsAuthOpen(false)}
         onSuccess={handleAuthSuccess}
+      />
+
+      <EmailVerificationDialog
+        isOpen={isEmailVerificationOpen}
+        onClose={() => setIsEmailVerificationOpen(false)}
+        onVerify={handleEmailVerification}
       />
     </div>
   );
