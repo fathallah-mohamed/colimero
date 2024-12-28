@@ -35,8 +35,8 @@ export default function CurrentTours() {
           </div>
         </div>
         <div className="text-center">
-          <Button asChild variant="default">
-            <Link to="/transporteurs">Découvrir toutes les tournées</Link>
+          <Button asChild variant="default" className="bg-blue-600 hover:bg-blue-700">
+            <Link to="/nos-transporteurs">Voir toutes les tournées</Link>
           </Button>
         </div>
       </div>

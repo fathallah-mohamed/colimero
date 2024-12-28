@@ -20,9 +20,9 @@ export default function Hero() {
             size="lg"
             className="bg-white text-blue-600 hover:bg-gray-100"
           >
-            <Link to="/envoyer" className="flex items-center">
+            <Link to="/envoyer-un-colis" className="flex items-center">
               <Package className="mr-2 h-5 w-5" />
-              Envoyer un colis
+              Expédier maintenant
             </Link>
           </Button>
           <Button
@@ -31,9 +31,9 @@ export default function Hero() {
             variant="outline"
             className="bg-transparent text-white border-white hover:bg-white/10"
           >
-            <Link to="/planifier" className="flex items-center">
+            <Link to="/planifier-une-tournee" className="flex items-center">
               <Search className="mr-2 h-5 w-5" />
-              Planifier une tournée
+              Créer une tournée
             </Link>
           </Button>
         </div>

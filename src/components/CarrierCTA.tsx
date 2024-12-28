@@ -43,8 +43,8 @@ export default function CarrierCTA() {
           ))}
         </div>
         <div className="text-center">
-          <Button asChild size="lg">
-            <Link to="/planifier">Créer une tournée</Link>
+          <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Link to="/planifier-une-tournee">Commencer maintenant</Link>
           </Button>
           <p className="text-sm text-gray-500 mt-4">
             Vous devez être connecté pour planifier une tournée
