@@ -166,6 +166,51 @@ export type Database = {
           },
         ]
       }
+      carrier_reviews: {
+        Row: {
+          carrier_id: string
+          client_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+        }
+        Insert: {
+          carrier_id: string
+          client_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          updated_at?: string
+        }
+        Update: {
+          carrier_id?: string
+          client_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carrier_reviews_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrier_reviews_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       carrier_services: {
         Row: {
           carrier_id: string
@@ -203,6 +248,7 @@ export type Database = {
           address: string | null
           authorized_routes: Json | null
           avatar_url: string | null
+          cities_covered: number | null
           company_details: Json | null
           company_name: string | null
           coverage_area: string[] | null
@@ -214,12 +260,16 @@ export type Database = {
           last_name: string | null
           phone: string | null
           phone_secondary: string | null
+          rating: number | null
+          satisfaction_rate: number | null
           siret: string | null
+          total_deliveries: number | null
         }
         Insert: {
           address?: string | null
           authorized_routes?: Json | null
           avatar_url?: string | null
+          cities_covered?: number | null
           company_details?: Json | null
           company_name?: string | null
           coverage_area?: string[] | null
@@ -231,12 +281,16 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
+          rating?: number | null
+          satisfaction_rate?: number | null
           siret?: string | null
+          total_deliveries?: number | null
         }
         Update: {
           address?: string | null
           authorized_routes?: Json | null
           avatar_url?: string | null
+          cities_covered?: number | null
           company_details?: Json | null
           company_name?: string | null
           coverage_area?: string[] | null
@@ -248,7 +302,10 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
+          rating?: number | null
+          satisfaction_rate?: number | null
           siret?: string | null
+          total_deliveries?: number | null
         }
         Relationships: []
       }

@@ -83,7 +83,7 @@ export function TransporteurList() {
                       </h3>
                       <div className="flex items-center text-yellow-400">
                         <Star className="h-4 w-4 fill-current" />
-                        <span className="ml-1 text-sm text-gray-600">4.8/5</span>
+                        <span className="ml-1 text-sm text-gray-600">{carrier.rating}/5</span>
                       </div>
                     </div>
 
