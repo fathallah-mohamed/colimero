@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Truck, Home, Package, Sofa, Calendar } from "lucide-react";
+import { Package, Truck, Home, Sofa, Laptop, TShirt } from "lucide-react";
 
 interface Service {
   id: string;
@@ -12,56 +12,62 @@ interface TransporteurServicesProps {
   services: Service[];
 }
 
-const SERVICE_LABELS: { [key: string]: string } = {
-  'transport_standard': 'Transport standard',
-  'transport_volumineux': 'Transport volumineux',
-  'livraison_express': 'Livraison express',
-  'livraison_domicile': 'Livraison à domicile',
-  'collecte_programmee': 'Collecte programmée'
+const SERVICE_ICONS: { [key: string]: any } = {
+  'transport_standard': Package,
+  'transport_volumineux': Sofa,
+  'livraison_express': Truck,
+  'livraison_domicile': Home,
+  'electronique': Laptop,
+  'vetements': TShirt,
 };
 
-const ICON_COMPONENTS = {
-  truck: Truck,
-  home: Home,
-  package: Package,
-  sofa: Sofa,
-  calendar: Calendar,
+const SERVICE_LABELS: { [key: string]: string } = {
+  'transport_standard': 'Colis standards',
+  'transport_volumineux': 'Meubles',
+  'livraison_express': 'Livraison Express',
+  'livraison_domicile': 'Collecte & Livraison à Domicile',
+  'electronique': 'Électronique',
+  'vetements': 'Vêtements',
 };
 
 export function TransporteurServices({ services }: TransporteurServicesProps) {
   if (!services?.length) {
-    return (
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-6">Services proposés</h2>
-        <p className="text-center text-gray-500 py-4">
-          Aucun service disponible
-        </p>
-      </Card>
-    );
+    return null;
   }
 
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-6">Services proposés</h2>
+      <h2 className="text-xl font-semibold mb-6">Services et Capacités</h2>
+      
       <div className="space-y-6">
-        {services.map((service) => {
-          const IconComponent = ICON_COMPONENTS[service.icon as keyof typeof ICON_COMPONENTS] || Package;
-          const serviceLabel = SERVICE_LABELS[service.service_type] || service.service_type;
+        <div>
+          <h3 className="text-sm font-medium text-gray-600 mb-3">Types d'objets acceptés</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {services.map((service) => {
+              const IconComponent = SERVICE_ICONS[service.service_type] || Package;
+              const serviceLabel = SERVICE_LABELS[service.service_type] || service.service_type;
 
-          return (
-            <div key={service.id} className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-xl bg-[#E5DEFF] flex items-center justify-center flex-shrink-0">
-                <IconComponent className="h-6 w-6 text-[#00B0F0]" />
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">{serviceLabel}</h3>
-                {service.description && (
-                  <p className="text-sm text-gray-600 mt-1">{service.description}</p>
-                )}
-              </div>
+              return (
+                <div key={service.id} className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
+                    <IconComponent className="h-4 w-4 text-[#00B0F0]" />
+                  </div>
+                  <span className="text-sm text-gray-700">{serviceLabel}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-gray-600 mb-3">Services additionnels</h3>
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
+              <Home className="h-4 w-4 text-[#00B0F0]" />
             </div>
-          );
-        })}
+            <span className="text-sm text-gray-700">Collecte & Livraison à Domicile</span>
+          </div>
+        </div>
       </div>
     </Card>
   );
