@@ -46,7 +46,6 @@ const formSchema = z.object({
       location: z.string().min(1, "L'adresse est requise"),
       collection_date: z.date(),
       time: z.string().min(1, "L'heure est requise"),
-      capacity: z.number().min(0, "La capacité ne peut pas être négative"),
       type: z.literal("pickup")
     })
   ).min(1, "Au moins un point de collecte est requis"),
@@ -70,7 +69,6 @@ export default function CreateTourForm() {
           location: "",
           time: "",
           type: "pickup",
-          capacity: 1000,
           collection_date: new Date(),
         },
       ],
@@ -97,6 +95,14 @@ export default function CreateTourForm() {
         return;
       }
 
+      const routeWithoutCapacity = values.route.map(point => ({
+        name: point.name,
+        location: point.location,
+        collection_date: point.collection_date.toISOString(),
+        time: point.time,
+        type: point.type,
+      }));
+
       const { error } = await supabase.from("tours").insert({
         carrier_id: user.id,
         departure_country: values.departure_country,
@@ -105,7 +111,7 @@ export default function CreateTourForm() {
         total_capacity: values.total_capacity,
         remaining_capacity: values.remaining_capacity,
         type: values.type,
-        route: values.route,
+        route: routeWithoutCapacity,
       });
 
       if (error) throw error;
@@ -291,7 +297,6 @@ export default function CreateTourForm() {
                   location: "",
                   time: "",
                   type: "pickup",
-                  capacity: 0,
                   collection_date: new Date(),
                 })
               }

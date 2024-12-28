@@ -122,24 +122,6 @@ export function CollectionPointForm({ index, onRemove, form }: CollectionPointFo
           </FormItem>
         )}
       />
-
-      <FormField
-        control={form.control}
-        name={`route.${index}.capacity`}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Capacité disponible (kg)</FormLabel>
-            <FormControl>
-              <Input 
-                type="number" 
-                {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   );
 }
