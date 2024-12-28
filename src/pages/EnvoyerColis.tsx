@@ -35,7 +35,6 @@ export default function EnvoyerColis() {
 
       if (error) throw error;
       
-      // Parse the route JSON into proper RouteStop array
       return data.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
@@ -65,7 +64,6 @@ export default function EnvoyerColis() {
 
       if (error) throw error;
       
-      // Parse the route JSON into proper RouteStop array
       return data.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
@@ -106,7 +104,7 @@ export default function EnvoyerColis() {
           {tourType === "public" ? (
             <TransporteurTours 
               tours={publicTours} 
-              type="public" 
+              type="public"
               isLoading={isLoadingPublic}
             />
           ) : (
