@@ -1,20 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pencil, Trash2, Loader2 } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { DeleteAccountButton } from "@/components/profile/DeleteAccountButton";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -113,36 +103,6 @@ export default function Profile() {
     }
     setIsEditing(false);
     setLoading(false);
-  };
-
-  const handleDeleteProfile = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez être connecté pour supprimer votre profil",
-      });
-      return;
-    }
-
-    const { error } = await supabase.auth.admin.deleteUser(session.user.id);
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de supprimer le profil",
-      });
-    } else {
-      await supabase.auth.signOut();
-      navigate('/');
-      toast({
-        title: "Succès",
-        description: "Profil supprimé avec succès",
-      });
-    }
   };
 
   if (loading) {
@@ -239,28 +199,7 @@ export default function Profile() {
                   </DialogContent>
                 </Dialog>
 
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="flex items-center gap-2">
-                      <Trash2 className="h-4 w-4" />
-                      Supprimer
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Cette action est irréversible. Toutes vos données seront définitivement supprimées.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeleteProfile} className="bg-red-500 hover:bg-red-600">
-                        Supprimer
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <DeleteAccountButton />
               </div>
             </div>
 
