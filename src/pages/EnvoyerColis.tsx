@@ -12,6 +12,7 @@ export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
+  const [selectedStop, setSelectedStop] = useState<string | null>(null);
 
   const { data: tours, isLoading } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, tourType],
@@ -164,7 +165,14 @@ export default function EnvoyerColis() {
                           {stop.time}
                         </span>
                         <div className="flex justify-center">
-                          <button className="h-4 w-4 rounded-full border border-gray-300" />
+                          <button 
+                            className={`h-4 w-4 rounded-full border transition-colors ${
+                              selectedStop === `${tour.id}-${index}` 
+                                ? "bg-blue-500 border-blue-500" 
+                                : "border-gray-300 hover:border-blue-500"
+                            }`}
+                            onClick={() => setSelectedStop(`${tour.id}-${index}`)}
+                          />
                         </div>
                       </div>
                     ))}
@@ -176,7 +184,7 @@ export default function EnvoyerColis() {
                   </div>
 
                   <Button className="w-full bg-blue-500 hover:bg-blue-600">
-                    Sélectionnez un point de collecte
+                    {selectedStop?.startsWith(tour.id.toString()) ? "Réserver" : "Sélectionnez un point de collecte"}
                   </Button>
                 </div>
               ))
