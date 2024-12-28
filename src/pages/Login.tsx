@@ -24,7 +24,8 @@ export default function Login() {
     
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", { event, session });
       if (session?.user) {
         navigate("/");
       }
@@ -35,23 +36,21 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs",
-      });
-      return;
-    }
-
+    
+    // Reset previous state
     setIsLoading(true);
 
     try {
-      const trimmedEmail = email.trim();
+      // Basic validation
+      if (!email || !password) {
+        throw new Error("Veuillez remplir tous les champs");
+      }
+
+      const trimmedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
 
-      console.log("Attempting login with:", { email: trimmedEmail });
-      
+      console.log("Attempting login with email:", trimmedEmail);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: trimmedPassword,
@@ -59,25 +58,23 @@ export default function Login() {
 
       console.log("Auth response:", { data, error });
 
-      if (error) {
-        throw error;
-      }
-
-      if (!data?.user) {
-        throw new Error("No user data received");
-      }
+      if (error) throw error;
+      if (!data?.user) throw new Error("Aucune donnée utilisateur reçue");
 
       toast({
         title: "Connexion réussie",
         description: "Vous allez être redirigé vers la page d'accueil",
       });
-      
+
       navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
       
       let errorMessage = "Une erreur est survenue lors de la connexion";
-      if (error.message?.includes("Invalid login credentials")) {
+      
+      if (error.message === "Veuillez remplir tous les champs") {
+        errorMessage = error.message;
+      } else if (error.message?.includes("Invalid login credentials")) {
         errorMessage = "Email ou mot de passe incorrect";
       }
 
@@ -109,6 +106,7 @@ export default function Login() {
                 placeholder="exemple@email.com"
                 required
                 disabled={isLoading}
+                className="w-full"
               />
             </div>
 
@@ -121,6 +119,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                className="w-full"
               />
             </div>
 
