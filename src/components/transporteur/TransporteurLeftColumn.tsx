@@ -1,5 +1,6 @@
 import { TransporteurContact } from "./TransporteurContact";
 import { TransporteurCapacities } from "./TransporteurCapacities";
+import { TransporteurServices } from "./TransporteurServices";
 
 interface TransporteurLeftColumnProps {
   email: string;
@@ -7,6 +8,7 @@ interface TransporteurLeftColumnProps {
   phoneSecondary?: string | null;
   address?: string;
   capacities: any;
+  services: any[];
 }
 
 export function TransporteurLeftColumn({
@@ -15,6 +17,7 @@ export function TransporteurLeftColumn({
   phoneSecondary,
   address,
   capacities,
+  services,
 }: TransporteurLeftColumnProps) {
   return (
     <div className="space-y-6">
@@ -24,6 +27,7 @@ export function TransporteurLeftColumn({
         phoneSecondary={phoneSecondary}
         address={address}
       />
+      <TransporteurServices services={services} />
       <TransporteurCapacities capacities={capacities} />
     </div>
   );

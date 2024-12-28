@@ -21,6 +21,12 @@ export default function TransporteurDetails() {
             total_capacity,
             price_per_kg,
             offers_home_delivery
+          ),
+          carrier_services (
+            id,
+            service_type,
+            description,
+            icon
           )
         `)
         .eq("id", id)
@@ -48,13 +54,16 @@ export default function TransporteurDetails() {
         firstName={transporteur.first_name}
       />
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <TransporteurLeftColumn
-          email={transporteur.email || ""}
-          phone={transporteur.phone || ""}
-          phoneSecondary={transporteur.phone_secondary}
-          address={transporteur.address || ""}
-          capacities={transporteur.carrier_capacities}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <TransporteurLeftColumn
+            email={transporteur.email || ""}
+            phone={transporteur.phone || ""}
+            phoneSecondary={transporteur.phone_secondary}
+            address={transporteur.address || ""}
+            capacities={transporteur.carrier_capacities}
+            services={transporteur.carrier_services}
+          />
+        </div>
       </div>
     </TransporteurLayout>
   );
