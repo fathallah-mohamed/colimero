@@ -1,27 +1,18 @@
 import { Card } from "@/components/ui/card";
 import { Scale, Euro } from "lucide-react";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
-export const TransporteurCapacities = () => {
-  const { id } = useParams();
+interface CarrierCapacities {
+  total_capacity: number;
+  price_per_kg: number;
+  offers_home_delivery: boolean;
+}
 
-  const { data: capacities, isLoading } = useQuery({
-    queryKey: ["carrier-capacities", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("carrier_capacities")
-        .select("*")
-        .eq("carrier_id", id)
-        .single();
+interface TransporteurCapacitiesProps {
+  capacities: CarrierCapacities | null;
+}
 
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  if (isLoading) {
+export const TransporteurCapacities = ({ capacities }: TransporteurCapacitiesProps) => {
+  if (!capacities) {
     return (
       <Card className="p-6">
         <div className="animate-pulse space-y-4">
@@ -45,9 +36,7 @@ export const TransporteurCapacities = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500">Capacité totale</p>
-            <p className="text-gray-900">
-              {capacities?.total_capacity || 0} kg
-            </p>
+            <p className="text-gray-900">{capacities.total_capacity} kg</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -56,9 +45,7 @@ export const TransporteurCapacities = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500">Prix par kilo</p>
-            <p className="text-gray-900">
-              {capacities?.price_per_kg || 0}€/kg
-            </p>
+            <p className="text-gray-900">{capacities.price_per_kg}€/kg</p>
           </div>
         </div>
       </div>
