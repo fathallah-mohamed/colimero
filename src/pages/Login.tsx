@@ -15,14 +15,15 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         navigate("/");
       }
-    });
+    };
+    
+    checkSession();
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         navigate("/");
@@ -34,35 +35,49 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      console.log("Attempting login with email:", email);
+      const trimmedEmail = email.trim();
+      const trimmedPassword = password.trim();
+
+      console.log("Attempting login with:", { email: trimmedEmail });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
+        email: trimmedEmail,
+        password: trimmedPassword,
       });
 
-      console.log("Login response:", { data, error });
+      console.log("Auth response:", { data, error });
 
       if (error) {
         throw error;
       }
 
-      if (data.user) {
-        toast({
-          title: "Connexion réussie",
-          description: "Vous allez être redirigé vers la page d'accueil",
-        });
-        navigate("/");
-      } else {
+      if (!data?.user) {
         throw new Error("No user data received");
       }
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous allez être redirigé vers la page d'accueil",
+      });
+      
+      navigate("/");
     } catch (error: any) {
-      console.error("Login error details:", error);
+      console.error("Login error:", error);
       
       let errorMessage = "Une erreur est survenue lors de la connexion";
-      if (error.message === "Invalid login credentials") {
+      if (error.message?.includes("Invalid login credentials")) {
         errorMessage = "Email ou mot de passe incorrect";
       }
 
