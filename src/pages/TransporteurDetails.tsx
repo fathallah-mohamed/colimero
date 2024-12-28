@@ -9,6 +9,11 @@ import { Package, Truck, Scale, Home, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+interface CarrierService {
+  id: string;
+  service_type: string;
+}
+
 export default function TransporteurDetails() {
   const { id } = useParams();
 
@@ -25,6 +30,7 @@ export default function TransporteurDetails() {
             offers_home_delivery
           ),
           carrier_services (
+            id,
             service_type
           ),
           tours (
@@ -120,7 +126,7 @@ export default function TransporteurDetails() {
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Services</h2>
               <div className="space-y-4">
-                {transporteur.carrier_services?.map((service) => (
+                {transporteur.carrier_services?.map((service: CarrierService) => (
                   <div key={service.id} className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
                       {service.service_type === "express_delivery" ? (

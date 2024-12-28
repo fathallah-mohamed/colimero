@@ -6,10 +6,10 @@ interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
 }
 
 export function Heading({ level = 1, className, children, ...props }: HeadingProps) {
-  const Component = `h${level}` as keyof JSX.IntrinsicElements;
+  const Tag = `h${level}` as keyof JSX.IntrinsicElements;
 
   return (
-    <Component
+    <Tag
       className={cn(
         "font-bold tracking-tight",
         {
@@ -25,6 +25,6 @@ export function Heading({ level = 1, className, children, ...props }: HeadingPro
       {...props}
     >
       {children}
-    </Component>
+    </Tag>
   );
 }
