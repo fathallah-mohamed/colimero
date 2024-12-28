@@ -13,19 +13,19 @@ interface TransporteurServicesProps {
 }
 
 const SERVICE_ICONS = {
-  express_delivery: Truck,
-  home_delivery: Home,
-  standard_delivery: Package,
-  large_items_delivery: Sofa,
-  scheduled_pickup: Calendar,
+  livraison_express: Truck,
+  livraison_domicile: Home,
+  transport_standard: Package,
+  transport_volumineux: Sofa,
+  collecte_programmee: Calendar,
 };
 
 const SERVICE_NAMES = {
-  express_delivery: "Livraison Express",
-  home_delivery: "Livraison à domicile",
-  standard_delivery: "Transport de colis standard",
-  large_items_delivery: "Transport d'objets volumineux",
-  scheduled_pickup: "Collecte programmée",
+  livraison_express: "Livraison Express",
+  livraison_domicile: "Livraison à domicile",
+  transport_standard: "Transport de colis standard",
+  transport_volumineux: "Transport d'objets volumineux",
+  collecte_programmee: "Collecte programmée",
 };
 
 export function TransporteurServices({ services }: TransporteurServicesProps) {
