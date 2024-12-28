@@ -23,9 +23,6 @@ export function TransporteurList() {
             total_capacity,
             price_per_kg,
             offers_home_delivery
-          ),
-          carrier_services (
-            service_type
           )
         `);
 
@@ -96,12 +93,12 @@ export function TransporteurList() {
                         <Phone className="h-4 w-4 text-blue-500" />
                         <span>{carrier.phone}</span>
                       </div>
-                      {carrier.carrier_services?.map((service, index) => (
-                        <div key={index} className="flex items-center gap-2">
+                      {carrier.address && (
+                        <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-blue-500" />
-                          <span>{service.service_type}</span>
+                          <span>{carrier.address}</span>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
 
@@ -116,6 +113,7 @@ export function TransporteurList() {
                     </Button>
                     <Button 
                       size="sm" 
+                      onClick={() => navigate(`/nos-transporteurs/${carrier.id}#tournees`)}
                       className="bg-blue-600 text-white hover:bg-blue-700"
                     >
                       Voir les tournées
