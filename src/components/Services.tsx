@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { Truck, Package, Clock, Home, Calendar } from "lucide-react";
+import { Truck, Package, Clock, Home, Calendar, Sofa } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
-const ICON_COMPONENTS = {
-  truck: Truck,
-  package: Package,
-  clock: Clock,
-  home: Home,
-  calendar: Calendar,
+const SERVICE_EMOJIS = {
+  livraison_express: "🚚",
+  livraison_domicile: "🏠",
+  transport_standard: "📦",
+  transport_volumineux: "🛋️",
+  collecte_programmee: "📅",
 };
 
 export default function Services() {
@@ -57,23 +57,23 @@ export default function Services() {
         </div>
         <div className="mx-auto mt-16 max-w-7xl sm:mt-20 lg:mt-24">
           <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
-            {services?.map((service) => {
-              const IconComponent = ICON_COMPONENTS[service.icon as keyof typeof ICON_COMPONENTS] || Package;
-              
-              return (
-                <div key={service.id} className="relative flex flex-col items-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary">
-                    <IconComponent className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="mt-6 text-xl font-semibold text-gray-900">
-                    {service.service_type}
-                  </h3>
-                  <p className="mt-2 text-center text-gray-600">
-                    {service.description}
-                  </p>
+            {services?.map((service) => (
+              <div key={service.id} className="relative flex flex-col items-center text-center">
+                <div className="text-4xl mb-4">
+                  {SERVICE_EMOJIS[service.service_type as keyof typeof SERVICE_EMOJIS]}
                 </div>
-              );
-            })}
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {service.service_type === "livraison_express" && "Livraison Express"}
+                  {service.service_type === "livraison_domicile" && "Livraison à domicile"}
+                  {service.service_type === "transport_standard" && "Transport de colis standard"}
+                  {service.service_type === "transport_volumineux" && "Transport d'objets volumineux"}
+                  {service.service_type === "collecte_programmee" && "Collecte programmée"}
+                </h3>
+                <p className="text-gray-600">
+                  {service.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
