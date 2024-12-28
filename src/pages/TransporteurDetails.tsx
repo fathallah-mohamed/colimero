@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Phone, MapPin, Package, Truck, Home, Shirt, Sofa, MonitorSmartphone } from "lucide-react";
+import { Mail, Phone, MapPin, Package, Truck, Home, Shirt, Sofa, MonitorSmartphone, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
@@ -43,107 +44,175 @@ export default function TransporteurDetails() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* En-tête du profil */}
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-semibold text-gray-600">
-              {carrier.first_name?.[0] || "T"}
+      
+      {/* En-tête avec gradient */}
+      <div className="bg-gradient-to-r from-[#9b87f5] to-[#6E59A5] py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <Link to="/transporteurs" className="inline-flex items-center text-white mb-8 hover:opacity-80">
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Retour aux transporteurs
+          </Link>
+          <div className="flex items-center gap-6">
+            <div className="h-24 w-24 rounded-full bg-white/10 flex items-center justify-center">
+              {carrier.avatar_url ? (
+                <img
+                  src={carrier.avatar_url}
+                  alt={carrier.company_name}
+                  className="h-24 w-24 rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-4xl font-bold text-white">
+                  {carrier.company_name?.[0]}
+                </span>
+              )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{carrier.company_name}</h1>
-              <p className="text-gray-600">{carrier.first_name} {carrier.last_name}</p>
-              <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                <MapPin className="h-4 w-4" />
-                <span>Zone de couverture: {carrier.coverage_area?.join(" - ")}</span>
+              <h1 className="text-3xl font-bold text-white mb-2">
+                {carrier.company_name}
+              </h1>
+              <div className="flex items-center gap-4 text-white/80">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  <span>{carrier.address}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-5 w-5" />
+                  <span>{carrier.phone}</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Informations de contact */}
-          <div className="border-t border-gray-100 pt-4">
-            <h2 className="text-lg font-semibold mb-4">Informations de contact</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-600">
-                <Mail className="h-5 w-5 text-gray-400" />
-                <span>{carrier.email}</span>
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-semibold mb-6">Contact</h2>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
+                  <Mail className="h-5 w-5 text-[#8B5CF6]" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="text-gray-900">{carrier.email}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3 text-gray-600">
-                <Phone className="h-5 w-5 text-gray-400" />
-                <span>{carrier.phone}</span>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
+                  <Phone className="h-5 w-5 text-[#8B5CF6]" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Téléphone</p>
+                  <p className="text-gray-900">{carrier.phone}</p>
+                </div>
               </div>
               {carrier.phone_secondary && (
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                  <span>{carrier.phone_secondary}</span>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-[#8B5CF6]" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Téléphone secondaire</p>
+                    <p className="text-gray-900">{carrier.phone_secondary}</p>
+                  </div>
                 </div>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Services et Capacités */}
-        <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-          <h2 className="text-lg font-semibold mb-6">Services et Capacités</h2>
-          
-          {/* Types d'objets acceptés */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Types d'objets acceptés</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Package className="h-5 w-5 text-gray-400" />
-                <span>Colis standards</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Shirt className="h-5 w-5 text-gray-400" />
-                <span>Vêtements</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <MonitorSmartphone className="h-5 w-5 text-gray-400" />
-                <span>Électronique</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Sofa className="h-5 w-5 text-gray-400" />
-                <span>Meubles</span>
+          {/* Services et capacités */}
+          <div className="md:col-span-2">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+              <h2 className="text-xl font-semibold mb-6">Services et capacités</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-4">Types d'objets acceptés</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded bg-[#E5DEFF] flex items-center justify-center">
+                        <Package className="h-4 w-4 text-[#8B5CF6]" />
+                      </div>
+                      <span className="text-sm">Colis standards</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded bg-[#E5DEFF] flex items-center justify-center">
+                        <Shirt className="h-4 w-4 text-[#8B5CF6]" />
+                      </div>
+                      <span className="text-sm">Vêtements</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded bg-[#E5DEFF] flex items-center justify-center">
+                        <MonitorSmartphone className="h-4 w-4 text-[#8B5CF6]" />
+                      </div>
+                      <span className="text-sm">Électronique</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded bg-[#E5DEFF] flex items-center justify-center">
+                        <Sofa className="h-4 w-4 text-[#8B5CF6]" />
+                      </div>
+                      <span className="text-sm">Meubles</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-4">Capacité de transport</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded bg-[#E5DEFF] flex items-center justify-center">
+                        <Truck className="h-4 w-4 text-[#8B5CF6]" />
+                      </div>
+                      <span className="text-sm">
+                        {carrier.carrier_capacities?.total_capacity} kg
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded bg-[#E5DEFF] flex items-center justify-center">
+                        <Truck className="h-4 w-4 text-[#8B5CF6]" />
+                      </div>
+                      <span className="text-sm">
+                        {carrier.carrier_capacities?.price_per_kg}€/kg
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {carrier.carrier_capacities?.offers_home_delivery && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-semibold mb-6">Services additionnels</h2>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded bg-[#E5DEFF] flex items-center justify-center">
+                    <Home className="h-4 w-4 text-[#8B5CF6]" />
+                  </div>
+                  <span className="text-sm">Collecte & Livraison à Domicile</span>
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Capacité de transport */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Capacité de transport</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Truck className="h-5 w-5 text-gray-400" />
-                <span>{carrier.carrier_capacities?.total_capacity} kg</span>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Truck className="h-5 w-5 text-gray-400" />
-                <span>{carrier.carrier_capacities?.price_per_kg}€/kg</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Services additionnels */}
-          {carrier.carrier_capacities?.offers_home_delivery && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Services additionnels</h3>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Home className="h-5 w-5 text-gray-400" />
-                <span>Collecte & Livraison à Domicile</span>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Call to Action */}
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">
+        <div className="mt-8 flex flex-col items-center justify-center gap-4">
+          <p className="text-gray-600 text-center">
             Besoin d'en savoir plus ? Contactez ce transporteur dès maintenant !
           </p>
-          <Button className="w-full sm:w-auto bg-[#00A5FF] hover:bg-[#0094e6] text-white">
-            Contacter le transporteur
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              variant="outline"
+              className="bg-white border-[#9b87f5] text-[#9b87f5] hover:bg-[#E5DEFF] hover:text-[#9b87f5] hover:border-[#9b87f5]"
+            >
+              Voir les tournées
+            </Button>
+            <Button 
+              className="bg-[#9b87f5] text-white hover:bg-[#8B5CF6]"
+            >
+              Contacter le transporteur
+            </Button>
+          </div>
         </div>
       </div>
     </div>
