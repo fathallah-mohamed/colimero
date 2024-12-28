@@ -1,8 +1,11 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar, MapPin } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 export interface TransporteurToursProps {
   tours: Tour[];
@@ -11,6 +14,11 @@ export interface TransporteurToursProps {
 }
 
 export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
+  const navigate = useNavigate();
+  const [selectedPoints, setSelectedPoints] = useState<Record<number, string>>({});
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [currentTourId, setCurrentTourId] = useState<number | null>(null);
+
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Chargement...</div>;
   }
@@ -22,6 +30,24 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
       </div>
     );
   }
+
+  const handlePointSelection = (tourId: number, cityName: string) => {
+    setSelectedPoints(prev => ({
+      ...prev,
+      [tourId]: cityName
+    }));
+  };
+
+  const handleReservation = (tourId: number) => {
+    setCurrentTourId(tourId);
+    setIsAuthOpen(true);
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthOpen(false);
+    // Ici vous pouvez ajouter la logique pour gérer la réservation après la connexion
+    console.log("Réservation pour la tournée:", currentTourId, "Point sélectionné:", selectedPoints[currentTourId!]);
+  };
 
   return (
     <div className="space-y-4">
@@ -41,7 +67,10 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:text-blue-500"
+            onClick={() => navigate(`/nos-transporteurs/${tour.carrier_id}`)}
+          >
             {tour.carriers?.avatar_url ? (
               <img
                 src={tour.carriers.avatar_url}
@@ -51,7 +80,9 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             ) : (
               <div className="h-8 w-8 rounded-full bg-gray-100" />
             )}
-            <span className="text-gray-600">{tour.carriers?.company_name}</span>
+            <span className="text-gray-600 hover:text-blue-500">
+              {tour.carriers?.company_name}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -92,7 +123,13 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
                   <div>{stop.time}</div>
                 </div>
                 <div className="flex justify-center">
-                  <button className="h-4 w-4 rounded-full border border-gray-300" />
+                  <input
+                    type="radio"
+                    name={`tour-${tour.id}`}
+                    className="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
+                    onChange={() => handlePointSelection(tour.id, stop.name)}
+                    checked={selectedPoints[tour.id] === stop.name}
+                  />
                 </div>
               </div>
             ))}
@@ -104,11 +141,21 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
           </div>
 
-          <Button className="w-full bg-blue-500 hover:bg-blue-600">
-            Sélectionnez un point de collecte
+          <Button 
+            className="w-full bg-blue-500 hover:bg-blue-600"
+            onClick={() => handleReservation(tour.id)}
+            disabled={!selectedPoints[tour.id]}
+          >
+            {selectedPoints[tour.id] ? "Réserver" : "Sélectionnez un point de collecte"}
           </Button>
         </div>
       ))}
+
+      <AuthDialog 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 }
