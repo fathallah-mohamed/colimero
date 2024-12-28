@@ -87,10 +87,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             </div>
           </div>
 
-          <div 
-            className="flex items-center gap-3 cursor-pointer hover:text-blue-500"
-            onClick={() => navigate(`/nos-transporteurs/${tour.carrier_id}`)}
-          >
+          <div className="flex items-center gap-3">
             {tour.carriers?.avatar_url ? (
               <img
                 src={tour.carriers.avatar_url}
