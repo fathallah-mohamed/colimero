@@ -215,6 +215,8 @@ export type Database = {
         Row: {
           carrier_id: string
           created_at: string
+          description: string | null
+          icon: string
           id: string
           service_type: string
           updated_at: string
@@ -222,6 +224,8 @@ export type Database = {
         Insert: {
           carrier_id: string
           created_at?: string
+          description?: string | null
+          icon?: string
           id?: string
           service_type: string
           updated_at?: string
@@ -229,6 +233,8 @@ export type Database = {
         Update: {
           carrier_id?: string
           created_at?: string
+          description?: string | null
+          icon?: string
           id?: string
           service_type?: string
           updated_at?: string
@@ -333,6 +339,33 @@ export type Database = {
           id?: string
           last_name?: string | null
           phone?: string | null
+        }
+        Relationships: []
+      }
+      service_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          service_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          service_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          service_type?: string
+          updated_at?: string
         }
         Relationships: []
       }

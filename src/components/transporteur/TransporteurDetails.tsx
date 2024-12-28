@@ -5,6 +5,7 @@ import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader
 import { TransporteurContact } from "@/components/transporteur/TransporteurContact";
 import { TransporteurCapacities } from "@/components/transporteur/TransporteurCapacities";
 import { TransporteurServices } from "@/components/transporteur/TransporteurServices";
+import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
@@ -23,7 +24,18 @@ export default function TransporteurDetails() {
           ),
           carrier_services (
             id,
-            service_type
+            service_type,
+            description,
+            icon
+          ),
+          tours (
+            id,
+            type,
+            departure_date,
+            departure_country,
+            destination_country,
+            remaining_capacity,
+            total_capacity
           )
         `)
         .eq("id", id)
@@ -55,6 +67,9 @@ export default function TransporteurDetails() {
     );
   }
 
+  const publicTours = transporteur.tours?.filter(tour => tour.type === 'public') || [];
+  const privateTours = transporteur.tours?.filter(tour => tour.type === 'private') || [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <TransporteurHeader
@@ -78,6 +93,12 @@ export default function TransporteurDetails() {
             <TransporteurCapacities />
 
             <TransporteurServices services={transporteur.carrier_services} />
+          </div>
+
+          {/* Colonne de droite */}
+          <div className="md:col-span-2 space-y-6">
+            <TransporteurTours tours={publicTours} type="public" />
+            <TransporteurTours tours={privateTours} type="private" />
           </div>
         </div>
       </div>
