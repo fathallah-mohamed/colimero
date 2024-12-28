@@ -51,7 +51,7 @@ export default function Login() {
         return;
       }
 
-      console.log("Attempting login with:", { email: trimmedEmail }); // Debug log
+      console.log("Attempting login with:", { email: trimmedEmail });
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
@@ -59,9 +59,11 @@ export default function Login() {
       });
 
       if (signInError) {
-        console.error("Sign in error:", signInError); // Debug log
+        console.error("Sign in error:", signInError);
+        
+        // Handle specific error cases
         if (signInError.message === "Invalid login credentials") {
-          setError("Email ou mot de passe incorrect");
+          setError("Email ou mot de passe incorrect. Pour les tests, utilisez: fakhri2@transport.com / password123");
         } else if (signInError.message.includes("Email not confirmed")) {
           setError("Veuillez confirmer votre email avant de vous connecter");
         } else {
@@ -70,7 +72,7 @@ export default function Login() {
         return;
       }
 
-      console.log("Login successful:", data); // Debug log
+      console.log("Login successful:", data);
 
       toast({
         title: "Connexion réussie",
@@ -143,6 +145,13 @@ export default function Login() {
             >
               Créer un compte
             </button>
+          </div>
+
+          {/* Add test credentials hint */}
+          <div className="mt-4 p-4 bg-blue-50 rounded-md text-sm text-blue-600">
+            <p className="font-medium">Identifiants de test :</p>
+            <p>Email : fakhri2@transport.com</p>
+            <p>Mot de passe : password123</p>
           </div>
         </div>
       </div>
