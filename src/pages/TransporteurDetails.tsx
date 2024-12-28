@@ -94,7 +94,9 @@ export default function TransporteurDetails() {
               address={transporteur.address || ""}
             />
 
-            <TransporteurCapacities />
+            <TransporteurCapacities
+              capacities={transporteur.carrier_capacities}
+            />
 
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Services</h2>
