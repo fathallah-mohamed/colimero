@@ -8,6 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+const countryNames: { [key: string]: string } = {
+  'FR': 'France',
+  'TN': 'Tunisie',
+  'MA': 'Maroc',
+  'DZ': 'Algérie'
+};
+
 export function TransporteurList() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -87,7 +94,9 @@ export function TransporteurList() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-blue-500" />
-                        <span>{carrier.coverage_area?.join(" ↔ ") || "France ↔ Tunisie"}</span>
+                        <span>
+                          {carrier.coverage_area?.map(code => countryNames[code] || code).join(" ↔ ")}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-blue-500" />
@@ -102,23 +111,14 @@ export function TransporteurList() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigate(`/nos-transporteurs/${carrier.id}`)}
-                      className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                    >
-                      Voir le profil
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      onClick={() => navigate(`/nos-transporteurs/${carrier.id}#tournees`)}
-                      className="bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                      Voir les tournées
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/nos-transporteurs/${carrier.id}`)}
+                    className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                  >
+                    Voir le profil
+                  </Button>
                 </div>
               </CardContent>
             </Card>

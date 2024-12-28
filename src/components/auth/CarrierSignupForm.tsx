@@ -14,6 +14,14 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
+
+const countryOptions = [
+  { id: "FR", label: "France" },
+  { id: "TN", label: "Tunisie" },
+  { id: "MA", label: "Maroc" },
+  { id: "DZ", label: "Algérie" },
+];
 
 const formSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -26,6 +34,7 @@ const formSchema = z.object({
   address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
   totalCapacity: z.number().min(1, "La capacité totale doit être supérieure à 0"),
   pricePerKg: z.number().min(0, "Le prix par kg doit être positif"),
+  coverageArea: z.array(z.string()).min(1, "Sélectionnez au moins un pays"),
 });
 
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
@@ -37,6 +46,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
     defaultValues: {
       totalCapacity: 1000,
       pricePerKg: 12,
+      coverageArea: ["FR", "TN"],
     },
   });
 
@@ -66,6 +76,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
             siret: values.siret,
             phone: values.phone,
             address: values.address,
+            coverage_area: values.coverageArea,
           })
           .eq("id", authData.user.id);
 
@@ -208,6 +219,47 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="coverageArea"
+            render={() => (
+              <FormItem>
+                <FormLabel>Zones de couverture</FormLabel>
+                <div className="grid grid-cols-2 gap-4">
+                  {countryOptions.map((country) => (
+                    <FormField
+                      key={country.id}
+                      control={form.control}
+                      name="coverageArea"
+                      render={({ field }) => (
+                        <FormItem
+                          key={country.id}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(country.id)}
+                              onCheckedChange={(checked) => {
+                                const updatedValue = checked
+                                  ? [...field.value, country.id]
+                                  : field.value?.filter((value) => value !== country.id);
+                                field.onChange(updatedValue);
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {country.label}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
                 <FormMessage />
               </FormItem>
             )}
