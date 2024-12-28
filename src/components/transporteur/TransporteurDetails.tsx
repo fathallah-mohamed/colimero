@@ -15,6 +15,20 @@ interface CarrierService {
   service_type: string;
 }
 
+const serviceTypeLabels: Record<string, string> = {
+  'express_delivery': 'Livraison Express',
+  'home_delivery': 'Livraison à domicile',
+  'fragile_handling': 'Traitement spécial fragile',
+  'pickup_delivery': 'Collecte et livraison à domicile'
+};
+
+const serviceTypeIcons: Record<string, any> = {
+  'express_delivery': Truck,
+  'home_delivery': Home,
+  'fragile_handling': Package,
+  'pickup_delivery': Package
+};
+
 export default function TransporteurDetails() {
   const { id } = useParams();
 
@@ -78,20 +92,6 @@ export default function TransporteurDetails() {
   const publicTours = transporteur.tours?.filter((tour) => tour.type === "public") || [];
   const privateTours = transporteur.tours?.filter((tour) => tour.type === "private") || [];
 
-  const serviceTypeLabels: Record<string, string> = {
-    'express_delivery': 'Livraison Express',
-    'home_delivery': 'Livraison à domicile',
-    'fragile_handling': 'Traitement spécial fragile',
-    'pickup_delivery': 'Collecte et livraison à domicile'
-  };
-
-  const serviceTypeIcons: Record<string, any> = {
-    'express_delivery': Truck,
-    'home_delivery': Home,
-    'fragile_handling': Package,
-    'pickup_delivery': Package
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <TransporteurHeader
@@ -123,9 +123,9 @@ export default function TransporteurDetails() {
                 {transporteur.carrier_services?.map((service: CarrierService) => (
                   <div key={service.id} className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-                      {serviceTypeIcons[service.service_type] ? (
+                      {serviceTypeIcons[service.service_type] && (
                         <serviceTypeIcons[service.service_type] className="h-5 w-5 text-[#00B0F0]" />
-                      ) : null}
+                      )}
                     </div>
                     <div>
                       <p className="text-gray-900">
