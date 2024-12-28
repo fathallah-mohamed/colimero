@@ -25,7 +25,7 @@ export default function TransporteurDetails() {
         .from("carriers")
         .select(`
           *,
-          carrier_capacities (
+          carrier_capacities!carrier_capacities_carrier_id_fkey (
             total_capacity,
             price_per_kg,
             offers_home_delivery
@@ -74,9 +74,9 @@ export default function TransporteurDetails() {
     );
   }
 
+  const carrierCapacity = transporteur.carrier_capacities?.[0];
   const publicTours = transporteur.tours?.filter((tour) => tour.type === "public") || [];
   const privateTours = transporteur.tours?.filter((tour) => tour.type === "private") || [];
-  const carrierCapacity = transporteur.carrier_capacities?.[0];
 
   return (
     <div className="min-h-screen bg-gray-50">
