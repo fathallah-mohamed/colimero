@@ -23,11 +23,15 @@ export function TourFilters({
   onDepartureChange,
   onDestinationChange,
 }: TourFiltersProps) {
-  const isMaghrebCountry = MAGHREB_COUNTRIES.includes(departureCountry);
-
   const handleSwitch = () => {
-    // Only allow switching if it doesn't result in Maghreb-to-Maghreb
-    if (!MAGHREB_COUNTRIES.includes(destinationCountry)) {
+    // Allow switching if either country is France, or if one is France and the other is Maghreb
+    const isValidSwitch = 
+      departureCountry === 'FR' || 
+      destinationCountry === 'FR' ||
+      (MAGHREB_COUNTRIES.includes(departureCountry) && !MAGHREB_COUNTRIES.includes(destinationCountry)) ||
+      (MAGHREB_COUNTRIES.includes(destinationCountry) && !MAGHREB_COUNTRIES.includes(departureCountry));
+
+    if (isValidSwitch) {
       onDepartureChange(destinationCountry);
       onDestinationChange(departureCountry);
     }
@@ -69,9 +73,9 @@ export function TourFilters({
           <Select 
             value={destinationCountry} 
             onValueChange={onDestinationChange}
-            disabled={isMaghrebCountry}
+            disabled={MAGHREB_COUNTRIES.includes(departureCountry)}
           >
-            <SelectTrigger className={`w-full ${isMaghrebCountry ? 'bg-gray-50' : 'bg-white'}`}>
+            <SelectTrigger className={`w-full ${MAGHREB_COUNTRIES.includes(departureCountry) ? 'bg-gray-50' : 'bg-white'}`}>
               <SelectValue placeholder="Pays de destination" />
             </SelectTrigger>
             <SelectContent>
