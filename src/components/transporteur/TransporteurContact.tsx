@@ -29,9 +29,13 @@ export function TransporteurContact({ email, phone, phoneSecondary, address }: T
           </div>
           <div>
             <p className="text-sm text-gray-500">Téléphone</p>
-            <p className="text-gray-900">{phone}</p>
+            <a href={`tel:${phone}`} className="text-gray-900 hover:text-[#00B0F0] transition-colors">
+              {phone}
+            </a>
             {phoneSecondary && (
-              <p className="text-gray-600 text-sm">{phoneSecondary}</p>
+              <a href={`tel:${phoneSecondary}`} className="block text-gray-600 text-sm hover:text-[#00B0F0] transition-colors">
+                {phoneSecondary}
+              </a>
             )}
           </div>
         </div>
