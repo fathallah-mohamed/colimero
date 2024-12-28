@@ -20,9 +20,9 @@ export function Heading({
       className={cn(
         "font-bold tracking-tight",
         gradient && "bg-gradient-to-r from-[#2563EB] to-[#00B0F0] bg-clip-text text-transparent",
-        level === 1 && "text-4xl md:text-5xl lg:text-6xl",
-        level === 2 && "text-3xl md:text-4xl",
-        level === 3 && "text-2xl md:text-3xl",
+        level === 1 && "text-3xl md:text-4xl",
+        level === 2 && "text-2xl md:text-3xl",
+        level === 3 && "text-xl md:text-2xl",
         className
       )}
       {...props}
