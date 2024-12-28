@@ -74,10 +74,6 @@ export default function TransporteurDetails() {
     );
   }
 
-  const carrierCapacity = transporteur.carrier_capacities?.[0];
-  const publicTours = transporteur.tours?.filter((tour) => tour.type === "public") || [];
-  const privateTours = transporteur.tours?.filter((tour) => tour.type === "private") || [];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <TransporteurHeader
@@ -98,10 +94,7 @@ export default function TransporteurDetails() {
               address={transporteur.address || ""}
             />
 
-            <TransporteurCapacities
-              totalCapacity={carrierCapacity?.total_capacity}
-              pricePerKg={carrierCapacity?.price_per_kg}
-            />
+            <TransporteurCapacities />
 
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Services</h2>
@@ -128,103 +121,6 @@ export default function TransporteurDetails() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </Card>
-          </div>
-
-          {/* Colonne de droite */}
-          <div className="md:col-span-2 space-y-6">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Tournées Publiques</h2>
-              <div className="space-y-4">
-                {publicTours.map((tour) => (
-                  <div
-                    key={tour.id}
-                    className="border rounded-lg p-4 hover:border-[#00B0F0] transition-colors"
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5 text-[#00B0F0]" />
-                        <div>
-                          <p className="font-medium">
-                            {format(new Date(tour.departure_date), "d MMMM yyyy", {
-                              locale: fr,
-                            })}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {tour.departure_country} vers {tour.destination_country}
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="outline">Réserver</Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#00B0F0]"
-                          style={{
-                            width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-600">
-                        {tour.remaining_capacity}kg / {tour.total_capacity}kg
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {publicTours.length === 0 && (
-                  <p className="text-center text-gray-500 py-4">
-                    Aucune tournée publique disponible
-                  </p>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Tournées Privées</h2>
-              <div className="space-y-4">
-                {privateTours.map((tour) => (
-                  <div
-                    key={tour.id}
-                    className="border rounded-lg p-4 hover:border-[#00B0F0] transition-colors"
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5 text-[#00B0F0]" />
-                        <div>
-                          <p className="font-medium">
-                            {format(new Date(tour.departure_date), "d MMMM yyyy", {
-                              locale: fr,
-                            })}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {tour.departure_country} vers {tour.destination_country}
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="outline">Demander un accès</Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#00B0F0]"
-                          style={{
-                            width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-600">
-                        {tour.remaining_capacity}kg / {tour.total_capacity}kg
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {privateTours.length === 0 && (
-                  <p className="text-center text-gray-500 py-4">
-                    Aucune tournée privée disponible
-                  </p>
-                )}
               </div>
             </Card>
           </div>
