@@ -2,9 +2,10 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader";
-import { TransporteurContact } from "@/components/transporteur/TransporteurContact";
-import { TransporteurCapacities } from "@/components/transporteur/TransporteurCapacities";
-import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import { TransporteurLayout } from "@/components/transporteur/TransporteurLayout";
+import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLeftColumn";
+import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
+import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
@@ -21,15 +22,11 @@ export default function TransporteurDetails() {
             price_per_kg,
             offers_home_delivery
           ),
-          tours (
+          carrier_services (
             id,
-            type,
-            departure_date,
-            collection_date,
-            remaining_capacity,
-            total_capacity,
-            departure_country,
-            destination_country
+            service_type,
+            description,
+            icon
           )
         `)
         .eq("id", id)
@@ -41,61 +38,32 @@ export default function TransporteurDetails() {
   });
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des informations...</p>
-        </div>
-      </div>
-    );
+    return <TransporteurLoading />;
   }
 
   if (!transporteur) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-xl text-gray-600">Transporteur non trouvé</p>
-        </div>
-      </div>
-    );
+    return <TransporteurNotFound />;
   }
 
-  const publicTours = transporteur.tours?.filter(tour => tour.type === 'public') || [];
-  const privateTours = transporteur.tours?.filter(tour => tour.type === 'private') || [];
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <TransporteurLayout>
       <TransporteurHeader
         name={transporteur.company_name || ""}
         coverageArea={transporteur.coverage_area?.join(", ") || ""}
         avatarUrl={transporteur.avatar_url}
         firstName={transporteur.first_name}
       />
-
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Colonne de gauche */}
-          <div className="space-y-6">
-            <TransporteurContact
-              email={transporteur.email || ""}
-              phone={transporteur.phone || ""}
-              phoneSecondary={transporteur.phone_secondary}
-              address={transporteur.address || ""}
-            />
-
-            <TransporteurCapacities
-              capacities={transporteur.carrier_capacities}
-            />
-          </div>
-
-          {/* Colonne de droite */}
-          <div className="md:col-span-2 space-y-6">
-            <TransporteurTours tours={publicTours} type="public" />
-            <TransporteurTours tours={privateTours} type="private" />
-          </div>
-        </div>
+        <TransporteurLeftColumn
+          email={transporteur.email || ""}
+          phone={transporteur.phone || ""}
+          phoneSecondary={transporteur.phone_secondary}
+          address={transporteur.address || ""}
+          capacities={transporteur.carrier_capacities}
+          services={transporteur.carrier_services}
+          transporteurName={transporteur.company_name || transporteur.first_name}
+        />
       </div>
-    </div>
+    </TransporteurLayout>
   );
 }
