@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader";
 import { TransporteurContact } from "@/components/transporteur/TransporteurContact";
 import { TransporteurCapacities } from "@/components/transporteur/TransporteurCapacities";
-import { TransporteurServices } from "@/components/transporteur/TransporteurServices";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 
 export default function TransporteurDetails() {
@@ -22,20 +21,15 @@ export default function TransporteurDetails() {
             price_per_kg,
             offers_home_delivery
           ),
-          carrier_services!carrier_services_carrier_id_fkey (
-            id,
-            service_type,
-            description,
-            icon
-          ),
           tours (
             id,
             type,
             departure_date,
-            departure_country,
-            destination_country,
+            collection_date,
             remaining_capacity,
-            total_capacity
+            total_capacity,
+            departure_country,
+            destination_country
           )
         `)
         .eq("id", id)
@@ -93,8 +87,6 @@ export default function TransporteurDetails() {
             <TransporteurCapacities
               capacities={transporteur.carrier_capacities}
             />
-
-            <TransporteurServices services={transporteur.carrier_services || []} />
           </div>
 
           {/* Colonne de droite */}
