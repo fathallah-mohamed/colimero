@@ -1,31 +1,36 @@
-import { Mail, Phone, MapPin } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 interface TransporteurContactProps {
   email: string;
   phone: string;
   phoneSecondary?: string | null;
-  address?: string;
+  address: string;
 }
 
-export function TransporteurContact({ email, phone, phoneSecondary, address }: TransporteurContactProps) {
+export function TransporteurContact({
+  email,
+  phone,
+  phoneSecondary,
+  address,
+}: TransporteurContactProps) {
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
   return (
-    <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-6">Contact</h2>
+    <div className="space-y-4">
+      <h3 className="font-semibold">Contact</h3>
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-            <Mail className="h-5 w-5 text-[#00B0F0]" />
+        <div className="flex gap-3">
+          <div className="flex-shrink-0">
+            <Mail className="h-5 w-5 text-gray-400" />
           </div>
           <div>
             <p className="text-sm text-gray-500">Email</p>
             <p className="text-gray-900">{email}</p>
           </div>
         </div>
-
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-            <Phone className="h-5 w-5 text-[#00B0F0]" />
+        <div className="flex gap-3">
+          <div className="flex-shrink-0">
+            <Phone className="h-5 w-5 text-gray-400" />
           </div>
           <div>
             <p className="text-sm text-gray-500">Téléphone</p>
@@ -39,19 +44,23 @@ export function TransporteurContact({ email, phone, phoneSecondary, address }: T
             )}
           </div>
         </div>
-
-        {address && (
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-              <MapPin className="h-5 w-5 text-[#00B0F0]" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Adresse</p>
-              <p className="text-gray-900">{address}</p>
-            </div>
+        <div className="flex gap-3">
+          <div className="flex-shrink-0">
+            <MapPin className="h-5 w-5 text-gray-400" />
           </div>
-        )}
+          <div>
+            <p className="text-sm text-gray-500">Adresse</p>
+            <a 
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-900 hover:text-[#00B0F0] transition-colors"
+            >
+              {address}
+            </a>
+          </div>
+        </div>
       </div>
-    </Card>
+    </div>
   );
 }
