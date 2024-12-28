@@ -47,13 +47,15 @@ export default function TransporteurDetails() {
         avatarUrl={transporteur.avatar_url}
         firstName={transporteur.first_name}
       />
-      <TransporteurLeftColumn
-        email={transporteur.email || ""}
-        phone={transporteur.phone || ""}
-        phoneSecondary={transporteur.phone_secondary}
-        address={transporteur.address || ""}
-        capacities={transporteur.carrier_capacities}
-      />
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <TransporteurLeftColumn
+          email={transporteur.email || ""}
+          phone={transporteur.phone || ""}
+          phoneSecondary={transporteur.phone_secondary}
+          address={transporteur.address || ""}
+          capacities={transporteur.carrier_capacities}
+        />
+      </div>
     </TransporteurLayout>
   );
 }
