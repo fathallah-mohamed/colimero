@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,24 +29,27 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CollectionPointForm } from "./CollectionPointForm";
 
 const formSchema = z.object({
   departure_country: z.string(),
   destination_country: z.string(),
   departure_date: z.date(),
-  collection_date: z.date(),
   total_capacity: z.number().min(1),
+  remaining_capacity: z.number().min(0),
   type: z.enum(["public", "private"]),
   route: z.array(
     z.object({
-      name: z.string(),
-      location: z.string(),
-      time: z.string(),
-      type: z.enum(["pickup", "dropoff"]),
+      name: z.string().min(1, "La ville est requise"),
+      location: z.string().min(1, "L'adresse est requise"),
+      collection_date: z.date(),
+      time: z.string().min(1, "L'heure est requise"),
+      capacity: z.number().min(0, "La capacité ne peut pas être négative"),
+      type: z.literal("pickup")
     })
-  ),
+  ).min(1, "Au moins un point de collecte est requis"),
 });
 
 export default function CreateTourForm() {
@@ -59,9 +62,24 @@ export default function CreateTourForm() {
       departure_country: "FR",
       destination_country: "TN",
       total_capacity: 1000,
+      remaining_capacity: 1000,
       type: "public",
-      route: [],
+      route: [
+        {
+          name: "",
+          location: "",
+          time: "",
+          type: "pickup",
+          capacity: 1000,
+          collection_date: new Date(),
+        },
+      ],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "route",
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -84,9 +102,8 @@ export default function CreateTourForm() {
         departure_country: values.departure_country,
         destination_country: values.destination_country,
         departure_date: values.departure_date.toISOString(),
-        collection_date: values.collection_date.toISOString(),
         total_capacity: values.total_capacity,
-        remaining_capacity: values.total_capacity,
+        remaining_capacity: values.remaining_capacity,
         type: values.type,
         route: values.route,
       });
@@ -172,49 +189,7 @@ export default function CreateTourForm() {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: fr })
-                        ) : (
-                          <span>Choisir une date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="collection_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date de collecte</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
                           "w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground"
@@ -266,6 +241,24 @@ export default function CreateTourForm() {
 
           <FormField
             control={form.control}
+            name="remaining_capacity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Capacité disponible (kg)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
@@ -287,7 +280,42 @@ export default function CreateTourForm() {
           />
         </div>
 
-        <Button type="submit">Créer la tournée</Button>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Points de collecte</h2>
+            <Button
+              type="button"
+              onClick={() =>
+                append({
+                  name: "",
+                  location: "",
+                  time: "",
+                  type: "pickup",
+                  capacity: 0,
+                  collection_date: new Date(),
+                })
+              }
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter un point
+            </Button>
+          </div>
+
+          {fields.map((field, index) => (
+            <CollectionPointForm
+              key={field.id}
+              index={index}
+              onRemove={remove}
+              form={form}
+            />
+          ))}
+        </div>
+
+        <div className="flex justify-center">
+          <Button type="submit" className="w-full max-w-md">
+            Créer la tournée
+          </Button>
+        </div>
       </form>
     </Form>
   );
