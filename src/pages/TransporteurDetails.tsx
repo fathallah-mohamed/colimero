@@ -7,6 +7,9 @@ import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLe
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import { TransporteurContact } from "@/components/transporteur/TransporteurContact";
+import { TransporteurServices } from "@/components/transporteur/TransporteurServices";
+import { TransporteurCapacities } from "@/components/transporteur/TransporteurCapacities";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
