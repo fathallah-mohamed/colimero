@@ -17,6 +17,7 @@ export default function Login() {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("Initial session check:", session);
       if (session?.user) {
         navigate("/");
       }
@@ -36,8 +37,6 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Reset previous state
     setIsLoading(true);
 
     try {
@@ -50,6 +49,10 @@ export default function Login() {
       const trimmedPassword = password.trim();
 
       console.log("Attempting login with email:", trimmedEmail);
+
+      // First, check if the user exists
+      const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers();
+      console.log("Users in database:", users);
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
