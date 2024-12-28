@@ -30,13 +30,20 @@ export default function EnvoyerColis() {
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
         .eq("type", "public")
+        .gte("departure_date", new Date().toISOString())
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
       
       return data.map(tour => ({
         ...tour,
-        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
+        carriers: {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers?.carrier_capacities) 
+            ? tour.carriers.carrier_capacities 
+            : [tour.carriers?.carrier_capacities]
+        }
       })) as Tour[];
     },
   });
@@ -59,13 +66,20 @@ export default function EnvoyerColis() {
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
         .eq("type", "private")
+        .gte("departure_date", new Date().toISOString())
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
       
       return data.map(tour => ({
         ...tour,
-        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
+        carriers: {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers?.carrier_capacities) 
+            ? tour.carriers.carrier_capacities 
+            : [tour.carriers?.carrier_capacities]
+        }
       })) as Tour[];
     },
   });
@@ -81,7 +95,7 @@ export default function EnvoyerColis() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
 
         <div className="space-y-6">

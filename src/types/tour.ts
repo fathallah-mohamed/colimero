@@ -21,7 +21,7 @@ export interface Tour {
   carriers?: {
     company_name: string;
     avatar_url: string | null;
-    carrier_capacities?: Array<{
+    carrier_capacities: Array<{
       price_per_kg: number;
     }>;
   };
