@@ -78,6 +78,8 @@ export default function TransporteurDetails() {
     return <TransporteurNotFound />;
   }
 
+  const transporteurName = transporteur.company_name || transporteur.first_name;
+
   return (
     <TransporteurLayout>
       <TransporteurHeader
@@ -87,6 +89,20 @@ export default function TransporteurDetails() {
         firstName={transporteur.first_name}
       />
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        <TransporteurContact
+          email={transporteur.email || ""}
+          phone={transporteur.phone || ""}
+          phoneSecondary={transporteur.phone_secondary}
+          address={transporteur.address || ""}
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <TransporteurServices services={transporteur.carrier_services} />
+          <TransporteurCapacities capacities={transporteur.carrier_capacities} />
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <TransporteurTours tours={publicTours || []} type="public" />
+          <TransporteurTours tours={privateTours || []} type="private" />
+        </div>
         <TransporteurLeftColumn
           email={transporteur.email || ""}
           phone={transporteur.phone || ""}
@@ -94,13 +110,8 @@ export default function TransporteurDetails() {
           address={transporteur.address || ""}
           capacities={transporteur.carrier_capacities}
           services={transporteur.carrier_services}
-          transporteurName={transporteur.company_name || transporteur.first_name}
+          transporteurName={transporteurName}
         />
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          <TransporteurTours tours={publicTours || []} type="public" />
-          <TransporteurTours tours={privateTours || []} type="private" />
-        </div>
       </div>
     </TransporteurLayout>
   );

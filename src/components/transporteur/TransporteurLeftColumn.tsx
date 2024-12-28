@@ -36,21 +36,19 @@ export function TransporteurLeftColumn({
         <TransporteurServices services={services} />
         <TransporteurCapacities capacities={capacities} />
       </div>
-      <div className="flex justify-center mt-8">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button className="w-full max-w-md" size="lg">
-              Contacter le transporteur
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:max-w-lg">
-            <SheetHeader>
-              <SheetTitle>Contacter {transporteurName}</SheetTitle>
-            </SheetHeader>
-            <ContactForm transporteurEmail={email} transporteurName={transporteurName} />
-          </SheetContent>
-        </Sheet>
-      </div>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button className="w-full max-w-md mx-auto block" size="lg">
+            Contacter {transporteurName}
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Contacter {transporteurName}</SheetTitle>
+          </SheetHeader>
+          <ContactForm transporteurEmail={email} transporteurName={transporteurName} />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
