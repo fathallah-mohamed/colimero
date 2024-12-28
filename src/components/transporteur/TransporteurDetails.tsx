@@ -4,30 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader";
 import { TransporteurContact } from "@/components/transporteur/TransporteurContact";
 import { TransporteurCapacities } from "@/components/transporteur/TransporteurCapacities";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Package, Truck, Home, Calendar } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-
-interface CarrierService {
-  id: string;
-  service_type: string;
-}
-
-const serviceTypeLabels: Record<string, string> = {
-  'express_delivery': 'Livraison Express',
-  'home_delivery': 'Livraison à domicile',
-  'fragile_handling': 'Traitement spécial fragile',
-  'pickup_delivery': 'Collecte et livraison à domicile'
-};
-
-const serviceTypeIcons: Record<string, any> = {
-  'express_delivery': Truck,
-  'home_delivery': Home,
-  'fragile_handling': Package,
-  'pickup_delivery': Package
-};
+import { TransporteurServices } from "@/components/transporteur/TransporteurServices";
+import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
@@ -117,122 +95,13 @@ export default function TransporteurDetails() {
               pricePerKg={carrierCapacity?.price_per_kg}
             />
 
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Services</h2>
-              <div className="space-y-4">
-                {transporteur.carrier_services?.map((service: CarrierService) => (
-                  <div key={service.id} className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-[#E5DEFF] flex items-center justify-center">
-                      {serviceTypeIcons[service.service_type] && (
-                        <serviceTypeIcons[service.service_type] className="h-5 w-5 text-[#00B0F0]" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-gray-900">
-                        {serviceTypeLabels[service.service_type] || service.service_type}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
+            <TransporteurServices services={transporteur.carrier_services} />
           </div>
 
           {/* Colonne de droite */}
           <div className="md:col-span-2 space-y-6">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Tournées Publiques</h2>
-              <div className="space-y-4">
-                {publicTours.map((tour) => (
-                  <div
-                    key={tour.id}
-                    className="border rounded-lg p-4 hover:border-[#00B0F0] transition-colors"
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5 text-[#00B0F0]" />
-                        <div>
-                          <p className="font-medium">
-                            {format(new Date(tour.departure_date), "d MMMM yyyy", {
-                              locale: fr,
-                            })}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {tour.departure_country} vers {tour.destination_country}
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="outline">Réserver</Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#00B0F0]"
-                          style={{
-                            width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-600">
-                        {tour.remaining_capacity}kg / {tour.total_capacity}kg
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {publicTours.length === 0 && (
-                  <p className="text-center text-gray-500 py-4">
-                    Aucune tournée publique disponible
-                  </p>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Tournées Privées</h2>
-              <div className="space-y-4">
-                {privateTours.map((tour) => (
-                  <div
-                    key={tour.id}
-                    className="border rounded-lg p-4 hover:border-[#00B0F0] transition-colors"
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5 text-[#00B0F0]" />
-                        <div>
-                          <p className="font-medium">
-                            {format(new Date(tour.departure_date), "d MMMM yyyy", {
-                              locale: fr,
-                            })}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {tour.departure_country} vers {tour.destination_country}
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="outline">Demander un accès</Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-[#00B0F0]"
-                          style={{
-                            width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-gray-600">
-                        {tour.remaining_capacity}kg / {tour.total_capacity}kg
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {privateTours.length === 0 && (
-                  <p className="text-center text-gray-500 py-4">
-                    Aucune tournée privée disponible
-                  </p>
-                )}
-              </div>
-            </Card>
+            <TransporteurTours tours={publicTours} type="public" />
+            <TransporteurTours tours={privateTours} type="private" />
           </div>
         </div>
       </div>
