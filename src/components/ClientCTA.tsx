@@ -40,10 +40,10 @@ export default function ClientCTA() {
         </div>
         <div className="text-center space-x-4">
           <Button asChild size="lg" variant="default">
-            <Link to="/envoyer">Créer un compte client</Link>
+            <Link to="/envoyer-un-colis">Créer un compte client</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/login">Se connecter</Link>
+            <Link to="/connexion">Se connecter</Link>
           </Button>
         </div>
       </div>

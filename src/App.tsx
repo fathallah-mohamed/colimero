@@ -24,15 +24,15 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/planifier" element={<PlanifierTournee />} />
-          <Route path="/envoyer" element={<EnvoyerColis />} />
-          <Route path="/transporteurs" element={<Transporteurs />} />
-          <Route path="/transporteurs/:id" element={<TransporteurDetails />} />
-          <Route path="/tours" element={<Tours />} />
-          <Route path="/blog" element={<Blog />} />
+          <Route path="/planifier-une-tournee" element={<PlanifierTournee />} />
+          <Route path="/envoyer-un-colis" element={<EnvoyerColis />} />
+          <Route path="/nos-transporteurs" element={<Transporteurs />} />
+          <Route path="/transporteur/:id" element={<TransporteurDetails />} />
+          <Route path="/tournees" element={<Tours />} />
+          <Route path="/actualites" element={<Blog />} />
           <Route path="/a-propos" element={<APropos />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/nous-contacter" element={<Contact />} />
+          <Route path="/connexion" element={<Login />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

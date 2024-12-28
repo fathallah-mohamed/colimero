@@ -8,12 +8,12 @@ export default function Navigation() {
 
   const menuItems = [
     { name: "Accueil", href: "/" },
-    { name: "Planifier une tournée", href: "/planifier", highlight: true },
-    { name: "Envoyer un colis", href: "/envoyer", highlight: true },
-    { name: "Transporteurs", href: "/transporteurs" },
-    { name: "Blog", href: "/blog" },
+    { name: "Planifier une tournée", href: "/planifier-une-tournee", highlight: true },
+    { name: "Envoyer un colis", href: "/envoyer-un-colis", highlight: true },
+    { name: "Transporteurs", href: "/nos-transporteurs" },
+    { name: "Actualités", href: "/actualites" },
     { name: "À propos", href: "/a-propos" },
-    { name: "Contact", href: "/contact" },
+    { name: "Contact", href: "/nous-contacter" },
   ];
 
   return (
@@ -50,7 +50,7 @@ export default function Navigation() {
               </Link>
             ))}
             <Button asChild variant="outline" className="ml-4">
-              <Link to="/login">Se connecter</Link>
+              <Link to="/connexion">Se connecter</Link>
             </Button>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default function Navigation() {
           ))}
           <div className="mt-4 px-3">
             <Button asChild variant="outline" className="w-full">
-              <Link to="/login">Se connecter</Link>
+              <Link to="/connexion">Se connecter</Link>
             </Button>
           </div>
         </div>
