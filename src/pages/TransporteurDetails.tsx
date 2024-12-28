@@ -7,6 +7,9 @@ import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLe
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ContactForm } from "@/components/transporteur/ContactForm";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
@@ -102,6 +105,22 @@ export default function TransporteurDetails() {
           <TransporteurTours tours={publicTours || []} type="public" />
           <TransporteurTours tours={privateTours || []} type="private" />
         </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button className="w-full max-w-md mx-auto block" size="lg">
+              Contacter {transporteurName}
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-full sm:max-w-lg">
+            <SheetHeader>
+              <SheetTitle>Contacter {transporteurName}</SheetTitle>
+            </SheetHeader>
+            <ContactForm 
+              transporteurEmail={transporteur.email || ""} 
+              transporteurName={transporteurName} 
+            />
+          </SheetContent>
+        </Sheet>
       </div>
     </TransporteurLayout>
   );

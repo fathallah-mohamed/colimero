@@ -1,9 +1,6 @@
 import { TransporteurContact } from "./TransporteurContact";
 import { TransporteurCapacities } from "./TransporteurCapacities";
 import { TransporteurServices } from "./TransporteurServices";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ContactForm } from "./ContactForm";
 
 interface TransporteurLeftColumnProps {
   email: string;
@@ -36,19 +33,6 @@ export function TransporteurLeftColumn({
         <TransporteurServices services={services} />
         <TransporteurCapacities capacities={capacities} />
       </div>
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button className="w-full max-w-md mx-auto block" size="lg">
-            Contacter {transporteurName}
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right" className="w-full sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>Contacter {transporteurName}</SheetTitle>
-          </SheetHeader>
-          <ContactForm transporteurEmail={email} transporteurName={transporteurName} />
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }
