@@ -5,8 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 export default function Transporteurs() {
+  const navigate = useNavigate();
+  
   const { data: carriers, isLoading } = useQuery({
     queryKey: ["carriers"],
     queryFn: async () => {
@@ -75,7 +78,11 @@ export default function Transporteurs() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/transporteurs/${carrier.id}`)}
+                        >
                           Voir le profil
                         </Button>
                         <Button size="sm" className="bg-black text-white hover:bg-black/90">
