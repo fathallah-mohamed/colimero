@@ -57,7 +57,9 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             ) : (
               <div className="h-8 w-8 rounded-full bg-gray-100" />
             )}
-            <span className="text-gray-600">{tour.carriers?.company_name}</span>
+            <span className="text-gray-600 hover:text-blue-600 transition-colors">
+              {tour.carriers?.company_name}
+            </span>
           </div>
 
           <div className="space-y-2">
