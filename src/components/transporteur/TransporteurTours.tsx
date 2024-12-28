@@ -52,7 +52,6 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
   };
 
   const handleEmailVerification = (email: string) => {
-    // Ici vous pouvez ajouter la logique de vérification d'email
     toast({
       title: "Email vérifié",
       description: "Nous vous contacterons prochainement pour finaliser votre réservation.",
@@ -62,8 +61,12 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
   const handleAuthSuccess = () => {
     setIsAuthOpen(false);
-    // Ici vous pouvez ajouter la logique pour gérer la réservation après la connexion
     console.log("Réservation pour la tournée:", currentTourId, "Point sélectionné:", selectedPoints[currentTourId!]);
+  };
+
+  const getGoogleMapsUrl = (location: string, city: string) => {
+    const query = encodeURIComponent(`${location}, ${city}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
   };
 
   return (
@@ -129,7 +132,14 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
                 <span className="font-medium">{stop.name}</span>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600">{stop.location}</span>
+                  <a 
+                    href={getGoogleMapsUrl(stop.location, stop.name)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-blue-500 transition-colors"
+                  >
+                    {stop.location}
+                  </a>
                 </div>
                 <div className="text-gray-600">
                   <div>
