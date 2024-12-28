@@ -7,6 +7,9 @@ import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLe
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import { TransporteurContact } from "@/components/transporteur/TransporteurContact";
+import { TransporteurServices } from "@/components/transporteur/TransporteurServices";
+import { TransporteurCapacities } from "@/components/transporteur/TransporteurCapacities";
 
 export default function TransporteurDetails() {
   const { id } = useParams();
@@ -89,6 +92,16 @@ export default function TransporteurDetails() {
         firstName={transporteur.first_name}
       />
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+        <TransporteurContact
+          email={transporteur.email || ""}
+          phone={transporteur.phone || ""}
+          phoneSecondary={transporteur.phone_secondary}
+          address={transporteur.address || ""}
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <TransporteurServices services={transporteur.carrier_services} />
+          <TransporteurCapacities capacities={transporteur.carrier_capacities} />
+        </div>
         <div className="grid md:grid-cols-2 gap-6">
           <TransporteurTours tours={publicTours || []} type="public" />
           <TransporteurTours tours={privateTours || []} type="private" />
