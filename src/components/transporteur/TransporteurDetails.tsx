@@ -104,8 +104,16 @@ export default function TransporteurDetails() {
           transporteurName={transporteur.company_name || transporteur.first_name}
         />
         <div className="grid md:grid-cols-2 gap-6">
-          <TransporteurTours tours={publicTours} type="public" isLoading={isLoadingPublic} />
-          <TransporteurTours tours={privateTours} type="private" isLoading={isLoadingPrivate} />
+          <TransporteurTours 
+            tours={publicTours} 
+            type="public" 
+            isLoading={isLoadingPublic} 
+          />
+          <TransporteurTours 
+            tours={privateTours} 
+            type="private" 
+            isLoading={isLoadingPrivate} 
+          />
         </div>
       </div>
     </TransporteurLayout>
