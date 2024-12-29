@@ -29,16 +29,32 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
   const { toast } = useToast();
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = new Date(e.target.value);
-    if (selectedDate > departureDate) {
+    try {
+      const selectedDate = new Date(e.target.value);
+      
+      // Vérifier si la date est valide
+      if (isNaN(selectedDate.getTime())) {
+        throw new Error("Date invalide");
+      }
+
+      // Vérifier si la date est antérieure à la date de départ
+      if (selectedDate > departureDate) {
+        toast({
+          variant: "destructive",
+          title: "Date invalide",
+          description: "La date de collecte doit être antérieure à la date de départ",
+        });
+        return;
+      }
+
+      form.setValue(`route.${index}.collection_date`, e.target.value);
+    } catch (error) {
       toast({
         variant: "destructive",
-        title: "Date invalide",
-        description: "La date de collecte doit être antérieure à la date de départ",
+        title: "Erreur",
+        description: "Format de date invalide",
       });
-      return;
     }
-    form.setValue(`route.${index}.collection_date`, e.target.value);
   };
 
   return (
@@ -94,7 +110,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
                 <Input 
                   type="date" 
                   {...field}
-                  max={departureDate.toISOString().split('T')[0]}
+                  max={departureDate ? departureDate.toISOString().split('T')[0] : undefined}
                   onChange={handleDateChange}
                 />
               </FormControl>
