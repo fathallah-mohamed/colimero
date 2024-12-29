@@ -15,21 +15,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const countryOptions = [
-  { id: "FR", label: "France" },
-  { id: "TN", label: "Tunisie" },
-  { id: "MA", label: "Maroc" },
-  { id: "DZ", label: "Algérie" },
-];
-
-const serviceOptions = [
-  { id: "livraison_express", label: "Livraison Express", icon: "truck" },
-  { id: "livraison_domicile", label: "Livraison à domicile", icon: "home" },
-  { id: "transport_standard", label: "Transport de colis standard", icon: "package" },
-  { id: "transport_volumineux", label: "Transport d'objets volumineux", icon: "sofa" },
-  { id: "collecte_programmee", label: "Collecte programmée", icon: "calendar" },
-];
-
 const formSchema = z.object({
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -42,6 +27,7 @@ const formSchema = z.object({
   total_capacity: z.number().min(1, "La capacité totale doit être supérieure à 0"),
   price_per_kg: z.number().min(0, "Le prix par kg doit être positif"),
   services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
+  email: z.string().email("Email invalide"),
 });
 
 interface ProfileFormProps {
@@ -51,7 +37,6 @@ interface ProfileFormProps {
 
 export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
   const { toast } = useToast();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,25 +51,24 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
       total_capacity: initialData.carrier_capacities?.total_capacity || 1000,
       price_per_kg: initialData.carrier_capacities?.price_per_kg || 12,
       services: initialData.carrier_services?.map((s: any) => s.service_type) || [],
+      email: initialData.email || "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Vous devez être connecté pour modifier votre profil",
-        });
-        return;
-      }
+      // Update email in auth.users
+      const { error: emailUpdateError } = await supabase.auth.updateUser({
+        email: values.email,
+      });
 
+      if (emailUpdateError) throw emailUpdateError;
+
+      // Update carrier profile
       const { error: carrierError } = await supabase
         .from('carriers')
         .update({
+          email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
           company_name: values.company_name,
@@ -94,7 +78,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
           address: values.address,
           coverage_area: values.coverage_area,
         })
-        .eq('id', session.user.id);
+        .eq('id', initialData.id);
 
       if (carrierError) throw carrierError;
 
@@ -104,7 +88,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg,
         })
-        .eq('carrier_id', session.user.id);
+        .eq('carrier_id', initialData.id);
 
       if (capacityError) throw capacityError;
 
@@ -112,13 +96,13 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
       const { error: deleteError } = await supabase
         .from('carrier_services')
         .delete()
-        .eq('carrier_id', session.user.id);
+        .eq('carrier_id', initialData.id);
 
       if (deleteError) throw deleteError;
 
       // Insérer les nouveaux services
       const servicesToInsert = values.services.map(serviceType => ({
-        carrier_id: session.user.id,
+        carrier_id: initialData.id,
         service_type: serviceType,
         icon: serviceOptions.find(opt => opt.id === serviceType)?.icon || 'package'
       }));
@@ -131,7 +115,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       toast({
         title: "Succès",
-        description: "Profil mis à jour avec succès",
+        description: "Profil mis à jour avec succès. Veuillez vérifier votre email pour confirmer le changement.",
       });
       
       onClose();
@@ -147,35 +131,47 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="first_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Prénom</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} type="email" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="first_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prénom</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="last_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="last_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
