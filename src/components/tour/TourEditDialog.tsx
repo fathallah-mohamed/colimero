@@ -14,9 +14,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CollectionPointForm } from "./CollectionPointForm";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
+import { Form } from "@/components/ui/form";
 import type { RouteStop } from "@/types/tour";
-import type { Json } from "@/integrations/supabase/types";
 
 interface TourEditDialogProps {
   isOpen: boolean;
@@ -25,48 +25,40 @@ interface TourEditDialogProps {
   onComplete: () => void;
 }
 
-interface FormData {
-  total_capacity: string;
-  remaining_capacity: string;
-  type: string;
-  departure_date: string;
-  collection_date: string;
-  route: RouteStop[];
-}
-
 export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
-  const form = useForm<FormData>({
+  const form = useForm({
     defaultValues: {
       total_capacity: tour?.total_capacity?.toString() || "",
       remaining_capacity: tour?.remaining_capacity?.toString() || "",
       type: tour?.type || "",
       departure_date: tour?.departure_date ? new Date(tour.departure_date).toISOString().split('T')[0] : "",
       collection_date: tour?.collection_date ? new Date(tour.collection_date).toISOString().split('T')[0] : "",
-      route: Array.isArray(tour?.route) ? tour.route : JSON.parse(tour?.route || "[]"),
+      route: Array.isArray(tour?.route) ? tour.route : [],
     }
   });
 
-  const { watch, setValue } = form;
-  const formData = watch();
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "route"
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: any) => {
     if (!tour) return;
 
     setLoading(true);
-    const routeJson = formData.route as unknown as Json;
+    const routeJson = values.route as unknown as Json;
 
     const { error } = await supabase
       .from('tours')
       .update({
-        total_capacity: Number(formData.total_capacity),
-        remaining_capacity: Number(formData.remaining_capacity),
-        type: formData.type,
-        departure_date: new Date(formData.departure_date).toISOString(),
-        collection_date: new Date(formData.collection_date).toISOString(),
+        total_capacity: Number(values.total_capacity),
+        remaining_capacity: Number(values.remaining_capacity),
+        type: values.type,
+        departure_date: new Date(values.departure_date).toISOString(),
+        collection_date: new Date(values.collection_date).toISOString(),
         route: routeJson,
       })
       .eq('id', tour.id);
@@ -90,19 +82,12 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
   };
 
   const addCollectionPoint = () => {
-    setValue('route', [
-      ...formData.route,
-      {
-        name: "",
-        location: "",
-        time: "08:00",
-        type: "pickup" as const,
-      },
-    ]);
-  };
-
-  const removeCollectionPoint = (index: number) => {
-    setValue('route', formData.route.filter((_, i) => i !== index));
+    append({
+      name: "",
+      location: "",
+      time: "08:00",
+      type: "pickup" as const,
+    });
   };
 
   if (!tour) return null;
@@ -113,97 +98,95 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
         <DialogHeader>
           <DialogTitle>Modifier la tournée</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="total_capacity">Capacité totale (kg)</Label>
-              <Input
-                type="number"
-                id="total_capacity"
-                value={formData.total_capacity}
-                onChange={(e) => setValue('total_capacity', e.target.value)}
-              />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="total_capacity">Capacité totale (kg)</Label>
+                <Input
+                  type="number"
+                  id="total_capacity"
+                  {...form.register('total_capacity')}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="remaining_capacity">Capacité restante (kg)</Label>
+                <Input
+                  type="number"
+                  id="remaining_capacity"
+                  {...form.register('remaining_capacity')}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="remaining_capacity">Capacité restante (kg)</Label>
-              <Input
-                type="number"
-                id="remaining_capacity"
-                value={formData.remaining_capacity}
-                onChange={(e) => setValue('remaining_capacity', e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type">Type de tournée</Label>
-            <Select
-              value={formData.type}
-              onValueChange={(value) => setValue('type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="public">Publique</SelectItem>
-                <SelectItem value="private">Privée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="departure_date">Date de départ</Label>
-              <Input
-                type="date"
-                id="departure_date"
-                value={formData.departure_date}
-                onChange={(e) => setValue('departure_date', e.target.value)}
-              />
+              <Label htmlFor="type">Type de tournée</Label>
+              <Select
+                value={form.watch('type')}
+                onValueChange={(value) => form.setValue('type', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez un type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Publique</SelectItem>
+                  <SelectItem value="private">Privée</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="collection_date">Date de collecte</Label>
-              <Input
-                type="date"
-                id="collection_date"
-                value={formData.collection_date}
-                onChange={(e) => setValue('collection_date', e.target.value)}
-              />
-            </div>
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="departure_date">Date de départ</Label>
+                <Input
+                  type="date"
+                  id="departure_date"
+                  {...form.register('departure_date')}
+                />
+              </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Points de collecte</Label>
-              <Button type="button" variant="outline" size="sm" onClick={addCollectionPoint}>
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter un point
-              </Button>
+              <div className="space-y-2">
+                <Label htmlFor="collection_date">Date de collecte</Label>
+                <Input
+                  type="date"
+                  id="collection_date"
+                  {...form.register('collection_date')}
+                />
+              </div>
             </div>
 
             <div className="space-y-4">
-              {formData.route.map((_, index) => (
-                <CollectionPointForm
-                  key={index}
-                  index={index}
-                  onRemove={removeCollectionPoint}
-                  form={form}
-                />
-              ))}
-            </div>
-          </div>
+              <div className="flex items-center justify-between">
+                <Label>Points de collecte</Label>
+                <Button type="button" variant="outline" size="sm" onClick={addCollectionPoint}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un point
+                </Button>
+              </div>
 
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Mise à jour..." : "Enregistrer"}
-            </Button>
-          </div>
-        </form>
+              <div className="space-y-4">
+                {fields.map((field, index) => (
+                  <CollectionPointForm
+                    key={field.id}
+                    index={index}
+                    onRemove={remove}
+                    form={form}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Mise à jour..." : "Enregistrer"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
