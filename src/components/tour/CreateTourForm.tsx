@@ -32,6 +32,7 @@ import {
 import { CalendarIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollectionPointForm } from "./CollectionPointForm";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   departure_country: z.string(),
@@ -49,6 +50,12 @@ const formSchema = z.object({
       type: z.literal("pickup")
     })
   ).min(1, "Au moins un point de collecte est requis"),
+  terms_accepted: z.literal(true, {
+    errorMap: () => ({ message: "Vous devez accepter les conditions" }),
+  }),
+  customs_declaration: z.literal(true, {
+    errorMap: () => ({ message: "Vous devez accepter la déclaration douanière" }),
+  }),
 });
 
 export default function CreateTourForm() {
@@ -63,6 +70,8 @@ export default function CreateTourForm() {
       total_capacity: 1000,
       remaining_capacity: 1000,
       type: "public",
+      terms_accepted: false,
+      customs_declaration: false,
       route: [
         {
           name: "",
@@ -108,11 +117,13 @@ export default function CreateTourForm() {
         departure_country: values.departure_country,
         destination_country: values.destination_country,
         departure_date: values.departure_date.toISOString(),
-        collection_date: values.route[0].collection_date.toISOString(), // Using the first collection point's date as the tour's collection date
+        collection_date: values.route[0].collection_date.toISOString(),
         total_capacity: values.total_capacity,
         remaining_capacity: values.remaining_capacity,
         type: values.type,
         route: routeWithoutCapacity,
+        terms_accepted: values.terms_accepted,
+        customs_declaration: values.customs_declaration,
       });
 
       if (error) throw error;
@@ -317,8 +328,56 @@ export default function CreateTourForm() {
           ))}
         </div>
 
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="customs_declaration"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    Je déclare que je respecterai toutes les lois douanières et réglementations applicables, et que je suis responsable des objets que je transporte.
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="terms_accepted"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    J'accepte les conditions générales d'utilisation et comprends que je suis responsable du respect des lois applicables.
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+
         <div className="flex justify-center">
-          <Button type="submit" className="w-full max-w-md">
+          <Button 
+            type="submit" 
+            className="w-full max-w-md"
+            disabled={!form.getValues("terms_accepted") || !form.getValues("customs_declaration")}
+          >
             Créer la tournée
           </Button>
         </div>
