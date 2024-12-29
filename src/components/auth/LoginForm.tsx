@@ -36,40 +36,30 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     try {
       console.log("Tentative de connexion avec:", email);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) {
-        console.error("Erreur d'authentification:", error);
-        let errorMessage = "Email ou mot de passe incorrect";
-        
-        if (error.message.includes("Email not confirmed")) {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        }
-        
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: errorMessage,
-        });
-        setPassword("");
-        return;
+      if (signInError) {
+        console.error("Erreur d'authentification:", signInError);
+        throw signInError;
       }
 
-      if (!data.user) {
+      if (!signInData.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      console.log("Connexion réussie, données utilisateur:", data.user);
+      console.log("Connexion réussie, données utilisateur:", signInData.user);
       
       // Vérifier si l'utilisateur est un admin
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('*')
-        .eq('id', data.user.id)
+        .eq('id', signInData.user.id)
         .single();
+
+      console.log("Résultat de la vérification admin:", { adminData, adminError });
 
       if (adminData) {
         console.log("Utilisateur admin trouvé:", adminData);
@@ -83,7 +73,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
       }
 
       // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
-      const userType = data.user.user_metadata?.user_type;
+      const userType = signInData.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
       
       switch (userType) {
@@ -101,12 +91,20 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
       
       onSuccess?.();
 
-    } catch (error) {
-      console.error("Erreur:", error);
+    } catch (error: any) {
+      console.error("Erreur complète:", error);
+      let errorMessage = "Une erreur est survenue lors de la connexion";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message === "Email not confirmed") {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      }
+
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: "Une erreur est survenue lors de la connexion",
+        description: errorMessage,
       });
       setPassword("");
     } finally {
