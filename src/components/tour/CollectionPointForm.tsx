@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
-import { UseFieldArrayRemove, UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -10,20 +9,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { UseFormReturn } from "react-hook-form";
+import type { RouteStop } from "@/types/tour";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CollectionPointFormProps {
   index: number;
-  onRemove: UseFieldArrayRemove;
+  onRemove: (index: number) => void;
   form: UseFormReturn<any>;
 }
 
@@ -73,48 +71,6 @@ export function CollectionPointForm({ index, onRemove, form }: CollectionPointFo
 
         <FormField
           control={form.control}
-          name={`route.${index}.collection_date`}
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date de collecte</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP", { locale: fr })
-                      ) : (
-                        <span>Choisir une date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name={`route.${index}.time`}
           render={({ field }) => (
             <FormItem>
@@ -122,6 +78,28 @@ export function CollectionPointForm({ index, onRemove, form }: CollectionPointFo
               <FormControl>
                 <Input type="time" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={`route.${index}.type`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="pickup">Collecte</SelectItem>
+                  <SelectItem value="dropoff">Livraison</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

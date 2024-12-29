@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +56,6 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
     if (!tour) return;
 
     setLoading(true);
-    // Convert RouteStop[] to Json type for Supabase
     const routeJson = formData.route as unknown as Json;
 
     const { error } = await supabase
@@ -104,13 +102,6 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
 
   const removeCollectionPoint = (index: number) => {
     setValue('route', formData.route.filter((_, i) => i !== index));
-  };
-
-  const updateCollectionPoint = (index: number, field: keyof RouteStop, value: string) => {
-    const newRoute = formData.route.map((point, i) => 
-      i === index ? { ...point, [field]: value } : point
-    );
-    setValue('route', newRoute);
   };
 
   if (!tour) return null;
@@ -192,13 +183,12 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
             </div>
 
             <div className="space-y-4">
-              {formData.route.map((point, index) => (
+              {formData.route.map((_, index) => (
                 <CollectionPointForm
                   key={index}
                   index={index}
-                  point={point}
                   onRemove={removeCollectionPoint}
-                  onUpdate={updateCollectionPoint}
+                  form={form}
                 />
               ))}
             </div>
