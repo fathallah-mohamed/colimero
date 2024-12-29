@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Table,
@@ -9,11 +10,15 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
-import RequestDetailsDialog from "./RequestDetailsDialog";
-import { useState } from "react";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,14 +50,12 @@ export default function RejectedRequests() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 mb-4">
-        <Input
-          placeholder="Rechercher par nom ou email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
+      <Input
+        placeholder="Rechercher par nom ou email..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="max-w-sm"
+      />
 
       <Table>
         <TableHeader>
@@ -61,7 +64,6 @@ export default function RejectedRequests() {
             <TableHead>Email</TableHead>
             <TableHead>Téléphone</TableHead>
             <TableHead>Date de demande</TableHead>
-            <TableHead>Raison du rejet</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -76,7 +78,6 @@ export default function RejectedRequests() {
                   locale: fr,
                 })}
               </TableCell>
-              <TableCell>{request.reason}</TableCell>
               <TableCell>
                 <Button
                   variant="outline"
@@ -90,10 +91,37 @@ export default function RejectedRequests() {
         </TableBody>
       </Table>
 
-      <RequestDetailsDialog
-        request={selectedRequest}
-        onClose={() => setSelectedRequest(null)}
-      />
+      <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Détails de la demande - {selectedRequest?.company_name}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div>
+              <h3 className="font-semibold mb-2">Informations personnelles</h3>
+              <p>Prénom : {selectedRequest?.first_name}</p>
+              <p>Nom : {selectedRequest?.last_name}</p>
+              <p>Email : {selectedRequest?.email}</p>
+              <p>Téléphone : {selectedRequest?.phone}</p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">Informations entreprise</h3>
+              <p>Nom : {selectedRequest?.company_name}</p>
+              <p>SIRET : {selectedRequest?.siret}</p>
+              <p>Adresse : {selectedRequest?.address}</p>
+            </div>
+
+            <div className="col-span-2">
+              <h3 className="font-semibold mb-2">Raison du rejet</h3>
+              <p>{selectedRequest?.reason}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

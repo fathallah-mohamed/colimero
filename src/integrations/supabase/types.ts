@@ -188,6 +188,7 @@ export type Database = {
           phone: string
           phone_secondary: string | null
           price_per_kg: number | null
+          reason: string | null
           services: string[] | null
           siret: string
           status: string
@@ -206,6 +207,7 @@ export type Database = {
           phone: string
           phone_secondary?: string | null
           price_per_kg?: number | null
+          reason?: string | null
           services?: string[] | null
           siret: string
           status?: string
@@ -224,6 +226,7 @@ export type Database = {
           phone?: string
           phone_secondary?: string | null
           price_per_kg?: number | null
+          reason?: string | null
           services?: string[] | null
           siret?: string
           status?: string
@@ -288,6 +291,7 @@ export type Database = {
           phone: string | null
           phone_secondary: string | null
           siret: string | null
+          status: string | null
           total_deliveries: number | null
         }
         Insert: {
@@ -307,6 +311,7 @@ export type Database = {
           phone?: string | null
           phone_secondary?: string | null
           siret?: string | null
+          status?: string | null
           total_deliveries?: number | null
         }
         Update: {
@@ -326,6 +331,7 @@ export type Database = {
           phone?: string | null
           phone_secondary?: string | null
           siret?: string | null
+          status?: string | null
           total_deliveries?: number | null
         }
         Relationships: []

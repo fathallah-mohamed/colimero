@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Table,
@@ -15,13 +16,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ApprovedCarriers() {
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+
   const { data: carriers, isLoading } = useQuery({
     queryKey: ["approved-carriers"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("carriers")
         .select("*")
+        .eq("status", "active")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -30,26 +34,31 @@ export default function ApprovedCarriers() {
   });
 
   const handleSuspendCarrier = async (carrierId: string) => {
-    try {
-      const { error } = await supabase
-        .from("carriers")
-        .update({ status: "suspended" })
-        .eq("id", carrierId);
+    const { error } = await supabase
+      .from("carriers")
+      .update({ status: "suspended" })
+      .eq("id", carrierId);
 
-      if (error) throw error;
-
-      toast({
-        title: "Compte suspendu",
-        description: "Le compte du transporteur a été suspendu avec succès.",
-      });
-    } catch (error: any) {
+    if (error) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: "Impossible de suspendre le transporteur.",
       });
+      return;
     }
+
+    toast({
+      title: "Transporteur suspendu",
+      description: "Le compte du transporteur a été suspendu avec succès.",
+    });
   };
+
+  const filteredCarriers = carriers?.filter(
+    (carrier) =>
+      carrier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      carrier.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return <div>Chargement...</div>;
@@ -57,12 +66,12 @@ export default function ApprovedCarriers() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 mb-4">
-        <Input
-          placeholder="Rechercher par nom ou email..."
-          className="max-w-sm"
-        />
-      </div>
+      <Input
+        placeholder="Rechercher par nom ou email..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="max-w-sm"
+      />
 
       <Table>
         <TableHeader>
@@ -75,7 +84,7 @@ export default function ApprovedCarriers() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {carriers?.map((carrier) => (
+          {filteredCarriers?.map((carrier) => (
             <TableRow key={carrier.id}>
               <TableCell>{carrier.company_name}</TableCell>
               <TableCell>{carrier.email}</TableCell>
