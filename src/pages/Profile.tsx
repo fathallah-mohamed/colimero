@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pencil, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { DeleteAccountButton } from "@/components/profile/DeleteAccountButton";
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { ProfileForm } from "@/components/profile/ProfileForm";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -22,14 +20,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    phone: "",
-    company_name: "",
-    siret: "",
-    address: "",
-  });
 
   useEffect(() => {
     checkUser();
@@ -48,7 +38,14 @@ export default function Profile() {
     if (session?.user) {
       const { data, error } = await supabase
         .from('carriers')
-        .select('*')
+        .select(`
+          *,
+          carrier_capacities (
+            total_capacity,
+            price_per_kg,
+            offers_home_delivery
+          )
+        `)
         .eq('id', session.user.id)
         .single();
 
@@ -58,50 +55,7 @@ export default function Profile() {
       }
 
       setProfile(data);
-      setFormData({
-        first_name: data.first_name || "",
-        last_name: data.last_name || "",
-        phone: data.phone || "",
-        company_name: data.company_name || "",
-        siret: data.siret || "",
-        address: data.address || "",
-      });
     }
-    setLoading(false);
-  };
-
-  const handleUpdateProfile = async () => {
-    setLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez être connecté pour modifier votre profil",
-      });
-      return;
-    }
-
-    const { error } = await supabase
-      .from('carriers')
-      .update(formData)
-      .eq('id', session.user.id);
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le profil",
-      });
-    } else {
-      toast({
-        title: "Succès",
-        description: "Profil mis à jour avec succès",
-      });
-      fetchProfile();
-    }
-    setIsEditing(false);
     setLoading(false);
   };
 
@@ -123,85 +77,24 @@ export default function Profile() {
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-6 py-8">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">Mon profil</h1>
-              <div className="flex gap-2">
-                <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <Pencil className="h-4 w-4" />
-                      Modifier
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Modifier mon profil</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="first_name">Prénom</Label>
-                          <Input
-                            id="first_name"
-                            value={formData.first_name}
-                            onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="last_name">Nom</Label>
-                          <Input
-                            id="last_name"
-                            value={formData.last_name}
-                            onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="phone">Téléphone</Label>
-                        <Input
-                          id="phone"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="company_name">Nom de l'entreprise</Label>
-                        <Input
-                          id="company_name"
-                          value={formData.company_name}
-                          onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="siret">SIRET</Label>
-                        <Input
-                          id="siret"
-                          value={formData.siret}
-                          onChange={(e) => setFormData({ ...formData, siret: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="address">Adresse</Label>
-                        <Input
-                          id="address"
-                          value={formData.address}
-                          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setIsEditing(false)}>
-                        Annuler
-                      </Button>
-                      <Button onClick={handleUpdateProfile}>
-                        Enregistrer
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                <DeleteAccountButton />
-              </div>
+              <ProfileHeader onEdit={() => setIsEditing(true)} />
+              <DeleteAccountButton />
             </div>
+
+            <Dialog open={isEditing} onOpenChange={setIsEditing}>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Modifier mon profil</DialogTitle>
+                </DialogHeader>
+                <ProfileForm 
+                  initialData={profile} 
+                  onClose={() => {
+                    setIsEditing(false);
+                    fetchProfile();
+                  }} 
+                />
+              </DialogContent>
+            </Dialog>
 
             <div className="space-y-8">
               <div>
@@ -242,6 +135,28 @@ export default function Profile() {
                   <div>
                     <p className="text-sm text-gray-500">Adresse</p>
                     <p className="text-gray-900">{profile.address || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Zones de couverture</p>
+                    <p className="text-gray-900">
+                      {profile.coverage_area?.map((code: string) => {
+                        const country = {
+                          FR: "France",
+                          TN: "Tunisie",
+                          MA: "Maroc",
+                          DZ: "Algérie"
+                        }[code];
+                        return country;
+                      }).join(", ") || "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Capacité totale</p>
+                    <p className="text-gray-900">{profile.carrier_capacities?.total_capacity || "-"} kg</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Prix par kg</p>
+                    <p className="text-gray-900">{profile.carrier_capacities?.price_per_kg || "-"} €</p>
                   </div>
                 </div>
               </div>
