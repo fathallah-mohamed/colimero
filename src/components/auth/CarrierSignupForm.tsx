@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ServiceOptions } from "./ServiceOptions";
 import { CoverageAreaSelect } from "./CoverageAreaSelect";
 
@@ -32,10 +31,12 @@ const formSchema = z.object({
   services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       totalCapacity: 1000,
@@ -46,7 +47,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     try {
       const { error } = await supabase
         .from('carrier_registration_requests')
@@ -63,6 +64,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
           total_capacity: values.totalCapacity,
           price_per_kg: values.pricePerKg,
           services: values.services,
+          status: 'pending'
         });
 
       if (error) throw error;

@@ -175,6 +175,63 @@ export type Database = {
           },
         ]
       }
+      carrier_registration_requests: {
+        Row: {
+          address: string
+          company_name: string
+          coverage_area: string[] | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          phone_secondary: string | null
+          price_per_kg: number | null
+          services: string[] | null
+          siret: string
+          status: string
+          total_capacity: number | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          company_name: string
+          coverage_area?: string[] | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          phone: string
+          phone_secondary?: string | null
+          price_per_kg?: number | null
+          services?: string[] | null
+          siret: string
+          status?: string
+          total_capacity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          company_name?: string
+          coverage_area?: string[] | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string
+          phone_secondary?: string | null
+          price_per_kg?: number | null
+          services?: string[] | null
+          siret?: string
+          status?: string
+          total_capacity?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       carrier_services: {
         Row: {
           carrier_id: string
