@@ -24,16 +24,20 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
     setIsLoading(true);
 
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      // First, check if the fields are not empty
+      if (!email.trim() || !password.trim()) {
+        throw new Error("Veuillez remplir tous les champs");
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) throw error;
 
-      if (user) {
-        // Vérifier le type d'utilisateur dans les métadonnées
-        const userType = user.user_metadata?.user_type;
+      if (data.user) {
+        const userType = data.user.user_metadata?.user_type;
         
         toast({
           title: "Connexion réussie",
@@ -43,20 +47,32 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
         // Rediriger selon le type d'utilisateur
         if (userType === 'carrier') {
           navigate('/mes-tournees');
-        } else if (email === 'admin@colimero.fr') {
+        } else if (email.trim() === 'admin@colimero.fr') {
           navigate('/admin');
         } else {
           navigate('/');
         }
+        
+        onSuccess?.();
       }
     } catch (error: any) {
       console.error("Login error:", error);
+      
+      // Personnaliser le message d'erreur selon le type d'erreur
+      let errorMessage = "Une erreur est survenue lors de la connexion";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message === "Email not confirmed") {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      } else if (error.message === "Veuillez remplir tous les champs") {
+        errorMessage = error.message;
+      }
+
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: error.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Une erreur est survenue lors de la connexion",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
