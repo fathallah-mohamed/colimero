@@ -30,12 +30,7 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password.trim(),
-        options: {
-          data: {
-            email: email.trim()
-          }
-        }
+        password: password.trim()
       });
 
       console.log("Sign in response:", { data, error });
