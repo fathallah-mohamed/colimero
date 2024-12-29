@@ -22,31 +22,22 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setPassword(""); // Clear password for security
-    console.log("Starting login attempt...");
+    console.log("Tentative de connexion avec:", email);
 
     try {
       if (!email.trim() || !password.trim()) {
         throw new Error("Veuillez remplir tous les champs");
       }
 
-      console.log("Attempting login with Supabase...");
+      console.log("Tentative d'authentification avec Supabase...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) {
-        console.error("Login error:", error);
-        let errorMessage = "Une erreur est survenue lors de la connexion";
-        
-        if (error.message === "Invalid login credentials") {
-          errorMessage = "Email ou mot de passe incorrect";
-        } else if (error.message === "Email not confirmed") {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        }
-        
-        throw new Error(errorMessage);
+        console.error("Erreur d'authentification:", error);
+        throw error;
       }
 
       if (!data.user) {
@@ -54,9 +45,9 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         throw new Error("Erreur lors de la connexion");
       }
 
-      console.log("Login successful, user data:", data.user);
+      console.log("Connexion réussie, données utilisateur:", data.user);
       const userType = data.user.user_metadata?.user_type;
-      console.log("User type:", userType);
+      console.log("Type d'utilisateur:", userType);
 
       // Redirect based on user type
       switch (userType) {
@@ -77,14 +68,23 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
 
       onSuccess();
     } catch (error: any) {
-      console.error("Full error details:", error);
+      console.error("Erreur complète:", error);
+      let errorMessage = "Une erreur est survenue lors de la connexion";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message === "Email not confirmed") {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      }
+
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
+      setPassword(""); // Clear password after attempt
     }
   };
 

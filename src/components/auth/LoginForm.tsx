@@ -22,14 +22,23 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("Tentative de connexion avec:", email);
 
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
+      if (!email.trim() || !password.trim()) {
+        throw new Error("Veuillez remplir tous les champs");
+      }
+
+      console.log("Tentative d'authentification avec Supabase...");
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur d'authentification:", error);
+        throw error;
+      }
 
       // Vérifier le type d'utilisateur
       const { data: userData } = await supabase.auth.getUser();
@@ -50,13 +59,23 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         onSuccess?.();
       }
     } catch (error: any) {
+      console.error("Erreur complète:", error);
+      let errorMessage = "Une erreur est survenue lors de la connexion";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message === "Email not confirmed") {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      }
+
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
+      setPassword(""); // Clear password after attempt
     }
   };
 
