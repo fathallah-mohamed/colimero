@@ -10,9 +10,10 @@ interface TourEditFormProps {
   onSubmit: (values: any) => void;
   loading: boolean;
   onClose: () => void;
+  isFormValid: boolean;
 }
 
-export function TourEditForm({ form, onSubmit, loading, onClose }: TourEditFormProps) {
+export function TourEditForm({ form, onSubmit, loading, onClose, isFormValid }: TourEditFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -33,7 +34,7 @@ export function TourEditForm({ form, onSubmit, loading, onClose }: TourEditFormP
           </Button>
           <Button 
             type="submit" 
-            disabled={loading}
+            disabled={loading || !isFormValid}
             className="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white"
           >
             {loading ? "Mise à jour..." : "Enregistrer"}

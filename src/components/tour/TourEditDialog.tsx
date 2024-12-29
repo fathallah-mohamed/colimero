@@ -38,6 +38,10 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
 
   if (!tour) return null;
 
+  const isFormValid = form.formState.isValid && 
+                     form.watch('terms_accepted') && 
+                     form.watch('customs_declaration');
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -54,6 +58,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
           onSubmit={handleSubmit}
           loading={loading}
           onClose={onClose}
+          isFormValid={isFormValid}
         />
       </DialogContent>
     </Dialog>
