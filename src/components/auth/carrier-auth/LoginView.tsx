@@ -22,14 +22,17 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log("Tentative de connexion avec:", email);
 
     try {
       if (!email.trim() || !password.trim()) {
-        throw new Error("Veuillez remplir tous les champs");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Veuillez remplir tous les champs",
+        });
+        return;
       }
 
-      console.log("Tentative d'authentification avec Supabase...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -54,19 +57,22 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
           title: "Erreur de connexion",
           description: errorMessage,
         });
+        setPassword("");
         return;
       }
 
       if (!data.user) {
-        console.error("No user data received");
-        throw new Error("Erreur lors de la connexion");
+        throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      console.log("Connexion réussie, données utilisateur:", data.user);
       const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
-      // Redirect based on user type
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
+
       switch (userType) {
         case 'admin':
           navigate("/admin");
@@ -78,30 +84,12 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
           navigate("/");
       }
 
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté",
-      });
-
       onSuccess();
     } catch (error: any) {
       console.error("Erreur complète:", error);
-      let errorMessage = "Une erreur est survenue lors de la connexion";
-      
-      if (error.message === "Invalid login credentials") {
-        errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message === "Email not confirmed") {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      }
-
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: errorMessage,
-      });
+      setPassword("");
     } finally {
       setIsLoading(false);
-      setPassword(""); // Clear password after attempt
     }
   };
 

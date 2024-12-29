@@ -34,7 +34,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     setIsLoading(true);
 
     try {
-      console.log("Attempting login with email:", email.trim());
+      console.log("Tentative de connexion avec:", email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -60,6 +60,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
           title: "Erreur de connexion",
           description: errorMessage,
         });
+        setPassword("");
         return;
       }
 
