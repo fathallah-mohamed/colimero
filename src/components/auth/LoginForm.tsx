@@ -41,14 +41,29 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         password: password.trim(),
       });
 
-      console.log("Auth response:", { data, error });
-
       if (error) {
-        console.error("Authentication error:", error);
-        throw error;
+        console.error("Erreur d'authentification:", error);
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+        
+        if (error.message === "Invalid login credentials") {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (error.message === "Email not confirmed") {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (error.message.includes("Invalid email")) {
+          errorMessage = "Format d'email invalide";
+        } else if (error.message.includes("Password")) {
+          errorMessage = "Le mot de passe est incorrect";
+        }
+
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: errorMessage,
+        });
+        return;
       }
 
-      if (!data?.user) {
+      if (!data.user) {
         console.error("No user data received");
         throw new Error("No user data received");
       }
@@ -75,21 +90,6 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
       onSuccess?.();
     } catch (error: any) {
       console.error("Login error:", error);
-      
-      let errorMessage = "Une erreur est survenue lors de la connexion";
-      
-      if (error.message?.includes("Invalid login credentials")) {
-        errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message === "Email not confirmed") {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      }
-
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: errorMessage,
-      });
-      
       setPassword("");
     } finally {
       setIsLoading(false);
