@@ -24,7 +24,6 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
     setIsLoading(true);
 
     try {
-      // Validate inputs
       if (!email.trim() || !password.trim()) {
         throw new Error("Veuillez remplir tous les champs");
       }
@@ -125,20 +124,13 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
         {isLoading ? "Chargement..." : "Se connecter"}
       </Button>
 
-      <div className="flex justify-between text-sm text-[#00B0F0]">
+      <div className="flex justify-center text-sm text-[#00B0F0]">
         <button
           type="button"
           className="hover:underline"
           onClick={onForgotPassword}
         >
           Mot de passe oublié ?
-        </button>
-        <button
-          type="button"
-          className="hover:underline"
-          onClick={onRegister}
-        >
-          Créer un compte
         </button>
       </div>
     </form>
