@@ -25,8 +25,8 @@ export function TourDates({ form, tour }: TourDatesProps) {
             <FormControl>
               <Input 
                 type="date" 
-                {...field} 
-                defaultValue={tour?.departure_date ? new Date(tour.departure_date).toISOString().split('T')[0] : ''}
+                {...field}
+                value={field.value || (tour?.departure_date ? new Date(tour.departure_date).toISOString().split('T')[0] : '')}
                 className="bg-white" 
               />
             </FormControl>

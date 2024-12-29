@@ -32,12 +32,10 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
     try {
       const selectedDate = new Date(e.target.value);
       
-      // Vérifier si la date est valide
       if (isNaN(selectedDate.getTime())) {
         throw new Error("Date invalide");
       }
 
-      // Vérifier si la date est antérieure à la date de départ
       if (departureDate && !isNaN(departureDate.getTime()) && selectedDate > departureDate) {
         toast({
           variant: "destructive",
@@ -57,12 +55,11 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
     }
   };
 
-  // Ensure we have a valid departure date before trying to format it
   const maxDate = departureDate && !isNaN(departureDate.getTime()) 
     ? departureDate.toISOString().split('T')[0] 
     : undefined;
 
-  const collectionDate = form.watch(`route.${index}.collection_date`);
+  const routeValue = form.watch(`route.${index}`);
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
@@ -86,7 +83,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
             <FormItem>
               <FormLabel>Ville</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Nom de la ville" />
+                <Input {...field} value={field.value || routeValue?.name || ''} placeholder="Nom de la ville" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,7 +97,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
             <FormItem>
               <FormLabel>Adresse</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Adresse précise" />
+                <Input {...field} value={field.value || routeValue?.location || ''} placeholder="Adresse précise" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,7 +113,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
               <FormControl>
                 <Input 
                   type="date" 
-                  value={collectionDate || ''}
+                  value={field.value || routeValue?.collection_date || ''}
                   max={maxDate}
                   onChange={handleDateChange}
                 />
@@ -133,7 +130,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
             <FormItem>
               <FormLabel>Heure</FormLabel>
               <FormControl>
-                <Input type="time" {...field} />
+                <Input type="time" {...field} value={field.value || routeValue?.time || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -146,7 +143,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
           render={({ field }) => (
             <FormItem>
               <FormLabel>Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || routeValue?.type || 'pickup'}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un type" />
