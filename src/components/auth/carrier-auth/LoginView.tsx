@@ -28,8 +28,23 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         throw new Error("Veuillez remplir tous les champs");
       }
 
-      console.log("Tentative de connexion avec:", { email: email.trim() });
+      // First, check if the user exists
+      const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers({
+        filters: {
+          email: email.trim()
+        }
+      });
 
+      if (usersError) {
+        console.error("Erreur lors de la vérification de l'utilisateur:", usersError);
+        throw new Error("Erreur lors de la vérification de l'utilisateur");
+      }
+
+      if (!users || users.length === 0) {
+        throw new Error("Aucun utilisateur trouvé avec cet email");
+      }
+
+      // Attempt login
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -44,21 +59,20 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      console.log("Utilisateur connecté:", data.user);
-
-      // Vérifier le type d'utilisateur dans les métadonnées
+      // Check user type in metadata
       const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
-      if (userType === 'admin') {
-        console.log("Redirection vers le dashboard admin");
-        navigate("/admin");
-      } else if (userType === 'carrier') {
-        console.log("Redirection vers mes tournées");
-        navigate("/mes-tournees");
-      } else {
-        console.log("Redirection vers la page d'accueil");
-        navigate("/");
+      // Redirect based on user type
+      switch (userType) {
+        case 'admin':
+          navigate("/admin");
+          break;
+        case 'carrier':
+          navigate("/mes-tournees");
+          break;
+        default:
+          navigate("/");
       }
 
       toast({
@@ -76,6 +90,8 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         errorMessage = "Email ou mot de passe incorrect";
       } else if (error.message === "Email not confirmed") {
         errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      } else if (error.message === "Aucun utilisateur trouvé avec cet email") {
+        errorMessage = "Aucun compte n'existe avec cet email";
       }
 
       toast({
