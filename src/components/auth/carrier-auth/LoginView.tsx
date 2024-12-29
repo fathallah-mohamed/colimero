@@ -22,30 +22,32 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("Starting login attempt for email:", email);
 
     try {
       if (!email.trim() || !password.trim()) {
         throw new Error("Veuillez remplir tous les champs");
       }
 
-      // Attempt login
+      console.log("Attempting login with Supabase...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) {
-        console.error("Erreur de connexion:", error);
+        console.error("Login error:", error);
         throw error;
       }
 
-      if (!data?.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
+      if (!data.user) {
+        console.error("No user data received");
+        throw new Error("Erreur lors de la connexion");
       }
 
-      // Check user type in metadata
+      console.log("Login successful, user data:", data.user);
       const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
+      console.log("User type:", userType);
 
       // Redirect based on user type
       switch (userType) {
@@ -66,8 +68,7 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
 
       onSuccess();
     } catch (error: any) {
-      console.error("Erreur complète:", error);
-      
+      console.error("Full error:", error);
       let errorMessage = "Une erreur est survenue lors de la connexion";
       
       if (error.message === "Invalid login credentials") {
