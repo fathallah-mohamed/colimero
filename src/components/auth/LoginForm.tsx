@@ -34,33 +34,24 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     setIsLoading(true);
 
     try {
-      console.log("Tentative de connexion avec:", email);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) {
-        console.error("Erreur d'authentification:", error);
-        throw error;
+      if (error) throw error;
+
+      if (!user) {
+        throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      if (!data.user) {
-        console.error("Aucune donnée utilisateur reçue");
-        throw new Error("Erreur lors de la connexion");
-      }
-
-      console.log("Connexion réussie, données utilisateur:", data.user);
-      const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
+      const userType = user.user_metadata?.user_type;
 
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",
       });
 
-      // Redirection selon le type d'utilisateur
       switch (userType) {
         case 'admin':
           navigate("/admin");
@@ -74,7 +65,6 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
       
       onSuccess?.();
     } catch (error: any) {
-      console.error("Erreur complète:", error);
       let errorMessage = "Une erreur est survenue lors de la connexion";
       
       if (error.message === "Invalid login credentials") {
@@ -88,7 +78,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         title: "Erreur de connexion",
         description: errorMessage,
       });
-      setPassword(""); // Clear password after failed attempt
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
