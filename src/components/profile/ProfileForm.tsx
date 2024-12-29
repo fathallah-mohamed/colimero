@@ -11,9 +11,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ServiceFields } from "./ServiceFields";
+import { CoverageFields } from "./CoverageFields";
+import { SERVICE_OPTIONS } from "./constants";
 
 const formSchema = z.object({
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
@@ -57,14 +59,12 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      // Update email in auth.users
       const { error: emailUpdateError } = await supabase.auth.updateUser({
         email: values.email,
       });
 
       if (emailUpdateError) throw emailUpdateError;
 
-      // Update carrier profile
       const { error: carrierError } = await supabase
         .from('carriers')
         .update({
@@ -92,7 +92,6 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (capacityError) throw capacityError;
 
-      // Supprimer les services existants
       const { error: deleteError } = await supabase
         .from('carrier_services')
         .delete()
@@ -100,11 +99,10 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (deleteError) throw deleteError;
 
-      // Insérer les nouveaux services
       const servicesToInsert = values.services.map(serviceType => ({
         carrier_id: initialData.id,
         service_type: serviceType,
-        icon: serviceOptions.find(opt => opt.id === serviceType)?.icon || 'package'
+        icon: SERVICE_OPTIONS.find(opt => opt.id === serviceType)?.icon || 'package'
       }));
 
       const { error: servicesError } = await supabase
@@ -243,46 +241,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="coverage_area"
-          render={() => (
-            <FormItem>
-              <FormLabel>Zones de couverture</FormLabel>
-              <div className="grid grid-cols-2 gap-4">
-                {countryOptions.map((country) => (
-                  <FormField
-                    key={country.id}
-                    control={form.control}
-                    name="coverage_area"
-                    render={({ field }) => (
-                      <FormItem
-                        key={country.id}
-                        className="flex flex-row items-start space-x-3 space-y-0"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(country.id)}
-                            onCheckedChange={(checked) => {
-                              const updatedValue = checked
-                                ? [...field.value, country.id]
-                                : field.value?.filter((value) => value !== country.id);
-                              field.onChange(updatedValue);
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {country.label}
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <CoverageFields form={form} />
 
         <FormField
           control={form.control}
@@ -320,46 +279,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="services"
-          render={() => (
-            <FormItem className="col-span-2">
-              <FormLabel>Services proposés</FormLabel>
-              <div className="grid grid-cols-2 gap-4">
-                {serviceOptions.map((service) => (
-                  <FormField
-                    key={service.id}
-                    control={form.control}
-                    name="services"
-                    render={({ field }) => (
-                      <FormItem
-                        key={service.id}
-                        className="flex flex-row items-start space-x-3 space-y-0"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(service.id)}
-                            onCheckedChange={(checked) => {
-                              const updatedValue = checked
-                                ? [...field.value, service.id]
-                                : field.value?.filter((value) => value !== service.id);
-                              field.onChange(updatedValue);
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {service.label}
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <ServiceFields form={form} />
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
