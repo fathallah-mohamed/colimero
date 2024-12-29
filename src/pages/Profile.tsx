@@ -34,29 +34,53 @@ export default function Profile() {
   };
 
   const fetchProfile = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      const { data, error } = await supabase
-        .from('carriers')
-        .select(`
-          *,
-          carrier_capacities (
-            total_capacity,
-            price_per_kg,
-            offers_home_delivery
-          )
-        `)
-        .eq('id', session.user.id)
-        .single();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from('carriers')
+          .select(`
+            *,
+            carrier_capacities (
+              total_capacity,
+              price_per_kg,
+              offers_home_delivery
+            )
+          `)
+          .eq('id', session.user.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
+        if (error) {
+          console.error('Error fetching profile:', error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de charger votre profil",
+          });
+          return;
+        }
+
+        if (!data) {
+          toast({
+            variant: "destructive",
+            title: "Profil non trouvé",
+            description: "Votre profil n'a pas été trouvé",
+          });
+          return;
+        }
+
+        setProfile(data);
       }
-
-      setProfile(data);
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger votre profil",
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (loading) {
@@ -65,6 +89,22 @@ export default function Profile() {
         <Navigation />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold">Profil non trouvé</h2>
+            <p className="mt-2 text-gray-600">
+              Nous n'avons pas pu trouver votre profil. Veuillez vous reconnecter.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -164,6 +204,7 @@ export default function Profile() {
             <div className="mt-8 pt-8 border-t border-gray-200">
               <DeleteAccountButton />
             </div>
+
           </div>
         </div>
       </div>
