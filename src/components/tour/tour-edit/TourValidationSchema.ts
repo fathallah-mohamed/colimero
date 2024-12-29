@@ -22,7 +22,9 @@ export const tourFormSchema = z.object({
     name: z.string().min(1, "Le nom de la ville est requis"),
     location: z.string().min(1, "L'adresse est requise"),
     time: z.string().min(1, "L'heure est requise"),
-    type: z.literal("pickup")
+    type: z.enum(["pickup", "dropoff"], {
+      required_error: "Le type de point est requis",
+    })
   })).min(1, "Au moins un point de collecte est requis"),
   departure_country: z.string().min(1, "Le pays de départ est requis"),
   destination_country: z.string().min(1, "Le pays de destination est requis"),

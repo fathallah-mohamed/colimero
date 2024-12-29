@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 import {
   FormControl,
@@ -10,7 +9,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
-import type { RouteStop } from "@/types/tour";
 import {
   Select,
   SelectContent,

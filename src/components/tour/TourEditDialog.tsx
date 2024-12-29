@@ -26,7 +26,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
       route: Array.isArray(tour?.route) ? tour.route.map((stop: any) => ({
         name: stop.name || "",
         location: stop.location || "",
-        time: stop.time || "08:00",
+        time: stop.time || "",
         type: stop.type || "pickup"
       })) : [],
       departure_country: tour?.departure_country || "FR",
