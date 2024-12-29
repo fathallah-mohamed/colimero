@@ -1,22 +1,13 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CollectionPointForm } from "./CollectionPointForm";
-import { useForm, useFieldArray } from "react-hook-form";
+import { supabase } from "@/integrations/supabase/client";
+import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form";
-import type { RouteStop } from "@/types/tour";
+import { TourBasicInfo } from "./tour-edit/TourBasicInfo";
+import { TourDates } from "./tour-edit/TourDates";
+import { TourCollectionPoints } from "./tour-edit/TourCollectionPoints";
 
 interface TourEditDialogProps {
   isOpen: boolean;
@@ -38,11 +29,6 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
       collection_date: tour?.collection_date ? new Date(tour.collection_date).toISOString().split('T')[0] : "",
       route: Array.isArray(tour?.route) ? tour.route : [],
     }
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "route"
   });
 
   const handleSubmit = async (values: any) => {
@@ -81,107 +67,38 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
     onComplete();
   };
 
-  const addCollectionPoint = () => {
-    append({
-      name: "",
-      location: "",
-      time: "08:00",
-      type: "pickup" as const,
-    });
-  };
-
   if (!tour) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Modifier la tournée</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold text-primary">
+            Modifier la tournée
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="total_capacity">Capacité totale (kg)</Label>
-                <Input
-                  type="number"
-                  id="total_capacity"
-                  {...form.register('total_capacity')}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="remaining_capacity">Capacité restante (kg)</Label>
-                <Input
-                  type="number"
-                  id="remaining_capacity"
-                  {...form.register('remaining_capacity')}
-                />
-              </div>
+            <div className="space-y-6">
+              <TourBasicInfo form={form} />
+              <TourDates form={form} />
+              <TourCollectionPoints form={form} />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type">Type de tournée</Label>
-              <Select
-                value={form.watch('type')}
-                onValueChange={(value) => form.setValue('type', value)}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onClose}
+                className="w-full sm:w-auto"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez un type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="public">Publique</SelectItem>
-                  <SelectItem value="private">Privée</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="departure_date">Date de départ</Label>
-                <Input
-                  type="date"
-                  id="departure_date"
-                  {...form.register('departure_date')}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="collection_date">Date de collecte</Label>
-                <Input
-                  type="date"
-                  id="collection_date"
-                  {...form.register('collection_date')}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Points de collecte</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addCollectionPoint}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Ajouter un point
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {fields.map((field, index) => (
-                  <CollectionPointForm
-                    key={field.id}
-                    index={index}
-                    onRemove={remove}
-                    form={form}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>
                 Annuler
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white"
+              >
                 {loading ? "Mise à jour..." : "Enregistrer"}
               </Button>
             </div>
