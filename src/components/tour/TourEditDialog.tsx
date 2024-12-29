@@ -14,6 +14,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CollectionPointForm } from "./CollectionPointForm";
+import { useForm } from "react-hook-form";
 import type { RouteStop } from "@/types/tour";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -36,28 +37,20 @@ interface FormData {
 export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    total_capacity: "",
-    remaining_capacity: "",
-    type: "",
-    departure_date: "",
-    collection_date: "",
-    route: [],
-  });
-
-  // Mettre à jour les données du formulaire quand une tournée est sélectionnée
-  useState(() => {
-    if (tour) {
-      setFormData({
-        total_capacity: tour.total_capacity,
-        remaining_capacity: tour.remaining_capacity,
-        type: tour.type,
-        departure_date: new Date(tour.departure_date).toISOString().split('T')[0],
-        collection_date: new Date(tour.collection_date).toISOString().split('T')[0],
-        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route),
-      });
+  
+  const form = useForm<FormData>({
+    defaultValues: {
+      total_capacity: tour?.total_capacity?.toString() || "",
+      remaining_capacity: tour?.remaining_capacity?.toString() || "",
+      type: tour?.type || "",
+      departure_date: tour?.departure_date ? new Date(tour.departure_date).toISOString().split('T')[0] : "",
+      collection_date: tour?.collection_date ? new Date(tour.collection_date).toISOString().split('T')[0] : "",
+      route: Array.isArray(tour?.route) ? tour.route : JSON.parse(tour?.route || "[]"),
     }
   });
+
+  const { watch, setValue } = form;
+  const formData = watch();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,34 +91,26 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
   };
 
   const addCollectionPoint = () => {
-    setFormData(prev => ({
-      ...prev,
-      route: [
-        ...prev.route,
-        {
-          name: "",
-          location: "",
-          time: "08:00",
-          type: "pickup" as const,
-        },
-      ],
-    }));
+    setValue('route', [
+      ...formData.route,
+      {
+        name: "",
+        location: "",
+        time: "08:00",
+        type: "pickup" as const,
+      },
+    ]);
   };
 
   const removeCollectionPoint = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      route: prev.route.filter((_, i) => i !== index),
-    }));
+    setValue('route', formData.route.filter((_, i) => i !== index));
   };
 
   const updateCollectionPoint = (index: number, field: keyof RouteStop, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      route: prev.route.map((point, i) => 
-        i === index ? { ...point, [field]: value } : point
-      ),
-    }));
+    const newRoute = formData.route.map((point, i) => 
+      i === index ? { ...point, [field]: value } : point
+    );
+    setValue('route', newRoute);
   };
 
   if (!tour) return null;
@@ -144,7 +129,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
                 type="number"
                 id="total_capacity"
                 value={formData.total_capacity}
-                onChange={(e) => setFormData({ ...formData, total_capacity: e.target.value })}
+                onChange={(e) => setValue('total_capacity', e.target.value)}
               />
             </div>
 
@@ -154,7 +139,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
                 type="number"
                 id="remaining_capacity"
                 value={formData.remaining_capacity}
-                onChange={(e) => setFormData({ ...formData, remaining_capacity: e.target.value })}
+                onChange={(e) => setValue('remaining_capacity', e.target.value)}
               />
             </div>
           </div>
@@ -163,7 +148,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
             <Label htmlFor="type">Type de tournée</Label>
             <Select
               value={formData.type}
-              onValueChange={(value) => setFormData({ ...formData, type: value })}
+              onValueChange={(value) => setValue('type', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type" />
@@ -182,7 +167,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
                 type="date"
                 id="departure_date"
                 value={formData.departure_date}
-                onChange={(e) => setFormData({ ...formData, departure_date: e.target.value })}
+                onChange={(e) => setValue('departure_date', e.target.value)}
               />
             </div>
 
@@ -192,7 +177,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
                 type="date"
                 id="collection_date"
                 value={formData.collection_date}
-                onChange={(e) => setFormData({ ...formData, collection_date: e.target.value })}
+                onChange={(e) => setValue('collection_date', e.target.value)}
               />
             </div>
           </div>
@@ -211,8 +196,9 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
                 <CollectionPointForm
                   key={index}
                   index={index}
+                  point={point}
                   onRemove={removeCollectionPoint}
-                  form={form}
+                  onUpdate={updateCollectionPoint}
                 />
               ))}
             </div>
