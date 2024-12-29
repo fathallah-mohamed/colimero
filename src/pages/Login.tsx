@@ -1,7 +1,10 @@
 import Navigation from "@/components/Navigation";
 import { LoginView } from "@/components/auth/carrier-auth/LoginView";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -10,6 +13,8 @@ export default function Login() {
         <LoginView 
           onForgotPassword={() => {}} 
           onRegister={() => {}}
+          onSuccess={() => navigate("/profil")}
+          hideRegister
         />
       </div>
     </div>
