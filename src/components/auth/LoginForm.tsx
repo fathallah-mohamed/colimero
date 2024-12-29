@@ -32,10 +32,8 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     }
 
     setIsLoading(true);
-    console.log("Tentative de connexion avec:", email);
 
     try {
-      console.log("Tentative d'authentification avec Supabase...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -43,9 +41,13 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
 
       if (error) {
         console.error("Erreur d'authentification:", error);
+        
+        // Handle specific error cases
         let errorMessage = "Email ou mot de passe incorrect";
-        if (error.message === "Email not confirmed") {
+        if (error.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect";
         }
         
         toast({
@@ -57,9 +59,11 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         return;
       }
 
-      console.log("Connexion réussie, données utilisateur:", data.user);
-      const userType = data.user?.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
+      if (!data.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
+
+      const userType = data.user.user_metadata?.user_type;
       
       // Redirect based on user type
       switch (userType) {
