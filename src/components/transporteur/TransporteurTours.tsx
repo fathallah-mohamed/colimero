@@ -7,6 +7,7 @@ import type { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { EmailVerificationDialog } from "@/components/tour/EmailVerificationDialog";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,6 +24,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isEmailVerificationOpen, setIsEmailVerificationOpen] = useState(false);
   const [currentTourId, setCurrentTourId] = useState<number | null>(null);
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Chargement...</div>;
@@ -50,11 +52,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
       const userType = session.user.user_metadata?.user_type;
       
       if (userType === 'carrier') {
-        toast({
-          variant: "destructive",
-          title: "Accès refusé",
-          description: "Les transporteurs ne peuvent pas réserver de tournées. Veuillez vous connecter avec un compte client.",
-        });
+        setShowAccessDenied(true);
         return;
       }
     }
@@ -87,6 +85,10 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
   return (
     <div className="space-y-4">
+      {showAccessDenied && (
+        <AccessDeniedMessage userType="client" />
+      )}
+
       {tours.map((tour) => (
         <div key={tour.id} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
