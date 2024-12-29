@@ -19,19 +19,34 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    console.log("Tentative de connexion avec:", email);
 
     try {
+      if (!email.trim() || !password.trim()) {
+        throw new Error("Veuillez remplir tous les champs");
+      }
+
+      console.log("Tentative d'authentification avec Supabase...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur d'authentification:", error);
+        throw error;
+      }
 
-      // Vérifier le type d'utilisateur
-      const userType = data.user?.user_metadata?.user_type;
+      if (!data.user) {
+        console.error("Aucune donnée utilisateur reçue");
+        throw new Error("Erreur lors de la connexion");
+      }
 
-      // Rediriger selon le type d'utilisateur
+      console.log("Connexion réussie, données utilisateur:", data.user);
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
+
+      // Redirection selon le type d'utilisateur
       switch (userType) {
         case 'admin':
           navigate("/admin");
@@ -43,8 +58,16 @@ export default function Login() {
           navigate("/");
       }
     } catch (error: any) {
-      console.error("Erreur de connexion:", error);
-      setError("Email ou mot de passe incorrect");
+      console.error("Erreur complète:", error);
+      let errorMessage = "Une erreur est survenue lors de la connexion";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message === "Email not confirmed") {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
