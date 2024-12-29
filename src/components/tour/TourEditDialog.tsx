@@ -35,36 +35,45 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
     if (!tour) return;
 
     setLoading(true);
-    const routeJson = values.route;
+    try {
+      // Ensure valid dates by creating Date objects and converting to ISO string
+      const departureDate = new Date(values.departure_date);
+      const collectionDate = new Date(values.collection_date);
 
-    const { error } = await supabase
-      .from('tours')
-      .update({
-        total_capacity: Number(values.total_capacity),
-        remaining_capacity: Number(values.remaining_capacity),
-        type: values.type,
-        departure_date: new Date(values.departure_date).toISOString(),
-        collection_date: new Date(values.collection_date).toISOString(),
-        route: routeJson,
-      })
-      .eq('id', tour.id);
+      // Validate dates
+      if (isNaN(departureDate.getTime()) || isNaN(collectionDate.getTime())) {
+        throw new Error("Invalid date format");
+      }
 
-    setLoading(false);
+      const { error } = await supabase
+        .from('tours')
+        .update({
+          total_capacity: Number(values.total_capacity),
+          remaining_capacity: Number(values.remaining_capacity),
+          type: values.type,
+          departure_date: departureDate.toISOString(),
+          collection_date: collectionDate.toISOString(),
+          route: values.route,
+        })
+        .eq('id', tour.id);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "La tournée a été mise à jour",
+      });
+      onComplete();
+    } catch (error) {
+      console.error('Error updating tour:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour la tournée",
+        description: "Impossible de mettre à jour la tournée. Vérifiez les dates saisies.",
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    toast({
-      title: "Succès",
-      description: "La tournée a été mise à jour",
-    });
-    onComplete();
   };
 
   if (!tour) return null;
