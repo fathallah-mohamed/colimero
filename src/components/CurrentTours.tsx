@@ -21,10 +21,7 @@ export default function CurrentTours() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-500"
-                    style={{ width: `${((1000 - 600) / 1000) * 100}%` }}
-                  ></div>
+                  <div className="w-3/5 h-full bg-blue-500"></div>
                 </div>
                 <span className="text-sm text-gray-600">600kg / 1000kg</span>
               </div>
