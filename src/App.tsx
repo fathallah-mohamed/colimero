@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import MesTournees from "./pages/MesTournees";
 import DemandesApprobation from "./pages/DemandesApprobation";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/profil" element={<Profile />} />
           <Route path="/mes-tournees" element={<MesTournees />} />
           <Route path="/demandes-approbation" element={<DemandesApprobation />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
