@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface LoginViewProps {
   onForgotPassword: () => void;
@@ -16,27 +17,37 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (data.user) {
+      if (user) {
+        // Vérifier le type d'utilisateur dans les métadonnées
+        const userType = user.user_metadata?.user_type;
+        
         toast({
           title: "Connexion réussie",
-          description: "Vous allez être redirigé",
+          description: "Redirection en cours...",
         });
-        onSuccess?.();
+
+        // Rediriger selon le type d'utilisateur
+        if (userType === 'carrier') {
+          navigate('/mes-tournees');
+        } else if (email === 'admin@colimero.fr') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);
