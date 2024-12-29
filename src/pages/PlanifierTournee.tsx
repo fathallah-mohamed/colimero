@@ -47,6 +47,10 @@ export default function PlanifierTournee() {
     },
   ];
 
+  const handleCreateTourClick = () => {
+    setIsAuthDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
@@ -87,7 +91,7 @@ export default function PlanifierTournee() {
             <Button
               size="lg"
               className="bg-[#0091FF] hover:bg-[#0091FF]/90 text-white px-8"
-              onClick={() => setIsAuthDialogOpen(true)}
+              onClick={handleCreateTourClick}
             >
               Créer une tournée
             </Button>

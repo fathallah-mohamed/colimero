@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import CarrierSignupForm from "./CarrierSignupForm";
@@ -28,6 +28,15 @@ export default function CarrierAuthDialog({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Reset view to login when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setView("login");
+      setEmail("");
+      setPassword("");
+    }
+  }, [isOpen]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,7 +48,6 @@ export default function CarrierAuthDialog({
         throw new Error("Veuillez remplir tous les champs");
       }
 
-      // First, attempt to sign in
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
