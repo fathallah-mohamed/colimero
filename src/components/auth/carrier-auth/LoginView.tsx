@@ -28,37 +28,37 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         throw new Error("Veuillez remplir tous les champs");
       }
 
+      console.log("Tentative de connexion avec:", { email: email.trim() });
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur de connexion:", error);
+        throw error;
+      }
 
       if (!data?.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const { data: adminData } = await supabase
-        .from("administrators")
-        .select("*")
-        .eq("id", data.user.id)
-        .single();
+      console.log("Utilisateur connecté:", data.user);
 
-      if (adminData) {
+      // Vérifier le type d'utilisateur dans les métadonnées
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
+
+      if (userType === 'admin') {
+        console.log("Redirection vers le dashboard admin");
         navigate("/admin");
+      } else if (userType === 'carrier') {
+        console.log("Redirection vers mes tournées");
+        navigate("/mes-tournees");
       } else {
-        const { data: carrierData } = await supabase
-          .from("carriers")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
-
-        if (carrierData) {
-          navigate("/mes-tournees");
-        } else {
-          navigate("/");
-        }
+        console.log("Redirection vers la page d'accueil");
+        navigate("/");
       }
 
       toast({
@@ -68,7 +68,7 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
 
       onSuccess();
     } catch (error: any) {
-      console.error("Erreur de connexion:", error);
+      console.error("Erreur complète:", error);
       
       let errorMessage = "Une erreur est survenue lors de la connexion";
       
