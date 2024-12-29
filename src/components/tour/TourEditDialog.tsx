@@ -49,7 +49,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
     if (!tour) return;
 
     setLoading(true);
-    const routeJson = values.route as unknown as Json;
+    const routeJson = values.route;
 
     const { error } = await supabase
       .from('tours')
