@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { authenticateUser } from "@/utils/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -34,22 +34,61 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     setIsLoading(true);
 
     try {
-      const authResponse = await authenticateUser(email, password);
+      console.log("Tentative de connexion avec:", email);
       
-      if (authResponse.success) {
-        toast({
-          title: "Connexion réussie",
-          description: "Vous êtes maintenant connecté",
-        });
-        
-        if (authResponse.redirectTo) {
-          navigate(authResponse.redirectTo);
-        }
-        
-        onSuccess?.();
-      } else {
-        setPassword("");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      if (error) {
+        console.error("Erreur d'authentification:", error);
+        throw error;
       }
+
+      if (!data.user) {
+        console.error("Aucune donnée utilisateur reçue");
+        throw new Error("Erreur lors de la connexion");
+      }
+
+      console.log("Connexion réussie, données utilisateur:", data.user);
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
+
+      // Redirection selon le type d'utilisateur
+      switch (userType) {
+        case 'admin':
+          navigate("/admin");
+          break;
+        case 'carrier':
+          navigate("/mes-tournees");
+          break;
+        default:
+          navigate("/");
+      }
+      
+      onSuccess?.();
+    } catch (error: any) {
+      console.error("Erreur complète:", error);
+      let errorMessage = "Une erreur est survenue lors de la connexion";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message === "Email not confirmed") {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: errorMessage,
+      });
+      setPassword(""); // Clear password after failed attempt
     } finally {
       setIsLoading(false);
     }
