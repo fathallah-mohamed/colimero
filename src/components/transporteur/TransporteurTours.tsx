@@ -107,11 +107,11 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
               <span>Capacité restante : {tour.remaining_capacity} kg</span>
               <span>Total : {tour.total_capacity} kg</span>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-500 rounded-full transition-all"
                 style={{
-                  width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
+                  width: `${((tour.total_capacity - tour.remaining_capacity) / tour.total_capacity) * 100}%`,
                 }}
               />
             </div>
