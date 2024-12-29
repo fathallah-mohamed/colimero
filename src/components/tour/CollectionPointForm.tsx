@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CollectionPointFormProps {
   index: number;
@@ -25,6 +26,21 @@ interface CollectionPointFormProps {
 }
 
 export function CollectionPointForm({ index, onRemove, form, departureDate }: CollectionPointFormProps) {
+  const { toast } = useToast();
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDate = new Date(e.target.value);
+    if (selectedDate > departureDate) {
+      toast({
+        variant: "destructive",
+        title: "Date invalide",
+        description: "La date de collecte doit être antérieure à la date de départ",
+      });
+      return;
+    }
+    form.setValue(`route.${index}.collection_date`, e.target.value);
+  };
+
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
       <div className="flex justify-between items-center">
@@ -77,14 +93,9 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
               <FormControl>
                 <Input 
                   type="date" 
-                  {...field} 
+                  {...field}
                   max={departureDate.toISOString().split('T')[0]}
-                  onChange={(e) => {
-                    const selectedDate = new Date(e.target.value);
-                    if (selectedDate <= departureDate) {
-                      field.onChange(e.target.value);
-                    }
-                  }}
+                  onChange={handleDateChange}
                 />
               </FormControl>
               <FormMessage />
