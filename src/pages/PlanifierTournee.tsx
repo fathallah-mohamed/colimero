@@ -13,12 +13,12 @@ export default function PlanifierTournee() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Vérifier l'état de connexion initial
+    // Check initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
     });
 
-    // Écouter les changements d'état de connexion
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
