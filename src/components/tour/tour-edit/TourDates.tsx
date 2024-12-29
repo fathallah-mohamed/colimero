@@ -4,6 +4,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
@@ -23,6 +24,7 @@ export function TourDates({ form }: TourDatesProps) {
             <FormControl>
               <Input type="date" {...field} className="bg-white" />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -36,6 +38,7 @@ export function TourDates({ form }: TourDatesProps) {
             <FormControl>
               <Input type="date" {...field} className="bg-white" />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
