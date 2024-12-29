@@ -15,13 +15,11 @@ export const tourFormSchema = z.object({
   departure_date: z.string()
     .min(1, "La date de départ est requise")
     .refine(val => !isNaN(new Date(val).getTime()), "Format de date invalide"),
-  collection_date: z.string()
-    .min(1, "La date de collecte est requise")
-    .refine(val => !isNaN(new Date(val).getTime()), "Format de date invalide"),
   route: z.array(z.object({
     name: z.string().min(1, "Le nom de la ville est requis"),
     location: z.string().min(1, "L'adresse est requise"),
     time: z.string().min(1, "L'heure est requise"),
+    collection_date: z.string().min(1, "La date de collecte est requise"),
     type: z.enum(["pickup", "dropoff"], {
       required_error: "Le type de point est requis",
     })

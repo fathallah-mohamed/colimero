@@ -14,27 +14,13 @@ interface TourDatesProps {
 
 export function TourDates({ form }: TourDatesProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div>
       <FormField
         control={form.control}
         name="departure_date"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Date de départ</FormLabel>
-            <FormControl>
-              <Input type="date" {...field} className="bg-white" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="collection_date"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Date de collecte</FormLabel>
             <FormControl>
               <Input type="date" {...field} className="bg-white" />
             </FormControl>

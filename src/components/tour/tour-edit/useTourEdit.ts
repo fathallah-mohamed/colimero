@@ -13,10 +13,15 @@ export function useTourEdit(tour: any, onComplete: () => void) {
     setLoading(true);
     try {
       const departureDate = new Date(values.departure_date);
-      const collectionDate = new Date(values.collection_date);
 
-      if (collectionDate > departureDate) {
-        throw new Error("La date de collecte ne peut pas être après la date de départ");
+      // Vérifier que toutes les dates de collecte sont antérieures à la date de départ
+      const hasInvalidDates = values.route.some(point => {
+        const collectionDate = new Date(point.collection_date);
+        return collectionDate > departureDate;
+      });
+
+      if (hasInvalidDates) {
+        throw new Error("Les dates de collecte doivent être antérieures à la date de départ");
       }
 
       if (values.remaining_capacity > values.total_capacity) {
@@ -30,7 +35,6 @@ export function useTourEdit(tour: any, onComplete: () => void) {
           remaining_capacity: values.remaining_capacity,
           type: values.type,
           departure_date: departureDate.toISOString(),
-          collection_date: collectionDate.toISOString(),
           route: values.route,
           departure_country: values.departure_country,
           destination_country: values.destination_country,
