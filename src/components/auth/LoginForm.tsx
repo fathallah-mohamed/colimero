@@ -34,12 +34,16 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     setIsLoading(true);
 
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      console.log("Tentative de connexion avec:", email);
+      console.log("Tentative d'authentification avec Supabase...");
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) {
+        console.error("Erreur d'authentification:", error);
         let errorMessage = "Email ou mot de passe incorrect";
         
         if (error.message.includes("Email not confirmed")) {
@@ -52,14 +56,17 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
           description: errorMessage,
         });
         setPassword("");
+        setIsLoading(false);
         return;
       }
 
-      if (!user) {
+      if (!data.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = user.user_metadata?.user_type;
+      console.log("Connexion réussie, données utilisateur:", data.user);
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
       
       // Redirect based on user type
       switch (userType) {
