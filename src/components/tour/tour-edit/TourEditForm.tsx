@@ -3,7 +3,6 @@ import { Form } from "@/components/ui/form";
 import { TourBasicInfo } from "./TourBasicInfo";
 import { TourDates } from "./TourDates";
 import { TourCollectionPoints } from "./TourCollectionPoints";
-import { TourTerms } from "./TourTerms";
 import { Button } from "@/components/ui/button";
 
 interface TourEditFormProps {
@@ -23,7 +22,6 @@ export function TourEditForm({ form, onSubmit, loading, onClose, isFormValid, to
           <TourBasicInfo form={form} tour={tour} />
           <TourDates form={form} tour={tour} />
           <TourCollectionPoints form={form} tour={tour} />
-          <TourTerms form={form} />
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t">
