@@ -21,61 +21,64 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email.trim() || !password.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    console.log("Tentative de connexion avec:", email);
 
     try {
-      if (!email.trim() || !password.trim()) {
-        throw new Error("Veuillez remplir tous les champs");
-      }
-
-      console.log("Tentative d'authentification avec Supabase...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) {
-        console.error("Erreur d'authentification:", error);
-        throw error;
+        let errorMessage = "Email ou mot de passe incorrect";
+        if (error.message === "Email not confirmed") {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        }
+        
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: errorMessage,
+        });
+        return;
       }
 
-      // Vérifier le type d'utilisateur
-      const { data: userData } = await supabase.auth.getUser();
-      const userType = userData?.user?.user_metadata?.user_type;
+      if (data.user) {
+        const userType = data.user.user_metadata?.user_type;
+        
+        if (userType === 'carrier') {
+          navigate("/mes-tournees");
+        } else if (userType === 'admin') {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
 
-      if (userType === 'carrier') {
         toast({
           title: "Connexion réussie",
-          description: "En tant que transporteur, vous ne pouvez pas réserver de tournée. Vous allez être redirigé vers la page d'envoi de colis.",
-          variant: "default",
+          description: "Vous êtes maintenant connecté",
         });
-        onSuccess?.();
-      } else {
-        toast({
-          title: "Connexion réussie",
-          description: "Vous allez être redirigé",
-        });
+        
         onSuccess?.();
       }
-    } catch (error: any) {
-      console.error("Erreur complète:", error);
-      let errorMessage = "Une erreur est survenue lors de la connexion";
-      
-      if (error.message === "Invalid login credentials") {
-        errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message === "Email not confirmed") {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      }
-
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: errorMessage,
+        description: "Une erreur est survenue lors de la connexion",
       });
     } finally {
       setIsLoading(false);
-      setPassword(""); // Clear password after attempt
     }
   };
 
@@ -89,6 +92,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -100,6 +104,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          disabled={isLoading}
         />
       </div>
 
