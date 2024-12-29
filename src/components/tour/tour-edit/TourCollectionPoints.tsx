@@ -1,7 +1,8 @@
-import { UseFormReturn, useFieldArray } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CollectionPointForm } from "../CollectionPointForm";
+import { useFieldArray } from "react-hook-form";
 
 interface TourCollectionPointsProps {
   form: UseFormReturn<any>;
@@ -13,14 +14,7 @@ export function TourCollectionPoints({ form }: TourCollectionPointsProps) {
     name: "route"
   });
 
-  const addCollectionPoint = () => {
-    append({
-      name: "",
-      location: "",
-      time: "08:00",
-      type: "pickup" as const,
-    });
-  };
+  const departureDate = new Date(form.watch('departure_date'));
 
   return (
     <div className="space-y-4">
@@ -30,7 +24,13 @@ export function TourCollectionPoints({ form }: TourCollectionPointsProps) {
           type="button"
           variant="outline"
           size="sm"
-          onClick={addCollectionPoint}
+          onClick={() => append({
+            name: "",
+            location: "",
+            time: "",
+            type: "pickup",
+            collection_date: new Date().toISOString().split('T')[0],
+          })}
           className="text-primary hover:text-primary-hover"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -45,6 +45,7 @@ export function TourCollectionPoints({ form }: TourCollectionPointsProps) {
             index={index}
             onRemove={remove}
             form={form}
+            departureDate={departureDate}
           />
         ))}
       </div>
