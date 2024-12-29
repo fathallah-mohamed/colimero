@@ -59,8 +59,6 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
     ? departureDate.toISOString().split('T')[0] 
     : undefined;
 
-  const routeValue = form.watch(`route.${index}`);
-
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
       <div className="flex justify-between items-center">
@@ -113,7 +111,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
               <FormControl>
                 <Input 
                   type="date" 
-                  value={field.value}
+                  {...field}
                   max={maxDate}
                   onChange={handleDateChange}
                 />
