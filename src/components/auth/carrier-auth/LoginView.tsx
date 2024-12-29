@@ -22,7 +22,8 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log("Starting login attempt for email:", email);
+    setPassword(""); // Clear password for security
+    console.log("Starting login attempt...");
 
     try {
       if (!email.trim() || !password.trim()) {
@@ -37,7 +38,15 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
 
       if (error) {
         console.error("Login error:", error);
-        throw error;
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+        
+        if (error.message === "Invalid login credentials") {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (error.message === "Email not confirmed") {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        }
+        
+        throw new Error(errorMessage);
       }
 
       if (!data.user) {
@@ -68,19 +77,11 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
 
       onSuccess();
     } catch (error: any) {
-      console.error("Full error:", error);
-      let errorMessage = "Une erreur est survenue lors de la connexion";
-      
-      if (error.message === "Invalid login credentials") {
-        errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message === "Email not confirmed") {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      }
-
+      console.error("Full error details:", error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: errorMessage,
+        title: "Erreur de connexion",
+        description: error.message,
       });
     } finally {
       setIsLoading(false);
@@ -96,6 +97,7 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={isLoading}
+          className="w-full"
         />
         <Input
           type="password"
@@ -103,6 +105,7 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
+          className="w-full"
         />
       </div>
 
@@ -111,7 +114,7 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         className="w-full bg-[#00B0F0] hover:bg-[#00B0F0]/90"
         disabled={isLoading}
       >
-        {isLoading ? "Chargement..." : "Se connecter"}
+        {isLoading ? "Connexion..." : "Se connecter"}
       </Button>
 
       <div className={`flex ${hideRegister ? 'justify-center' : 'justify-between'} text-sm text-[#00B0F0]`}>
