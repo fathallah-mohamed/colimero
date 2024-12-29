@@ -31,7 +31,6 @@ const serviceOptions = [
 ];
 
 const formSchema = z.object({
-  email: z.string().email("Email invalide"),
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
@@ -393,3 +392,4 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
     </Form>
   );
 }
+
