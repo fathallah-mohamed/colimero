@@ -22,16 +22,26 @@ const countryOptions = [
   { id: "DZ", label: "Algérie" },
 ];
 
+const serviceOptions = [
+  { id: "livraison_express", label: "Livraison Express", icon: "truck" },
+  { id: "livraison_domicile", label: "Livraison à domicile", icon: "home" },
+  { id: "transport_standard", label: "Transport de colis standard", icon: "package" },
+  { id: "transport_volumineux", label: "Transport d'objets volumineux", icon: "sofa" },
+  { id: "collecte_programmee", label: "Collecte programmée", icon: "calendar" },
+];
+
 const formSchema = z.object({
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
   siret: z.string().length(14, "Le numéro SIRET doit contenir 14 chiffres"),
   phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
+  phone_secondary: z.string().optional(),
   address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
   coverage_area: z.array(z.string()).min(1, "Sélectionnez au moins un pays"),
   total_capacity: z.number().min(1, "La capacité totale doit être supérieure à 0"),
   price_per_kg: z.number().min(0, "Le prix par kg doit être positif"),
+  services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
 });
 
 interface ProfileFormProps {
@@ -41,6 +51,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
   const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,10 +60,12 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
       company_name: initialData.company_name || "",
       siret: initialData.siret || "",
       phone: initialData.phone || "",
+      phone_secondary: initialData.phone_secondary || "",
       address: initialData.address || "",
       coverage_area: initialData.coverage_area || ["FR", "TN"],
       total_capacity: initialData.carrier_capacities?.total_capacity || 1000,
       price_per_kg: initialData.carrier_capacities?.price_per_kg || 12,
+      services: initialData.carrier_services?.map((s: any) => s.service_type) || [],
     },
   });
 
@@ -77,6 +90,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
           company_name: values.company_name,
           siret: values.siret,
           phone: values.phone,
+          phone_secondary: values.phone_secondary,
           address: values.address,
           coverage_area: values.coverage_area,
         })
@@ -93,6 +107,27 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
         .eq('carrier_id', session.user.id);
 
       if (capacityError) throw capacityError;
+
+      // Supprimer les services existants
+      const { error: deleteError } = await supabase
+        .from('carrier_services')
+        .delete()
+        .eq('carrier_id', session.user.id);
+
+      if (deleteError) throw deleteError;
+
+      // Insérer les nouveaux services
+      const servicesToInsert = values.services.map(serviceType => ({
+        carrier_id: session.user.id,
+        service_type: serviceType,
+        icon: serviceOptions.find(opt => opt.id === serviceType)?.icon || 'package'
+      }));
+
+      const { error: servicesError } = await supabase
+        .from('carrier_services')
+        .insert(servicesToInsert);
+
+      if (servicesError) throw servicesError;
 
       toast({
         title: "Succès",
@@ -175,7 +210,21 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Téléphone</FormLabel>
+              <FormLabel>Téléphone principal</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone_secondary"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -270,6 +319,47 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="services"
+          render={() => (
+            <FormItem className="col-span-2">
+              <FormLabel>Services proposés</FormLabel>
+              <div className="grid grid-cols-2 gap-4">
+                {serviceOptions.map((service) => (
+                  <FormField
+                    key={service.id}
+                    control={form.control}
+                    name="services"
+                    render={({ field }) => (
+                      <FormItem
+                        key={service.id}
+                        className="flex flex-row items-start space-x-3 space-y-0"
+                      >
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value?.includes(service.id)}
+                            onCheckedChange={(checked) => {
+                              const updatedValue = checked
+                                ? [...field.value, service.id]
+                                : field.value?.filter((value) => value !== service.id);
+                              field.onChange(updatedValue);
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          {service.label}
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
               <FormMessage />
             </FormItem>
           )}

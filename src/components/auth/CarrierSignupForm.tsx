@@ -23,6 +23,14 @@ const countryOptions = [
   { id: "DZ", label: "Algérie" },
 ];
 
+const serviceOptions = [
+  { id: "livraison_express", label: "Livraison Express", icon: "truck" },
+  { id: "livraison_domicile", label: "Livraison à domicile", icon: "home" },
+  { id: "transport_standard", label: "Transport de colis standard", icon: "package" },
+  { id: "transport_volumineux", label: "Transport d'objets volumineux", icon: "sofa" },
+  { id: "collecte_programmee", label: "Collecte programmée", icon: "calendar" },
+];
+
 const formSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
@@ -31,10 +39,12 @@ const formSchema = z.object({
   companyName: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
   siret: z.string().length(14, "Le numéro SIRET doit contenir 14 chiffres"),
   phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
+  phoneSecondary: z.string().optional(),
   address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
   totalCapacity: z.number().min(1, "La capacité totale doit être supérieure à 0"),
   pricePerKg: z.number().min(0, "Le prix par kg doit être positif"),
   coverageArea: z.array(z.string()).min(1, "Sélectionnez au moins un pays"),
+  services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
 });
 
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
@@ -47,6 +57,8 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       totalCapacity: 1000,
       pricePerKg: 12,
       coverageArea: ["FR", "TN"],
+      services: [],
+      phoneSecondary: "",
     },
   });
 
@@ -75,6 +87,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
             company_name: values.companyName,
             siret: values.siret,
             phone: values.phone,
+            phone_secondary: values.phoneSecondary,
             address: values.address,
             coverage_area: values.coverageArea,
           })
@@ -91,6 +104,19 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
           });
 
         if (capacityError) throw capacityError;
+
+        // Insérer les services sélectionnés
+        const servicesToInsert = values.services.map(serviceType => ({
+          carrier_id: authData.user.id,
+          service_type: serviceType,
+          icon: serviceOptions.find(opt => opt.id === serviceType)?.icon || 'package'
+        }));
+
+        const { error: servicesError } = await supabase
+          .from("carrier_services")
+          .insert(servicesToInsert);
+
+        if (servicesError) throw servicesError;
 
         toast({
           title: "Compte créé avec succès",
@@ -201,7 +227,21 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Téléphone</FormLabel>
+                <FormLabel>Téléphone principal</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="phoneSecondary"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -227,7 +267,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
           <FormField
             control={form.control}
             name="coverageArea"
-            render={() => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Zones de couverture</FormLabel>
                 <div className="grid grid-cols-2 gap-4">
@@ -296,6 +336,47 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="services"
+            render={() => (
+              <FormItem className="col-span-2">
+                <FormLabel>Services proposés</FormLabel>
+                <div className="grid grid-cols-2 gap-4">
+                  {serviceOptions.map((service) => (
+                    <FormField
+                      key={service.id}
+                      control={form.control}
+                      name="services"
+                      render={({ field }) => (
+                        <FormItem
+                          key={service.id}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(service.id)}
+                              onCheckedChange={(checked) => {
+                                const updatedValue = checked
+                                  ? [...field.value, service.id]
+                                  : field.value?.filter((value) => value !== service.id);
+                                field.onChange(updatedValue);
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {service.label}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
                 <FormMessage />
               </FormItem>
             )}
