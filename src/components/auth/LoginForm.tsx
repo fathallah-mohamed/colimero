@@ -34,20 +34,16 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) {
-        console.error("Erreur d'authentification:", error);
-        
-        // Handle specific error cases
         let errorMessage = "Email ou mot de passe incorrect";
+        
         if (error.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou mot de passe incorrect";
         }
         
         toast({
@@ -59,11 +55,11 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         return;
       }
 
-      if (!data.user) {
+      if (!user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = data.user.user_metadata?.user_type;
+      const userType = user.user_metadata?.user_type;
       
       // Redirect based on user type
       switch (userType) {
@@ -85,7 +81,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
       onSuccess?.();
 
     } catch (error) {
-      console.error("Erreur complète:", error);
+      console.error("Erreur:", error);
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
