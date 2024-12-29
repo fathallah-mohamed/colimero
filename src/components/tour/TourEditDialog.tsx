@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { CollectionPointForm } from "./CollectionPointForm";
 import type { RouteStop } from "@/types/tour";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -207,48 +208,12 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
 
             <div className="space-y-4">
               {formData.route.map((point, index) => (
-                <div key={index} className="p-4 border rounded-lg space-y-4 bg-gray-50">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Point de collecte {index + 1}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeCollectionPoint(index)}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Ville</Label>
-                      <Input
-                        value={point.name}
-                        onChange={(e) => updateCollectionPoint(index, 'name', e.target.value)}
-                        placeholder="Nom de la ville"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Adresse</Label>
-                      <Input
-                        value={point.location}
-                        onChange={(e) => updateCollectionPoint(index, 'location', e.target.value)}
-                        placeholder="Adresse précise"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Heure</Label>
-                      <Input
-                        type="time"
-                        value={point.time}
-                        onChange={(e) => updateCollectionPoint(index, 'time', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <CollectionPointForm
+                  key={index}
+                  index={index}
+                  onRemove={removeCollectionPoint}
+                  form={form}
+                />
               ))}
             </div>
           </div>
