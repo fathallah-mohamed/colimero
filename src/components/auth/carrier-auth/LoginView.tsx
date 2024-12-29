@@ -28,22 +28,6 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         throw new Error("Veuillez remplir tous les champs");
       }
 
-      // First, check if the user exists
-      const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers({
-        filters: {
-          email: email.trim()
-        }
-      });
-
-      if (usersError) {
-        console.error("Erreur lors de la vérification de l'utilisateur:", usersError);
-        throw new Error("Erreur lors de la vérification de l'utilisateur");
-      }
-
-      if (!users || users.length === 0) {
-        throw new Error("Aucun utilisateur trouvé avec cet email");
-      }
-
       // Attempt login
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -90,8 +74,6 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
         errorMessage = "Email ou mot de passe incorrect";
       } else if (error.message === "Email not confirmed") {
         errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      } else if (error.message === "Aucun utilisateur trouvé avec cet email") {
-        errorMessage = "Aucun compte n'existe avec cet email";
       }
 
       toast({
