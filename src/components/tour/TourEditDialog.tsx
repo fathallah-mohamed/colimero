@@ -26,7 +26,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
         name: stop.name || "",
         location: stop.location || "",
         time: stop.time || "",
-        collection_date: stop.collection_date ? new Date(stop.collection_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        collection_date: stop.collection_date || new Date().toISOString().split('T')[0],
         type: stop.type || "pickup"
       })) : [],
       departure_country: tour?.departure_country || "FR",
@@ -59,6 +59,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
           loading={loading}
           onClose={onClose}
           isFormValid={isFormValid}
+          tour={tour}
         />
       </DialogContent>
     </Dialog>

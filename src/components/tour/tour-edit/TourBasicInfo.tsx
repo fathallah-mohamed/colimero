@@ -12,9 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 interface TourBasicInfoProps {
   form: UseFormReturn<any>;
+  tour: any;
 }
 
-export function TourBasicInfo({ form }: TourBasicInfoProps) {
+export function TourBasicInfo({ form, tour }: TourBasicInfoProps) {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -27,7 +28,8 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
               <FormControl>
                 <Input 
                   type="number" 
-                  {...field} 
+                  {...field}
+                  defaultValue={tour?.total_capacity}
                   className="bg-white"
                   placeholder="Entrez la capacité totale" 
                 />
@@ -46,7 +48,8 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
               <FormControl>
                 <Input 
                   type="number" 
-                  {...field} 
+                  {...field}
+                  defaultValue={tour?.remaining_capacity}
                   className="bg-white"
                   placeholder="Entrez la capacité restante" 
                 />
@@ -62,7 +65,7 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Pays de départ</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={tour?.departure_country || field.value}>
                 <FormControl>
                   <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Sélectionnez un pays" />
@@ -84,7 +87,7 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Pays de destination</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={tour?.destination_country || field.value}>
                 <FormControl>
                   <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Sélectionnez un pays" />
@@ -106,7 +109,7 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
           render={({ field }) => (
             <FormItem className="sm:col-span-2">
               <FormLabel>Type de tournée</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={tour?.type || field.value}>
                 <FormControl>
                   <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Sélectionnez un type" />
@@ -133,6 +136,7 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  defaultChecked={tour?.customs_declaration}
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
@@ -154,6 +158,7 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  defaultChecked={tour?.terms_accepted}
                 />
               </FormControl>
               <div className="space-y-1 leading-none">

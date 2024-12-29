@@ -6,9 +6,10 @@ import { useFieldArray } from "react-hook-form";
 
 interface TourCollectionPointsProps {
   form: UseFormReturn<any>;
+  tour: any;
 }
 
-export function TourCollectionPoints({ form }: TourCollectionPointsProps) {
+export function TourCollectionPoints({ form, tour }: TourCollectionPointsProps) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "route"

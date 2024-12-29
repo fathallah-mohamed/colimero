@@ -11,16 +11,17 @@ interface TourEditFormProps {
   loading: boolean;
   onClose: () => void;
   isFormValid: boolean;
+  tour: any;
 }
 
-export function TourEditForm({ form, onSubmit, loading, onClose, isFormValid }: TourEditFormProps) {
+export function TourEditForm({ form, onSubmit, loading, onClose, isFormValid, tour }: TourEditFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-6">
-          <TourBasicInfo form={form} />
-          <TourDates form={form} />
-          <TourCollectionPoints form={form} />
+          <TourBasicInfo form={form} tour={tour} />
+          <TourDates form={form} tour={tour} />
+          <TourCollectionPoints form={form} tour={tour} />
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t">

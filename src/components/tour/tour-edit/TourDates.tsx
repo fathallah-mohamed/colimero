@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 
 interface TourDatesProps {
   form: UseFormReturn<any>;
+  tour: any;
 }
 
-export function TourDates({ form }: TourDatesProps) {
+export function TourDates({ form, tour }: TourDatesProps) {
   return (
     <div>
       <FormField
@@ -22,7 +23,12 @@ export function TourDates({ form }: TourDatesProps) {
           <FormItem>
             <FormLabel>Date de départ</FormLabel>
             <FormControl>
-              <Input type="date" {...field} className="bg-white" />
+              <Input 
+                type="date" 
+                {...field} 
+                defaultValue={tour?.departure_date ? new Date(tour.departure_date).toISOString().split('T')[0] : ''}
+                className="bg-white" 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
