@@ -32,14 +32,17 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     }
 
     setIsLoading(true);
+    console.log("Tentative de connexion avec:", email);
 
     try {
-      const { data: { session }, error } = await supabase.auth.signInWithPassword({
+      console.log("Tentative d'authentification avec Supabase...");
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) {
+        console.error("Erreur d'authentification:", error);
         let errorMessage = "Email ou mot de passe incorrect";
         if (error.message === "Email not confirmed") {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
@@ -54,26 +57,31 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         return;
       }
 
-      if (session?.user) {
-        const userType = session.user.user_metadata?.user_type;
-        
-        if (userType === 'carrier') {
+      console.log("Connexion réussie, données utilisateur:", data.user);
+      const userType = data.user?.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
+      
+      // Redirect based on user type
+      switch (userType) {
+        case 'carrier':
           navigate("/mes-tournees");
-        } else if (userType === 'admin') {
+          break;
+        case 'admin':
           navigate("/admin");
-        } else {
+          break;
+        default:
           navigate("/");
-        }
-
-        toast({
-          title: "Connexion réussie",
-          description: "Vous êtes maintenant connecté",
-        });
-        
-        onSuccess?.();
       }
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
+      
+      onSuccess?.();
+
     } catch (error) {
-      console.error("Erreur de connexion:", error);
+      console.error("Erreur complète:", error);
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
