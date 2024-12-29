@@ -28,21 +28,26 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
         throw new Error("Veuillez remplir tous les champs");
       }
 
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
+        options: {
+          data: {
+            email: email.trim()
+          }
+        }
       });
 
-      console.log("Sign in response:", { user, error: signInError });
+      console.log("Sign in response:", { data, error });
 
-      if (signInError) {
-        if (signInError.message.includes("Invalid login credentials")) {
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
           throw new Error("Email ou mot de passe incorrect");
         }
-        throw signInError;
+        throw error;
       }
 
-      if (!user) {
+      if (!data.user) {
         throw new Error("Une erreur est survenue lors de la connexion");
       }
 
