@@ -38,7 +38,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
       }
 
       // Vérifier si la date est antérieure à la date de départ
-      if (selectedDate > departureDate) {
+      if (departureDate && !isNaN(departureDate.getTime()) && selectedDate > departureDate) {
         toast({
           variant: "destructive",
           title: "Date invalide",
@@ -61,6 +61,8 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
   const maxDate = departureDate && !isNaN(departureDate.getTime()) 
     ? departureDate.toISOString().split('T')[0] 
     : undefined;
+
+  const collectionDate = form.watch(`route.${index}.collection_date`);
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
@@ -114,7 +116,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
               <FormControl>
                 <Input 
                   type="date" 
-                  {...field}
+                  value={collectionDate || ''}
                   max={maxDate}
                   onChange={handleDateChange}
                 />
