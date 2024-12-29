@@ -57,6 +57,11 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
     }
   };
 
+  // Ensure we have a valid departure date before trying to format it
+  const maxDate = departureDate && !isNaN(departureDate.getTime()) 
+    ? departureDate.toISOString().split('T')[0] 
+    : undefined;
+
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
       <div className="flex justify-between items-center">
@@ -110,7 +115,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
                 <Input 
                   type="date" 
                   {...field}
-                  max={departureDate ? departureDate.toISOString().split('T')[0] : undefined}
+                  max={maxDate}
                   onChange={handleDateChange}
                 />
               </FormControl>
