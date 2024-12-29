@@ -31,13 +31,36 @@ export default function CarrierAuthDialog({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // First, check if the user exists and is a carrier
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
       });
 
-      if (error) throw error;
+      if (signInError) {
+        if (signInError.message.includes("Invalid login credentials")) {
+          throw new Error("Email ou mot de passe incorrect");
+        }
+        throw signInError;
+      }
+
+      if (!user) {
+        throw new Error("Une erreur est survenue lors de la connexion");
+      }
+
+      // Check if user is a carrier
+      const { data: carrierData, error: carrierError } = await supabase
+        .from('carriers')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (carrierError || !carrierData) {
+        await supabase.auth.signOut();
+        throw new Error("Ce compte n'est pas un compte transporteur");
+      }
 
       toast({
         title: "Connexion réussie",
@@ -60,7 +83,7 @@ export default function CarrierAuthDialog({
     e.preventDefault();
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -120,6 +143,7 @@ export default function CarrierAuthDialog({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-white"
               />
             </div>
             {view === "login" && (
@@ -131,12 +155,13 @@ export default function CarrierAuthDialog({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="bg-white"
                 />
               </div>
             )}
             <Button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600"
+              className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
               disabled={isLoading}
             >
               {isLoading
@@ -146,7 +171,7 @@ export default function CarrierAuthDialog({
                 : "Envoyer le lien"}
             </Button>
 
-            <div className="flex justify-between text-sm text-blue-500">
+            <div className="flex justify-between text-sm text-[#00B0F0]">
               {view === "login" && (
                 <>
                   <button
