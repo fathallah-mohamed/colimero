@@ -17,6 +17,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess, requiredUse
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
