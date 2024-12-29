@@ -24,41 +24,54 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
     setIsLoading(true);
 
     try {
-      // First, check if the fields are not empty
+      // Validate inputs
       if (!email.trim() || !password.trim()) {
         throw new Error("Veuillez remplir tous les champs");
       }
+
+      console.log("Attempting login with:", { email: email.trim() });
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) throw error;
-
-      if (data.user) {
-        const userType = data.user.user_metadata?.user_type;
-        
-        toast({
-          title: "Connexion réussie",
-          description: "Redirection en cours...",
-        });
-
-        // Rediriger selon le type d'utilisateur
-        if (userType === 'carrier') {
-          navigate('/mes-tournees');
-        } else if (email.trim() === 'admin@colimero.fr') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
-        
-        onSuccess?.();
+      if (error) {
+        console.error("Supabase auth error:", error);
+        throw error;
       }
-    } catch (error: any) {
-      console.error("Login error:", error);
+
+      if (!data.user) {
+        throw new Error("No user data received");
+      }
+
+      console.log("Login successful:", { 
+        user: data.user.id,
+        metadata: data.user.user_metadata 
+      });
+
+      const userType = data.user.user_metadata?.user_type;
+      const isAdmin = email.trim() === 'admin@colimero.fr';
+
+      toast({
+        title: "Connexion réussie",
+        description: "Redirection en cours...",
+      });
+
+      // Redirect based on user type
+      if (userType === 'carrier') {
+        navigate('/mes-tournees');
+      } else if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
       
-      // Personnaliser le message d'erreur selon le type d'erreur
+      onSuccess?.();
+
+    } catch (error: any) {
+      console.error("Login error details:", error);
+      
       let errorMessage = "Une erreur est survenue lors de la connexion";
       
       if (error.message === "Invalid login credentials") {
