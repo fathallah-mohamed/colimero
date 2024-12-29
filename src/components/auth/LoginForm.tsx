@@ -34,7 +34,7 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: { session }, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -50,11 +50,12 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
           title: "Erreur de connexion",
           description: errorMessage,
         });
+        setPassword("");
         return;
       }
 
-      if (data.user) {
-        const userType = data.user.user_metadata?.user_type;
+      if (session?.user) {
+        const userType = session.user.user_metadata?.user_type;
         
         if (userType === 'carrier') {
           navigate("/mes-tournees");
@@ -72,11 +73,13 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         onSuccess?.();
       }
     } catch (error) {
+      console.error("Erreur de connexion:", error);
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
         description: "Une erreur est survenue lors de la connexion",
       });
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
