@@ -83,7 +83,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
             <FormItem>
               <FormLabel>Ville</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || routeValue?.name || ''} placeholder="Nom de la ville" />
+                <Input {...field} placeholder="Nom de la ville" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -97,7 +97,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
             <FormItem>
               <FormLabel>Adresse</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || routeValue?.location || ''} placeholder="Adresse précise" />
+                <Input {...field} placeholder="Adresse précise" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -113,7 +113,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
               <FormControl>
                 <Input 
                   type="date" 
-                  value={field.value || routeValue?.collection_date || ''}
+                  value={field.value}
                   max={maxDate}
                   onChange={handleDateChange}
                 />
@@ -130,7 +130,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
             <FormItem>
               <FormLabel>Heure</FormLabel>
               <FormControl>
-                <Input type="time" {...field} value={field.value || routeValue?.time || ''} />
+                <Input type="time" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -143,7 +143,7 @@ export function CollectionPointForm({ index, onRemove, form, departureDate }: Co
           render={({ field }) => (
             <FormItem>
               <FormLabel>Type</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value || routeValue?.type || 'pickup'}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un type" />
