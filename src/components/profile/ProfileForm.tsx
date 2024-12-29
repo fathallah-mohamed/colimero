@@ -31,6 +31,7 @@ const serviceOptions = [
 ];
 
 const formSchema = z.object({
+  email: z.string().email("Email invalide"),
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
@@ -55,6 +56,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      email: initialData.email || "",
       first_name: initialData.first_name || "",
       last_name: initialData.last_name || "",
       company_name: initialData.company_name || "",
@@ -80,6 +82,20 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
           description: "Vous devez être connecté pour modifier votre profil",
         });
         return;
+      }
+
+      // Update email if changed
+      if (values.email !== initialData.email) {
+        const { error: emailError } = await supabase.auth.updateUser({
+          email: values.email,
+        });
+
+        if (emailError) throw emailError;
+
+        toast({
+          title: "Email en cours de modification",
+          description: "Un email de confirmation a été envoyé à votre nouvelle adresse. Veuillez cliquer sur le lien pour confirmer le changement.",
+        });
       }
 
       const { error: carrierError } = await supabase
