@@ -61,30 +61,29 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navigation />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
           <div className="px-6 py-8">
-            <div className="flex justify-between items-center mb-6">
-              <ProfileHeader onEdit={() => setIsEditing(true)} />
-              <DeleteAccountButton />
-            </div>
+            <ProfileHeader onEdit={() => setIsEditing(true)} />
 
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
               <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                  <DialogTitle>Modifier mon profil</DialogTitle>
+                  <DialogTitle className="text-2xl font-semibold text-primary">
+                    Modifier mon profil
+                  </DialogTitle>
                 </DialogHeader>
                 <ProfileForm 
                   initialData={profile} 
@@ -99,46 +98,46 @@ export default function Profile() {
             <div className="space-y-8">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
-                <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500">Prénom</p>
-                      <p className="text-gray-900">{profile.first_name || "-"}</p>
+                      <p className="text-sm text-gray-500 mb-1">Prénom</p>
+                      <p className="text-gray-900 font-medium">{profile.first_name || "-"}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Nom</p>
-                      <p className="text-gray-900">{profile.last_name || "-"}</p>
+                      <p className="text-sm text-gray-500 mb-1">Nom</p>
+                      <p className="text-gray-900 font-medium">{profile.last_name || "-"}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Email</p>
-                    <p className="text-gray-900">{profile.email || "-"}</p>
+                    <p className="text-sm text-gray-500 mb-1">Email</p>
+                    <p className="text-gray-900 font-medium">{profile.email || "-"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Téléphone</p>
-                    <p className="text-gray-900">{profile.phone || "-"}</p>
+                    <p className="text-sm text-gray-500 mb-1">Téléphone</p>
+                    <p className="text-gray-900 font-medium">{profile.phone || "-"}</p>
                   </div>
                 </div>
               </div>
 
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations entreprise</h2>
-                <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
                   <div>
-                    <p className="text-sm text-gray-500">Nom de l'entreprise</p>
-                    <p className="text-gray-900">{profile.company_name || "-"}</p>
+                    <p className="text-sm text-gray-500 mb-1">Nom de l'entreprise</p>
+                    <p className="text-gray-900 font-medium">{profile.company_name || "-"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">SIRET</p>
-                    <p className="text-gray-900">{profile.siret || "-"}</p>
+                    <p className="text-sm text-gray-500 mb-1">SIRET</p>
+                    <p className="text-gray-900 font-medium">{profile.siret || "-"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Adresse</p>
-                    <p className="text-gray-900">{profile.address || "-"}</p>
+                    <p className="text-sm text-gray-500 mb-1">Adresse</p>
+                    <p className="text-gray-900 font-medium">{profile.address || "-"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Zones de couverture</p>
-                    <p className="text-gray-900">
+                    <p className="text-sm text-gray-500 mb-1">Zones de couverture</p>
+                    <p className="text-gray-900 font-medium">
                       {profile.coverage_area?.map((code: string) => {
                         const country = {
                           FR: "France",
@@ -151,15 +150,19 @@ export default function Profile() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Capacité totale</p>
-                    <p className="text-gray-900">{profile.carrier_capacities?.total_capacity || "-"} kg</p>
+                    <p className="text-sm text-gray-500 mb-1">Capacité totale</p>
+                    <p className="text-gray-900 font-medium">{profile.carrier_capacities?.total_capacity || "-"} kg</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Prix par kg</p>
-                    <p className="text-gray-900">{profile.carrier_capacities?.price_per_kg || "-"} €</p>
+                    <p className="text-sm text-gray-500 mb-1">Prix par kg</p>
+                    <p className="text-gray-900 font-medium">{profile.carrier_capacities?.price_per_kg || "-"} €</p>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <DeleteAccountButton />
             </div>
           </div>
         </div>

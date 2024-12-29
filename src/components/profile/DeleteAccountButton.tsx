@@ -52,15 +52,20 @@ export const DeleteAccountButton = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="flex items-center gap-2">
+        <Button 
+          variant="destructive" 
+          className="flex items-center gap-2 bg-red-500 hover:bg-red-600"
+        >
           <Trash2 className="h-4 w-4" />
           Supprimer mon compte
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
+          <AlertDialogTitle className="text-xl font-semibold text-gray-900">
+            Êtes-vous absolument sûr ?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="space-y-2 text-gray-500">
             <p>Cette action est irréversible et entraînera :</p>
             <ul className="list-disc pl-4">
               <li>La suppression définitive de votre compte</li>
@@ -71,10 +76,12 @@ export const DeleteAccountButton = () => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel className="hover:bg-gray-100">
+            Annuler
+          </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleDeleteProfile} 
-            className="bg-red-500 hover:bg-red-600"
+            className="bg-red-500 hover:bg-red-600 text-white"
           >
             Supprimer définitivement
           </AlertDialogAction>
