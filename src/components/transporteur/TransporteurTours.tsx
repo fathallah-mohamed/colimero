@@ -140,7 +140,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
                 </div>
                 <div className="text-gray-600">
                   <div>
-                    {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", {
+                    {format(new Date(stop.collection_date), "EEEE d MMMM yyyy", {
                       locale: fr,
                     })}
                   </div>
