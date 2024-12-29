@@ -22,42 +22,30 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess }: LoginView
     setIsLoading(true);
 
     try {
-      console.log("Attempting login with email:", email);
-
-      if (!email.trim() || !password.trim()) {
-        throw new Error("Veuillez remplir tous les champs");
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password.trim()
+        password: password.trim(),
       });
 
-      console.log("Sign in response:", { data, error });
-
       if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          throw new Error("Email ou mot de passe incorrect");
-        }
         throw error;
       }
 
-      if (!data.user) {
-        throw new Error("Une erreur est survenue lors de la connexion");
+      if (data.user) {
+        toast({
+          title: "Connexion réussie",
+          description: "Vous allez être redirigé",
+        });
+        onSuccess?.();
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Vous allez être redirigé",
-      });
-
-      onSuccess?.();
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
-        description: error.message,
+        description: error.message === "Invalid login credentials" 
+          ? "Email ou mot de passe incorrect"
+          : "Une erreur est survenue lors de la connexion",
       });
     } finally {
       setIsLoading(false);
