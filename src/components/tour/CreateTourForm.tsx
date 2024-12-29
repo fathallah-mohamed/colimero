@@ -134,6 +134,7 @@ export default function CreateTourForm() {
         departure_country: values.departure_country,
         destination_country: values.destination_country,
         departure_date: values.departure_date.toISOString(),
+        collection_date: new Date(values.route[0].collection_date).toISOString(), // Utiliser la première date de collecte comme date de référence
         total_capacity: values.total_capacity,
         remaining_capacity: values.remaining_capacity,
         type: values.type,
