@@ -21,9 +21,10 @@ interface CollectionPointFormProps {
   index: number;
   onRemove: (index: number) => void;
   form: UseFormReturn<any>;
+  departureDate: Date;
 }
 
-export function CollectionPointForm({ index, onRemove, form }: CollectionPointFormProps) {
+export function CollectionPointForm({ index, onRemove, form, departureDate }: CollectionPointFormProps) {
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
       <div className="flex justify-between items-center">
@@ -61,6 +62,30 @@ export function CollectionPointForm({ index, onRemove, form }: CollectionPointFo
               <FormLabel>Adresse</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Adresse précise" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={`route.${index}.collection_date`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date de collecte</FormLabel>
+              <FormControl>
+                <Input 
+                  type="date" 
+                  {...field} 
+                  max={departureDate.toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    if (selectedDate <= departureDate) {
+                      field.onChange(e.target.value);
+                    }
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

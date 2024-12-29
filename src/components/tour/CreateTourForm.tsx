@@ -45,7 +45,7 @@ const formSchema = z.object({
     z.object({
       name: z.string().min(1, "La ville est requise"),
       location: z.string().min(1, "L'adresse est requise"),
-      collection_date: z.date(),
+      collection_date: z.string().min(1, "La date de collecte est requise"),
       time: z.string().min(1, "L'heure est requise"),
       type: z.literal("pickup")
     })
@@ -78,7 +78,7 @@ export default function CreateTourForm() {
           location: "",
           time: "",
           type: "pickup",
-          collection_date: new Date(),
+          collection_date: new Date().toISOString().split('T')[0],
         },
       ],
     },
@@ -88,6 +88,8 @@ export default function CreateTourForm() {
     control: form.control,
     name: "route",
   });
+
+  const departureDate = form.watch('departure_date');
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -104,10 +106,25 @@ export default function CreateTourForm() {
         return;
       }
 
-      const routeWithoutCapacity = values.route.map(point => ({
+      // Vérifier que toutes les dates de collecte sont antérieures à la date de départ
+      const hasInvalidDates = values.route.some(point => {
+        const collectionDate = new Date(point.collection_date);
+        return collectionDate > values.departure_date;
+      });
+
+      if (hasInvalidDates) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Les dates de collecte doivent être antérieures à la date de départ",
+        });
+        return;
+      }
+
+      const routeWithDates = values.route.map(point => ({
         name: point.name,
         location: point.location,
-        collection_date: point.collection_date.toISOString(),
+        collection_date: new Date(point.collection_date).toISOString(),
         time: point.time,
         type: point.type,
       }));
@@ -117,11 +134,10 @@ export default function CreateTourForm() {
         departure_country: values.departure_country,
         destination_country: values.destination_country,
         departure_date: values.departure_date.toISOString(),
-        collection_date: values.route[0].collection_date.toISOString(),
         total_capacity: values.total_capacity,
         remaining_capacity: values.remaining_capacity,
         type: values.type,
-        route: routeWithoutCapacity,
+        route: routeWithDates,
         terms_accepted: values.terms_accepted,
         customs_declaration: values.customs_declaration,
       });
@@ -309,7 +325,7 @@ export default function CreateTourForm() {
                   location: "",
                   time: "",
                   type: "pickup",
-                  collection_date: new Date(),
+                  collection_date: new Date().toISOString().split('T')[0],
                 })
               }
             >
@@ -324,6 +340,7 @@ export default function CreateTourForm() {
               index={index}
               onRemove={remove}
               form={form}
+              departureDate={departureDate}
             />
           ))}
         </div>
