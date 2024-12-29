@@ -10,9 +10,10 @@ interface LoginFormProps {
   onForgotPassword: () => void;
   onRegister: () => void;
   onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier';
 }
 
-export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginFormProps) {
+export function LoginForm({ onForgotPassword, onRegister, onSuccess, requiredUserType }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,21 +22,19 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email.trim() || !password.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs",
-      });
-      return;
-    }
-
     setIsLoading(true);
+    setError(null);
 
     try {
-      console.log("Tentative de connexion avec:", email);
-      
+      if (!email.trim() || !password.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Veuillez remplir tous les champs",
+        });
+        return;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -47,51 +46,47 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
         
         if (error.message === "Invalid login credentials") {
           errorMessage = "Email ou mot de passe incorrect";
-        } else if (error.message === "Email not confirmed") {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (error.message.includes("Invalid email")) {
-          errorMessage = "Format d'email invalide";
-        } else if (error.message.includes("Password")) {
-          errorMessage = "Le mot de passe est incorrect";
         }
-
         toast({
           variant: "destructive",
           title: "Erreur de connexion",
           description: errorMessage,
         });
-        setPassword("");
         return;
       }
 
       if (!data.user) {
-        console.error("No user data received");
-        throw new Error("No user data received");
+        throw new Error("Aucune donnée utilisateur reçue");
       }
 
       const userType = data.user.user_metadata?.user_type;
-      console.log("User type:", userType);
+
+      if (requiredUserType && userType !== requiredUserType) {
+        await supabase.auth.signOut();
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: requiredUserType === 'client' 
+            ? "Seuls les clients peuvent réserver des tournées. Veuillez vous connecter avec un compte client."
+            : "Cette fonctionnalité est réservée aux transporteurs.",
+        });
+        return;
+      }
 
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",
       });
 
-      switch (userType) {
-        case 'admin':
-          navigate("/admin");
-          break;
-        case 'carrier':
-          navigate("/mes-tournees");
-          break;
-        default:
-          navigate("/");
-      }
-      
       onSuccess?.();
+
     } catch (error: any) {
-      console.error("Login error:", error);
-      setPassword("");
+      console.error("Erreur complète:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la connexion",
+      });
     } finally {
       setIsLoading(false);
     }

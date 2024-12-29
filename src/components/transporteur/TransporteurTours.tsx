@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { EmailVerificationDialog } from "@/components/tour/EmailVerificationDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface TransporteurToursProps {
   tours: Tour[];
@@ -42,7 +43,22 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
     }));
   };
 
-  const handleReservation = (tourId: number) => {
+  const handleReservation = async (tourId: number) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session?.user) {
+      const userType = session.user.user_metadata?.user_type;
+      
+      if (userType === 'carrier') {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Les transporteurs ne peuvent pas réserver de tournées. Veuillez vous connecter avec un compte client.",
+        });
+        return;
+      }
+    }
+
     setCurrentTourId(tourId);
     if (type === "private") {
       setIsEmailVerificationOpen(true);
@@ -179,6 +195,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
         isOpen={isAuthOpen} 
         onClose={() => setIsAuthOpen(false)}
         onSuccess={handleAuthSuccess}
+        requiredUserType="client"
       />
 
       <EmailVerificationDialog

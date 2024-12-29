@@ -5,7 +5,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
 
@@ -15,9 +14,10 @@ interface AuthDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier';
 }
 
-export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogProps) {
+export default function AuthDialog({ isOpen, onClose, onSuccess, requiredUserType }: AuthDialogProps) {
   const [view, setView] = useState<View>("login");
 
   return (
@@ -42,6 +42,7 @@ export default function AuthDialog({ isOpen, onClose, onSuccess }: AuthDialogPro
             onForgotPassword={() => setView("forgot-password")}
             onRegister={() => setView("register")}
             onSuccess={onSuccess}
+            requiredUserType={requiredUserType}
           />
         ) : (
           <RegisterForm onLogin={() => setView("login")} />
