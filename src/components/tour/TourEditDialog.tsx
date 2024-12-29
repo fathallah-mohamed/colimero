@@ -35,6 +35,10 @@ const formSchema = z.object({
     time: z.string().min(1, "L'heure est requise"),
     type: z.literal("pickup")
   })).min(1, "Au moins un point de collecte est requis"),
+  departure_country: z.string().min(1, "Le pays de départ est requis"),
+  destination_country: z.string().min(1, "Le pays de destination est requis"),
+  terms_accepted: z.boolean(),
+  customs_declaration: z.boolean()
 });
 
 interface TourEditDialogProps {
@@ -62,6 +66,10 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
         time: stop.time || "08:00",
         type: stop.type || "pickup"
       })) : [],
+      departure_country: tour?.departure_country || "FR",
+      destination_country: tour?.destination_country || "TN",
+      terms_accepted: tour?.terms_accepted || false,
+      customs_declaration: tour?.customs_declaration || false
     }
   });
 
@@ -92,6 +100,10 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
           departure_date: departureDate.toISOString(),
           collection_date: collectionDate.toISOString(),
           route: values.route,
+          departure_country: values.departure_country,
+          destination_country: values.destination_country,
+          terms_accepted: values.terms_accepted,
+          customs_declaration: values.customs_declaration
         })
         .eq('id', tour.id);
 
