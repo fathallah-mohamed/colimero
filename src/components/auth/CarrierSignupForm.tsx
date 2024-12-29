@@ -11,29 +11,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
-
-const countryOptions = [
-  { id: "FR", label: "France" },
-  { id: "TN", label: "Tunisie" },
-  { id: "MA", label: "Maroc" },
-  { id: "DZ", label: "Algérie" },
-];
-
-const serviceOptions = [
-  { id: "livraison_express", label: "Livraison Express", icon: "truck" },
-  { id: "livraison_domicile", label: "Livraison à domicile", icon: "home" },
-  { id: "transport_standard", label: "Transport de colis standard", icon: "package" },
-  { id: "transport_volumineux", label: "Transport d'objets volumineux", icon: "sofa" },
-  { id: "collecte_programmee", label: "Collecte programmée", icon: "calendar" },
-];
+import { ServiceOptions } from "./ServiceOptions";
+import { CoverageAreaSelect } from "./CoverageAreaSelect";
 
 const formSchema = z.object({
   email: z.string().email("Email invalide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   companyName: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
@@ -49,7 +34,6 @@ const formSchema = z.object({
 
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,67 +48,31 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            user_type: "carrier",
-            first_name: values.firstName,
-            last_name: values.lastName,
-          },
-        },
-      });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from("carriers")
-          .update({
-            first_name: values.firstName,
-            last_name: values.lastName,
-            company_name: values.companyName,
-            siret: values.siret,
-            phone: values.phone,
-            phone_secondary: values.phoneSecondary,
-            address: values.address,
-            coverage_area: values.coverageArea,
-          })
-          .eq("id", authData.user.id);
-
-        if (profileError) throw profileError;
-
-        const { error: capacityError } = await supabase
-          .from("carrier_capacities")
-          .insert({
-            carrier_id: authData.user.id,
-            total_capacity: values.totalCapacity,
-            price_per_kg: values.pricePerKg,
-          });
-
-        if (capacityError) throw capacityError;
-
-        // Insérer les services sélectionnés
-        const servicesToInsert = values.services.map(serviceType => ({
-          carrier_id: authData.user.id,
-          service_type: serviceType,
-          icon: serviceOptions.find(opt => opt.id === serviceType)?.icon || 'package'
-        }));
-
-        const { error: servicesError } = await supabase
-          .from("carrier_services")
-          .insert(servicesToInsert);
-
-        if (servicesError) throw servicesError;
-
-        toast({
-          title: "Compte créé avec succès",
-          description: "Veuillez vérifier votre email pour confirmer votre compte",
+      const { error } = await supabase
+        .from('carrier_registration_requests')
+        .insert({
+          email: values.email,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          company_name: values.companyName,
+          siret: values.siret,
+          phone: values.phone,
+          phone_secondary: values.phoneSecondary,
+          address: values.address,
+          coverage_area: values.coverageArea,
+          total_capacity: values.totalCapacity,
+          price_per_kg: values.pricePerKg,
+          services: values.services,
         });
-        
-        onSuccess();
-      }
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande envoyée avec succès",
+        description: "Votre demande d'inscription a été envoyée pour validation. Vous serez informé par email une fois votre compte activé.",
+      });
+      
+      onSuccess();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -146,20 +94,6 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input type="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mot de passe</FormLabel>
-                <FormControl>
-                  <Input type="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -266,47 +200,6 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
 
           <FormField
             control={form.control}
-            name="coverageArea"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Zones de couverture</FormLabel>
-                <div className="grid grid-cols-2 gap-4">
-                  {countryOptions.map((country) => (
-                    <FormField
-                      key={country.id}
-                      control={form.control}
-                      name="coverageArea"
-                      render={({ field }) => (
-                        <FormItem
-                          key={country.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(country.id)}
-                              onCheckedChange={(checked) => {
-                                const updatedValue = checked
-                                  ? [...field.value, country.id]
-                                  : field.value?.filter((value) => value !== country.id);
-                                field.onChange(updatedValue);
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {country.label}
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="totalCapacity"
             render={({ field }) => (
               <FormItem>
@@ -340,51 +233,13 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="services"
-            render={() => (
-              <FormItem className="col-span-2">
-                <FormLabel>Services proposés</FormLabel>
-                <div className="grid grid-cols-2 gap-4">
-                  {serviceOptions.map((service) => (
-                    <FormField
-                      key={service.id}
-                      control={form.control}
-                      name="services"
-                      render={({ field }) => (
-                        <FormItem
-                          key={service.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(service.id)}
-                              onCheckedChange={(checked) => {
-                                const updatedValue = checked
-                                  ? [...field.value, service.id]
-                                  : field.value?.filter((value) => value !== service.id);
-                                field.onChange(updatedValue);
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {service.label}
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
+        <CoverageAreaSelect form={form} />
+        <ServiceOptions form={form} />
+
         <Button type="submit" className="w-full">
-          Créer mon compte
+          Envoyer ma demande d'inscription
         </Button>
       </form>
     </Form>
