@@ -25,7 +25,12 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
             <FormItem>
               <FormLabel>Capacité totale (kg)</FormLabel>
               <FormControl>
-                <Input type="number" {...field} className="bg-white" />
+                <Input 
+                  type="number" 
+                  {...field} 
+                  className="bg-white"
+                  placeholder="Entrez la capacité totale" 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -39,7 +44,12 @@ export function TourBasicInfo({ form }: TourBasicInfoProps) {
             <FormItem>
               <FormLabel>Capacité restante (kg)</FormLabel>
               <FormControl>
-                <Input type="number" {...field} className="bg-white" />
+                <Input 
+                  type="number" 
+                  {...field} 
+                  className="bg-white"
+                  placeholder="Entrez la capacité restante" 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

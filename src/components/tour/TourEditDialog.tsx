@@ -22,14 +22,13 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
       remaining_capacity: tour?.remaining_capacity?.toString() || "",
       type: tour?.type || "public",
       departure_date: tour?.departure_date ? new Date(tour.departure_date).toISOString().split('T')[0] : "",
-      route: Array.isArray(tour?.route) ? tour.route : 
-        (typeof tour?.route === 'string' ? JSON.parse(tour.route) : []).map((stop: any) => ({
-          name: stop.name || "",
-          location: stop.location || "",
-          time: stop.time || "",
-          collection_date: stop.collection_date || new Date().toISOString().split('T')[0],
-          type: stop.type || "pickup"
-        })),
+      route: Array.isArray(tour?.route) ? tour.route.map((stop: any) => ({
+        name: stop.name || "",
+        location: stop.location || "",
+        time: stop.time || "",
+        collection_date: stop.collection_date ? new Date(stop.collection_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        type: stop.type || "pickup"
+      })) : [],
       departure_country: tour?.departure_country || "FR",
       destination_country: tour?.destination_country || "TN",
       terms_accepted: tour?.terms_accepted || false,
