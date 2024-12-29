@@ -63,15 +63,18 @@ export type Database = {
         Row: {
           approval_request_id: string | null
           created_at: string
+          customs_declaration: boolean | null
           delivery_notes: string | null
           delivery_status: string | null
           id: string
           item_type: string
+          package_description: string | null
           pickup_city: string
           recipient_address: string
           recipient_name: string
           recipient_phone: string
           status: string
+          terms_accepted: boolean | null
           tour_id: number
           tracking_number: string
           user_id: string
@@ -80,15 +83,18 @@ export type Database = {
         Insert: {
           approval_request_id?: string | null
           created_at?: string
+          customs_declaration?: boolean | null
           delivery_notes?: string | null
           delivery_status?: string | null
           id?: string
           item_type: string
+          package_description?: string | null
           pickup_city: string
           recipient_address: string
           recipient_name: string
           recipient_phone: string
           status: string
+          terms_accepted?: boolean | null
           tour_id: number
           tracking_number: string
           user_id: string
@@ -97,15 +103,18 @@ export type Database = {
         Update: {
           approval_request_id?: string | null
           created_at?: string
+          customs_declaration?: boolean | null
           delivery_notes?: string | null
           delivery_status?: string | null
           id?: string
           item_type?: string
+          package_description?: string | null
           pickup_city?: string
           recipient_address?: string
           recipient_name?: string
           recipient_phone?: string
           status?: string
+          terms_accepted?: boolean | null
           tour_id?: number
           tracking_number?: string
           user_id?: string
@@ -291,6 +300,30 @@ export type Database = {
         }
         Relationships: []
       }
+      prohibited_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       service_templates: {
         Row: {
           created_at: string
@@ -323,12 +356,14 @@ export type Database = {
           carrier_id: string
           collection_date: string
           created_at: string
+          customs_declaration: boolean | null
           departure_country: string
           departure_date: string
           destination_country: string
           id: number
           remaining_capacity: number
           route: Json
+          terms_accepted: boolean | null
           total_capacity: number
           type: string
           updated_at: string
@@ -337,12 +372,14 @@ export type Database = {
           carrier_id: string
           collection_date: string
           created_at?: string
+          customs_declaration?: boolean | null
           departure_country?: string
           departure_date: string
           destination_country?: string
           id?: number
           remaining_capacity: number
           route: Json
+          terms_accepted?: boolean | null
           total_capacity: number
           type: string
           updated_at?: string
@@ -351,12 +388,14 @@ export type Database = {
           carrier_id?: string
           collection_date?: string
           created_at?: string
+          customs_declaration?: boolean | null
           departure_country?: string
           departure_date?: string
           destination_country?: string
           id?: number
           remaining_capacity?: number
           route?: Json
+          terms_accepted?: boolean | null
           total_capacity?: number
           type?: string
           updated_at?: string

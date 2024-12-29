@@ -33,11 +33,19 @@ export default function CarrierAuthDialog({
     setIsLoading(true);
 
     try {
-      // First, check if the user exists and is a carrier
+      console.log("Attempting login with email:", email);
+
+      if (!email.trim() || !password.trim()) {
+        throw new Error("Veuillez remplir tous les champs");
+      }
+
+      // First, attempt to sign in
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
+
+      console.log("Sign in response:", { user, error: signInError });
 
       if (signInError) {
         if (signInError.message.includes("Invalid login credentials")) {
@@ -57,7 +65,10 @@ export default function CarrierAuthDialog({
         .eq('id', user.id)
         .single();
 
+      console.log("Carrier check response:", { carrierData, error: carrierError });
+
       if (carrierError || !carrierData) {
+        // If not a carrier, sign out and show error
         await supabase.auth.signOut();
         throw new Error("Ce compte n'est pas un compte transporteur");
       }
@@ -69,6 +80,7 @@ export default function CarrierAuthDialog({
 
       onClose();
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
