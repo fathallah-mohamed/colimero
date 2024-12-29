@@ -14,6 +14,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { RouteStop } from "@/types/tour";
+import type { Json } from "@/integrations/supabase/types";
 
 interface TourEditDialogProps {
   isOpen: boolean;
@@ -22,16 +23,25 @@ interface TourEditDialogProps {
   onComplete: () => void;
 }
 
+interface FormData {
+  total_capacity: string;
+  remaining_capacity: string;
+  type: string;
+  departure_date: string;
+  collection_date: string;
+  route: RouteStop[];
+}
+
 export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     total_capacity: "",
     remaining_capacity: "",
     type: "",
     departure_date: "",
     collection_date: "",
-    route: [] as RouteStop[],
+    route: [],
   });
 
   // Mettre à jour les données du formulaire quand une tournée est sélectionnée
@@ -53,6 +63,9 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
     if (!tour) return;
 
     setLoading(true);
+    // Convert RouteStop[] to Json type for Supabase
+    const routeJson = formData.route as unknown as Json;
+
     const { error } = await supabase
       .from('tours')
       .update({
@@ -61,7 +74,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
         type: formData.type,
         departure_date: new Date(formData.departure_date).toISOString(),
         collection_date: new Date(formData.collection_date).toISOString(),
-        route: formData.route,
+        route: routeJson,
       })
       .eq('id', tour.id);
 
