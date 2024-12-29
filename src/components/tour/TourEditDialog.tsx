@@ -53,10 +53,15 @@ export function TourEditDialog({ isOpen, onClose, tour, onComplete }: TourEditDi
     defaultValues: {
       total_capacity: tour?.total_capacity?.toString() || "",
       remaining_capacity: tour?.remaining_capacity?.toString() || "",
-      type: tour?.type || "",
+      type: tour?.type || "public",
       departure_date: tour?.departure_date ? new Date(tour.departure_date).toISOString().split('T')[0] : "",
       collection_date: tour?.collection_date ? new Date(tour.collection_date).toISOString().split('T')[0] : "",
-      route: Array.isArray(tour?.route) ? tour.route : [],
+      route: Array.isArray(tour?.route) ? tour.route.map((stop: any) => ({
+        name: stop.name || "",
+        location: stop.location || "",
+        time: stop.time || "08:00",
+        type: stop.type || "pickup"
+      })) : [],
     }
   });
 
