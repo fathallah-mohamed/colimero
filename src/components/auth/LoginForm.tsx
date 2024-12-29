@@ -35,7 +35,6 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
 
     try {
       console.log("Tentative de connexion avec:", email);
-      console.log("Tentative d'authentification avec Supabase...");
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -56,7 +55,6 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
           description: errorMessage,
         });
         setPassword("");
-        setIsLoading(false);
         return;
       }
 
@@ -65,16 +63,32 @@ export function LoginForm({ onForgotPassword, onRegister, onSuccess }: LoginForm
       }
 
       console.log("Connexion réussie, données utilisateur:", data.user);
+      
+      // Vérifier si l'utilisateur est un admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('administrators')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (adminData) {
+        console.log("Utilisateur admin trouvé:", adminData);
+        navigate("/admin");
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue dans l'interface administrateur",
+        });
+        onSuccess?.();
+        return;
+      }
+
+      // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
       const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
       
-      // Redirect based on user type
       switch (userType) {
         case 'carrier':
           navigate("/mes-tournees");
-          break;
-        case 'admin':
-          navigate("/admin");
           break;
         default:
           navigate("/");
