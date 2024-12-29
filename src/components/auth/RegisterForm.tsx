@@ -46,7 +46,18 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message === "User already registered") {
+          toast({
+            variant: "destructive",
+            title: "Erreur d'inscription",
+            description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
+          });
+          onLogin(); // Redirect to login
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Compte créé avec succès",
@@ -55,6 +66,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
 
       onLogin();
     } catch (error: any) {
+      console.error("Erreur complète:", error);
       toast({
         variant: "destructive",
         title: "Erreur d'inscription",
@@ -137,7 +149,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
         disabled={isLoading}
       >
-        Créer mon compte
+        {isLoading ? "Création en cours..." : "Créer mon compte"}
       </Button>
 
       <div className="text-center text-sm">
