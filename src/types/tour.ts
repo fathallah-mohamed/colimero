@@ -3,6 +3,7 @@ export interface RouteStop {
   location: string;
   time: string;
   type: 'pickup' | 'dropoff';
+  collection_date: string;
 }
 
 export interface Tour {
