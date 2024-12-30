@@ -54,15 +54,6 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
-        toast({
-          variant: "destructive",
-          title: "Accès refusé",
-          description: requiredUserType === 'client' 
-            ? "Cette fonctionnalité est réservée aux clients. Les transporteurs ne peuvent pas réserver de tournées. Veuillez vous connecter avec un compte client."
-            : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur.",
-          className: "bg-red-50 border-red-300",
-          duration: 5000,
-        });
         return;
       }
 
