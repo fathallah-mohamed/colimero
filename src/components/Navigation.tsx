@@ -25,10 +25,6 @@ export default function Navigation() {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      // Clear any potentially invalid session first
-      await supabase.auth.signOut();
-      
-      // Then check current session
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
