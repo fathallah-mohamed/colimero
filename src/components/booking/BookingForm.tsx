@@ -93,7 +93,6 @@ export function BookingForm({
   useEffect(() => {
     const fetchCarrierPrice = async () => {
       try {
-        // First get the carrier_id from the tour
         const { data: tourData, error: tourError } = await supabase
           .from('tours')
           .select('carrier_id')
@@ -102,7 +101,6 @@ export function BookingForm({
 
         if (tourError) throw tourError;
 
-        // Then get the price_per_kg from carrier_capacities
         const { data: capacityData, error: capacityError } = await supabase
           .from('carrier_capacities')
           .select('price_per_kg')
@@ -124,6 +122,37 @@ export function BookingForm({
 
     fetchCarrierPrice();
   }, [tourId, toast]);
+
+  // Nouveau useEffect pour récupérer les informations du client
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('first_name, last_name, phone')
+          .eq('id', user.id)
+          .single();
+
+        if (clientError) throw clientError;
+
+        if (clientData) {
+          const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
+          setFormData(prev => ({
+            ...prev,
+            senderName: fullName,
+            senderPhone: clientData.phone || ''
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleWeightChange = (increment: boolean) => {
     setWeight(prev => {
@@ -171,10 +200,7 @@ export function BookingForm({
   };
 
   const calculateTotalPrice = () => {
-    // Calculate price based on weight
     const weightPrice = weight * pricePerKg;
-
-    // Calculate price for special items
     const specialItemsPrice = selectedSpecialItems.reduce((total, item) => {
       const itemPrice = specialItems.find(i => i.name === item)?.price || 0;
       const quantity = itemQuantities[item] || 1;
@@ -292,6 +318,8 @@ export function BookingForm({
                 value={formData.senderName}
                 onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
                 required
+                readOnly
+                className="bg-gray-50"
               />
             </div>
             <div>
@@ -311,7 +339,8 @@ export function BookingForm({
                   value={formData.senderPhone}
                   onChange={(e) => setFormData({ ...formData, senderPhone: e.target.value })}
                   required
-                  className="flex-1"
+                  readOnly
+                  className="flex-1 bg-gray-50"
                 />
               </div>
             </div>
