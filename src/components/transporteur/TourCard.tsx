@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDialog } from "@/components/booking/BookingDialog";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { Button } from "@/components/ui/button";
 
 interface TourCardProps {
   tour: {
@@ -35,9 +36,14 @@ export function TourCard({ tour }: TourCardProps) {
 
   return (
     <>
-      <div className="tour-card">
-        <h2>{tour.route[0].name}</h2>
-        <button onClick={handleBookClick}>Book Now</button>
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <h2 className="text-lg font-semibold mb-2">{tour.route[0].name}</h2>
+        <Button 
+          onClick={handleBookClick}
+          className="w-full"
+        >
+          Réserver
+        </Button>
       </div>
       
       <BookingDialog
