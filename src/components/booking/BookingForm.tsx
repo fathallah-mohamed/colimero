@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox"; // Add this import
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -91,6 +91,7 @@ export function BookingForm({
     recipientAddress: "",
     deliveryCity: ""
   });
+  const [hasExistingBooking, setHasExistingBooking] = useState(false);
 
   useEffect(() => {
     const fetchCarrierPrice = async () => {
@@ -122,10 +123,33 @@ export function BookingForm({
       }
     };
 
+    const checkExistingBooking = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: existingBooking, error } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('tour_id', tourId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking existing booking:', error);
+          return;
+        }
+
+        setHasExistingBooking(!!existingBooking);
+      } catch (error) {
+        console.error('Error checking existing booking:', error);
+      }
+    };
+
     fetchCarrierPrice();
+    checkExistingBooking();
   }, [tourId, toast]);
 
-  // Nouveau useEffect pour récupérer les informations du client
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -215,6 +239,15 @@ export function BookingForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (hasExistingBooking) {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Vous avez déjà une réservation pour cette tournée",
+      });
+      return;
+    }
+
     if (!customsDeclaration) {
       toast({
         variant: "destructive",
@@ -288,6 +321,19 @@ export function BookingForm({
       setIsLoading(false);
     }
   };
+
+  if (hasExistingBooking) {
+    return (
+      <div className="p-6 text-center space-y-4">
+        <p className="text-red-600 font-medium">
+          Vous avez déjà une réservation pour cette tournée
+        </p>
+        <Button onClick={onCancel} variant="outline">
+          Retour
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
