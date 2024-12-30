@@ -11,42 +11,43 @@ interface TourCardHeaderProps {
 
 export function TourCardHeader({ tour, hideAvatar }: TourCardHeaderProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4">
-      <div className="flex items-center gap-6 overflow-x-auto">
-        {/* Date de départ */}
-        <div className="flex items-center gap-3 min-w-fit">
-          <div className="p-2 bg-primary/10 rounded-full">
-            <CalendarDays className="w-5 h-5 text-primary" />
+    <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm">
+      {/* Informations principales */}
+      <div className="flex flex-wrap items-center gap-4 p-4 border-b border-gray-100">
+        {!hideAvatar && (
+          <div className="flex items-center gap-3 min-w-[200px]">
+            <div className="p-2 bg-primary/10 rounded-full">
+              <TruckIcon className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex items-center gap-2">
+              <TransporteurAvatar
+                avatarUrl={tour.carriers?.avatar_url}
+                name={tour.carriers?.company_name || ""}
+                size="sm"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                  {tour.carriers?.company_name}
+                </span>
+                <span className="text-xs text-primary">Vérifié</span>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Départ</span>
-            <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-              {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
-            </span>
-          </div>
-        </div>
+        )}
 
-        {/* Séparateur vertical */}
-        <div className="h-10 w-px bg-gray-200" />
-
-        {/* Trajet */}
-        <div className="flex items-center gap-3 min-w-fit">
+        <div className="flex items-center gap-3 min-w-[180px]">
           <div className="p-2 bg-primary/10 rounded-full">
             <MapPin className="w-5 h-5 text-primary" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Trajet</span>
-            <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+            <span className="text-sm font-medium text-gray-900">
               {tour.departure_country === "FR" ? "France" : "Tunisie"} → {tour.destination_country === "FR" ? "France" : "Tunisie"}
             </span>
           </div>
         </div>
 
-        {/* Séparateur vertical */}
-        <div className="h-10 w-px bg-gray-200" />
-
-        {/* Prix */}
-        <div className="flex items-center gap-3 min-w-fit">
+        <div className="flex items-center gap-3 min-w-[120px]">
           <div className="p-2 bg-primary/10 rounded-full">
             <EuroIcon className="w-5 h-5 text-primary" />
           </div>
@@ -57,35 +58,21 @@ export function TourCardHeader({ tour, hideAvatar }: TourCardHeaderProps) {
             </span>
           </div>
         </div>
+      </div>
 
-        {!hideAvatar && (
-          <>
-            {/* Séparateur vertical */}
-            <div className="h-10 w-px bg-gray-200" />
-
-            {/* Transporteur */}
-            <div className="flex items-center gap-3 min-w-fit">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <TruckIcon className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex items-center gap-2">
-                <TransporteurAvatar
-                  avatarUrl={tour.carriers?.avatar_url}
-                  name={tour.carriers?.company_name || ""}
-                  size="sm"
-                />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
-                    {tour.carriers?.company_name}
-                  </span>
-                  <span className="text-xs text-primary">
-                    Vérifié
-                  </span>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+      {/* Date de départ */}
+      <div className="p-4 bg-gray-50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-full">
+            <CalendarDays className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Date de départ</span>
+            <span className="text-sm font-medium text-gray-900">
+              {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
