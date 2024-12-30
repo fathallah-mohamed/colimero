@@ -89,7 +89,7 @@ export default function CurrentTours() {
         </div>
         <div className="text-center">
           <Button asChild variant="default" className="bg-blue-600 hover:bg-blue-700">
-            <Link to="/nos-transporteurs">Voir toutes les tournées</Link>
+            <Link to="/tournees">Voir toutes les tournées</Link>
           </Button>
         </div>
       </div>
