@@ -18,11 +18,11 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
     try {
       if (!email.trim()) {
-        throw new Error("Veuillez entrer votre adresse email");
+        throw new Error("L'adresse email est requise");
       }
 
       if (!password.trim()) {
-        throw new Error("Veuillez entrer votre mot de passe");
+        throw new Error("Le mot de passe est requis");
       }
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -35,22 +35,24 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         
         switch (signInError.message) {
           case "Invalid login credentials":
-            errorMessage = "Email ou mot de passe incorrect";
+            errorMessage = "Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.";
             break;
           case "Email not confirmed":
-            errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+            errorMessage = "Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail.";
             break;
           case "Invalid email":
-            errorMessage = "Format d'email invalide";
+            errorMessage = "Format d'email invalide. Veuillez entrer une adresse email valide.";
             break;
           case "Too many requests":
-            errorMessage = "Trop de tentatives de connexion, veuillez réessayer plus tard";
+            errorMessage = "Trop de tentatives de connexion. Veuillez patienter quelques minutes.";
             break;
           default:
             console.error("Erreur de connexion:", signInError);
         }
         
-        throw new Error(errorMessage);
+        setError(errorMessage);
+        setPassword("");
+        return;
       }
 
       if (!data.user) {
