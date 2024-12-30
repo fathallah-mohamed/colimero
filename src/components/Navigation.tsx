@@ -23,13 +23,20 @@ export default function Navigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Vérifier l'état de connexion initial
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Initial session check
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Session check error:", error);
+        return;
+      }
       setUser(session?.user ?? null);
       setUserType(session?.user?.user_metadata?.user_type ?? null);
-    });
+    };
 
-    // Écouter les changements d'état de connexion
+    checkSession();
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setUserType(session?.user?.user_metadata?.user_type ?? null);
@@ -239,4 +246,4 @@ export default function Navigation() {
       </div>
     </nav>
   );
-}
+};
