@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, User } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TransporteurAvatar } from "./TransporteurAvatar";
 
 const countryNames: { [key: string]: string } = {
   'FR': 'France',
@@ -68,16 +69,12 @@ export function TransporteurList() {
             <Card className="bg-white hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
-                    {carrier.avatar_url ? (
-                      <img
-                        src={carrier.avatar_url}
-                        alt={carrier.company_name}
-                        className="h-16 w-16 rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="h-8 w-8 text-gray-400" />
-                    )}
+                  <div className="h-16 w-16">
+                    <TransporteurAvatar
+                      avatarUrl={carrier.avatar_url}
+                      name={carrier.company_name || `${carrier.first_name} ${carrier.last_name}`}
+                      size="md"
+                    />
                   </div>
 
                   <div className="flex-1">
