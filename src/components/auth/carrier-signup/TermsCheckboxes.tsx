@@ -18,7 +18,6 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
             <Checkbox
               checked={field.value}
               onCheckedChange={field.onChange}
-              defaultChecked
             />
             <label className="text-sm text-muted-foreground leading-normal">
               Je certifie que toutes les informations fournies sont exactes.
@@ -36,7 +35,6 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
             <Checkbox
               checked={field.value}
               onCheckedChange={field.onChange}
-              defaultChecked
             />
             <label className="text-sm text-muted-foreground leading-normal">
               Je m'engage à respecter les lois et réglementations douanières lors du transport des colis.
@@ -54,7 +52,6 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
             <Checkbox
               checked={field.value}
               onCheckedChange={field.onChange}
-              defaultChecked
             />
             <label className="text-sm text-muted-foreground leading-normal">
               Je reconnais être entièrement responsable des objets transportés dans mes tournées.
