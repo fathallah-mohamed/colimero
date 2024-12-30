@@ -6,21 +6,31 @@ import { supabase } from "@/integrations/supabase/client";
 import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
 import { TrendingUp, Users, Shield } from "lucide-react";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 
 export default function PlanifierTournee() {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState<'client' | 'carrier' | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check initial auth state
+    // Check initial auth state and user type
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
+      if (session) {
+        const userMetadata = session.user.user_metadata;
+        setUserType(userMetadata.user_type as 'client' | 'carrier');
+      }
     });
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
+      if (session) {
+        const userMetadata = session.user.user_metadata;
+        setUserType(userMetadata.user_type as 'client' | 'carrier');
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -56,12 +66,16 @@ export default function PlanifierTournee() {
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {isAuthenticated ? (
-          <div className="space-y-8">
-            <h1 className="text-3xl font-bold text-center">
-              Créer une nouvelle tournée
-            </h1>
-            <CreateTourForm />
-          </div>
+          userType === 'carrier' ? (
+            <div className="space-y-8">
+              <h1 className="text-3xl font-bold text-center">
+                Créer une nouvelle tournée
+              </h1>
+              <CreateTourForm />
+            </div>
+          ) : (
+            <AccessDeniedMessage userType="client" />
+          )
         ) : (
           <div className="text-center">
             <h1 className="text-4xl font-bold text-[#0091FF] mb-6">
