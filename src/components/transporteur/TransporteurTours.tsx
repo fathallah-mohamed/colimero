@@ -92,7 +92,11 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
 
   return (
     <div className="space-y-4">
-      {showAccessDenied && <AccessDeniedMessage userType="client" />}
+      <AccessDeniedMessage 
+        userType="carrier" 
+        isOpen={showAccessDenied} 
+        onClose={() => setShowAccessDenied(false)}
+      />
 
       {tours.map((tour) => (
         <TourCard
