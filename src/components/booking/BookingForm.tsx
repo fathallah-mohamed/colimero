@@ -9,6 +9,7 @@ import { BookingPhotoUpload } from "./BookingPhotoUpload";
 import { SenderInfo } from "./form/SenderInfo";
 import { RecipientInfo } from "./form/RecipientInfo";
 import { BookingCommitments } from "./form/BookingCommitments";
+import { useConsents } from "@/hooks/useConsents";
 import type { BookingFormData } from "@/types/booking";
 
 const contentTypes = [
@@ -48,16 +49,15 @@ export function BookingForm({
   onSuccess, 
   onCancel 
 }: BookingFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { consentTypes, userConsents } = useConsents();
+  const [isLoading, setIsLoading] = useState(false);
   const [weight, setWeight] = useState(5);
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [selectedSpecialItems, setSelectedSpecialItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
   const [pricePerKg, setPricePerKg] = useState<number>(0);
-  const [customsDeclaration, setCustomsDeclaration] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [formData, setFormData] = useState({
     senderName: "",
     senderPhone: "",
@@ -211,6 +211,20 @@ export function BookingForm({
     return weightPrice + specialItemsPrice;
   };
 
+  const areConsentsValid = () => {
+    if (!consentTypes || !userConsents) return false;
+    
+    return consentTypes
+      .filter(type => type.required)
+      .every(type => 
+        userConsents.some(
+          consent => 
+            consent.consentTypeId === type.id && 
+            consent.accepted
+        )
+      );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -223,11 +237,11 @@ export function BookingForm({
       return;
     }
 
-    if (!customsDeclaration || !termsAccepted) {
+    if (!areConsentsValid()) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez accepter les conditions générales et la déclaration douanière",
+        description: "Veuillez accepter tous les consentements requis",
       });
       return;
     }
@@ -273,8 +287,8 @@ export function BookingForm({
         status: "pending",
         tracking_number: `COL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
         item_type: selectedContentTypes[0] || "general",
-        customs_declaration: customsDeclaration,
-        terms_accepted: termsAccepted
+        customs_declaration: true,
+        terms_accepted: true
       };
 
       const { error } = await supabase.from("bookings").insert(bookingData);
@@ -315,7 +329,9 @@ export function BookingForm({
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-center">Détails du colis</h2>
-        <p className="text-sm text-gray-500 text-center">Remplissez les informations de votre colis</p>
+        <p className="text-sm text-gray-500 text-center">
+          Remplissez les informations de votre colis
+        </p>
 
         <div className="space-y-4">
           <div className="bg-blue-50 p-4 rounded-lg mb-4">
@@ -357,19 +373,14 @@ export function BookingForm({
             destinationCountry={destinationCountry}
           />
 
-          <BookingCommitments
-            customsDeclaration={customsDeclaration}
-            setCustomsDeclaration={setCustomsDeclaration}
-            termsAccepted={termsAccepted}
-            setTermsAccepted={setTermsAccepted}
-          />
+          <BookingCommitments />
         </div>
       </div>
 
       <Button 
         type="submit" 
         className="w-full bg-blue-400 hover:bg-blue-500"
-        disabled={isLoading || !customsDeclaration || !termsAccepted}
+        disabled={isLoading || !areConsentsValid()}
       >
         Confirmer la réservation ({calculateTotalPrice().toFixed(2)}€)
       </Button>
