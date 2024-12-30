@@ -1,11 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
 import { TransporteurAvatar } from "./TransporteurAvatar";
+import type { Tour } from "@/types/tour";
 
-export function TransporteurTours({ tours }: { tours: any[] }) {
+interface TransporteurToursProps {
+  tours: Tour[];
+  isLoading?: boolean;
+}
+
+export function TransporteurTours({ tours, isLoading }: TransporteurToursProps) {
   const navigate = useNavigate();
-  const { toast } = useToast();
+
+  if (isLoading) {
+    return <div>Chargement...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -16,7 +24,7 @@ export function TransporteurTours({ tours }: { tours: any[] }) {
               <div className="flex items-center gap-3">
                 <TransporteurAvatar
                   avatarUrl={tour.carriers?.avatar_url}
-                  name={tour.carriers?.company_name}
+                  name={tour.carriers?.company_name || ""}
                   size="sm"
                 />
                 <span className="text-gray-600">

@@ -15,10 +15,12 @@ const sizes = {
 
 export function TransporteurAvatar({ avatarUrl, name, size = "md" }: TransporteurAvatarProps) {
   const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
+    ? name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "?";
 
   return (
     <Avatar className={`${sizes[size]} bg-white/10`}>
