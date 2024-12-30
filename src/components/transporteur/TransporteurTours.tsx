@@ -6,9 +6,10 @@ import type { Tour } from "@/types/tour";
 interface TransporteurToursProps {
   tours: Tour[];
   isLoading?: boolean;
+  type?: 'public' | 'private';
 }
 
-export function TransporteurTours({ tours, isLoading }: TransporteurToursProps) {
+export function TransporteurTours({ tours, isLoading, type }: TransporteurToursProps) {
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -39,8 +40,8 @@ export function TransporteurTours({ tours, isLoading }: TransporteurToursProps) 
               </button>
             </div>
             <div className="text-gray-500">
-              <p>Date: {new Date(tour.date).toLocaleDateString()}</p>
-              <p>Statut: {tour.status}</p>
+              <p>Date: {new Date(tour.departure_date).toLocaleDateString()}</p>
+              <p>Type: {tour.type}</p>
             </div>
           </CardContent>
         </Card>
