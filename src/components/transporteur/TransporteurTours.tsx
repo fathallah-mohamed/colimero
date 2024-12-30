@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { EmailVerificationDialog } from "@/components/tour/EmailVerificationDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { BookingForm } from "@/components/booking/BookingForm";
 
 export interface TransporteurToursProps {
   tours: Tour[];
@@ -25,6 +27,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
   const [isEmailVerificationOpen, setIsEmailVerificationOpen] = useState(false);
   const [currentTourId, setCurrentTourId] = useState<number | null>(null);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
+  const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Chargement...</div>;
@@ -55,6 +58,10 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
         setShowAccessDenied(true);
         return;
       }
+
+      setCurrentTourId(tourId);
+      setIsBookingFormOpen(true);
+      return;
     }
 
     setCurrentTourId(tourId);
@@ -75,7 +82,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
   const handleAuthSuccess = () => {
     setIsAuthOpen(false);
-    console.log("Réservation pour la tournée:", currentTourId, "Point sélectionné:", selectedPoints[currentTourId!]);
+    setIsBookingFormOpen(true);
   };
 
   const getGoogleMapsUrl = (location: string, city: string) => {
@@ -205,6 +212,22 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
         onClose={() => setIsEmailVerificationOpen(false)}
         onVerify={handleEmailVerification}
       />
+
+      <Dialog open={isBookingFormOpen} onOpenChange={setIsBookingFormOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          {currentTourId && selectedPoints[currentTourId] && (
+            <BookingForm
+              tourId={currentTourId}
+              pickupCity={selectedPoints[currentTourId]}
+              onSuccess={() => {
+                setIsBookingFormOpen(false);
+                navigate("/mes-reservations");
+              }}
+              onCancel={() => setIsBookingFormOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
