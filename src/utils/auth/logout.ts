@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const handleLogoutFlow = async () => {
   try {
+    // Simple signOut call without any scope parameter
     const { error } = await supabase.auth.signOut();
 
     if (error) {
