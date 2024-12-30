@@ -7,7 +7,6 @@ export const handleLogoutFlow = async () => {
     
     if (sessionError) {
       console.error("Session check error:", sessionError);
-      // If we can't get the session, clear local storage and consider it a successful logout
       localStorage.removeItem('supabase.auth.token');
       return { success: true };
     }
@@ -18,9 +17,7 @@ export const handleLogoutFlow = async () => {
     }
 
     // We have a valid session, proceed with logout
-    const { error } = await supabase.auth.signOut({
-      scope: 'local' // Only clear the current tab's session
-    });
+    const { error } = await supabase.auth.signOut();
 
     if (error) {
       console.error("Logout error:", error);

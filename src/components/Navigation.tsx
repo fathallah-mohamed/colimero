@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
+import { checkAuthStatus } from "@/utils/auth";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,48 +26,29 @@ export default function Navigation() {
   useEffect(() => {
     // Initial session check
     const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Session check error:", error);
-          setUser(null);
-          setUserType(null);
-          return;
-        }
-        
-        if (!session) {
-          setUser(null);
-          setUserType(null);
-          return;
-        }
-
-        // Verify user is still valid
-        const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
-        if (userError) {
-          console.error("User verification error:", userError);
-          setUser(null);
-          setUserType(null);
-          if (userError.status === 403) {
-            localStorage.removeItem('supabase.auth.token');
-          }
-          return;
-        }
-
-        setUser(currentUser);
-        setUserType(currentUser?.user_metadata?.user_type ?? null);
-      } catch (error) {
-        console.error("Session check error:", error);
+      const { isAuthenticated, user: currentUser } = await checkAuthStatus();
+      
+      if (!isAuthenticated || !currentUser) {
         setUser(null);
         setUserType(null);
+        return;
       }
+
+      setUser(currentUser);
+      setUserType(currentUser?.user_metadata?.user_type ?? null);
     };
 
     checkSession();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setUserType(session?.user?.user_metadata?.user_type ?? null);
+      if (session?.user) {
+        setUser(session.user);
+        setUserType(session.user?.user_metadata?.user_type ?? null);
+      } else {
+        setUser(null);
+        setUserType(null);
+      }
     });
 
     return () => subscription.unsubscribe();

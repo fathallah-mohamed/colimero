@@ -17,20 +17,26 @@ export const checkAuthStatus = async () => {
       return { isAuthenticated: false };
     }
 
-    // Verify the session is still valid
+    // Verify the session is still valid with a separate call
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError) {
       console.error("User verification error:", userError);
       if (userError.status === 403) {
         localStorage.removeItem('supabase.auth.token');
+        await supabase.auth.signOut(); // Force a clean signout
       }
       return { isAuthenticated: false, error: userError };
+    }
+
+    if (!user) {
+      return { isAuthenticated: false };
     }
 
     return { isAuthenticated: true, user };
   } catch (error) {
     console.error("Error checking auth status:", error);
+    localStorage.removeItem('supabase.auth.token');
     return { isAuthenticated: false, error };
   }
 };
@@ -45,7 +51,6 @@ export const useAuthRedirect = () => {
     if (!isAuthenticated) {
       if (error) {
         console.error("Auth error:", error);
-        // Clear any invalid session data
         localStorage.removeItem('supabase.auth.token');
       }
       
