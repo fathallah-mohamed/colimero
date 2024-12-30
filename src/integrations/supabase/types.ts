@@ -319,6 +319,7 @@ export type Database = {
           company_name: string | null
           coverage_area: string[] | null
           created_at: string
+          customs_terms_accepted: boolean | null
           email: string | null
           email_verified: boolean | null
           first_name: string | null
@@ -326,8 +327,11 @@ export type Database = {
           last_name: string | null
           phone: string | null
           phone_secondary: string | null
+          responsibility_terms_accepted: boolean | null
           siret: string | null
           status: string | null
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
           total_deliveries: number | null
         }
         Insert: {
@@ -339,6 +343,7 @@ export type Database = {
           company_name?: string | null
           coverage_area?: string[] | null
           created_at?: string
+          customs_terms_accepted?: boolean | null
           email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
@@ -346,8 +351,11 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
+          responsibility_terms_accepted?: boolean | null
           siret?: string | null
           status?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           total_deliveries?: number | null
         }
         Update: {
@@ -359,6 +367,7 @@ export type Database = {
           company_name?: string | null
           coverage_area?: string[] | null
           created_at?: string
+          customs_terms_accepted?: boolean | null
           email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
@@ -366,8 +375,11 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
+          responsibility_terms_accepted?: boolean | null
           siret?: string | null
           status?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           total_deliveries?: number | null
         }
         Relationships: []
@@ -380,6 +392,8 @@ export type Database = {
           id: string
           last_name: string | null
           phone: string | null
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
         }
         Insert: {
           created_at?: string
@@ -388,6 +402,8 @@ export type Database = {
           id: string
           last_name?: string | null
           phone?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
         }
         Update: {
           created_at?: string
@@ -396,6 +412,8 @@ export type Database = {
           id?: string
           last_name?: string | null
           phone?: string | null
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
         }
         Relationships: []
       }

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RegisterFormProps {
   onLogin: () => void;
@@ -17,6 +18,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(true);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,6 +28,15 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         variant: "destructive",
         title: "Erreur",
         description: "Les mots de passe ne correspondent pas",
+      });
+      return;
+    }
+
+    if (!termsAccepted) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Vous devez accepter les conditions pour continuer",
       });
       return;
     }
@@ -53,11 +64,22 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
             title: "Erreur d'inscription",
             description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
           });
-          onLogin(); // Redirect to login
+          onLogin();
           return;
         }
         throw error;
       }
+
+      // Update the clients table with terms acceptance
+      const { error: clientError } = await supabase
+        .from('clients')
+        .update({
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString(),
+        })
+        .eq('id', (await supabase.auth.getUser()).data.user?.id);
+
+      if (clientError) throw clientError;
 
       toast({
         title: "Compte créé avec succès",
@@ -144,10 +166,25 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         />
       </div>
 
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="terms"
+          checked={termsAccepted}
+          onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+          defaultChecked
+        />
+        <label
+          htmlFor="terms"
+          className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Je déclare que toutes les informations fournies sont exactes et que je respecterai les lois en vigueur pour toute réservation effectuée via cette plateforme, en particulier concernant le contenu des colis.
+        </label>
+      </div>
+
       <Button
         type="submit"
         className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
-        disabled={isLoading}
+        disabled={isLoading || !termsAccepted}
       >
         {isLoading ? "Création en cours..." : "Créer mon compte"}
       </Button>
