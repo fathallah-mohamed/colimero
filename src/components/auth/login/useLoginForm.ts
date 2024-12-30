@@ -31,9 +31,8 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
     try {
       console.log("Tentative de connexion avec:", email);
-      console.log("Tentative d'authentification avec Supabase...");
-
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -41,16 +40,14 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
-        // Analyse détaillée de l'erreur
         let errorMessage = "Une erreur est survenue lors de la connexion";
-        const errorBody = signInError.message;
-        console.log("Message d'erreur complet:", errorBody);
-
-        if (errorBody.includes("Invalid login credentials") || errorBody.includes("invalid_credentials")) {
+        
+        if (signInError.message.includes("Invalid login credentials") || 
+            signInError.message.includes("invalid_credentials")) {
           errorMessage = "Email ou mot de passe incorrect";
-        } else if (errorBody.includes("Email not confirmed")) {
+        } else if (signInError.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (errorBody.includes("Invalid email")) {
+        } else if (signInError.message.includes("Invalid email")) {
           errorMessage = "Format d'email invalide";
         }
 
@@ -60,13 +57,13 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         return;
       }
 
-      if (!user) {
+      if (!data?.user) {
         setError("Une erreur est survenue lors de la connexion");
         setIsLoading(false);
         return;
       }
 
-      const userType = user.user_metadata?.user_type;
+      const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
