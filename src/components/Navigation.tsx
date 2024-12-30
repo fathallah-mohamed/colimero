@@ -58,8 +58,22 @@ export default function Navigation() {
     }
   };
 
+  const handlePlanifierTourneeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (userType === 'carrier') {
+      navigate('/planifier-une-tournee');
+    } else {
+      navigate('/connexion');
+    }
+  };
+
   const menuItems = [
-    { name: "Planifier une tournée", href: "/planifier-une-tournee", highlight: true },
+    { 
+      name: "Planifier une tournée", 
+      href: "/planifier-une-tournee", 
+      highlight: true,
+      onClick: handlePlanifierTourneeClick
+    },
     { name: "Envoyer un colis", href: "/envoyer-un-colis", highlight: true },
     { name: "Transporteurs", href: "/nos-transporteurs" },
     { name: "Actualités", href: "/actualites" },
@@ -116,12 +130,10 @@ export default function Navigation() {
     <nav className="relative bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <Link to="/" className="text-2xl font-bold text-[#00B0F0]">
             Colimero
           </Link>
 
-          {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
@@ -130,12 +142,12 @@ export default function Navigation() {
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
 
-          {/* Desktop menu */}
           <div className="hidden md:flex md:items-center md:space-x-8">
             {menuItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={item.onClick}
                 className={`text-base ${
                   item.highlight
                     ? "text-[#00B0F0] font-medium"
@@ -156,7 +168,6 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       <div
         className={`${
           isOpen ? "block" : "hidden"
@@ -167,12 +178,15 @@ export default function Navigation() {
             <Link
               key={item.name}
               to={item.href}
+              onClick={(e) => {
+                setIsOpen(false);
+                if (item.onClick) item.onClick(e);
+              }}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 item.highlight
                   ? "text-[#00B0F0]"
                   : "text-gray-700 hover:text-gray-900"
               }`}
-              onClick={() => setIsOpen(false)}
             >
               {item.name}
             </Link>
