@@ -1,267 +1,457 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox"; // Add this import
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { BookingWeightSelector } from "./BookingWeightSelector";
 import { BookingContentTypes } from "./BookingContentTypes";
 import { BookingSpecialItems } from "./BookingSpecialItems";
 import { BookingPhotoUpload } from "./BookingPhotoUpload";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle } from "lucide-react";
 import type { BookingFormData } from "@/types/booking";
+
+const contentTypes = [
+  "Vêtements",
+  "Chaussures",
+  "Produits alimentaires",
+  "Electronique",
+  "Livres",
+  "Jouets",
+  "Cosmétiques",
+  "Médicaments",
+  "Documents",
+  "Accessoires"
+];
+
+const specialItems = [
+  { name: "Vélo", price: 50, icon: "bike" },
+  { name: "Trottinette", price: 30, icon: "scooter" },
+  { name: "Ordinateur portable", price: 20, icon: "laptop" },
+  { name: "Smartphone", price: 15, icon: "smartphone" },
+  { name: "Télévision", price: 40, icon: "tv" },
+  { name: "Colis volumineux", price: 25, icon: "package" }
+];
+
+const destinationCities = {
+  TN: [
+    { name: "Tunis", location: "15 Avenue Habib Bourguiba, Tunis", hours: "9h00 - 18h00" },
+    { name: "Sfax", location: "Route de l'Aéroport Km 0.5, Sfax", hours: "8h00 - 17h00" },
+    { name: "Sousse", location: "Avenue 14 Janvier, Sousse", hours: "9h00 - 17h00" }
+  ],
+  MA: [
+    { name: "Casablanca", location: "Boulevard Mohammed V, Casablanca", hours: "9h00 - 18h00" },
+    { name: "Rabat", location: "Avenue Mohammed V, Rabat", hours: "8h00 - 17h00" },
+    { name: "Marrakech", location: "Avenue Mohammed VI, Marrakech", hours: "9h00 - 17h00" }
+  ],
+  DZ: [
+    { name: "Alger", location: "Rue Didouche Mourad, Alger", hours: "9h00 - 18h00" },
+    { name: "Oran", location: "Boulevard de l'ALN, Oran", hours: "8h00 - 17h00" },
+    { name: "Constantine", location: "Avenue de l'Indépendance, Constantine", hours: "9h00 - 17h00" }
+  ]
+};
 
 interface BookingFormProps {
   tourId: number;
   pickupCity: string;
   destinationCountry: string;
-  onSuccess?: () => void;
-  onCancel?: () => void;
+  onSuccess: () => void;
+  onCancel: () => void;
 }
 
-export function BookingForm({ tourId, pickupCity, destinationCountry, onSuccess, onCancel }: BookingFormProps) {
-  const navigate = useNavigate();
+export function BookingForm({ 
+  tourId, 
+  pickupCity, 
+  destinationCountry,
+  onSuccess, 
+  onCancel 
+}: BookingFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [weight, setWeight] = useState(5);
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [selectedSpecialItems, setSelectedSpecialItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [pricePerKg, setPricePerKg] = useState<number>(0);
   const [customsDeclaration, setCustomsDeclaration] = useState(false);
+  const [formData, setFormData] = useState({
+    senderName: "",
+    senderPhone: "",
+    recipientName: "",
+    recipientPhone: "",
+    recipientAddress: "",
+    deliveryCity: ""
+  });
 
-  const contentTypes = [
-    "Vêtements",
-    "Électronique",
-    "Documents",
-    "Alimentaire",
-    "Cosmétiques",
-    "Autres",
-  ];
+  useEffect(() => {
+    const fetchCarrierPrice = async () => {
+      try {
+        const { data: tourData, error: tourError } = await supabase
+          .from('tours')
+          .select('carrier_id')
+          .eq('id', tourId)
+          .single();
 
-  const specialItems = [
-    { name: "Fragile", price: 5, icon: "package" },
-    { name: "Volumineux", price: 10, icon: "box" },
-    { name: "Urgent", price: 15, icon: "zap" },
-  ];
+        if (tourError) throw tourError;
+
+        const { data: capacityData, error: capacityError } = await supabase
+          .from('carrier_capacities')
+          .select('price_per_kg')
+          .eq('carrier_id', tourData.carrier_id)
+          .single();
+
+        if (capacityError) throw capacityError;
+
+        setPricePerKg(capacityData.price_per_kg);
+      } catch (error) {
+        console.error('Error fetching carrier price:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de récupérer le prix du transporteur",
+        });
+      }
+    };
+
+    fetchCarrierPrice();
+  }, [tourId, toast]);
+
+  // Nouveau useEffect pour récupérer les informations du client
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('first_name, last_name, phone')
+          .eq('id', user.id)
+          .single();
+
+        if (clientError) throw clientError;
+
+        if (clientData) {
+          const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
+          setFormData(prev => ({
+            ...prev,
+            senderName: fullName,
+            senderPhone: clientData.phone || ''
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const handleWeightChange = (increment: boolean) => {
+    setWeight(prev => {
+      const newWeight = increment ? prev + 1 : prev - 1;
+      return Math.min(Math.max(newWeight, 5), 30);
+    });
+  };
 
   const handleContentTypeToggle = (type: string) => {
-    setSelectedContentTypes((prev) =>
-      prev.includes(type)
-        ? prev.filter((t) => t !== type)
+    setSelectedContentTypes(prev => 
+      prev.includes(type) 
+        ? prev.filter(t => t !== type)
         : [...prev, type]
     );
   };
 
   const handleSpecialItemToggle = (item: string) => {
-    setSelectedSpecialItems((prev) =>
-      prev.includes(item)
-        ? prev.filter((i) => i !== item)
-        : [...prev, item]
-    );
+    setSelectedSpecialItems(prev => {
+      const newItems = prev.includes(item)
+        ? prev.filter(i => i !== item)
+        : [...prev, item];
+      
+      if (!prev.includes(item)) {
+        setItemQuantities(prev => ({
+          ...prev,
+          [item]: 1
+        }));
+      }
+      
+      return newItems;
+    });
   };
 
   const handleQuantityChange = (itemName: string, increment: boolean) => {
-    setItemQuantities((prev) => ({
+    setItemQuantities(prev => ({
       ...prev,
-      [itemName]: Math.max(1, (prev[itemName] || 1) + (increment ? 1 : -1)),
+      [itemName]: Math.max(1, (prev[itemName] || 1) + (increment ? 1 : -1))
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setPhotos(prev => [...prev, ...Array.from(e.target.files!)]);
+    }
+  };
+
+  const calculateTotalPrice = () => {
+    const weightPrice = weight * pricePerKg;
+    const specialItemsPrice = selectedSpecialItems.reduce((total, item) => {
+      const itemPrice = specialItems.find(i => i.name === item)?.price || 0;
+      const quantity = itemQuantities[item] || 1;
+      return total + (itemPrice * quantity);
+    }, 0);
+
+    return weightPrice + specialItemsPrice;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!termsAccepted) {
+
+    if (!customsDeclaration) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez accepter les conditions générales",
+        description: "Veuillez accepter la déclaration douanière",
       });
       return;
     }
 
-    setIsSubmitting(true);
-
-    const formData = new FormData(e.currentTarget);
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez être connecté pour effectuer une réservation",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
-    const specialItemsWithQuantity = selectedSpecialItems.map(item => ({
-      name: item,
-      quantity: itemQuantities[item] || 1
-    }));
-
-    const bookingData: BookingFormData = {
-      tour_id: tourId,
-      user_id: user.id,
-      pickup_city: pickupCity,
-      delivery_city: formData.get("delivery_city") as string,
-      weight,
-      content_types: selectedContentTypes,
-      special_items: specialItemsWithQuantity,
-      photos,
-      sender_name: formData.get("sender_name") as string,
-      sender_phone: formData.get("sender_phone") as string,
-      recipient_name: formData.get("recipient_name") as string,
-      recipient_phone: formData.get("recipient_phone") as string,
-      recipient_address: formData.get("recipient_address") as string,
-      status: "pending",
-      tracking_number: Math.random().toString(36).substring(2, 15),
-      item_type: selectedContentTypes.join(", "),
-      customs_declaration: customsDeclaration,
-    };
+    setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from("bookings")
-        .insert([bookingData]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Utilisateur non connecté");
+
+      const uploadedPhotos = [];
+      for (const photo of photos) {
+        const fileExt = photo.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('bookings')
+          .upload(`${user.id}/${fileName}`, photo);
+        
+        if (!uploadError) {
+          uploadedPhotos.push(fileName);
+        }
+      }
+
+      const specialItemsWithQuantities = selectedSpecialItems.map(item => ({
+        name: item,
+        quantity: itemQuantities[item] || 1
+      }));
+
+      const bookingData: BookingFormData = {
+        tour_id: tourId,
+        user_id: user.id,
+        pickup_city: pickupCity,
+        weight: weight,
+        content_types: selectedContentTypes,
+        special_items: specialItemsWithQuantities,
+        photos: uploadedPhotos,
+        sender_name: formData.senderName,
+        sender_phone: formData.senderPhone,
+        recipient_name: formData.recipientName,
+        recipient_phone: formData.recipientPhone,
+        recipient_address: formData.recipientAddress,
+        delivery_city: formData.deliveryCity,
+        status: "pending",
+        tracking_number: `COL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        item_type: selectedContentTypes[0] || "general",
+        customs_declaration: customsDeclaration
+      };
+
+      const { error } = await supabase.from("bookings").insert(bookingData);
 
       if (error) throw error;
 
-      setIsSuccess(true);
       toast({
-        title: "Réservation confirmée !",
-        description: "Votre demande a été enregistrée avec succès.",
+        title: "Réservation effectuée",
+        description: "Votre réservation a été enregistrée avec succès",
       });
-
-      // Redirection après un court délai pour montrer le message de succès
-      setTimeout(() => {
-        navigate("/mes-reservations");
-      }, 2000);
-
+      onSuccess();
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de la réservation",
+        description: error.message,
       });
-      console.error("Booking error:", error);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  if (isSuccess) {
-    return (
-      <div className="flex flex-col items-center justify-center p-6 space-y-4">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-          <CheckCircle className="w-8 h-8 text-green-500" />
-        </div>
-        <h2 className="text-2xl font-semibold text-center">Réservation confirmée !</h2>
-        <p className="text-gray-600 text-center">
-          Votre demande a été enregistrée avec succès. Vous allez être redirigé vers vos réservations...
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <BookingWeightSelector 
-        weight={weight} 
-        onWeightChange={setWeight}
-      />
-
-      <BookingContentTypes
-        selectedTypes={selectedContentTypes}
-        onTypeToggle={handleContentTypeToggle}
-        contentTypes={contentTypes}
-      />
-
-      <BookingSpecialItems
-        selectedItems={selectedSpecialItems}
-        onItemToggle={handleSpecialItemToggle}
-        specialItems={specialItems}
-        itemQuantities={itemQuantities}
-        onQuantityChange={handleQuantityChange}
-      />
-
-      <BookingPhotoUpload 
-        photos={photos}
-        onPhotosChange={setPhotos}
-      />
-
+    <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-4">
-        <div>
-          <Label htmlFor="sender_name">Nom de l'expéditeur</Label>
-          <Input id="sender_name" name="sender_name" required />
-        </div>
-        <div>
-          <Label htmlFor="sender_phone">Téléphone de l'expéditeur</Label>
-          <Input id="sender_phone" name="sender_phone" required />
-        </div>
-        <div>
-          <Label htmlFor="recipient_name">Nom du destinataire</Label>
-          <Input id="recipient_name" name="recipient_name" required />
-        </div>
-        <div>
-          <Label htmlFor="recipient_phone">Téléphone du destinataire</Label>
-          <Input id="recipient_phone" name="recipient_phone" required />
-        </div>
-        <div>
-          <Label htmlFor="recipient_address">Adresse du destinataire</Label>
-          <Input id="recipient_address" name="recipient_address" required />
-        </div>
-        <div>
-          <Label htmlFor="delivery_city">Ville de livraison</Label>
-          <Input id="delivery_city" name="delivery_city" required />
+        <h2 className="text-xl font-semibold text-center">Détails du colis</h2>
+        <p className="text-sm text-gray-500 text-center">Remplissez les informations de votre colis</p>
+
+        <div className="space-y-4">
+          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+            <p className="text-sm text-blue-600">Prix au kilo: {pricePerKg}€</p>
+          </div>
+
+          <BookingWeightSelector 
+            weight={weight}
+            onWeightChange={handleWeightChange}
+          />
+
+          <BookingContentTypes
+            selectedTypes={selectedContentTypes}
+            onTypeToggle={handleContentTypeToggle}
+            contentTypes={contentTypes}
+          />
+
+          <BookingSpecialItems
+            selectedItems={selectedSpecialItems}
+            onItemToggle={handleSpecialItemToggle}
+            specialItems={specialItems}
+            itemQuantities={itemQuantities}
+            onQuantityChange={handleQuantityChange}
+          />
+
+          <BookingPhotoUpload
+            photos={photos}
+            onPhotoUpload={handlePhotoUpload}
+          />
+
+          <div className="space-y-4">
+            <h3 className="font-medium">Informations de l'expéditeur</h3>
+            <div>
+              <Label>Nom et prénom</Label>
+              <Input
+                value={formData.senderName}
+                onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
+                required
+                readOnly
+                className="bg-gray-50"
+              />
+            </div>
+            <div>
+              <Label>Votre numéro de téléphone</Label>
+              <div className="flex gap-2">
+                <Select defaultValue="FR">
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Pays" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FR">France (+33)</SelectItem>
+                    <SelectItem value="TN">Tunisie (+216)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="tel"
+                  value={formData.senderPhone}
+                  onChange={(e) => setFormData({ ...formData, senderPhone: e.target.value })}
+                  required
+                  readOnly
+                  className="flex-1 bg-gray-50"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-medium">Informations du destinataire</h3>
+            <div>
+              <Label>Nom et prénom</Label>
+              <Input
+                placeholder="Entrez le nom et prénom du destinataire"
+                value={formData.recipientName}
+                onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label>Numéro de téléphone du destinataire</Label>
+              <div className="flex gap-2">
+                <Select defaultValue="TN">
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Pays" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TN">Tunisie (+216)</SelectItem>
+                    <SelectItem value="MA">Maroc (+212)</SelectItem>
+                    <SelectItem value="DZ">Algérie (+213)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="tel"
+                  placeholder="Numéro de téléphone"
+                  value={formData.recipientPhone}
+                  onChange={(e) => setFormData({ ...formData, recipientPhone: e.target.value })}
+                  required
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Ville de livraison</Label>
+              <Select 
+                value={formData.deliveryCity}
+                onValueChange={(value) => setFormData({ ...formData, deliveryCity: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisissez une ville de livraison" />
+                </SelectTrigger>
+                <SelectContent>
+                  {destinationCities[destinationCountry as keyof typeof destinationCities]?.map((city) => (
+                    <SelectItem key={city.name} value={city.name}>
+                      <div className="space-y-1">
+                        <div className="font-medium">{city.name}</div>
+                        <div className="text-sm text-gray-500">{city.location}</div>
+                        <div className="text-sm text-gray-500">Horaires : {city.hours}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Adresse complète</Label>
+              <Textarea
+                placeholder="Adresse complète du destinataire"
+                value={formData.recipientAddress}
+                onChange={(e) => setFormData({ ...formData, recipientAddress: e.target.value })}
+                required
+              />
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-start space-x-3">
           <Checkbox
-            id="terms"
-            checked={termsAccepted}
-            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+            id="customs-declaration"
+            checked={customsDeclaration}
+            onCheckedChange={(checked) => setCustomsDeclaration(checked as boolean)}
+            className="mt-1"
           />
-          <label
-            htmlFor="terms"
+          <Label
+            htmlFor="customs-declaration"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            J'accepte les conditions générales
-          </label>
+            Je déclare que le contenu de mon colis ne contient aucun objet interdit par la loi ou les règlements douaniers.
+          </Label>
         </div>
-
-        {destinationCountry !== "FR" && (
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="customs"
-              checked={customsDeclaration}
-              onCheckedChange={(checked) => setCustomsDeclaration(checked as boolean)}
-            />
-            <label
-              htmlFor="customs"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Je déclare que mon colis respecte les règles douanières
-            </label>
-          </div>
-        )}
       </div>
 
-      <div className="flex justify-end space-x-4">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Annuler
-          </Button>
-        )}
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Envoi en cours..." : "Confirmer la réservation"}
-        </Button>
-      </div>
+      <Button 
+        type="submit" 
+        className="w-full bg-blue-400 hover:bg-blue-500"
+        disabled={isLoading || !customsDeclaration}
+      >
+        Confirmer la réservation ({calculateTotalPrice().toFixed(2)}€)
+      </Button>
     </form>
   );
 }

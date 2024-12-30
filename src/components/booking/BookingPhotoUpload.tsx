@@ -2,11 +2,11 @@ import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
 
 interface BookingPhotoUploadProps {
-  photos: (File | string)[];
-  onPhotosChange: (photos: string[]) => void;
+  photos: File[];
+  onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function BookingPhotoUpload({ photos, onPhotosChange }: BookingPhotoUploadProps) {
+export function BookingPhotoUpload({ photos, onPhotoUpload }: BookingPhotoUploadProps) {
   return (
     <div className="space-y-2">
       <Label>Photos et Vidéos</Label>
@@ -15,22 +15,7 @@ export function BookingPhotoUpload({ photos, onPhotosChange }: BookingPhotoUploa
           type="file"
           multiple
           accept="image/*,video/*"
-          onChange={(e) => {
-            const files = Array.from(e.target.files || []);
-            Promise.all(
-              files.map((file) => {
-                return new Promise<string>((resolve) => {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    resolve(reader.result as string);
-                  };
-                  reader.readAsDataURL(file);
-                });
-              })
-            ).then((photoUrls) => {
-              onPhotosChange(photoUrls);
-            });
-          }}
+          onChange={onPhotoUpload}
           className="hidden"
           id="photo-upload"
         />
@@ -47,7 +32,7 @@ export function BookingPhotoUpload({ photos, onPhotosChange }: BookingPhotoUploa
           {photos.map((photo, index) => (
             <div key={index} className="relative">
               <img
-                src={typeof photo === 'string' ? photo : URL.createObjectURL(photo)}
+                src={URL.createObjectURL(photo)}
                 alt={`Upload ${index + 1}`}
                 className="h-16 w-16 object-cover rounded"
               />

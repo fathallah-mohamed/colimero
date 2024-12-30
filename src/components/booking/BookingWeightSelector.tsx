@@ -4,17 +4,10 @@ import { Minus, Plus } from "lucide-react";
 
 interface BookingWeightSelectorProps {
   weight: number;
-  onWeightChange: (weight: number) => void;
+  onWeightChange: (increment: boolean) => void;
 }
 
 export function BookingWeightSelector({ weight, onWeightChange }: BookingWeightSelectorProps) {
-  const handleWeightChange = (increment: boolean) => {
-    const newWeight = increment ? weight + 1 : weight - 1;
-    if (newWeight >= 5 && newWeight <= 30) {
-      onWeightChange(newWeight);
-    }
-  };
-
   return (
     <div className="space-y-2">
       <Label>Poids (kg) - minimum 5 kg, maximum 30 kg</Label>
@@ -23,7 +16,7 @@ export function BookingWeightSelector({ weight, onWeightChange }: BookingWeightS
           type="button" 
           variant="outline" 
           size="icon"
-          onClick={() => handleWeightChange(false)}
+          onClick={() => onWeightChange(false)}
           disabled={weight <= 5}
         >
           <Minus className="h-4 w-4" />
@@ -33,7 +26,7 @@ export function BookingWeightSelector({ weight, onWeightChange }: BookingWeightS
           type="button" 
           variant="outline" 
           size="icon"
-          onClick={() => handleWeightChange(true)}
+          onClick={() => onWeightChange(true)}
           disabled={weight >= 30}
         >
           <Plus className="h-4 w-4" />
