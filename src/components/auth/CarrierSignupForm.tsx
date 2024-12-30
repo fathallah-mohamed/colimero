@@ -25,9 +25,9 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       services: [],
       phoneSecondary: "",
       avatar_url: null,
-      terms_accepted: true,
-      customs_terms_accepted: true,
-      responsibility_terms_accepted: true,
+      terms_accepted: false,
+      customs_terms_accepted: false,
+      responsibility_terms_accepted: false,
     },
   });
 
@@ -69,6 +69,9 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
     }
   }
 
+  const allTermsAccepted = form.watch(['terms_accepted', 'customs_terms_accepted', 'responsibility_terms_accepted'])
+    .every(value => value === true);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -87,7 +90,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
         <Button 
           type="submit" 
           className="w-full"
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || !allTermsAccepted}
         >
           Envoyer ma demande d'inscription
         </Button>
