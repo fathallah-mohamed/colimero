@@ -7,7 +7,8 @@ import { TourCardHeader } from "./TourCardHeader";
 import { TourCollectionPoints } from "./TourCollectionPoints";
 import { TourTimeline } from "./TourTimeline";
 import { TourStatusSelect } from "@/components/tour/TourStatusSelect";
-import { useAuth } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TourCardProps {
   tour: Tour;
@@ -26,8 +27,15 @@ export function TourCard({
   hideAvatar,
   onStatusChange 
 }: TourCardProps) {
-  const auth = useAuth();
-  const isCarrierOwner = auth?.user?.id === tour.carrier_id;
+  const [isCarrierOwner, setIsCarrierOwner] = useState(false);
+
+  useEffect(() => {
+    const checkOwnership = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsCarrierOwner(session?.user?.id === tour.carrier_id);
+    };
+    checkOwnership();
+  }, [tour.carrier_id]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">

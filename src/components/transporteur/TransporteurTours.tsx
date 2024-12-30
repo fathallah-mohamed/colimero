@@ -95,6 +95,8 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
     );
   }
 
+  const currentTour = currentTourId ? tours.find(tour => tour.id === currentTourId) : null;
+
   return (
     <div className="space-y-4">
       <AccessDeniedMessage 
