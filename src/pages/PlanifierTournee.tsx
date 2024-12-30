@@ -1,68 +1,87 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navigation from "@/components/Navigation";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import Navigation from "@/components/Navigation";
 import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
 import { TrendingUp, Users, Shield } from "lucide-react";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PlanifierTournee() {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<'client' | 'carrier' | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Check initial auth state and user type
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-      if (session) {
-        const userMetadata = session.user.user_metadata;
-        setUserType(userMetadata.user_type as 'client' | 'carrier');
+    let mounted = true;
+
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session error:", error);
+          if (mounted) {
+            setIsAuthenticated(false);
+            setUserType(null);
+          }
+          return;
+        }
+
+        if (mounted) {
+          setIsAuthenticated(!!session);
+          if (session?.user) {
+            const userMetadata = session.user.user_metadata;
+            setUserType(userMetadata.user_type as 'client' | 'carrier');
+          } else {
+            setUserType(null);
+          }
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        if (mounted) {
+          setIsAuthenticated(false);
+          setUserType(null);
+        }
       }
-    });
+    };
+
+    // Initial check
+    checkSession();
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      if (session) {
-        const userMetadata = session.user.user_metadata;
-        setUserType(userMetadata.user_type as 'client' | 'carrier');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (mounted) {
+        setIsAuthenticated(!!session);
+        if (session?.user) {
+          const userMetadata = session.user.user_metadata;
+          setUserType(userMetadata.user_type as 'client' | 'carrier');
+        } else {
+          setUserType(null);
+        }
+
+        // Handle token refresh errors
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully');
+        } else if (event === 'SIGNED_OUT') {
+          setIsAuthenticated(false);
+          setUserType(null);
+          navigate('/connexion');
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const benefits = [
-    {
-      icon: TrendingUp,
-      title: "Revenus optimisés",
-      description:
-        "Maximisez vos profits en remplissant votre véhicule sur vos trajets existants.",
-    },
-    {
-      icon: Users,
-      title: "Réseau d'expéditeurs",
-      description:
-        "Accédez à une large base de clients vérifiés prêts à expédier.",
-    },
-    {
-      icon: Shield,
-      title: "Gestion simplifiée",
-      description:
-        "Gérez facilement vos tournées et vos clients via notre plateforme intuitive.",
-    },
-  ];
-
-  const handleCreateTourClick = () => {
-    setIsAuthDialogOpen(true);
-  };
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {isAuthenticated ? (
@@ -79,39 +98,50 @@ export default function PlanifierTournee() {
         ) : (
           <div className="text-center">
             <h1 className="text-4xl font-bold text-[#0091FF] mb-6">
-              Planifiez une tournée et connectez-vous à notre réseau d'expéditeurs !
+              Créez votre tournée en quelques clics
             </h1>
-            <p className="text-gray-600 mb-12 max-w-3xl mx-auto">
-              Créez facilement une tournée pour vos trajets, remplissez votre
-              véhicule et optimisez vos revenus. Grâce à Colimero, vous accédez à
-              un large réseau d'expéditeurs prêts à collaborer.
+            <p className="text-xl text-gray-600 mb-12">
+              Optimisez vos livraisons et maximisez vos revenus
             </p>
 
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              {benefits.map((benefit, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <div className="bg-[#0091FF]/10 w-12 h-12 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                    <benefit.icon className="w-6 h-6 text-[#0091FF]" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
-                  <p className="text-gray-600">{benefit.description}</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              <div className="p-6 bg-white rounded-lg shadow-md">
+                <TrendingUp className="w-12 h-12 text-[#0091FF] mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Augmentez vos revenus
+                </h3>
+                <p className="text-gray-600">
+                  Optimisez vos trajets et maximisez votre rentabilité
+                </p>
+              </div>
+
+              <div className="p-6 bg-white rounded-lg shadow-md">
+                <Users className="w-12 h-12 text-[#0091FF] mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Élargissez votre clientèle
+                </h3>
+                <p className="text-gray-600">
+                  Accédez à une nouvelle base de clients
+                </p>
+              </div>
+
+              <div className="p-6 bg-white rounded-lg shadow-md">
+                <Shield className="w-12 h-12 text-[#0091FF] mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  En toute sécurité
+                </h3>
+                <p className="text-gray-600">
+                  Profitez d'une plateforme sécurisée et fiable
+                </p>
+              </div>
             </div>
 
-            <Button
-              size="lg"
-              className="bg-[#0091FF] hover:bg-[#0091FF]/90 text-white px-8"
-              onClick={handleCreateTourClick}
+            <button
+              onClick={() => setIsAuthDialogOpen(true)}
+              className="bg-[#0091FF] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#007ACC] transition-colors"
             >
-              Créer une tournée
-            </Button>
-            <p className="text-sm text-gray-500 mt-4">
-              Vous devez être connecté pour planifier une tournée
-            </p>
+              Commencer maintenant
+            </button>
           </div>
         )}
       </div>
