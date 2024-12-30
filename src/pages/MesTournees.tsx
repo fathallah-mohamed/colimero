@@ -2,25 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Edit2, Trash2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
+import { TourCard } from "@/components/tour/TourCard";
 import { TourEditDialog } from "@/components/tour/TourEditDialog";
-import { TourBookingsList } from "@/components/tour/TourBookingsList";
 
 export default function MesTournees() {
   const navigate = useNavigate();
@@ -105,6 +91,12 @@ export default function MesTournees() {
     setIsEditDialogOpen(true);
   };
 
+  const handleStatusChange = (tourId: number, newStatus: string) => {
+    setTours(tours.map(tour => 
+      tour.id === tourId ? { ...tour, status: newStatus } : tour
+    ));
+  };
+
   const onEditComplete = () => {
     setIsEditDialogOpen(false);
     setSelectedTour(null);
@@ -149,66 +141,13 @@ export default function MesTournees() {
             </div>
           ) : (
             tours.map((tour) => (
-              <div key={tour.id} className="bg-white shadow rounded-lg p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-lg font-semibold">
-                        {tour.departure_country} → {tour.destination_country}
-                      </h2>
-                      <Badge variant={tour.type === 'public' ? 'default' : 'secondary'}>
-                        {tour.type === 'public' ? 'Public' : 'Privé'}
-                      </Badge>
-                    </div>
-                    <p className="text-gray-600 mb-1">
-                      Départ : {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <p className="text-gray-600">
-                        Capacité restante : {tour.remaining_capacity} kg
-                      </p>
-                      <p className="text-gray-600">
-                        Total : {tour.total_capacity} kg
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleEdit(tour)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="icon">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Supprimer la tournée ?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Cette action est irréversible. Toutes les réservations associées seront également supprimées.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Annuler</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(tour.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Supprimer
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-
-                <TourBookingsList bookings={tour.bookings} />
-              </div>
+              <TourCard
+                key={tour.id}
+                tour={tour}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onStatusChange={handleStatusChange}
+              />
             ))
           )}
         </div>
