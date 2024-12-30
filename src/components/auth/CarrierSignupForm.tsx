@@ -11,6 +11,7 @@ import { PersonalInfoFields } from "./carrier-signup/PersonalInfoFields";
 import { CompanyInfoFields } from "./carrier-signup/CompanyInfoFields";
 import { CapacityFields } from "./carrier-signup/CapacityFields";
 import { AvatarUpload } from "./carrier-signup/AvatarUpload";
+import { TermsCheckboxes } from "./carrier-signup/TermsCheckboxes";
 
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
@@ -24,6 +25,9 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       services: [],
       phoneSecondary: "",
       avatar_url: null,
+      terms_accepted: true,
+      customs_terms_accepted: true,
+      responsibility_terms_accepted: true,
     },
   });
 
@@ -78,8 +82,13 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
 
         <CoverageAreaSelect form={form} />
         <ServiceOptions form={form} />
+        <TermsCheckboxes form={form} />
 
-        <Button type="submit" className="w-full">
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={!form.formState.isValid}
+        >
           Envoyer ma demande d'inscription
         </Button>
       </form>

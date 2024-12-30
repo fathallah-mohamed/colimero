@@ -14,6 +14,15 @@ export const formSchema = z.object({
   coverageArea: z.array(z.string()).min(1, "Sélectionnez au moins un pays"),
   services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
   avatar_url: z.string().nullable().optional(),
+  terms_accepted: z.boolean().refine((val) => val === true, {
+    message: "Vous devez accepter les conditions générales",
+  }),
+  customs_terms_accepted: z.boolean().refine((val) => val === true, {
+    message: "Vous devez accepter les conditions douanières",
+  }),
+  responsibility_terms_accepted: z.boolean().refine((val) => val === true, {
+    message: "Vous devez accepter les conditions de responsabilité",
+  }),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
