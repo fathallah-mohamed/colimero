@@ -15,6 +15,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import MesTournees from "./pages/MesTournees";
+import MesReservations from "./pages/MesReservations";
 import DemandesApprobation from "./pages/DemandesApprobation";
 import AdminDashboard from "./pages/AdminDashboard";
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/connexion" element={<Login />} />
           <Route path="/profil" element={<Profile />} />
           <Route path="/mes-tournees" element={<MesTournees />} />
+          <Route path="/mes-reservations" element={<MesReservations />} />
           <Route path="/demandes-approbation" element={<DemandesApprobation />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
