@@ -26,66 +26,69 @@ export function useProfile() {
         const userType = session.user.user_metadata?.user_type;
         const table = userType === 'carrier' ? 'carriers' : 'clients';
         
-        const query = supabase
-          .from(table)
-          .select(userType === 'carrier' ? `
-            id,
-            first_name,
-            last_name,
-            phone,
-            company_name,
-            siret,
-            address,
-            coverage_area,
-            carrier_capacities (
-              total_capacity,
-              price_per_kg,
-              offers_home_delivery
-            ),
-            carrier_services (
-              service_type,
-              icon
-            )
-          ` : 'id, first_name, last_name, phone')
-          .eq('id', session.user.id);
+        let query;
+        if (userType === 'carrier') {
+          const { data, error } = await supabase
+            .from('carriers')
+            .select(`
+              id,
+              first_name,
+              last_name,
+              phone,
+              email,
+              company_name,
+              siret,
+              address,
+              coverage_area,
+              carrier_capacities!carrier_capacities_carrier_id_fkey (
+                total_capacity,
+                price_per_kg,
+                offers_home_delivery
+              ),
+              carrier_services!carrier_services_carrier_id_fkey (
+                service_type,
+                icon
+              )
+            `)
+            .eq('id', session.user.id)
+            .single();
 
-        const { data, error } = await query.maybeSingle();
+          if (error) throw error;
+          if (data) {
+            const profileData: ProfileData = {
+              id: data.id,
+              first_name: data.first_name,
+              last_name: data.last_name,
+              phone: data.phone,
+              email: session.user.email,
+              company_name: data.company_name,
+              siret: data.siret,
+              address: data.address,
+              coverage_area: data.coverage_area,
+              carrier_capacities: data.carrier_capacities,
+              carrier_services: data.carrier_services
+            };
+            setProfile(profileData);
+          }
+        } else {
+          const { data, error } = await supabase
+            .from('clients')
+            .select('id, first_name, last_name, phone')
+            .eq('id', session.user.id)
+            .single();
 
-        if (error) {
-          console.error('Error fetching profile:', error);
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible de charger votre profil",
-          });
-          return;
+          if (error) throw error;
+          if (data) {
+            const profileData: ProfileData = {
+              id: data.id,
+              first_name: data.first_name,
+              last_name: data.last_name,
+              phone: data.phone,
+              email: session.user.email
+            };
+            setProfile(profileData);
+          }
         }
-
-        if (!data) {
-          toast({
-            variant: "destructive",
-            title: "Profil non trouvé",
-            description: "Votre profil n'a pas été trouvé",
-          });
-          return;
-        }
-
-        // Create a new object with the profile data and email
-        const profileData: ProfileData = {
-          id: data.id,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          phone: data.phone,
-          email: session.user.email,
-          company_name: data.company_name,
-          siret: data.siret,
-          address: data.address,
-          coverage_area: data.coverage_area,
-          carrier_capacities: data.carrier_capacities,
-          carrier_services: data.carrier_services
-        };
-
-        setProfile(profileData);
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
