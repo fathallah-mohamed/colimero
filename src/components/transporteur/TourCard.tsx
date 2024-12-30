@@ -22,7 +22,6 @@ export function TourCard({ tour }: TourCardProps) {
       const { data } = await supabase.auth.getSession();
       setSession(data.session);
     };
-    
     checkSession();
   }, []);
 
