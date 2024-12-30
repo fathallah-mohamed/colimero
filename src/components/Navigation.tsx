@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@supabase/supabase-js";
+import { handleLogoutFlow } from "@/utils/auth/logout";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,45 +39,21 @@ export default function Navigation() {
   }, []);
 
   const handleLogout = async () => {
-    try {
-      // Vérifier d'abord si l'utilisateur est connecté
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // Si pas de session, nettoyer l'état local et rediriger
-        setUser(null);
-        setUserType(null);
-        navigate('/');
-        return;
-      }
-
-      // Tenter la déconnexion
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error("Erreur de déconnexion:", error);
-        // Si l'erreur est liée à la session, nettoyer quand même l'état local
-        if (error.message.includes("session")) {
-          setUser(null);
-          setUserType(null);
-          navigate('/');
-          return;
-        }
-        throw error;
-      }
-
+    const result = await handleLogoutFlow();
+    
+    if (result.success) {
+      setUser(null);
+      setUserType(null);
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
       });
-      
       navigate('/');
-    } catch (error: any) {
-      console.error("Erreur complète:", error);
+    } else {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
+        description: result.error || "Une erreur est survenue lors de la déconnexion",
       });
     }
   };
