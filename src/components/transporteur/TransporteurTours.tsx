@@ -122,7 +122,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             <TransporteurAvatar
               avatarUrl={tour.carriers?.avatar_url}
               name={tour.carriers?.company_name || ""}
-              size="sm"
+              size="xl"
             />
             <span className="text-gray-600">
               {tour.carriers?.company_name}

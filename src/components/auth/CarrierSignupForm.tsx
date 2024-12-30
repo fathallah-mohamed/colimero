@@ -10,6 +10,7 @@ import { formSchema, type FormValues } from "./carrier-signup/FormSchema";
 import { PersonalInfoFields } from "./carrier-signup/PersonalInfoFields";
 import { CompanyInfoFields } from "./carrier-signup/CompanyInfoFields";
 import { CapacityFields } from "./carrier-signup/CapacityFields";
+import { AvatarUpload } from "./carrier-signup/AvatarUpload";
 
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
@@ -22,6 +23,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       coverageArea: ["FR", "TN"],
       services: [],
       phoneSecondary: "",
+      avatar_url: null,
     },
   });
 
@@ -42,7 +44,8 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
           total_capacity: values.totalCapacity,
           price_per_kg: values.pricePerKg,
           services: values.services,
-          status: 'pending'
+          status: 'pending',
+          avatar_url: values.avatar_url,
         });
 
       if (error) throw error;
@@ -65,6 +68,8 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <AvatarUpload form={form} />
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <PersonalInfoFields form={form} />
           <CompanyInfoFields form={form} />
