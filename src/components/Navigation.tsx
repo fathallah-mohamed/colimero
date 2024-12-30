@@ -25,13 +25,40 @@ export default function Navigation() {
   useEffect(() => {
     // Initial session check
     const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session check error:", error);
+          setUser(null);
+          setUserType(null);
+          return;
+        }
+        
+        if (!session) {
+          setUser(null);
+          setUserType(null);
+          return;
+        }
+
+        // Verify user is still valid
+        const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("User verification error:", userError);
+          setUser(null);
+          setUserType(null);
+          if (userError.status === 403) {
+            localStorage.removeItem('supabase.auth.token');
+          }
+          return;
+        }
+
+        setUser(currentUser);
+        setUserType(currentUser?.user_metadata?.user_type ?? null);
+      } catch (error) {
         console.error("Session check error:", error);
-        return;
+        setUser(null);
+        setUserType(null);
       }
-      setUser(session?.user ?? null);
-      setUserType(session?.user?.user_metadata?.user_type ?? null);
     };
 
     checkSession();
@@ -246,4 +273,4 @@ export default function Navigation() {
       </div>
     </nav>
   );
-};
+}

@@ -2,12 +2,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const handleLogoutFlow = async () => {
   try {
-    // Try to get the current session first
+    // First check if we have a session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
-      console.error("Session error during logout:", sessionError);
-      // Consider it a successful logout if we can't get the session
+      console.error("Session check error:", sessionError);
+      // If we can't get the session, clear local storage and consider it a successful logout
+      localStorage.removeItem('supabase.auth.token');
       return { success: true };
     }
 
@@ -18,11 +19,16 @@ export const handleLogoutFlow = async () => {
 
     // We have a valid session, proceed with logout
     const { error } = await supabase.auth.signOut({
-      scope: 'local'
+      scope: 'local' // Only clear the current tab's session
     });
 
     if (error) {
       console.error("Logout error:", error);
+      // If we get a 403/session not found, still consider it a successful logout
+      if (error.status === 403 && error.message.includes('session_not_found')) {
+        localStorage.removeItem('supabase.auth.token');
+        return { success: true };
+      }
       return { 
         success: false, 
         error: "Une erreur est survenue lors de la déconnexion" 
