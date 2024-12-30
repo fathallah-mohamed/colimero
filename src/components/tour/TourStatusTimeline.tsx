@@ -95,7 +95,8 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
           {index < statusOrder.length - 1 && (
             <div className={cn(
               "absolute top-8 left-16 w-[calc(100%+1rem)] h-[2px]",
-              index < currentIndex ? "bg-green-500" : "bg-gray-200"
+              index < currentIndex ? "bg-green-500" : 
+              index === currentIndex ? "bg-green-500" : "bg-gray-200"
             )} />
           )}
         </div>
