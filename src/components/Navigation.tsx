@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@supabase/supabase-js";
-import { handleLogoutFlow } from "@/utils/auth/logout";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,21 +38,21 @@ export default function Navigation() {
   }, []);
 
   const handleLogout = async () => {
-    const result = await handleLogoutFlow();
-    
-    if (result.success) {
-      setUser(null);
-      setUserType(null);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
       });
+      
       navigate('/');
-    } else {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: result.error || "Une erreur est survenue lors de la déconnexion",
+        description: "Une erreur est survenue lors de la déconnexion",
       });
     }
   };
