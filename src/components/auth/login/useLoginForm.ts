@@ -16,44 +16,39 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     setIsLoading(true);
     setError(null);
 
+    // Validation des champs
+    if (!email.trim()) {
+      setError("L'adresse email est requise");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Le mot de passe est requis");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      if (!email.trim()) {
-        setError("L'adresse email est requise");
-        setIsLoading(false);
-        return;
-      }
-
-      if (!password.trim()) {
-        setError("Le mot de passe est requis");
-        setIsLoading(false);
-        return;
-      }
-
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password.trim()
+        password: password.trim(),
       });
 
       if (signInError) {
+        console.error("Erreur d'authentification:", signInError);
         let errorMessage = "Une erreur est survenue lors de la connexion";
         
-        switch (signInError.message) {
-          case "Invalid login credentials":
-            errorMessage = "Email ou mot de passe incorrect";
-            break;
-          case "Email not confirmed":
-            errorMessage = "Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail";
-            break;
-          case "Invalid email":
-            errorMessage = "Format d'email invalide";
-            break;
-          case "Too many requests":
-            errorMessage = "Trop de tentatives de connexion, veuillez réessayer plus tard";
-            break;
-          default:
-            console.error("Erreur de connexion:", signInError);
+        if (signInError.message === "Invalid login credentials") {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (signInError.message === "Email not confirmed") {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (signInError.message.includes("Invalid email")) {
+          errorMessage = "Format d'email invalide";
+        } else if (signInError.message.includes("Password")) {
+          errorMessage = "Le mot de passe est incorrect";
         }
-        
+
         setError(errorMessage);
         setPassword("");
         setIsLoading(false);
@@ -67,6 +62,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       }
 
       const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
@@ -98,8 +94,8 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       onSuccess?.();
 
     } catch (error: any) {
-      console.error("Erreur lors de la connexion:", error);
-      setError(error.message || "Une erreur est survenue lors de la connexion");
+      console.error("Erreur complète:", error);
+      setError("Une erreur est survenue lors de la connexion");
       setPassword("");
     } finally {
       setIsLoading(false);
