@@ -1,7 +1,8 @@
 import { MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Heading } from "@/components/ui/heading";
+import { TransporteurAvatar } from "./TransporteurAvatar";
 
 interface TransporteurHeaderProps {
   name: string;
@@ -33,19 +34,11 @@ export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }:
           Retour aux transporteurs
         </Link>
         <div className="flex items-center gap-6">
-          <div className="h-24 w-24 rounded-full bg-white/10 flex items-center justify-center">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={name}
-                className="h-24 w-24 rounded-full object-cover"
-              />
-            ) : (
-              <span className="text-4xl font-bold text-white">
-                {firstName?.[0] || name[0]}
-              </span>
-            )}
-          </div>
+          <TransporteurAvatar
+            avatarUrl={avatarUrl}
+            name={name}
+            size="lg"
+          />
           <div>
             <Heading level={1} className="text-white mb-2">
               {name}
