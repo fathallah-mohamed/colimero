@@ -30,6 +30,9 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     }
 
     try {
+      console.log("Tentative de connexion avec:", email);
+      console.log("Tentative d'authentification avec Supabase...");
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -39,14 +42,13 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         console.error("Erreur d'authentification:", signInError);
         let errorMessage = "Une erreur est survenue lors de la connexion";
         
-        if (signInError.message === "Invalid login credentials") {
+        // Analyse détaillée de l'erreur
+        if (signInError.message.includes("Invalid login credentials")) {
           errorMessage = "Email ou mot de passe incorrect";
-        } else if (signInError.message === "Email not confirmed") {
+        } else if (signInError.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
         } else if (signInError.message.includes("Invalid email")) {
           errorMessage = "Format d'email invalide";
-        } else if (signInError.message.includes("Password")) {
-          errorMessage = "Le mot de passe est incorrect";
         }
 
         setError(errorMessage);
