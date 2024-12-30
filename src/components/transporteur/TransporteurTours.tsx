@@ -34,7 +34,25 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
     }));
   };
 
+  const checkTourStatus = (tour: Tour) => {
+    const nonBookableStatuses = ['collecting', 'in_transit', 'completed', 'cancelled'];
+    if (nonBookableStatuses.includes(tour.status)) {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Cette tournée n'est plus au stade de ramassage. Les réservations ne sont plus possibles.",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleReservation = async (tourId: number) => {
+    const currentTour = tours.find(t => t.id === tourId);
+    if (!currentTour || !checkTourStatus(currentTour)) {
+      return;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.user) {
@@ -67,6 +85,11 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
   };
 
   const handleAuthSuccess = () => {
+    const currentTour = tours.find(t => t.id === currentTourId);
+    if (!currentTour || !checkTourStatus(currentTour)) {
+      setIsAuthOpen(false);
+      return;
+    }
     setIsAuthOpen(false);
     setIsBookingFormOpen(true);
   };
