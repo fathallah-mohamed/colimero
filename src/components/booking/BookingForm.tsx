@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox"; // Add this import
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -81,6 +82,7 @@ export function BookingForm({
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
   const [pricePerKg, setPricePerKg] = useState<number>(0);
+  const [customsDeclaration, setCustomsDeclaration] = useState(false);
   const [formData, setFormData] = useState({
     senderName: "",
     senderPhone: "",
@@ -212,6 +214,16 @@ export function BookingForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!customsDeclaration) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez accepter la déclaration douanière",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -252,7 +264,8 @@ export function BookingForm({
         delivery_city: formData.deliveryCity,
         status: "pending",
         tracking_number: `COL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        item_type: selectedContentTypes[0] || "general"
+        item_type: selectedContentTypes[0] || "general",
+        customs_declaration: customsDeclaration
       };
 
       const { error } = await supabase.from("bookings").insert(bookingData);
@@ -415,10 +428,27 @@ export function BookingForm({
         </div>
       </div>
 
+      <div className="space-y-4">
+        <div className="flex items-start space-x-3">
+          <Checkbox
+            id="customs-declaration"
+            checked={customsDeclaration}
+            onCheckedChange={(checked) => setCustomsDeclaration(checked as boolean)}
+            className="mt-1"
+          />
+          <Label
+            htmlFor="customs-declaration"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Je déclare que le contenu de mon colis ne contient aucun objet interdit par la loi ou les règlements douaniers.
+          </Label>
+        </div>
+      </div>
+
       <Button 
         type="submit" 
         className="w-full bg-blue-400 hover:bg-blue-500"
-        disabled={isLoading}
+        disabled={isLoading || !customsDeclaration}
       >
         Confirmer la réservation ({calculateTotalPrice().toFixed(2)}€)
       </Button>
