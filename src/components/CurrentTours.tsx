@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { TourCapacityDisplay } from "./transporteur/TourCapacityDisplay";
 
 export default function CurrentTours() {
   const { data: tours, isLoading } = useQuery({
@@ -65,19 +66,10 @@ export default function CurrentTours() {
                       {tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 5}€/kg
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500"
-                        style={{
-                          width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-600">
-                      {tour.remaining_capacity} / {tour.total_capacity}kg
-                    </span>
-                  </div>
+                  <TourCapacityDisplay
+                    remainingCapacity={tour.remaining_capacity}
+                    totalCapacity={tour.total_capacity}
+                  />
                 </div>
               </div>
             ))
