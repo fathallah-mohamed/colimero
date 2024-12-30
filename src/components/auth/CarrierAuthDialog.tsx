@@ -1,37 +1,61 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
 import CarrierSignupForm from "./CarrierSignupForm";
+import { LoginView } from "./carrier-auth/LoginView";
 
-interface CarrierAuthDialogProps {
+type View = "login" | "register" | "forgot-password";
+
+export default function CarrierAuthDialog({
+  isOpen,
+  onClose,
+}: {
   isOpen: boolean;
   onClose: () => void;
-}
+}) {
+  const [view, setView] = useState<View>("login");
 
-export default function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialogProps) {
-  const isMobile = useIsMobile();
+  // Reset view to login when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setView("login");
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className={`
-          ${isMobile ? 'h-[95vh] p-4' : 'max-h-[90vh]'} 
-          w-full max-w-2xl 
-          overflow-hidden
-          flex flex-col
-        `}
-      >
-        <ScrollArea 
-          className="flex-1 pr-4 overflow-y-auto"
-          style={{ 
-            height: isMobile ? 'calc(100vh - 5vh)' : 'auto',
-            WebkitOverflowScrolling: 'touch'
-          }}
-        >
-          <div className="pb-20 md:pb-6">
-            <CarrierSignupForm onSuccess={onClose} />
-          </div>
-        </ScrollArea>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>
+            {view === "login"
+              ? "Connexion"
+              : view === "register"
+              ? "Créer un compte"
+              : "Réinitialiser le mot de passe"}
+          </DialogTitle>
+          <DialogDescription>
+            {view === "login"
+              ? "Connectez-vous pour accéder à votre compte"
+              : view === "register"
+              ? "Créez votre compte pour commencer"
+              : "Entrez votre email pour réinitialiser votre mot de passe"}
+          </DialogDescription>
+        </DialogHeader>
+
+        {view === "register" ? (
+          <CarrierSignupForm onSuccess={() => setView("login")} />
+        ) : (
+          <LoginView
+            onForgotPassword={() => setView("forgot-password")}
+            onRegister={() => setView("register")}
+            onSuccess={onClose}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
