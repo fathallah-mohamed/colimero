@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +80,7 @@ export function BookingForm({
   const [selectedSpecialItems, setSelectedSpecialItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
+  const [pricePerKg, setPricePerKg] = useState<number>(0);
   const [formData, setFormData] = useState({
     senderName: "",
     senderPhone: "",
@@ -88,6 +89,41 @@ export function BookingForm({
     recipientAddress: "",
     deliveryCity: ""
   });
+
+  useEffect(() => {
+    const fetchCarrierPrice = async () => {
+      try {
+        // First get the carrier_id from the tour
+        const { data: tourData, error: tourError } = await supabase
+          .from('tours')
+          .select('carrier_id')
+          .eq('id', tourId)
+          .single();
+
+        if (tourError) throw tourError;
+
+        // Then get the price_per_kg from carrier_capacities
+        const { data: capacityData, error: capacityError } = await supabase
+          .from('carrier_capacities')
+          .select('price_per_kg')
+          .eq('carrier_id', tourData.carrier_id)
+          .single();
+
+        if (capacityError) throw capacityError;
+
+        setPricePerKg(capacityData.price_per_kg);
+      } catch (error) {
+        console.error('Error fetching carrier price:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de récupérer le prix du transporteur",
+        });
+      }
+    };
+
+    fetchCarrierPrice();
+  }, [tourId, toast]);
 
   const handleWeightChange = (increment: boolean) => {
     setWeight(prev => {
@@ -135,11 +171,17 @@ export function BookingForm({
   };
 
   const calculateTotalPrice = () => {
-    return selectedSpecialItems.reduce((total, item) => {
+    // Calculate price based on weight
+    const weightPrice = weight * pricePerKg;
+
+    // Calculate price for special items
+    const specialItemsPrice = selectedSpecialItems.reduce((total, item) => {
       const itemPrice = specialItems.find(i => i.name === item)?.price || 0;
       const quantity = itemQuantities[item] || 1;
       return total + (itemPrice * quantity);
     }, 0);
+
+    return weightPrice + specialItemsPrice;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -214,6 +256,10 @@ export function BookingForm({
         <p className="text-sm text-gray-500 text-center">Remplissez les informations de votre colis</p>
 
         <div className="space-y-4">
+          <div className="bg-blue-50 p-4 rounded-lg mb-4">
+            <p className="text-sm text-blue-600">Prix au kilo: {pricePerKg}€</p>
+          </div>
+
           <BookingWeightSelector 
             weight={weight}
             onWeightChange={handleWeightChange}
@@ -345,7 +391,7 @@ export function BookingForm({
         className="w-full bg-blue-400 hover:bg-blue-500"
         disabled={isLoading}
       >
-        Confirmer la réservation ({calculateTotalPrice()}.00€)
+        Confirmer la réservation ({calculateTotalPrice().toFixed(2)}€)
       </Button>
     </form>
   );
