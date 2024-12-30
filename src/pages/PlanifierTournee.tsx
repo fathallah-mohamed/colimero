@@ -10,72 +10,67 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function PlanifierTournee() {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<'client' | 'carrier' | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    let mounted = true;
-
     const checkSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Session error:", error);
-          if (mounted) {
-            setIsAuthenticated(false);
-            setUserType(null);
-          }
+          setIsAuthenticated(false);
+          setUserType(null);
           return;
         }
 
-        if (mounted) {
-          setIsAuthenticated(!!session);
-          if (session?.user) {
-            const userMetadata = session.user.user_metadata;
-            setUserType(userMetadata.user_type as 'client' | 'carrier');
-          } else {
-            setUserType(null);
-          }
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        if (mounted) {
-          setIsAuthenticated(false);
-          setUserType(null);
-        }
-      }
-    };
-
-    // Initial check
-    checkSession();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (mounted) {
         setIsAuthenticated(!!session);
         if (session?.user) {
           const userMetadata = session.user.user_metadata;
           setUserType(userMetadata.user_type as 'client' | 'carrier');
+          
+          // Show access denied dialog if user is a client
+          if (userMetadata.user_type === 'client') {
+            setIsAccessDeniedOpen(true);
+          }
         } else {
           setUserType(null);
         }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        setIsAuthenticated(false);
+        setUserType(null);
+      }
+    };
 
-        // Handle token refresh errors
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed successfully');
-        } else if (event === 'SIGNED_OUT') {
-          setIsAuthenticated(false);
-          setUserType(null);
-          navigate('/connexion');
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setIsAuthenticated(!!session);
+      if (session?.user) {
+        const userMetadata = session.user.user_metadata;
+        setUserType(userMetadata.user_type as 'client' | 'carrier');
+        
+        // Show access denied dialog if user is a client
+        if (userMetadata.user_type === 'client') {
+          setIsAccessDeniedOpen(true);
         }
+      } else {
+        setUserType(null);
+      }
+
+      if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+        setUserType(null);
+        navigate('/connexion');
       }
     });
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
@@ -93,7 +88,14 @@ export default function PlanifierTournee() {
               <CreateTourForm />
             </div>
           ) : (
-            <AccessDeniedMessage userType="client" />
+            <AccessDeniedMessage 
+              userType="client" 
+              isOpen={isAccessDeniedOpen}
+              onClose={() => {
+                setIsAccessDeniedOpen(false);
+                navigate('/');
+              }}
+            />
           )
         ) : (
           <div className="text-center">
