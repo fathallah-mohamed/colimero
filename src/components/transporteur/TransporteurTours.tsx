@@ -34,36 +34,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
     }));
   };
 
-  const isTourBookable = (status: string) => {
-    return ['planned', 'collecting'].includes(status);
-  };
-
-  const getStatusMessage = (status: string) => {
-    switch (status) {
-      case 'in_transit':
-        return "Cette tournée est déjà en cours de livraison";
-      case 'completed':
-        return "Cette tournée est terminée";
-      case 'cancelled':
-        return "Cette tournée a été annulée";
-      default:
-        return "Cette tournée n'est plus disponible pour les réservations";
-    }
-  };
-
   const handleReservation = async (tourId: number) => {
-    const tour = tours.find(t => t.id === tourId);
-    if (!tour) return;
-
-    if (!isTourBookable(tour.status)) {
-      toast({
-        variant: "destructive",
-        title: "Réservation impossible",
-        description: getStatusMessage(tour.status),
-      });
-      return;
-    }
-
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.user) {
@@ -96,19 +67,6 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
   };
 
   const handleAuthSuccess = () => {
-    const tour = tours.find(t => t.id === currentTourId);
-    if (!tour) return;
-
-    if (!isTourBookable(tour.status)) {
-      toast({
-        variant: "destructive",
-        title: "Réservation impossible",
-        description: getStatusMessage(tour.status),
-      });
-      setIsAuthOpen(false);
-      return;
-    }
-
     setIsAuthOpen(false);
     setIsBookingFormOpen(true);
   };
