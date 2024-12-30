@@ -417,6 +417,36 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          label: string
+          required: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          label: string
+          required?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          label?: string
+          required?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       prohibited_items: {
         Row: {
           category: string
@@ -523,6 +553,44 @@ export type Database = {
             columns: ["carrier_id"]
             isOneToOne: false
             referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_consents: {
+        Row: {
+          accepted: boolean
+          accepted_at: string | null
+          consent_type_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean
+          accepted_at?: string | null
+          consent_type_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean
+          accepted_at?: string | null
+          consent_type_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_consents_consent_type_id_fkey"
+            columns: ["consent_type_id"]
+            isOneToOne: false
+            referencedRelation: "consent_types"
             referencedColumns: ["id"]
           },
         ]

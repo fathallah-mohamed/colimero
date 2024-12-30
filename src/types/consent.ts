@@ -4,12 +4,16 @@ export interface ConsentType {
   label: string;
   description: string | null;
   required: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UserConsent {
   id: string;
-  userId: string;
-  consentTypeId: string;
+  user_id: string;
+  consent_type_id: string;
   accepted: boolean;
-  acceptedAt: string | null;
+  accepted_at: string | null;
+  created_at: string;
+  updated_at: string;
 }

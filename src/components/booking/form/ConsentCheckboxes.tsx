@@ -13,7 +13,7 @@ export function ConsentCheckboxes() {
     <div className="space-y-4">
       {consentTypes?.map((consentType) => {
         const userConsent = userConsents?.find(
-          (consent) => consent.consentTypeId === consentType.id
+          (consent) => consent.consent_type_id === consentType.id
         );
 
         return (
