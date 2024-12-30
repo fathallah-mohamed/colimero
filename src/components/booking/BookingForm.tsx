@@ -219,7 +219,7 @@ export function BookingForm({
       .every(type => 
         userConsents.some(
           consent => 
-            consent.consentTypeId === type.id && 
+            consent.consent_type_id === type.id && 
             consent.accepted
         )
       );
