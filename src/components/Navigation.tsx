@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { handleLogout } from "@/utils/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,13 +23,13 @@ export default function Navigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Vérifier l'état de connexion initial
+    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setUserType(session?.user?.user_metadata?.user_type ?? null);
     });
 
-    // Écouter les changements d'état de connexion
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setUserType(session?.user?.user_metadata?.user_type ?? null);
@@ -37,18 +38,16 @@ export default function Navigation() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
+  const onLogout = async () => {
+    const { success } = await handleLogout();
+    
+    if (success) {
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
       });
-      
       navigate('/');
-    } catch (error: any) {
+    } else {
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -103,7 +102,7 @@ export default function Navigation() {
             </>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
+          <DropdownMenuItem onClick={onLogout}>
             Déconnexion
           </DropdownMenuItem>
         </DropdownMenuContent>

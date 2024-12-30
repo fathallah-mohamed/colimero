@@ -1,12 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
-interface AuthResponse {
-  success: boolean;
-  redirectTo?: string;
-}
-
-export const authenticateUser = async (email: string, password: string): Promise<AuthResponse> => {
+export const authenticateUser = async (email: string, password: string) => {
   try {
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
@@ -24,25 +19,12 @@ export const authenticateUser = async (email: string, password: string): Promise
 
     console.log("Connexion réussie, données utilisateur:", signInData.user);
     
-    // Vérifier si l'utilisateur est un admin
-    const { data: adminData, error: adminError } = await supabase
-      .from('administrators')
-      .select('*')
-      .eq('id', signInData.user.id)
-      .single();
-
-    console.log("Résultat de la vérification admin:", { adminData, adminError });
-
-    if (adminData) {
-      console.log("Utilisateur admin trouvé:", adminData);
-      return { success: true, redirectTo: "/admin" };
-    }
-
-    // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
     const userType = signInData.user.user_metadata?.user_type;
     console.log("Type d'utilisateur:", userType);
     
     switch (userType) {
+      case 'admin':
+        return { success: true, redirectTo: "/admin" };
       case 'carrier':
         return { success: true, redirectTo: "/mes-tournees" };
       default:
@@ -65,5 +47,57 @@ export const authenticateUser = async (email: string, password: string): Promise
     });
 
     return { success: false };
+  }
+};
+
+export const handleLogout = async () => {
+  try {
+    // First, check if there's a valid session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      // If no session exists, consider it a successful logout
+      return { success: true };
+    }
+
+    // Clear local storage first to prevent token issues
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Attempt to sign out with local scope to avoid cross-tab issues
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
+    
+    if (error) {
+      console.error("Erreur de déconnexion:", error);
+      throw error;
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Erreur complète:", error);
+    return { success: false, error };
+  }
+};
+
+export const checkAuthStatus = async () => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return { isAuthenticated: false };
+    }
+
+    // Verify if the session is still valid
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      // If there's an error or no user, clear the invalid session
+      await supabase.auth.signOut({ scope: 'local' });
+      return { isAuthenticated: false };
+    }
+
+    return { isAuthenticated: true, user };
+  } catch (error) {
+    console.error("Error checking auth status:", error);
+    return { isAuthenticated: false };
   }
 };
