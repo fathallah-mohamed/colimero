@@ -1,130 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { User } from "@supabase/supabase-js";
-import { handleLogoutFlow } from "@/utils/auth/logout";
+import { MenuItems } from "./navigation/MenuItems";
+import { AccountMenu } from "./navigation/AccountMenu";
+import { MobileMenu } from "./navigation/MobileMenu";
+import { useNavigation } from "./navigation/useNavigation";
 
 export default function Navigation() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [userType, setUserType] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    // Vérifier l'état de connexion initial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setUserType(session?.user?.user_metadata?.user_type ?? null);
-    });
-
-    // Écouter les changements d'état de connexion
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setUserType(session?.user?.user_metadata?.user_type ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleLogout = async () => {
-    const result = await handleLogoutFlow();
-    
-    if (result.success) {
-      setUser(null);
-      setUserType(null);
-      toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
-      });
-      navigate('/');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: result.error || "Une erreur est survenue lors de la déconnexion",
-      });
-    }
-  };
-
-  const handlePlanifierTourneeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (userType === 'carrier') {
-      navigate('/planifier-une-tournee');
-    } else {
-      navigate('/connexion');
-    }
-  };
-
-  const menuItems = [
-    { 
-      name: "Planifier une tournée", 
-      href: "/planifier-une-tournee", 
-      highlight: true,
-      onClick: handlePlanifierTourneeClick
-    },
-    { name: "Envoyer un colis", href: "/envoyer-un-colis", highlight: true },
-    { name: "Transporteurs", href: "/nos-transporteurs" },
-    { name: "Actualités", href: "/actualites" },
-    { name: "À propos", href: "/a-propos" },
-    { name: "Contact", href: "/nous-contacter" },
-  ];
-
-  const renderAccountMenu = () => {
-    if (!user) return null;
-
-    const isCarrier = userType === 'carrier';
-    const menuLabel = isCarrier ? "Mon compte transporteur" : "Mon compte";
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">Mon compte</Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>{menuLabel}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link to="/profil">Profil</Link>
-          </DropdownMenuItem>
-          {isCarrier ? (
-            <>
-              <DropdownMenuItem asChild>
-                <Link to="/mes-tournees">Mes tournées</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/demandes-approbation">Demandes d'approbation</Link>
-              </DropdownMenuItem>
-            </>
-          ) : (
-            <>
-              <DropdownMenuItem asChild>
-                <Link to="/mes-reservations">Mes réservations</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/demandes-approbation">Mes demandes d'approbation</Link>
-              </DropdownMenuItem>
-            </>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
-            Déconnexion
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
+  const { isOpen, setIsOpen, user, userType, handleLogout, menuItems } = useNavigation();
 
   return (
     <nav className="relative bg-white">
@@ -143,114 +25,24 @@ export default function Navigation() {
           </button>
 
           <div className="hidden md:flex md:items-center md:space-x-8">
-            {menuItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={item.onClick}
-                className={`text-base ${
-                  item.highlight
-                    ? "text-[#00B0F0] font-medium"
-                    : "text-gray-700 hover:text-gray-900"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-            {user ? (
-              renderAccountMenu()
-            ) : (
-              <Button asChild variant="outline" className="ml-4">
-                <Link to="/connexion">Se connecter</Link>
-              </Button>
-            )}
+            <MenuItems items={menuItems} className="text-base" />
+            <AccountMenu 
+              user={user} 
+              userType={userType} 
+              onLogout={handleLogout} 
+            />
           </div>
         </div>
       </div>
 
-      <div
-        className={`${
-          isOpen ? "block" : "hidden"
-        } md:hidden absolute top-16 inset-x-0 bg-white shadow-lg z-50`}
-      >
-        <div className="px-2 pt-2 pb-3 space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={(e) => {
-                setIsOpen(false);
-                if (item.onClick) item.onClick(e);
-              }}
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                item.highlight
-                  ? "text-[#00B0F0]"
-                  : "text-gray-700 hover:text-gray-900"
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-          {user ? (
-            <>
-              <Link
-                to="/profil"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                onClick={() => setIsOpen(false)}
-              >
-                Profil
-              </Link>
-              {userType === 'carrier' ? (
-                <>
-                  <Link
-                    to="/mes-tournees"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Mes tournées
-                  </Link>
-                  <Link
-                    to="/demandes-approbation"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Demandes d'approbation
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/mes-reservations"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Mes réservations
-                  </Link>
-                  <Link
-                    to="/demandes-approbation"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Mes demandes d'approbation
-                  </Link>
-                </>
-              )}
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-              >
-                Déconnexion
-              </button>
-            </>
-          ) : (
-            <div className="mt-4 px-3">
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/connexion">Se connecter</Link>
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+      <MobileMenu
+        isOpen={isOpen}
+        items={menuItems}
+        user={user}
+        userType={userType}
+        onLogout={handleLogout}
+        onClose={() => setIsOpen(false)}
+      />
     </nav>
   );
 }
