@@ -16,14 +16,21 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     setIsLoading(true);
     setError(null);
 
-    try {
-      if (!email.trim() || !password.trim()) {
-        setError("Veuillez remplir tous les champs");
-        return;
-      }
+    // Validation des champs
+    if (!email.trim()) {
+      setError("L'adresse email est requise");
+      setIsLoading(false);
+      return;
+    }
 
-      // Log attempt for debugging
-      console.log("Tentative de connexion avec:", email.trim());
+    if (!password.trim()) {
+      setError("Le mot de passe est requis");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      console.log("Tentative de connexion pour:", email.trim());
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -33,16 +40,22 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
-        // Handle specific error cases
-        if (signInError.message === "Invalid login credentials") {
-          setError("Email ou mot de passe incorrect");
-        } else if (signInError.message === "Email not confirmed") {
-          setError("Veuillez confirmer votre email avant de vous connecter");
-        } else if (signInError.message.includes("Invalid email")) {
-          setError("Format d'email invalide");
-        } else {
-          setError("Une erreur est survenue lors de la connexion");
+        // Messages d'erreur spécifiques
+        switch (signInError.message) {
+          case "Invalid login credentials":
+            setError("Email ou mot de passe incorrect");
+            break;
+          case "Email not confirmed":
+            setError("Veuillez confirmer votre email avant de vous connecter");
+            break;
+          case "Invalid email":
+            setError("Format d'email invalide");
+            break;
+          default:
+            setError("Une erreur est survenue lors de la connexion");
         }
+        setPassword("");
+        setIsLoading(false);
         return;
       }
 
@@ -50,19 +63,18 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // Log successful login for debugging
-      console.log("Connexion réussie, données utilisateur:", data.user);
-      
       const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
+      // Vérification du type d'utilisateur requis
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
         setError(
           requiredUserType === 'client' 
-            ? "Cette fonctionnalité est réservée aux clients. Les transporteurs ne peuvent pas réserver de tournées. Veuillez vous connecter avec un compte client."
+            ? "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
             : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
         );
+        setIsLoading(false);
         return;
       }
 
@@ -71,9 +83,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         description: "Vous êtes maintenant connecté",
       });
 
-      onSuccess?.();
-
-      // Redirect based on user type
+      // Redirection selon le type d'utilisateur
       switch (userType) {
         case 'admin':
           navigate("/admin");
@@ -85,9 +95,11 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
           navigate("/");
       }
 
+      onSuccess?.();
+
     } catch (error: any) {
       console.error("Erreur complète:", error);
-      setError("Une erreur est survenue lors de la connexion");
+      setError("Une erreur inattendue est survenue");
     } finally {
       setIsLoading(false);
     }

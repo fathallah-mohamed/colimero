@@ -21,13 +21,11 @@ export function LoginFormFields({
   onPasswordChange,
 }: LoginFormFieldsProps) {
   return (
-    <>
+    <div className="space-y-4">
       {error && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">
-            {error}
-          </AlertDescription>
+          <AlertDescription className="ml-2">{error}</AlertDescription>
         </Alert>
       )}
 
@@ -38,8 +36,10 @@ export function LoginFormFields({
           type="email"
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
+          placeholder="votre@email.fr"
           required
           disabled={isLoading}
+          className="w-full"
         />
       </div>
 
@@ -50,10 +50,12 @@ export function LoginFormFields({
           type="password"
           value={password}
           onChange={(e) => onPasswordChange(e.target.value)}
+          placeholder="Votre mot de passe"
           required
           disabled={isLoading}
+          className="w-full"
         />
       </div>
-    </>
+    </div>
   );
 }

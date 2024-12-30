@@ -26,7 +26,7 @@ export function LoginForm({
   } = useLoginForm(onSuccess, requiredUserType);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 py-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <LoginFormFields
         email={email}
         password={password}
