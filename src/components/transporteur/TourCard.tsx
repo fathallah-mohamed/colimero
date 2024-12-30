@@ -6,6 +6,8 @@ import { TourCapacityDisplay } from "./TourCapacityDisplay";
 import { TourCardHeader } from "./TourCardHeader";
 import { TourCollectionPoints } from "./TourCollectionPoints";
 import { TourTimeline } from "./TourTimeline";
+import { TourStatusSelect } from "@/components/tour/TourStatusSelect";
+import { useAuth } from "@supabase/auth-helpers-react";
 
 interface TourCardProps {
   tour: Tour;
@@ -13,12 +15,32 @@ interface TourCardProps {
   onPointSelect: (cityName: string) => void;
   onReservation: () => void;
   hideAvatar?: boolean;
+  onStatusChange?: (newStatus: string) => void;
 }
 
-export function TourCard({ tour, selectedPoint, onPointSelect, onReservation, hideAvatar }: TourCardProps) {
+export function TourCard({ 
+  tour, 
+  selectedPoint, 
+  onPointSelect, 
+  onReservation, 
+  hideAvatar,
+  onStatusChange 
+}: TourCardProps) {
+  const auth = useAuth();
+  const isCarrierOwner = auth?.user?.id === tour.carrier_id;
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-      <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
+      <div className="flex justify-between items-start">
+        <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
+        {isCarrierOwner && onStatusChange && (
+          <TourStatusSelect
+            tourId={tour.id}
+            currentStatus={tour.status}
+            onStatusChange={onStatusChange}
+          />
+        )}
+      </div>
 
       <TourTimeline status={tour.status} />
 

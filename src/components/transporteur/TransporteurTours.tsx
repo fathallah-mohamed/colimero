@@ -76,7 +76,12 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
     navigate("/mes-reservations");
   };
 
-  const currentTour = tours.find(tour => tour.id === currentTourId);
+  const handleStatusChange = (tourId: number) => (newStatus: string) => {
+    setSelectedPoints(prev => ({
+      ...prev,
+      [tourId]: prev[tourId]
+    }));
+  };
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">Chargement...</div>;
@@ -106,6 +111,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
           onPointSelect={(cityName) => handlePointSelection(tour.id, cityName)}
           onReservation={() => handleReservation(tour.id)}
           hideAvatar={hideAvatar}
+          onStatusChange={handleStatusChange(tour.id)}
         />
       ))}
 
