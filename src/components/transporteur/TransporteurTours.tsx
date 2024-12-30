@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
+import { TourCapacityDisplay } from "./TourCapacityDisplay";
 
 export interface TransporteurToursProps {
   tours: Tour[];
@@ -28,18 +29,6 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
   const [currentTourId, setCurrentTourId] = useState<number | null>(null);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
-
-  if (isLoading) {
-    return <div className="p-8 text-center text-gray-500">Chargement...</div>;
-  }
-
-  if (tours.length === 0) {
-    return (
-      <div className="p-8 text-center text-gray-500">
-        Aucune tournée {type === "public" ? "publique" : "privée"} disponible
-      </div>
-    );
-  }
 
   const handlePointSelection = (tourId: number, cityName: string) => {
     setSelectedPoints(prev => ({
@@ -97,6 +86,18 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
   const currentTour = tours.find(tour => tour.id === currentTourId);
 
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-500">Chargement...</div>;
+  }
+
+  if (tours.length === 0) {
+    return (
+      <div className="p-8 text-center text-gray-500">
+        Aucune tournée {type === "public" ? "publique" : "privée"} disponible
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {showAccessDenied && (
@@ -133,30 +134,10 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             </span>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-              <div className="space-y-1">
-                <span className="text-sm text-gray-500">Capacité disponible</span>
-                <p className="text-lg font-medium text-blue-600">{tour.remaining_capacity} kg</p>
-              </div>
-              <div className="text-right space-y-1">
-                <span className="text-sm text-gray-500">Capacité totale</span>
-                <p className="text-lg font-medium">{tour.total_capacity} kg</p>
-              </div>
-            </div>
-            
-            <div className="relative h-2.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all"
-                style={{
-                  width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
-                }}
-              />
-            </div>
-            <p className="text-sm text-center text-gray-500">
-              {Math.round((tour.remaining_capacity / tour.total_capacity) * 100)}% de capacité disponible
-            </p>
-          </div>
+          <TourCapacityDisplay 
+            remainingCapacity={tour.remaining_capacity} 
+            totalCapacity={tour.total_capacity}
+          />
 
           <div className="space-y-4">
             <div className="grid grid-cols-4 text-sm text-gray-500 px-2">
