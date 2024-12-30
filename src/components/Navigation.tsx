@@ -17,6 +17,7 @@ import { User } from "@supabase/supabase-js";
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -24,11 +25,13 @@ export default function Navigation() {
     // Vérifier l'état de connexion initial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setUserType(session?.user?.user_metadata?.user_type ?? null);
     });
 
     // Écouter les changements d'état de connexion
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setUserType(session?.user?.user_metadata?.user_type ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -62,6 +65,51 @@ export default function Navigation() {
     { name: "À propos", href: "/a-propos" },
     { name: "Contact", href: "/nous-contacter" },
   ];
+
+  const renderAccountMenu = () => {
+    if (!user) return null;
+
+    const isCarrier = userType === 'carrier';
+    const menuLabel = isCarrier ? "Mon compte transporteur" : "Mon compte";
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">Mon compte</Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>{menuLabel}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link to="/profil">Profil</Link>
+          </DropdownMenuItem>
+          {isCarrier ? (
+            <>
+              <DropdownMenuItem asChild>
+                <Link to="/mes-tournees">Mes tournées</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/demandes-approbation">Demandes d'approbation</Link>
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <DropdownMenuItem asChild>
+                <Link to="/mes-reservations">Mes réservations</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/demandes-approbation">Mes demandes d'approbation</Link>
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>
+            Déconnexion
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   return (
     <nav className="relative bg-white">
@@ -97,28 +145,7 @@ export default function Navigation() {
               </Link>
             ))}
             {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">Mon compte</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Mon compte transporteur</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/profil">Profil</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/mes-tournees">Mes tournées</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/demandes-approbation">Demandes d'approbation</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    Déconnexion
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              renderAccountMenu()
             ) : (
               <Button asChild variant="outline" className="ml-4">
                 <Link to="/connexion">Se connecter</Link>
@@ -158,20 +185,41 @@ export default function Navigation() {
               >
                 Profil
               </Link>
-              <Link
-                to="/mes-tournees"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                onClick={() => setIsOpen(false)}
-              >
-                Mes tournées
-              </Link>
-              <Link
-                to="/demandes-approbation"
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                onClick={() => setIsOpen(false)}
-              >
-                Demandes d'approbation
-              </Link>
+              {userType === 'carrier' ? (
+                <>
+                  <Link
+                    to="/mes-tournees"
+                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Mes tournées
+                  </Link>
+                  <Link
+                    to="/demandes-approbation"
+                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Demandes d'approbation
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/mes-reservations"
+                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Mes réservations
+                  </Link>
+                  <Link
+                    to="/demandes-approbation"
+                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Mes demandes d'approbation
+                  </Link>
+                </>
+              )}
               <button
                 onClick={handleLogout}
                 className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
