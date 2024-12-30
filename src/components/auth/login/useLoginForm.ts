@@ -16,47 +16,35 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     setIsLoading(true);
     setError(null);
 
-    // Validation des champs
-    if (!email.trim()) {
-      setError("L'adresse email est requise");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!password.trim()) {
-      setError("Le mot de passe est requis");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      console.log("Tentative de connexion pour:", email.trim());
+      // Basic validation
+      if (!email.trim()) {
+        throw new Error("L'adresse email est requise");
+      }
 
+      if (!password.trim()) {
+        throw new Error("Le mot de passe est requis");
+      }
+
+      // Attempt authentication
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password.trim(),
+        password: password.trim()
       });
 
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
-        // Messages d'erreur spécifiques
         switch (signInError.message) {
           case "Invalid login credentials":
-            setError("Email ou mot de passe incorrect");
-            break;
+            throw new Error("Email ou mot de passe incorrect");
           case "Email not confirmed":
-            setError("Veuillez confirmer votre email avant de vous connecter");
-            break;
+            throw new Error("Veuillez confirmer votre email avant de vous connecter");
           case "Invalid email":
-            setError("Format d'email invalide");
-            break;
+            throw new Error("Format d'email invalide");
           default:
-            setError("Une erreur est survenue lors de la connexion");
+            throw new Error("Une erreur est survenue lors de la connexion");
         }
-        setPassword("");
-        setIsLoading(false);
-        return;
       }
 
       if (!data.user) {
@@ -64,18 +52,15 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       }
 
       const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
 
-      // Vérification du type d'utilisateur requis
+      // Check required user type
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
-        setError(
+        throw new Error(
           requiredUserType === 'client' 
             ? "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
             : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
         );
-        setIsLoading(false);
-        return;
       }
 
       toast({
@@ -83,7 +68,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         description: "Vous êtes maintenant connecté",
       });
 
-      // Redirection selon le type d'utilisateur
+      // Redirect based on user type
       switch (userType) {
         case 'admin':
           navigate("/admin");
@@ -99,7 +84,8 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
     } catch (error: any) {
       console.error("Erreur complète:", error);
-      setError("Une erreur inattendue est survenue");
+      setError(error.message || "Une erreur inattendue est survenue");
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
