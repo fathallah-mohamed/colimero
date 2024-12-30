@@ -19,7 +19,7 @@ export interface Tour {
   updated_at: string;
   departure_country: string;
   destination_country: string;
-  status: 'planned' | 'collecting' | 'in_transit' | 'completed';
+  status: 'planned' | 'collecting' | 'in_transit' | 'completed' | 'cancelled';
   carriers?: {
     company_name: string;
     avatar_url: string | null;

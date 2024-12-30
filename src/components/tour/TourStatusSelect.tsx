@@ -20,8 +20,9 @@ import { supabase } from "@/integrations/supabase/client";
 const statuses = [
   { value: "planned", label: "Planifiée" },
   { value: "collecting", label: "Collecte en cours" },
-  { value: "in_transit", label: "En transit" },
+  { value: "in_transit", label: "Livraison en cours" },
   { value: "completed", label: "Terminée" },
+  { value: "cancelled", label: "Annulée" },
 ];
 
 interface TourStatusSelectProps {
