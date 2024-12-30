@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BookingDialog } from "@/components/booking/BookingDialog";
+import { BookingDialog } from "../booking/BookingDialog";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
 
