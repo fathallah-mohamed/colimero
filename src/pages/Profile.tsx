@@ -16,11 +16,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+interface ProfileData {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  email?: string;
+  company_name?: string;
+  siret?: string;
+  address?: string;
+  coverage_area?: string[];
+  carrier_capacities?: {
+    total_capacity: number;
+    price_per_kg: number;
+  };
+  carrier_services?: Array<{
+    service_type: string;
+    icon: string;
+  }>;
+}
+
 export default function Profile() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
 
@@ -81,8 +101,13 @@ export default function Profile() {
           return;
         }
 
-        // Ajouter l'email depuis la session aux données du profil
-        setProfile({ ...data, email: session.user.email });
+        // Add email from session to profile data
+        const profileData: ProfileData = {
+          ...data,
+          email: session.user.email,
+        };
+
+        setProfile(profileData);
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
