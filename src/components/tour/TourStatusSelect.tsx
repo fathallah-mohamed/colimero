@@ -17,7 +17,9 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const statuses = [
+type TourStatus = "planned" | "collecting" | "in_transit" | "completed" | "cancelled";
+
+const statuses: { value: TourStatus; label: string }[] = [
   { value: "planned", label: "Planifiée" },
   { value: "collecting", label: "Collecte en cours" },
   { value: "in_transit", label: "Livraison en cours" },
@@ -27,15 +29,15 @@ const statuses = [
 
 interface TourStatusSelectProps {
   tourId: number;
-  currentStatus: string;
-  onStatusChange: (newStatus: string) => void;
+  currentStatus: TourStatus;
+  onStatusChange: (newStatus: TourStatus) => void;
 }
 
 export function TourStatusSelect({ tourId, currentStatus, onStatusChange }: TourStatusSelectProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleStatusChange = async (value: string) => {
+  const handleStatusChange = async (value: TourStatus) => {
     try {
       const { error } = await supabase
         .from('tours')
