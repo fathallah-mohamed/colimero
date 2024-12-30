@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export const checkAuthStatus = async () => {
   try {
@@ -32,11 +34,12 @@ export const checkAuthStatus = async () => {
   }
 };
 
+// Create a custom hook for auth redirect
 export const useAuthRedirect = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const checkAndRedirect = async () => {
+  return async () => {
     const { isAuthenticated, error } = await checkAuthStatus();
 
     if (!isAuthenticated) {
@@ -53,6 +56,4 @@ export const useAuthRedirect = () => {
       navigate("/connexion");
     }
   };
-
-  return checkAndRedirect;
 };
