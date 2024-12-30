@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TourCapacityDisplay } from "./TourCapacityDisplay";
 import { TourCardHeader } from "./TourCardHeader";
 import { TourCollectionPoints } from "./TourCollectionPoints";
+import { TourTimeline } from "./TourTimeline";
 
 interface TourCardProps {
   tour: Tour;
@@ -18,6 +19,8 @@ export function TourCard({ tour, selectedPoint, onPointSelect, onReservation, hi
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
       <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
+
+      <TourTimeline departureDate={tour.departure_date} />
 
       <TourCapacityDisplay 
         remainingCapacity={tour.remaining_capacity} 
