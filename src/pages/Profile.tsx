@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DeleteAccountButton } from "@/components/profile/DeleteAccountButton";
@@ -9,6 +10,7 @@ import { CarrierProfileView } from "@/components/profile/CarrierProfileView";
 import { ProfileLoading } from "@/components/profile/ProfileLoading";
 import { ProfileNotFound } from "@/components/profile/ProfileNotFound";
 import { useProfile } from "@/hooks/use-profile";
+import { ProfileData } from "@/types/profile";
 
 export default function Profile() {
   const { profile, loading, userType, fetchProfile } = useProfile();
@@ -68,9 +70,9 @@ export default function Profile() {
             </Dialog>
 
             {userType === 'carrier' ? (
-              <CarrierProfileView profile={profile} />
+              <CarrierProfileView profile={profile as ProfileData} />
             ) : (
-              <ClientProfileView profile={profile} />
+              <ClientProfileView profile={profile as ProfileData} />
             )}
 
             <div className="mt-8 pt-8 border-t border-gray-200">

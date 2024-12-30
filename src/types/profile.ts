@@ -11,6 +11,7 @@ export interface ProfileData {
   carrier_capacities?: {
     total_capacity: number;
     price_per_kg: number;
+    offers_home_delivery?: boolean;
   };
   carrier_services?: Array<{
     service_type: string;
