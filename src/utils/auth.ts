@@ -4,32 +4,32 @@ import { useToast } from "@/hooks/use-toast";
 
 export const checkAuthStatus = async () => {
   try {
-    // Clear any stale token first
-    localStorage.removeItem('supabase.auth.token');
+    // Clear any potentially stale session data
+    const currentSession = await supabase.auth.getSession();
     
-    // Check current session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError) {
-      console.error("Session error:", sessionError);
-      return { isAuthenticated: false, error: sessionError };
-    }
-
-    if (!session) {
+    if (!currentSession.data.session) {
       return { isAuthenticated: false };
     }
 
     // Verify the user is still valid
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    if (userError || !user) {
+    if (userError) {
       console.error("User verification error:", userError);
+      // Clear the invalid session
+      await supabase.auth.signOut({ scope: 'local' });
       return { isAuthenticated: false, error: userError };
+    }
+
+    if (!user) {
+      return { isAuthenticated: false };
     }
 
     return { isAuthenticated: true, user };
   } catch (error) {
     console.error("Auth check error:", error);
+    // Clear any potentially corrupted session state
+    await supabase.auth.signOut({ scope: 'local' });
     return { isAuthenticated: false, error };
   }
 };
