@@ -1,4 +1,5 @@
 import { ProfileData } from "@/types/profile";
+import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
 
 interface CarrierProfileViewProps {
   profile: ProfileData;
@@ -7,6 +8,20 @@ interface CarrierProfileViewProps {
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
   return (
     <div className="space-y-8">
+      <div className="flex items-center gap-4 mb-8">
+        <TransporteurAvatar
+          avatarUrl={profile.avatar_url}
+          name={profile.company_name || `${profile.first_name} ${profile.last_name}`}
+          size="xl"
+        />
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900">
+            {profile.company_name || `${profile.first_name} ${profile.last_name}`}
+          </h2>
+          <p className="text-gray-500">{profile.email}</p>
+        </div>
+      </div>
+
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
         <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">

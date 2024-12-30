@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 
 interface TransporteurAvatarProps {
   avatarUrl?: string | null;
@@ -15,20 +16,23 @@ const sizes = {
 
 export function TransporteurAvatar({ avatarUrl, name, size = "md" }: TransporteurAvatarProps) {
   const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
+    ? name.split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "";
+
+  const defaultAvatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`;
 
   return (
     <Avatar className={`${sizes[size]} bg-white/10`}>
       <AvatarImage
-        src={avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`}
+        src={avatarUrl || defaultAvatarUrl}
         alt={name}
         className="object-cover"
       />
       <AvatarFallback className="bg-blue-500 text-white">
-        {initials}
+        {initials || <User className="h-6 w-6" />}
       </AvatarFallback>
     </Avatar>
   );

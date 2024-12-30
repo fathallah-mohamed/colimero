@@ -8,6 +8,7 @@ export interface ProfileData {
   siret?: string;
   address?: string;
   coverage_area?: string[];
+  avatar_url?: string | null;
   carrier_capacities?: {
     total_capacity: number;
     price_per_kg: number;
