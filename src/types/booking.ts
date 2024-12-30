@@ -4,13 +4,17 @@ export interface BookingFormData {
   pickup_city: string;
   weight: number;
   content_types: string[];
-  special_items: string[];
+  special_items: Array<{
+    name: string;
+    quantity: number;
+  }>;
   photos: string[];
   sender_name: string;
   sender_phone: string;
   recipient_name: string;
   recipient_phone: string;
   recipient_address: string;
+  delivery_city: string;
   status: string;
   tracking_number: string;
   item_type: string;

@@ -40,19 +40,45 @@ const specialItems = [
   { name: "Colis volumineux", price: 25, icon: "package" }
 ];
 
+const destinationCities = {
+  TN: [
+    { name: "Tunis", location: "15 Avenue Habib Bourguiba, Tunis", hours: "9h00 - 18h00" },
+    { name: "Sfax", location: "Route de l'Aéroport Km 0.5, Sfax", hours: "8h00 - 17h00" },
+    { name: "Sousse", location: "Avenue 14 Janvier, Sousse", hours: "9h00 - 17h00" }
+  ],
+  MA: [
+    { name: "Casablanca", location: "Boulevard Mohammed V, Casablanca", hours: "9h00 - 18h00" },
+    { name: "Rabat", location: "Avenue Mohammed V, Rabat", hours: "8h00 - 17h00" },
+    { name: "Marrakech", location: "Avenue Mohammed VI, Marrakech", hours: "9h00 - 17h00" }
+  ],
+  DZ: [
+    { name: "Alger", location: "Rue Didouche Mourad, Alger", hours: "9h00 - 18h00" },
+    { name: "Oran", location: "Boulevard de l'ALN, Oran", hours: "8h00 - 17h00" },
+    { name: "Constantine", location: "Avenue de l'Indépendance, Constantine", hours: "9h00 - 17h00" }
+  ]
+};
+
 interface BookingFormProps {
   tourId: number;
   pickupCity: string;
+  destinationCountry: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: BookingFormProps) {
+export function BookingForm({ 
+  tourId, 
+  pickupCity, 
+  destinationCountry,
+  onSuccess, 
+  onCancel 
+}: BookingFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [weight, setWeight] = useState(5);
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [selectedSpecialItems, setSelectedSpecialItems] = useState<string[]>([]);
+  const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     senderName: "",
@@ -60,6 +86,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
     recipientName: "",
     recipientPhone: "",
     recipientAddress: "",
+    deliveryCity: ""
   });
 
   const handleWeightChange = (increment: boolean) => {
@@ -78,11 +105,27 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
   };
 
   const handleSpecialItemToggle = (item: string) => {
-    setSelectedSpecialItems(prev =>
-      prev.includes(item)
+    setSelectedSpecialItems(prev => {
+      const newItems = prev.includes(item)
         ? prev.filter(i => i !== item)
-        : [...prev, item]
-    );
+        : [...prev, item];
+      
+      if (!prev.includes(item)) {
+        setItemQuantities(prev => ({
+          ...prev,
+          [item]: 1
+        }));
+      }
+      
+      return newItems;
+    });
+  };
+
+  const handleQuantityChange = (itemName: string, increment: boolean) => {
+    setItemQuantities(prev => ({
+      ...prev,
+      [itemName]: Math.max(1, (prev[itemName] || 1) + (increment ? 1 : -1))
+    }));
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,11 +135,11 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
   };
 
   const calculateTotalPrice = () => {
-    const specialItemsTotal = selectedSpecialItems.reduce((total, item) => {
+    return selectedSpecialItems.reduce((total, item) => {
       const itemPrice = specialItems.find(i => i.name === item)?.price || 0;
-      return total + itemPrice;
+      const quantity = itemQuantities[item] || 1;
+      return total + (itemPrice * quantity);
     }, 0);
-    return specialItemsTotal;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,19 +163,25 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
         }
       }
 
+      const specialItemsWithQuantities = selectedSpecialItems.map(item => ({
+        name: item,
+        quantity: itemQuantities[item] || 1
+      }));
+
       const bookingData: BookingFormData = {
         tour_id: tourId,
         user_id: user.id,
         pickup_city: pickupCity,
         weight: weight,
         content_types: selectedContentTypes,
-        special_items: selectedSpecialItems,
+        special_items: specialItemsWithQuantities,
         photos: uploadedPhotos,
         sender_name: formData.senderName,
         sender_phone: formData.senderPhone,
         recipient_name: formData.recipientName,
         recipient_phone: formData.recipientPhone,
         recipient_address: formData.recipientAddress,
+        delivery_city: formData.deliveryCity,
         status: "pending",
         tracking_number: `COL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
         item_type: selectedContentTypes[0] || "general"
@@ -180,6 +229,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
             selectedItems={selectedSpecialItems}
             onItemToggle={handleSpecialItemToggle}
             specialItems={specialItems}
+            itemQuantities={itemQuantities}
+            onQuantityChange={handleQuantityChange}
           />
 
           <BookingPhotoUpload
@@ -234,13 +285,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
             <div>
               <Label>Numéro de téléphone du destinataire</Label>
               <div className="flex gap-2">
-                <Select defaultValue="FR">
+                <Select defaultValue="TN">
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Pays" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="FR">France (+33)</SelectItem>
                     <SelectItem value="TN">Tunisie (+216)</SelectItem>
+                    <SelectItem value="MA">Maroc (+212)</SelectItem>
+                    <SelectItem value="DZ">Algérie (+213)</SelectItem>
                   </SelectContent>
                 </Select>
                 <Input
@@ -254,24 +306,35 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
               </div>
             </div>
             <div>
-              <Label>Adresse de réception</Label>
+              <Label>Ville de livraison</Label>
+              <Select 
+                value={formData.deliveryCity}
+                onValueChange={(value) => setFormData({ ...formData, deliveryCity: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisissez une ville de livraison" />
+                </SelectTrigger>
+                <SelectContent>
+                  {destinationCities[destinationCountry as keyof typeof destinationCities]?.map((city) => (
+                    <SelectItem key={city.name} value={city.name}>
+                      <div className="space-y-1">
+                        <div className="font-medium">{city.name}</div>
+                        <div className="text-sm text-gray-500">{city.location}</div>
+                        <div className="text-sm text-gray-500">Horaires : {city.hours}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Adresse complète</Label>
               <Textarea
                 placeholder="Adresse complète du destinataire"
                 value={formData.recipientAddress}
                 onChange={(e) => setFormData({ ...formData, recipientAddress: e.target.value })}
                 required
               />
-            </div>
-            <div>
-              <Label>Point de récupération du colis</Label>
-              <Select value={pickupCity}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisissez un point de récupération" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={pickupCity}>{pickupCity}</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </div>
