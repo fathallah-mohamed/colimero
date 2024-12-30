@@ -1,11 +1,19 @@
 import { ProfileData } from "@/types/profile";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
+import { Check, X } from "lucide-react";
 
 interface CarrierProfileViewProps {
   profile: ProfileData;
 }
 
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
+  const CommitmentStatus = ({ accepted }: { accepted: boolean }) => (
+    <span className={`inline-flex items-center ${accepted ? 'text-green-600' : 'text-red-600'}`}>
+      {accepted ? <Check className="w-4 h-4 mr-1" /> : <X className="w-4 h-4 mr-1" />}
+      {accepted ? 'Accepté' : 'Non accepté'}
+    </span>
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4 mb-8">
@@ -42,6 +50,29 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
           <div>
             <p className="text-sm text-gray-500 mb-1">Téléphone</p>
             <p className="text-gray-900 font-medium">{profile.phone || "-"}</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
+        <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Conditions générales</p>
+            <CommitmentStatus accepted={profile.terms_accepted || false} />
+            {profile.terms_accepted && profile.terms_accepted_at && (
+              <p className="text-xs text-gray-500 mt-1">
+                Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Conditions douanières</p>
+            <CommitmentStatus accepted={profile.customs_terms_accepted || false} />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Responsabilité des objets transportés</p>
+            <CommitmentStatus accepted={profile.responsibility_terms_accepted || false} />
           </div>
         </div>
       </div>
