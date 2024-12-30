@@ -63,9 +63,19 @@ export function useProfile() {
           return;
         }
 
+        // Create a new object with the profile data and email
         const profileData: ProfileData = {
-          ...data,
+          id: data.id,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone: data.phone,
           email: session.user.email,
+          company_name: data.company_name,
+          siret: data.siret,
+          address: data.address,
+          coverage_area: data.coverage_area,
+          carrier_capacities: data.carrier_capacities,
+          carrier_services: data.carrier_services
         };
 
         setProfile(profileData);
