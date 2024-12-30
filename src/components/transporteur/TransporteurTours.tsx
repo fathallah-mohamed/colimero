@@ -133,19 +133,29 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
             </span>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Capacité restante : {tour.remaining_capacity} kg</span>
-              <span>Total : {tour.total_capacity} kg</span>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+              <div className="space-y-1">
+                <span className="text-sm text-gray-500">Capacité disponible</span>
+                <p className="text-lg font-medium text-blue-600">{tour.remaining_capacity} kg</p>
+              </div>
+              <div className="text-right space-y-1">
+                <span className="text-sm text-gray-500">Capacité totale</span>
+                <p className="text-lg font-medium">{tour.total_capacity} kg</p>
+              </div>
             </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            
+            <div className="relative h-2.5 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full transition-all"
+                className="absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all"
                 style={{
                   width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
                 }}
               />
             </div>
+            <p className="text-sm text-center text-gray-500">
+              {Math.round((tour.remaining_capacity / tour.total_capacity) * 100)}% de capacité disponible
+            </p>
           </div>
 
           <div className="space-y-4">
