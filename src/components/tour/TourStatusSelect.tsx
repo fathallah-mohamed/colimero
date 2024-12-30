@@ -23,7 +23,7 @@ const statuses = [
   { value: "in_transit", label: "Livraison en cours" },
   { value: "completed", label: "Terminée" },
   { value: "cancelled", label: "Annulée" },
-];
+] as const;
 
 interface TourStatusSelectProps {
   tourId: number;
@@ -40,7 +40,8 @@ export function TourStatusSelect({ tourId, currentStatus, onStatusChange }: Tour
       const { error } = await supabase
         .from('tours')
         .update({ status: value })
-        .eq('id', tourId);
+        .eq('id', tourId)
+        .select();
 
       if (error) throw error;
 
@@ -50,6 +51,7 @@ export function TourStatusSelect({ tourId, currentStatus, onStatusChange }: Tour
         description: "Le statut de la tournée a été mis à jour avec succès.",
       });
     } catch (error: any) {
+      console.error('Error updating tour status:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
