@@ -39,8 +39,31 @@ export default function Navigation() {
 
   const handleLogout = async () => {
     try {
+      // Vérifier d'abord si l'utilisateur est connecté
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // Si pas de session, nettoyer l'état local et rediriger
+        setUser(null);
+        setUserType(null);
+        navigate('/');
+        return;
+      }
+
+      // Tenter la déconnexion
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Erreur de déconnexion:", error);
+        // Si l'erreur est liée à la session, nettoyer quand même l'état local
+        if (error.message.includes("session")) {
+          setUser(null);
+          setUserType(null);
+          navigate('/');
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Déconnexion réussie",
@@ -49,6 +72,7 @@ export default function Navigation() {
       
       navigate('/');
     } catch (error: any) {
+      console.error("Erreur complète:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
