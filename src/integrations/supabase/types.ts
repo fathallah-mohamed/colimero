@@ -80,6 +80,7 @@ export type Database = {
       bookings: {
         Row: {
           approval_request_id: string | null
+          content_types: string[] | null
           created_at: string
           customs_declaration: boolean | null
           delivery_notes: string | null
@@ -87,10 +88,14 @@ export type Database = {
           id: string
           item_type: string
           package_description: string | null
+          photos: string[] | null
           pickup_city: string
           recipient_address: string
           recipient_name: string
           recipient_phone: string
+          sender_name: string | null
+          sender_phone: string | null
+          special_items: Json | null
           status: string
           terms_accepted: boolean | null
           tour_id: number
@@ -100,6 +105,7 @@ export type Database = {
         }
         Insert: {
           approval_request_id?: string | null
+          content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
           delivery_notes?: string | null
@@ -107,10 +113,14 @@ export type Database = {
           id?: string
           item_type: string
           package_description?: string | null
+          photos?: string[] | null
           pickup_city: string
           recipient_address: string
           recipient_name: string
           recipient_phone: string
+          sender_name?: string | null
+          sender_phone?: string | null
+          special_items?: Json | null
           status: string
           terms_accepted?: boolean | null
           tour_id: number
@@ -120,6 +130,7 @@ export type Database = {
         }
         Update: {
           approval_request_id?: string | null
+          content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
           delivery_notes?: string | null
@@ -127,10 +138,14 @@ export type Database = {
           id?: string
           item_type?: string
           package_description?: string | null
+          photos?: string[] | null
           pickup_city?: string
           recipient_address?: string
           recipient_name?: string
           recipient_phone?: string
+          sender_name?: string | null
+          sender_phone?: string | null
+          special_items?: Json | null
           status?: string
           terms_accepted?: boolean | null
           tour_id?: number

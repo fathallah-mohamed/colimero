@@ -5,9 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { Minus, Plus, Upload } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -15,13 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface BookingFormProps {
-  tourId: number;
-  pickupCity: string;
-  onSuccess: () => void;
-  onCancel: () => void;
-}
+import { BookingWeightSelector } from "./BookingWeightSelector";
+import { BookingContentTypes } from "./BookingContentTypes";
+import { BookingSpecialItems } from "./BookingSpecialItems";
+import { BookingPhotoUpload } from "./BookingPhotoUpload";
+import type { BookingFormData } from "@/types/booking";
 
 const contentTypes = [
   "Vêtements",
@@ -45,6 +40,13 @@ const specialItems = [
   { name: "Colis volumineux", price: 25, icon: "package" }
 ];
 
+interface BookingFormProps {
+  tourId: number;
+  pickupCity: string;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
 export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: BookingFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -52,7 +54,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [selectedSpecialItems, setSelectedSpecialItems] = useState<string[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
-
   const [formData, setFormData] = useState({
     senderName: "",
     senderPhone: "",
@@ -64,7 +65,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
   const handleWeightChange = (increment: boolean) => {
     setWeight(prev => {
       const newWeight = increment ? prev + 1 : prev - 1;
-      return Math.min(Math.max(newWeight, 5), 30); // Min 5kg, Max 30kg
+      return Math.min(Math.max(newWeight, 5), 30);
     });
   };
 
@@ -84,7 +85,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
     );
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setPhotos(prev => [...prev, ...Array.from(e.target.files!)]);
     }
@@ -106,7 +107,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Utilisateur non connecté");
 
-      // Upload photos if any
       const uploadedPhotos = [];
       for (const photo of photos) {
         const fileExt = photo.name.split('.').pop();
@@ -120,7 +120,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
         }
       }
 
-      const { error } = await supabase.from("bookings").insert({
+      const bookingData: BookingFormData = {
         tour_id: tourId,
         user_id: user.id,
         pickup_city: pickupCity,
@@ -135,7 +135,10 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
         recipient_address: formData.recipientAddress,
         status: "pending",
         tracking_number: `COL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      });
+        item_type: selectedContentTypes[0] || "general"
+      };
+
+      const { error } = await supabase.from("bookings").insert(bookingData);
 
       if (error) throw error;
 
@@ -162,113 +165,27 @@ export function BookingForm({ tourId, pickupCity, onSuccess, onCancel }: Booking
         <p className="text-sm text-gray-500 text-center">Remplissez les informations de votre colis</p>
 
         <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Capacité restante : 195 kg</span>
-              <span>Total : {weight} kg</span>
-            </div>
-            <div className="h-2 bg-gray-100 rounded-full mt-2">
-              <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(weight / 195) * 100}%` }} />
-            </div>
-          </div>
+          <BookingWeightSelector 
+            weight={weight}
+            onWeightChange={handleWeightChange}
+          />
 
-          <div className="space-y-2">
-            <Label>Poids (kg) - minimum 5 kg, maximum 30 kg</Label>
-            <div className="flex items-center justify-between">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon"
-                onClick={() => handleWeightChange(false)}
-                disabled={weight <= 5}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <span className="text-xl font-medium">{weight}</span>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon"
-                onClick={() => handleWeightChange(true)}
-                disabled={weight >= 30}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <BookingContentTypes
+            selectedTypes={selectedContentTypes}
+            onTypeToggle={handleContentTypeToggle}
+            contentTypes={contentTypes}
+          />
 
-          <div className="space-y-2">
-            <Label>Contenu (choix multiples)</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {contentTypes.map((type) => (
-                <div
-                  key={type}
-                  className={`p-2 border rounded-lg cursor-pointer text-center ${
-                    selectedContentTypes.includes(type)
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-blue-200"
-                  }`}
-                  onClick={() => handleContentTypeToggle(type)}
-                >
-                  <span className="text-sm">{type}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <BookingSpecialItems
+            selectedItems={selectedSpecialItems}
+            onItemToggle={handleSpecialItemToggle}
+            specialItems={specialItems}
+          />
 
-          <div className="space-y-2">
-            <Label>Objets spéciaux (choix multiples)</Label>
-            <div className="grid grid-cols-3 gap-4">
-              {specialItems.map((item) => (
-                <div
-                  key={item.name}
-                  className={`p-4 border rounded-lg cursor-pointer text-center ${
-                    selectedSpecialItems.includes(item.name)
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-blue-200"
-                  }`}
-                  onClick={() => handleSpecialItemToggle(item.name)}
-                >
-                  <span className="text-sm block mb-1">{item.name}</span>
-                  <span className="text-sm font-medium">{item.price}€</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Photos et Vidéos</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 text-center">
-              <input
-                type="file"
-                multiple
-                accept="image/*,video/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-                id="photo-upload"
-              />
-              <label
-                htmlFor="photo-upload"
-                className="cursor-pointer flex flex-col items-center"
-              >
-                <Upload className="h-6 w-6 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-600">Ajouter des médias</span>
-              </label>
-            </div>
-            {photos.length > 0 && (
-              <div className="flex gap-2 flex-wrap">
-                {photos.map((photo, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={URL.createObjectURL(photo)}
-                      alt={`Upload ${index + 1}`}
-                      className="h-16 w-16 object-cover rounded"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <BookingPhotoUpload
+            photos={photos}
+            onPhotoUpload={handlePhotoUpload}
+          />
 
           <div className="space-y-4">
             <h3 className="font-medium">Informations de l'expéditeur</h3>
