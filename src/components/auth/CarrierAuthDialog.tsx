@@ -8,7 +8,7 @@ interface CarrierAuthDialogProps {
   onClose: () => void;
 }
 
-export function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialogProps) {
+export default function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialogProps) {
   const isMobile = useIsMobile();
 
   return (
