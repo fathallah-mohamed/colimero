@@ -12,14 +12,13 @@ export interface Tour {
   route: RouteStop[];
   total_capacity: number;
   remaining_capacity: number;
-  type: 'public' | 'private';
+  type: string;
   departure_date: string;
   collection_date: string;
   created_at: string;
   updated_at: string;
   departure_country: string;
   destination_country: string;
-  status?: string;
   carriers?: {
     company_name: string;
     avatar_url: string | null;
