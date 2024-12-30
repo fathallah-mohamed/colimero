@@ -55,11 +55,14 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
   return (
     <div className="flex items-center justify-between w-full py-4">
       {statusOrder.map((status, index) => (
-        <div key={status} className="flex flex-col items-center">
+        <div key={status} className="flex flex-col items-center relative">
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-full p-0 h-8 w-8"
+            className={cn(
+              "rounded-full p-0 h-8 w-8 transition-colors",
+              index <= currentIndex && "hover:bg-gray-100"
+            )}
             onClick={() => handleStatusChange(status)}
             disabled={index > currentIndex + 1}
           >
@@ -79,12 +82,21 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
               )} />
             )}
           </Button>
-          <span className="text-xs mt-1">
+          <span className={cn(
+            "text-xs mt-1",
+            status === currentStatus ? "font-medium text-blue-500" : "text-gray-500"
+          )}>
             {status === 'planned' && "Planifiée"}
             {status === 'collecting' && "Collecte"}
             {status === 'in_transit' && "Livraison"}
             {status === 'completed' && "Terminée"}
           </span>
+          {index < statusOrder.length - 1 && (
+            <div className={cn(
+              "absolute top-4 left-8 w-[calc(100%+1rem)] h-[2px]",
+              index < currentIndex ? "bg-green-500" : "bg-gray-200"
+            )} />
+          )}
         </div>
       ))}
     </div>
