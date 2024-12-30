@@ -1,22 +1,14 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { BookingWeightSelector } from "./BookingWeightSelector";
 import { BookingContentTypes } from "./BookingContentTypes";
 import { BookingSpecialItems } from "./BookingSpecialItems";
 import { BookingPhotoUpload } from "./BookingPhotoUpload";
+import { SenderInfo } from "./form/SenderInfo";
+import { RecipientInfo } from "./form/RecipientInfo";
+import { BookingCommitments } from "./form/BookingCommitments";
 import type { BookingFormData } from "@/types/booking";
 
 const contentTypes = [
@@ -40,24 +32,6 @@ const specialItems = [
   { name: "Télévision", price: 40, icon: "tv" },
   { name: "Colis volumineux", price: 25, icon: "package" }
 ];
-
-const destinationCities = {
-  TN: [
-    { name: "Tunis", location: "15 Avenue Habib Bourguiba, Tunis", hours: "9h00 - 18h00" },
-    { name: "Sfax", location: "Route de l'Aéroport Km 0.5, Sfax", hours: "8h00 - 17h00" },
-    { name: "Sousse", location: "Avenue 14 Janvier, Sousse", hours: "9h00 - 17h00" }
-  ],
-  MA: [
-    { name: "Casablanca", location: "Boulevard Mohammed V, Casablanca", hours: "9h00 - 18h00" },
-    { name: "Rabat", location: "Avenue Mohammed V, Rabat", hours: "8h00 - 17h00" },
-    { name: "Marrakech", location: "Avenue Mohammed VI, Marrakech", hours: "9h00 - 17h00" }
-  ],
-  DZ: [
-    { name: "Alger", location: "Rue Didouche Mourad, Alger", hours: "9h00 - 18h00" },
-    { name: "Oran", location: "Boulevard de l'ALN, Oran", hours: "8h00 - 17h00" },
-    { name: "Constantine", location: "Avenue de l'Indépendance, Constantine", hours: "9h00 - 17h00" }
-  ]
-};
 
 interface BookingFormProps {
   tourId: number;
@@ -83,6 +57,7 @@ export function BookingForm({
   const [photos, setPhotos] = useState<File[]>([]);
   const [pricePerKg, setPricePerKg] = useState<number>(0);
   const [customsDeclaration, setCustomsDeclaration] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [formData, setFormData] = useState({
     senderName: "",
     senderPhone: "",
@@ -248,11 +223,11 @@ export function BookingForm({
       return;
     }
 
-    if (!customsDeclaration) {
+    if (!customsDeclaration || !termsAccepted) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez accepter la déclaration douanière",
+        description: "Veuillez accepter les conditions générales et la déclaration douanière",
       });
       return;
     }
@@ -298,7 +273,8 @@ export function BookingForm({
         status: "pending",
         tracking_number: `COL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
         item_type: selectedContentTypes[0] || "general",
-        customs_declaration: customsDeclaration
+        customs_declaration: customsDeclaration,
+        terms_accepted: termsAccepted
       };
 
       const { error } = await supabase.from("bookings").insert(bookingData);
@@ -370,132 +346,31 @@ export function BookingForm({
             onPhotoUpload={handlePhotoUpload}
           />
 
-          <div className="space-y-4">
-            <h3 className="font-medium">Informations de l'expéditeur</h3>
-            <div>
-              <Label>Nom et prénom</Label>
-              <Input
-                value={formData.senderName}
-                onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
-                required
-                readOnly
-                className="bg-gray-50"
-              />
-            </div>
-            <div>
-              <Label>Votre numéro de téléphone</Label>
-              <div className="flex gap-2">
-                <Select defaultValue="FR">
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Pays" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="FR">France (+33)</SelectItem>
-                    <SelectItem value="TN">Tunisie (+216)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="tel"
-                  value={formData.senderPhone}
-                  onChange={(e) => setFormData({ ...formData, senderPhone: e.target.value })}
-                  required
-                  readOnly
-                  className="flex-1 bg-gray-50"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="font-medium">Informations du destinataire</h3>
-            <div>
-              <Label>Nom et prénom</Label>
-              <Input
-                placeholder="Entrez le nom et prénom du destinataire"
-                value={formData.recipientName}
-                onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <Label>Numéro de téléphone du destinataire</Label>
-              <div className="flex gap-2">
-                <Select defaultValue="TN">
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Pays" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TN">Tunisie (+216)</SelectItem>
-                    <SelectItem value="MA">Maroc (+212)</SelectItem>
-                    <SelectItem value="DZ">Algérie (+213)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="tel"
-                  placeholder="Numéro de téléphone"
-                  value={formData.recipientPhone}
-                  onChange={(e) => setFormData({ ...formData, recipientPhone: e.target.value })}
-                  required
-                  className="flex-1"
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Ville de livraison</Label>
-              <Select 
-                value={formData.deliveryCity}
-                onValueChange={(value) => setFormData({ ...formData, deliveryCity: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisissez une ville de livraison" />
-                </SelectTrigger>
-                <SelectContent>
-                  {destinationCities[destinationCountry as keyof typeof destinationCities]?.map((city) => (
-                    <SelectItem key={city.name} value={city.name}>
-                      <div className="space-y-1">
-                        <div className="font-medium">{city.name}</div>
-                        <div className="text-sm text-gray-500">{city.location}</div>
-                        <div className="text-sm text-gray-500">Horaires : {city.hours}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Adresse complète</Label>
-              <Textarea
-                placeholder="Adresse complète du destinataire"
-                value={formData.recipientAddress}
-                onChange={(e) => setFormData({ ...formData, recipientAddress: e.target.value })}
-                required
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-start space-x-3">
-          <Checkbox
-            id="customs-declaration"
-            checked={customsDeclaration}
-            onCheckedChange={(checked) => setCustomsDeclaration(checked as boolean)}
-            className="mt-1"
+          <SenderInfo 
+            formData={formData}
+            setFormData={setFormData}
           />
-          <Label
-            htmlFor="customs-declaration"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Je déclare que le contenu de mon colis ne contient aucun objet interdit par la loi ou les règlements douaniers.
-          </Label>
+
+          <RecipientInfo 
+            formData={formData}
+            setFormData={setFormData}
+            destinationCities={destinationCities}
+            destinationCountry={destinationCountry}
+          />
+
+          <BookingCommitments
+            customsDeclaration={customsDeclaration}
+            setCustomsDeclaration={setCustomsDeclaration}
+            termsAccepted={termsAccepted}
+            setTermsAccepted={setTermsAccepted}
+          />
         </div>
       </div>
 
       <Button 
         type="submit" 
         className="w-full bg-blue-400 hover:bg-blue-500"
-        disabled={isLoading || !customsDeclaration}
+        disabled={isLoading || !customsDeclaration || !termsAccepted}
       >
         Confirmer la réservation ({calculateTotalPrice().toFixed(2)}€)
       </Button>
