@@ -5,7 +5,6 @@ import AuthDialog from "@/components/auth/AuthDialog";
 import { EmailVerificationDialog } from "@/components/tour/EmailVerificationDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { TourCard } from "./TourCard";
@@ -17,7 +16,7 @@ type TransporteurToursProps = {
   hideAvatar?: boolean;
 };
 
-export function TransporteurTours({ tours, type, isLoading, hideAvatar }: TransporteurToursProps) {
+export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
