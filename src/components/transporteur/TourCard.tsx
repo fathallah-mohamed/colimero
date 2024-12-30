@@ -20,7 +20,7 @@ export function TourCard({ tour, selectedPoint, onPointSelect, onReservation, hi
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
       <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
 
-      <TourTimeline departureDate={tour.departure_date} />
+      <TourTimeline status={tour.status} />
 
       <TourCapacityDisplay 
         remainingCapacity={tour.remaining_capacity} 

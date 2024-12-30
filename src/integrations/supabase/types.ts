@@ -513,6 +513,7 @@ export type Database = {
           id: number
           remaining_capacity: number
           route: Json
+          status: string
           terms_accepted: boolean | null
           total_capacity: number
           type: string
@@ -529,6 +530,7 @@ export type Database = {
           id?: number
           remaining_capacity: number
           route: Json
+          status?: string
           terms_accepted?: boolean | null
           total_capacity: number
           type: string
@@ -545,6 +547,7 @@ export type Database = {
           id?: number
           remaining_capacity?: number
           route?: Json
+          status?: string
           terms_accepted?: boolean | null
           total_capacity?: number
           type?: string
