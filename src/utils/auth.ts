@@ -4,22 +4,19 @@ import { useToast } from "@/hooks/use-toast";
 
 export const checkAuthStatus = async () => {
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    // First, get the current session
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (error) {
-      throw error;
-    }
-
     if (!session) {
       return { isAuthenticated: false };
     }
 
-    // Verify the session is still valid by attempting to get user
-    const { data: user, error: userError } = await supabase.auth.getUser();
+    // If we have a session, verify it's still valid
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
-      // Session is invalid, clear it
-      await supabase.auth.signOut();
+      // If there's an error or no user, clear the invalid session
+      await supabase.auth.signOut({ scope: 'local' });
       return { isAuthenticated: false };
     }
 
@@ -38,6 +35,9 @@ export const useAuthRedirect = () => {
     const { isAuthenticated, error } = await checkAuthStatus();
 
     if (!isAuthenticated) {
+      // Clear any existing session data
+      await supabase.auth.signOut({ scope: 'local' });
+      
       toast({
         title: "Session expirée",
         description: "Veuillez vous reconnecter",
