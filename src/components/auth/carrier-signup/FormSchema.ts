@@ -1,5 +1,8 @@
 import * as z from "zod";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
 export const formSchema = z.object({
   email: z.string().email("Email invalide"),
   firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
@@ -13,6 +16,17 @@ export const formSchema = z.object({
   pricePerKg: z.number().min(0, "Le prix par kg doit être positif"),
   coverageArea: z.array(z.string()).min(1, "Sélectionnez au moins un pays"),
   services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
+  avatar: z.instanceof(File)
+    .refine(
+      (file) => file?.size <= MAX_FILE_SIZE,
+      "La taille maximale est de 5MB"
+    )
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+      "Format accepté : .jpg, .jpeg, .png et .webp"
+    )
+    .nullable()
+    .optional(),
 });
 
 export type FormValues = z.infer<typeof formSchema>;

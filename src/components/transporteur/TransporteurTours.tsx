@@ -13,12 +13,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { TourCapacityDisplay } from "./TourCapacityDisplay";
+import { TransporteurAvatar } from "./TransporteurAvatar";
 
-export interface TransporteurToursProps {
+type TransporteurToursProps = {
   tours: Tour[];
   type: "public" | "private";
   isLoading: boolean;
-}
+};
 
 export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
   const navigate = useNavigate();
@@ -100,16 +101,14 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
   return (
     <div className="space-y-4">
-      {showAccessDenied && (
-        <AccessDeniedMessage userType="client" />
-      )}
+      {showAccessDenied && <AccessDeniedMessage userType="client" />}
 
       {tours.map((tour) => (
         <div key={tour.id} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xl font-medium">
-                {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
+                {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
               </span>
             </div>
             <div className="text-right">
@@ -120,15 +119,11 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
           </div>
 
           <div className="flex items-center gap-3">
-            {tour.carriers?.avatar_url ? (
-              <img
-                src={tour.carriers.avatar_url}
-                alt={tour.carriers.company_name}
-                className="h-8 w-8 rounded-full object-cover"
-              />
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-gray-100" />
-            )}
+            <TransporteurAvatar
+              avatarUrl={tour.carriers?.avatar_url}
+              name={tour.carriers?.company_name || ""}
+              size="sm"
+            />
             <span className="text-gray-600">
               {tour.carriers?.company_name}
             </span>
