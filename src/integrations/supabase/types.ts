@@ -83,6 +83,7 @@ export type Database = {
           content_types: string[] | null
           created_at: string
           customs_declaration: boolean | null
+          delivery_city: string
           delivery_notes: string | null
           delivery_status: string | null
           id: string
@@ -108,6 +109,7 @@ export type Database = {
           content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
+          delivery_city: string
           delivery_notes?: string | null
           delivery_status?: string | null
           id?: string
@@ -133,6 +135,7 @@ export type Database = {
           content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
+          delivery_city?: string
           delivery_notes?: string | null
           delivery_status?: string | null
           id?: string
