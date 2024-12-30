@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { DeleteAccountButton } from "@/components/profile/DeleteAccountButton";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileForm } from "@/components/profile/ProfileForm";
+import { ClientProfileForm } from "@/components/profile/ClientProfileForm";
+import { ClientProfileView } from "@/components/profile/ClientProfileView";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +22,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
     checkUser();
@@ -31,24 +34,33 @@ export default function Profile() {
     if (!session) {
       navigate('/connexion');
     }
+    setUserType(session?.user?.user_metadata?.user_type || null);
   };
 
   const fetchProfile = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data, error } = await supabase
-          .from('carriers')
-          .select(`
+        const userType = session.user.user_metadata?.user_type;
+        const table = userType === 'carrier' ? 'carriers' : 'clients';
+        
+        const query = supabase
+          .from(table)
+          .select(userType === 'carrier' ? `
             *,
             carrier_capacities (
               total_capacity,
               price_per_kg,
               offers_home_delivery
+            ),
+            carrier_services (
+              service_type,
+              icon
             )
-          `)
-          .eq('id', session.user.id)
-          .maybeSingle();
+          ` : '*')
+          .eq('id', session.user.id);
+
+        const { data, error } = await query.maybeSingle();
 
         if (error) {
           console.error('Error fetching profile:', error);
@@ -125,16 +137,27 @@ export default function Profile() {
                     Modifier mon profil
                   </DialogTitle>
                 </DialogHeader>
-                <ProfileForm 
-                  initialData={profile} 
-                  onClose={() => {
-                    setIsEditing(false);
-                    fetchProfile();
-                  }} 
-                />
+                {userType === 'carrier' ? (
+                  <ProfileForm 
+                    initialData={profile} 
+                    onClose={() => {
+                      setIsEditing(false);
+                      fetchProfile();
+                    }} 
+                  />
+                ) : (
+                  <ClientProfileForm 
+                    initialData={profile} 
+                    onClose={() => {
+                      setIsEditing(false);
+                      fetchProfile();
+                    }} 
+                  />
+                )}
               </DialogContent>
             </Dialog>
 
+            {userType === 'carrier' ? (
             <div className="space-y-8">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
@@ -200,11 +223,13 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+            ) : (
+              <ClientProfileView profile={profile} />
+            )}
 
             <div className="mt-8 pt-8 border-t border-gray-200">
               <DeleteAccountButton />
             </div>
-
           </div>
         </div>
       </div>
