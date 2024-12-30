@@ -214,7 +214,6 @@ export type Database = {
       carrier_registration_requests: {
         Row: {
           address: string
-          avatar_url: string | null
           company_name: string
           coverage_area: string[] | null
           created_at: string
@@ -234,7 +233,6 @@ export type Database = {
         }
         Insert: {
           address: string
-          avatar_url?: string | null
           company_name: string
           coverage_area?: string[] | null
           created_at?: string
@@ -254,7 +252,6 @@ export type Database = {
         }
         Update: {
           address?: string
-          avatar_url?: string | null
           company_name?: string
           coverage_area?: string[] | null
           created_at?: string
