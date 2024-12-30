@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Tour } from "@/types/tour";
@@ -90,6 +90,9 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
   };
 
+  // Find the current tour based on currentTourId
+  const currentTour = tours.find(tour => tour.id === currentTourId);
+
   return (
     <div className="space-y-4">
       {showAccessDenied && (
@@ -100,7 +103,6 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
         <div key={tour.id} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-500" />
               <span className="text-xl font-medium">
                 {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
               </span>
@@ -215,10 +217,11 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
       <Dialog open={isBookingFormOpen} onOpenChange={setIsBookingFormOpen}>
         <DialogContent className="sm:max-w-[500px]">
-          {currentTourId && selectedPoints[currentTourId] && (
+          {currentTourId && selectedPoints[currentTourId] && currentTour && (
             <BookingForm
               tourId={currentTourId}
               pickupCity={selectedPoints[currentTourId]}
+              destinationCountry={currentTour.destination_country}
               onSuccess={() => {
                 setIsBookingFormOpen(false);
                 navigate("/mes-reservations");
