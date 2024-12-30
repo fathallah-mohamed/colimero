@@ -513,7 +513,7 @@ export type Database = {
           id: number
           remaining_capacity: number
           route: Json
-          status: string
+          status: Database["public"]["Enums"]["tour_status"] | null
           terms_accepted: boolean | null
           total_capacity: number
           type: string
@@ -530,7 +530,7 @@ export type Database = {
           id?: number
           remaining_capacity: number
           route: Json
-          status?: string
+          status?: Database["public"]["Enums"]["tour_status"] | null
           terms_accepted?: boolean | null
           total_capacity: number
           type: string
@@ -547,7 +547,7 @@ export type Database = {
           id?: number
           remaining_capacity?: number
           route?: Json
-          status?: string
+          status?: Database["public"]["Enums"]["tour_status"] | null
           terms_accepted?: boolean | null
           total_capacity?: number
           type?: string
@@ -672,6 +672,12 @@ export type Database = {
         | "Montpellier"
         | "Gênes"
       moroccan_city: "Casablanca" | "Rabat" | "Tanger" | "Marrakech" | "Agadir"
+      tour_status:
+        | "planned"
+        | "collecting"
+        | "in_transit"
+        | "completed"
+        | "cancelled"
       tunisian_city: "Tunis" | "Sfax" | "Sousse" | "Bizerte" | "Kairouan"
     }
     CompositeTypes: {

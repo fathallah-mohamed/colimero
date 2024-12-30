@@ -39,14 +39,16 @@ export function TourCard({
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
         {isCarrierOwner && onStatusChange && (
-          <TourStatusSelect
-            tourId={tour.id}
-            currentStatus={tour.status}
-            onStatusChange={onStatusChange}
-          />
+          <div className="w-full md:w-auto">
+            <TourStatusSelect
+              tourId={tour.id}
+              currentStatus={tour.status}
+              onStatusChange={onStatusChange}
+            />
+          </div>
         )}
       </div>
 
