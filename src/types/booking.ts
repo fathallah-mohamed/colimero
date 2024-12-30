@@ -18,4 +18,5 @@ export interface BookingFormData {
   status: string;
   tracking_number: string;
   item_type: string;
+  customs_declaration: boolean;
 }
