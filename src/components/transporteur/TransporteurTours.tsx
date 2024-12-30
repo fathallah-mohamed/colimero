@@ -120,7 +120,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
           <div className="flex items-center gap-3">
             <TransporteurAvatar
-              avatarUrl="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952"
+              avatarUrl={tour.carriers?.avatar_url}
               name={tour.carriers?.company_name || ""}
               size="md"
             />
@@ -177,8 +177,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
           </div>
 
           <div className="text-center text-sm text-gray-500">
-            Départ pour la{" "}
-            {tour.destination_country === "TN" ? "Tunisie" : "France"} le{" "}
+            Départ pour la {tour.destination_country === "TN" ? "Tunisie" : "France"} le{" "}
             {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
           </div>
 
