@@ -183,8 +183,8 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
           <div className="text-center text-sm text-gray-500">
             Départ pour la{" "}
-            {tour.destination_country === "TN" ? "Tunisie" : "France"} :{" "}
-            {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
+            {tour.destination_country === "TN" ? "Tunisie" : "France"} le{" "}
+            {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
           </div>
 
           <Button 
