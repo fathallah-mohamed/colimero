@@ -14,10 +14,8 @@ export const handleLogoutFlow = async () => {
       return { success: true }; // No session means user is already logged out
     }
 
-    // If we have a session, attempt to sign out
-    const { error: signOutError } = await supabase.auth.signOut({
-      scope: 'local' // Use local scope to avoid the global session check
-    });
+    // If we have a session, attempt to sign out without specifying scope
+    const { error: signOutError } = await supabase.auth.signOut();
 
     if (signOutError) {
       console.error("SignOut error:", signOutError);
