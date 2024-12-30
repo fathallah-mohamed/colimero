@@ -276,6 +276,7 @@ export function BookingForm({
         title: "Réservation effectuée",
         description: "Votre réservation a été enregistrée avec succès",
       });
+
       onSuccess();
     } catch (error: any) {
       toast({

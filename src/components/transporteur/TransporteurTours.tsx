@@ -90,7 +90,11 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
   };
 
-  // Find the current tour based on currentTourId
+  const handleBookingSuccess = () => {
+    setIsBookingFormOpen(false);
+    navigate("/mes-reservations");
+  };
+
   const currentTour = tours.find(tour => tour.id === currentTourId);
 
   return (
@@ -222,10 +226,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
               tourId={currentTourId}
               pickupCity={selectedPoints[currentTourId]}
               destinationCountry={currentTour.destination_country}
-              onSuccess={() => {
-                setIsBookingFormOpen(false);
-                navigate("/mes-reservations");
-              }}
+              onSuccess={handleBookingSuccess}
               onCancel={() => setIsBookingFormOpen(false)}
             />
           )}
