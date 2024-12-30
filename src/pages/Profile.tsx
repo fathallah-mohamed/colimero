@@ -81,7 +81,8 @@ export default function Profile() {
           return;
         }
 
-        setProfile(data);
+        // Ajouter l'email depuis la session aux données du profil
+        setProfile({ ...data, email: session.user.email });
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
@@ -158,71 +159,71 @@ export default function Profile() {
             </Dialog>
 
             {userType === 'carrier' ? (
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
-                <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500 mb-1">Prénom</p>
-                      <p className="text-gray-900 font-medium">{profile.first_name || "-"}</p>
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
+                  <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Prénom</p>
+                        <p className="text-gray-900 font-medium">{profile.first_name || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500 mb-1">Nom</p>
+                        <p className="text-gray-900 font-medium">{profile.last_name || "-"}</p>
+                      </div>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Nom</p>
-                      <p className="text-gray-900 font-medium">{profile.last_name || "-"}</p>
+                      <p className="text-sm text-gray-500 mb-1">Email</p>
+                      <p className="text-gray-900 font-medium">{profile.email || "-"}</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Email</p>
-                    <p className="text-gray-900 font-medium">{profile.email || "-"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Téléphone</p>
-                    <p className="text-gray-900 font-medium">{profile.phone || "-"}</p>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Téléphone</p>
+                      <p className="text-gray-900 font-medium">{profile.phone || "-"}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations entreprise</h2>
-                <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Nom de l'entreprise</p>
-                    <p className="text-gray-900 font-medium">{profile.company_name || "-"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">SIRET</p>
-                    <p className="text-gray-900 font-medium">{profile.siret || "-"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Adresse</p>
-                    <p className="text-gray-900 font-medium">{profile.address || "-"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Zones de couverture</p>
-                    <p className="text-gray-900 font-medium">
-                      {profile.coverage_area?.map((code: string) => {
-                        const country = {
-                          FR: "France",
-                          TN: "Tunisie",
-                          MA: "Maroc",
-                          DZ: "Algérie"
-                        }[code];
-                        return country;
-                      }).join(", ") || "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Capacité totale</p>
-                    <p className="text-gray-900 font-medium">{profile.carrier_capacities?.total_capacity || "-"} kg</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Prix par kg</p>
-                    <p className="text-gray-900 font-medium">{profile.carrier_capacities?.price_per_kg || "-"} €</p>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations entreprise</h2>
+                  <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Nom de l'entreprise</p>
+                      <p className="text-gray-900 font-medium">{profile.company_name || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">SIRET</p>
+                      <p className="text-gray-900 font-medium">{profile.siret || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Adresse</p>
+                      <p className="text-gray-900 font-medium">{profile.address || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Zones de couverture</p>
+                      <p className="text-gray-900 font-medium">
+                        {profile.coverage_area?.map((code: string) => {
+                          const country = {
+                            FR: "France",
+                            TN: "Tunisie",
+                            MA: "Maroc",
+                            DZ: "Algérie"
+                          }[code];
+                          return country;
+                        }).join(", ") || "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Capacité totale</p>
+                      <p className="text-gray-900 font-medium">{profile.carrier_capacities?.total_capacity || "-"} kg</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Prix par kg</p>
+                      <p className="text-gray-900 font-medium">{profile.carrier_capacities?.price_per_kg || "-"} €</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             ) : (
               <ClientProfileView profile={profile} />
             )}
