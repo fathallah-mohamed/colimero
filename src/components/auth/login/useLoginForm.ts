@@ -22,19 +22,27 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Log attempt for debugging
+      console.log("Tentative de connexion avec:", email.trim());
+
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) {
-        console.error("Erreur d'authentification:", error);
-        let errorMessage = "Une erreur est survenue lors de la connexion";
+      if (signInError) {
+        console.error("Erreur d'authentification:", signInError);
         
-        if (error.message === "Invalid login credentials") {
-          errorMessage = "Email ou mot de passe incorrect";
+        // Handle specific error cases
+        if (signInError.message === "Invalid login credentials") {
+          setError("Email ou mot de passe incorrect");
+        } else if (signInError.message === "Email not confirmed") {
+          setError("Veuillez confirmer votre email avant de vous connecter");
+        } else if (signInError.message.includes("Invalid email")) {
+          setError("Format d'email invalide");
+        } else {
+          setError("Une erreur est survenue lors de la connexion");
         }
-        setError(errorMessage);
         return;
       }
 
@@ -42,7 +50,11 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
+      // Log successful login for debugging
+      console.log("Connexion réussie, données utilisateur:", data.user);
+      
       const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
@@ -60,6 +72,18 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       });
 
       onSuccess?.();
+
+      // Redirect based on user type
+      switch (userType) {
+        case 'admin':
+          navigate("/admin");
+          break;
+        case 'carrier':
+          navigate("/mes-tournees");
+          break;
+        default:
+          navigate("/");
+      }
 
     } catch (error: any) {
       console.error("Erreur complète:", error);
