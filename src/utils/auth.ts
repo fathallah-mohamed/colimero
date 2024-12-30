@@ -4,13 +4,20 @@ import { useToast } from "@/hooks/use-toast";
 
 export const checkAuthStatus = async () => {
   try {
-    // First clear any potentially invalid session data
+    // First clear any potentially invalid session
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      console.error("Error clearing session:", signOutError);
+    }
+    
+    // Clear any stale token
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Then check current session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
       console.error("Session error:", sessionError);
-      await supabase.auth.signOut();
-      localStorage.removeItem('supabase.auth.token');
       return { isAuthenticated: false, error: sessionError };
     }
 
@@ -21,16 +28,11 @@ export const checkAuthStatus = async () => {
     // Double check the user is still valid
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    if (userError) {
+    if (userError || !user) {
       console.error("User verification error:", userError);
       await supabase.auth.signOut();
       localStorage.removeItem('supabase.auth.token');
       return { isAuthenticated: false, error: userError };
-    }
-
-    if (!user) {
-      await supabase.auth.signOut();
-      return { isAuthenticated: false };
     }
 
     return { isAuthenticated: true, user };
@@ -52,6 +54,7 @@ export const useAuthRedirect = () => {
     if (!isAuthenticated) {
       if (error) {
         console.error("Auth error:", error);
+        // Clear any invalid session data
         await supabase.auth.signOut();
         localStorage.removeItem('supabase.auth.token');
       }

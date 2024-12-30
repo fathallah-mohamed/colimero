@@ -2,9 +2,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const handleLogoutFlow = async () => {
   try {
+    // First check if there's an active session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // If there's no session, consider it a successful logout
+    if (!session) {
+      localStorage.removeItem('supabase.auth.token');
+      return { success: true };
+    }
+
+    // Attempt to sign out
     const { error } = await supabase.auth.signOut();
     
-    // Even if we get a session error, we want to clear local storage
+    // Always clear local storage
     localStorage.removeItem('supabase.auth.token');
     
     // If we get a session error, we still consider it a successful logout
