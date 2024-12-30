@@ -120,9 +120,9 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
 
           <div className="flex items-center gap-3">
             <TransporteurAvatar
-              avatarUrl={tour.carriers?.avatar_url}
+              avatarUrl="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952"
               name={tour.carriers?.company_name || ""}
-              size="xl"
+              size="md"
             />
             <span className="text-gray-600">
               {tour.carriers?.company_name}
