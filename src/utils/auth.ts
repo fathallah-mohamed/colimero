@@ -17,8 +17,6 @@ export const checkAuthStatus = async () => {
     
     if (userError) {
       console.error("User verification error:", userError);
-      // Clear the invalid session
-      await supabase.auth.signOut();
       return { isAuthenticated: false, error: userError };
     }
 
@@ -29,8 +27,6 @@ export const checkAuthStatus = async () => {
     return { isAuthenticated: true, user };
   } catch (error) {
     console.error("Auth check error:", error);
-    // Clear any potentially corrupted session state
-    await supabase.auth.signOut();
     return { isAuthenticated: false, error };
   }
 };
