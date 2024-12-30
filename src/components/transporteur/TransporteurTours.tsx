@@ -14,9 +14,10 @@ type TransporteurToursProps = {
   tours: Tour[];
   type: "public" | "private";
   isLoading: boolean;
+  hideAvatar?: boolean;
 };
 
-export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
+export function TransporteurTours({ tours, type, isLoading, hideAvatar }: TransporteurToursProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selectedPoints, setSelectedPoints] = useState<Record<number, string>>({});
@@ -100,6 +101,7 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
           selectedPoint={selectedPoints[tour.id]}
           onPointSelect={(cityName) => handlePointSelection(tour.id, cityName)}
           onReservation={() => handleReservation(tour.id)}
+          hideAvatar={hideAvatar}
         />
       ))}
 

@@ -107,12 +107,14 @@ export default function TransporteurDetails() {
           <TransporteurTours 
             tours={publicTours} 
             type="public" 
-            isLoading={isLoadingPublic} 
+            isLoading={isLoadingPublic}
+            hideAvatar
           />
           <TransporteurTours 
             tours={privateTours} 
             type="private" 
-            isLoading={isLoadingPrivate} 
+            isLoading={isLoadingPrivate}
+            hideAvatar
           />
         </div>
       </div>

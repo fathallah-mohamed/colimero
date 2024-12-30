@@ -11,9 +11,10 @@ interface TourCardProps {
   selectedPoint: string | undefined;
   onPointSelect: (cityName: string) => void;
   onReservation: () => void;
+  hideAvatar?: boolean;
 }
 
-export function TourCard({ tour, selectedPoint, onPointSelect, onReservation }: TourCardProps) {
+export function TourCard({ tour, selectedPoint, onPointSelect, onReservation, hideAvatar }: TourCardProps) {
   const getGoogleMapsUrl = (location: string, city: string) => {
     const query = encodeURIComponent(`${location}, ${city}`);
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
@@ -34,16 +35,18 @@ export function TourCard({ tour, selectedPoint, onPointSelect, onReservation }: 
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <TransporteurAvatar
-          avatarUrl={tour.carriers?.avatar_url}
-          name={tour.carriers?.company_name || ""}
-          size="md"
-        />
-        <span className="text-gray-600">
-          {tour.carriers?.company_name}
-        </span>
-      </div>
+      {!hideAvatar && (
+        <div className="flex items-center gap-3">
+          <TransporteurAvatar
+            avatarUrl={tour.carriers?.avatar_url}
+            name={tour.carriers?.company_name || ""}
+            size="md"
+          />
+          <span className="text-gray-600">
+            {tour.carriers?.company_name}
+          </span>
+        </div>
+      )}
 
       <TourCapacityDisplay 
         remainingCapacity={tour.remaining_capacity} 
