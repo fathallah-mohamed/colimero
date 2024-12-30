@@ -1,61 +1,47 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { BookingDialog } from "@/components/booking/BookingDialog";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Tour } from "@/types/tour";
+import { Button } from "@/components/ui/button";
+import { TourCapacityDisplay } from "./TourCapacityDisplay";
+import { TourCardHeader } from "./TourCardHeader";
+import { TourCollectionPoints } from "./TourCollectionPoints";
 
 interface TourCardProps {
-  tour: {
-    id: number;
-    route: { name: string }[];
-    destination_country: string;
-  };
+  tour: Tour;
+  selectedPoint: string | undefined;
+  onPointSelect: (cityName: string) => void;
+  onReservation: () => void;
+  hideAvatar?: boolean;
 }
 
-export function TourCard({ tour }: TourCardProps) {
-  const [showBookingDialog, setShowBookingDialog] = useState(false);
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [session, setSession] = useState<any>(null);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-    };
-    checkSession();
-  }, []);
-
-  const handleBookClick = () => {
-    if (!session) {
-      setShowAuthDialog(true);
-    } else {
-      setShowBookingDialog(true);
-    }
-  };
-
+export function TourCard({ tour, selectedPoint, onPointSelect, onReservation, hideAvatar }: TourCardProps) {
   return (
-    <>
-      <div className="tour-card">
-        <h2>{tour.route[0].name}</h2>
-        <button onClick={handleBookClick}>Book Now</button>
-      </div>
-      
-      <BookingDialog
-        isOpen={showBookingDialog}
-        onClose={() => setShowBookingDialog(false)}
-        tourId={tour.id}
-        pickupCity={tour.route[0].name}
-        destinationCountry={tour.destination_country}
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+      <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
+
+      <TourCapacityDisplay 
+        remainingCapacity={tour.remaining_capacity} 
+        totalCapacity={tour.total_capacity}
       />
 
-      <AuthDialog
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
-        onSuccess={() => {
-          setShowAuthDialog(false);
-          setShowBookingDialog(true);
-        }}
-        requiredUserType="client"
+      <TourCollectionPoints
+        route={tour.route}
+        selectedPoint={selectedPoint}
+        onPointSelect={onPointSelect}
       />
-    </>
+
+      <div className="text-center text-sm text-gray-500">
+        Départ pour la {tour.destination_country === "TN" ? "Tunisie" : "France"} le{" "}
+        {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
+      </div>
+
+      <Button 
+        className="w-full bg-blue-500 hover:bg-blue-600"
+        onClick={onReservation}
+        disabled={!selectedPoint}
+      >
+        {selectedPoint ? "Réserver" : "Sélectionnez un point de collecte"}
+      </Button>
+    </div>
   );
 }
