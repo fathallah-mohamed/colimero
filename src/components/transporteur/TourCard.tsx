@@ -1,7 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tour } from "@/types/tour";
-import { Button } from "@/components/ui/button";
 import { TourCapacityDisplay } from "./TourCapacityDisplay";
 import { TourCardHeader } from "./TourCardHeader";
 import { TourCollectionPoints } from "./TourCollectionPoints";
