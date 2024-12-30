@@ -1,69 +1,55 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
-interface AuthResponse {
-  success: boolean;
-  redirectTo?: string;
-}
-
-export const authenticateUser = async (email: string, password: string): Promise<AuthResponse> => {
+export const checkAuthStatus = async () => {
   try {
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password.trim(),
-    });
-
-    if (signInError) {
-      console.error("Erreur d'authentification:", signInError);
-      throw signInError;
-    }
-
-    if (!signInData.user) {
-      throw new Error("Aucune donnée utilisateur reçue");
-    }
-
-    console.log("Connexion réussie, données utilisateur:", signInData.user);
+    const { data: { session }, error } = await supabase.auth.getSession();
     
-    // Vérifier si l'utilisateur est un admin
-    const { data: adminData, error: adminError } = await supabase
-      .from('administrators')
-      .select('*')
-      .eq('id', signInData.user.id)
-      .single();
-
-    console.log("Résultat de la vérification admin:", { adminData, adminError });
-
-    if (adminData) {
-      console.log("Utilisateur admin trouvé:", adminData);
-      return { success: true, redirectTo: "/admin" };
+    if (error) {
+      throw error;
     }
 
-    // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
-    const userType = signInData.user.user_metadata?.user_type;
-    console.log("Type d'utilisateur:", userType);
+    if (!session) {
+      return { isAuthenticated: false };
+    }
+
+    // Verify the session is still valid by attempting to get user
+    const { data: user, error: userError } = await supabase.auth.getUser();
     
-    switch (userType) {
-      case 'carrier':
-        return { success: true, redirectTo: "/mes-tournees" };
-      default:
-        return { success: true, redirectTo: "/" };
-    }
-  } catch (error: any) {
-    console.error("Erreur complète:", error);
-    let errorMessage = "Une erreur est survenue lors de la connexion";
-    
-    if (error.message === "Invalid login credentials") {
-      errorMessage = "Email ou mot de passe incorrect";
-    } else if (error.message === "Email not confirmed") {
-      errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+    if (userError || !user) {
+      // Session is invalid, clear it
+      await supabase.auth.signOut();
+      return { isAuthenticated: false };
     }
 
-    toast({
-      variant: "destructive",
-      title: "Erreur de connexion",
-      description: errorMessage,
-    });
-
-    return { success: false };
+    return { isAuthenticated: true, user };
+  } catch (error) {
+    console.error("Error checking auth status:", error);
+    return { isAuthenticated: false, error };
   }
+};
+
+export const useAuthRedirect = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const checkAndRedirect = async () => {
+    const { isAuthenticated, error } = await checkAuthStatus();
+
+    if (!isAuthenticated) {
+      toast({
+        title: "Session expirée",
+        description: "Veuillez vous reconnecter",
+        variant: "destructive",
+      });
+      navigate("/connexion");
+    }
+
+    if (error) {
+      console.error("Auth error:", error);
+    }
+  };
+
+  return checkAndRedirect;
 };
