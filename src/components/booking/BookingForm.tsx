@@ -354,7 +354,6 @@ export function BookingForm({
           <RecipientInfo 
             formData={formData}
             setFormData={setFormData}
-            destinationCities={destinationCities}
             destinationCountry={destinationCountry}
           />
 
