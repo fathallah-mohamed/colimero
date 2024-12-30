@@ -1,14 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 
 export const checkAuthStatus = async () => {
   try {
-    // Clear any potentially invalid session data first
+    // First clear any potentially invalid session data
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError) {
       console.error("Session error:", sessionError);
+      await supabase.auth.signOut();
       localStorage.removeItem('supabase.auth.token');
       return { isAuthenticated: false, error: sessionError };
     }
@@ -17,25 +16,25 @@ export const checkAuthStatus = async () => {
       return { isAuthenticated: false };
     }
 
-    // Verify the session is still valid with a separate call
+    // Double check the user is still valid
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError) {
       console.error("User verification error:", userError);
-      if (userError.status === 403) {
-        localStorage.removeItem('supabase.auth.token');
-        await supabase.auth.signOut(); // Force a clean signout
-      }
+      await supabase.auth.signOut();
+      localStorage.removeItem('supabase.auth.token');
       return { isAuthenticated: false, error: userError };
     }
 
     if (!user) {
+      await supabase.auth.signOut();
       return { isAuthenticated: false };
     }
 
     return { isAuthenticated: true, user };
   } catch (error) {
     console.error("Error checking auth status:", error);
+    await supabase.auth.signOut();
     localStorage.removeItem('supabase.auth.token');
     return { isAuthenticated: false, error };
   }
@@ -51,6 +50,7 @@ export const useAuthRedirect = () => {
     if (!isAuthenticated) {
       if (error) {
         console.error("Auth error:", error);
+        await supabase.auth.signOut();
         localStorage.removeItem('supabase.auth.token');
       }
       

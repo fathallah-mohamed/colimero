@@ -24,21 +24,19 @@ export default function Navigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initial session check
-    const checkSession = async () => {
-      const { isAuthenticated, user: currentUser } = await checkAuthStatus();
+    const initializeAuth = async () => {
+      // Clear any potentially invalid session first
+      await supabase.auth.signOut();
       
-      if (!isAuthenticated || !currentUser) {
-        setUser(null);
-        setUserType(null);
-        return;
+      // Then check current session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        setUserType(session.user?.user_metadata?.user_type ?? null);
       }
-
-      setUser(currentUser);
-      setUserType(currentUser?.user_metadata?.user_type ?? null);
     };
 
-    checkSession();
+    initializeAuth();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -69,7 +67,7 @@ export default function Navigation() {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: result.error || "Une erreur est survenue lors de la déconnexion",
+        description: "Une erreur est survenue lors de la déconnexion",
       });
     }
   };
