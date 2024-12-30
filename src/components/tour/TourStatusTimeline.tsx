@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Truck, XCircle } from "lucide-react";
+import { CheckCircle2, Circle, Truck, XCircle, CalendarCheck, PackageSearch, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -40,10 +40,10 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
 
   if (currentStatus === 'cancelled') {
     return (
-      <div className="flex items-center justify-center w-full py-4">
+      <div className="flex items-center justify-center w-full py-6">
         <div className="flex flex-col items-center">
-          <XCircle className="h-8 w-8 text-red-500" />
-          <span className="text-sm mt-1 text-red-500 font-medium">Tournée annulée</span>
+          <XCircle className="h-12 w-12 text-red-500" />
+          <span className="text-sm mt-2 text-red-500 font-medium">Tournée annulée</span>
         </div>
       </div>
     );
@@ -53,38 +53,39 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
   const currentIndex = statusOrder.indexOf(currentStatus);
 
   return (
-    <div className="flex items-center justify-between w-full py-4">
+    <div className="flex items-center justify-between w-full py-6">
       {statusOrder.map((status, index) => (
         <div key={status} className="flex flex-col items-center relative">
           <Button
             variant="ghost"
-            size="sm"
+            size="lg"
             className={cn(
-              "rounded-full p-0 h-8 w-8 transition-colors",
-              index <= currentIndex && "hover:bg-gray-100"
+              "rounded-full p-0 h-16 w-16 transition-all duration-200",
+              index <= currentIndex && "hover:bg-gray-100",
+              status === currentStatus && "ring-2 ring-primary ring-offset-2"
             )}
             onClick={() => handleStatusChange(status)}
             disabled={index > currentIndex + 1}
           >
             {index < currentIndex ? (
-              <CheckCircle2 className="h-6 w-6 text-green-500" />
+              <CheckCircle2 className="h-10 w-10 text-green-500" />
             ) : status === currentStatus ? (
-              <Circle className="h-6 w-6 text-blue-500" fill="currentColor" />
-            ) : status === 'in_transit' ? (
-              <Truck className={cn(
-                "h-6 w-6",
-                index === currentIndex + 1 ? "text-gray-400" : "text-gray-300"
-              )} />
-            ) : (
-              <Circle className={cn(
-                "h-6 w-6",
-                index === currentIndex + 1 ? "text-gray-400" : "text-gray-300"
-              )} />
-            )}
+              {
+                planned: <CalendarCheck className="h-10 w-10 text-primary" />,
+                collecting: <PackageSearch className="h-10 w-10 text-primary" />,
+                in_transit: <Truck className="h-10 w-10 text-primary" />,
+                completed: <MapPin className="h-10 w-10 text-primary" />
+              }[status]
+            ) : {
+              planned: <CalendarCheck className={cn("h-10 w-10", index === currentIndex + 1 ? "text-gray-400" : "text-gray-300")} />,
+              collecting: <PackageSearch className={cn("h-10 w-10", index === currentIndex + 1 ? "text-gray-400" : "text-gray-300")} />,
+              in_transit: <Truck className={cn("h-10 w-10", index === currentIndex + 1 ? "text-gray-400" : "text-gray-300")} />,
+              completed: <MapPin className={cn("h-10 w-10", index === currentIndex + 1 ? "text-gray-400" : "text-gray-300")} />
+            }[status]}
           </Button>
           <span className={cn(
-            "text-xs mt-1",
-            status === currentStatus ? "font-medium text-blue-500" : "text-gray-500"
+            "text-sm mt-3 font-medium",
+            status === currentStatus ? "text-primary" : "text-gray-500"
           )}>
             {status === 'planned' && "Planifiée"}
             {status === 'collecting' && "Collecte"}
@@ -93,7 +94,7 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
           </span>
           {index < statusOrder.length - 1 && (
             <div className={cn(
-              "absolute top-4 left-8 w-[calc(100%+1rem)] h-[2px]",
+              "absolute top-8 left-16 w-[calc(100%+1rem)] h-[2px]",
               index < currentIndex ? "bg-green-500" : "bg-gray-200"
             )} />
           )}
