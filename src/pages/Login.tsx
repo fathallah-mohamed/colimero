@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,38 +15,18 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const userType = session.user.user_metadata?.user_type;
-        switch (userType) {
-          case 'admin':
-            navigate("/admin");
-            break;
-          case 'carrier':
-            navigate("/mes-tournees");
-            break;
-          default:
-            navigate("/");
-        }
-      }
-    };
-    
-    checkSession();
-  }, [navigate]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    console.log("Tentative de connexion avec:", email);
 
     try {
       if (!email.trim() || !password.trim()) {
         throw new Error("Veuillez remplir tous les champs");
       }
 
+      console.log("Tentative d'authentification avec Supabase...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -58,12 +38,15 @@ export default function Login() {
       }
 
       if (!data.user) {
+        console.error("Aucune donnée utilisateur reçue");
         throw new Error("Erreur lors de la connexion");
       }
 
+      console.log("Connexion réussie, données utilisateur:", data.user);
       const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
 
-      // Redirect based on user type
+      // Redirection selon le type d'utilisateur
       switch (userType) {
         case 'admin':
           navigate("/admin");

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
-import { checkAuthStatus } from "@/utils/auth";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,25 +23,16 @@ export default function Navigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        setUserType(session.user?.user_metadata?.user_type ?? null);
-      }
-    };
+    // Vérifier l'état de connexion initial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setUserType(session?.user?.user_metadata?.user_type ?? null);
+    });
 
-    initializeAuth();
-
-    // Listen for auth state changes
+    // Écouter les changements d'état de connexion
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        setUserType(session.user?.user_metadata?.user_type ?? null);
-      } else {
-        setUser(null);
-        setUserType(null);
-      }
+      setUser(session?.user ?? null);
+      setUserType(session?.user?.user_metadata?.user_type ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -63,7 +53,7 @@ export default function Navigation() {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
+        description: result.error || "Une erreur est survenue lors de la déconnexion",
       });
     }
   };

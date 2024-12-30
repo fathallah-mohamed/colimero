@@ -1,22 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import { useAuthRedirect } from "@/utils/auth";
 import type { Tour } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
-  const checkAuth = useAuthRedirect();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, "public"],
@@ -100,6 +94,7 @@ export default function EnvoyerColis() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
+
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
 

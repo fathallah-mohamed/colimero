@@ -2,25 +2,36 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const handleLogoutFlow = async () => {
   try {
-    // First check if we have a session
-    const { data: { session } } = await supabase.auth.getSession();
+    // First try to get the session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    // If there's no session, consider it a successful logout
-    if (!session) {
-      return { success: true };
+    if (sessionError) {
+      console.error("Session error:", sessionError);
+      return { success: true }; // Return success since user is effectively logged out
     }
 
-    // Attempt to sign out
+    if (!session) {
+      return { success: true }; // No session means user is already logged out
+    }
+
+    // If we have a session, attempt to sign out without specifying scope
     const { error: signOutError } = await supabase.auth.signOut();
-    
+
     if (signOutError) {
-      console.error("Logout error:", signOutError);
-      return { success: false, error: signOutError };
+      console.error("SignOut error:", signOutError);
+      // If it's a session error, consider it a success since user is effectively logged out
+      if (signOutError.message.includes('session')) {
+        return { success: true };
+      }
+      throw signOutError;
     }
 
     return { success: true };
   } catch (error) {
     console.error("Logout error:", error);
-    return { success: false, error };
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Une erreur est survenue lors de la déconnexion" 
+    };
   }
 };
