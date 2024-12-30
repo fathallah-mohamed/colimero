@@ -29,7 +29,14 @@ export function useProfile() {
         const query = supabase
           .from(table)
           .select(userType === 'carrier' ? `
-            *,
+            id,
+            first_name,
+            last_name,
+            phone,
+            company_name,
+            siret,
+            address,
+            coverage_area,
             carrier_capacities (
               total_capacity,
               price_per_kg,
@@ -39,7 +46,7 @@ export function useProfile() {
               service_type,
               icon
             )
-          ` : '*')
+          ` : 'id, first_name, last_name, phone')
           .eq('id', session.user.id);
 
         const { data, error } = await query.maybeSingle();
