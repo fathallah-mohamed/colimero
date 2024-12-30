@@ -25,23 +25,25 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
   useEffect(() => {
     const fetchCarrierPrice = async () => {
       try {
-        const { data: tourData, error: tourError } = await supabase
+        const { data: tourData } = await supabase
           .from('tours')
           .select('carrier_id')
           .eq('id', tourId)
-          .single();
+          .maybeSingle();
 
-        if (tourError) throw tourError;
+        if (!tourData) {
+          throw new Error('Tour not found');
+        }
 
-        const { data: capacityData, error: capacityError } = await supabase
+        const { data: capacityData } = await supabase
           .from('carrier_capacities')
           .select('price_per_kg')
           .eq('carrier_id', tourData.carrier_id)
-          .single();
+          .maybeSingle();
 
-        if (capacityError) throw capacityError;
-
-        setPricePerKg(capacityData.price_per_kg);
+        if (capacityData) {
+          setPricePerKg(capacityData.price_per_kg);
+        }
       } catch (error) {
         console.error('Error fetching carrier price:', error);
         toast({
@@ -57,19 +59,16 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: existingBooking, error } = await supabase
+        // Changed from .single() to .select() to handle multiple results
+        const { data: existingBookings } = await supabase
           .from('bookings')
           .select('id')
           .eq('tour_id', tourId)
           .eq('user_id', user.id)
-          .single();
+          .neq('status', 'cancelled');
 
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error checking existing booking:', error);
-          return;
-        }
-
-        setHasExistingBooking(!!existingBooking);
+        // If there are any active bookings, set hasExistingBooking to true
+        setHasExistingBooking(existingBookings && existingBookings.length > 0);
       } catch (error) {
         console.error('Error checking existing booking:', error);
       }
@@ -85,13 +84,11 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: clientData, error: clientError } = await supabase
+        const { data: clientData } = await supabase
           .from('clients')
           .select('first_name, last_name, phone')
           .eq('id', user.id)
-          .single();
-
-        if (clientError) throw clientError;
+          .maybeSingle();
 
         if (clientData) {
           const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
