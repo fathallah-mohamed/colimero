@@ -7,8 +7,6 @@ import {
 import { useState } from "react";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 
 type View = "login" | "register" | "forgot-password";
 
@@ -21,21 +19,6 @@ interface AuthDialogProps {
 
 export default function AuthDialog({ isOpen, onClose, onSuccess, requiredUserType }: AuthDialogProps) {
   const [view, setView] = useState<View>("login");
-
-  const getErrorMessage = () => {
-    if (requiredUserType === 'client') {
-      return (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">
-            Cette fonctionnalité est réservée aux clients. Les transporteurs ne peuvent pas réserver de tournées. 
-            Veuillez vous connecter avec un compte client.
-          </AlertDescription>
-        </Alert>
-      );
-    }
-    return null;
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -53,8 +36,6 @@ export default function AuthDialog({ isOpen, onClose, onSuccess, requiredUserTyp
             }
           </p>
         </DialogHeader>
-
-        {getErrorMessage()}
 
         {view === "login" ? (
           <LoginForm
