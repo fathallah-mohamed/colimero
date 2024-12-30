@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingDialog } from "@/components/booking/BookingDialog";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 interface TourCardProps {
   tour: {
@@ -14,7 +14,15 @@ interface TourCardProps {
 export function TourCard({ tour }: TourCardProps) {
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { data: session } = await supabase.auth.getSession();
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+    checkSession();
+  }, []);
 
   const handleBookClick = () => {
     if (!session) {
