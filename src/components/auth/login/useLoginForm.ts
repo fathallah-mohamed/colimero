@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,11 +18,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
     try {
       if (!email.trim() || !password.trim()) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Veuillez remplir tous les champs",
-        });
+        setError("Veuillez remplir tous les champs");
         return;
       }
 
@@ -38,11 +34,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         if (error.message === "Invalid login credentials") {
           errorMessage = "Email ou mot de passe incorrect";
         }
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: errorMessage,
-        });
+        setError(errorMessage);
         return;
       }
 
@@ -54,14 +46,11 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
-        toast({
-          variant: "destructive",
-          title: "Accès refusé",
-          description: requiredUserType === 'client' 
+        setError(
+          requiredUserType === 'client' 
             ? "Cette fonctionnalité est réservée aux clients. Les transporteurs ne peuvent pas réserver de tournées. Veuillez vous connecter avec un compte client."
-            : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur.",
-          duration: 5000,
-        });
+            : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
+        );
         return;
       }
 
@@ -74,11 +63,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
     } catch (error: any) {
       console.error("Erreur complète:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la connexion",
-      });
+      setError("Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
     }

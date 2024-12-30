@@ -21,6 +21,7 @@ export function LoginForm({
     setEmail,
     password,
     setPassword,
+    error,
     handleSubmit,
   } = useLoginForm(onSuccess, requiredUserType);
 
@@ -30,6 +31,7 @@ export function LoginForm({
         email={email}
         password={password}
         isLoading={isLoading}
+        error={error}
         onEmailChange={setEmail}
         onPasswordChange={setPassword}
       />
