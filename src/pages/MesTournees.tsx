@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { TourEditDialog } from "@/components/tour/TourEditDialog";
+import { TourBookingsList } from "@/components/tour/TourBookingsList";
 
 export default function MesTournees() {
   const navigate = useNavigate();
@@ -44,14 +45,26 @@ export default function MesTournees() {
   const fetchTours = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
-      const { data, error } = await supabase
+      const { data: toursData, error: toursError } = await supabase
         .from('tours')
-        .select('*')
+        .select(`
+          *,
+          bookings (
+            id,
+            pickup_city,
+            delivery_city,
+            weight,
+            tracking_number,
+            status,
+            recipient_name,
+            recipient_phone
+          )
+        `)
         .eq('carrier_id', session.user.id)
         .order('departure_date', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching tours:', error);
+      if (toursError) {
+        console.error('Error fetching tours:', toursError);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -60,7 +73,7 @@ export default function MesTournees() {
         return;
       }
 
-      setTours(data || []);
+      setTours(toursData || []);
     }
     setLoading(false);
   };
@@ -193,6 +206,8 @@ export default function MesTournees() {
                     </AlertDialog>
                   </div>
                 </div>
+
+                <TourBookingsList bookings={tour.bookings} />
               </div>
             ))
           )}
