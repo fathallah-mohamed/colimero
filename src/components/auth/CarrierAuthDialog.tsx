@@ -16,7 +16,7 @@ export default function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialog
       <DialogContent 
         className={`
           fixed inset-0 
-          ${isMobile ? 'h-[100vh] p-4' : 'max-h-[90vh] relative'} 
+          ${isMobile ? 'min-h-screen p-4' : 'max-h-[90vh] relative'} 
           w-full max-w-2xl mx-auto
           overflow-hidden
           flex flex-col
@@ -24,15 +24,15 @@ export default function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialog
         `}
       >
         <ScrollArea 
-          className="flex-1 pr-4 overflow-y-auto"
+          className="flex-1 pr-4"
           style={{ 
-            height: isMobile ? 'calc(100vh - 20px)' : 'auto',
+            height: isMobile ? 'calc(100vh - 120px)' : 'auto',
             WebkitOverflowScrolling: 'touch',
             msOverflowStyle: 'none',
             scrollbarWidth: 'none'
           }}
         >
-          <div className="pb-32 md:pb-6">
+          <div className="pb-40 md:pb-6">
             <CarrierSignupForm onSuccess={onClose} />
           </div>
         </ScrollArea>
