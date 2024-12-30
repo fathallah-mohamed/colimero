@@ -33,21 +33,24 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       console.log("Tentative de connexion avec:", email);
       console.log("Tentative d'authentification avec Supabase...");
 
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
-        let errorMessage = "Une erreur est survenue lors de la connexion";
         
         // Analyse détaillée de l'erreur
-        if (signInError.message.includes("Invalid login credentials")) {
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+        const errorBody = signInError.message;
+        console.log("Message d'erreur complet:", errorBody);
+
+        if (errorBody.includes("Invalid login credentials") || errorBody.includes("invalid_credentials")) {
           errorMessage = "Email ou mot de passe incorrect";
-        } else if (signInError.message.includes("Email not confirmed")) {
+        } else if (errorBody.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (signInError.message.includes("Invalid email")) {
+        } else if (errorBody.includes("Invalid email")) {
           errorMessage = "Format d'email invalide";
         }
 
@@ -57,13 +60,13 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         return;
       }
 
-      if (!data.user) {
+      if (!user) {
         setError("Une erreur est survenue lors de la connexion");
         setIsLoading(false);
         return;
       }
 
-      const userType = data.user.user_metadata?.user_type;
+      const userType = user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
