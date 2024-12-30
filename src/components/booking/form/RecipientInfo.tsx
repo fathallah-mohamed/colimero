@@ -11,11 +11,28 @@ interface RecipientInfoProps {
     deliveryCity: string;
   };
   setFormData: (data: any) => void;
-  destinationCities: any;
   destinationCountry: string;
 }
 
-export function RecipientInfo({ formData, setFormData, destinationCities, destinationCountry }: RecipientInfoProps) {
+const destinationCities = {
+  'TN': [
+    { name: 'Tunis', location: 'Centre ville', hours: '9h-17h' },
+    { name: 'Sfax', location: 'Port de Sfax', hours: '8h-16h' },
+    { name: 'Sousse', location: 'Centre ville', hours: '9h-17h' }
+  ],
+  'MA': [
+    { name: 'Casablanca', location: 'Centre ville', hours: '9h-17h' },
+    { name: 'Rabat', location: 'Médina', hours: '8h-16h' },
+    { name: 'Tanger', location: 'Port de Tanger', hours: '9h-17h' }
+  ],
+  'DZ': [
+    { name: 'Alger', location: 'Centre ville', hours: '9h-17h' },
+    { name: 'Oran', location: 'Port d\'Oran', hours: '8h-16h' },
+    { name: 'Constantine', location: 'Centre ville', hours: '9h-17h' }
+  ]
+};
+
+export function RecipientInfo({ formData, setFormData, destinationCountry }: RecipientInfoProps) {
   return (
     <div className="space-y-4">
       <h3 className="font-medium">Informations du destinataire</h3>
@@ -61,7 +78,7 @@ export function RecipientInfo({ formData, setFormData, destinationCities, destin
             <SelectValue placeholder="Choisissez une ville de livraison" />
           </SelectTrigger>
           <SelectContent>
-            {destinationCities[destinationCountry]?.map((city: any) => (
+            {destinationCities[destinationCountry as keyof typeof destinationCities]?.map((city) => (
               <SelectItem key={city.name} value={city.name}>
                 <div className="space-y-1">
                   <div className="font-medium">{city.name}</div>
