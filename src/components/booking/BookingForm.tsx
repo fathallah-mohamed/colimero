@@ -26,7 +26,7 @@ export function BookingForm({ tourId, pickupCity, destinationCountry, onSuccess,
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [weight, setWeight] = useState(1);
+  const [weight, setWeight] = useState(5);
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [selectedSpecialItems, setSelectedSpecialItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
@@ -169,7 +169,10 @@ export function BookingForm({ tourId, pickupCity, destinationCountry, onSuccess,
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <BookingWeightSelector weight={weight} onWeightChange={setWeight} />
+      <BookingWeightSelector 
+        weight={weight} 
+        onWeightChange={setWeight}
+      />
 
       <BookingContentTypes
         selectedTypes={selectedContentTypes}
@@ -185,7 +188,10 @@ export function BookingForm({ tourId, pickupCity, destinationCountry, onSuccess,
         onQuantityChange={handleQuantityChange}
       />
 
-      <BookingPhotoUpload photos={photos} onPhotosChange={setPhotos} />
+      <BookingPhotoUpload 
+        photos={photos}
+        onPhotosChange={setPhotos}
+      />
 
       <div className="space-y-4">
         <div>
