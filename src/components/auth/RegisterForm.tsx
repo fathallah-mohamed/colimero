@@ -44,7 +44,8 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // 1. Créer le compte utilisateur avec les métadonnées
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
         options: {
@@ -57,8 +58,8 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         },
       });
 
-      if (error) {
-        if (error.message === "User already registered") {
+      if (signUpError) {
+        if (signUpError.message === "User already registered") {
           toast({
             variant: "destructive",
             title: "Erreur d'inscription",
@@ -67,19 +68,24 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
           onLogin();
           return;
         }
-        throw error;
+        throw signUpError;
       }
 
-      // Update the clients table with terms acceptance
-      const { error: clientError } = await supabase
-        .from('clients')
-        .update({
-          terms_accepted: true,
-          terms_accepted_at: new Date().toISOString(),
-        })
-        .eq('id', (await supabase.auth.getUser()).data.user?.id);
+      // 2. Mettre à jour la table clients avec les informations supplémentaires
+      if (signUpData.user) {
+        const { error: clientError } = await supabase
+          .from('clients')
+          .update({
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone,
+            terms_accepted: true,
+            terms_accepted_at: new Date().toISOString(),
+          })
+          .eq('id', signUpData.user.id);
 
-      if (clientError) throw clientError;
+        if (clientError) throw clientError;
+      }
 
       toast({
         title: "Compte créé avec succès",
