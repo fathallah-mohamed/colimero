@@ -245,9 +245,7 @@ export function BookingForm({
                   onCheckedChange={(checked) => setResponsibilityAccepted(checked as boolean)}
                 />
                 <Label htmlFor="responsibility" className="text-sm leading-relaxed">
-                  Je comprends et j'accepte que la plateforme agit uniquement en tant qu'intermédiaire et n'est pas responsable 
-                  de la livraison, des dommages, pertes ou retards qui pourraient survenir pendant le transport. La responsabilité 
-                  du transport incombe entièrement au transporteur sélectionné.
+                  Je reconnais que Colimero ne peut être tenu responsable du contenu de mon colis ni des éventuelles infractions liées à son transport. Toute responsabilité repose sur moi en tant qu'expéditeur.
                 </Label>
               </div>
             </div>
