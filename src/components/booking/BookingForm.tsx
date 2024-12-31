@@ -9,6 +9,7 @@ import { BookingCommitments } from "./form/BookingCommitments";
 import { BookingTotalPrice } from "./form/BookingTotalPrice";
 import { useBookingForm } from "@/hooks/useBookingForm";
 import { useConsents } from "@/hooks/useConsents";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const contentTypes = [
   "Vêtements",
@@ -140,66 +141,70 @@ export function BookingForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-center">Détails du colis</h2>
-        <p className="text-sm text-gray-500 text-center">
-          Remplissez les informations de votre colis
-        </p>
+    <form onSubmit={handleSubmit}>
+      <ScrollArea className="h-[80vh] pr-4">
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-center">Détails du colis</h2>
+            <p className="text-sm text-gray-500 text-center">
+              Remplissez les informations de votre colis
+            </p>
 
-        <div className="space-y-4">
-          <div className="bg-blue-50 p-4 rounded-lg mb-4">
-            <p className="text-sm text-blue-600">Prix au kilo: {pricePerKg}€</p>
+            <div className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <p className="text-sm text-blue-600">Prix au kilo: {pricePerKg}€</p>
+              </div>
+
+              <BookingWeightSelector 
+                weight={weight}
+                onWeightChange={handleWeightChange}
+              />
+
+              <BookingContentTypes
+                selectedTypes={selectedContentTypes}
+                onTypeToggle={handleContentTypeToggle}
+                contentTypes={contentTypes}
+              />
+
+              <BookingSpecialItems
+                selectedItems={selectedSpecialItems}
+                onItemToggle={handleSpecialItemToggle}
+                specialItems={specialItems}
+                itemQuantities={itemQuantities}
+                onQuantityChange={handleQuantityChange}
+              />
+
+              <BookingPhotoUpload
+                photos={photos}
+                onPhotoUpload={handlePhotoUpload}
+              />
+
+              <SenderInfo 
+                formData={formData}
+                setFormData={setFormData}
+              />
+
+              <RecipientInfo 
+                formData={formData}
+                setFormData={setFormData}
+                destinationCountry={destinationCountry}
+              />
+
+              <BookingCommitments />
+            </div>
           </div>
 
-          <BookingWeightSelector 
+          <BookingTotalPrice
             weight={weight}
-            onWeightChange={handleWeightChange}
-          />
-
-          <BookingContentTypes
-            selectedTypes={selectedContentTypes}
-            onTypeToggle={handleContentTypeToggle}
-            contentTypes={contentTypes}
-          />
-
-          <BookingSpecialItems
-            selectedItems={selectedSpecialItems}
-            onItemToggle={handleSpecialItemToggle}
-            specialItems={specialItems}
+            pricePerKg={pricePerKg}
+            selectedSpecialItems={selectedSpecialItems}
             itemQuantities={itemQuantities}
-            onQuantityChange={handleQuantityChange}
+            specialItems={specialItems}
+            isLoading={isLoading}
+            disabled={!areConsentsValid()}
           />
-
-          <BookingPhotoUpload
-            photos={photos}
-            onPhotoUpload={handlePhotoUpload}
-          />
-
-          <SenderInfo 
-            formData={formData}
-            setFormData={setFormData}
-          />
-
-          <RecipientInfo 
-            formData={formData}
-            setFormData={setFormData}
-            destinationCountry={destinationCountry}
-          />
-
-          <BookingCommitments />
         </div>
-      </div>
-
-      <BookingTotalPrice
-        weight={weight}
-        pricePerKg={pricePerKg}
-        selectedSpecialItems={selectedSpecialItems}
-        itemQuantities={itemQuantities}
-        specialItems={specialItems}
-        isLoading={isLoading}
-        disabled={!areConsentsValid()}
-      />
+      </ScrollArea>
     </form>
   );
 }

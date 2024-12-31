@@ -154,7 +154,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
       />
 
       <Dialog open={isBookingFormOpen} onOpenChange={setIsBookingFormOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] h-[90vh]">
           {currentTourId && selectedPoints[currentTourId] && currentTour && (
             <BookingForm
               tourId={currentTourId}
