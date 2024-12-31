@@ -12,22 +12,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TourCardProps {
   tour: Tour;
-  selectedPoint: string | undefined;
-  onPointSelect: (cityName: string) => void;
-  onReservation: () => void;
   hideAvatar?: boolean;
+  onBookingClick: (tourId: number, pickupCity: string) => void;
   onStatusChange?: (newStatus: string) => void;
 }
 
 export function TourCard({ 
   tour, 
-  selectedPoint, 
-  onPointSelect, 
-  onReservation, 
   hideAvatar,
+  onBookingClick,
   onStatusChange 
 }: TourCardProps) {
   const [isCarrierOwner, setIsCarrierOwner] = useState(false);
+  const [selectedPoint, setSelectedPoint] = useState<string>();
 
   useEffect(() => {
     const checkOwnership = async () => {
@@ -62,7 +59,7 @@ export function TourCard({
       <TourCollectionPoints
         route={tour.route}
         selectedPoint={selectedPoint}
-        onPointSelect={onPointSelect}
+        onPointSelect={setSelectedPoint}
       />
 
       <div className="text-center text-sm text-gray-500">
@@ -72,7 +69,7 @@ export function TourCard({
 
       <Button 
         className="w-full bg-blue-500 hover:bg-blue-600"
-        onClick={onReservation}
+        onClick={() => selectedPoint && onBookingClick(tour.id, selectedPoint)}
         disabled={!selectedPoint}
       >
         {selectedPoint ? "Réserver" : "Sélectionnez un point de collecte"}

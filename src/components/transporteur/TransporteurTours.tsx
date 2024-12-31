@@ -9,9 +9,10 @@ interface TransporteurToursProps {
   tours: Tour[];
   type: "public" | "private";
   isLoading: boolean;
+  hideAvatar?: boolean;
 }
 
-export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
+export function TransporteurTours({ tours, type, isLoading, hideAvatar }: TransporteurToursProps) {
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [currentTourId, setCurrentTourId] = useState<number | null>(null);
   const [selectedPoints, setSelectedPoints] = useState<Record<number, { pickupCity: string }>>({});
@@ -51,15 +52,16 @@ export function TransporteurTours({ tours, type, isLoading }: TransporteurToursP
           <TourCard
             key={tour.id}
             tour={tour}
+            hideAvatar={hideAvatar}
             onBookingClick={handleBookingClick}
           />
         ))}
       </div>
 
       <Dialog open={isBookingFormOpen} onOpenChange={setIsBookingFormOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0">
           {currentTourId && selectedPoints[currentTourId] && currentTour && (
-            <div className="h-full overflow-hidden">
+            <div className="h-full">
               <BookingForm
                 tourId={currentTourId}
                 pickupCity={selectedPoints[currentTourId].pickupCity}
