@@ -47,7 +47,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4">
         {tours.map((tour) => (
           <TourCard
             key={tour.id}
