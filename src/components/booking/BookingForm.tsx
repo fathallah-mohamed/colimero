@@ -141,59 +141,61 @@ export function BookingForm({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <ScrollArea className="h-[80vh] pr-4">
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-center">Détails du colis</h2>
-            <p className="text-sm text-gray-500 text-center">
-              Remplissez les informations de votre colis
-            </p>
+    <div className="h-full flex flex-col">
+      <div className="p-6 border-b">
+        <h2 className="text-xl font-semibold">Détails du colis</h2>
+        <p className="text-sm text-gray-500">
+          Remplissez les informations de votre colis
+        </p>
+      </div>
 
-            <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                <p className="text-sm text-blue-600">Prix au kilo: {pricePerKg}€</p>
-              </div>
-
-              <BookingWeightSelector 
-                weight={weight}
-                onWeightChange={handleWeightChange}
-              />
-
-              <BookingContentTypes
-                selectedTypes={selectedContentTypes}
-                onTypeToggle={handleContentTypeToggle}
-                contentTypes={contentTypes}
-              />
-
-              <BookingSpecialItems
-                selectedItems={selectedSpecialItems}
-                onItemToggle={handleSpecialItemToggle}
-                specialItems={specialItems}
-                itemQuantities={itemQuantities}
-                onQuantityChange={handleQuantityChange}
-              />
-
-              <BookingPhotoUpload
-                photos={photos}
-                onPhotoUpload={handlePhotoUpload}
-              />
-
-              <SenderInfo 
-                formData={formData}
-                setFormData={setFormData}
-              />
-
-              <RecipientInfo 
-                formData={formData}
-                setFormData={setFormData}
-                destinationCountry={destinationCountry}
-              />
-
-              <BookingCommitments />
+      <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        <ScrollArea className="flex-1 p-6">
+          <div className="space-y-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <p className="text-sm text-blue-600">Prix au kilo: {pricePerKg}€</p>
             </div>
-          </div>
 
+            <BookingWeightSelector 
+              weight={weight}
+              onWeightChange={handleWeightChange}
+            />
+
+            <BookingContentTypes
+              selectedTypes={selectedContentTypes}
+              onTypeToggle={handleContentTypeToggle}
+              contentTypes={contentTypes}
+            />
+
+            <BookingSpecialItems
+              selectedItems={selectedSpecialItems}
+              onItemToggle={handleSpecialItemToggle}
+              specialItems={specialItems}
+              itemQuantities={itemQuantities}
+              onQuantityChange={handleQuantityChange}
+            />
+
+            <BookingPhotoUpload
+              photos={photos}
+              onPhotoUpload={handlePhotoUpload}
+            />
+
+            <SenderInfo 
+              formData={formData}
+              setFormData={setFormData}
+            />
+
+            <RecipientInfo 
+              formData={formData}
+              setFormData={setFormData}
+              destinationCountry={destinationCountry}
+            />
+
+            <BookingCommitments />
+          </div>
+        </ScrollArea>
+
+        <div className="p-6 border-t mt-auto">
           <BookingTotalPrice
             weight={weight}
             pricePerKg={pricePerKg}
@@ -204,7 +206,7 @@ export function BookingForm({
             disabled={!areConsentsValid()}
           />
         </div>
-      </ScrollArea>
-    </form>
+      </form>
+    </div>
   );
 }
