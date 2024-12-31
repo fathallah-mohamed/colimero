@@ -9,6 +9,7 @@ import { TourTimeline } from "./TourTimeline";
 import { TourStatusSelect } from "@/components/tour/TourStatusSelect";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 interface TourCardProps {
   tour: Tour;
@@ -25,14 +26,41 @@ export function TourCard({
 }: TourCardProps) {
   const [isCarrierOwner, setIsCarrierOwner] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const checkOwnership = async () => {
+    const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
       setIsCarrierOwner(session?.user?.id === tour.carrier_id);
     };
-    checkOwnership();
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+      setIsCarrierOwner(session?.user?.id === tour.carrier_id);
+    });
+
+    return () => subscription.unsubscribe();
   }, [tour.carrier_id]);
+
+  const handleBookingClick = () => {
+    if (!selectedPoint) return;
+    
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+    } else {
+      onBookingClick(tour.id, selectedPoint);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthDialog(false);
+    if (selectedPoint) {
+      onBookingClick(tour.id, selectedPoint);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
@@ -69,11 +97,18 @@ export function TourCard({
 
       <Button 
         className="w-full bg-blue-500 hover:bg-blue-600"
-        onClick={() => selectedPoint && onBookingClick(tour.id, selectedPoint)}
+        onClick={handleBookingClick}
         disabled={!selectedPoint}
       >
         {selectedPoint ? "Réserver" : "Sélectionnez un point de collecte"}
       </Button>
+
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={handleAuthSuccess}
+        requiredUserType="client"
+      />
     </div>
   );
 }
