@@ -16,12 +16,6 @@ export function LoginFormActions({
   onCarrierRegister,
   requiredUserType,
 }: LoginFormActionsProps) {
-  // Si requiredUserType n'est pas défini (connexion depuis le header), on montre les deux boutons
-  // Si requiredUserType est 'client' (réservation), on montre uniquement le bouton client
-  // Si requiredUserType est 'carrier' (création tournée), on montre uniquement le bouton transporteur
-  const showClientRegister = !requiredUserType || requiredUserType === 'client';
-  const showCarrierRegister = !requiredUserType || requiredUserType === 'carrier';
-
   return (
     <div className="space-y-4">
       <Button
@@ -32,7 +26,7 @@ export function LoginFormActions({
         {isLoading ? "Connexion..." : "Se connecter"}
       </Button>
 
-      {(showClientRegister || showCarrierRegister) && (
+      {(!requiredUserType || requiredUserType === 'client' || requiredUserType === 'carrier') && (
         <>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -46,7 +40,7 @@ export function LoginFormActions({
           </div>
 
           <div className="grid gap-2">
-            {showClientRegister && requiredUserType !== 'carrier' && (
+            {(!requiredUserType || requiredUserType === 'client') && (
               <Button
                 type="button"
                 variant="outline"
@@ -56,7 +50,7 @@ export function LoginFormActions({
                 Créer un compte client
               </Button>
             )}
-            {showCarrierRegister && requiredUserType !== 'client' && (
+            {(!requiredUserType || requiredUserType === 'carrier') && (
               <Button
                 type="button"
                 variant="outline"
