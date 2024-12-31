@@ -47,21 +47,11 @@ export function useNavigation() {
     }
   };
 
-  const handlePlanifierTourneeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (userType === 'carrier') {
-      navigate('/planifier-une-tournee');
-    } else {
-      navigate('/connexion');
-    }
-  };
-
   const menuItems: MenuItem[] = [
     { 
       name: "Planifier une tournée", 
       href: "/planifier-une-tournee", 
       highlight: true,
-      onClick: handlePlanifierTourneeClick
     },
     { name: "Envoyer un colis", href: "/envoyer-un-colis", highlight: true },
     { name: "Transporteurs", href: "/nos-transporteurs" },

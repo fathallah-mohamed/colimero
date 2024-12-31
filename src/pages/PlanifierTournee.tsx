@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
@@ -13,7 +12,6 @@ export default function PlanifierTournee() {
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<'client' | 'carrier' | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -57,19 +55,6 @@ export default function PlanifierTournee() {
   };
 
   const renderContent = () => {
-    // Si c'est un transporteur connecté, afficher le formulaire de création
-    if (isAuthenticated && userType === 'carrier') {
-      return (
-        <div className="space-y-8">
-          <h1 className="text-3xl font-bold text-center">
-            Créer une nouvelle tournée
-          </h1>
-          <CreateTourForm />
-        </div>
-      );
-    }
-
-    // Pour tous les autres cas (non connecté ou client), afficher la page de présentation
     return (
       <div className="max-w-6xl mx-auto px-4 py-12 text-center">
         <h1 className="text-4xl font-bold text-[#0091FF] mb-6">
@@ -132,7 +117,16 @@ export default function PlanifierTournee() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {renderContent()}
+        {isAuthenticated && userType === 'carrier' ? (
+          <div className="space-y-8">
+            <h1 className="text-3xl font-bold text-center">
+              Créer une nouvelle tournée
+            </h1>
+            <CreateTourForm />
+          </div>
+        ) : (
+          renderContent()
+        )}
       </div>
 
       <CarrierAuthDialog
@@ -143,9 +137,7 @@ export default function PlanifierTournee() {
       <AccessDeniedMessage 
         userType="client" 
         isOpen={isAccessDeniedOpen}
-        onClose={() => {
-          setIsAccessDeniedOpen(false);
-        }}
+        onClose={() => setIsAccessDeniedOpen(false)}
       />
     </div>
   );
