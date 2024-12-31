@@ -2,7 +2,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TourStatus } from "../../types/tour";
 import { cn } from "@/lib/utils";
-import { CalendarCheck, PackageSearch, Truck, MapPin, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { CalendarCheck, PackageSearch, Truck, MapPin, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface TourStatusTimelineProps {
@@ -40,9 +40,11 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
   if (currentStatus === 'cancelled') {
     return (
       <div className="flex items-center justify-center w-full py-6">
-        <div className="flex flex-col items-center">
-          <XCircle className="h-10 w-10 text-destructive" />
-          <span className="text-sm mt-3 font-medium text-destructive">Annulée</span>
+        <div className="flex flex-col items-center gap-2">
+          <div className="bg-red-100 p-3 rounded-full">
+            <XCircle className="h-8 w-8 text-red-500" />
+          </div>
+          <span className="text-sm font-medium text-red-500">Tournée annulée</span>
         </div>
       </div>
     );
@@ -51,25 +53,16 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
   const statusOrder: TourStatus[] = ['planned', 'collecting', 'in_transit', 'completed'];
   const currentIndex = statusOrder.indexOf(currentStatus);
 
-  const getIcon = (status: TourStatus, isCompleted: boolean) => {
-    if (isCompleted) {
-      return <CheckCircle2 className="h-6 w-6 text-green-500" />;
-    }
-
-    const iconClass = cn(
-      "h-6 w-6",
-      status === currentStatus ? "text-white" : "text-gray-400"
-    );
-
+  const getIcon = (status: TourStatus) => {
     switch (status) {
       case "planned":
-        return <CalendarCheck className={iconClass} />;
+        return <CalendarCheck className="h-6 w-6" />;
       case "collecting":
-        return <PackageSearch className={iconClass} />;
+        return <PackageSearch className="h-6 w-6" />;
       case "in_transit":
-        return <Truck className={iconClass} />;
+        return <Truck className="h-6 w-6" />;
       case "completed":
-        return <MapPin className={iconClass} />;
+        return <MapPin className="h-6 w-6" />;
       default:
         return null;
     }
@@ -91,55 +84,66 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto py-8 px-4">
-      <div className="relative">
-        {/* Ligne de progression */}
-        <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2" />
-        <div 
-          className="absolute top-1/2 left-0 h-1 bg-green-500 -translate-y-1/2 transition-all duration-500"
-          style={{ width: `${(currentIndex / (statusOrder.length - 1)) * 100}%` }}
-        />
-
-        {/* Points de statut */}
-        <div className="relative z-10 flex justify-between">
-          {statusOrder.map((status, index) => {
-            const isCompleted = index < currentIndex;
-            const isCurrent = index === currentIndex;
-            
-            return (
-              <div key={status} className="flex flex-col items-center">
-                <Button
-                  variant={isCurrent ? "default" : "ghost"}
-                  size="icon"
-                  className={cn(
-                    "rounded-full w-12 h-12 mb-2 relative",
-                    isCompleted && "bg-green-500",
-                    isCurrent && "bg-primary shadow-lg",
-                    !isCompleted && !isCurrent && "bg-gray-100"
-                  )}
-                  onClick={() => handleStatusChange(status)}
-                  disabled={index > currentIndex + 1}
-                >
-                  {getIcon(status, isCompleted)}
-                  {index < statusOrder.length - 1 && (
-                    <ArrowRight 
-                      className={cn(
-                        "absolute -right-8 top-1/2 -translate-y-1/2 h-4 w-4",
-                        (index < currentIndex) ? "text-green-500" : "text-gray-300"
-                      )} 
-                    />
-                  )}
-                </Button>
-                <span className={cn(
-                  "text-sm font-medium whitespace-nowrap",
-                  isCurrent ? "text-primary" : "text-gray-500"
+    <div className="w-full max-w-4xl mx-auto py-8 px-4">
+      <div className="relative flex justify-between items-center">
+        {statusOrder.map((status, index) => {
+          const isCompleted = index <= currentIndex;
+          const isCurrent = index === currentIndex;
+          
+          return (
+            <div key={status} className="flex flex-col items-center relative z-10">
+              <Button
+                variant="ghost"
+                onClick={() => handleStatusChange(status)}
+                disabled={index > currentIndex + 1}
+                className={cn(
+                  "w-16 h-16 rounded-full p-0 relative transition-all duration-300",
+                  isCompleted && "bg-primary hover:bg-primary/90",
+                  isCurrent && "ring-4 ring-primary/20",
+                  !isCompleted && !isCurrent && "bg-gray-100 hover:bg-gray-200"
+                )}
+              >
+                <div className={cn(
+                  "absolute inset-0 rounded-full transition-transform duration-500",
+                  isCompleted && "scale-100",
+                  !isCompleted && "scale-0"
                 )}>
-                  {getStatusLabel(status)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+                  {isCompleted && !isCurrent && (
+                    <CheckCircle2 className="h-6 w-6 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  )}
+                </div>
+                <div className={cn(
+                  "absolute inset-0 flex items-center justify-center",
+                  isCompleted && !isCurrent && "opacity-0",
+                  (isCurrent || !isCompleted) && "opacity-100"
+                )}>
+                  <div className={cn(
+                    "text-gray-500",
+                    isCompleted && "text-white"
+                  )}>
+                    {getIcon(status)}
+                  </div>
+                </div>
+              </Button>
+              <span className={cn(
+                "mt-4 text-sm font-medium whitespace-nowrap",
+                isCurrent && "text-primary font-semibold",
+                !isCurrent && "text-gray-500"
+              )}>
+                {getStatusLabel(status)}
+              </span>
+            </div>
+          );
+        })}
+        
+        {/* Progress bar */}
+        <div className="absolute top-8 left-0 h-0.5 bg-gray-200 w-full -z-10" />
+        <div 
+          className="absolute top-8 left-0 h-0.5 bg-primary transition-all duration-500 -z-10"
+          style={{ 
+            width: `${(currentIndex / (statusOrder.length - 1)) * 100}%`,
+          }} 
+        />
       </div>
     </div>
   );
