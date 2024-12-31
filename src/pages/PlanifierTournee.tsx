@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
 import { TrendingUp, Users, Shield } from "lucide-react";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export default function PlanifierTournee() {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isCarrierAuthDialogOpen, setIsCarrierAuthDialogOpen] = useState(false);
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -45,7 +47,7 @@ export default function PlanifierTournee() {
 
   const handleCreateTourClick = () => {
     if (!isAuthenticated) {
-      setIsCarrierAuthDialogOpen(true);
+      setIsAuthDialogOpen(true);
       return;
     }
 
@@ -54,6 +56,13 @@ export default function PlanifierTournee() {
       return;
     }
 
+    if (userType === 'carrier') {
+      setShowCreateForm(true);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthDialogOpen(false);
     if (userType === 'carrier') {
       setShowCreateForm(true);
     }
@@ -127,6 +136,17 @@ export default function PlanifierTournee() {
           </div>
         )}
       </div>
+
+      <AuthDialog
+        isOpen={isAuthDialogOpen}
+        onClose={() => setIsAuthDialogOpen(false)}
+        onSuccess={handleAuthSuccess}
+        requiredUserType="carrier"
+        onRegisterClick={() => {
+          setIsAuthDialogOpen(false);
+          setIsCarrierAuthDialogOpen(true);
+        }}
+      />
 
       <CarrierAuthDialog
         isOpen={isCarrierAuthDialogOpen}

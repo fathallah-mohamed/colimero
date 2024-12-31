@@ -15,10 +15,25 @@ interface AuthDialogProps {
   onClose: () => void;
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
+  onRegisterClick?: () => void;
 }
 
-export default function AuthDialog({ isOpen, onClose, onSuccess, requiredUserType }: AuthDialogProps) {
+export default function AuthDialog({ 
+  isOpen, 
+  onClose, 
+  onSuccess, 
+  requiredUserType,
+  onRegisterClick 
+}: AuthDialogProps) {
   const [view, setView] = useState<View>("login");
+
+  const handleRegisterClick = () => {
+    if (requiredUserType === 'carrier' && onRegisterClick) {
+      onRegisterClick();
+    } else {
+      setView("register");
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -40,7 +55,7 @@ export default function AuthDialog({ isOpen, onClose, onSuccess, requiredUserTyp
         {view === "login" ? (
           <LoginForm
             onForgotPassword={() => setView("forgot-password")}
-            onRegister={() => setView("register")}
+            onRegister={handleRegisterClick}
             onSuccess={onSuccess}
             requiredUserType={requiredUserType}
           />
