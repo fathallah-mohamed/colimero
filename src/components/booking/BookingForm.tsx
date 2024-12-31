@@ -10,6 +10,10 @@ import { BookingTotalPrice } from "./form/BookingTotalPrice";
 import { useBookingForm } from "@/hooks/useBookingForm";
 import { useConsents } from "@/hooks/useConsents";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
 
 const contentTypes = [
   "Vêtements",
@@ -49,6 +53,8 @@ export function BookingForm({
   onCancel 
 }: BookingFormProps) {
   const { consentTypes, userConsents } = useConsents();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
   const {
     isLoading,
     weight,
@@ -65,7 +71,7 @@ export function BookingForm({
     formData,
     setFormData,
     hasExistingBooking,
-    handleSubmit,
+    handleSubmit: submitBooking,
   } = useBookingForm(tourId, onSuccess);
 
   const handleWeightChange = (increment: boolean) => {
@@ -125,6 +131,19 @@ export function BookingForm({
             consent.accepted
         )
       );
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (responsibilityAccepted) {
+      setShowConfirmDialog(false);
+      await submitBooking(e);
+    }
   };
 
   if (hasExistingBooking) {
@@ -207,6 +226,46 @@ export function BookingForm({
           />
         </div>
       </form>
+
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmation de réservation</DialogTitle>
+            <DialogDescription>
+              Veuillez lire attentivement et accepter les conditions suivantes avant de confirmer votre réservation.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-6">
+            <div className="space-y-6">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="responsibility"
+                  checked={responsibilityAccepted}
+                  onCheckedChange={(checked) => setResponsibilityAccepted(checked as boolean)}
+                />
+                <Label htmlFor="responsibility" className="text-sm leading-relaxed">
+                  Je comprends et j'accepte que la plateforme agit uniquement en tant qu'intermédiaire et n'est pas responsable 
+                  de la livraison, des dommages, pertes ou retards qui pourraient survenir pendant le transport. La responsabilité 
+                  du transport incombe entièrement au transporteur sélectionné.
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleConfirmBooking}
+              disabled={!responsibilityAccepted}
+            >
+              Confirmer la réservation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
