@@ -42,6 +42,30 @@ export default function AuthDialog({
     setShowCarrierDialog(true);
   };
 
+  const getDialogTitle = () => {
+    if (view === "login") {
+      if (requiredUserType === 'client') {
+        return "Connexion requise pour réserver";
+      } else if (requiredUserType === 'carrier') {
+        return "Connexion requise pour créer une tournée";
+      }
+      return "Connexion";
+    }
+    return "Créer un compte client";
+  };
+
+  const getDialogDescription = () => {
+    if (view === "login") {
+      if (requiredUserType === 'client') {
+        return "Connectez-vous pour réserver cette tournée.";
+      } else if (requiredUserType === 'carrier') {
+        return "Connectez-vous pour créer une tournée.";
+      }
+      return "Connectez-vous à votre compte.";
+    }
+    return "Créez votre compte client pour commencer à expédier vos colis";
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -49,14 +73,11 @@ export default function AuthDialog({
           <DialogHeader>
             <div className="flex justify-between items-center">
               <DialogTitle className="text-2xl font-bold">
-                {view === "login" ? "Connexion requise" : "Créer un compte client"}
+                {getDialogTitle()}
               </DialogTitle>
             </div>
             <p className="text-lg text-gray-600">
-              {view === "login" 
-                ? "Connectez-vous pour réserver cette tournée."
-                : "Créez votre compte client pour commencer à expédier vos colis"
-              }
+              {getDialogDescription()}
             </p>
           </DialogHeader>
 
