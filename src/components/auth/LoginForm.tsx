@@ -5,6 +5,7 @@ import { useLoginForm } from "./login/useLoginForm";
 interface LoginFormProps {
   onForgotPassword: () => void;
   onRegister: () => void;
+  onCarrierRegister: () => void;
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
 }
@@ -12,6 +13,7 @@ interface LoginFormProps {
 export function LoginForm({
   onForgotPassword,
   onRegister,
+  onCarrierRegister,
   onSuccess,
   requiredUserType
 }: LoginFormProps) {
@@ -40,6 +42,7 @@ export function LoginForm({
         isLoading={isLoading}
         onForgotPassword={onForgotPassword}
         onRegister={onRegister}
+        onCarrierRegister={onCarrierRegister}
       />
     </form>
   );

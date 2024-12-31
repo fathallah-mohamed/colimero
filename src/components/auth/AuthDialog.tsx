@@ -7,6 +7,7 @@ import {
 import { useState } from "react";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
+import CarrierAuthDialog from "./CarrierAuthDialog";
 
 type View = "login" | "register" | "forgot-password";
 
@@ -26,6 +27,7 @@ export default function AuthDialog({
   onRegisterClick 
 }: AuthDialogProps) {
   const [view, setView] = useState<View>("login");
+  const [showCarrierDialog, setShowCarrierDialog] = useState(false);
 
   const handleRegisterClick = () => {
     if (requiredUserType === 'carrier' && onRegisterClick) {
@@ -35,34 +37,47 @@ export default function AuthDialog({
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl font-bold">
-              {view === "login" ? "Connexion requise" : "Créer un compte client"}
-            </DialogTitle>
-          </div>
-          <p className="text-lg text-gray-600">
-            {view === "login" 
-              ? "Connectez-vous pour réserver cette tournée."
-              : "Créez votre compte client pour commencer à expédier vos colis"
-            }
-          </p>
-        </DialogHeader>
+  const handleCarrierRegisterClick = () => {
+    onClose();
+    setShowCarrierDialog(true);
+  };
 
-        {view === "login" ? (
-          <LoginForm
-            onForgotPassword={() => setView("forgot-password")}
-            onRegister={handleRegisterClick}
-            onSuccess={onSuccess}
-            requiredUserType={requiredUserType}
-          />
-        ) : (
-          <RegisterForm onLogin={() => setView("login")} />
-        )}
-      </DialogContent>
-    </Dialog>
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex justify-between items-center">
+              <DialogTitle className="text-2xl font-bold">
+                {view === "login" ? "Connexion requise" : "Créer un compte client"}
+              </DialogTitle>
+            </div>
+            <p className="text-lg text-gray-600">
+              {view === "login" 
+                ? "Connectez-vous pour réserver cette tournée."
+                : "Créez votre compte client pour commencer à expédier vos colis"
+              }
+            </p>
+          </DialogHeader>
+
+          {view === "login" ? (
+            <LoginForm
+              onForgotPassword={() => setView("forgot-password")}
+              onRegister={handleRegisterClick}
+              onCarrierRegister={handleCarrierRegisterClick}
+              onSuccess={onSuccess}
+              requiredUserType={requiredUserType}
+            />
+          ) : (
+            <RegisterForm onLogin={() => setView("login")} />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <CarrierAuthDialog 
+        isOpen={showCarrierDialog} 
+        onClose={() => setShowCarrierDialog(false)} 
+      />
+    </>
   );
 }
