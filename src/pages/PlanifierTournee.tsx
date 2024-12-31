@@ -17,62 +17,32 @@ export default function PlanifierTournee() {
 
   useEffect(() => {
     const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Session error:", error);
-          setIsAuthenticated(false);
-          setUserType(null);
-          return;
-        }
-
-        setIsAuthenticated(!!session);
-        if (session?.user) {
-          const userMetadata = session.user.user_metadata;
-          setUserType(userMetadata.user_type as 'client' | 'carrier');
-          
-          // Show access denied dialog if user is a client
-          if (userMetadata.user_type === 'client') {
-            setIsAccessDeniedOpen(true);
-          }
-        } else {
-          setUserType(null);
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        setIsAuthenticated(false);
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      if (session?.user) {
+        const userMetadata = session.user.user_metadata;
+        setUserType(userMetadata.user_type as 'client' | 'carrier');
+      } else {
         setUserType(null);
       }
     };
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
       if (session?.user) {
         const userMetadata = session.user.user_metadata;
         setUserType(userMetadata.user_type as 'client' | 'carrier');
-        
-        // Show access denied dialog if user is a client
-        if (userMetadata.user_type === 'client') {
-          setIsAccessDeniedOpen(true);
-        }
       } else {
         setUserType(null);
-      }
-
-      if (event === 'SIGNED_OUT') {
-        setIsAuthenticated(false);
-        setUserType(null);
-        navigate('/connexion');
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   const handleCreateTourClick = () => {
     if (!isAuthenticated) {
@@ -87,6 +57,7 @@ export default function PlanifierTournee() {
   };
 
   const renderContent = () => {
+    // Si c'est un transporteur connecté, afficher le formulaire de création
     if (isAuthenticated && userType === 'carrier') {
       return (
         <div className="space-y-8">
@@ -98,12 +69,13 @@ export default function PlanifierTournee() {
       );
     }
 
+    // Pour tous les autres cas (non connecté ou client), afficher la page de présentation
     return (
-      <div className="text-center">
+      <div className="max-w-6xl mx-auto px-4 py-12 text-center">
         <h1 className="text-4xl font-bold text-[#0091FF] mb-6">
           Planifiez une tournée et connectez-vous à notre réseau d'expéditeurs !
         </h1>
-        <p className="text-xl text-gray-600 mb-12">
+        <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
           Créez facilement une tournée pour vos trajets, remplissez votre véhicule et optimisez vos revenus. 
           Grâce à Colimero, vous accédez à un large réseau d'expéditeurs prêts à collaborer.
         </p>
@@ -147,9 +119,11 @@ export default function PlanifierTournee() {
           Créer une tournée
         </Button>
 
-        <p className="text-sm text-gray-500 mt-4">
-          Vous devez être connecté pour planifier une tournée
-        </p>
+        {!isAuthenticated && (
+          <p className="text-sm text-gray-500 mt-4">
+            Vous devez être connecté pour planifier une tournée
+          </p>
+        )}
       </div>
     );
   };
@@ -171,7 +145,6 @@ export default function PlanifierTournee() {
         isOpen={isAccessDeniedOpen}
         onClose={() => {
           setIsAccessDeniedOpen(false);
-          navigate('/');
         }}
       />
     </div>
