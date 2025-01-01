@@ -5,9 +5,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { LoginForm } from "./LoginForm";
+import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { RegisterForm } from "./RegisterForm";
 import CarrierAuthDialog from "./CarrierAuthDialog";
+import { ClientLoginForm } from "./login/ClientLoginForm";
+import { CarrierLoginForm } from "./login/CarrierLoginForm";
+import { GeneralLoginForm } from "./login/GeneralLoginForm";
 
 type View = "login" | "register" | "forgot-password";
 
@@ -66,6 +69,34 @@ export default function AuthDialog({
     return "Créez votre compte client pour commencer à expédier vos colis";
   };
 
+  const renderLoginForm = () => {
+    if (requiredUserType === 'client') {
+      return (
+        <ClientLoginForm
+          onForgotPassword={() => setView("forgot-password")}
+          onRegister={handleRegisterClick}
+          onSuccess={onSuccess}
+        />
+      );
+    } else if (requiredUserType === 'carrier') {
+      return (
+        <CarrierLoginForm
+          onForgotPassword={() => setView("forgot-password")}
+          onCarrierRegister={handleCarrierRegisterClick}
+          onSuccess={onSuccess}
+        />
+      );
+    }
+    return (
+      <GeneralLoginForm
+        onForgotPassword={() => setView("forgot-password")}
+        onRegister={handleRegisterClick}
+        onCarrierRegister={handleCarrierRegisterClick}
+        onSuccess={onSuccess}
+      />
+    );
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -82,15 +113,14 @@ export default function AuthDialog({
           </DialogHeader>
 
           {view === "login" ? (
-            <LoginForm
-              onForgotPassword={() => setView("forgot-password")}
-              onRegister={handleRegisterClick}
-              onCarrierRegister={handleCarrierRegisterClick}
-              onSuccess={onSuccess}
-              requiredUserType={requiredUserType}
-            />
-          ) : (
+            renderLoginForm()
+          ) : view === "register" ? (
             <RegisterForm onLogin={() => setView("login")} />
+          ) : (
+            <ForgotPasswordForm
+              onSuccess={() => setView("login")}
+              onCancel={() => setView("login")}
+            />
           )}
         </DialogContent>
       </Dialog>
