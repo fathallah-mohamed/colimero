@@ -6,6 +6,8 @@ import { BookingDetails } from "./card/BookingDetails";
 import { BookingActions } from "./actions/BookingActions";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { BookingStatusBadge } from "./BookingStatusBadge";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -23,6 +25,7 @@ export function BookingCard({
 }: BookingCardProps) {
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
   const updateBookingStatus = async (newStatus: BookingStatus) => {
@@ -76,7 +79,25 @@ export function BookingCard({
         <BookingStatusBadge status={currentStatus} />
       </div>
       
-      <BookingDetails booking={booking} />
+      <Button
+        variant="ghost"
+        className="w-full flex items-center justify-center gap-2"
+        onClick={() => setShowDetails(!showDetails)}
+      >
+        {showDetails ? (
+          <>
+            Masquer les détails
+            <ChevronUp className="h-4 w-4" />
+          </>
+        ) : (
+          <>
+            Voir les détails
+            <ChevronDown className="h-4 w-4" />
+          </>
+        )}
+      </Button>
+
+      {showDetails && <BookingDetails booking={booking} />}
       
       <BookingActions
         status={currentStatus}
