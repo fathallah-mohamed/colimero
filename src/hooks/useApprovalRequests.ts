@@ -26,7 +26,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               company_name
             )
           ),
-          user:profiles!inner (
+          user:clients!inner (
             first_name,
             last_name,
             phone
