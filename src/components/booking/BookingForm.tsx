@@ -9,24 +9,14 @@ import { BookingCommitments } from "./form/BookingCommitments";
 import { BookingTotalPrice } from "./form/BookingTotalPrice";
 import { useConsents } from "@/hooks/useConsents";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { BookingFormProvider } from "./context/BookingFormProvider";
 import { useBookingFormContext } from "./context/BookingFormContext";
+import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 
 const contentTypes = [
-  "Vêtements",
-  "Chaussures",
-  "Produits alimentaires",
-  "Electronique",
-  "Livres",
-  "Jouets",
-  "Cosmétiques",
-  "Médicaments",
-  "Documents",
-  "Accessoires"
+  "Vêtements", "Chaussures", "Produits alimentaires", "Electronique",
+  "Livres", "Jouets", "Cosmétiques", "Médicaments", "Documents", "Accessoires"
 ];
 
 const specialItems = [
@@ -124,7 +114,6 @@ function BookingFormContent({
 
   const areConsentsValid = () => {
     if (!consentTypes || !userConsents) return false;
-    
     return consentTypes
       .filter(type => type.required)
       .every(type => 
@@ -207,12 +196,12 @@ function BookingFormContent({
 
             <SenderInfo 
               formData={formData}
-              setFormData={(newData) => setState(prev => ({ ...prev, formData: newData }))}
+              setFormData={(newData) => setState(prev => ({ ...prev, formData: { ...prev.formData, ...newData } }))}
             />
 
             <RecipientInfo 
               formData={formData}
-              setFormData={(newData) => setState(prev => ({ ...prev, formData: newData }))}
+              setFormData={(newData) => setState(prev => ({ ...prev, formData: { ...prev.formData, ...newData } }))}
               destinationCountry={destinationCountry}
             />
 
@@ -233,50 +222,19 @@ function BookingFormContent({
         </div>
       </form>
 
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmation de réservation</DialogTitle>
-            <DialogDescription>
-              Veuillez lire attentivement et accepter les conditions suivantes avant de confirmer votre réservation.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-6">
-            <div className="space-y-6">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="responsibility"
-                  checked={responsibilityAccepted}
-                  onCheckedChange={(checked) => setResponsibilityAccepted(checked as boolean)}
-                />
-                <Label htmlFor="responsibility" className="text-sm leading-relaxed">
-                  Je reconnais que Colimero ne peut être tenu responsable du contenu de mon colis ni des éventuelles infractions liées à son transport. Toute responsabilité repose sur moi en tant qu'expéditeur.
-                </Label>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-              Annuler
-            </Button>
-            <Button 
-              onClick={handleConfirmBooking}
-              disabled={!responsibilityAccepted}
-            >
-              Confirmer la réservation
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BookingConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        responsibilityAccepted={responsibilityAccepted}
+        onResponsibilityChange={setResponsibilityAccepted}
+        onConfirm={handleConfirmBooking}
+      />
     </div>
   );
 }
 
 export function BookingForm(props: BookingFormProps) {
   const { tourId, onSuccess } = props;
-
   return (
     <BookingFormProvider tourId={tourId} onSuccess={onSuccess}>
       <BookingFormContent {...props} />

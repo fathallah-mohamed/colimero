@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BookingFormData, BookingFormState, BookingStatus } from "@/types/booking";
+import { BookingFormData, BookingFormState } from "@/types/booking";
 
 const generateTrackingNumber = () => {
   return 'TN' + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -47,7 +47,6 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
 
       const bookingData: BookingFormData = {
         ...values,
-        tour_id: tourId,
         user_id: user.id,
         tracking_number: generateTrackingNumber(),
         status: 'pending',
