@@ -14,6 +14,8 @@ interface EditBookingDialogProps {
 }
 
 export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: EditBookingDialogProps) {
+  console.log("Initial booking data:", booking);
+
   const [formData, setFormData] = useState({
     sender_name: booking?.sender_name || "",
     sender_phone: booking?.sender_phone || "",

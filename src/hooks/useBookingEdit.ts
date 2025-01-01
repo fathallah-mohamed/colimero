@@ -22,7 +22,8 @@ export function useBookingEdit(bookingId: string, onSuccess: () => Promise<void>
   const updateBooking = async (formData: BookingFormData, itemQuantities: Record<string, number>) => {
     try {
       setIsSubmitting(true);
-      console.log("Submitting updated booking data:", formData);
+      console.log("Starting booking update for ID:", bookingId);
+      console.log("Form data to submit:", formData);
       console.log("Item quantities:", itemQuantities);
 
       // Format special items to include quantities
