@@ -41,18 +41,14 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         console.error("Erreur d'authentification:", signInError);
         
         // Messages d'erreur spécifiques
-        switch (signInError.message) {
-          case "Invalid login credentials":
-            setError("Email ou mot de passe incorrect");
-            break;
-          case "Email not confirmed":
-            setError("Veuillez confirmer votre email avant de vous connecter");
-            break;
-          case "Invalid email":
-            setError("Format d'email invalide");
-            break;
-          default:
-            setError("Une erreur est survenue lors de la connexion");
+        if (signInError.message.includes("Invalid login credentials")) {
+          setError("Email ou mot de passe incorrect");
+        } else if (signInError.message.includes("Email not confirmed")) {
+          setError("Veuillez confirmer votre email avant de vous connecter");
+        } else if (signInError.message.includes("Invalid email")) {
+          setError("Format d'email invalide");
+        } else {
+          setError("Une erreur est survenue lors de la connexion");
         }
         setPassword("");
         setIsLoading(false);
@@ -95,11 +91,14 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
           navigate("/");
       }
 
-      onSuccess?.();
+      if (onSuccess) {
+        onSuccess();
+      }
 
     } catch (error: any) {
       console.error("Erreur complète:", error);
       setError("Une erreur inattendue est survenue");
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
