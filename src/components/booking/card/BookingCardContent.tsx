@@ -3,9 +3,9 @@ import { BookingHeader } from "./BookingHeader";
 import { BookingStatusBadge } from "../BookingStatusBadge";
 import { BookingActions } from "../actions/BookingActions";
 import { EditBookingDialog } from "../EditBookingDialog";
-import { BookingInfo } from "./BookingInfo";
-import { useBookingStatus } from "../hooks/useBookingStatus";
 import type { BookingStatus } from "@/types/booking";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingCardContentProps {
   booking: any;
@@ -22,8 +22,40 @@ export function BookingCardContent({
   onUpdate,
   tourStatus
 }: BookingCardContentProps) {
+  const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const { isUpdating, updateStatus } = useBookingStatus(booking.id, onStatusChange, onUpdate);
+  const { toast } = useToast();
+
+  const updateBookingStatus = async (newStatus: BookingStatus) => {
+    try {
+      console.log("Updating booking status to:", newStatus, "for booking:", booking.id);
+      
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus 
+        })
+        .eq('id', booking.id);
+
+      if (error) throw error;
+
+      setCurrentStatus(newStatus);
+      onStatusChange(booking.id, newStatus);
+      
+      toast({
+        title: "Succès",
+        description: "Le statut a été mis à jour",
+      });
+    } catch (error) {
+      console.error('Error in updateBookingStatus:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut",
+      });
+    }
+  };
 
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", booking.id);
@@ -42,21 +74,21 @@ export function BookingCardContent({
     <>
       <div className="flex justify-between items-start">
         <BookingHeader booking={booking} />
-        <BookingStatusBadge status={booking.status} />
+        <BookingStatusBadge status={currentStatus} />
       </div>
       
-      <BookingInfo 
-        delivery_city={booking.delivery_city}
-        recipient_name={booking.recipient_name}
-        recipient_phone={booking.recipient_phone}
-      />
+      <div className="mt-4">
+        <p className="text-gray-600">{booking.delivery_city}</p>
+        <p className="font-medium">{booking.recipient_name}</p>
+        <p className="text-gray-600">{booking.recipient_phone}</p>
+      </div>
 
       {showActions && (
         <div className="mt-4">
           <BookingActions
-            status={booking.status}
+            status={currentStatus}
             isCollecting={isCollecting}
-            onStatusChange={updateStatus}
+            onStatusChange={updateBookingStatus}
             onEdit={handleEdit}
             tourStatus={tourStatus}
           />
