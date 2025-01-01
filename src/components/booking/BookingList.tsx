@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingCard } from "./BookingCard";
 import { AlertCircle, Loader2 } from "lucide-react";
+import type { BookingStatus } from "@/types/booking";
 
 export function BookingList() {
-  const { data: bookings, isLoading } = useQuery({
+  const { data: bookings, isLoading, refetch } = useQuery({
     queryKey: ["bookings"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -26,6 +27,11 @@ export function BookingList() {
       return data;
     },
   });
+
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    console.log("Status change requested:", bookingId, newStatus);
+    // The actual update is handled in the BookingCard component
+  };
 
   if (isLoading) {
     return (
@@ -52,7 +58,13 @@ export function BookingList() {
   return (
     <div className="space-y-6">
       {bookings.map((booking) => (
-        <BookingCard key={booking.id} booking={booking} />
+        <BookingCard 
+          key={booking.id} 
+          booking={booking} 
+          isCollecting={true}
+          onStatusChange={handleStatusChange}
+          onUpdate={refetch}
+        />
       ))}
     </div>
   );

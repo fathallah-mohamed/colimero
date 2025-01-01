@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { BookingStatusBadge } from "../BookingStatusBadge";
+import { BookingStatusBadge } from "@/components/booking/BookingStatusBadge";
 import type { BookingStatus } from "@/types/booking";
 
 interface BookingActionsProps {
