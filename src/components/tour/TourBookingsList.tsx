@@ -56,8 +56,8 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
           <div className="space-y-2">
             <p className="text-sm font-medium">Objets spéciaux:</p>
             <div className="flex flex-wrap gap-2">
-              {specialItems.map((item: string) => (
-                <Badge key={item} variant="secondary">
+              {specialItems.map((item: string, index: number) => (
+                <Badge key={`${item}-${index}`} variant="secondary">
                   {item}
                 </Badge>
               ))}
