@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useToast } from "@/hooks/use-toast";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { useProfile } from "@/hooks/use-profile";
 
 interface TourCardProps {
   tour: Tour;
@@ -28,9 +30,11 @@ export function TourCard({
   const [isCarrierOwner, setIsCarrierOwner] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const { toast } = useToast();
+  const { profile } = useProfile();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,7 +54,7 @@ export function TourCard({
     return () => subscription.unsubscribe();
   }, [tour.carrier_id]);
 
-  const handleBookingClick = () => {
+  const handleBookingClick = async () => {
     if (!selectedPoint) return;
     
     if (!isAuthenticated) {
@@ -67,13 +71,22 @@ export function TourCard({
       return;
     }
 
-    onBookingClick(tour.id, selectedPoint);
+    // Si c'est une tournée privée, on affiche le dialogue de demande d'approbation
+    if (tour.type === 'private') {
+      setShowApprovalDialog(true);
+    } else {
+      onBookingClick(tour.id, selectedPoint);
+    }
   };
 
   const handleAuthSuccess = () => {
     setShowAuthDialog(false);
     if (selectedPoint) {
-      onBookingClick(tour.id, selectedPoint);
+      if (tour.type === 'private') {
+        setShowApprovalDialog(true);
+      } else {
+        onBookingClick(tour.id, selectedPoint);
+      }
     }
   };
 
@@ -115,7 +128,12 @@ export function TourCard({
         onClick={handleBookingClick}
         disabled={!selectedPoint}
       >
-        {selectedPoint ? "Réserver" : "Sélectionnez un point de collecte"}
+        {!selectedPoint 
+          ? "Sélectionnez un point de collecte" 
+          : tour.type === 'private' 
+            ? "Demander une approbation" 
+            : "Réserver"
+        }
       </Button>
 
       <AuthDialog 
@@ -123,6 +141,13 @@ export function TourCard({
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"
+      />
+
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={tour.id}
+        userProfile={profile}
       />
     </div>
   );
