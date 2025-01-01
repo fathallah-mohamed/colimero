@@ -22,31 +22,42 @@ export function BookingCardContent({
   onUpdate,
   tourStatus
 }: BookingCardContentProps) {
-  const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
 
   const updateBookingStatus = async (newStatus: BookingStatus) => {
+    if (isUpdating) return;
+
     try {
+      setIsUpdating(true);
       console.log("Updating booking status to:", newStatus, "for booking:", booking.id);
       
       const { error } = await supabase
         .from('bookings')
         .update({ 
           status: newStatus,
-          delivery_status: newStatus 
+          delivery_status: newStatus,
+          updated_at: new Date().toISOString()
         })
         .eq('id', booking.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in updateBookingStatus:', error);
+        throw error;
+      }
 
-      setCurrentStatus(newStatus);
-      onStatusChange(booking.id, newStatus);
+      // Attendre que la mise à jour soit terminée avant de notifier le parent
+      await onStatusChange(booking.id, newStatus);
       
       toast({
         title: "Succès",
         description: "Le statut a été mis à jour",
       });
+
+      // Rafraîchir les données
+      await onUpdate();
+
     } catch (error) {
       console.error('Error in updateBookingStatus:', error);
       toast({
@@ -54,6 +65,8 @@ export function BookingCardContent({
         title: "Erreur",
         description: "Impossible de mettre à jour le statut",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -74,7 +87,7 @@ export function BookingCardContent({
     <>
       <div className="flex justify-between items-start">
         <BookingHeader booking={booking} />
-        <BookingStatusBadge status={currentStatus} />
+        <BookingStatusBadge status={booking.status} />
       </div>
       
       <div className="mt-4">
@@ -86,7 +99,7 @@ export function BookingCardContent({
       {showActions && (
         <div className="mt-4">
           <BookingActions
-            status={currentStatus}
+            status={booking.status}
             isCollecting={isCollecting}
             onStatusChange={updateBookingStatus}
             onEdit={handleEdit}
