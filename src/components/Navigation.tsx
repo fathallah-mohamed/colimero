@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigation } from "./useNavigation";
+import { useNavigation } from "@/components/navigation/useNavigation";
 import { Button } from "@/components/ui/button";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import AccountMenu from "@/components/AccountMenu";
 import MobileMenu from "@/components/MobileMenu";
 import { LogIn } from "lucide-react";
