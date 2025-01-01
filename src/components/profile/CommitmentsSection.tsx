@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface CommitmentStatusProps {
   accepted: boolean;
   description: string;
+  acceptedAt?: string | null;
 }
 
-const CommitmentStatus = ({ accepted, description }: CommitmentStatusProps) => (
+const CommitmentStatus = ({ accepted, description, acceptedAt }: CommitmentStatusProps) => (
   <div className="space-y-2">
     <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
       {accepted ? (
@@ -24,6 +25,11 @@ const CommitmentStatus = ({ accepted, description }: CommitmentStatusProps) => (
         {description}
       </AlertDescription>
     </Alert>
+    {accepted && acceptedAt && (
+      <p className="text-xs text-gray-500 mt-1">
+        Accepté le {new Date(acceptedAt).toLocaleDateString()}
+      </p>
+    )}
   </div>
 );
 
@@ -41,6 +47,7 @@ interface CommitmentType {
 interface CarrierCommitment {
   commitment_type_id: string;
   accepted: boolean;
+  accepted_at: string | null;
   commitment_type: CommitmentType;
 }
 
@@ -53,6 +60,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
         .select(`
           commitment_type_id,
           accepted,
+          accepted_at,
           commitment_type:commitment_types(*)
         `)
         .eq('carrier_id', profile.id);
@@ -78,12 +86,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
 
   return (
     <div>
-      <div className="flex flex-col mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Engagements</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Compte créé le {new Date(profile.created_at!).toLocaleDateString()}
-        </p>
-      </div>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
       <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
         {commitments?.map((commitment) => (
           <div key={commitment.commitment_type_id}>
@@ -91,6 +94,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
             <CommitmentStatus 
               accepted={commitment.accepted}
               description={commitment.commitment_type.description}
+              acceptedAt={commitment.accepted_at}
             />
           </div>
         ))}

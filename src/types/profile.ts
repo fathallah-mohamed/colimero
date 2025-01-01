@@ -18,5 +18,4 @@ export interface ProfileData {
     service_type: string;
     icon: string;
   }>;
-  created_at?: string;
 }
