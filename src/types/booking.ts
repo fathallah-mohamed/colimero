@@ -15,7 +15,7 @@ export interface BookingFormData {
   recipient_phone: string;
   recipient_address: string;
   delivery_city: string;
-  status: "pending" | "confirmed" | "cancelled";
+  status: string;
   tracking_number: string;
   item_type: string;
   customs_declaration: boolean;
