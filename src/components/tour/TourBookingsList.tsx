@@ -71,6 +71,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
             onStatusChange={handleStatusChange}
             onUpdate={handleUpdate}
             isEven={index % 2 === 0}
+            tourStatus={tourStatus}
           />
         ))
       )}

@@ -9,6 +9,7 @@ interface BookingCardProps {
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
   onUpdate: () => Promise<void>;
   isEven?: boolean;
+  tourStatus?: string;
 }
 
 export function BookingCard({ 
@@ -16,7 +17,8 @@ export function BookingCard({
   isCollecting, 
   onStatusChange,
   onUpdate,
-  isEven = false
+  isEven = false,
+  tourStatus
 }: BookingCardProps) {
   return (
     <BookingCardWrapper isEven={isEven}>
@@ -25,6 +27,7 @@ export function BookingCard({
         isCollecting={isCollecting}
         onStatusChange={onStatusChange}
         onUpdate={onUpdate}
+        tourStatus={tourStatus}
       />
       <BookingCardDetails booking={booking} />
     </BookingCardWrapper>

@@ -12,13 +12,15 @@ interface BookingCardContentProps {
   isCollecting: boolean;
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
   onUpdate: () => Promise<void>;
+  tourStatus?: string;
 }
 
 export function BookingCardContent({ 
   booking, 
   isCollecting, 
   onStatusChange,
-  onUpdate 
+  onUpdate,
+  tourStatus
 }: BookingCardContentProps) {
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -66,6 +68,8 @@ export function BookingCardContent({
     setShowEditDialog(false);
   };
 
+  const showActions = isCollecting || tourStatus === 'planned';
+
   return (
     <>
       <div className="flex justify-between items-start">
@@ -79,13 +83,14 @@ export function BookingCardContent({
         <p className="text-gray-600">{booking.recipient_phone}</p>
       </div>
 
-      {isCollecting && (
+      {showActions && (
         <div className="mt-4">
           <BookingActions
             status={currentStatus}
             isCollecting={isCollecting}
             onStatusChange={updateBookingStatus}
             onEdit={handleEdit}
+            tourStatus={tourStatus}
           />
         </div>
       )}
