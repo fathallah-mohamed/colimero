@@ -1,10 +1,11 @@
 import { createContext, useContext } from 'react';
-import { BookingFormState } from '@/types/booking';
+import { BookingFormState, BookingFormData } from '@/types/booking';
 
 interface BookingFormContextType extends BookingFormState {
   setState: React.Dispatch<React.SetStateAction<BookingFormState>>;
   pricePerKg: number;
   isLoading: boolean;
+  handleSubmit: (values: BookingFormData) => Promise<void>;
 }
 
 export const BookingFormContext = createContext<BookingFormContextType | undefined>(undefined);

@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -38,13 +37,13 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
   };
 
   const renderBookingCard = (booking: any) => {
-    const specialItems = Array.isArray(booking.special_items) ? booking.special_items : [];
+    const specialItems = booking.special_items || [];
     
     return (
       <Card key={booking.id} className="p-4 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">{booking.recipient_name}</h3>
-          <Badge variant={booking.status === 'confirmed' ? 'success' : 'default'}>
+          <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
             {booking.status}
           </Badge>
         </div>
@@ -53,7 +52,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
         <p>Adresse de livraison: {booking.recipient_address}</p>
         <p>Téléphone: {booking.recipient_phone}</p>
         
-        {specialItems.length > 0 && (
+        {specialItems && specialItems.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium">Objets spéciaux:</p>
             <div className="flex flex-wrap gap-2">

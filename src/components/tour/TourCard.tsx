@@ -91,7 +91,7 @@ export function TourCard({ tour, onEdit, onDelete, onStatusChange }: TourCardPro
       />
 
       <TourBookingsList 
-        bookings={tour.bookings} 
+        tourId={tour.id}
         tourStatus={tour.status}
       />
     </div>

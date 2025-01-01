@@ -18,6 +18,7 @@ export interface BookingFormState {
 
 export interface BookingFormData {
   tour_id: number;
+  user_id: string;
   pickup_city: string;
   delivery_city: string;
   weight: number;
@@ -25,15 +26,13 @@ export interface BookingFormData {
   recipient_name: string;
   recipient_address: string;
   recipient_phone: string;
-  sender_name?: string;
-  sender_phone?: string;
-  package_description?: string;
-  special_items?: string[];
-  content_types?: string[];
-  photos?: string[];
-  delivery_notes?: string;
+  sender_name: string;
+  sender_phone: string;
+  special_items: string[];
+  content_types: string[];
+  photos: string[];
   terms_accepted: boolean;
   customs_declaration: boolean;
-  status: BookingStatus;
   tracking_number: string;
+  status: BookingStatus;
 }

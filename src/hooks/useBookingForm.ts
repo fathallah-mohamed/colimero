@@ -10,7 +10,6 @@ const generateTrackingNumber = () => {
 
 export function useBookingForm(tourId: number, onSuccess: () => void) {
   const [isLoading, setIsLoading] = useState(false);
-  const [hasExistingBooking, setHasExistingBooking] = useState(false);
   const [state, setState] = useState<BookingFormState>({
     weight: 5,
     selectedContentTypes: [],
@@ -26,11 +25,11 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
       deliveryCity: '',
     },
   });
-  const [pricePerKg] = useState(10); // This could be fetched from the API
+  const [pricePerKg] = useState(10);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = async (values: BookingFormData) => {
+  const handleSubmit = async (values: Omit<BookingFormData, 'user_id' | 'tracking_number' | 'status'>) => {
     try {
       setIsLoading(true);
 
@@ -48,10 +47,9 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
 
       const bookingData: BookingFormData = {
         ...values,
-        tour_id: tourId,
         user_id: user.id,
-        status: 'pending' as BookingStatus,
         tracking_number: generateTrackingNumber(),
+        status: 'pending' as BookingStatus,
       };
 
       const { error } = await supabase.from("bookings").insert(bookingData);
@@ -78,7 +76,6 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
 
   return {
     isLoading,
-    hasExistingBooking,
     pricePerKg,
     ...state,
     setState,
