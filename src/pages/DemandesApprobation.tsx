@@ -29,7 +29,8 @@ export default function DemandesApprobation() {
   const fetchRequests = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
-      const { data, error } = await supabase
+      // First fetch approval requests with tour data
+      const { data: approvalData, error: approvalError } = await supabase
         .from('approval_requests')
         .select(`
           *,
@@ -40,21 +41,35 @@ export default function DemandesApprobation() {
             route,
             total_capacity,
             remaining_capacity
-          ),
-          user:users (
-            email,
-            raw_user_meta_data
           )
         `)
         .eq('tour.carrier_id', session.user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching requests:', error);
+      if (approvalError) {
+        console.error('Error fetching requests:', approvalError);
         return;
       }
 
-      setRequests(data || []);
+      // Then fetch user data for each request
+      if (approvalData) {
+        const requestsWithUserData = await Promise.all(
+          approvalData.map(async (request) => {
+            const { data: userData } = await supabase
+              .from('clients')
+              .select('first_name, last_name, phone')
+              .eq('id', request.user_id)
+              .single();
+
+            return {
+              ...request,
+              user: userData
+            };
+          })
+        );
+
+        setRequests(requestsWithUserData);
+      }
     }
     setLoading(false);
   };
@@ -111,11 +126,13 @@ export default function DemandesApprobation() {
                       {request.tour?.departure_country} → {request.tour?.destination_country}
                     </h2>
                     <p className="text-gray-600">
-                      Client : {request.user?.raw_user_meta_data?.first_name} {request.user?.raw_user_meta_data?.last_name}
+                      Client : {request.user?.first_name} {request.user?.last_name}
                     </p>
-                    <p className="text-gray-600">
-                      Email : {request.user?.email}
-                    </p>
+                    {request.user?.phone && (
+                      <p className="text-gray-600">
+                        Téléphone : {request.user.phone}
+                      </p>
+                    )}
                     <p className="text-gray-600">
                       Date de départ : {request.tour?.departure_date ? 
                         format(new Date(request.tour.departure_date), "EEEE d MMMM yyyy", { locale: fr }) : 
