@@ -10,6 +10,7 @@ import { TourStatusSelect } from "@/components/tour/TourStatusSelect";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface TourCardProps {
   tour: Tour;
@@ -28,18 +29,22 @@ export function TourCard({
   const [selectedPoint, setSelectedPoint] = useState<string>();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
       setIsCarrierOwner(session?.user?.id === tour.carrier_id);
+      setUserType(session?.user?.user_metadata?.user_type || null);
     };
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
       setIsCarrierOwner(session?.user?.id === tour.carrier_id);
+      setUserType(session?.user?.user_metadata?.user_type || null);
     });
 
     return () => subscription.unsubscribe();
@@ -50,9 +55,19 @@ export function TourCard({
     
     if (!isAuthenticated) {
       setShowAuthDialog(true);
-    } else {
-      onBookingClick(tour.id, selectedPoint);
+      return;
     }
+
+    if (userType === 'carrier') {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Les transporteurs ne peuvent pas effectuer de réservations.",
+      });
+      return;
+    }
+
+    onBookingClick(tour.id, selectedPoint);
   };
 
   const handleAuthSuccess = () => {
