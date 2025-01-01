@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BookingHeader } from "./card/BookingHeader";
 import { BookingDetails } from "./card/BookingDetails";
 import { BookingActions } from "./actions/BookingActions";
+import { EditBookingDialog } from "./EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -20,6 +21,7 @@ export function BookingCard({
   onUpdate 
 }: BookingCardProps) {
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
 
   const updateBookingStatus = async (newStatus: BookingStatus) => {
@@ -30,7 +32,7 @@ export function BookingCard({
         .from('bookings')
         .update({ 
           status: newStatus,
-          delivery_status: newStatus // Keep sync with old field for compatibility
+          delivery_status: newStatus
         })
         .eq('id', booking.id);
 
@@ -58,6 +60,11 @@ export function BookingCard({
 
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", booking.id);
+    setShowEditDialog(true);
+  };
+
+  const handleEditComplete = () => {
+    setShowEditDialog(false);
     onUpdate();
   };
 
@@ -70,6 +77,13 @@ export function BookingCard({
         isCollecting={isCollecting}
         onStatusChange={updateBookingStatus}
         onEdit={handleEdit}
+      />
+
+      <EditBookingDialog
+        booking={booking}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onSuccess={handleEditComplete}
       />
     </div>
   );
