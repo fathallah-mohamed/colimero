@@ -1,24 +1,25 @@
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'collected';
 
+export interface FormData {
+  senderName: string;
+  senderPhone: string;
+  recipientName: string;
+  recipientPhone: string;
+  recipientAddress: string;
+  deliveryCity: string;
+}
+
 export interface BookingFormState {
   weight: number;
   selectedContentTypes: string[];
   selectedSpecialItems: string[];
   itemQuantities: Record<string, number>;
   photos: File[];
-  formData: {
-    senderName: string;
-    senderPhone: string;
-    recipientName: string;
-    recipientPhone: string;
-    recipientAddress: string;
-    deliveryCity: string;
-  };
+  formData: FormData;
 }
 
 export interface BookingFormData {
   tour_id: number;
-  user_id?: string;
   pickup_city: string;
   delivery_city: string;
   weight: number;
@@ -33,6 +34,7 @@ export interface BookingFormData {
   photos: string[];
   terms_accepted: boolean;
   customs_declaration: boolean;
-  tracking_number?: string;
-  status?: BookingStatus;
+  tracking_number: string;
+  status: BookingStatus;
+  user_id?: string;
 }

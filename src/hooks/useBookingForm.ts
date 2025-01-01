@@ -8,23 +8,25 @@ const generateTrackingNumber = () => {
   return 'TN' + Math.random().toString(36).substr(2, 9).toUpperCase();
 };
 
+const initialState: BookingFormState = {
+  weight: 5,
+  selectedContentTypes: [],
+  selectedSpecialItems: [],
+  itemQuantities: {},
+  photos: [],
+  formData: {
+    senderName: '',
+    senderPhone: '',
+    recipientName: '',
+    recipientPhone: '',
+    recipientAddress: '',
+    deliveryCity: '',
+  },
+};
+
 export function useBookingForm(tourId: number, onSuccess: () => void) {
   const [isLoading, setIsLoading] = useState(false);
-  const [state, setState] = useState<BookingFormState>({
-    weight: 5,
-    selectedContentTypes: [],
-    selectedSpecialItems: [],
-    itemQuantities: {},
-    photos: [],
-    formData: {
-      senderName: '',
-      senderPhone: '',
-      recipientName: '',
-      recipientPhone: '',
-      recipientAddress: '',
-      deliveryCity: '',
-    },
-  });
+  const [state, setState] = useState<BookingFormState>(initialState);
   const [pricePerKg] = useState(10);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -52,7 +54,9 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
         status: 'pending',
       };
 
-      const { error } = await supabase.from("bookings").insert(bookingData);
+      const { error } = await supabase
+        .from("bookings")
+        .insert(bookingData);
 
       if (error) throw error;
 

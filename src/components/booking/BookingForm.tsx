@@ -13,6 +13,7 @@ import { useState } from "react";
 import { BookingFormProvider } from "./context/BookingFormProvider";
 import { useBookingFormContext } from "./context/BookingFormContext";
 import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
+import { SpecialItemDisplay } from "./form/SpecialItemDisplay";
 
 const contentTypes = [
   "Vêtements", "Chaussures", "Produits alimentaires", "Electronique",
@@ -112,6 +113,13 @@ function BookingFormContent({
     }
   };
 
+  const handleFormDataChange = (newData: Partial<typeof formData>) => {
+    setState(prev => ({
+      ...prev,
+      formData: { ...prev.formData, ...newData }
+    }));
+  };
+
   const areConsentsValid = () => {
     if (!consentTypes || !userConsents) return false;
     return consentTypes
@@ -189,6 +197,15 @@ function BookingFormContent({
               onQuantityChange={handleQuantityChange}
             />
 
+            <div className="flex flex-wrap gap-2">
+              {selectedSpecialItems.map(itemName => (
+                <SpecialItemDisplay
+                  key={itemName}
+                  item={{ name: itemName, quantity: itemQuantities[itemName] || 1 }}
+                />
+              ))}
+            </div>
+
             <BookingPhotoUpload
               photos={photos}
               onPhotoUpload={handlePhotoUpload}
@@ -196,12 +213,12 @@ function BookingFormContent({
 
             <SenderInfo 
               formData={formData}
-              setFormData={(newData) => setState(prev => ({ ...prev, formData: { ...prev.formData, ...newData } }))}
+              setFormData={handleFormDataChange}
             />
 
             <RecipientInfo 
               formData={formData}
-              setFormData={(newData) => setState(prev => ({ ...prev, formData: { ...prev.formData, ...newData } }))}
+              setFormData={handleFormDataChange}
               destinationCountry={destinationCountry}
             />
 
