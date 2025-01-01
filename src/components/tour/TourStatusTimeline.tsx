@@ -19,7 +19,7 @@ export function TourStatusTimeline({
   onStatusChange,
   isCompleted = false 
 }: TourStatusTimelineProps) {
-  const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
+  const { handleStatusChange, isUpdating } = useTimelineTransition(tourId, onStatusChange);
 
   if (currentStatus === 'cancelled') {
     return <CancelledTimeline />;
@@ -34,6 +34,10 @@ export function TourStatusTimeline({
         {statusOrder.map((status, index) => {
           const isStatusCompleted = index < currentIndex;
           const isCurrent = status === currentStatus;
+          const isDisabled = isCompleted || 
+                           isUpdating || 
+                           (index > currentIndex + 1) || 
+                           (index < currentIndex);
           
           return (
             <div key={status} className="flex flex-col items-center relative z-10">
@@ -42,7 +46,7 @@ export function TourStatusTimeline({
                 isCompleted={isStatusCompleted}
                 isCurrent={isCurrent}
                 onClick={() => handleStatusChange(currentStatus, status)}
-                disabled={isCompleted || (index > currentIndex + 1) || (index < currentIndex)}
+                disabled={isDisabled}
               />
               <span className={cn(
                 "mt-4 text-sm font-medium whitespace-nowrap",
