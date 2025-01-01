@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ export default function DemandesApprobation() {
         .from('approval_requests')
         .select(`
           *,
-          tours (
+          tour:tours (
             departure_country,
             destination_country,
             departure_date
@@ -98,10 +98,10 @@ export default function DemandesApprobation() {
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-lg font-semibold">
-                    {request.tours.departure_country} → {request.tours.destination_country}
+                    {request.tour?.departure_country} → {request.tour?.destination_country}
                   </h2>
                   <p className="text-gray-600">
-                    Date de départ : {new Date(request.tours.departure_date).toLocaleDateString()}
+                    Date de départ : {request.tour?.departure_date ? new Date(request.tour.departure_date).toLocaleDateString() : 'Non spécifiée'}
                   </p>
                   <p className="text-gray-600">
                     Statut : <span className={`font-medium ${
