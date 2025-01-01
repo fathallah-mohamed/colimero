@@ -22,6 +22,12 @@ export function ApprovalRequestCard({
     stop.name === request.pickup_city
   );
 
+  const handleCancel = () => {
+    if (onCancel && request.id) {
+      onCancel(request.id);
+    }
+  };
+
   return (
     <div key={request.id} className="bg-white shadow rounded-lg p-6">
       <div className="flex justify-between items-start">
@@ -52,22 +58,27 @@ export function ApprovalRequestCard({
             </p>
           </div>
 
-          {selectedStop && (
-            <div className="bg-gray-50 p-3 rounded-md">
-              <h3 className="font-medium text-gray-900 mb-2">Point de collecte sélectionné :</h3>
-              <p className="text-sm text-gray-600">
-                {selectedStop.name} - {selectedStop.location}
-              </p>
-              <p className="text-sm text-gray-600">
-                Date de collecte : {selectedStop.collection_date ? 
-                  format(new Date(selectedStop.collection_date), "EEEE d MMMM yyyy", { locale: fr }) : 
-                  'Non spécifiée'}
-              </p>
-              <p className="text-sm text-gray-600">
-                Heure : {selectedStop.time}
-              </p>
-            </div>
-          )}
+          <div className="bg-gray-50 p-3 rounded-md">
+            <h3 className="font-medium text-gray-900 mb-2">Point de collecte :</h3>
+            <p className="text-sm text-gray-600">
+              Ville : {request.pickup_city || 'Non spécifiée'}
+            </p>
+            {selectedStop && (
+              <>
+                <p className="text-sm text-gray-600">
+                  Emplacement : {selectedStop.location}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Date de collecte : {selectedStop.collection_date ? 
+                    format(new Date(selectedStop.collection_date), "EEEE d MMMM yyyy", { locale: fr }) : 
+                    format(new Date(request.tour?.collection_date), "EEEE d MMMM yyyy", { locale: fr })}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Heure : {selectedStop.time}
+                </p>
+              </>
+            )}
+          </div>
 
           <div>
             <p className="text-gray-600">
@@ -108,7 +119,7 @@ export function ApprovalRequestCard({
             ) : (
               <Button
                 variant="outline"
-                onClick={() => onCancel?.(request.id)}
+                onClick={handleCancel}
                 className="text-red-600 hover:text-red-700"
               >
                 Annuler la demande
