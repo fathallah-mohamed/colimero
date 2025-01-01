@@ -26,10 +26,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               company_name
             )
           ),
-          user:users (
-            raw_user_meta_data->first_name,
-            raw_user_meta_data->last_name,
-            raw_user_meta_data->phone
+          user:users!inner (
+            first_name:raw_user_meta_data->first_name,
+            last_name:raw_user_meta_data->last_name,
+            phone:raw_user_meta_data->phone
           )
         `)
         .order('created_at', { ascending: false });
@@ -44,7 +44,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
       const { data: approvalData, error: approvalError } = await query;
 
-      if (approvalError) throw approvalError;
+      if (approvalError) {
+        console.error('Error details:', approvalError);
+        throw approvalError;
+      }
+      
       setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error fetching requests:', error);
