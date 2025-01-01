@@ -1,5 +1,12 @@
 export type TourStatus = 'planned' | 'collecting' | 'in_transit' | 'completed' | 'cancelled';
 
+export interface TourStatusInfo {
+  id: number;
+  code: TourStatus;
+  label: string;
+  description: string | null;
+}
+
 export interface RouteStop {
   name: string;
   location: string;
@@ -21,12 +28,7 @@ export interface Tour {
   updated_at: string;
   departure_country: string;
   destination_country: string;
-  status: TourStatus;
-  carriers?: {
-    company_name: string;
-    avatar_url: string | null;
-    carrier_capacities: Array<{
-      price_per_kg: number;
-    }>;
-  };
+  terms_accepted: boolean | null;
+  customs_declaration: boolean | null;
+  status: TourStatus | null;
 }

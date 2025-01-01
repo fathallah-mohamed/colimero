@@ -1,5 +1,12 @@
 export type BookingStatus = 'pending' | 'confirmed' | 'collected' | 'in_transit' | 'cancelled';
 
+export interface BookingStatusInfo {
+  id: number;
+  code: BookingStatus;
+  label: string;
+  description: string | null;
+}
+
 export interface FormData {
   sender_name: string;
   sender_phone: string;

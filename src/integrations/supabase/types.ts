@@ -77,6 +77,30 @@ export type Database = {
           },
         ]
       }
+      booking_statuses: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: number
+          label: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          label: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          label?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           approval_request_id: string | null
@@ -97,7 +121,7 @@ export type Database = {
           sender_name: string | null
           sender_phone: string | null
           special_items: Json | null
-          status: Database["public"]["Enums"]["booking_status"]
+          status: string
           terms_accepted: boolean | null
           tour_id: number
           tracking_number: string
@@ -123,7 +147,7 @@ export type Database = {
           sender_name?: string | null
           sender_phone?: string | null
           special_items?: Json | null
-          status?: Database["public"]["Enums"]["booking_status"]
+          status?: string
           terms_accepted?: boolean | null
           tour_id: number
           tracking_number: string
@@ -149,7 +173,7 @@ export type Database = {
           sender_name?: string | null
           sender_phone?: string | null
           special_items?: Json | null
-          status?: Database["public"]["Enums"]["booking_status"]
+          status?: string
           terms_accepted?: boolean | null
           tour_id?: number
           tracking_number?: string
@@ -170,6 +194,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tours"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_booking_status"
+            columns: ["status"]
+            isOneToOne: false
+            referencedRelation: "booking_statuses"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -561,6 +592,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_statuses: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: number
+          label: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          label: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          label?: string
+        }
+        Relationships: []
+      }
       tours: {
         Row: {
           carrier_id: string
@@ -573,7 +628,7 @@ export type Database = {
           id: number
           remaining_capacity: number
           route: Json
-          status: Database["public"]["Enums"]["tour_status"] | null
+          status: string | null
           terms_accepted: boolean | null
           total_capacity: number
           type: string
@@ -590,7 +645,7 @@ export type Database = {
           id?: number
           remaining_capacity: number
           route: Json
-          status?: Database["public"]["Enums"]["tour_status"] | null
+          status?: string | null
           terms_accepted?: boolean | null
           total_capacity: number
           type: string
@@ -607,13 +662,20 @@ export type Database = {
           id?: number
           remaining_capacity?: number
           route?: Json
-          status?: Database["public"]["Enums"]["tour_status"] | null
+          status?: string | null
           terms_accepted?: boolean | null
           total_capacity?: number
           type?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_tour_status"
+            columns: ["status"]
+            isOneToOne: false
+            referencedRelation: "tour_statuses"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "tours_carrier_id_fkey"
             columns: ["carrier_id"]
