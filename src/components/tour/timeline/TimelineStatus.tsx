@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TimelineIcon } from "./TimelineIcon";
-import { TourStatus } from "../../../types/tour";
+import { TourStatus } from "@/types/tour";
 
 interface TimelineStatusProps {
   status: TourStatus;
@@ -11,7 +11,13 @@ interface TimelineStatusProps {
   onClick: () => void;
 }
 
-export function TimelineStatus({ status, currentStatus, currentIndex, index, onClick }: TimelineStatusProps) {
+export function TimelineStatus({ 
+  status, 
+  currentStatus, 
+  currentIndex, 
+  index, 
+  onClick 
+}: TimelineStatusProps) {
   const isCompleted = index < currentIndex;
   const isCurrent = status === currentStatus;
 
@@ -29,9 +35,10 @@ export function TimelineStatus({ status, currentStatus, currentIndex, index, onC
         disabled={index > currentIndex + 1}
       >
         <TimelineIcon 
-          status={status} 
-          isCompleted={isCompleted} 
-          isCurrent={isCurrent} 
+          status={status}
+          isCompleted={isCompleted}
+          isCurrent={isCurrent}
+          className="h-6 w-6"
         />
       </Button>
       <span className={cn(
