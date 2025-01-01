@@ -15,6 +15,16 @@ export interface RouteStop {
   collection_date: string;
 }
 
+interface CarrierCapacity {
+  price_per_kg: number;
+}
+
+interface Carrier {
+  company_name: string | null;
+  avatar_url: string | null;
+  carrier_capacities?: CarrierCapacity[];
+}
+
 export interface Tour {
   id: number;
   carrier_id: string;
@@ -31,4 +41,5 @@ export interface Tour {
   terms_accepted: boolean | null;
   customs_declaration: boolean | null;
   status: TourStatus | null;
+  carriers?: Carrier | null;
 }

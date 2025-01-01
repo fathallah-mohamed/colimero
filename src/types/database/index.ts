@@ -1,12 +1,13 @@
-import { Tables } from './tables';
-import { CarrierTables } from './carriers';
-import { TourTables } from './tours';
-import { UserTables } from './users';
-import { ItemTables } from './items';
+import type { Tables as BaseTables } from './tables';
+import type { CarrierTables } from './carriers';
+import type { TourTables } from './tours';
+import type { UserTables } from './users';
+import type { ItemTables } from './items';
+import type { Json } from './tables';
 
 export interface Database {
   public: {
-    Tables: Tables & CarrierTables & TourTables & UserTables & ItemTables;
+    Tables: BaseTables & CarrierTables & TourTables & UserTables & ItemTables;
     Views: {
       [_ in never]: never;
     };
