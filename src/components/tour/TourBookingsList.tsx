@@ -49,32 +49,13 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
   }, [tourId]);
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
-    console.log("Changing status to:", newStatus, "for booking:", bookingId);
-    
-    const { error } = await supabase
-      .from("bookings")
-      .update({ 
-        status: newStatus,
-        delivery_status: newStatus
-      })
-      .eq("id", bookingId);
-
-    if (error) {
-      console.error("Error updating booking status:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
-      });
-      return;
-    }
-
+    console.log("Status change requested:", bookingId, newStatus);
     await fetchBookings();
+  };
 
-    toast({
-      title: "Succès",
-      description: `Le statut a été mis à jour en "${newStatus}"`,
-    });
+  const handleUpdate = async () => {
+    console.log("Update requested, fetching bookings...");
+    await fetchBookings();
   };
 
   return (
@@ -88,7 +69,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
             booking={booking}
             isCollecting={tourStatus === "collecting"}
             onStatusChange={handleStatusChange}
-            onUpdate={fetchBookings}
+            onUpdate={handleUpdate}
             isEven={index % 2 === 0}
           />
         ))

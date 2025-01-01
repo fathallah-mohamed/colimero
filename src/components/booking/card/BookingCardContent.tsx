@@ -11,7 +11,7 @@ interface BookingCardContentProps {
   booking: any;
   isCollecting: boolean;
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
 }
 
 export function BookingCardContent({ 
@@ -62,8 +62,8 @@ export function BookingCardContent({
 
   const handleEditSuccess = async () => {
     console.log("Edit successful, updating booking list");
+    await onUpdate();
     setShowEditDialog(false);
-    await onUpdate(); // Attendre la fin de la mise à jour
   };
 
   return (
