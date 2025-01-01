@@ -36,11 +36,11 @@ export function ApprovalRequestCard({
             {userType === 'carrier' && request.user && (
               <>
                 <p className="text-gray-600">
-                  Client : {request.user.raw_user_meta_data_first_name} {request.user.raw_user_meta_data_last_name}
+                  Client : {request.user.first_name} {request.user.last_name}
                 </p>
-                {request.user.raw_user_meta_data_phone && (
+                {request.user.phone && (
                   <p className="text-gray-600">
-                    Téléphone : {request.user.raw_user_meta_data_phone}
+                    Téléphone : {request.user.phone}
                   </p>
                 )}
               </>

@@ -11,60 +11,41 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     if (!userId) return;
 
     try {
-      let query;
-      
+      let query = supabase
+        .from('approval_requests')
+        .select(`
+          *,
+          tour:tours (
+            departure_country,
+            destination_country,
+            departure_date,
+            route,
+            total_capacity,
+            remaining_capacity,
+            carriers (
+              company_name
+            )
+          ),
+          user:users (
+            raw_user_meta_data->first_name,
+            raw_user_meta_data->last_name,
+            raw_user_meta_data->phone
+          )
+        `)
+        .order('created_at', { ascending: false });
+
       if (userType === 'carrier') {
-        // Fetch requests for carrier's tours
-        const { data: approvalData, error: approvalError } = await supabase
-          .from('approval_requests')
-          .select(`
-            *,
-            tour:tours (
-              departure_country,
-              destination_country,
-              departure_date,
-              route,
-              total_capacity,
-              remaining_capacity,
-              carriers (
-                company_name
-              )
-            ),
-            user:auth.users!approval_requests_user_id_fkey (
-              raw_user_meta_data->>first_name,
-              raw_user_meta_data->>last_name,
-              raw_user_meta_data->>phone
-            )
-          `)
-          .eq('tour.carrier_id', userId)
-          .order('created_at', { ascending: false });
-
-        if (approvalError) throw approvalError;
-        setRequests(approvalData || []);
+        // Pour les transporteurs, filtrer par les demandes liées à leurs tournées
+        query = query.eq('tour.carrier_id', userId);
       } else {
-        // Fetch client's requests
-        const { data, error } = await supabase
-          .from('approval_requests')
-          .select(`
-            *,
-            tour:tours (
-              departure_country,
-              destination_country,
-              departure_date,
-              route,
-              total_capacity,
-              remaining_capacity,
-              carriers (
-                company_name
-              )
-            )
-          `)
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setRequests(data || []);
+        // Pour les clients, filtrer par leurs propres demandes
+        query = query.eq('user_id', userId);
       }
+
+      const { data: approvalData, error: approvalError } = await query;
+
+      if (approvalError) throw approvalError;
+      setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error fetching requests:', error);
       toast({
