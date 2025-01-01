@@ -3,6 +3,10 @@ import { useToast } from "./use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { BookingFormData } from "@/types/booking";
 
+const generateTrackingNumber = () => {
+  return 'TN' + Math.random().toString(36).substr(2, 9).toUpperCase();
+};
+
 export function useBookingForm(tourId: number, onSuccess?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -21,6 +25,7 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
 
       const { error } = await supabase.from("bookings").insert({
         ...data,
+        tracking_number: generateTrackingNumber(),
         tour_id: tourId,
         user_id: user.id,
         status: "pending",

@@ -1,5 +1,23 @@
 export type BookingStatus = 'pending' | 'confirmed' | 'collected' | 'in_transit' | 'cancelled';
 
+export interface FormData {
+  senderName: string;
+  senderPhone: string;
+  recipientName: string;
+  recipientPhone: string;
+  recipientAddress: string;
+  deliveryCity: string;
+}
+
+export interface BookingFormState {
+  weight: number;
+  selectedContentTypes: string[];
+  selectedSpecialItems: string[];
+  itemQuantities: Record<string, number>;
+  photos: File[];
+  formData: FormData;
+}
+
 export interface Booking {
   id: string;
   user_id: string;
@@ -25,4 +43,4 @@ export interface Booking {
   created_at: string;
 }
 
-export type BookingFormData = Omit<Booking, 'id' | 'user_id' | 'created_at'>;
+export type BookingFormData = Omit<Booking, 'id' | 'created_at'>;
