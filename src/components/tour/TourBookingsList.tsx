@@ -9,6 +9,11 @@ interface TourBookingsListProps {
   tourStatus: string;
 }
 
+interface SpecialItem {
+  name: string;
+  quantity: number;
+}
+
 export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) {
   const [bookings, setBookings] = useState<any[]>([]);
   const { toast } = useToast();
@@ -56,9 +61,9 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
           <div className="space-y-2">
             <p className="text-sm font-medium">Objets spéciaux:</p>
             <div className="flex flex-wrap gap-2">
-              {specialItems.map((item: string, index: number) => (
-                <Badge key={`${item}-${index}`} variant="secondary">
-                  {item}
+              {specialItems.map((item: SpecialItem, index: number) => (
+                <Badge key={`${item.name}-${index}`} variant="secondary">
+                  {item.name} ({item.quantity})
                 </Badge>
               ))}
             </div>
