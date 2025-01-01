@@ -2,8 +2,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TourStatus } from "../../types/tour";
 import { cn } from "@/lib/utils";
-import { CalendarCheck, PackageSearch, Truck, MapPin, CheckCircle2, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { XCircle } from "lucide-react";
+import { TimelineButton } from "./timeline/TimelineButton";
+import { getStatusLabel } from "./timeline/timelineUtils";
 
 interface TourStatusTimelineProps {
   tourId: number;
@@ -125,36 +126,6 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
   const statusOrder: TourStatus[] = ['planned', 'collecting', 'in_transit', 'completed'];
   const currentIndex = statusOrder.indexOf(currentStatus);
 
-  const getIcon = (status: TourStatus) => {
-    switch (status) {
-      case "planned":
-        return <CalendarCheck className="h-6 w-6" />;
-      case "collecting":
-        return <PackageSearch className="h-6 w-6" />;
-      case "in_transit":
-        return <Truck className="h-6 w-6" />;
-      case "completed":
-        return <MapPin className="h-6 w-6" />;
-      default:
-        return null;
-    }
-  };
-
-  const getStatusLabel = (status: TourStatus) => {
-    switch (status) {
-      case "planned":
-        return "Planifiée";
-      case "collecting":
-        return "Collecte";
-      case "in_transit":
-        return "Livraison";
-      case "completed":
-        return "Terminée";
-      default:
-        return status;
-    }
-  };
-
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4">
       <div className="relative flex justify-between items-center">
@@ -164,39 +135,13 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
           
           return (
             <div key={status} className="flex flex-col items-center relative z-10">
-              <Button
-                variant="ghost"
+              <TimelineButton
+                status={status}
+                isCompleted={isCompleted}
+                isCurrent={isCurrent}
                 onClick={() => handleStatusChange(status)}
                 disabled={index > currentIndex + 1}
-                className={cn(
-                  "w-16 h-16 rounded-full p-0 relative transition-all duration-300",
-                  isCompleted && "bg-primary hover:bg-primary/90",
-                  isCurrent && "ring-4 ring-primary/20",
-                  !isCompleted && !isCurrent && "bg-gray-100 hover:bg-gray-200"
-                )}
-              >
-                <div className={cn(
-                  "absolute inset-0 rounded-full transition-transform duration-500",
-                  isCompleted && "scale-100",
-                  !isCompleted && "scale-0"
-                )}>
-                  {isCompleted && !isCurrent && (
-                    <CheckCircle2 className="h-6 w-6 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                  )}
-                </div>
-                <div className={cn(
-                  "absolute inset-0 flex items-center justify-center",
-                  isCompleted && !isCurrent && "opacity-0",
-                  (isCurrent || !isCompleted) && "opacity-100"
-                )}>
-                  <div className={cn(
-                    "text-gray-500",
-                    isCompleted && "text-white"
-                  )}>
-                    {getIcon(status)}
-                  </div>
-                </div>
-              </Button>
+              />
               <span className={cn(
                 "mt-4 text-sm font-medium whitespace-nowrap",
                 isCurrent && "text-primary font-semibold",

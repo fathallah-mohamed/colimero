@@ -1,4 +1,4 @@
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'collected';
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'collected' | 'in_transit';
 
 export interface FormData {
   senderName: string;
