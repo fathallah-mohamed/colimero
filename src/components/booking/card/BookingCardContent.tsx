@@ -32,7 +32,7 @@ export function BookingCardContent({
         .from('bookings')
         .update({ 
           status: newStatus,
-          delivery_status: newStatus
+          delivery_status: newStatus 
         })
         .eq('id', booking.id);
 

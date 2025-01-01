@@ -2,52 +2,43 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-interface BookingFormData {
-  sender_name: string;
-  sender_phone: string;
-  recipient_name: string;
-  recipient_phone: string;
-  recipient_address: string;
-  delivery_city: string;
-  weight: number;
-  content_types: string[];
-  special_items: string[];
-  photos: string[];
-}
-
 export function useBookingEdit(bookingId: string, onSuccess: () => Promise<void>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const updateBooking = async (formData: BookingFormData, itemQuantities: Record<string, number>) => {
+  const updateBooking = async (formData: any, itemQuantities: Record<string, number>) => {
     try {
       setIsSubmitting(true);
-      console.log("Starting booking update for ID:", bookingId);
-      console.log("Form data to submit:", formData);
+      console.log("Starting booking update with ID:", bookingId);
+      console.log("Form data:", formData);
       console.log("Item quantities:", itemQuantities);
 
-      // Format special items to include quantities
-      const formattedSpecialItems = formData.special_items.map(item => ({
+      // Format special items with quantities
+      const formattedSpecialItems = formData.special_items.map((item: string) => ({
         name: item,
         quantity: itemQuantities[item] || 1
       }));
 
       console.log("Formatted special items:", formattedSpecialItems);
 
+      // Prepare update data
+      const updateData = {
+        sender_name: formData.sender_name,
+        sender_phone: formData.sender_phone,
+        recipient_name: formData.recipient_name,
+        recipient_phone: formData.recipient_phone,
+        recipient_address: formData.recipient_address,
+        delivery_city: formData.delivery_city,
+        weight: formData.weight,
+        content_types: formData.content_types,
+        special_items: formattedSpecialItems,
+      };
+
+      console.log("Final update data:", updateData);
+
       const { data, error } = await supabase
         .from("bookings")
-        .update({
-          sender_name: formData.sender_name,
-          sender_phone: formData.sender_phone,
-          recipient_name: formData.recipient_name,
-          recipient_phone: formData.recipient_phone,
-          recipient_address: formData.recipient_address,
-          delivery_city: formData.delivery_city,
-          weight: formData.weight,
-          content_types: formData.content_types,
-          special_items: formattedSpecialItems,
-          photos: formData.photos
-        })
+        .update(updateData)
         .eq("id", bookingId)
         .select();
 
@@ -56,7 +47,7 @@ export function useBookingEdit(bookingId: string, onSuccess: () => Promise<void>
         throw error;
       }
 
-      console.log("Update successful, updated data:", data);
+      console.log("Update successful, response:", data);
 
       toast({
         title: "Succès",

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { BookingFormFields } from "./edit-booking/BookingFormFields";
-import { ContentTypesSection } from "./edit-booking/ContentTypesSection";
-import { SpecialItemsSection } from "./edit-booking/SpecialItemsSection";
 import { useBookingEdit } from "@/hooks/useBookingEdit";
+import { BookingContentTypes } from "./BookingContentTypes";
+import { BookingSpecialItems } from "./BookingSpecialItems";
+import { BookingWeightSelector } from "./BookingWeightSelector";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface EditBookingDialogProps {
   booking: any;
@@ -14,8 +16,6 @@ interface EditBookingDialogProps {
 }
 
 export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: EditBookingDialogProps) {
-  console.log("Initial booking data:", booking);
-
   const [formData, setFormData] = useState({
     sender_name: booking?.sender_name || "",
     sender_phone: booking?.sender_phone || "",
@@ -26,7 +26,6 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
     weight: booking?.weight || 5,
     content_types: booking?.content_types || [],
     special_items: booking?.special_items?.map((item: any) => item.name) || [],
-    photos: booking?.photos || [],
   });
 
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>(
@@ -40,12 +39,39 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
 
   const handleFieldChange = (field: string, value: any) => {
     console.log(`Updating field ${field} with value:`, value);
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleQuantityChange = (item: string, quantity: number) => {
-    console.log(`Updating quantity for ${item} to:`, quantity);
-    setItemQuantities((prev) => ({ ...prev, [item]: quantity }));
+  const handleWeightChange = (increment: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      weight: Math.min(Math.max(increment ? prev.weight + 1 : prev.weight - 1, 5), 30)
+    }));
+  };
+
+  const handleContentTypeToggle = (type: string) => {
+    setFormData(prev => ({
+      ...prev,
+      content_types: prev.content_types.includes(type)
+        ? prev.content_types.filter(t => t !== type)
+        : [...prev.content_types, type]
+    }));
+  };
+
+  const handleSpecialItemToggle = (item: string) => {
+    setFormData(prev => ({
+      ...prev,
+      special_items: prev.special_items.includes(item)
+        ? prev.special_items.filter(i => i !== item)
+        : [...prev.special_items, item]
+    }));
+  };
+
+  const handleQuantityChange = (item: string, increment: boolean) => {
+    setItemQuantities(prev => ({
+      ...prev,
+      [item]: Math.max((prev[item] || 1) + (increment ? 1 : -1), 1)
+    }));
   };
 
   const handleSubmit = async () => {
@@ -65,20 +91,90 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
         </DialogHeader>
 
         <div className="space-y-6">
-          <BookingFormFields 
-            formData={formData}
-            onChange={handleFieldChange}
+          <div className="space-y-4">
+            <div>
+              <Label>Nom de l'expéditeur</Label>
+              <Input
+                value={formData.sender_name}
+                onChange={(e) => handleFieldChange("sender_name", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Téléphone de l'expéditeur</Label>
+              <Input
+                value={formData.sender_phone}
+                onChange={(e) => handleFieldChange("sender_phone", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Nom du destinataire</Label>
+              <Input
+                value={formData.recipient_name}
+                onChange={(e) => handleFieldChange("recipient_name", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Téléphone du destinataire</Label>
+              <Input
+                value={formData.recipient_phone}
+                onChange={(e) => handleFieldChange("recipient_phone", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Adresse du destinataire</Label>
+              <Input
+                value={formData.recipient_address}
+                onChange={(e) => handleFieldChange("recipient_address", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Ville de livraison</Label>
+              <Input
+                value={formData.delivery_city}
+                onChange={(e) => handleFieldChange("delivery_city", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <BookingWeightSelector
+            weight={formData.weight}
+            onWeightChange={handleWeightChange}
           />
 
-          <ContentTypesSection
-            contentTypes={formData.content_types}
-            onChange={(types) => handleFieldChange("content_types", types)}
+          <BookingContentTypes
+            selectedTypes={formData.content_types}
+            onTypeToggle={handleContentTypeToggle}
+            contentTypes={[
+              "Vêtements",
+              "Chaussures",
+              "Jouets",
+              "Livres",
+              "Cosmétiques",
+              "Accessoires",
+              "Electronique",
+              "Produits alimentaires",
+              "Médicaments",
+              "Documents"
+            ]}
           />
 
-          <SpecialItemsSection
-            specialItems={formData.special_items}
+          <BookingSpecialItems
+            selectedItems={formData.special_items}
+            onItemToggle={handleSpecialItemToggle}
+            specialItems={[
+              { name: "Vélo", price: 50, icon: "bicycle" },
+              { name: "Trottinette", price: 30, icon: "scooter" },
+              { name: "Télévision", price: 80, icon: "tv" },
+              { name: "Meuble", price: 100, icon: "cabinet" },
+              { name: "Instrument de musique", price: 70, icon: "music" },
+              { name: "Équipement sportif", price: 40, icon: "dumbbell" }
+            ]}
             itemQuantities={itemQuantities}
-            onSpecialItemChange={(items) => handleFieldChange("special_items", items)}
             onQuantityChange={handleQuantityChange}
           />
 
