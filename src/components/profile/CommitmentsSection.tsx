@@ -30,23 +30,10 @@ interface CommitmentsSectionProps {
 }
 
 export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
-  console.log("Profile data for commitments:", profile);
-  
-  // Conversion stricte en booléen en vérifiant si la valeur est strictement true
-  const termsAccepted = profile.terms_accepted === true;
-  const customsTermsAccepted = profile.customs_terms_accepted === true;
-  const responsibilityTermsAccepted = profile.responsibility_terms_accepted === true;
-
-  console.log("Commitment values after conversion:", {
-    termsAccepted,
-    customsTermsAccepted,
-    responsibilityTermsAccepted,
-    rawValues: {
-      terms: profile.terms_accepted,
-      customs: profile.customs_terms_accepted,
-      responsibility: profile.responsibility_terms_accepted
-    }
-  });
+  // Forcer la conversion en booléen avec !!
+  const termsAccepted = !!profile.terms_accepted;
+  const customsTermsAccepted = !!profile.customs_terms_accepted;
+  const responsibilityTermsAccepted = !!profile.responsibility_terms_accepted;
 
   return (
     <div>
