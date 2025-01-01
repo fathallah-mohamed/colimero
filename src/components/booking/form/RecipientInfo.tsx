@@ -1,21 +1,10 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { FormData } from "@/types/booking";
 
 interface RecipientInfoProps {
-  formData: {
-    recipientName: string;
-    recipientPhone: string;
-    recipientAddress: string;
-    deliveryCity: string;
-  };
-  setFormData: React.Dispatch<React.SetStateAction<{
-    senderName: string;
-    senderPhone: string;
-    recipientName: string;
-    recipientPhone: string;
-    recipientAddress: string;
-    deliveryCity: string;
-  }>>;
+  formData: FormData;
+  setFormData: (data: Partial<FormData>) => void;
   destinationCountry: string;
 }
 
@@ -30,7 +19,7 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
             id="recipientName"
             value={formData.recipientName}
             onChange={(e) =>
-              setFormData((prev) => ({ ...prev, recipientName: e.target.value }))
+              setFormData({ recipientName: e.target.value })
             }
             placeholder="Nom du destinataire"
           />
@@ -41,7 +30,7 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
             id="recipientPhone"
             value={formData.recipientPhone}
             onChange={(e) =>
-              setFormData((prev) => ({ ...prev, recipientPhone: e.target.value }))
+              setFormData({ recipientPhone: e.target.value })
             }
             placeholder="Numéro de téléphone"
           />
@@ -52,7 +41,7 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
             id="recipientAddress"
             value={formData.recipientAddress}
             onChange={(e) =>
-              setFormData((prev) => ({ ...prev, recipientAddress: e.target.value }))
+              setFormData({ recipientAddress: e.target.value })
             }
             placeholder="Adresse de livraison"
           />
@@ -63,7 +52,7 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
             id="deliveryCity"
             value={formData.deliveryCity}
             onChange={(e) =>
-              setFormData((prev) => ({ ...prev, deliveryCity: e.target.value }))
+              setFormData({ deliveryCity: e.target.value })
             }
             placeholder="Ville de livraison"
           />

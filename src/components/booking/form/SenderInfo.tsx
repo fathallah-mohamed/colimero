@@ -1,13 +1,11 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FormData } from "@/types/booking";
 
 interface SenderInfoProps {
-  formData: {
-    senderName: string;
-    senderPhone: string;
-  };
-  setFormData: (data: any) => void;
+  formData: FormData;
+  setFormData: (data: Partial<FormData>) => void;
 }
 
 export function SenderInfo({ formData, setFormData }: SenderInfoProps) {
@@ -18,7 +16,7 @@ export function SenderInfo({ formData, setFormData }: SenderInfoProps) {
         <Label>Nom et prénom</Label>
         <Input
           value={formData.senderName}
-          onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
+          onChange={(e) => setFormData({ senderName: e.target.value })}
           required
           readOnly
           className="bg-gray-50"
@@ -39,7 +37,7 @@ export function SenderInfo({ formData, setFormData }: SenderInfoProps) {
           <Input
             type="tel"
             value={formData.senderPhone}
-            onChange={(e) => setFormData({ ...formData, senderPhone: e.target.value })}
+            onChange={(e) => setFormData({ senderPhone: e.target.value })}
             required
             readOnly
             className="flex-1 bg-gray-50"
