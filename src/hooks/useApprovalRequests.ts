@@ -26,10 +26,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               company_name
             )
           ),
-          user:users!inner (
-            first_name:raw_user_meta_data->first_name,
-            last_name:raw_user_meta_data->last_name,
-            phone:raw_user_meta_data->phone
+          user:profiles!inner (
+            first_name,
+            last_name,
+            phone
           )
         `)
         .order('created_at', { ascending: false });
