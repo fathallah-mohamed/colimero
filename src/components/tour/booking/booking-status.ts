@@ -3,11 +3,13 @@ import { BookingStatus } from "@/types/booking";
 export const getStatusBadgeVariant = (status: BookingStatus) => {
   switch (status) {
     case "collected":
-      return "default";
+      return "success";
     case "cancelled":
       return "destructive";
     case "in_transit":
       return "secondary";
+    case "pending":
+      return "warning";
     default:
       return "secondary";
   }
