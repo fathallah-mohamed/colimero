@@ -36,82 +36,88 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
         </div>
       </div>
 
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <User className="h-5 w-5 text-primary/70" />
-          Informations personnelles
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InfoItem 
-            icon={User} 
-            label="Prénom" 
-            value={profile.first_name || "-"} 
-          />
-          <InfoItem 
-            icon={User} 
-            label="Nom" 
-            value={profile.last_name || "-"} 
-          />
-          <InfoItem 
-            icon={Mail} 
-            label="Email" 
-            value={profile.email || "-"} 
-          />
-          <InfoItem 
-            icon={Phone} 
-            label="Téléphone" 
-            value={profile.phone || "-"} 
-          />
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-primary/70" />
-          Informations entreprise
-        </h2>
-        <div className="grid grid-cols-1 gap-4">
-          <InfoItem 
-            icon={Building2} 
-            label="Nom de l'entreprise" 
-            value={profile.company_name || "-"} 
-          />
-          <InfoItem 
-            icon={Wallet} 
-            label="SIRET" 
-            value={profile.siret || "-"} 
-          />
-          <InfoItem 
-            icon={MapPin} 
-            label="Adresse" 
-            value={profile.address || "-"} 
-          />
-          <InfoItem 
-            icon={MapPin} 
-            label="Zones de couverture" 
-            value={profile.coverage_area?.map((code: string) => {
-              const country = {
-                FR: "France",
-                TN: "Tunisie",
-                MA: "Maroc",
-                DZ: "Algérie"
-              }[code];
-              return country;
-            }).join(", ") || "-"} 
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Section Informations personnelles */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <User className="h-5 w-5 text-primary/70" />
+            Informations personnelles
+          </h2>
+          <div className="space-y-4">
             <InfoItem 
-              icon={Weight} 
-              label="Capacité totale" 
-              value={`${profile.carrier_capacities?.total_capacity || "-"} kg`} 
+              icon={User} 
+              label="Prénom" 
+              value={profile.first_name || "-"} 
             />
             <InfoItem 
-              icon={Euro} 
-              label="Prix par kg" 
-              value={`${profile.carrier_capacities?.price_per_kg || "-"} €`} 
+              icon={User} 
+              label="Nom" 
+              value={profile.last_name || "-"} 
+            />
+            <InfoItem 
+              icon={Mail} 
+              label="Email" 
+              value={profile.email || "-"} 
+            />
+            <InfoItem 
+              icon={Phone} 
+              label="Téléphone" 
+              value={profile.phone || "-"} 
             />
           </div>
         </div>
+
+        {/* Section Informations entreprise */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-primary/70" />
+            Informations entreprise
+          </h2>
+          <div className="space-y-4">
+            <InfoItem 
+              icon={Building2} 
+              label="Nom de l'entreprise" 
+              value={profile.company_name || "-"} 
+            />
+            <InfoItem 
+              icon={Wallet} 
+              label="SIRET" 
+              value={profile.siret || "-"} 
+            />
+            <InfoItem 
+              icon={MapPin} 
+              label="Adresse" 
+              value={profile.address || "-"} 
+            />
+            <InfoItem 
+              icon={MapPin} 
+              label="Zones de couverture" 
+              value={profile.coverage_area?.map((code: string) => {
+                const country = {
+                  FR: "France",
+                  TN: "Tunisie",
+                  MA: "Maroc",
+                  DZ: "Algérie"
+                }[code];
+                return country;
+              }).join(", ") || "-"} 
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Section Capacités */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InfoItem 
+          icon={Weight} 
+          label="Capacité totale" 
+          value={`${profile.carrier_capacities?.total_capacity || "-"} kg`} 
+        />
+        <InfoItem 
+          icon={Euro} 
+          label="Prix par kg" 
+          value={`${profile.carrier_capacities?.price_per_kg || "-"} €`} 
+        />
       </div>
 
       <CommitmentsSection profile={profile} />
