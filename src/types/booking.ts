@@ -1,4 +1,4 @@
-export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'collected' | 'in_transit' | 'delivered';
+export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'collected' | 'in_transit' | 'delivered' | 'cancelled';
 
 export interface BookingStatusInfo {
   id: number;

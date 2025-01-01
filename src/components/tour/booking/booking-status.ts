@@ -25,6 +25,12 @@ export const getStatusLabel = (status: BookingStatus) => {
       return "En transit";
     case "pending":
       return "En attente";
+    case "accepted":
+      return "Accepté";
+    case "rejected":
+      return "Refusé";
+    case "delivered":
+      return "Livré";
     default:
       return status;
   }
