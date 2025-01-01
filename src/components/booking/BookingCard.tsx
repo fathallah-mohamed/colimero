@@ -23,14 +23,20 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
 
   const updateBookingStatus = async (newStatus: BookingStatus) => {
     try {
-      console.log("Updating booking status:", newStatus);
+      console.log("Updating booking status to:", newStatus, "for booking:", booking.id);
       
       const { error } = await supabase
         .from('bookings')
-        .update({ status: newStatus })
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus // Garder la synchronisation avec l'ancien champ pour compatibilité
+        })
         .eq('id', booking.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating booking status:', error);
+        throw error;
+      }
 
       setCurrentStatus(newStatus);
       
