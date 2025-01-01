@@ -46,7 +46,10 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
             variant="outline"
             size="sm"
             className="text-red-500 hover:text-red-600"
-            onClick={() => handleStatusChange("cancelled")}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStatusChange("cancelled");
+            }}
           >
             <XSquare className="h-4 w-4 mr-2" />
             Annuler
@@ -55,7 +58,10 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
             variant="outline"
             size="sm"
             className="text-green-500 hover:text-green-600"
-            onClick={() => handleStatusChange("collected")}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStatusChange("collected");
+            }}
           >
             <CheckSquare className="h-4 w-4 mr-2" />
             Marquer comme collecté
@@ -68,7 +74,10 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
           variant="outline"
           size="sm"
           className="text-blue-500 hover:text-blue-600"
-          onClick={() => handleStatusChange("pending")}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleStatusChange("pending");
+          }}
         >
           <RotateCcw className="h-4 w-4 mr-2" />
           Remettre en attente

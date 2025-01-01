@@ -35,7 +35,7 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
       });
       
       if (onUpdate) {
-        onUpdate();
+        await onUpdate();
       }
     } catch (error: any) {
       toast({
