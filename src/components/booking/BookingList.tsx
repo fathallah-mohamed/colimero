@@ -33,6 +33,10 @@ export function BookingList() {
     // The actual update is handled in the BookingCard component
   };
 
+  const handleUpdate = async (): Promise<void> => {
+    await refetch();
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -63,7 +67,7 @@ export function BookingList() {
           booking={booking} 
           isCollecting={true}
           onStatusChange={handleStatusChange}
-          onUpdate={refetch}
+          onUpdate={handleUpdate}
           isEven={index % 2 === 0}
         />
       ))}
