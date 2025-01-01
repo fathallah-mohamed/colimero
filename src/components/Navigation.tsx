@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useNavigation } from "./useNavigation";
+import { useNavigation } from "./navigation/useNavigation";
 import { Button } from "@/components/ui/button";
-import { AuthDialog } from "@/components/auth/AuthDialog";
-import AccountMenu from "@/components/AccountMenu";
-import MobileMenu from "@/components/MobileMenu";
+import AuthDialog from "@/components/auth/AuthDialog";
+import AccountMenu from "./navigation/AccountMenu";
+import MobileMenu from "./navigation/MobileMenu";
 import { LogIn } from "lucide-react";
 
 export default function Navigation() {
