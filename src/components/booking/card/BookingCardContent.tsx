@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { BookingHeader } from "./BookingHeader";
 import { BookingStatusBadge } from "../BookingStatusBadge";
-import { BookingDetails } from "../details/BookingDetails";
 import { BookingActions } from "../actions/BookingActions";
 import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
@@ -71,6 +70,12 @@ export function BookingCardContent({
         <BookingStatusBadge status={currentStatus} />
       </div>
       
+      <div className="mt-4">
+        <p className="text-gray-600">{booking.delivery_city}</p>
+        <p className="font-medium">{booking.recipient_name}</p>
+        <p className="text-gray-600">{booking.recipient_phone}</p>
+      </div>
+
       <BookingActions
         status={currentStatus}
         isCollecting={isCollecting}
