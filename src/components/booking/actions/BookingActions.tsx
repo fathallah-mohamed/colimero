@@ -7,19 +7,15 @@ interface BookingActionsProps {
   isCollecting: boolean;
   onStatusChange: (status: BookingStatus) => void;
   onEdit: () => void;
-  tourStatus: string;
 }
 
 export function BookingActions({ 
   status, 
   isCollecting, 
   onStatusChange, 
-  onEdit,
-  tourStatus
+  onEdit 
 }: BookingActionsProps) {
-  const canModifyBooking = tourStatus === 'planned';
-
-  if (!canModifyBooking && !isCollecting) return null;
+  if (!isCollecting) return null;
 
   const handleStatusChange = (newStatus: BookingStatus) => {
     console.log("BookingActions - Changing status to:", newStatus);
@@ -34,15 +30,13 @@ export function BookingActions({
 
   return (
     <div className="flex items-center gap-2">
-      {canModifyBooking && (
-        <BookingActionButton
-          onClick={handleEdit}
-          icon={Edit}
-          label="Modifier"
-        />
-      )}
+      <BookingActionButton
+        onClick={handleEdit}
+        icon={Edit}
+        label="Modifier"
+      />
 
-      {status === "cancelled" && canModifyBooking && (
+      {status === "cancelled" && (
         <BookingActionButton
           onClick={() => handleStatusChange("pending")}
           icon={RotateCcw}
@@ -53,26 +47,22 @@ export function BookingActions({
 
       {status === "pending" && (
         <>
-          {canModifyBooking && (
-            <BookingActionButton
-              onClick={() => handleStatusChange("cancelled")}
-              icon={XSquare}
-              label="Annuler"
-              colorClass="text-red-500 hover:text-red-600"
-            />
-          )}
-          {isCollecting && (
-            <BookingActionButton
-              onClick={() => handleStatusChange("collected")}
-              icon={CheckSquare}
-              label="Marquer comme collecté"
-              colorClass="text-green-500 hover:text-green-600"
-            />
-          )}
+          <BookingActionButton
+            onClick={() => handleStatusChange("cancelled")}
+            icon={XSquare}
+            label="Annuler"
+            colorClass="text-red-500 hover:text-red-600"
+          />
+          <BookingActionButton
+            onClick={() => handleStatusChange("collected")}
+            icon={CheckSquare}
+            label="Marquer comme collecté"
+            colorClass="text-green-500 hover:text-green-600"
+          />
         </>
       )}
 
-      {status === "collected" && isCollecting && (
+      {status === "collected" && (
         <BookingActionButton
           onClick={() => handleStatusChange("pending")}
           icon={RotateCcw}
