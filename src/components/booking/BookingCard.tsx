@@ -23,6 +23,8 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
 
   const updateBookingStatus = async (newStatus: BookingStatus) => {
     try {
+      console.log("Updating booking status:", newStatus);
+      
       const { error } = await supabase
         .from('bookings')
         .update({ status: newStatus })
