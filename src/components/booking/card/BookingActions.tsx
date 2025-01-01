@@ -1,86 +1,70 @@
-import { Button } from "@/components/ui/button";
-import { BookingStatusBadge } from "@/components/booking/BookingStatusBadge";
-import { Edit2, CheckSquare, XSquare, RotateCcw } from "lucide-react";
-import type { BookingStatus } from "@/types/booking";
+import { BookingStatus } from "@/types/booking";
+import { CheckSquare, XSquare, RotateCcw, Edit } from "lucide-react";
+import { BookingActionButton } from "./BookingActionButton";
 
 interface BookingActionsProps {
-  bookingId: string;
-  currentStatus: BookingStatus;
+  status: BookingStatus;
   isCollecting: boolean;
-  onStatusChange: (newStatus: BookingStatus) => void;
-  onUpdate: () => void;
+  onStatusChange: (status: BookingStatus) => void;
+  onEdit: () => void;
 }
 
-export function BookingActions({
-  bookingId,
-  currentStatus,
-  isCollecting,
-  onStatusChange,
-  onUpdate,
+export function BookingActions({ 
+  status, 
+  isCollecting, 
+  onStatusChange, 
+  onEdit 
 }: BookingActionsProps) {
+  if (!isCollecting) return null;
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Edit button clicked");
+    onEdit();
+  };
+
   return (
-    <div className="flex justify-between items-center pt-4 border-t">
-      <BookingStatusBadge status={currentStatus} />
-      <div className="flex gap-2">
-        {isCollecting && (
-          <>
-            {currentStatus === "cancelled" && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onStatusChange("pending")}
-                className="text-blue-500 hover:text-blue-600"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Remettre en attente
-              </Button>
-            )}
+    <div className="flex items-center gap-2">
+      <BookingActionButton
+        onClick={handleEdit}
+        icon={Edit}
+        label="Modifier"
+      />
 
-            {currentStatus === "pending" && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onStatusChange("cancelled")}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <XSquare className="h-4 w-4 mr-2" />
-                  Annuler
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onUpdate}
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Modifier
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onStatusChange("collected")}
-                  className="text-green-600 hover:text-green-700"
-                >
-                  <CheckSquare className="h-4 w-4 mr-2" />
-                  Marquer comme collecté
-                </Button>
-              </>
-            )}
+      {status === "cancelled" && (
+        <BookingActionButton
+          onClick={() => onStatusChange("pending")}
+          icon={RotateCcw}
+          label="Remettre en attente"
+          colorClass="text-blue-500 hover:text-blue-600"
+        />
+      )}
 
-            {currentStatus === "collected" && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onStatusChange("pending")}
-                className="text-blue-500 hover:text-blue-600"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Remettre en attente
-              </Button>
-            )}
-          </>
-        )}
-      </div>
+      {status === "pending" && (
+        <>
+          <BookingActionButton
+            onClick={() => onStatusChange("cancelled")}
+            icon={XSquare}
+            label="Annuler"
+            colorClass="text-red-500 hover:text-red-600"
+          />
+          <BookingActionButton
+            onClick={() => onStatusChange("collected")}
+            icon={CheckSquare}
+            label="Marquer comme collecté"
+            colorClass="text-green-500 hover:text-green-600"
+          />
+        </>
+      )}
+
+      {status === "collected" && (
+        <BookingActionButton
+          onClick={() => onStatusChange("pending")}
+          icon={RotateCcw}
+          label="Remettre en attente"
+          colorClass="text-blue-500 hover:text-blue-600"
+        />
+      )}
     </div>
   );
 }

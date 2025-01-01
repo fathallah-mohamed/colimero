@@ -27,7 +27,10 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
     try {
       const { error } = await supabase
         .from('bookings')
-        .update({ status: newStatus })
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus 
+        })
         .eq('id', booking.id);
 
       if (error) throw error;
@@ -52,10 +55,14 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
     }
   };
 
+  const handleEdit = () => {
+    console.log("Opening edit dialog for booking:", booking.id);
+    setShowEditDialog(true);
+  };
+
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        {/* En-tête avec les informations principales */}
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-start">
             <div>
@@ -68,18 +75,16 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
             <BookingStatusBadge status={booking.status} />
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end">
             <BookingActions
               status={booking.status}
               isCollecting={isCollecting}
               onStatusChange={handleStatusChange}
-              onEdit={() => setShowEditDialog(true)}
+              onEdit={handleEdit}
             />
           </div>
         </div>
 
-        {/* Bouton Voir les détails */}
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="w-full flex items-center gap-2">

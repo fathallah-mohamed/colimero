@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { LucideIcon } from "lucide-react";
 
 interface BookingActionButtonProps {
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   icon: LucideIcon;
   label: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
@@ -16,17 +16,12 @@ export function BookingActionButton({
   variant = "outline",
   colorClass
 }: BookingActionButtonProps) {
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onClick();
-  };
-
   return (
     <Button
       variant={variant}
       size="sm"
       className={colorClass}
-      onClick={handleClick}
+      onClick={onClick}
     >
       <Icon className="h-4 w-4 mr-2" />
       {label}
