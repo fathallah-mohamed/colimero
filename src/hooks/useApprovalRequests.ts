@@ -69,7 +69,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
     if (error) {
       console.error('Error checking existing request:', error);
-      return { exists: true, status: null }; // En cas d'erreur, on empêche la création par précaution
+      return { exists: true, status: null };
     }
 
     const pendingOrApproved = data?.find(request => 
@@ -89,55 +89,60 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   };
 
   const handleApproval = async (requestId: string, approved: boolean) => {
-    const { error } = await supabase
-      .from('approval_requests')
-      .update({
-        status: approved ? 'approved' : 'rejected',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', requestId);
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: approved ? 'approved' : 'rejected',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: `La demande a été ${approved ? 'approuvée' : 'rejetée'} avec succès.`,
+      });
+
+      await fetchRequests();
+    } catch (error) {
+      console.error('Error handling approval:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Une erreur est survenue lors de la mise à jour de la demande.",
       });
-      return;
     }
-
-    toast({
-      title: "Succès",
-      description: `La demande a été ${approved ? 'approuvée' : 'rejetée'} avec succès.`,
-    });
-
-    fetchRequests();
   };
 
   const handleCancelRequest = async (requestId: string) => {
-    const { error } = await supabase
-      .from('approval_requests')
-      .update({
-        status: 'cancelled',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', requestId);
+    try {
+      console.log('Cancelling request:', requestId);
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "La demande a été annulée avec succès.",
+      });
+
+      await fetchRequests();
+    } catch (error) {
+      console.error('Error cancelling request:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Une erreur est survenue lors de l'annulation de la demande.",
       });
-      return;
     }
-
-    toast({
-      title: "Succès",
-      description: "La demande a été annulée avec succès.",
-    });
-
-    fetchRequests();
   };
 
   useEffect(() => {
