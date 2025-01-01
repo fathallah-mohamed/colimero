@@ -30,10 +30,10 @@ interface CommitmentsSectionProps {
 }
 
 export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
-  // Forcer la conversion en booléen avec !!
-  const termsAccepted = !!profile.terms_accepted;
-  const customsTermsAccepted = !!profile.customs_terms_accepted;
-  const responsibilityTermsAccepted = !!profile.responsibility_terms_accepted;
+  // Forcer la conversion en booléen avec Boolean()
+  const termsAccepted = Boolean(profile.terms_accepted);
+  const customsTermsAccepted = Boolean(profile.customs_terms_accepted);
+  const responsibilityTermsAccepted = Boolean(profile.responsibility_terms_accepted);
 
   return (
     <div>
