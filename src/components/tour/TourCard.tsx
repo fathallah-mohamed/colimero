@@ -10,9 +10,16 @@ interface TourCardProps {
   onEdit: (tour: any) => void;
   onDelete: (tourId: number) => void;
   onStatusChange: (tourId: number, newStatus: string) => void;
+  isCompleted?: boolean;
 }
 
-export function TourCard({ tour, onEdit, onDelete, onStatusChange }: TourCardProps) {
+export function TourCard({ 
+  tour, 
+  onEdit, 
+  onDelete, 
+  onStatusChange,
+  isCompleted = false
+}: TourCardProps) {
   const { toast } = useToast();
 
   const handleDownloadPDF = async () => {
@@ -33,13 +40,14 @@ export function TourCard({ tour, onEdit, onDelete, onStatusChange }: TourCardPro
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex justify-between items-start">
         <TourHeader tour={tour} />
         <TourActions
           onEdit={() => onEdit(tour)}
           onDelete={() => onDelete(tour.id)}
           onDownloadPDF={handleDownloadPDF}
+          isCompleted={isCompleted}
         />
       </div>
 
@@ -47,6 +55,7 @@ export function TourCard({ tour, onEdit, onDelete, onStatusChange }: TourCardPro
         tourId={tour.id}
         currentStatus={tour.status}
         onStatusChange={(newStatus) => onStatusChange(tour.id, newStatus)}
+        isCompleted={isCompleted}
       />
 
       <TourBookingsList 

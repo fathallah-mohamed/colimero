@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { TourCard } from "@/components/tour/TourCard";
 import { TourEditDialog } from "@/components/tour/TourEditDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function MesTournees() {
   const navigate = useNavigate();
@@ -65,6 +66,17 @@ export default function MesTournees() {
   };
 
   const handleDelete = async (tourId: number) => {
+    // Ne pas permettre la suppression des tournées terminées
+    const tour = tours.find(t => t.id === tourId);
+    if (tour?.status === 'completed') {
+      toast({
+        variant: "destructive",
+        title: "Action impossible",
+        description: "Les tournées terminées ne peuvent pas être supprimées",
+      });
+      return;
+    }
+
     const { error } = await supabase
       .from('tours')
       .delete()
@@ -87,11 +99,45 @@ export default function MesTournees() {
   };
 
   const handleEdit = (tour: any) => {
+    // Ne pas permettre l'édition des tournées terminées
+    if (tour.status === 'completed') {
+      toast({
+        variant: "destructive",
+        title: "Action impossible",
+        description: "Les tournées terminées ne peuvent pas être modifiées",
+      });
+      return;
+    }
     setSelectedTour(tour);
     setIsEditDialogOpen(true);
   };
 
-  const handleStatusChange = (tourId: number, newStatus: string) => {
+  const handleStatusChange = async (tourId: number, newStatus: string) => {
+    // Ne pas permettre le changement de statut pour les tournées terminées
+    const tour = tours.find(t => t.id === tourId);
+    if (tour?.status === 'completed') {
+      toast({
+        variant: "destructive",
+        title: "Action impossible",
+        description: "Le statut des tournées terminées ne peut pas être modifié",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('tours')
+      .update({ status: newStatus })
+      .eq('id', tourId);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut",
+      });
+      return;
+    }
+
     setTours(tours.map(tour => 
       tour.id === tourId ? { ...tour, status: newStatus } : tour
     ));
@@ -102,6 +148,9 @@ export default function MesTournees() {
     setSelectedTour(null);
     fetchTours();
   };
+
+  const upcomingTours = tours.filter(tour => tour.status !== 'completed');
+  const completedTours = tours.filter(tour => tour.status === 'completed');
 
   if (loading) {
     return (
@@ -124,33 +173,69 @@ export default function MesTournees() {
             Créer une nouvelle tournée
           </Button>
         </div>
-        
-        <div className="grid gap-6">
-          {tours.length === 0 ? (
-            <div className="bg-white shadow rounded-lg p-6 text-center">
-              <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Aucune tournée planifiée
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Vous n'avez pas encore créé de tournée. Commencez par en planifier une !
-              </p>
-              <Button onClick={() => navigate('/planifier-une-tournee')}>
-                Planifier une tournée
-              </Button>
+
+        <Tabs defaultValue="upcoming" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upcoming">Tournées à venir</TabsTrigger>
+            <TabsTrigger value="completed">Tournées terminées</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upcoming">
+            <div className="grid gap-6">
+              {upcomingTours.length === 0 ? (
+                <div className="bg-white shadow rounded-lg p-6 text-center">
+                  <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Aucune tournée planifiée
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    Vous n'avez pas encore créé de tournée. Commencez par en planifier une !
+                  </p>
+                  <Button onClick={() => navigate('/planifier-une-tournee')}>
+                    Planifier une tournée
+                  </Button>
+                </div>
+              ) : (
+                upcomingTours.map((tour) => (
+                  <TourCard
+                    key={tour.id}
+                    tour={tour}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onStatusChange={handleStatusChange}
+                  />
+                ))
+              )}
             </div>
-          ) : (
-            tours.map((tour) => (
-              <TourCard
-                key={tour.id}
-                tour={tour}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onStatusChange={handleStatusChange}
-              />
-            ))
-          )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="completed">
+            <div className="grid gap-6">
+              {completedTours.length === 0 ? (
+                <div className="bg-white shadow rounded-lg p-6 text-center">
+                  <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Aucune tournée terminée
+                  </h3>
+                  <p className="text-gray-500">
+                    Les tournées terminées apparaîtront ici.
+                  </p>
+                </div>
+              ) : (
+                completedTours.map((tour) => (
+                  <TourCard
+                    key={tour.id}
+                    tour={tour}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onStatusChange={handleStatusChange}
+                    isCompleted={true}
+                  />
+                ))
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <TourEditDialog
           isOpen={isEditDialogOpen}
