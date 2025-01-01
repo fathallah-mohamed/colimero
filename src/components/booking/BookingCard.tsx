@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { BookingHeader } from "./card/BookingHeader";
 import { BookingDetails } from "./card/BookingDetails";
-import { BookingActions } from "./card/BookingActions";
+import { BookingActions } from "./actions/BookingActions";
 import type { BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -56,16 +56,20 @@ export function BookingCard({
     }
   };
 
+  const handleEdit = () => {
+    console.log("Opening edit dialog for booking:", booking.id);
+    onUpdate();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
       <BookingHeader booking={booking} />
       <BookingDetails booking={booking} />
       <BookingActions
-        bookingId={booking.id}
-        currentStatus={currentStatus}
+        status={currentStatus}
         isCollecting={isCollecting}
         onStatusChange={updateBookingStatus}
-        onUpdate={onUpdate}
+        onEdit={handleEdit}
       />
     </div>
   );

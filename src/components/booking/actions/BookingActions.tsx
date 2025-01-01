@@ -17,10 +17,16 @@ export function BookingActions({
 }: BookingActionsProps) {
   if (!isCollecting) return null;
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Edit button clicked");
+    onEdit();
+  };
+
   return (
     <div className="flex items-center gap-2">
       <BookingActionButton
-        onClick={onEdit}
+        onClick={handleEdit}
         icon={Edit}
         label="Modifier"
       />
