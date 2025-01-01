@@ -125,7 +125,6 @@ export type Database = {
           terms_accepted: boolean | null
           tour_id: number
           tracking_number: string
-          updated_at: string | null
           user_id: string
           weight: number
         }
@@ -152,7 +151,6 @@ export type Database = {
           terms_accepted?: boolean | null
           tour_id: number
           tracking_number: string
-          updated_at?: string | null
           user_id: string
           weight: number
         }
@@ -179,7 +177,6 @@ export type Database = {
           terms_accepted?: boolean | null
           tour_id?: number
           tracking_number?: string
-          updated_at?: string | null
           user_id?: string
           weight?: number
         }

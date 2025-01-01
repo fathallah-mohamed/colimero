@@ -23,7 +23,8 @@ export function BookingActions({
     onStatusChange(newStatus);
   };
 
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     console.log("Edit button clicked");
     onEdit();
   };

@@ -18,7 +18,7 @@ export function BookingActionButtons({
   return (
     <>
       <BookingActionButton
-        onClick={() => onEdit()}
+        onClick={onEdit}
         icon={Edit}
         label="Modifier"
         disabled={isUpdating}

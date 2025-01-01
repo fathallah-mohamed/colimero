@@ -7,7 +7,6 @@ interface BookingActionButtonProps {
   label: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   colorClass?: string;
-  disabled?: boolean;
 }
 
 export function BookingActionButton({ 
@@ -15,8 +14,7 @@ export function BookingActionButton({
   icon: Icon, 
   label, 
   variant = "outline",
-  colorClass,
-  disabled = false
+  colorClass
 }: BookingActionButtonProps) {
   return (
     <Button
@@ -24,7 +22,6 @@ export function BookingActionButton({
       size="sm"
       className={colorClass}
       onClick={onClick}
-      disabled={disabled}
     >
       <Icon className="h-4 w-4 mr-2" />
       {label}

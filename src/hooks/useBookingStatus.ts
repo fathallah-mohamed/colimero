@@ -36,11 +36,11 @@ export function useBookingStatus(
         .from('bookings')
         .select('status, delivery_status')
         .eq('id', bookingId)
-        .maybeSingle();
+        .single();
 
       if (fetchError) throw fetchError;
 
-      if (updatedBooking?.status === newStatus) {
+      if (updatedBooking.status === newStatus) {
         setCurrentStatus(newStatus);
         onSuccess(bookingId, newStatus);
         
