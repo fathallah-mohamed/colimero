@@ -15,7 +15,7 @@ export function SenderInfo({ formData }: SenderInfoProps) {
       <div>
         <Label>Nom et prénom</Label>
         <Input
-          value={formData.senderName}
+          value={formData.sender_name}
           readOnly
           className="bg-gray-50"
         />
@@ -34,7 +34,7 @@ export function SenderInfo({ formData }: SenderInfoProps) {
           </Select>
           <Input
             type="tel"
-            value={formData.senderPhone}
+            value={formData.sender_phone}
             readOnly
             className="flex-1 bg-gray-50"
           />

@@ -17,9 +17,9 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
           <Label htmlFor="recipientName">Nom complet</Label>
           <Input
             id="recipientName"
-            value={formData.recipientName}
+            value={formData.recipient_name}
             onChange={(e) =>
-              setFormData({ recipientName: e.target.value })
+              setFormData({ recipient_name: e.target.value })
             }
             placeholder="Nom du destinataire"
           />
@@ -28,9 +28,9 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
           <Label htmlFor="recipientPhone">Téléphone</Label>
           <Input
             id="recipientPhone"
-            value={formData.recipientPhone}
+            value={formData.recipient_phone}
             onChange={(e) =>
-              setFormData({ recipientPhone: e.target.value })
+              setFormData({ recipient_phone: e.target.value })
             }
             placeholder="Numéro de téléphone"
           />
@@ -39,9 +39,9 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
           <Label htmlFor="recipientAddress">Adresse</Label>
           <Input
             id="recipientAddress"
-            value={formData.recipientAddress}
+            value={formData.recipient_address}
             onChange={(e) =>
-              setFormData({ recipientAddress: e.target.value })
+              setFormData({ recipient_address: e.target.value })
             }
             placeholder="Adresse de livraison"
           />
@@ -50,9 +50,9 @@ export function RecipientInfo({ formData, setFormData, destinationCountry }: Rec
           <Label htmlFor="deliveryCity">Ville de livraison ({destinationCountry})</Label>
           <Input
             id="deliveryCity"
-            value={formData.deliveryCity}
+            value={formData.delivery_city}
             onChange={(e) =>
-              setFormData({ deliveryCity: e.target.value })
+              setFormData({ delivery_city: e.target.value })
             }
             placeholder="Ville de livraison"
           />
