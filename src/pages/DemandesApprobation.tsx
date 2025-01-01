@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,8 @@ import { ApprovalRequestCard } from "@/components/approval-requests/ApprovalRequ
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
-  const { data: { session } } = await supabase.auth.getSession();
+  const [session, setSession] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const userType = session?.user?.user_metadata?.user_type;
   const userId = session?.user?.id;
 
@@ -20,12 +21,20 @@ export default function DemandesApprobation() {
   } = useApprovalRequests(userType, userId);
 
   useEffect(() => {
-    if (!session) {
-      navigate('/connexion');
-    }
-  }, [session]);
+    async function getSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setIsLoading(false);
 
-  if (loading) {
+      if (!session) {
+        navigate('/connexion');
+      }
+    }
+
+    getSession();
+  }, [navigate]);
+
+  if (isLoading || loading) {
     return (
       <div className="min-h-screen">
         <Navigation />
