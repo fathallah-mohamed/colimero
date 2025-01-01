@@ -93,12 +93,12 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Modifier la réservation</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 py-4">
           <BookingFormFields 
             formData={formData}
             onChange={handleFieldChange}
@@ -117,7 +117,7 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
           />
         </div>
 
-        <div className="flex justify-end gap-2 pt-4">
+        <div className="flex justify-end gap-2 pt-4 sticky bottom-0 bg-white p-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
