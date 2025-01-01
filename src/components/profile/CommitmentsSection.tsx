@@ -26,10 +26,21 @@ interface CommitmentsSectionProps {
 }
 
 export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
-  // Utilisation de === true pour une comparaison stricte
-  const termsAccepted = profile.terms_accepted === true;
-  const customsTermsAccepted = profile.customs_terms_accepted === true;
-  const responsibilityTermsAccepted = profile.responsibility_terms_accepted === true;
+  // Utilisation de Boolean() pour s'assurer d'avoir une valeur booléenne
+  const termsAccepted = Boolean(profile.terms_accepted);
+  const customsTermsAccepted = Boolean(profile.customs_terms_accepted);
+  const responsibilityTermsAccepted = Boolean(profile.responsibility_terms_accepted);
+
+  console.log("Commitments values:", {
+    termsAccepted,
+    customsTermsAccepted,
+    responsibilityTermsAccepted,
+    rawValues: {
+      terms: profile.terms_accepted,
+      customs: profile.customs_terms_accepted,
+      responsibility: profile.responsibility_terms_accepted
+    }
+  });
 
   return (
     <div>
