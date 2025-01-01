@@ -25,7 +25,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               departure_date,
               route,
               total_capacity,
-              remaining_capacity
+              remaining_capacity,
+              carriers (
+                company_name
+              )
             )
           `)
           .eq('tour.carrier_id', userId)
@@ -64,7 +67,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               departure_date,
               route,
               total_capacity,
-              remaining_capacity
+              remaining_capacity,
+              carriers (
+                company_name
+              )
             )
           `)
           .eq('user_id', userId)
@@ -83,6 +89,24 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     } finally {
       setLoading(false);
     }
+  };
+
+  const checkExistingRequest = async (tourId: string) => {
+    const { data, error } = await supabase
+      .from('approval_requests')
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('tour_id', tourId);
+
+    if (error) {
+      console.error('Error checking existing request:', error);
+      return true; // En cas d'erreur, on empêche la création par précaution
+    }
+
+    // Retourne true s'il existe une demande en attente ou approuvée
+    return data?.some(request => 
+      request.status === 'pending' || request.status === 'approved'
+    ) || false;
   };
 
   const handleApproval = async (requestId: string, approved: boolean) => {
@@ -145,6 +169,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     requests, 
     loading, 
     handleApproval,
-    handleCancelRequest
+    handleCancelRequest,
+    checkExistingRequest
   };
 }

@@ -17,6 +17,11 @@ export function ApprovalRequestCard({
   onReject,
   onCancel
 }: ApprovalRequestCardProps) {
+  // Trouver le point de collecte sélectionné
+  const selectedStop = request.tour?.route?.find((stop: any) => 
+    stop.name === request.pickup_city
+  );
+
   return (
     <div key={request.id} className="bg-white shadow rounded-lg p-6">
       <div className="flex justify-between items-start">
@@ -25,6 +30,9 @@ export function ApprovalRequestCard({
             <h2 className="text-lg font-semibold">
               {request.tour?.departure_country} → {request.tour?.destination_country}
             </h2>
+            <p className="text-gray-600">
+              Transporteur : {request.tour?.carriers?.company_name}
+            </p>
             {userType === 'carrier' && request.user && (
               <>
                 <p className="text-gray-600">
@@ -44,16 +52,14 @@ export function ApprovalRequestCard({
             </p>
           </div>
 
-          <div>
-            <h3 className="font-medium text-gray-900">Points de collecte :</h3>
-            <ul className="mt-2 space-y-2">
-              {request.tour?.route?.map((stop: any, index: number) => (
-                <li key={index} className="text-sm text-gray-600">
-                  {stop.name} - {stop.location} ({stop.time})
-                </li>
-              ))}
-            </ul>
-          </div>
+          {selectedStop && (
+            <div>
+              <h3 className="font-medium text-gray-900">Point de collecte sélectionné :</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                {selectedStop.name} - {selectedStop.location} ({selectedStop.time})
+              </p>
+            </div>
+          )}
 
           <div>
             <p className="text-gray-600">
