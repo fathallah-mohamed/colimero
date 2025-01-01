@@ -19,6 +19,7 @@ interface BookingCardProps {
 export function BookingCard({ booking, isCollecting = false, onStatusChange, onUpdate }: BookingCardProps) {
   const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
 
   const handleCancel = async () => {
     try {
@@ -29,6 +30,8 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
 
       if (error) throw error;
 
+      setCurrentStatus('cancelled');
+      
       toast({
         title: "Réservation annulée",
         description: "Votre réservation a été annulée avec succès",
@@ -47,8 +50,37 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
   };
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
-    if (onStatusChange) {
-      await onStatusChange(booking.id, newStatus);
+    try {
+      console.log("BookingCard - Changing status to:", newStatus);
+      
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', booking.id);
+
+      if (error) throw error;
+
+      setCurrentStatus(newStatus);
+      
+      if (onStatusChange) {
+        await onStatusChange(booking.id, newStatus);
+      }
+
+      toast({
+        title: "Statut mis à jour",
+        description: `La réservation a été mise à jour avec succès`,
+      });
+
+      if (onUpdate) {
+        await onUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la réservation",
+      });
     }
   };
 
@@ -73,12 +105,12 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
           <div className="flex items-center gap-2">
             {isCollecting ? (
               <BookingActions
-                status={booking.status}
+                status={currentStatus}
                 isCollecting={isCollecting}
                 onStatusChange={handleStatusChange}
                 onEdit={() => {}}
               />
-            ) : booking.status === 'pending' && (
+            ) : currentStatus === 'pending' && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="icon">
