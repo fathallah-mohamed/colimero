@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CheckSquare, XSquare, Info } from "lucide-react";
+import { CheckSquare, XSquare, Info, RotateCcw } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -76,6 +76,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
     const specialItems = booking.special_items || [];
     const isCollecting = tourStatus === "collecting";
     const isCancelled = booking.status === "cancelled";
+    const isPending = booking.status === "pending";
     
     return (
       <Card key={booking.id} className="p-4 space-y-4">
@@ -140,26 +141,40 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
           </CollapsibleContent>
         </Collapsible>
 
-        {isCollecting && !isCancelled && (
+        {isCollecting && (
           <div className="flex gap-2 justify-end pt-2 border-t">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-red-500 hover:text-red-600"
-              onClick={() => handleStatusChange(booking.id, "cancelled")}
-            >
-              <XSquare className="h-4 w-4 mr-2" />
-              Annuler
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-green-500 hover:text-green-600"
-              onClick={() => handleStatusChange(booking.id, "collected")}
-            >
-              <CheckSquare className="h-4 w-4 mr-2" />
-              Marquer comme collecté
-            </Button>
+            {isCancelled ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-500 hover:text-blue-600"
+                onClick={() => handleStatusChange(booking.id, "pending")}
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Remettre en attente
+              </Button>
+            ) : isPending && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-500 hover:text-red-600"
+                  onClick={() => handleStatusChange(booking.id, "cancelled")}
+                >
+                  <XSquare className="h-4 w-4 mr-2" />
+                  Annuler
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-green-500 hover:text-green-600"
+                  onClick={() => handleStatusChange(booking.id, "collected")}
+                >
+                  <CheckSquare className="h-4 w-4 mr-2" />
+                  Marquer comme collecté
+                </Button>
+              </>
+            )}
           </div>
         )}
       </Card>
