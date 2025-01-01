@@ -1,13 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckSquare, XSquare, Info, RotateCcw, Edit } from "lucide-react";
+import { Info } from "lucide-react";
 import { useState } from "react";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Booking, BookingStatus } from "@/types/booking";
+import { BookingStatusBadge } from "./BookingStatusBadge";
+import { BookingActions } from "./BookingActions";
 
 interface BookingCardProps {
   booking: Booking;
@@ -20,8 +21,6 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
   const specialItems = booking.special_items || [];
-  const isCancelled = booking.status === "cancelled";
-  const isPending = booking.status === "pending";
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
@@ -52,50 +51,18 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
     }
   };
 
-  const getStatusBadgeVariant = (status: BookingStatus) => {
-    switch (status) {
-      case "collected":
-        return "default";
-      case "cancelled":
-        return "destructive";
-      case "in_transit":
-        return "secondary";
-      default:
-        return "secondary";
-    }
-  };
-
-  const getStatusLabel = (status: BookingStatus) => {
-    switch (status) {
-      case "collected":
-        return "Collecté";
-      case "cancelled":
-        return "Annulé";
-      case "in_transit":
-        return "En transit";
-      case "pending":
-        return "En attente";
-      default:
-        return status;
-    }
-  };
-
   return (
     <Card className="p-4 space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{booking.recipient_name}</h3>
         <div className="flex items-center gap-2">
-          <Badge variant={getStatusBadgeVariant(booking.status)}>
-            {getStatusLabel(booking.status)}
-          </Badge>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowEditDialog(true)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Modifier
-          </Button>
+          <BookingStatusBadge status={booking.status} />
+          <BookingActions
+            status={booking.status}
+            isCollecting={isCollecting}
+            onStatusChange={handleStatusChange}
+            onEdit={() => setShowEditDialog(true)}
+          />
         </div>
       </div>
 
@@ -137,52 +104,13 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
               <p className="text-sm font-medium">Objets spéciaux:</p>
               <div className="flex flex-wrap gap-2">
                 {specialItems.map((item: any, index: number) => (
-                  <Badge key={index} variant="secondary">
-                    {item.name} ({item.quantity})
-                  </Badge>
+                  <BookingStatusBadge key={index} status={item.name} />
                 ))}
               </div>
             </div>
           )}
         </CollapsibleContent>
       </Collapsible>
-
-      {isCollecting && (
-        <div className="flex gap-2 justify-end pt-2 border-t">
-          {isCancelled ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-500 hover:text-blue-600"
-              onClick={() => handleStatusChange("pending")}
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Remettre en attente
-            </Button>
-          ) : isPending && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-red-500 hover:text-red-600"
-                onClick={() => handleStatusChange("cancelled")}
-              >
-                <XSquare className="h-4 w-4 mr-2" />
-                Annuler
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-500 hover:text-green-600"
-                onClick={() => handleStatusChange("collected")}
-              >
-                <CheckSquare className="h-4 w-4 mr-2" />
-                Marquer comme collecté
-              </Button>
-            </>
-          )}
-        </div>
-      )}
 
       <EditBookingDialog
         booking={booking}
