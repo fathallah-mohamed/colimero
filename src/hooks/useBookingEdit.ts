@@ -33,7 +33,7 @@ export function useBookingEdit(bookingId: string, onSuccess: () => Promise<void>
 
       console.log("Formatted special items:", formattedSpecialItems);
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("bookings")
         .update({
           sender_name: formData.sender_name,
@@ -47,12 +47,15 @@ export function useBookingEdit(bookingId: string, onSuccess: () => Promise<void>
           special_items: formattedSpecialItems,
           photos: formData.photos
         })
-        .eq("id", bookingId);
+        .eq("id", bookingId)
+        .select();
 
       if (error) {
         console.error("Error updating booking:", error);
         throw error;
       }
+
+      console.log("Update successful, updated data:", data);
 
       toast({
         title: "Succès",

@@ -47,6 +47,8 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
   };
 
   const handleSubmit = async () => {
+    console.log("Submitting form with data:", formData);
+    console.log("Item quantities:", itemQuantities);
     const success = await updateBooking(formData, itemQuantities);
     if (success) {
       onOpenChange(false);
