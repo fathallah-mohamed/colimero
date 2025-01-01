@@ -1,33 +1,22 @@
-import { cn } from "@/lib/utils";
-import { CalendarCheck, PackageSearch, Truck, MapPin, CheckCircle2 } from "lucide-react";
-import { TourStatus } from "../../../types/tour";
+import { CalendarCheck, PackageSearch, Truck, MapPin } from "lucide-react";
+import { TourStatus } from "@/types/tour";
 
 interface TimelineIconProps {
   status: TourStatus;
-  isCompleted: boolean;
-  isCurrent: boolean;
+  className?: string;
 }
 
-export function TimelineIcon({ status, isCompleted, isCurrent }: TimelineIconProps) {
-  if (isCompleted) {
-    return <CheckCircle2 className="h-10 w-10 text-green-500" />;
-  }
-
-  const iconClass = cn(
-    "h-10 w-10",
-    isCurrent ? "text-primary" : "text-gray-300"
-  );
-
+export function TimelineIcon({ status, className }: TimelineIconProps) {
   switch (status) {
     case "planned":
-      return <CalendarCheck className={iconClass} />;
+      return <CalendarCheck className={className} />;
     case "collecting":
-      return <PackageSearch className={iconClass} />;
+      return <PackageSearch className={className} />;
     case "in_transit":
-      return <Truck className={iconClass} />;
+      return <Truck className={className} />;
     case "completed":
-      return <MapPin className={iconClass} />;
+      return <MapPin className={className} />;
     default:
-      return null;
+      return <CalendarCheck className={className} />;
   }
 }
