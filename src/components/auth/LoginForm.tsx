@@ -1,7 +1,6 @@
 import { useLoginForm } from "./login/useLoginForm";
 import { LoginFormFields } from "./login/LoginFormFields";
 import { LoginFormActions } from "./login/LoginFormActions";
-import { Form } from "@/components/ui/form";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -18,18 +17,31 @@ export default function LoginForm({
   isBookingFlow,
   isCreateTourFlow
 }: LoginFormProps) {
-  const { form, onSubmit, isLoading } = useLoginForm({ onSuccess, requiredUserType });
+  const { 
+    isLoading, 
+    email, 
+    setEmail, 
+    password, 
+    setPassword, 
+    error, 
+    handleSubmit 
+  } = useLoginForm({ onSuccess, requiredUserType });
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <LoginFormFields form={form} isLoading={isLoading} />
-        <LoginFormActions 
-          onRegisterClick={onRegisterClick}
-          isBookingFlow={isBookingFlow}
-          isCreateTourFlow={isCreateTourFlow}
-        />
-      </form>
-    </Form>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <LoginFormFields 
+        email={email}
+        password={password}
+        isLoading={isLoading}
+        error={error}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
+      />
+      <LoginFormActions 
+        onRegisterClick={onRegisterClick}
+        isBookingFlow={isBookingFlow}
+        isCreateTourFlow={isCreateTourFlow}
+      />
+    </form>
   );
 }
