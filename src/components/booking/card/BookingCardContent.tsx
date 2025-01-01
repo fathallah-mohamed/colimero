@@ -36,10 +36,7 @@ export function BookingCardContent({
         })
         .eq('id', booking.id);
 
-      if (error) {
-        console.error('Error updating booking status:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       setCurrentStatus(newStatus);
       onStatusChange(booking.id, newStatus);
@@ -63,10 +60,10 @@ export function BookingCardContent({
     setShowEditDialog(true);
   };
 
-  const handleEditSuccess = () => {
+  const handleEditSuccess = async () => {
     console.log("Edit successful, updating booking list");
     setShowEditDialog(false);
-    onUpdate(); // Appel de la fonction de mise à jour après une modification réussie
+    await onUpdate(); // Attendre la fin de la mise à jour
   };
 
   return (
