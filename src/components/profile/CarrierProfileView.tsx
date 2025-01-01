@@ -26,7 +26,7 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-500">{label}</p>
+            <p className="text-sm font-medium text-gray-900">{label}</p>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -38,25 +38,19 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className={`flex items-center gap-2 ${accepted ? 'text-green-600' : 'text-red-600'}`}>
-            {accepted ? (
-              <>
-                <Check className="h-5 w-5" />
-                <span className="text-sm font-medium">Accepté</span>
-              </>
-            ) : (
-              <>
-                <X className="h-5 w-5" />
-                <span className="text-sm font-medium">Non accepté</span>
-              </>
-            )}
-          </div>
+          {accepted && profile.terms_accepted_at && (
+            <p className="text-sm text-gray-500">
+              Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
+            </p>
+          )}
         </div>
-        {accepted && profile.terms_accepted_at && (
-          <span className="text-xs text-gray-500">
-            le {new Date(profile.terms_accepted_at).toLocaleDateString()}
-          </span>
-        )}
+        <div className={`flex items-center gap-2 ${accepted ? 'text-green-600' : 'text-red-600'}`}>
+          {accepted ? (
+            <Check className="h-5 w-5" />
+          ) : (
+            <X className="h-5 w-5" />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -102,22 +96,22 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements acceptés à l'inscription</h2>
         <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
           <CommitmentStatus 
             accepted={profile.terms_accepted || false}
             label="Conditions générales"
-            description="En acceptant les conditions générales, vous vous engagez à respecter les règles et procédures de notre plateforme pour assurer un service de qualité."
+            description="En acceptant les conditions générales, vous vous êtes engagé à respecter les règles et procédures de notre plateforme pour assurer un service de qualité."
           />
           <CommitmentStatus 
             accepted={profile.customs_terms_accepted || false}
             label="Conditions douanières"
-            description="Les conditions douanières concernent la conformité avec les réglementations douanières internationales et la gestion des documents nécessaires."
+            description="Vous vous êtes engagé à respecter les réglementations douanières internationales et à gérer les documents nécessaires."
           />
           <CommitmentStatus 
             accepted={profile.responsibility_terms_accepted || false}
             label="Responsabilité des objets transportés"
-            description="Cette clause définit vos responsabilités concernant la sécurité et l'intégrité des objets pendant le transport, ainsi que les procédures en cas de dommages."
+            description="Vous avez accepté vos responsabilités concernant la sécurité et l'intégrité des objets pendant le transport."
           />
         </div>
       </div>
