@@ -1,13 +1,24 @@
 import { ProfileData } from "@/types/profile";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
 import { CommitmentsSection } from "./CommitmentsSection";
+import { Building2, Mail, MapPin, Phone, User, Wallet, Weight, Euro } from "lucide-react";
 
 interface CarrierProfileViewProps {
   profile: ProfileData;
 }
 
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
-  console.log("Profile data:", profile); // Pour déboguer les valeurs des engagements
+  const InfoItem = ({ icon: Icon, label, value }: { icon: any, label: string, value: string | number }) => (
+    <div className="flex items-start gap-3 p-4 rounded-lg bg-white border border-gray-100">
+      <div className="flex-shrink-0">
+        <Icon className="h-5 w-5 text-primary/70" />
+      </div>
+      <div className="space-y-1 min-w-0">
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-gray-900 font-medium break-words">{value}</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-8">
@@ -26,65 +37,79 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
-        <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Prénom</p>
-              <p className="text-gray-900 font-medium">{profile.first_name || "-"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Nom</p>
-              <p className="text-gray-900 font-medium">{profile.last_name || "-"}</p>
-            </div>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Email</p>
-            <p className="text-gray-900 font-medium">{profile.email || "-"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Téléphone</p>
-            <p className="text-gray-900 font-medium">{profile.phone || "-"}</p>
-          </div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <User className="h-5 w-5 text-primary/70" />
+          Informations personnelles
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InfoItem 
+            icon={User} 
+            label="Prénom" 
+            value={profile.first_name || "-"} 
+          />
+          <InfoItem 
+            icon={User} 
+            label="Nom" 
+            value={profile.last_name || "-"} 
+          />
+          <InfoItem 
+            icon={Mail} 
+            label="Email" 
+            value={profile.email || "-"} 
+          />
+          <InfoItem 
+            icon={Phone} 
+            label="Téléphone" 
+            value={profile.phone || "-"} 
+          />
         </div>
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations entreprise</h2>
-        <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Nom de l'entreprise</p>
-            <p className="text-gray-900 font-medium">{profile.company_name || "-"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">SIRET</p>
-            <p className="text-gray-900 font-medium">{profile.siret || "-"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Adresse</p>
-            <p className="text-gray-900 font-medium">{profile.address || "-"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Zones de couverture</p>
-            <p className="text-gray-900 font-medium">
-              {profile.coverage_area?.map((code: string) => {
-                const country = {
-                  FR: "France",
-                  TN: "Tunisie",
-                  MA: "Maroc",
-                  DZ: "Algérie"
-                }[code];
-                return country;
-              }).join(", ") || "-"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Capacité totale</p>
-            <p className="text-gray-900 font-medium">{profile.carrier_capacities?.total_capacity || "-"} kg</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Prix par kg</p>
-            <p className="text-gray-900 font-medium">{profile.carrier_capacities?.price_per_kg || "-"} €</p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Building2 className="h-5 w-5 text-primary/70" />
+          Informations entreprise
+        </h2>
+        <div className="grid grid-cols-1 gap-4">
+          <InfoItem 
+            icon={Building2} 
+            label="Nom de l'entreprise" 
+            value={profile.company_name || "-"} 
+          />
+          <InfoItem 
+            icon={Wallet} 
+            label="SIRET" 
+            value={profile.siret || "-"} 
+          />
+          <InfoItem 
+            icon={MapPin} 
+            label="Adresse" 
+            value={profile.address || "-"} 
+          />
+          <InfoItem 
+            icon={MapPin} 
+            label="Zones de couverture" 
+            value={profile.coverage_area?.map((code: string) => {
+              const country = {
+                FR: "France",
+                TN: "Tunisie",
+                MA: "Maroc",
+                DZ: "Algérie"
+              }[code];
+              return country;
+            }).join(", ") || "-"} 
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InfoItem 
+              icon={Weight} 
+              label="Capacité totale" 
+              value={`${profile.carrier_capacities?.total_capacity || "-"} kg`} 
+            />
+            <InfoItem 
+              icon={Euro} 
+              label="Prix par kg" 
+              value={`${profile.carrier_capacities?.price_per_kg || "-"} €`} 
+            />
           </div>
         </div>
       </div>
