@@ -48,6 +48,7 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
+      console.log("Submitting form data:", formData);
 
       const formattedSpecialItems = formData.special_items.map(item => ({
         name: item,

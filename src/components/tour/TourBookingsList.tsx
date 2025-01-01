@@ -13,10 +13,6 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
   const [bookings, setBookings] = useState<any[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchBookings();
-  }, [tourId]);
-
   const fetchBookings = async () => {
     console.log("Fetching bookings for tour:", tourId);
     const { data, error } = await supabase
@@ -47,6 +43,10 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
     console.log("Bookings fetched:", data);
     setBookings(data || []);
   };
+
+  useEffect(() => {
+    fetchBookings();
+  }, [tourId]);
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     console.log("Changing status to:", newStatus, "for booking:", bookingId);

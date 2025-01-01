@@ -63,6 +63,11 @@ export function BookingCardContent({
     setShowEditDialog(true);
   };
 
+  const handleEditSuccess = () => {
+    setShowEditDialog(false);
+    onUpdate(); // Appel de la fonction de mise à jour après une modification réussie
+  };
+
   return (
     <>
       <div className="flex justify-between items-start">
@@ -87,7 +92,7 @@ export function BookingCardContent({
         booking={booking}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-        onSuccess={onUpdate}
+        onSuccess={handleEditSuccess}
       />
     </>
   );
