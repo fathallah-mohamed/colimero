@@ -1,130 +1,81 @@
-import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Package } from "lucide-react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
-import { BookingStatus } from "@/types/booking";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
-export function TourBookingsList({ tourId }: { tourId: number }) {
-  const { data: bookings, refetch } = useQuery({
-    queryKey: ["tour-bookings", tourId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("tour_id", tourId)
-        .order("created_at", { ascending: false });
+interface TourBookingsListProps {
+  tourId: number;
+  tourStatus: string;
+}
 
-      if (error) throw error;
-      return data;
-    },
-  });
+export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const { toast } = useToast();
 
-  const updateBookingStatus = async (bookingId: string, status: BookingStatus) => {
-    try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ status })
-        .eq("id", bookingId);
+  useEffect(() => {
+    fetchBookings();
+  }, [tourId]);
 
-      if (error) throw error;
+  const fetchBookings = async () => {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("tour_id", tourId);
 
-      toast({
-        title: "Succès",
-        description: "Le statut de la réservation a été mis à jour",
-      });
-      refetch();
-    } catch (error) {
-      console.error("Error updating booking status:", error);
+    if (error) {
+      console.error("Error fetching bookings:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la réservation",
+        description: "Impossible de charger les réservations",
       });
+      return;
     }
+
+    setBookings(data || []);
   };
 
-  if (!bookings?.length) {
+  const renderBookingCard = (booking: any) => {
+    const specialItems = Array.isArray(booking.special_items) ? booking.special_items : [];
+    
     return (
-      <div className="text-center py-8 text-gray-500">
-        Aucune réservation pour cette tournée
-      </div>
+      <Card key={booking.id} className="p-4 space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">{booking.recipient_name}</h3>
+          <Badge variant={booking.status === 'confirmed' ? 'success' : 'default'}>
+            {booking.status}
+          </Badge>
+        </div>
+        <p>Poids: {booking.weight} kg</p>
+        <p>Numéro de suivi: {booking.tracking_number}</p>
+        <p>Adresse de livraison: {booking.recipient_address}</p>
+        <p>Téléphone: {booking.recipient_phone}</p>
+        
+        {specialItems.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Objets spéciaux:</p>
+            <div className="flex flex-wrap gap-2">
+              {specialItems.map((item: string) => (
+                <Badge key={item} variant="secondary">
+                  {item}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+      </Card>
     );
-  }
+  };
 
   return (
     <div className="space-y-4">
-      {bookings.map((booking) => (
-        <div
-          key={booking.id}
-          className="bg-white p-4 rounded-lg shadow-sm space-y-3"
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <h4 className="font-medium">
-                {booking.sender_name || "Expéditeur inconnu"}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {format(new Date(booking.created_at), "d MMMM yyyy", {
-                  locale: fr,
-                })}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {booking.status === "pending" && (
-                <>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() =>
-                      updateBookingStatus(booking.id, "cancelled")
-                    }
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() =>
-                      updateBookingStatus(booking.id, "collected")
-                    }
-                  >
-                    Marquer comme collecté
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600">Expéditeur</p>
-              <p>{booking.sender_name}</p>
-              <p>{booking.sender_phone}</p>
-              <p>{booking.pickup_city}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Destinataire</p>
-              <p>{booking.recipient_name}</p>
-              <p>{booking.recipient_phone}</p>
-              <p>{booking.delivery_city}</p>
-            </div>
-          </div>
-
-          <div className="text-sm">
-            <p className="text-gray-600">Détails du colis</p>
-            <p>Poids: {booking.weight} kg</p>
-            <p>Type: {booking.item_type}</p>
-            {booking.special_items && booking.special_items.length > 0 && (
-              <p>
-                Objets spéciaux:{" "}
-                {(booking.special_items as string[]).join(", ")}
-              </p>
-            )}
-          </div>
-        </div>
-      ))}
+      {bookings.length === 0 ? (
+        <p>Aucune réservation pour cette tournée.</p>
+      ) : (
+        bookings.map(renderBookingCard)
+      )}
     </div>
   );
 }

@@ -2,10 +2,31 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { BookingFormData } from "@/types/booking";
+import { BookingFormData, BookingFormState, BookingStatus } from "@/types/booking";
 
-export function useBookingForm() {
+const generateTrackingNumber = () => {
+  return 'TN' + Math.random().toString(36).substr(2, 9).toUpperCase();
+};
+
+export function useBookingForm(tourId: number, onSuccess: () => void) {
   const [isLoading, setIsLoading] = useState(false);
+  const [hasExistingBooking, setHasExistingBooking] = useState(false);
+  const [state, setState] = useState<BookingFormState>({
+    weight: 5,
+    selectedContentTypes: [],
+    selectedSpecialItems: [],
+    itemQuantities: {},
+    photos: [],
+    formData: {
+      senderName: '',
+      senderPhone: '',
+      recipientName: '',
+      recipientPhone: '',
+      recipientAddress: '',
+      deliveryCity: '',
+    },
+  });
+  const [pricePerKg] = useState(10); // This could be fetched from the API
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -13,9 +34,7 @@ export function useBookingForm() {
     try {
       setIsLoading(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
         toast({
@@ -27,11 +46,15 @@ export function useBookingForm() {
         return;
       }
 
-      const { error } = await supabase.from("bookings").insert({
+      const bookingData: BookingFormData = {
         ...values,
+        tour_id: tourId,
         user_id: user.id,
-        status: values.status as BookingStatus,
-      });
+        status: 'pending' as BookingStatus,
+        tracking_number: generateTrackingNumber(),
+      };
+
+      const { error } = await supabase.from("bookings").insert(bookingData);
 
       if (error) throw error;
 
@@ -39,14 +62,14 @@ export function useBookingForm() {
         title: "Succès",
         description: "Votre réservation a été enregistrée",
       });
-      navigate("/mes-reservations");
+      
+      onSuccess();
     } catch (error) {
       console.error("Error submitting booking:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description:
-          "Une erreur est survenue lors de l'enregistrement de votre réservation",
+        description: "Une erreur est survenue lors de l'enregistrement de votre réservation",
       });
     } finally {
       setIsLoading(false);
@@ -55,6 +78,10 @@ export function useBookingForm() {
 
   return {
     isLoading,
+    hasExistingBooking,
+    pricePerKg,
+    ...state,
+    setState,
     handleSubmit,
   };
 }

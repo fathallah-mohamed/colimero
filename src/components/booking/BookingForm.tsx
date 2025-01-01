@@ -7,13 +7,14 @@ import { SenderInfo } from "./form/SenderInfo";
 import { RecipientInfo } from "./form/RecipientInfo";
 import { BookingCommitments } from "./form/BookingCommitments";
 import { BookingTotalPrice } from "./form/BookingTotalPrice";
-import { useBookingForm } from "@/hooks/useBookingForm";
 import { useConsents } from "@/hooks/useConsents";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { BookingFormProvider } from "./context/BookingFormProvider";
+import { useBookingFormContext } from "./context/BookingFormContext";
 
 const contentTypes = [
   "Vêtements",
@@ -45,77 +46,78 @@ interface BookingFormProps {
   onCancel: () => void;
 }
 
-export function BookingForm({ 
-  tourId, 
+function BookingFormContent({ 
   pickupCity, 
   destinationCountry,
-  onSuccess, 
   onCancel 
-}: BookingFormProps) {
+}: Omit<BookingFormProps, 'tourId' | 'onSuccess'>) {
   const { consentTypes, userConsents } = useConsents();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
   const {
     isLoading,
     weight,
-    setWeight,
     selectedContentTypes,
-    setSelectedContentTypes,
     selectedSpecialItems,
-    setSelectedSpecialItems,
     itemQuantities,
-    setItemQuantities,
     photos,
-    setPhotos,
     pricePerKg,
     formData,
-    setFormData,
-    hasExistingBooking,
-    handleSubmit: submitBooking,
-  } = useBookingForm(tourId, onSuccess);
+    setState,
+    handleSubmit,
+  } = useBookingFormContext();
 
   const handleWeightChange = (increment: boolean) => {
-    setWeight(prev => {
-      const newWeight = increment ? prev + 1 : prev - 1;
-      return Math.min(Math.max(newWeight, 5), 30);
-    });
+    setState(prev => ({
+      ...prev,
+      weight: Math.min(Math.max(prev.weight + (increment ? 1 : -1), 5), 30)
+    }));
   };
 
   const handleContentTypeToggle = (type: string) => {
-    setSelectedContentTypes(prev => 
-      prev.includes(type) 
-        ? prev.filter(t => t !== type)
-        : [...prev, type]
-    );
+    setState(prev => ({
+      ...prev,
+      selectedContentTypes: prev.selectedContentTypes.includes(type)
+        ? prev.selectedContentTypes.filter(t => t !== type)
+        : [...prev.selectedContentTypes, type]
+    }));
   };
 
   const handleSpecialItemToggle = (item: string) => {
-    setSelectedSpecialItems(prev => {
-      const newItems = prev.includes(item)
-        ? prev.filter(i => i !== item)
-        : [...prev, item];
+    setState(prev => {
+      const newSelectedItems = prev.selectedSpecialItems.includes(item)
+        ? prev.selectedSpecialItems.filter(i => i !== item)
+        : [...prev.selectedSpecialItems, item];
       
-      if (!prev.includes(item)) {
-        setItemQuantities(prev => ({
-          ...prev,
-          [item]: 1
-        }));
+      const newItemQuantities = { ...prev.itemQuantities };
+      if (!prev.selectedSpecialItems.includes(item)) {
+        newItemQuantities[item] = 1;
       }
       
-      return newItems;
+      return {
+        ...prev,
+        selectedSpecialItems: newSelectedItems,
+        itemQuantities: newItemQuantities
+      };
     });
   };
 
   const handleQuantityChange = (itemName: string, increment: boolean) => {
-    setItemQuantities(prev => ({
+    setState(prev => ({
       ...prev,
-      [itemName]: Math.max(1, (prev[itemName] || 1) + (increment ? 1 : -1))
+      itemQuantities: {
+        ...prev.itemQuantities,
+        [itemName]: Math.max(1, (prev.itemQuantities[itemName] || 1) + (increment ? 1 : -1))
+      }
     }));
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setPhotos(prev => [...prev, ...Array.from(e.target.files!)]);
+      setState(prev => ({
+        ...prev,
+        photos: [...prev.photos, ...Array.from(e.target.files!)]
+      }));
     }
   };
 
@@ -133,31 +135,32 @@ export function BookingForm({
       );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleConfirmBooking = async () => {
     if (responsibilityAccepted) {
       setShowConfirmDialog(false);
-      await submitBooking(e);
+      const bookingData = {
+        pickup_city: pickupCity,
+        delivery_city: formData.deliveryCity,
+        weight,
+        item_type: selectedContentTypes.join(', '),
+        recipient_name: formData.recipientName,
+        recipient_address: formData.recipientAddress,
+        recipient_phone: formData.recipientPhone,
+        sender_name: formData.senderName,
+        sender_phone: formData.senderPhone,
+        special_items: selectedSpecialItems,
+        content_types: selectedContentTypes,
+        terms_accepted: true,
+        customs_declaration: true
+      };
+      await handleSubmit(bookingData);
     }
   };
-
-  if (hasExistingBooking) {
-    return (
-      <div className="p-6 text-center space-y-4">
-        <p className="text-red-600 font-medium">
-          Vous avez déjà une réservation pour cette tournée
-        </p>
-        <Button onClick={onCancel} variant="outline">
-          Retour
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full flex flex-col">
@@ -168,7 +171,7 @@ export function BookingForm({
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col h-full">
+      <form onSubmit={handleFormSubmit} className="flex flex-col h-full">
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-6">
             <div className="bg-blue-50 p-4 rounded-lg">
@@ -201,12 +204,12 @@ export function BookingForm({
 
             <SenderInfo 
               formData={formData}
-              setFormData={setFormData}
+              setFormData={(newData) => setState(prev => ({ ...prev, formData: newData }))}
             />
 
             <RecipientInfo 
               formData={formData}
-              setFormData={setFormData}
+              setFormData={(newData) => setState(prev => ({ ...prev, formData: newData }))}
               destinationCountry={destinationCountry}
             />
 
@@ -265,5 +268,15 @@ export function BookingForm({
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export function BookingForm(props: BookingFormProps) {
+  const { tourId, onSuccess } = props;
+
+  return (
+    <BookingFormProvider tourId={tourId} onSuccess={onSuccess}>
+      <BookingFormContent {...props} />
+    </BookingFormProvider>
   );
 }
