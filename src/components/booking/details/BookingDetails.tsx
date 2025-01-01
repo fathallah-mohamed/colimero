@@ -26,7 +26,7 @@ export function BookingDetails({ booking }: BookingDetailsProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-sm text-gray-500">Ville de collecte</p>
+          <p className="text-sm text-gray-500">Point de collecte</p>
           <p className="font-medium">{booking.pickup_city}</p>
         </div>
         <div>
