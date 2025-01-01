@@ -1,66 +1,51 @@
-import { Link } from "react-router-dom";
-import { Button } from "../ui/button";
+import { User } from "@supabase/supabase-js";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
+import { LogOut, User as UserIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface AccountMenuProps {
-  user: User | null;
+  user: User;
   userType: string | null;
   onLogout: () => void;
 }
 
-export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
-  if (!user) {
-    return (
-      <Button asChild variant="outline" className="ml-4">
-        <Link to="/connexion">Se connecter</Link>
-      </Button>
-    );
-  }
-
-  const isCarrier = userType === 'carrier';
-  const menuLabel = isCarrier ? "Mon compte transporteur" : "Mon compte";
-
+export default function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Mon compte</Button>
+        <Button variant="ghost" className="relative">
+          <UserIcon className="h-5 w-5" />
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>{menuLabel}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link to="/profil">Profil</Link>
+          <Link to="/profile" className="cursor-pointer">
+            Mon profil
+          </Link>
         </DropdownMenuItem>
-        {isCarrier ? (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/mes-tournees">Mes tournées</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/demandes-approbation">Demandes d'approbation</Link>
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/mes-reservations">Mes réservations</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/demandes-approbation">Mes demandes d'approbation</Link>
-            </DropdownMenuItem>
-          </>
+        {userType === 'carrier' && (
+          <DropdownMenuItem asChild>
+            <Link to="/mes-tournees" className="cursor-pointer">
+              Mes tournées
+            </Link>
+          </DropdownMenuItem>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onLogout}>
-          Déconnexion
+        {userType === 'client' && (
+          <DropdownMenuItem asChild>
+            <Link to="/mes-reservations" className="cursor-pointer">
+              Mes réservations
+            </Link>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onClick={onLogout} className="text-red-600">
+          <LogOut className="h-4 w-4 mr-2" />
+          Se déconnecter
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

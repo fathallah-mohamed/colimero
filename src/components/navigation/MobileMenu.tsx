@@ -1,104 +1,88 @@
+import { User } from "@supabase/supabase-js";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { MenuItem } from "./MenuItems";
-import { User } from "@supabase/supabase-js";
-import { Button } from "../ui/button";
 
 interface MobileMenuProps {
   isOpen: boolean;
-  items: MenuItem[];
+  setIsOpen: (isOpen: boolean) => void;
+  menuItems: MenuItem[];
   user: User | null;
   userType: string | null;
   onLogout: () => void;
-  onClose: () => void;
 }
 
-export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }: MobileMenuProps) {
+export default function MobileMenu({
+  isOpen,
+  setIsOpen,
+  menuItems,
+  user,
+  userType,
+  onLogout,
+}: MobileMenuProps) {
   return (
-    <div
-      className={`${
-        isOpen ? "block" : "hidden"
-      } md:hidden absolute top-16 inset-x-0 bg-white shadow-lg z-50`}
-    >
-      <div className="px-2 pt-2 pb-3 space-y-1">
-        {items.map((item) => (
-          <Link
-            key={item.name}
-            to={item.href}
-            onClick={(e) => {
-              onClose();
-              if (item.onClick) item.onClick(e);
-            }}
-            className={`block px-3 py-2 rounded-md text-base font-medium ${
-              item.highlight
-                ? "text-[#00B0F0]"
-                : "text-gray-700 hover:text-gray-900"
-            }`}
-          >
-            {item.name}
-          </Link>
-        ))}
-        {user ? (
-          <>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+        <nav className="flex flex-col gap-4">
+          {menuItems.map((item) => (
             <Link
-              to="/profil"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-              onClick={onClose}
+              key={item.href}
+              to={item.href}
+              className={`block px-2 py-1 rounded-lg ${
+                item.highlight
+                  ? "text-blue-600 font-medium"
+                  : "text-gray-700 hover:text-gray-900"
+              }`}
+              onClick={() => setIsOpen(false)}
             >
-              Profil
+              {item.name}
             </Link>
-            {userType === 'carrier' ? (
-              <>
+          ))}
+
+          {user && (
+            <>
+              <Link
+                to="/profile"
+                className="block px-2 py-1 text-gray-700 hover:text-gray-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Mon profil
+              </Link>
+              {userType === 'carrier' && (
                 <Link
                   to="/mes-tournees"
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                  onClick={onClose}
+                  className="block px-2 py-1 text-gray-700 hover:text-gray-900"
+                  onClick={() => setIsOpen(false)}
                 >
                   Mes tournées
                 </Link>
-                <Link
-                  to="/demandes-approbation"
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                  onClick={onClose}
-                >
-                  Demandes d'approbation
-                </Link>
-              </>
-            ) : (
-              <>
+              )}
+              {userType === 'client' && (
                 <Link
                   to="/mes-reservations"
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                  onClick={onClose}
+                  className="block px-2 py-1 text-gray-700 hover:text-gray-900"
+                  onClick={() => setIsOpen(false)}
                 >
                   Mes réservations
                 </Link>
-                <Link
-                  to="/demandes-approbation"
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                  onClick={onClose}
-                >
-                  Mes demandes d'approbation
-                </Link>
-              </>
-            )}
-            <button
-              onClick={() => {
-                onClose();
-                onLogout();
-              }}
-              className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-            >
-              Déconnexion
-            </button>
-          </>
-        ) : (
-          <div className="mt-4 px-3">
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/connexion">Se connecter</Link>
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
+              )}
+              <Button
+                variant="ghost"
+                className="justify-start px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => {
+                  onLogout();
+                  setIsOpen(false);
+                }}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Se déconnecter
+              </Button>
+            </>
+          )}
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 }
