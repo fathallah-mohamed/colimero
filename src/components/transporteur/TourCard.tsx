@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 
 interface TourCardProps {
   tour: Tour;
@@ -33,6 +34,7 @@ export function TourCard({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const { toast } = useToast();
+  const { checkExistingRequest } = useApprovalRequests(userType, isAuthenticated ? supabase.auth.getUser()?.data?.user?.id : null);
 
   useEffect(() => {
     const checkAuth = async () => {
