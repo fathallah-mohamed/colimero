@@ -24,10 +24,21 @@ export function BookingCardContent({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
 
+  const canModifyBooking = booking.tours?.status === 'planned';
+
   const updateBookingStatus = async (newStatus: BookingStatus) => {
     try {
       console.log("Updating booking status to:", newStatus, "for booking:", booking.id);
       
+      if (!canModifyBooking) {
+        toast({
+          variant: "destructive",
+          title: "Action impossible",
+          description: "Les réservations ne peuvent être modifiées que lorsque la tournée est planifiée",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('bookings')
         .update({ 
@@ -50,12 +61,21 @@ export function BookingCardContent({
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
+        description: "Impossible de mettre à jour le statut de la réservation",
       });
     }
   };
 
   const handleEdit = () => {
+    if (!canModifyBooking) {
+      toast({
+        variant: "destructive",
+        title: "Action impossible",
+        description: "Les réservations ne peuvent être modifiées que lorsque la tournée est planifiée",
+      });
+      return;
+    }
+    
     console.log("Opening edit dialog for booking:", booking.id);
     setShowEditDialog(true);
   };
