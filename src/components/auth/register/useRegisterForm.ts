@@ -50,10 +50,13 @@ export function useRegisterForm(onLogin: () => void) {
       });
 
       if (signUpError) {
-        if (signUpError.message === "User already registered") {
+        // Vérifier si l'erreur est due à un utilisateur déjà existant
+        const errorMessage = signUpError.message;
+        if (errorMessage.includes("User already registered") || 
+            signUpError.message === "User already registered" ||
+            errorMessage.includes("already exists")) {
           toast({
-            variant: "destructive",
-            title: "Erreur d'inscription",
+            title: "Compte existant",
             description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
           });
           onLogin();
@@ -75,14 +78,14 @@ export function useRegisterForm(onLogin: () => void) {
           .eq('id', signUpData.user.id);
 
         if (clientError) throw clientError;
+
+        toast({
+          title: "Compte créé avec succès",
+          description: "Vous pouvez maintenant vous connecter",
+        });
+
+        onLogin();
       }
-
-      toast({
-        title: "Compte créé avec succès",
-        description: "Vous pouvez maintenant vous connecter",
-      });
-
-      onLogin();
     } catch (error: any) {
       console.error("Erreur complète:", error);
       toast({
