@@ -47,9 +47,10 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
 
       const bookingData: BookingFormData = {
         ...values,
+        tour_id: tourId,
         user_id: user.id,
         tracking_number: generateTrackingNumber(),
-        status: 'pending' as BookingStatus,
+        status: 'pending',
       };
 
       const { error } = await supabase.from("bookings").insert(bookingData);

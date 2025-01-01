@@ -49,8 +49,9 @@ interface BookingFormProps {
 function BookingFormContent({ 
   pickupCity, 
   destinationCountry,
-  onCancel 
-}: Omit<BookingFormProps, 'tourId' | 'onSuccess'>) {
+  onCancel,
+  tourId 
+}: Omit<BookingFormProps, 'onSuccess'>) {
   const { consentTypes, userConsents } = useConsents();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
@@ -144,6 +145,7 @@ function BookingFormContent({
     if (responsibilityAccepted) {
       setShowConfirmDialog(false);
       const bookingData = {
+        tour_id: tourId,
         pickup_city: pickupCity,
         delivery_city: formData.deliveryCity,
         weight,
@@ -155,6 +157,7 @@ function BookingFormContent({
         sender_phone: formData.senderPhone,
         special_items: selectedSpecialItems,
         content_types: selectedContentTypes,
+        photos: photos.map(file => URL.createObjectURL(file)),
         terms_accepted: true,
         customs_declaration: true
       };
