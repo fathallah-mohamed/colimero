@@ -45,7 +45,6 @@ export default function Navigation() {
 
       <MobileMenu
         isOpen={isOpen}
-        setIsOpen={setIsOpen}
         items={menuItems}
         user={user}
         userType={userType}
