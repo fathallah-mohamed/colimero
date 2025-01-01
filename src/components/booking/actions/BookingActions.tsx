@@ -17,6 +17,11 @@ export function BookingActions({
 }: BookingActionsProps) {
   if (!isCollecting) return null;
 
+  const handleStatusChange = (newStatus: BookingStatus) => {
+    console.log("BookingActions - Changing status to:", newStatus);
+    onStatusChange(newStatus);
+  };
+
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log("Edit button clicked");
@@ -33,7 +38,7 @@ export function BookingActions({
 
       {status === "cancelled" && (
         <BookingActionButton
-          onClick={() => onStatusChange("pending")}
+          onClick={() => handleStatusChange("pending")}
           icon={RotateCcw}
           label="Remettre en attente"
           colorClass="text-blue-500 hover:text-blue-600"
@@ -43,13 +48,13 @@ export function BookingActions({
       {status === "pending" && (
         <>
           <BookingActionButton
-            onClick={() => onStatusChange("cancelled")}
+            onClick={() => handleStatusChange("cancelled")}
             icon={XSquare}
             label="Annuler"
             colorClass="text-red-500 hover:text-red-600"
           />
           <BookingActionButton
-            onClick={() => onStatusChange("collected")}
+            onClick={() => handleStatusChange("collected")}
             icon={CheckSquare}
             label="Marquer comme collecté"
             colorClass="text-green-500 hover:text-green-600"
@@ -59,7 +64,7 @@ export function BookingActions({
 
       {status === "collected" && (
         <BookingActionButton
-          onClick={() => onStatusChange("pending")}
+          onClick={() => handleStatusChange("pending")}
           icon={RotateCcw}
           label="Remettre en attente"
           colorClass="text-blue-500 hover:text-blue-600"

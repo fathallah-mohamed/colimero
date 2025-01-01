@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCard } from "../booking/BookingCard";
-import type { Database } from "@/integrations/supabase/types";
 import type { BookingStatus } from "@/types/booking";
 
 interface TourBookingsListProps {
@@ -56,7 +55,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
       .from("bookings")
       .update({ 
         status: newStatus,
-        delivery_status: newStatus // Keep sync with old field for compatibility
+        delivery_status: newStatus
       })
       .eq("id", bookingId);
 

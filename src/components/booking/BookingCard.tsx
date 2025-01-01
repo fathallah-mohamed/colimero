@@ -5,6 +5,7 @@ import { BookingHeader } from "./card/BookingHeader";
 import { BookingDetails } from "./card/BookingDetails";
 import { BookingActions } from "./actions/BookingActions";
 import { EditBookingDialog } from "./EditBookingDialog";
+import { BookingStatusBadge } from "./BookingStatusBadge";
 import type { BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -70,8 +71,13 @@ export function BookingCard({
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-      <BookingHeader booking={booking} />
+      <div className="flex justify-between items-start">
+        <BookingHeader booking={booking} />
+        <BookingStatusBadge status={currentStatus} />
+      </div>
+      
       <BookingDetails booking={booking} />
+      
       <BookingActions
         status={currentStatus}
         isCollecting={isCollecting}
