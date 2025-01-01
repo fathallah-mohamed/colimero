@@ -16,9 +16,8 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
 
   const handleStatusChange = async (newStatus: TourStatus) => {
     try {
-      // Si on passe de "collecting" à "planned", on doit mettre à jour les réservations
+      // Cas 1: De "collecting" à "planned"
       if (currentStatus === 'collecting' && newStatus === 'planned') {
-        // Mettre à jour le statut de la tournée
         const { error: tourError } = await supabase
           .from('tours')
           .update({ status: newStatus })
@@ -26,7 +25,6 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
 
         if (tourError) throw tourError;
 
-        // Mettre à jour toutes les réservations non-annulées en "pending"
         const { error: bookingsError } = await supabase
           .from('bookings')
           .update({ status: 'pending' })
@@ -40,8 +38,55 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
           title: "Statut mis à jour",
           description: "Le statut de la tournée et des réservations ont été mis à jour avec succès.",
         });
-      } else {
-        // Comportement normal pour les autres changements de statut
+      }
+      // Cas 2: De "collecting" à "in_transit"
+      else if (currentStatus === 'collecting' && newStatus === 'in_transit') {
+        const { error: tourError } = await supabase
+          .from('tours')
+          .update({ status: newStatus })
+          .eq('id', tourId);
+
+        if (tourError) throw tourError;
+
+        const { error: bookingsError } = await supabase
+          .from('bookings')
+          .update({ status: 'in_transit' })
+          .eq('tour_id', tourId)
+          .eq('status', 'collected');
+
+        if (bookingsError) throw bookingsError;
+
+        onStatusChange(newStatus);
+        toast({
+          title: "Statut mis à jour",
+          description: "Le statut de la tournée et des réservations collectées ont été mis à jour avec succès.",
+        });
+      }
+      // Cas 3: De "in_transit" à "collecting"
+      else if (currentStatus === 'in_transit' && newStatus === 'collecting') {
+        const { error: tourError } = await supabase
+          .from('tours')
+          .update({ status: newStatus })
+          .eq('id', tourId);
+
+        if (tourError) throw tourError;
+
+        const { error: bookingsError } = await supabase
+          .from('bookings')
+          .update({ status: 'collected' })
+          .eq('tour_id', tourId)
+          .eq('status', 'in_transit');
+
+        if (bookingsError) throw bookingsError;
+
+        onStatusChange(newStatus);
+        toast({
+          title: "Statut mis à jour",
+          description: "Le statut de la tournée et des réservations en transit ont été mis à jour avec succès.",
+        });
+      }
+      // Comportement normal pour les autres changements de statut
+      else {
         const { error } = await supabase
           .from('tours')
           .update({ status: newStatus })
