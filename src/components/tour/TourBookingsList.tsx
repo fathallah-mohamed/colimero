@@ -54,9 +54,11 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
     
     const { error } = await supabase
       .from("bookings")
-      .update({ status: newStatus })
-      .eq("id", bookingId)
-      .select();
+      .update({ 
+        status: newStatus,
+        delivery_status: newStatus // Keep sync with old field for compatibility
+      })
+      .eq("id", bookingId);
 
     if (error) {
       console.error("Error updating booking status:", error);
