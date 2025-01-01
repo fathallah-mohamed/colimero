@@ -32,10 +32,7 @@ export function BookingCardContent({
       
       const { error } = await supabase
         .from('bookings')
-        .update({ 
-          status: newStatus,
-          delivery_status: newStatus 
-        })
+        .update({ status: newStatus })
         .eq('id', booking.id);
 
       if (error) throw error;
