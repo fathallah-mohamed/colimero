@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -36,6 +36,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
   departure_country: z.string(),
@@ -67,31 +68,29 @@ export default function CreateTourForm() {
   const [showEngagementsDialog, setShowEngagementsDialog] = useState(false);
   const [hasAcceptedEngagements, setHasAcceptedEngagements] = useState(false);
 
-  useEffect(() => {
-    checkEngagements();
-  }, []);
-
-  const checkEngagements = async () => {
-    try {
+  const { data: userConsents, isLoading: isLoadingConsents } = useQuery({
+    queryKey: ["userConsents"],
+    queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) throw new Error("User not authenticated");
 
-      const { data: userConsents, error } = await supabase
+      const { data, error } = await supabase
         .from('user_consents')
         .select('*')
         .eq('user_id', user.id);
 
       if (error) throw error;
+      return data;
+    },
+  });
 
-      const allAccepted = userConsents?.every(consent => consent.accepted) ?? false;
-      setHasAcceptedEngagements(allAccepted);
-      if (!allAccepted) {
-        setShowEngagementsDialog(true);
-      }
-    } catch (error) {
-      console.error('Error checking engagements:', error);
+  useEffect(() => {
+    const allAccepted = userConsents?.every(consent => consent.accepted) ?? false;
+    setHasAcceptedEngagements(allAccepted);
+    if (!allAccepted) {
+      setShowEngagementsDialog(true);
     }
-  };
+  }, [userConsents]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
