@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { BookingFormFields } from "./edit-booking/BookingFormFields";
 import { ContentTypesSection } from "./edit-booking/ContentTypesSection";
 import { SpecialItemsSection } from "./edit-booking/SpecialItemsSection";
+import { useBookingEdit } from "@/hooks/useBookingEdit";
 
 interface EditBookingDialogProps {
   booking: any;
@@ -15,8 +14,6 @@ interface EditBookingDialogProps {
 }
 
 export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: EditBookingDialogProps) {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     sender_name: booking?.sender_name || "",
     sender_phone: booking?.sender_phone || "",
@@ -37,6 +34,8 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
     }, {}) || {}
   );
 
+  const { isSubmitting, updateBooking } = useBookingEdit(booking.id, onSuccess);
+
   const handleFieldChange = (field: string, value: any) => {
     console.log(`Updating field ${field} with value:`, value);
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -48,53 +47,9 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
   };
 
   const handleSubmit = async () => {
-    try {
-      setIsSubmitting(true);
-      console.log("Submitting updated booking data:", formData);
-
-      // Format special items to match the initial booking structure
-      const formattedSpecialItems = formData.special_items.map(item => ({
-        name: item,
-        quantity: itemQuantities[item] || 1
-      }));
-
-      const { error } = await supabase
-        .from("bookings")
-        .update({
-          sender_name: formData.sender_name,
-          sender_phone: formData.sender_phone,
-          recipient_name: formData.recipient_name,
-          recipient_phone: formData.recipient_phone,
-          recipient_address: formData.recipient_address,
-          delivery_city: formData.delivery_city,
-          weight: formData.weight,
-          content_types: formData.content_types,
-          special_items: formattedSpecialItems,
-          photos: formData.photos
-        })
-        .eq("id", booking.id);
-
-      if (error) {
-        console.error("Error updating booking:", error);
-        throw error;
-      }
-
-      toast({
-        title: "Succès",
-        description: "La réservation a été mise à jour",
-      });
-
-      await onSuccess();
+    const success = await updateBooking(formData, itemQuantities);
+    if (success) {
       onOpenChange(false);
-    } catch (error: any) {
-      console.error("Error updating booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Impossible de mettre à jour la réservation",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
