@@ -16,18 +16,45 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
 
   const handleStatusChange = async (newStatus: TourStatus) => {
     try {
-      const { error } = await supabase
-        .from('tours')
-        .update({ status: newStatus })
-        .eq('id', tourId);
+      // Si on passe de "collecting" à "planned", on doit mettre à jour les réservations
+      if (currentStatus === 'collecting' && newStatus === 'planned') {
+        // Mettre à jour le statut de la tournée
+        const { error: tourError } = await supabase
+          .from('tours')
+          .update({ status: newStatus })
+          .eq('id', tourId);
 
-      if (error) throw error;
+        if (tourError) throw tourError;
 
-      onStatusChange(newStatus);
-      toast({
-        title: "Statut mis à jour",
-        description: "Le statut de la tournée a été mis à jour avec succès.",
-      });
+        // Mettre à jour toutes les réservations non-annulées en "pending"
+        const { error: bookingsError } = await supabase
+          .from('bookings')
+          .update({ status: 'pending' })
+          .eq('tour_id', tourId)
+          .neq('status', 'cancelled');
+
+        if (bookingsError) throw bookingsError;
+
+        onStatusChange(newStatus);
+        toast({
+          title: "Statut mis à jour",
+          description: "Le statut de la tournée et des réservations ont été mis à jour avec succès.",
+        });
+      } else {
+        // Comportement normal pour les autres changements de statut
+        const { error } = await supabase
+          .from('tours')
+          .update({ status: newStatus })
+          .eq('id', tourId);
+
+        if (error) throw error;
+
+        onStatusChange(newStatus);
+        toast({
+          title: "Statut mis à jour",
+          description: "Le statut de la tournée a été mis à jour avec succès.",
+        });
+      }
     } catch (error) {
       toast({
         variant: "destructive",
