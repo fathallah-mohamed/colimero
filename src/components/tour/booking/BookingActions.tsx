@@ -57,6 +57,18 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
           </Button>
         </>
       )}
+
+      {status === "collected" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-blue-500 hover:text-blue-600"
+          onClick={() => onStatusChange("pending")}
+        >
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Remettre en attente
+        </Button>
+      )}
     </div>
   );
 }

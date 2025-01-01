@@ -21,7 +21,17 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
   const fetchBookings = async () => {
     const { data, error } = await supabase
       .from("bookings")
-      .select("*")
+      .select(`
+        *,
+        tours (
+          departure_date,
+          destination_country,
+          carriers (
+            company_name,
+            avatar_url
+          )
+        )
+      `)
       .eq("tour_id", tourId);
 
     if (error) {
@@ -44,6 +54,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
       .eq("id", bookingId);
 
     if (error) {
+      console.error("Error updating booking status:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -52,12 +63,15 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
       return;
     }
 
+    // Mettre à jour le statut localement
+    setBookings(bookings.map(booking => 
+      booking.id === bookingId ? { ...booking, status: newStatus } : booking
+    ));
+
     toast({
       title: "Succès",
       description: "Le statut a été mis à jour",
     });
-
-    fetchBookings();
   };
 
   return (
