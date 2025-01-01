@@ -19,7 +19,7 @@ export function BookingHeader({ booking }: BookingHeaderProps) {
       </div>
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <MapPin className="h-4 w-4" />
-        <span>{booking.pickup_city} → {booking.delivery_city}</span>
+        <span>{booking.pickup_city} {booking.delivery_city}</span>
       </div>
     </div>
   );
