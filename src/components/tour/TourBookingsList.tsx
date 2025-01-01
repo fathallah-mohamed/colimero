@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCard } from "./booking/BookingCard";
+import type { Database } from "@/integrations/supabase/types";
 
 interface TourBookingsListProps {
   tourId: number;
   tourStatus: string;
 }
+
+type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
 export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -35,7 +38,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
     setBookings(data || []);
   };
 
-  const handleStatusChange = async (bookingId: string, newStatus: string) => {
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     const { error } = await supabase
       .from("bookings")
       .update({ status: newStatus })
