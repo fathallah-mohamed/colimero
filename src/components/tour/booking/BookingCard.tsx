@@ -5,6 +5,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { CheckSquare, XSquare, Info, RotateCcw, Edit } from "lucide-react";
 import { useState } from "react";
 import { EditBookingDialog } from "./EditBookingDialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingCardProps {
   booking: any;
@@ -15,9 +17,35 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const { toast } = useToast();
   const specialItems = booking.special_items || [];
   const isCancelled = booking.status === "cancelled";
   const isPending = booking.status === "pending";
+
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', booking.id);
+
+      if (error) throw error;
+
+      onStatusChange(booking.id, newStatus);
+      toast({
+        title: "Statut mis à jour",
+        description: `La réservation a été marquée comme ${newStatus === 'collected' ? 'collectée' : newStatus === 'cancelled' ? 'annulée' : 'en attente'}`,
+      });
+      onUpdate();
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la réservation",
+      });
+    }
+  };
 
   return (
     <Card className="p-4 space-y-4">
@@ -99,7 +127,7 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
               variant="outline"
               size="sm"
               className="text-blue-500 hover:text-blue-600"
-              onClick={() => onStatusChange(booking.id, "pending")}
+              onClick={() => handleStatusChange("pending")}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Remettre en attente
@@ -110,7 +138,7 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
                 variant="outline"
                 size="sm"
                 className="text-red-500 hover:text-red-600"
-                onClick={() => onStatusChange(booking.id, "cancelled")}
+                onClick={() => handleStatusChange("cancelled")}
               >
                 <XSquare className="h-4 w-4 mr-2" />
                 Annuler
@@ -119,7 +147,7 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
                 variant="outline"
                 size="sm"
                 className="text-green-500 hover:text-green-600"
-                onClick={() => onStatusChange(booking.id, "collected")}
+                onClick={() => handleStatusChange("collected")}
               >
                 <CheckSquare className="h-4 w-4 mr-2" />
                 Marquer comme collecté
