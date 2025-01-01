@@ -12,6 +12,11 @@ interface BookingActionsProps {
 export function BookingActions({ status, isCollecting, onStatusChange, onEdit }: BookingActionsProps) {
   if (!isCollecting) return null;
 
+  const handleStatusChange = (newStatus: BookingStatus) => {
+    console.log("BookingActions - Changing status to:", newStatus);
+    onStatusChange(newStatus);
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -28,7 +33,7 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
           variant="outline"
           size="sm"
           className="text-blue-500 hover:text-blue-600"
-          onClick={() => onStatusChange("pending")}
+          onClick={() => handleStatusChange("pending")}
         >
           <RotateCcw className="h-4 w-4 mr-2" />
           Remettre en attente
@@ -41,7 +46,7 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
             variant="outline"
             size="sm"
             className="text-red-500 hover:text-red-600"
-            onClick={() => onStatusChange("cancelled")}
+            onClick={() => handleStatusChange("cancelled")}
           >
             <XSquare className="h-4 w-4 mr-2" />
             Annuler
@@ -50,7 +55,7 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
             variant="outline"
             size="sm"
             className="text-green-500 hover:text-green-600"
-            onClick={() => onStatusChange("collected")}
+            onClick={() => handleStatusChange("collected")}
           >
             <CheckSquare className="h-4 w-4 mr-2" />
             Marquer comme collecté
@@ -63,7 +68,7 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
           variant="outline"
           size="sm"
           className="text-blue-500 hover:text-blue-600"
-          onClick={() => onStatusChange("pending")}
+          onClick={() => handleStatusChange("pending")}
         >
           <RotateCcw className="h-4 w-4 mr-2" />
           Remettre en attente

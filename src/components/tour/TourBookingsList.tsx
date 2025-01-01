@@ -48,6 +48,8 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
   };
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    console.log("Changing status to:", newStatus, "for booking:", bookingId);
+    
     const { error } = await supabase
       .from("bookings")
       .update({ status: newStatus })
@@ -63,14 +65,12 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
       return;
     }
 
-    // Mettre à jour le statut localement
-    setBookings(bookings.map(booking => 
-      booking.id === bookingId ? { ...booking, status: newStatus } : booking
-    ));
+    // Mettre à jour le statut localement et rafraîchir les données
+    await fetchBookings();
 
     toast({
       title: "Succès",
-      description: "Le statut a été mis à jour",
+      description: `Le statut a été mis à jour en "${newStatus}"`,
     });
   };
 
