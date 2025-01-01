@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigation } from "@/components/navigation/useNavigation";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/auth/AuthDialog";
-import AccountMenu from "@/components/AccountMenu";
-import MobileMenu from "@/components/MobileMenu";
+import AccountMenu from "@/components/navigation/AccountMenu";
+import { MobileMenu } from "@/components/navigation/MobileMenu";
 import { LogIn } from "lucide-react";
 
 export default function Navigation() {
@@ -46,10 +46,11 @@ export default function Navigation() {
       <MobileMenu
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        menuItems={menuItems}
+        items={menuItems}
         user={user}
         userType={userType}
         onLogout={handleLogout}
+        onClose={() => setIsOpen(false)}
       />
 
       <AuthDialog

@@ -16,7 +16,7 @@ interface AccountMenuProps {
   onLogout: () => void;
 }
 
-export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
+export default function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
   if (!user) {
     return (
       <Button asChild variant="outline" className="ml-4">
