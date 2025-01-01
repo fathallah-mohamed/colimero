@@ -24,13 +24,9 @@ export function BookingCardContent({
 }: BookingCardContentProps) {
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
   const updateBookingStatus = async (newStatus: BookingStatus) => {
-    if (isUpdating) return;
-    
-    setIsUpdating(true);
     try {
       console.log("Updating booking status to:", newStatus, "for booking:", booking.id);
       
@@ -38,33 +34,19 @@ export function BookingCardContent({
         .from('bookings')
         .update({ 
           status: newStatus,
-          delivery_status: newStatus,
-          updated_at: new Date().toISOString()
+          delivery_status: newStatus 
         })
         .eq('id', booking.id);
 
       if (error) throw error;
 
-      // Vérifier que la mise à jour a bien été effectuée
-      const { data: updatedBooking, error: fetchError } = await supabase
-        .from('bookings')
-        .select('status, delivery_status')
-        .eq('id', booking.id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      if (updatedBooking.status === newStatus) {
-        setCurrentStatus(newStatus);
-        onStatusChange(booking.id, newStatus);
-        
-        toast({
-          title: "Succès",
-          description: "Le statut a été mis à jour",
-        });
-      } else {
-        throw new Error("La mise à jour n'a pas été enregistrée");
-      }
+      setCurrentStatus(newStatus);
+      onStatusChange(booking.id, newStatus);
+      
+      toast({
+        title: "Succès",
+        description: "Le statut a été mis à jour",
+      });
     } catch (error) {
       console.error('Error in updateBookingStatus:', error);
       toast({
@@ -72,10 +54,6 @@ export function BookingCardContent({
         title: "Erreur",
         description: "Impossible de mettre à jour le statut",
       });
-      // Recharger le statut actuel depuis la base de données
-      await onUpdate();
-    } finally {
-      setIsUpdating(false);
     }
   };
 
