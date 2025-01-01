@@ -1,9 +1,8 @@
 import { User } from "@supabase/supabase-js";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { MenuItem } from "./useNavigation";
 import { Link } from "react-router-dom";
-import { MenuItem } from "./MenuItems";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -24,28 +23,26 @@ export default function MobileMenu({
 }: MobileMenuProps) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-        <nav className="flex flex-col gap-4">
+      <SheetContent side="left">
+        <SheetHeader>
+          <SheetTitle>Menu</SheetTitle>
+        </SheetHeader>
+        <div className="mt-4 space-y-4">
           {menuItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}
-              className={`block px-2 py-1 rounded-lg ${
-                item.highlight
-                  ? "text-blue-600 font-medium"
-                  : "text-gray-700 hover:text-gray-900"
-              }`}
+              className="block py-2 text-sm"
               onClick={() => setIsOpen(false)}
             >
               {item.name}
             </Link>
           ))}
-
-          {user && (
+          {user ? (
             <>
               <Link
                 to="/profile"
-                className="block px-2 py-1 text-gray-700 hover:text-gray-900"
+                className="block py-2 text-sm"
                 onClick={() => setIsOpen(false)}
               >
                 Mon profil
@@ -53,7 +50,7 @@ export default function MobileMenu({
               {userType === 'carrier' && (
                 <Link
                   to="/mes-tournees"
-                  className="block px-2 py-1 text-gray-700 hover:text-gray-900"
+                  className="block py-2 text-sm"
                   onClick={() => setIsOpen(false)}
                 >
                   Mes tournées
@@ -62,7 +59,7 @@ export default function MobileMenu({
               {userType === 'client' && (
                 <Link
                   to="/mes-reservations"
-                  className="block px-2 py-1 text-gray-700 hover:text-gray-900"
+                  className="block py-2 text-sm"
                   onClick={() => setIsOpen(false)}
                 >
                   Mes réservations
@@ -70,18 +67,17 @@ export default function MobileMenu({
               )}
               <Button
                 variant="ghost"
-                className="justify-start px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="w-full justify-start px-0 text-red-600"
                 onClick={() => {
                   onLogout();
                   setIsOpen(false);
                 }}
               >
-                <LogOut className="h-4 w-4 mr-2" />
                 Se déconnecter
               </Button>
             </>
-          )}
-        </nav>
+          ) : null}
+        </div>
       </SheetContent>
     </Sheet>
   );
