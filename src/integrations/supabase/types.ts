@@ -211,6 +211,51 @@ export type Database = {
           },
         ]
       }
+      carrier_commitments: {
+        Row: {
+          accepted: boolean
+          accepted_at: string | null
+          carrier_id: string
+          commitment_type_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          accepted?: boolean
+          accepted_at?: string | null
+          carrier_id: string
+          commitment_type_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted?: boolean
+          accepted_at?: string | null
+          carrier_id?: string
+          commitment_type_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carrier_commitments_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carrier_commitments_commitment_type_id_fkey"
+            columns: ["commitment_type_id"]
+            isOneToOne: false
+            referencedRelation: "commitment_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       carrier_registration_requests: {
         Row: {
           address: string
@@ -322,7 +367,6 @@ export type Database = {
           company_name: string | null
           coverage_area: string[] | null
           created_at: string
-          customs_terms_accepted: boolean | null
           email: string | null
           email_verified: boolean | null
           first_name: string | null
@@ -330,11 +374,8 @@ export type Database = {
           last_name: string | null
           phone: string | null
           phone_secondary: string | null
-          responsibility_terms_accepted: boolean | null
           siret: string | null
           status: string | null
-          terms_accepted: boolean | null
-          terms_accepted_at: string | null
           total_deliveries: number | null
         }
         Insert: {
@@ -346,7 +387,6 @@ export type Database = {
           company_name?: string | null
           coverage_area?: string[] | null
           created_at?: string
-          customs_terms_accepted?: boolean | null
           email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
@@ -354,11 +394,8 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
-          responsibility_terms_accepted?: boolean | null
           siret?: string | null
           status?: string | null
-          terms_accepted?: boolean | null
-          terms_accepted_at?: string | null
           total_deliveries?: number | null
         }
         Update: {
@@ -370,7 +407,6 @@ export type Database = {
           company_name?: string | null
           coverage_area?: string[] | null
           created_at?: string
-          customs_terms_accepted?: boolean | null
           email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
@@ -378,11 +414,8 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
-          responsibility_terms_accepted?: boolean | null
           siret?: string | null
           status?: string | null
-          terms_accepted?: boolean | null
-          terms_accepted_at?: string | null
           total_deliveries?: number | null
         }
         Relationships: []
@@ -417,6 +450,33 @@ export type Database = {
           phone?: string | null
           terms_accepted?: boolean | null
           terms_accepted_at?: string | null
+        }
+        Relationships: []
+      }
+      commitment_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          id: string
+          label: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          id?: string
+          label: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          label?: string
+          updated_at?: string
         }
         Relationships: []
       }

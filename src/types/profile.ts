@@ -9,10 +9,6 @@ export interface ProfileData {
   address?: string;
   coverage_area?: string[];
   avatar_url?: string | null;
-  terms_accepted?: boolean;
-  terms_accepted_at?: string;
-  customs_terms_accepted?: boolean;
-  responsibility_terms_accepted?: boolean;
   carrier_capacities?: {
     total_capacity: number;
     price_per_kg: number;

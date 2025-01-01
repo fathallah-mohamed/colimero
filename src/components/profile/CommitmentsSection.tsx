@@ -1,13 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProfileData } from "@/types/profile";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CommitmentStatusProps {
   accepted: boolean;
   description: string;
+  acceptedAt?: string | null;
 }
 
-const CommitmentStatus = ({ accepted, description }: CommitmentStatusProps) => (
+const CommitmentStatus = ({ accepted, description, acceptedAt }: CommitmentStatusProps) => (
   <div className="space-y-2">
     <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
       {accepted ? (
@@ -22,6 +25,11 @@ const CommitmentStatus = ({ accepted, description }: CommitmentStatusProps) => (
         {description}
       </AlertDescription>
     </Alert>
+    {accepted && acceptedAt && (
+      <p className="text-xs text-gray-500 mt-1">
+        Accepté le {new Date(acceptedAt).toLocaleDateString()}
+      </p>
+    )}
   </div>
 );
 
@@ -29,42 +37,67 @@ interface CommitmentsSectionProps {
   profile: ProfileData;
 }
 
+interface CommitmentType {
+  id: string;
+  code: string;
+  label: string;
+  description: string;
+}
+
+interface CarrierCommitment {
+  commitment_type_id: string;
+  accepted: boolean;
+  accepted_at: string | null;
+  commitment_type: CommitmentType;
+}
+
 export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
-  // Forcer la conversion en booléen avec Boolean()
-  const termsAccepted = Boolean(profile.terms_accepted);
-  const customsTermsAccepted = Boolean(profile.customs_terms_accepted);
-  const responsibilityTermsAccepted = Boolean(profile.responsibility_terms_accepted);
+  const { data: commitments, isLoading } = useQuery({
+    queryKey: ['carrier-commitments', profile.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('carrier_commitments')
+        .select(`
+          commitment_type_id,
+          accepted,
+          accepted_at,
+          commitment_type:commitment_types(*)
+        `)
+        .eq('carrier_id', profile.id);
+
+      if (error) throw error;
+      return data as CarrierCommitment[];
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
+        <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-20 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
       <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
-        <div>
-          <p className="text-sm text-gray-500 mb-2">Conditions générales</p>
-          <CommitmentStatus 
-            accepted={termsAccepted}
-            description="Je certifie que toutes les informations fournies sont exactes et je m'engage à respecter les conditions générales d'utilisation de la plateforme."
-          />
-          {termsAccepted && profile.terms_accepted_at && (
-            <p className="text-xs text-gray-500 mt-1">
-              Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
-            </p>
-          )}
-        </div>
-        <div>
-          <p className="text-sm text-gray-500 mb-2">Conditions douanières</p>
-          <CommitmentStatus 
-            accepted={customsTermsAccepted}
-            description="Je m'engage à respecter toutes les réglementations douanières en vigueur et à déclarer correctement tous les colis transportés lors des passages aux frontières."
-          />
-        </div>
-        <div>
-          <p className="text-sm text-gray-500 mb-2">Responsabilité des objets transportés</p>
-          <CommitmentStatus 
-            accepted={responsibilityTermsAccepted}
-            description="Je reconnais être entièrement responsable des objets transportés pendant toute la durée de leur prise en charge, de leur collecte jusqu'à leur livraison."
-          />
-        </div>
+        {commitments?.map((commitment) => (
+          <div key={commitment.commitment_type_id}>
+            <p className="text-sm text-gray-500 mb-2">{commitment.commitment_type.label}</p>
+            <CommitmentStatus 
+              accepted={commitment.accepted}
+              description={commitment.commitment_type.description}
+              acceptedAt={commitment.accepted_at}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
