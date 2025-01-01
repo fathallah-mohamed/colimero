@@ -7,7 +7,7 @@ interface BookingCardProps {
   booking: any;
   isCollecting: boolean;
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
   isEven?: boolean;
 }
 
