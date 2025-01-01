@@ -7,11 +7,12 @@ import { useState } from "react";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Booking, BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
-  booking: any;
+  booking: Booking;
   isCollecting: boolean;
-  onStatusChange: (bookingId: string, status: string) => void;
+  onStatusChange: (bookingId: string, status: BookingStatus) => void;
   onUpdate: () => void;
 }
 
@@ -22,7 +23,7 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
   const isCancelled = booking.status === "cancelled";
   const isPending = booking.status === "pending";
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
       const { error } = await supabase
         .from('bookings')
