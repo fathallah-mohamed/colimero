@@ -23,6 +23,7 @@ export function ApprovalRequestCard({
   );
 
   const handleCancel = () => {
+    console.log('Cancel clicked for request:', request.id);
     if (onCancel && request.id) {
       onCancel(request.id);
     }

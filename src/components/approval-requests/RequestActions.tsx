@@ -11,12 +11,6 @@ interface RequestActionsProps {
 export function RequestActions({ status, userType, onApprove, onReject, onCancel }: RequestActionsProps) {
   if (status !== 'pending') return null;
 
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    }
-  };
-
   return (
     <div className="flex gap-2">
       {userType === 'carrier' ? (
@@ -35,7 +29,7 @@ export function RequestActions({ status, userType, onApprove, onReject, onCancel
       ) : (
         <Button
           variant="outline"
-          onClick={handleCancel}
+          onClick={onCancel}
           className="text-red-600 hover:text-red-700"
         >
           Annuler la demande

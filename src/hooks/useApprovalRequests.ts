@@ -118,7 +118,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
   const handleCancelRequest = async (requestId: string) => {
     try {
-      console.log('Cancelling request:', requestId);
+      console.log('Attempting to cancel request:', requestId);
+      
       const { error } = await supabase
         .from('approval_requests')
         .update({
@@ -127,8 +128,13 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         })
         .eq('id', requestId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      console.log('Request cancelled successfully');
+      
       toast({
         title: "Succès",
         description: "La demande a été annulée avec succès.",
