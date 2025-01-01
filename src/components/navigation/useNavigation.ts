@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
+import { handleLogoutFlow } from "@/utils/auth/logout";
 import { MenuItem } from "./MenuItems";
 
 export function useNavigation() {
@@ -27,15 +28,9 @@ export function useNavigation() {
   }, []);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const result = await handleLogoutFlow();
     
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-      });
-    } else {
+    if (result.success) {
       setUser(null);
       setUserType(null);
       toast({
@@ -43,6 +38,12 @@ export function useNavigation() {
         description: "Vous avez été déconnecté avec succès",
       });
       navigate('/');
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: result.error || "Une erreur est survenue lors de la déconnexion",
+      });
     }
   };
 

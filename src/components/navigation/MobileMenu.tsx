@@ -1,27 +1,18 @@
 import { Link } from "react-router-dom";
 import { MenuItem } from "./MenuItems";
 import { User } from "@supabase/supabase-js";
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 
 interface MobileMenuProps {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  menuItems: MenuItem[];
+  items: MenuItem[];
   user: User | null;
   userType: string | null;
   onLogout: () => void;
+  onClose: () => void;
 }
 
-export default function MobileMenu({ 
-  isOpen, 
-  setIsOpen, 
-  menuItems, 
-  user, 
-  userType, 
-  onLogout 
-}: MobileMenuProps) {
-  const onClose = () => setIsOpen(false);
-
+export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }: MobileMenuProps) {
   return (
     <div
       className={`${
@@ -29,7 +20,7 @@ export default function MobileMenu({
       } md:hidden absolute top-16 inset-x-0 bg-white shadow-lg z-50`}
     >
       <div className="px-2 pt-2 pb-3 space-y-1">
-        {menuItems.map((item) => (
+        {items.map((item) => (
           <Link
             key={item.name}
             to={item.href}
