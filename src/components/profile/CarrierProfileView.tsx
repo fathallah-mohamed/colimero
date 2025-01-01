@@ -63,38 +63,6 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
-        <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Conditions générales</p>
-            <CommitmentStatus 
-              accepted={profile.terms_accepted || false} 
-              description="Je certifie que toutes les informations fournies sont exactes et je m'engage à respecter les conditions générales d'utilisation de la plateforme."
-            />
-            {profile.terms_accepted && profile.terms_accepted_at && (
-              <p className="text-xs text-gray-500 mt-1">
-                Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Conditions douanières</p>
-            <CommitmentStatus 
-              accepted={profile.customs_terms_accepted || false}
-              description="Je m'engage à respecter toutes les réglementations douanières en vigueur et à déclarer correctement tous les colis transportés lors des passages aux frontières."
-            />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-2">Responsabilité des objets transportés</p>
-            <CommitmentStatus 
-              accepted={profile.responsibility_terms_accepted || false}
-              description="Je reconnais être entièrement responsable des objets transportés pendant toute la durée de leur prise en charge, de leur collecte jusqu'à leur livraison."
-            />
-          </div>
-        </div>
-      </div>
-
-      <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations entreprise</h2>
         <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
           <div>
@@ -130,6 +98,38 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
           <div>
             <p className="text-sm text-gray-500 mb-1">Prix par kg</p>
             <p className="text-gray-900 font-medium">{profile.carrier_capacities?.price_per_kg || "-"} €</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
+        <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Conditions générales</p>
+            <CommitmentStatus 
+              accepted={Boolean(profile.terms_accepted)} 
+              description="Je certifie que toutes les informations fournies sont exactes et je m'engage à respecter les conditions générales d'utilisation de la plateforme."
+            />
+            {profile.terms_accepted && profile.terms_accepted_at && (
+              <p className="text-xs text-gray-500 mt-1">
+                Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Conditions douanières</p>
+            <CommitmentStatus 
+              accepted={Boolean(profile.customs_terms_accepted)}
+              description="Je m'engage à respecter toutes les réglementations douanières en vigueur et à déclarer correctement tous les colis transportés lors des passages aux frontières."
+            />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-2">Responsabilité des objets transportés</p>
+            <CommitmentStatus 
+              accepted={Boolean(profile.responsibility_terms_accepted)}
+              description="Je reconnais être entièrement responsable des objets transportés pendant toute la durée de leur prise en charge, de leur collecte jusqu'à leur livraison."
+            />
           </div>
         </div>
       </div>
