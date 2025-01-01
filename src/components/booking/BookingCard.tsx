@@ -79,24 +79,6 @@ export function BookingCard({
         <BookingStatusBadge status={currentStatus} />
       </div>
       
-      <Button
-        variant="ghost"
-        className="w-full flex items-center justify-center gap-2"
-        onClick={() => setShowDetails(!showDetails)}
-      >
-        {showDetails ? (
-          <>
-            Masquer les détails
-            <ChevronUp className="h-4 w-4" />
-          </>
-        ) : (
-          <>
-            Voir les détails
-            <ChevronDown className="h-4 w-4" />
-          </>
-        )}
-      </Button>
-
       {showDetails && <BookingDetails booking={booking} />}
       
       <BookingActions
@@ -105,6 +87,26 @@ export function BookingCard({
         onStatusChange={updateBookingStatus}
         onEdit={handleEdit}
       />
+
+      <div className="flex justify-center">
+        <Button
+          variant="ghost"
+          className="flex items-center justify-center gap-2"
+          onClick={() => setShowDetails(!showDetails)}
+        >
+          {showDetails ? (
+            <>
+              Masquer les détails
+              <ChevronUp className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Voir les détails
+              <ChevronDown className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
 
       <EditBookingDialog
         booking={booking}
