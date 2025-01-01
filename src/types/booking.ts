@@ -2,24 +2,21 @@ export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'collected';
 
 export interface BookingFormData {
   tour_id: number;
-  user_id: string;
   pickup_city: string;
-  weight: number;
-  content_types: string[];
-  special_items: Array<{
-    name: string;
-    quantity: number;
-  }>;
-  photos: string[];
-  sender_name: string;
-  sender_phone: string;
-  recipient_name: string;
-  recipient_phone: string;
-  recipient_address: string;
   delivery_city: string;
-  status: BookingStatus;
-  tracking_number: string;
+  weight: number;
   item_type: string;
-  customs_declaration: boolean;
+  recipient_name: string;
+  recipient_address: string;
+  recipient_phone: string;
+  sender_name?: string;
+  sender_phone?: string;
+  package_description?: string;
+  special_items?: string[];
+  content_types?: string[];
+  photos?: string[];
+  delivery_notes?: string;
   terms_accepted: boolean;
+  customs_declaration: boolean;
+  status: BookingStatus;
 }

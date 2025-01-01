@@ -663,7 +663,7 @@ export type Database = {
     }
     Enums: {
       algerian_city: "Alger" | "Oran" | "Constantine" | "Annaba" | "Sétif"
-      booking_status: "pending" | "confirmed" | "cancelled"
+      booking_status: "pending" | "confirmed" | "cancelled" | "collected"
       french_city:
         | "Paris"
         | "Lyon"
