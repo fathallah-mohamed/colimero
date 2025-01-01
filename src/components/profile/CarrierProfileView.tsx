@@ -7,6 +7,8 @@ interface CarrierProfileViewProps {
 }
 
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
+  console.log("Profile data:", profile); // Pour déboguer les valeurs des engagements
+
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4 mb-8">

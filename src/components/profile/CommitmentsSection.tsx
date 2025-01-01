@@ -26,6 +26,11 @@ interface CommitmentsSectionProps {
 }
 
 export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
+  // Utilisation de === true pour une comparaison stricte
+  const termsAccepted = profile.terms_accepted === true;
+  const customsTermsAccepted = profile.customs_terms_accepted === true;
+  const responsibilityTermsAccepted = profile.responsibility_terms_accepted === true;
+
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
@@ -33,10 +38,10 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
         <div>
           <p className="text-sm text-gray-500 mb-2">Conditions générales</p>
           <CommitmentStatus 
-            accepted={profile.terms_accepted === true}
+            accepted={termsAccepted}
             description="Je certifie que toutes les informations fournies sont exactes et je m'engage à respecter les conditions générales d'utilisation de la plateforme."
           />
-          {profile.terms_accepted && profile.terms_accepted_at && (
+          {termsAccepted && profile.terms_accepted_at && (
             <p className="text-xs text-gray-500 mt-1">
               Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
             </p>
@@ -45,14 +50,14 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
         <div>
           <p className="text-sm text-gray-500 mb-2">Conditions douanières</p>
           <CommitmentStatus 
-            accepted={profile.customs_terms_accepted === true}
+            accepted={customsTermsAccepted}
             description="Je m'engage à respecter toutes les réglementations douanières en vigueur et à déclarer correctement tous les colis transportés lors des passages aux frontières."
           />
         </div>
         <div>
           <p className="text-sm text-gray-500 mb-2">Responsabilité des objets transportés</p>
           <CommitmentStatus 
-            accepted={profile.responsibility_terms_accepted === true}
+            accepted={responsibilityTermsAccepted}
             description="Je reconnais être entièrement responsable des objets transportés pendant toute la durée de leur prise en charge, de leur collecte jusqu'à leur livraison."
           />
         </div>
