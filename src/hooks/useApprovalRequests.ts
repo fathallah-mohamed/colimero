@@ -26,7 +26,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               company_name
             )
           ),
-          user:clients!approval_requests_user_id_fkey (
+          user:clients (
             first_name,
             last_name,
             phone
