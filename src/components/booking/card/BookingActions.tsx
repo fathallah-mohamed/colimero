@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BookingStatusBadge } from "@/components/booking/BookingStatusBadge";
+import { Edit2, CheckSquare, XSquare } from "lucide-react";
 import type { BookingStatus } from "@/types/booking";
 
 interface BookingActionsProps {
@@ -25,42 +26,31 @@ export function BookingActions({
           <>
             <Button
               variant="outline"
-              onClick={() => onStatusChange("rejected")}
+              size="sm"
+              onClick={() => onStatusChange("cancelled")}
               className="text-red-600 hover:text-red-700"
             >
-              Refuser
+              <XSquare className="h-4 w-4 mr-2" />
+              Annuler
             </Button>
             <Button
-              onClick={() => onStatusChange("accepted")}
-              className="bg-green-600 hover:bg-green-700"
+              variant="outline"
+              size="sm"
+              onClick={onUpdate}
             >
-              Accepter
+              <Edit2 className="h-4 w-4 mr-2" />
+              Modifier
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onStatusChange("collected")}
+              className="text-green-600 hover:text-green-700"
+            >
+              <CheckSquare className="h-4 w-4 mr-2" />
+              Marquer comme collecté
             </Button>
           </>
-        )}
-        {currentStatus === "accepted" && (
-          <Button
-            onClick={() => onStatusChange("collected")}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Marquer comme collecté
-          </Button>
-        )}
-        {currentStatus === "collected" && (
-          <Button
-            onClick={() => onStatusChange("in_transit")}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            En transit
-          </Button>
-        )}
-        {currentStatus === "in_transit" && (
-          <Button
-            onClick={() => onStatusChange("delivered")}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            Marquer comme livré
-          </Button>
         )}
       </div>
     </div>
