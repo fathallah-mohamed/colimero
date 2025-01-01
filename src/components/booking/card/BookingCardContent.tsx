@@ -79,12 +79,16 @@ export function BookingCardContent({
         <p className="text-gray-600">{booking.recipient_phone}</p>
       </div>
 
-      <BookingActions
-        status={currentStatus}
-        isCollecting={isCollecting}
-        onStatusChange={updateBookingStatus}
-        onEdit={handleEdit}
-      />
+      {isCollecting && (
+        <div className="mt-4">
+          <BookingActions
+            status={currentStatus}
+            isCollecting={isCollecting}
+            onStatusChange={updateBookingStatus}
+            onEdit={handleEdit}
+          />
+        </div>
+      )}
 
       <EditBookingDialog
         booking={booking}
