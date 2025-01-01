@@ -33,6 +33,9 @@ import { CalendarIcon, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CollectionPointForm } from "./CollectionPointForm";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   departure_country: z.string(),
@@ -61,6 +64,34 @@ const formSchema = z.object({
 export default function CreateTourForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [showEngagementsDialog, setShowEngagementsDialog] = useState(false);
+  const [hasAcceptedEngagements, setHasAcceptedEngagements] = useState(false);
+
+  useEffect(() => {
+    checkEngagements();
+  }, []);
+
+  const checkEngagements = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: userConsents, error } = await supabase
+        .from('user_consents')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      const allAccepted = userConsents?.every(consent => consent.accepted) ?? false;
+      setHasAcceptedEngagements(allAccepted);
+      if (!allAccepted) {
+        setShowEngagementsDialog(true);
+      }
+    } catch (error) {
+      console.error('Error checking engagements:', error);
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -158,6 +189,29 @@ export default function CreateTourForm() {
         description: "Une erreur est survenue lors de la création de la tournée",
       });
     }
+  }
+
+  if (!hasAcceptedEngagements) {
+    return (
+      <Dialog open={showEngagementsDialog} onOpenChange={setShowEngagementsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Engagements requis</DialogTitle>
+            <DialogDescription>
+              Pour créer une tournée, vous devez d'abord accepter tous les engagements dans votre profil.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => navigate('/profil')}>
+              Aller à mon profil
+            </Button>
+            <Button onClick={() => setShowEngagementsDialog(false)}>
+              Fermer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
 
   return (
