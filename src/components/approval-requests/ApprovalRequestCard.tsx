@@ -59,6 +59,11 @@ export function ApprovalRequestCard({
                 {selectedStop.name} - {selectedStop.location}
               </p>
               <p className="text-sm text-gray-600">
+                Date de collecte : {selectedStop.collection_date ? 
+                  format(new Date(selectedStop.collection_date), "EEEE d MMMM yyyy", { locale: fr }) : 
+                  'Non spécifiée'}
+              </p>
+              <p className="text-sm text-gray-600">
                 Heure : {selectedStop.time}
               </p>
             </div>
