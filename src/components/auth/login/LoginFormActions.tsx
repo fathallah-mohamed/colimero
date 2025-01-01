@@ -40,6 +40,7 @@ export function LoginFormActions({
           </div>
 
           <div className="grid gap-2">
+            {/* Afficher "Créer un compte client" uniquement si aucun type n'est requis ou si on demande un client */}
             {(!requiredUserType || requiredUserType === 'client') && (
               <Button
                 type="button"
@@ -50,8 +51,8 @@ export function LoginFormActions({
                 Créer un compte client
               </Button>
             )}
-            {/* Ne montrer l'option "Devenir transporteur" que si aucun type n'est requis */}
-            {!requiredUserType && (
+            {/* Afficher "Devenir transporteur" uniquement si aucun type n'est requis ou si on demande un transporteur */}
+            {(!requiredUserType || requiredUserType === 'carrier') && (
               <Button
                 type="button"
                 variant="outline"
