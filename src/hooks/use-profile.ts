@@ -40,6 +40,7 @@ export function useProfile() {
               siret,
               address,
               coverage_area,
+              created_at,
               carrier_capacities!carrier_capacities_carrier_id_fkey (
                 total_capacity,
                 price_per_kg,
@@ -65,6 +66,7 @@ export function useProfile() {
               siret: data.siret,
               address: data.address,
               coverage_area: data.coverage_area,
+              created_at: data.created_at,
               carrier_capacities: data.carrier_capacities,
               carrier_services: data.carrier_services
             };
@@ -73,7 +75,7 @@ export function useProfile() {
         } else {
           const { data, error } = await supabase
             .from('clients')
-            .select('id, first_name, last_name, phone')
+            .select('id, first_name, last_name, phone, created_at')
             .eq('id', session.user.id)
             .single();
 
@@ -84,7 +86,8 @@ export function useProfile() {
               first_name: data.first_name,
               last_name: data.last_name,
               phone: data.phone,
-              email: session.user.email
+              email: session.user.email,
+              created_at: data.created_at
             };
             setProfile(profileData);
           }
