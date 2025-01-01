@@ -1,55 +1,30 @@
 import React from 'react';
-import { Check, X, Info } from "lucide-react";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { CheckSquare } from "lucide-react";
 
 interface ClientProfileViewProps {
   profile: any;
 }
 
 export function ClientProfileView({ profile }: ClientProfileViewProps) {
-  const CommitmentStatus = ({ 
-    accepted, 
+  const CommitmentDisplay = ({ 
     label, 
-    description 
+    description,
+    acceptedAt
   }: { 
-    accepted: boolean; 
     label: string;
     description: string;
+    acceptedAt?: string;
   }) => (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-gray-900">{label}</p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs text-sm">{description}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          {accepted && profile.terms_accepted_at && (
-            <p className="text-sm text-gray-500">
-              Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
-            </p>
-          )}
-        </div>
-        <div className={`flex items-center gap-2 ${accepted ? 'text-green-600' : 'text-red-600'}`}>
-          {accepted ? (
-            <Check className="h-5 w-5" />
-          ) : (
-            <X className="h-5 w-5" />
-          )}
-        </div>
+    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+      <CheckSquare className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+      <div className="space-y-1">
+        <p className="font-medium text-gray-900">{label}</p>
+        <p className="text-sm text-gray-600">{description}</p>
+        {acceptedAt && (
+          <p className="text-sm text-gray-500">
+            Accepté le {new Date(acceptedAt).toLocaleDateString()}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -82,12 +57,14 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
 
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements acceptés à l'inscription</h2>
-        <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
-          <CommitmentStatus 
-            accepted={profile.terms_accepted || false}
-            label="Conditions générales"
-            description="En acceptant les conditions générales, vous vous êtes engagé à respecter les règles de la plateforme, notamment concernant le contenu des colis."
-          />
+        <div className="space-y-4">
+          {profile.terms_accepted && (
+            <CommitmentDisplay 
+              label="Conditions générales"
+              description="En acceptant les conditions générales, vous vous êtes engagé à respecter les règles de la plateforme, notamment concernant le contenu des colis et les procédures d'expédition."
+              acceptedAt={profile.terms_accepted_at}
+            />
+          )}
         </div>
       </div>
     </div>
