@@ -3,7 +3,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client' | 'carrier') {
+interface UseLoginFormProps {
+  onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier';
+}
+
+export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

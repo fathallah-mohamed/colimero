@@ -28,7 +28,7 @@ export default function LoginForm({
   } = useLoginForm({ onSuccess, requiredUserType });
 
   return (
-    <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <LoginFormFields 
         email={email}
         password={password}
