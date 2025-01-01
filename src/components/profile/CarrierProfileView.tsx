@@ -108,7 +108,7 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
           <div>
             <p className="text-sm text-gray-500 mb-2">Conditions générales</p>
             <CommitmentStatus 
-              accepted={Boolean(profile.terms_accepted)} 
+              accepted={!!profile.terms_accepted} 
               description="Je certifie que toutes les informations fournies sont exactes et je m'engage à respecter les conditions générales d'utilisation de la plateforme."
             />
             {profile.terms_accepted && profile.terms_accepted_at && (
@@ -120,14 +120,14 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
           <div>
             <p className="text-sm text-gray-500 mb-2">Conditions douanières</p>
             <CommitmentStatus 
-              accepted={Boolean(profile.customs_terms_accepted)}
+              accepted={!!profile.customs_terms_accepted}
               description="Je m'engage à respecter toutes les réglementations douanières en vigueur et à déclarer correctement tous les colis transportés lors des passages aux frontières."
             />
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-2">Responsabilité des objets transportés</p>
             <CommitmentStatus 
-              accepted={Boolean(profile.responsibility_terms_accepted)}
+              accepted={!!profile.responsibility_terms_accepted}
               description="Je reconnais être entièrement responsable des objets transportés pendant toute la durée de leur prise en charge, de leur collecte jusqu'à leur livraison."
             />
           </div>
