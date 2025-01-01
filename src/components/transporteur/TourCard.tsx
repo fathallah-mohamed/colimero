@@ -52,7 +52,7 @@ export function TourCard({
     return () => subscription.unsubscribe();
   }, [tour.carrier_id]);
 
-  const handleBookingClick = () => {
+  const handleBookingClick = async () => {
     if (!selectedPoint) return;
     
     if (!isAuthenticated) {
@@ -70,6 +70,30 @@ export function TourCard({
     }
 
     if (tour.type === 'private') {
+      // Vérifier s'il existe déjà une demande
+      const { exists, status } = await checkExistingRequest(tour.id.toString());
+      
+      if (exists) {
+        if (status === 'rejected') {
+          toast({
+            variant: "destructive",
+            title: "Demande rejetée",
+            description: "Votre demande d'approbation pour cette tournée a été rejetée par le transporteur.",
+          });
+          return;
+        } else if (status === 'pending') {
+          toast({
+            variant: "destructive",
+            title: "Demande en attente",
+            description: "Vous avez déjà une demande d'approbation en attente pour cette tournée.",
+          });
+          return;
+        } else if (status === 'approved') {
+          onBookingClick(tour.id, selectedPoint);
+          return;
+        }
+      }
+      
       setShowApprovalDialog(true);
     } else {
       onBookingClick(tour.id, selectedPoint);

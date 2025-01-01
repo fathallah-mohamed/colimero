@@ -29,32 +29,18 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               carriers (
                 company_name
               )
+            ),
+            user:clients (
+              first_name,
+              last_name,
+              phone
             )
           `)
           .eq('tour.carrier_id', userId)
           .order('created_at', { ascending: false });
 
         if (approvalError) throw approvalError;
-
-        // Fetch client data for each request
-        if (approvalData) {
-          const requestsWithUserData = await Promise.all(
-            approvalData.map(async (request) => {
-              const { data: userData } = await supabase
-                .from('clients')
-                .select('first_name, last_name, phone')
-                .eq('id', request.user_id)
-                .single();
-
-              return {
-                ...request,
-                user: userData
-              };
-            })
-          );
-
-          setRequests(requestsWithUserData);
-        }
+        setRequests(approvalData || []);
       } else {
         // Fetch client's requests
         const { data, error } = await supabase
@@ -100,13 +86,23 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
     if (error) {
       console.error('Error checking existing request:', error);
-      return true; // En cas d'erreur, on empêche la création par précaution
+      return { exists: true, status: null }; // En cas d'erreur, on empêche la création par précaution
     }
 
-    // Retourne true s'il existe une demande en attente ou approuvée
-    return data?.some(request => 
+    const pendingOrApproved = data?.find(request => 
       request.status === 'pending' || request.status === 'approved'
-    ) || false;
+    );
+
+    if (pendingOrApproved) {
+      return { exists: true, status: pendingOrApproved.status };
+    }
+
+    const rejected = data?.find(request => request.status === 'rejected');
+    if (rejected) {
+      return { exists: true, status: 'rejected' };
+    }
+
+    return { exists: false, status: null };
   };
 
   const handleApproval = async (requestId: string, approved: boolean) => {
