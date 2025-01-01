@@ -17,8 +17,32 @@ export function BookingDetails({ booking }: BookingDetailsProps) {
           <p className="text-sm text-gray-500">{booking.sender_phone}</p>
         </div>
         <div>
+          <p className="text-sm text-gray-500">Destinataire</p>
+          <p className="font-medium">{booking.recipient_name}</p>
+          <p className="text-sm text-gray-500">{booking.recipient_phone}</p>
+          <p className="text-sm text-gray-500">{booking.recipient_address}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
           <p className="text-sm text-gray-500">Ville de collecte</p>
           <p className="font-medium">{booking.pickup_city}</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Ville de livraison</p>
+          <p className="font-medium">{booking.delivery_city}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-sm text-gray-500">Poids</p>
+          <p className="font-medium">{booking.weight} kg</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Numéro de suivi</p>
+          <p className="font-medium">{booking.tracking_number}</p>
         </div>
       </div>
 
@@ -52,6 +76,13 @@ export function BookingDetails({ booking }: BookingDetailsProps) {
           {format(new Date(booking.tours?.departure_date), "d MMMM yyyy", { locale: fr })}
         </p>
       </div>
+
+      {booking.package_description && (
+        <div>
+          <p className="text-sm text-gray-500">Description du colis</p>
+          <p className="text-sm">{booking.package_description}</p>
+        </div>
+      )}
     </div>
   );
 }
