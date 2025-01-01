@@ -69,7 +69,6 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
       return;
     }
 
-    // Rafraîchir les données après la mise à jour
     await fetchBookings();
 
     toast({
@@ -83,13 +82,14 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
       {bookings.length === 0 ? (
         <p>Aucune réservation pour cette tournée.</p>
       ) : (
-        bookings.map((booking) => (
+        bookings.map((booking, index) => (
           <BookingCard
             key={booking.id}
             booking={booking}
             isCollecting={tourStatus === "collecting"}
             onStatusChange={handleStatusChange}
             onUpdate={fetchBookings}
+            isEven={index % 2 === 0}
           />
         ))
       )}
