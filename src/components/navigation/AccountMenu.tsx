@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@supabase/supabase-js";
+import { useState } from "react";
+import AuthDialog from "../auth/AuthDialog";
 
 interface AccountMenuProps {
   user: User | null;
@@ -17,11 +19,24 @@ interface AccountMenuProps {
 }
 
 export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
   if (!user) {
     return (
-      <Button asChild variant="outline" className="ml-4">
-        <Link to="/connexion">Se connecter</Link>
-      </Button>
+      <>
+        <Button 
+          variant="outline" 
+          className="ml-4"
+          onClick={() => setShowAuthDialog(true)}
+        >
+          Se connecter
+        </Button>
+
+        <AuthDialog 
+          isOpen={showAuthDialog} 
+          onClose={() => setShowAuthDialog(false)} 
+        />
+      </>
     );
   }
 
