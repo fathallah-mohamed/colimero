@@ -201,7 +201,10 @@ function BookingFormContent({
               {selectedSpecialItems.map(itemName => (
                 <SpecialItemDisplay
                   key={itemName}
-                  item={{ name: itemName, quantity: itemQuantities[itemName] || 1 }}
+                  item={{ 
+                    name: itemName, 
+                    quantity: itemQuantities[itemName] || 1 
+                  }}
                 />
               ))}
             </div>
