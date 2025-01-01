@@ -1,5 +1,6 @@
 import { BookingStatus } from "@/types/booking";
-import { BookingActionButtons } from "./BookingActionButtons";
+import { CheckSquare, XSquare, RotateCcw, Edit } from "lucide-react";
+import { BookingActionButton } from "./BookingActionButton";
 
 interface BookingActionsProps {
   status: BookingStatus;
@@ -7,7 +8,6 @@ interface BookingActionsProps {
   onStatusChange: (status: BookingStatus) => void;
   onEdit: () => void;
   tourStatus?: string;
-  isUpdating: boolean;
 }
 
 export function BookingActions({ 
@@ -15,8 +15,7 @@ export function BookingActions({
   isCollecting, 
   onStatusChange, 
   onEdit,
-  tourStatus,
-  isUpdating
+  tourStatus
 }: BookingActionsProps) {
   const handleStatusChange = (newStatus: BookingStatus) => {
     console.log("BookingActions - Changing status to:", newStatus);
@@ -33,12 +32,46 @@ export function BookingActions({
   if (isCollecting) {
     return (
       <div className="flex items-center gap-2">
-        <BookingActionButtons
-          status={status}
-          isUpdating={isUpdating}
-          onStatusChange={handleStatusChange}
-          onEdit={handleEdit}
+        <BookingActionButton
+          onClick={handleEdit}
+          icon={Edit}
+          label="Modifier"
         />
+
+        {status === "cancelled" && (
+          <BookingActionButton
+            onClick={() => handleStatusChange("pending")}
+            icon={RotateCcw}
+            label="Remettre en attente"
+            colorClass="text-blue-500 hover:text-blue-600"
+          />
+        )}
+
+        {status === "pending" && (
+          <>
+            <BookingActionButton
+              onClick={() => handleStatusChange("cancelled")}
+              icon={XSquare}
+              label="Annuler"
+              colorClass="text-red-500 hover:text-red-600"
+            />
+            <BookingActionButton
+              onClick={() => handleStatusChange("collected")}
+              icon={CheckSquare}
+              label="Marquer comme collecté"
+              colorClass="text-green-500 hover:text-green-600"
+            />
+          </>
+        )}
+
+        {status === "collected" && (
+          <BookingActionButton
+            onClick={() => handleStatusChange("pending")}
+            icon={RotateCcw}
+            label="Remettre en attente"
+            colorClass="text-blue-500 hover:text-blue-600"
+          />
+        )}
       </div>
     );
   }
@@ -47,12 +80,29 @@ export function BookingActions({
   if (tourStatus === 'planned') {
     return (
       <div className="flex items-center gap-2">
-        <BookingActionButtons
-          status={status}
-          isUpdating={isUpdating}
-          onStatusChange={handleStatusChange}
-          onEdit={handleEdit}
+        <BookingActionButton
+          onClick={handleEdit}
+          icon={Edit}
+          label="Modifier"
         />
+
+        {status === "pending" && (
+          <BookingActionButton
+            onClick={() => handleStatusChange("cancelled")}
+            icon={XSquare}
+            label="Annuler"
+            colorClass="text-red-500 hover:text-red-600"
+          />
+        )}
+
+        {status === "cancelled" && (
+          <BookingActionButton
+            onClick={() => handleStatusChange("pending")}
+            icon={RotateCcw}
+            label="Remettre en attente"
+            colorClass="text-blue-500 hover:text-blue-600"
+          />
+        )}
       </div>
     );
   }
