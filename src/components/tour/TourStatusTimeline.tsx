@@ -26,18 +26,19 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
 
         if (tourError) throw tourError;
 
+        // Les réservations avec statut "collected" restent "collected"
         const { error: bookingsError } = await supabase
           .from('bookings')
           .update({ status: 'pending' })
           .eq('tour_id', tourId)
-          .neq('status', 'cancelled');
+          .eq('status', 'pending');
 
         if (bookingsError) throw bookingsError;
 
         onStatusChange(newStatus);
         toast({
           title: "Statut mis à jour",
-          description: "Le statut de la tournée et des réservations ont été mis à jour avec succès.",
+          description: "Le statut de la tournée a été mis à jour. Les réservations collectées restent inchangées.",
         });
       }
       // Cas 2: De "collecting" à "in_transit"
@@ -83,7 +84,7 @@ export function TourStatusTimeline({ tourId, currentStatus, onStatusChange }: To
         onStatusChange(newStatus);
         toast({
           title: "Statut mis à jour",
-          description: "Le statut de la tournée et des réservations en transit ont été mis à jour avec succès.",
+          description: "Le statut de la tournée a été mis à jour. Les réservations en transit sont maintenant marquées comme collectées.",
         });
       }
       // Comportement normal pour les autres changements de statut
