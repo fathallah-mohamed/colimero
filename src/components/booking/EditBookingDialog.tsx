@@ -52,6 +52,7 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
       setIsSubmitting(true);
       console.log("Submitting updated booking data:", formData);
 
+      // Format special items to match the initial booking structure
       const formattedSpecialItems = formData.special_items.map(item => ({
         name: item,
         quantity: itemQuantities[item] || 1
@@ -73,7 +74,10 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
         })
         .eq("id", booking.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating booking:", error);
+        throw error;
+      }
 
       toast({
         title: "Succès",
@@ -82,12 +86,12 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
 
       await onSuccess();
       onOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating booking:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour la réservation",
+        description: error.message || "Impossible de mettre à jour la réservation",
       });
     } finally {
       setIsSubmitting(false);
