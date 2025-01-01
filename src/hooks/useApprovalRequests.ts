@@ -11,7 +11,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     if (!userId) return;
 
     try {
-      // First, get the approval requests with tour data
       let query = supabase
         .from('approval_requests')
         .select(`
@@ -26,6 +25,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             carriers (
               company_name
             )
+          ),
+          user:clients (
+            first_name,
+            last_name,
+            phone
           )
         `)
         .order('created_at', { ascending: false });
@@ -36,34 +40,14 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         query = query.eq('user_id', userId);
       }
 
-      const { data: approvalData, error: approvalError } = await query;
+      const { data: approvalData, error } = await query;
 
-      if (approvalError) {
-        console.error('Error details:', approvalError);
-        throw approvalError;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
       }
 
-      // If we have approval data, fetch the associated user data
-      if (approvalData && approvalData.length > 0) {
-        const userIds = approvalData.map(request => request.user_id);
-        
-        const { data: userData, error: userError } = await supabase
-          .from('clients')
-          .select('id, first_name, last_name, phone')
-          .in('id', userIds);
-
-        if (userError) throw userError;
-
-        // Merge the user data with the approval requests
-        const mergedData = approvalData.map(request => ({
-          ...request,
-          user: userData?.find(user => user.id === request.user_id)
-        }));
-        
-        setRequests(mergedData);
-      } else {
-        setRequests([]);
-      }
+      setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error fetching requests:', error);
       toast({
