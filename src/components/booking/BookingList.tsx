@@ -57,13 +57,14 @@ export function BookingList() {
 
   return (
     <div className="space-y-6">
-      {bookings.map((booking) => (
+      {bookings.map((booking, index) => (
         <BookingCard 
           key={booking.id} 
           booking={booking} 
           isCollecting={true}
           onStatusChange={handleStatusChange}
           onUpdate={refetch}
+          isEven={index % 2 === 0}
         />
       ))}
     </div>

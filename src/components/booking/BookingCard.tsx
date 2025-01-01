@@ -9,19 +9,22 @@ import { BookingStatusBadge } from "./BookingStatusBadge";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { BookingStatus } from "@/types/booking";
+import { cn } from "@/lib/utils";
 
 interface BookingCardProps {
   booking: any;
   isCollecting: boolean;
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
   onUpdate: () => void;
+  isEven?: boolean;
 }
 
 export function BookingCard({ 
   booking, 
   isCollecting, 
   onStatusChange,
-  onUpdate 
+  onUpdate,
+  isEven = false
 }: BookingCardProps) {
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -73,7 +76,10 @@ export function BookingCard({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+    <div className={cn(
+      "rounded-lg shadow-sm p-6 space-y-4",
+      isEven ? "bg-[#F6F6F7]" : "bg-[#F1F1F1]"
+    )}>
       <div className="flex justify-between items-start">
         <BookingHeader booking={booking} />
         <BookingStatusBadge status={currentStatus} />
