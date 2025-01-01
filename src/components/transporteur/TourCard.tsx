@@ -10,7 +10,6 @@ import { TourStatusSelect } from "@/components/tour/TourStatusSelect";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { useToast } from "@/hooks/use-toast";
 
 interface TourCardProps {
   tour: Tour;
@@ -29,7 +28,6 @@ export function TourCard({
   const [selectedPoint, setSelectedPoint] = useState<string>();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -50,15 +48,6 @@ export function TourCard({
   const handleBookingClick = () => {
     if (!selectedPoint) return;
     
-    if (tour.status !== 'planned') {
-      toast({
-        variant: "destructive",
-        title: "Réservation impossible",
-        description: "Cette tournée est en cours et n'accepte plus de réservations.",
-      });
-      return;
-    }
-
     if (!isAuthenticated) {
       setShowAuthDialog(true);
     } else {
