@@ -26,7 +26,7 @@ export function LoginFormActions({
         {isLoading ? "Connexion..." : "Se connecter"}
       </Button>
 
-      {(!requiredUserType || requiredUserType === 'client' || requiredUserType === 'carrier') && (
+      {(!requiredUserType || requiredUserType === 'client') && (
         <>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -39,28 +39,38 @@ export function LoginFormActions({
             </div>
           </div>
 
-          <div className="grid gap-2">
-            {(!requiredUserType || requiredUserType === 'client') && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onRegister}
-                className="w-full"
-              >
-                Créer un compte client
-              </Button>
-            )}
-            {(!requiredUserType || requiredUserType === 'carrier') && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCarrierRegister}
-                className="w-full"
-              >
-                Devenir transporteur
-              </Button>
-            )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onRegister}
+            className="w-full"
+          >
+            Créer un compte client
+          </Button>
+        </>
+      )}
+
+      {(!requiredUserType || requiredUserType === 'carrier') && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Vous êtes transporteur ?
+              </span>
+            </div>
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCarrierRegister}
+            className="w-full"
+          >
+            Devenir transporteur
+          </Button>
         </>
       )}
 
