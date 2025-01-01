@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MenuItems } from "./navigation/MenuItems";
+import { MenuItems } from "./navigation/MenuItems.tsx";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { LogIn } from "lucide-react";
 
