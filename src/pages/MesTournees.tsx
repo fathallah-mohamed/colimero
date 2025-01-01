@@ -124,23 +124,12 @@ export default function MesTournees() {
       return;
     }
 
-    const { error } = await supabase
-      .from('tours')
-      .update({ status: newStatus })
-      .eq('id', tourId);
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
-      });
-      return;
-    }
-
+    // Mettre à jour l'état local immédiatement pour une meilleure UX
     setTours(tours.map(tour => 
       tour.id === tourId ? { ...tour, status: newStatus } : tour
     ));
+
+    // La mise à jour dans la BDD est gérée par le composant TourStatusTimeline
   };
 
   const onEditComplete = () => {
