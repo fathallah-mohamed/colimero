@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useToast } from "@/hooks/use-toast";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface TourCardProps {
   tour: Tour;
@@ -28,6 +29,7 @@ export function TourCard({
   const [isCarrierOwner, setIsCarrierOwner] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const { toast } = useToast();
@@ -67,13 +69,21 @@ export function TourCard({
       return;
     }
 
-    onBookingClick(tour.id, selectedPoint);
+    if (tour.type === 'private') {
+      setShowApprovalDialog(true);
+    } else {
+      onBookingClick(tour.id, selectedPoint);
+    }
   };
 
   const handleAuthSuccess = () => {
     setShowAuthDialog(false);
     if (selectedPoint) {
-      onBookingClick(tour.id, selectedPoint);
+      if (tour.type === 'private') {
+        setShowApprovalDialog(true);
+      } else {
+        onBookingClick(tour.id, selectedPoint);
+      }
     }
   };
 
@@ -123,6 +133,13 @@ export function TourCard({
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"
+      />
+
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={tour.id}
+        pickupCity={selectedPoint || ''}
       />
     </div>
   );
