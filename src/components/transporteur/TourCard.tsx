@@ -33,8 +33,9 @@ export function TourCard({
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { checkExistingRequest } = useApprovalRequests(userType, isAuthenticated ? supabase.auth.getUser()?.data?.user?.id : null);
+  const { checkExistingRequest } = useApprovalRequests(userType, userId);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,6 +43,7 @@ export function TourCard({
       setIsAuthenticated(!!session);
       setIsCarrierOwner(session?.user?.id === tour.carrier_id);
       setUserType(session?.user?.user_metadata?.user_type || null);
+      setUserId(session?.user?.id || null);
     };
     checkAuth();
 
@@ -49,6 +51,7 @@ export function TourCard({
       setIsAuthenticated(!!session);
       setIsCarrierOwner(session?.user?.id === tour.carrier_id);
       setUserType(session?.user?.user_metadata?.user_type || null);
+      setUserId(session?.user?.id || null);
     });
 
     return () => subscription.unsubscribe();

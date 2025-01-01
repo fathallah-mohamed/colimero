@@ -53,10 +53,13 @@ export function ApprovalRequestCard({
           </div>
 
           {selectedStop && (
-            <div>
-              <h3 className="font-medium text-gray-900">Point de collecte sélectionné :</h3>
-              <p className="mt-2 text-sm text-gray-600">
-                {selectedStop.name} - {selectedStop.location} ({selectedStop.time})
+            <div className="bg-gray-50 p-3 rounded-md">
+              <h3 className="font-medium text-gray-900 mb-2">Point de collecte sélectionné :</h3>
+              <p className="text-sm text-gray-600">
+                {selectedStop.name} - {selectedStop.location}
+              </p>
+              <p className="text-sm text-gray-600">
+                Heure : {selectedStop.time}
               </p>
             </div>
           )}
