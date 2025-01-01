@@ -1,5 +1,3 @@
-export type BookingStatus = "pending" | "confirmed" | "cancelled";
-
 export interface BookingFormData {
   tour_id: number;
   user_id: string;
@@ -17,7 +15,7 @@ export interface BookingFormData {
   recipient_phone: string;
   recipient_address: string;
   delivery_city: string;
-  status: BookingStatus;
+  status: string;
   tracking_number: string;
   item_type: string;
   customs_declaration: boolean;

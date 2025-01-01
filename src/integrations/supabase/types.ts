@@ -97,7 +97,7 @@ export type Database = {
           sender_name: string | null
           sender_phone: string | null
           special_items: Json | null
-          status: Database["public"]["Enums"]["booking_status"]
+          status: string
           terms_accepted: boolean | null
           tour_id: number
           tracking_number: string
@@ -123,7 +123,7 @@ export type Database = {
           sender_name?: string | null
           sender_phone?: string | null
           special_items?: Json | null
-          status?: Database["public"]["Enums"]["booking_status"]
+          status: string
           terms_accepted?: boolean | null
           tour_id: number
           tracking_number: string
@@ -149,7 +149,7 @@ export type Database = {
           sender_name?: string | null
           sender_phone?: string | null
           special_items?: Json | null
-          status?: Database["public"]["Enums"]["booking_status"]
+          status?: string
           terms_accepted?: boolean | null
           tour_id?: number
           tracking_number?: string
@@ -663,7 +663,6 @@ export type Database = {
     }
     Enums: {
       algerian_city: "Alger" | "Oran" | "Constantine" | "Annaba" | "Sétif"
-      booking_status: "pending" | "confirmed" | "cancelled"
       french_city:
         | "Paris"
         | "Lyon"

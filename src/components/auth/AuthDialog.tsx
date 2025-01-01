@@ -1,6 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import LoginForm from "./LoginForm";
-import { useLocation } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { LoginForm } from "./LoginForm";
+import { RegisterForm } from "./RegisterForm";
+import CarrierAuthDialog from "./CarrierAuthDialog";
+
+type View = "login" | "register" | "forgot-password";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -17,44 +26,79 @@ export default function AuthDialog({
   requiredUserType,
   onRegisterClick 
 }: AuthDialogProps) {
-  const location = useLocation();
-  const isBookingFlow = location.pathname.includes("/tours");
-  const isCreateTourFlow = location.pathname.includes("/planifier-une-tournee");
+  const [view, setView] = useState<View>("login");
+  const [showCarrierDialog, setShowCarrierDialog] = useState(false);
+
+  const handleRegisterClick = () => {
+    if (requiredUserType === 'carrier' && onRegisterClick) {
+      onRegisterClick();
+    } else {
+      setView("register");
+    }
+  };
+
+  const handleCarrierRegisterClick = () => {
+    onClose();
+    setShowCarrierDialog(true);
+  };
 
   const getDialogTitle = () => {
-    if (isBookingFlow) {
-      return "Connexion requise pour réserver";
+    if (view === "login") {
+      if (requiredUserType === 'client') {
+        return "Connexion requise pour réserver";
+      } else if (requiredUserType === 'carrier') {
+        return "Connexion requise pour créer une tournée";
+      }
+      return "Connexion";
     }
-    if (isCreateTourFlow) {
-      return "Connexion requise pour créer une tournée";
-    }
-    return "Connexion";
+    return "Créer un compte client";
   };
 
   const getDialogDescription = () => {
-    if (isBookingFlow) {
-      return "Connectez-vous pour réserver cette tournée";
+    if (view === "login") {
+      if (requiredUserType === 'client') {
+        return "Connectez-vous pour réserver cette tournée.";
+      } else if (requiredUserType === 'carrier') {
+        return "Connectez-vous pour créer une tournée.";
+      }
+      return "Connectez-vous à votre compte.";
     }
-    if (isCreateTourFlow) {
-      return "Connectez-vous en tant que transporteur pour créer une tournée";
-    }
-    return "Connectez-vous à votre compte";
+    return "Créez votre compte client pour commencer à expédier vos colis";
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{getDialogTitle()}</DialogTitle>
-        </DialogHeader>
-        <LoginForm 
-          onSuccess={onSuccess} 
-          requiredUserType={requiredUserType}
-          onRegisterClick={onRegisterClick}
-          isBookingFlow={isBookingFlow}
-          isCreateTourFlow={isCreateTourFlow}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex justify-between items-center">
+              <DialogTitle className="text-2xl font-bold">
+                {getDialogTitle()}
+              </DialogTitle>
+            </div>
+            <p className="text-lg text-gray-600">
+              {getDialogDescription()}
+            </p>
+          </DialogHeader>
+
+          {view === "login" ? (
+            <LoginForm
+              onForgotPassword={() => setView("forgot-password")}
+              onRegister={handleRegisterClick}
+              onCarrierRegister={handleCarrierRegisterClick}
+              onSuccess={onSuccess}
+              requiredUserType={requiredUserType}
+            />
+          ) : (
+            <RegisterForm onLogin={() => setView("login")} />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <CarrierAuthDialog 
+        isOpen={showCarrierDialog} 
+        onClose={() => setShowCarrierDialog(false)} 
+      />
+    </>
   );
 }
