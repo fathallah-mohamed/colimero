@@ -30,7 +30,7 @@ export function BookingCardContent({
     try {
       console.log("Updating booking status to:", newStatus, "for booking:", booking.id);
       
-      if (!canModifyBooking) {
+      if (!canModifyBooking && !isCollecting) {
         toast({
           variant: "destructive",
           title: "Action impossible",
@@ -99,16 +99,15 @@ export function BookingCardContent({
         <p className="text-gray-600">{booking.recipient_phone}</p>
       </div>
 
-      {isCollecting && (
-        <div className="mt-4">
-          <BookingActions
-            status={currentStatus}
-            isCollecting={isCollecting}
-            onStatusChange={updateBookingStatus}
-            onEdit={handleEdit}
-          />
-        </div>
-      )}
+      <div className="mt-4">
+        <BookingActions
+          status={currentStatus}
+          isCollecting={isCollecting}
+          onStatusChange={updateBookingStatus}
+          onEdit={handleEdit}
+          tourStatus={booking.tours?.status}
+        />
+      </div>
 
       <EditBookingDialog
         booking={booking}
