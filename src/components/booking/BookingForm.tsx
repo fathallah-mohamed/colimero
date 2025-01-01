@@ -32,6 +32,14 @@ const specialItems = [
   { name: "Colis volumineux", price: 25, icon: "package" }
 ];
 
+interface BookingFormProps {
+  tourId: number;
+  pickupCity: string;
+  destinationCountry: string;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
 function BookingFormContent({ 
   pickupCity, 
   destinationCountry,
