@@ -15,7 +15,6 @@ export function RegisterTerms({
         id="terms"
         checked={termsAccepted}
         onCheckedChange={(checked) => onTermsAcceptedChange(checked as boolean)}
-        defaultChecked
       />
       <label
         htmlFor="terms"
