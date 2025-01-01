@@ -64,6 +64,7 @@ export function BookingCardContent({
   };
 
   const handleEditSuccess = () => {
+    console.log("Edit successful, updating booking list");
     setShowEditDialog(false);
     onUpdate(); // Appel de la fonction de mise à jour après une modification réussie
   };

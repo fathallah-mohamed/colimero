@@ -118,7 +118,7 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
           />
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 sticky bottom-0 bg-white p-4 border-t">
+        <div className="flex justify-end gap-2 pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
