@@ -33,21 +33,22 @@ interface EditBookingDialogProps {
 
 export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: EditBookingDialogProps) {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    sender_name: booking.sender_name || "",
-    sender_phone: booking.sender_phone || "",
-    recipient_name: booking.recipient_name || "",
-    recipient_phone: booking.recipient_phone || "",
-    recipient_address: booking.recipient_address || "",
-    delivery_city: booking.delivery_city || "",
-    weight: booking.weight || 5,
-    content_types: booking.content_types || [],
-    special_items: booking.special_items || [],
-    photos: booking.photos || [],
+    sender_name: booking?.sender_name || "",
+    sender_phone: booking?.sender_phone || "",
+    recipient_name: booking?.recipient_name || "",
+    recipient_phone: booking?.recipient_phone || "",
+    recipient_address: booking?.recipient_address || "",
+    delivery_city: booking?.delivery_city || "",
+    weight: booking?.weight || 5,
+    content_types: booking?.content_types || [],
+    special_items: booking?.special_items?.map((item: any) => item.name) || [],
+    photos: booking?.photos || [],
   });
 
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>(
-    booking.special_items?.reduce((acc: Record<string, number>, item: any) => {
+    booking?.special_items?.reduce((acc: Record<string, number>, item: any) => {
       acc[item.name] = item.quantity || 1;
       return acc;
     }, {}) || {}
@@ -104,6 +105,14 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
 
   const handleSubmit = async () => {
     try {
+      setIsSubmitting(true);
+
+      // Préparer les special_items avec leurs quantités
+      const formattedSpecialItems = formData.special_items.map(item => ({
+        name: item,
+        quantity: itemQuantities[item] || 1
+      }));
+
       const { error } = await supabase
         .from("bookings")
         .update({
@@ -115,10 +124,7 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
           delivery_city: formData.delivery_city,
           weight: formData.weight,
           content_types: formData.content_types,
-          special_items: formData.special_items.map(item => ({
-            name: item,
-            quantity: itemQuantities[item] || 1
-          })),
+          special_items: formattedSpecialItems,
           photos: formData.photos
         })
         .eq("id", booking.id);
@@ -139,6 +145,8 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
         title: "Erreur",
         description: "Impossible de mettre à jour la réservation",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -233,8 +241,11 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit}>
-            Enregistrer les modifications
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Enregistrement..." : "Enregistrer les modifications"}
           </Button>
         </div>
       </DialogContent>
