@@ -35,7 +35,11 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
       onStatusChange(booking.id, newStatus);
       toast({
         title: "Statut mis à jour",
-        description: `La réservation a été marquée comme ${newStatus === 'collected' ? 'collectée' : newStatus === 'cancelled' ? 'annulée' : 'en attente'}`,
+        description: `La réservation a été marquée comme ${
+          newStatus === 'collected' ? 'collectée' : 
+          newStatus === 'cancelled' ? 'annulée' : 
+          'en attente'
+        }`,
       });
       onUpdate();
     } catch (error) {
@@ -48,19 +52,41 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
     }
   };
 
+  const getStatusBadgeVariant = (status: BookingStatus) => {
+    switch (status) {
+      case "collected":
+        return "default";
+      case "cancelled":
+        return "destructive";
+      case "in_transit":
+        return "secondary";
+      default:
+        return "secondary";
+    }
+  };
+
+  const getStatusLabel = (status: BookingStatus) => {
+    switch (status) {
+      case "collected":
+        return "Collecté";
+      case "cancelled":
+        return "Annulé";
+      case "in_transit":
+        return "En transit";
+      case "pending":
+        return "En attente";
+      default:
+        return status;
+    }
+  };
+
   return (
     <Card className="p-4 space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{booking.recipient_name}</h3>
         <div className="flex items-center gap-2">
-          <Badge 
-            variant={booking.status === "collected" ? "default" : 
-                    booking.status === "cancelled" ? "destructive" : 
-                    "secondary"}
-          >
-            {booking.status === "collected" ? "Collecté" :
-             booking.status === "cancelled" ? "Annulé" :
-             "En attente"}
+          <Badge variant={getStatusBadgeVariant(booking.status)}>
+            {getStatusLabel(booking.status)}
           </Badge>
           <Button
             variant="outline"
