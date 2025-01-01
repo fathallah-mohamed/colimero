@@ -17,12 +17,12 @@ const initialState: BookingFormState = {
   itemQuantities: {},
   photos: [],
   formData: {
-    senderName: '',
-    senderPhone: '',
-    recipientName: '',
-    recipientPhone: '',
-    recipientAddress: '',
-    deliveryCity: '',
+    sender_name: '',
+    sender_phone: '',
+    recipient_name: '',
+    recipient_phone: '',
+    recipient_address: '',
+    delivery_city: '',
   },
 };
 
@@ -46,8 +46,8 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
             ...prev,
             formData: {
               ...prev.formData,
-              senderName: `${clientData.first_name} ${clientData.last_name}`.trim(),
-              senderPhone: clientData.phone || '',
+              sender_name: `${clientData.first_name} ${clientData.last_name}`.trim(),
+              sender_phone: clientData.phone || '',
             }
           }));
         }
@@ -60,17 +60,7 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
   const handleSubmit = async (values: BookingFormData) => {
     const result = await createBooking(values);
     if (result.success) {
-      // Update tour remaining capacity
-      const { error: updateError } = await supabase
-        .from('tours')
-        .update({
-          remaining_capacity: supabase.sql`remaining_capacity - ${values.weight}`
-        })
-        .eq('id', tourId);
-
-      if (updateError) {
-        console.error('Error updating tour capacity:', updateError);
-      }
+      onSuccess();
     }
   };
 

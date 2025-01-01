@@ -1,12 +1,12 @@
 export type BookingStatus = 'pending' | 'confirmed' | 'collected' | 'in_transit' | 'cancelled';
 
 export interface FormData {
-  senderName: string;
-  senderPhone: string;
-  recipientName: string;
-  recipientPhone: string;
-  recipientAddress: string;
-  deliveryCity: string;
+  sender_name: string;
+  sender_phone: string;
+  recipient_name: string;
+  recipient_phone: string;
+  recipient_address: string;
+  delivery_city: string;
 }
 
 export interface BookingFormState {
