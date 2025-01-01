@@ -141,8 +141,20 @@ function BookingFormContent({
   const handleConfirmBooking = async () => {
     if (responsibilityAccepted) {
       setShowConfirmDialog(false);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Vous devez être connecté pour effectuer une réservation",
+        });
+        return;
+      }
+
       const bookingData = {
         tour_id: tourId,
+        user_id: user.id,
         pickup_city: pickupCity,
         delivery_city: formData.deliveryCity,
         weight,

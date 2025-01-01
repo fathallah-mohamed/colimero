@@ -49,7 +49,6 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
 
       const bookingData: BookingFormData = {
         ...values,
-        user_id: user.id,
         tracking_number: generateTrackingNumber(),
         status: 'pending',
       };
