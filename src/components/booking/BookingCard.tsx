@@ -2,12 +2,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { BookingHeader } from "./card/BookingHeader";
-import { BookingDetails } from "./card/BookingDetails";
+import { BookingDetails } from "./details/BookingDetails";
 import { BookingActions } from "./actions/BookingActions";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { BookingStatusBadge } from "./BookingStatusBadge";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import type { BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -88,20 +88,22 @@ export function BookingCard({
         onEdit={handleEdit}
       />
 
-      <div className="flex justify-center">
+      <div className="flex justify-center border-t pt-4">
         <Button
-          variant="ghost"
-          className="flex items-center justify-center gap-2"
+          variant="outline"
+          size="lg"
+          className="flex items-center justify-center gap-2 w-full max-w-md hover:bg-gray-50"
           onClick={() => setShowDetails(!showDetails)}
         >
+          <Info className="h-4 w-4" />
           {showDetails ? (
             <>
-              Masquer les détails
+              Masquer les détails de la réservation
               <ChevronUp className="h-4 w-4" />
             </>
           ) : (
             <>
-              Voir les détails
+              Voir tous les détails de la réservation
               <ChevronDown className="h-4 w-4" />
             </>
           )}
