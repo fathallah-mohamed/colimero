@@ -10,8 +10,7 @@ interface BookingActionsProps {
 }
 
 export function BookingActions({ status, isCollecting, onStatusChange, onEdit }: BookingActionsProps) {
-  const isCancelled = status === "cancelled";
-  const isPending = status === "pending";
+  if (!isCollecting) return null;
 
   return (
     <div className="flex items-center gap-2">
@@ -24,40 +23,38 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit }:
         Modifier
       </Button>
 
-      {isCollecting && (
+      {status === "cancelled" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-blue-500 hover:text-blue-600"
+          onClick={() => onStatusChange("pending")}
+        >
+          <RotateCcw className="h-4 w-4 mr-2" />
+          Remettre en attente
+        </Button>
+      )}
+
+      {status === "pending" && (
         <>
-          {isCancelled ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-blue-500 hover:text-blue-600"
-              onClick={() => onStatusChange("pending")}
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Remettre en attente
-            </Button>
-          ) : isPending && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-red-500 hover:text-red-600"
-                onClick={() => onStatusChange("cancelled")}
-              >
-                <XSquare className="h-4 w-4 mr-2" />
-                Annuler
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-500 hover:text-green-600"
-                onClick={() => onStatusChange("collected")}
-              >
-                <CheckSquare className="h-4 w-4 mr-2" />
-                Marquer comme collecté
-              </Button>
-            </>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-red-500 hover:text-red-600"
+            onClick={() => onStatusChange("cancelled")}
+          >
+            <XSquare className="h-4 w-4 mr-2" />
+            Annuler
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-green-500 hover:text-green-600"
+            onClick={() => onStatusChange("collected")}
+          >
+            <CheckSquare className="h-4 w-4 mr-2" />
+            Marquer comme collecté
+          </Button>
         </>
       )}
     </div>

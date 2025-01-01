@@ -104,7 +104,9 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
               <p className="text-sm font-medium">Objets spéciaux:</p>
               <div className="flex flex-wrap gap-2">
                 {specialItems.map((item: any, index: number) => (
-                  <BookingStatusBadge key={index} status={item.name} />
+                  <span key={index} className="px-2 py-1 bg-gray-100 rounded text-sm">
+                    {item.name}
+                  </span>
                 ))}
               </div>
             </div>
