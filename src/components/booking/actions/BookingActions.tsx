@@ -1,5 +1,5 @@
 import { BookingStatus } from "@/types/booking";
-import { XSquare, Edit } from "lucide-react";
+import { XSquare, Edit, RotateCcw, Package } from "lucide-react";
 import { BookingActionButton } from "./BookingActionButton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,8 +66,8 @@ export function BookingActions({
     return null;
   }
 
-  // Pour les transporteurs, garder la logique existante
-  if (isCollecting) {
+  // Pour les transporteurs, afficher toutes les actions possibles
+  if (isCollecting || tourStatus === 'planned') {
     return (
       <div className="flex items-center gap-2">
         <BookingActionButton
@@ -76,8 +76,23 @@ export function BookingActions({
           label="Modifier"
         />
 
+        {status === "cancelled" && (
+          <BookingActionButton
+            onClick={() => handleStatusChange("pending")}
+            icon={RotateCcw}
+            label="Remettre en attente"
+            colorClass="text-blue-500 hover:text-blue-600"
+          />
+        )}
+
         {status === "pending" && (
           <>
+            <BookingActionButton
+              onClick={() => handleStatusChange("collected")}
+              icon={Package}
+              label="Marquer comme collecté"
+              colorClass="text-green-500 hover:text-green-600"
+            />
             <BookingActionButton
               onClick={() => handleStatusChange("cancelled")}
               icon={XSquare}
@@ -85,28 +100,6 @@ export function BookingActions({
               colorClass="text-red-500 hover:text-red-600"
             />
           </>
-        )}
-      </div>
-    );
-  }
-
-  // Pour les autres cas (tournées planifiées)
-  if (tourStatus === 'planned') {
-    return (
-      <div className="flex items-center gap-2">
-        <BookingActionButton
-          onClick={handleEdit}
-          icon={Edit}
-          label="Modifier"
-        />
-
-        {status === "pending" && (
-          <BookingActionButton
-            onClick={() => handleStatusChange("cancelled")}
-            icon={XSquare}
-            label="Annuler"
-            colorClass="text-red-500 hover:text-red-600"
-          />
         )}
       </div>
     );
