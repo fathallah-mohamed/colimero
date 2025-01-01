@@ -31,7 +31,7 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = async (values: Omit<BookingFormData, 'user_id' | 'tracking_number' | 'status'>) => {
+  const handleSubmit = async (values: Omit<BookingFormData, 'tracking_number' | 'status'>) => {
     try {
       setIsLoading(true);
 

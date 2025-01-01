@@ -1,7 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 
 interface SpecialItemDisplayProps {
-  item: { name: string; quantity: number };
+  item: {
+    name: string;
+    quantity: number;
+  };
 }
 
 export function SpecialItemDisplay({ item }: SpecialItemDisplayProps) {
