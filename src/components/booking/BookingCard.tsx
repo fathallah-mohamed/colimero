@@ -78,7 +78,7 @@ export function BookingCard({
   return (
     <div className={cn(
       "rounded-lg shadow-sm p-6 space-y-4",
-      isEven ? "bg-[#F2FCE2]" : "bg-[#FEF7CD]"
+      isEven ? "bg-white" : "bg-[#F3F3F3]"
     )}>
       <div className="flex justify-between items-start">
         <BookingHeader booking={booking} />
