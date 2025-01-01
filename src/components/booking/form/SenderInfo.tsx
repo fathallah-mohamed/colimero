@@ -8,7 +8,7 @@ interface SenderInfoProps {
   setFormData: (data: Partial<FormData>) => void;
 }
 
-export function SenderInfo({ formData, setFormData }: SenderInfoProps) {
+export function SenderInfo({ formData }: SenderInfoProps) {
   return (
     <div className="space-y-4">
       <h3 className="font-medium">Informations de l'expéditeur</h3>
@@ -16,8 +16,6 @@ export function SenderInfo({ formData, setFormData }: SenderInfoProps) {
         <Label>Nom et prénom</Label>
         <Input
           value={formData.senderName}
-          onChange={(e) => setFormData({ senderName: e.target.value })}
-          required
           readOnly
           className="bg-gray-50"
         />
@@ -25,7 +23,7 @@ export function SenderInfo({ formData, setFormData }: SenderInfoProps) {
       <div>
         <Label>Votre numéro de téléphone</Label>
         <div className="flex gap-2">
-          <Select defaultValue="FR">
+          <Select defaultValue="FR" disabled>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Pays" />
             </SelectTrigger>
@@ -37,8 +35,6 @@ export function SenderInfo({ formData, setFormData }: SenderInfoProps) {
           <Input
             type="tel"
             value={formData.senderPhone}
-            onChange={(e) => setFormData({ senderPhone: e.target.value })}
-            required
             readOnly
             className="flex-1 bg-gray-50"
           />
