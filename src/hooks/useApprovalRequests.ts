@@ -30,10 +30,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
                 company_name
               )
             ),
-            user:clients (
-              first_name,
-              last_name,
-              phone
+            user:auth.users!approval_requests_user_id_fkey (
+              raw_user_meta_data->>first_name,
+              raw_user_meta_data->>last_name,
+              raw_user_meta_data->>phone
             )
           `)
           .eq('tour.carrier_id', userId)
