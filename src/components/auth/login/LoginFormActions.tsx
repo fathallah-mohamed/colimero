@@ -50,8 +50,8 @@ export function LoginFormActions({
                 Créer un compte client
               </Button>
             )}
-            {/* Ne montrer l'option "Devenir transporteur" que si aucun type n'est requis ou si on demande spécifiquement un transporteur */}
-            {(!requiredUserType || requiredUserType === 'carrier') && !['client'].includes(requiredUserType || '') && (
+            {/* Ne montrer l'option "Devenir transporteur" que si aucun type n'est requis */}
+            {!requiredUserType && (
               <Button
                 type="button"
                 variant="outline"
