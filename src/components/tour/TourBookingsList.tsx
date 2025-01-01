@@ -10,6 +10,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { BookingStatus } from "@/types/booking";
 
 interface TourBookingsListProps {
   tourId: number;
@@ -48,7 +49,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
     setBookings(data || []);
   };
 
-  const handleStatusChange = async (bookingId: string, newStatus: string) => {
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     const { error } = await supabase
       .from("bookings")
       .update({ status: newStatus })
