@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { BookingFormData } from "@/types/booking";
+import type { BookingFormData, BookingStatus } from "@/types/booking";
 
 export function useBookingForm(tourId: number, onSuccess: () => void) {
   const { toast } = useToast();
@@ -156,7 +156,7 @@ export function useBookingForm(tourId: number, onSuccess: () => void) {
         recipient_phone: formData.recipientPhone,
         recipient_address: formData.recipientAddress,
         delivery_city: formData.deliveryCity,
-        status: "pending",
+        status: 'pending' as BookingStatus,
         tracking_number: `COL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
         item_type: selectedContentTypes[0] || "general",
         customs_declaration: true,

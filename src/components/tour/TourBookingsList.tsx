@@ -8,22 +8,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { BookingStatus } from "@/types/booking";
 
 const statusMap = {
   pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
   confirmed: { label: "Confirmée", color: "bg-green-100 text-green-800" },
   cancelled: { label: "Annulée", color: "bg-red-100 text-red-800" },
   collected: { label: "Collectée", color: "bg-blue-100 text-blue-800" },
-};
+} as const;
 
 export function TourBookingsList({ bookings, tourStatus }: { bookings: any[], tourStatus: string }) {
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all');
   const { toast } = useToast();
 
   const handleCancelBooking = async (bookingId: string) => {
     const { error } = await supabase
       .from('bookings')
-      .update({ status: 'cancelled' })
+      .update({ status: 'cancelled' as BookingStatus })
       .eq('id', bookingId);
 
     if (error) {
@@ -44,7 +45,7 @@ export function TourBookingsList({ bookings, tourStatus }: { bookings: any[], to
   const handleCollectBooking = async (bookingId: string) => {
     const { error } = await supabase
       .from('bookings')
-      .update({ status: 'collected' })
+      .update({ status: 'collected' as BookingStatus })
       .eq('id', bookingId);
 
     if (error) {
