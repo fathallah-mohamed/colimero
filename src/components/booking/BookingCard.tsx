@@ -6,14 +6,24 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Package, Trash2 } from "lucide-react";
+import { BookingStatus } from "@/types/booking";
+import { BookingActions } from "../tour/booking/BookingActions";
 
 const statusMap = {
   pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
   confirmed: { label: "Confirmée", color: "bg-green-100 text-green-800" },
   cancelled: { label: "Annulée", color: "bg-red-100 text-red-800" },
+  collected: { label: "Collectée", color: "bg-blue-100 text-blue-800" },
 };
 
-export function BookingCard({ booking }: { booking: any }) {
+interface BookingCardProps {
+  booking: any;
+  isCollecting?: boolean;
+  onStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
+  onUpdate?: () => Promise<void>;
+}
+
+export function BookingCard({ booking, isCollecting = false, onStatusChange, onUpdate }: BookingCardProps) {
   const { toast } = useToast();
 
   const handleCancel = async () => {
@@ -29,12 +39,22 @@ export function BookingCard({ booking }: { booking: any }) {
         title: "Réservation annulée",
         description: "Votre réservation a été annulée avec succès",
       });
+      
+      if (onUpdate) {
+        onUpdate();
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible d'annuler la réservation",
       });
+    }
+  };
+
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    if (onStatusChange) {
+      await onStatusChange(booking.id, newStatus);
     }
   };
 
@@ -93,7 +113,14 @@ export function BookingCard({ booking }: { booking: any }) {
             <p className="font-medium">{booking.recipient_name}</p>
             <p className="text-sm text-gray-500">{booking.recipient_phone}</p>
           </div>
-          {booking.status === 'pending' && (
+          {isCollecting ? (
+            <BookingActions
+              status={booking.status}
+              isCollecting={isCollecting}
+              onStatusChange={handleStatusChange}
+              onEdit={() => {}}
+            />
+          ) : booking.status === 'pending' && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="icon">
