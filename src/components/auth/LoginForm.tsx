@@ -1,49 +1,35 @@
+import { useLoginForm } from "./login/useLoginForm";
 import { LoginFormFields } from "./login/LoginFormFields";
 import { LoginFormActions } from "./login/LoginFormActions";
-import { useLoginForm } from "./login/useLoginForm";
+import { Form } from "@/components/ui/form";
 
 interface LoginFormProps {
-  onForgotPassword: () => void;
-  onRegister: () => void;
-  onCarrierRegister: () => void;
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
+  onRegisterClick?: () => void;
+  isBookingFlow?: boolean;
+  isCreateTourFlow?: boolean;
 }
 
-export function LoginForm({
-  onForgotPassword,
-  onRegister,
-  onCarrierRegister,
-  onSuccess,
-  requiredUserType
+export default function LoginForm({ 
+  onSuccess, 
+  requiredUserType,
+  onRegisterClick,
+  isBookingFlow,
+  isCreateTourFlow
 }: LoginFormProps) {
-  const {
-    isLoading,
-    email,
-    setEmail,
-    password,
-    setPassword,
-    error,
-    handleSubmit,
-  } = useLoginForm(onSuccess, requiredUserType);
+  const { form, onSubmit, isLoading } = useLoginForm({ onSuccess, requiredUserType });
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <LoginFormFields
-        email={email}
-        password={password}
-        isLoading={isLoading}
-        error={error}
-        onEmailChange={setEmail}
-        onPasswordChange={setPassword}
-      />
-
-      <LoginFormActions
-        isLoading={isLoading}
-        onForgotPassword={onForgotPassword}
-        onRegister={onRegister}
-        onCarrierRegister={onCarrierRegister}
-      />
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <LoginFormFields form={form} isLoading={isLoading} />
+        <LoginFormActions 
+          onRegisterClick={onRegisterClick}
+          isBookingFlow={isBookingFlow}
+          isCreateTourFlow={isCreateTourFlow}
+        />
+      </form>
+    </Form>
   );
 }
