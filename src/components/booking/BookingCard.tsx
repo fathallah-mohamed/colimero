@@ -1,25 +1,26 @@
-import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Eye } from "lucide-react";
-import { BookingStatus } from "@/types/booking";
-import { BookingActions } from "./actions/BookingActions";
 import { useState } from "react";
-import { BookingHeader } from "./header/BookingHeader";
-import { BookingDetails } from "./details/BookingDetails";
+import { BookingHeader } from "./card/BookingHeader";
+import { BookingDetails } from "./card/BookingDetails";
+import { BookingActions } from "./card/BookingActions";
+import type { BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
   booking: any;
-  isCollecting?: boolean;
-  onStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
-  onUpdate?: () => Promise<void>;
+  isCollecting: boolean;
+  onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
+  onUpdate: () => void;
 }
 
-export function BookingCard({ booking, isCollecting = false, onStatusChange, onUpdate }: BookingCardProps) {
-  const { toast } = useToast();
-  const [showDetails, setShowDetails] = useState(false);
+export function BookingCard({ 
+  booking, 
+  isCollecting, 
+  onStatusChange,
+  onUpdate 
+}: BookingCardProps) {
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
+  const { toast } = useToast();
 
   const updateBookingStatus = async (newStatus: BookingStatus) => {
     try {
@@ -29,7 +30,7 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
         .from('bookings')
         .update({ 
           status: newStatus,
-          delivery_status: newStatus // Garder la synchronisation avec l'ancien champ pour compatibilité
+          delivery_status: newStatus // Keep sync with old field for compatibility
         })
         .eq('id', booking.id);
 
@@ -39,85 +40,33 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
       }
 
       setCurrentStatus(newStatus);
+      onStatusChange(booking.id, newStatus);
       
-      if (onStatusChange) {
-        await onStatusChange(booking.id, newStatus);
-      }
-
       toast({
-        title: "Statut mis à jour",
-        description: "La réservation a été mise à jour avec succès",
+        title: "Succès",
+        description: "Le statut a été mis à jour",
       });
-
-      if (onUpdate) {
-        await onUpdate();
-      }
     } catch (error) {
-      console.error('Error updating booking status:', error);
+      console.error('Error in updateBookingStatus:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la réservation",
+        description: "Impossible de mettre à jour le statut",
       });
     }
   };
 
-  const handleCancel = async () => {
-    await updateBookingStatus('cancelled');
-  };
-
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
       <BookingHeader booking={booking} />
-
-      {showDetails && <BookingDetails booking={booking} />}
-
-      <div className="border-t pt-4 mt-4">
-        <div className="flex justify-between items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-600"
-            onClick={() => setShowDetails(!showDetails)}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            {showDetails ? "Masquer les détails" : "Voir les détails"}
-          </Button>
-
-          <div className="flex items-center gap-2">
-            {isCollecting ? (
-              <BookingActions
-                status={currentStatus}
-                isCollecting={isCollecting}
-                onStatusChange={updateBookingStatus}
-                onEdit={() => {}}
-              />
-            ) : currentStatus === 'pending' && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Annuler la réservation ?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Cette action est irréversible. Êtes-vous sûr de vouloir annuler cette réservation ?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleCancel} className="bg-red-500 hover:bg-red-600">
-                      Confirmer
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-          </div>
-        </div>
-      </div>
+      <BookingDetails booking={booking} />
+      <BookingActions
+        bookingId={booking.id}
+        currentStatus={currentStatus}
+        isCollecting={isCollecting}
+        onStatusChange={updateBookingStatus}
+        onUpdate={onUpdate}
+      />
     </div>
   );
 }
