@@ -4,8 +4,7 @@ import { BookingStatusBadge } from "../BookingStatusBadge";
 import { BookingActions } from "../actions/BookingActions";
 import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useBookingStatus } from "@/hooks/useBookingStatus";
 
 interface BookingCardContentProps {
   booking: any;
@@ -22,62 +21,14 @@ export function BookingCardContent({
   onUpdate,
   tourStatus
 }: BookingCardContentProps) {
-  const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const { toast } = useToast();
-
-  const updateBookingStatus = async (newStatus: BookingStatus) => {
-    if (isUpdating) return;
-    
-    setIsUpdating(true);
-    try {
-      console.log("Updating booking status to:", newStatus, "for booking:", booking.id);
-      
-      const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: newStatus,
-          delivery_status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', booking.id);
-
-      if (error) throw error;
-
-      // Vérifier que la mise à jour a bien été effectuée
-      const { data: updatedBooking, error: fetchError } = await supabase
-        .from('bookings')
-        .select('status, delivery_status')
-        .eq('id', booking.id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      if (updatedBooking.status === newStatus) {
-        setCurrentStatus(newStatus);
-        onStatusChange(booking.id, newStatus);
-        
-        toast({
-          title: "Succès",
-          description: "Le statut a été mis à jour",
-        });
-      } else {
-        throw new Error("La mise à jour n'a pas été enregistrée");
-      }
-    } catch (error) {
-      console.error('Error in updateBookingStatus:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
-      });
-      // Recharger le statut actuel depuis la base de données
-      await onUpdate();
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  
+  const { currentStatus, isUpdating, updateStatus } = useBookingStatus(
+    booking.id,
+    booking.status,
+    onStatusChange,
+    onUpdate
+  );
 
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", booking.id);
@@ -110,9 +61,10 @@ export function BookingCardContent({
           <BookingActions
             status={currentStatus}
             isCollecting={isCollecting}
-            onStatusChange={updateBookingStatus}
+            onStatusChange={updateStatus}
             onEdit={handleEdit}
             tourStatus={tourStatus}
+            isUpdating={isUpdating}
           />
         </div>
       )}
