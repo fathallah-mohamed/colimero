@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Trash2, Eye } from "lucide-react";
 import { BookingStatus } from "@/types/booking";
-import { BookingActions } from "../tour/booking/BookingActions";
+import { BookingActions } from "./actions/BookingActions";
 import { useState } from "react";
 import { BookingHeader } from "./header/BookingHeader";
 import { BookingDetails } from "./details/BookingDetails";
@@ -21,38 +21,8 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
   const [showDetails, setShowDetails] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<BookingStatus>(booking.status);
 
-  const handleCancel = async () => {
+  const updateBookingStatus = async (newStatus: BookingStatus) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', booking.id);
-
-      if (error) throw error;
-
-      setCurrentStatus('cancelled');
-      
-      toast({
-        title: "Réservation annulée",
-        description: "Votre réservation a été annulée avec succès",
-      });
-      
-      if (onUpdate) {
-        await onUpdate();
-      }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'annuler la réservation",
-      });
-    }
-  };
-
-  const handleStatusChange = async (newStatus: BookingStatus) => {
-    try {
-      console.log("BookingCard - Changing status to:", newStatus);
-      
       const { error } = await supabase
         .from('bookings')
         .update({ status: newStatus })
@@ -68,7 +38,7 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
 
       toast({
         title: "Statut mis à jour",
-        description: `La réservation a été mise à jour avec succès`,
+        description: "La réservation a été mise à jour avec succès",
       });
 
       if (onUpdate) {
@@ -82,6 +52,10 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
         description: "Impossible de mettre à jour le statut de la réservation",
       });
     }
+  };
+
+  const handleCancel = async () => {
+    await updateBookingStatus('cancelled');
   };
 
   return (
@@ -107,7 +81,7 @@ export function BookingCard({ booking, isCollecting = false, onStatusChange, onU
               <BookingActions
                 status={currentStatus}
                 isCollecting={isCollecting}
-                onStatusChange={handleStatusChange}
+                onStatusChange={updateBookingStatus}
                 onEdit={() => {}}
               />
             ) : currentStatus === 'pending' && (
