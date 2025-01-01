@@ -1,4 +1,3 @@
-import { BookingStatusBadge } from "../BookingStatusBadge";
 import type { Booking } from "@/types/booking";
 
 interface BookingHeaderProps {
@@ -13,7 +12,6 @@ export function BookingHeader({ booking }: BookingHeaderProps) {
           Réservation #{booking.tracking_number}
         </h3>
       </div>
-      <BookingStatusBadge status={booking.status} />
     </div>
   );
 }
