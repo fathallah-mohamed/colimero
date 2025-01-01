@@ -1,33 +1,17 @@
 import { ProfileData } from "@/types/profile";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
-import { CheckSquare } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 interface CarrierProfileViewProps {
   profile: ProfileData;
 }
 
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
-  const CommitmentDisplay = ({ 
-    label, 
-    description,
-    acceptedAt
-  }: { 
-    label: string;
-    description: string;
-    acceptedAt?: string;
-  }) => (
-    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-      <CheckSquare className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-      <div className="space-y-1">
-        <p className="font-medium text-gray-900">{label}</p>
-        <p className="text-sm text-gray-600">{description}</p>
-        {acceptedAt && (
-          <p className="text-sm text-gray-500">
-            Accepté le {new Date(acceptedAt).toLocaleDateString()}
-          </p>
-        )}
-      </div>
-    </div>
+  const CommitmentStatus = ({ accepted }: { accepted: boolean }) => (
+    <span className={`inline-flex items-center ${accepted ? 'text-green-600' : 'text-red-600'}`}>
+      {accepted ? <Check className="w-4 h-4 mr-1" /> : <X className="w-4 h-4 mr-1" />}
+      {accepted ? 'Accepté' : 'Non accepté'}
+    </span>
   );
 
   return (
@@ -71,29 +55,25 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements acceptés à l'inscription</h2>
-        <div className="space-y-4">
-          {profile.terms_accepted && (
-            <CommitmentDisplay 
-              label="Conditions générales"
-              description="En acceptant les conditions générales, vous vous êtes engagé à respecter les règles et procédures de notre plateforme pour assurer un service de qualité."
-              acceptedAt={profile.terms_accepted_at}
-            />
-          )}
-          {profile.customs_terms_accepted && (
-            <CommitmentDisplay 
-              label="Conditions douanières"
-              description="Vous vous êtes engagé à respecter les réglementations douanières internationales et à gérer les documents nécessaires pour le transport transfrontalier."
-              acceptedAt={profile.terms_accepted_at}
-            />
-          )}
-          {profile.responsibility_terms_accepted && (
-            <CommitmentDisplay 
-              label="Responsabilité des objets transportés"
-              description="Vous avez accepté vos responsabilités concernant la sécurité et l'intégrité des objets pendant le transport, incluant la manipulation appropriée et la protection contre les dommages."
-              acceptedAt={profile.terms_accepted_at}
-            />
-          )}
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
+        <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Conditions générales</p>
+            <CommitmentStatus accepted={profile.terms_accepted || false} />
+            {profile.terms_accepted && profile.terms_accepted_at && (
+              <p className="text-xs text-gray-500 mt-1">
+                Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Conditions douanières</p>
+            <CommitmentStatus accepted={profile.customs_terms_accepted || false} />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Responsabilité des objets transportés</p>
+            <CommitmentStatus accepted={profile.responsibility_terms_accepted || false} />
+          </div>
         </div>
       </div>
 

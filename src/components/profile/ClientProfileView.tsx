@@ -1,32 +1,16 @@
 import React from 'react';
-import { CheckSquare } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 interface ClientProfileViewProps {
   profile: any;
 }
 
 export function ClientProfileView({ profile }: ClientProfileViewProps) {
-  const CommitmentDisplay = ({ 
-    label, 
-    description,
-    acceptedAt
-  }: { 
-    label: string;
-    description: string;
-    acceptedAt?: string;
-  }) => (
-    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-      <CheckSquare className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-      <div className="space-y-1">
-        <p className="font-medium text-gray-900">{label}</p>
-        <p className="text-sm text-gray-600">{description}</p>
-        {acceptedAt && (
-          <p className="text-sm text-gray-500">
-            Accepté le {new Date(acceptedAt).toLocaleDateString()}
-          </p>
-        )}
-      </div>
-    </div>
+  const CommitmentStatus = ({ accepted }: { accepted: boolean }) => (
+    <span className={`inline-flex items-center ${accepted ? 'text-green-600' : 'text-red-600'}`}>
+      {accepted ? <Check className="w-4 h-4 mr-1" /> : <X className="w-4 h-4 mr-1" />}
+      {accepted ? 'Accepté' : 'Non accepté'}
+    </span>
   );
 
   return (
@@ -56,15 +40,17 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements acceptés à l'inscription</h2>
-        <div className="space-y-4">
-          {profile.terms_accepted && (
-            <CommitmentDisplay 
-              label="Conditions générales"
-              description="En acceptant les conditions générales, vous vous êtes engagé à respecter les règles de la plateforme, notamment concernant le contenu des colis et les procédures d'expédition."
-              acceptedAt={profile.terms_accepted_at}
-            />
-          )}
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
+        <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Conditions générales</p>
+            <CommitmentStatus accepted={profile.terms_accepted || false} />
+            {profile.terms_accepted && profile.terms_accepted_at && (
+              <p className="text-xs text-gray-500 mt-1">
+                Accepté le {new Date(profile.terms_accepted_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
