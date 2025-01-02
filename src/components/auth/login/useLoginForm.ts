@@ -31,7 +31,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
     try {
       console.log("Tentative de connexion pour:", email.trim());
-      console.log("Mot de passe fourni:", password.trim());
+      console.log("Tentative d'authentification avec Supabase...");
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -40,15 +40,14 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
+        console.error("Erreur détaillée:", signInError);
         
-        // Messages d'erreur spécifiques
         if (signInError.message === "Invalid login credentials") {
           setError("Email ou mot de passe incorrect");
           console.log("Échec de l'authentification: identifiants invalides");
         } else if (signInError.message === "Email not confirmed") {
           setError("Veuillez confirmer votre email avant de vous connecter");
         } else {
-          console.error("Erreur détaillée:", signInError);
           setError("Une erreur est survenue lors de la connexion");
         }
         setPassword("");
@@ -75,6 +74,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         return;
       }
 
+      console.log("Connexion réussie pour l'utilisateur:", data.user.email);
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",
