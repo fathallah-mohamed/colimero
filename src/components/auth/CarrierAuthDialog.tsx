@@ -30,9 +30,14 @@ export default function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialog
           }}
         >
           <div className="pb-20 md:pb-6">
-            <Heading level={2} className="mb-6 text-center">
-              Créer un compte transporteur
-            </Heading>
+            <div className="text-center mb-6">
+              <Heading level={2} className="mb-2">
+                Créer un compte transporteur
+              </Heading>
+              <p className="text-gray-600">
+                Créez un compte transporteur pour commencer à créer des tournées et accéder à notre réseau d'expéditeurs
+              </p>
+            </div>
             <CarrierSignupForm onSuccess={onClose} />
           </div>
         </ScrollArea>
