@@ -14,7 +14,7 @@ const formSchema = z.object({
   last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
   birth_date: z.string().optional(),
-  address: z.string().optional(),
+  address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères").optional(),
 });
 
 interface ClientProfileFormProps {
@@ -31,7 +31,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       first_name: initialData.first_name || "",
       last_name: initialData.last_name || "",
       phone: initialData.phone || "",
-      birth_date: initialData.birth_date || "",
+      birth_date: initialData.birth_date ? new Date(initialData.birth_date).toISOString().split('T')[0] : "",
       address: initialData.address || "",
     },
   });

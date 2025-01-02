@@ -44,7 +44,7 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
           <FormItem>
             <FormLabel>Adresse</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} placeholder="Entrez votre adresse complète" />
             </FormControl>
             <FormMessage />
           </FormItem>
