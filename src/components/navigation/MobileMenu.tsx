@@ -3,6 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
 import { Package, Truck, Calendar, Users, MessageSquare, UserCircle2 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import AuthDialog from "../auth/AuthDialog";
 
 interface MobileMenuProps {
