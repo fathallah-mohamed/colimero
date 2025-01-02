@@ -15,6 +15,7 @@ export function useProfile() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate('/connexion');
+      return;
     }
     setUserType(session?.user?.user_metadata?.user_type || null);
   };
@@ -22,98 +23,107 @@ export function useProfile() {
   const fetchProfile = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const userType = session.user.user_metadata?.user_type;
+      if (!session?.user) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      const userType = session.user.user_metadata?.user_type;
+      console.log("Fetching profile for user type:", userType);
+      
+      if (userType === 'admin') {
+        const { data: adminData, error: adminError } = await supabase
+          .from('administrators')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (adminError) throw adminError;
         
-        if (userType === 'admin') {
-          // Récupérer uniquement le profil administrateur
-          const { data, error } = await supabase
-            .from('administrators')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+        if (adminData) {
+          const profileData: ProfileData = {
+            id: adminData.id,
+            first_name: adminData.first_name,
+            last_name: adminData.last_name,
+            phone: adminData.phone,
+            email: session.user.email,
+            address: adminData.address,
+            created_at: adminData.created_at
+          };
+          console.log("Admin profile data:", profileData);
+          setProfile(profileData);
+        }
+      } else if (userType === 'carrier') {
+        const { data: carrierData, error: carrierError } = await supabase
+          .from('carriers')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            phone,
+            email,
+            company_name,
+            siret,
+            address,
+            coverage_area,
+            created_at,
+            carrier_capacities!carrier_capacities_carrier_id_fkey (
+              total_capacity,
+              price_per_kg,
+              offers_home_delivery
+            ),
+            carrier_services!carrier_services_carrier_id_fkey (
+              service_type,
+              icon
+            )
+          `)
+          .eq('id', session.user.id)
+          .single();
 
-          if (error) throw error;
-          if (data) {
-            const profileData: ProfileData = {
-              id: data.id,
-              first_name: data.first_name,
-              last_name: data.last_name,
-              phone: data.phone,
-              email: session.user.email,
-              address: data.address,
-              created_at: data.created_at
-            };
-            setProfile(profileData);
-          }
-        } else if (userType === 'carrier') {
-          const { data, error } = await supabase
-            .from('carriers')
-            .select(`
-              id,
-              first_name,
-              last_name,
-              phone,
-              email,
-              company_name,
-              siret,
-              address,
-              coverage_area,
-              created_at,
-              carrier_capacities!carrier_capacities_carrier_id_fkey (
-                total_capacity,
-                price_per_kg,
-                offers_home_delivery
-              ),
-              carrier_services!carrier_services_carrier_id_fkey (
-                service_type,
-                icon
-              )
-            `)
-            .eq('id', session.user.id)
-            .single();
+        if (carrierError) throw carrierError;
+        
+        if (carrierData) {
+          const profileData: ProfileData = {
+            id: carrierData.id,
+            first_name: carrierData.first_name,
+            last_name: carrierData.last_name,
+            phone: carrierData.phone,
+            email: session.user.email,
+            company_name: carrierData.company_name,
+            siret: carrierData.siret,
+            address: carrierData.address,
+            coverage_area: carrierData.coverage_area,
+            created_at: carrierData.created_at,
+            carrier_capacities: carrierData.carrier_capacities,
+            carrier_services: carrierData.carrier_services
+          };
+          console.log("Carrier profile data:", profileData);
+          setProfile(profileData);
+        }
+      } else {
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
 
-          if (error) throw error;
-          if (data) {
-            const profileData: ProfileData = {
-              id: data.id,
-              first_name: data.first_name,
-              last_name: data.last_name,
-              phone: data.phone,
-              email: session.user.email,
-              company_name: data.company_name,
-              siret: data.siret,
-              address: data.address,
-              coverage_area: data.coverage_area,
-              created_at: data.created_at,
-              carrier_capacities: data.carrier_capacities,
-              carrier_services: data.carrier_services
-            };
-            setProfile(profileData);
-          }
-        } else {
-          // Pour les clients, on ne récupère que leurs propres données
-          const { data, error } = await supabase
-            .from('clients')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (error) throw error;
-          if (data) {
-            const profileData: ProfileData = {
-              id: data.id,
-              first_name: data.first_name,
-              last_name: data.last_name,
-              phone: data.phone,
-              email: session.user.email,
-              created_at: data.created_at,
-              birth_date: data.birth_date,
-              address: data.address,
-              id_document: data.id_document
-            };
-            setProfile(profileData);
-          }
+        if (clientError) throw clientError;
+        
+        if (clientData) {
+          const profileData: ProfileData = {
+            id: clientData.id,
+            first_name: clientData.first_name,
+            last_name: clientData.last_name,
+            phone: clientData.phone,
+            email: session.user.email,
+            created_at: clientData.created_at,
+            birth_date: clientData.birth_date,
+            address: clientData.address,
+            id_document: clientData.id_document
+          };
+          console.log("Client profile data:", profileData);
+          setProfile(profileData);
         }
       }
     } catch (error: any) {
