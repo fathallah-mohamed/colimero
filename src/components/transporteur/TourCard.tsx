@@ -74,8 +74,17 @@ export function TourCard({
       return;
     }
 
+    // Vérifier si la tournée n'est pas planifiée
+    if (tour.status !== 'planned') {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Cette tournée n'est plus disponible pour les réservations.",
+      });
+      return;
+    }
+
     if (tour.type === 'private') {
-      // Vérifier s'il existe déjà une demande
       const { exists, status } = await checkExistingRequest(tour.id.toString());
       
       if (exists) {
@@ -116,6 +125,8 @@ export function TourCard({
     }
   };
 
+  const isBookingDisabled = tour.status !== 'planned';
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -150,11 +161,16 @@ export function TourCard({
       </div>
 
       <Button 
-        className="w-full bg-blue-500 hover:bg-blue-600"
+        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300"
         onClick={handleBookingClick}
-        disabled={!selectedPoint}
+        disabled={!selectedPoint || isBookingDisabled}
       >
-        {selectedPoint ? "Réserver" : "Sélectionnez un point de collecte"}
+        {!selectedPoint 
+          ? "Sélectionnez un point de collecte" 
+          : isBookingDisabled 
+            ? "Cette tournée n'est plus disponible" 
+            : "Réserver"
+        }
       </Button>
 
       <AuthDialog 
