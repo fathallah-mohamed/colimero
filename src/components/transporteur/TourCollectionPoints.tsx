@@ -14,6 +14,21 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      // Ensure we have a valid date string
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date:", dateString);
+        return "Date non disponible";
+      }
+      return format(date, "EEEE d MMMM yyyy", { locale: fr });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date non disponible";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-4 text-sm text-gray-500 px-2">
@@ -37,11 +52,7 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
             </a>
           </div>
           <div className="text-gray-600">
-            <div>
-              {format(new Date(stop.collection_date), "EEEE d MMMM yyyy", {
-                locale: fr,
-              })}
-            </div>
+            <div>{formatDate(stop.collection_date)}</div>
             <div>{stop.time}</div>
           </div>
           <div className="flex justify-center">

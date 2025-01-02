@@ -11,19 +11,31 @@ export type Database = {
     Tables: {
       administrators: {
         Row: {
+          address: string | null
           created_at: string
           email: string
+          first_name: string | null
           id: string
+          last_name: string | null
+          phone: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string
           email: string
+          first_name?: string | null
           id: string
+          last_name?: string | null
+          phone?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string
           email?: string
+          first_name?: string | null
           id?: string
+          last_name?: string | null
+          phone?: string | null
         }
         Relationships: []
       }
