@@ -19,10 +19,16 @@ export default function EnvoyerColis() {
         .select('*')
         .eq('type', 'private');
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        throw fetchError;
+      }
 
       if (!tours || tours.length === 0) {
-        console.log('No private tours found to update');
+        toast({
+          variant: "default",
+          title: "Info",
+          description: "Aucune tournée privée trouvée",
+        });
         return;
       }
 
@@ -31,7 +37,9 @@ export default function EnvoyerColis() {
         .update({ status: 'planned' })
         .eq('id', tours[0].id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        throw updateError;
+      }
 
       toast({
         title: "Succès",
