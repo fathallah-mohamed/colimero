@@ -38,35 +38,37 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
-        <RegisterFormFields
-          firstName={firstName}
-          lastName={lastName}
-          email={email}
-          phone={phone}
-          password={password}
-          confirmPassword={confirmPassword}
-          birthDate={birthDate}
-          address={address}
-          idDocument={idDocument}
-          onFirstNameChange={setFirstName}
-          onLastNameChange={setLastName}
-          onEmailChange={setEmail}
-          onPhoneChange={setPhone}
-          onPasswordChange={setPassword}
-          onConfirmPasswordChange={setConfirmPassword}
-          onBirthDateChange={setBirthDate}
-          onAddressChange={setAddress}
-          onIdDocumentChange={setIdDocument}
-        />
+      <div className="flex-1 overflow-y-auto">
+        <form onSubmit={handleSubmit} className="space-y-6 px-1">
+          <RegisterFormFields
+            firstName={firstName}
+            lastName={lastName}
+            email={email}
+            phone={phone}
+            password={password}
+            confirmPassword={confirmPassword}
+            birthDate={birthDate}
+            address={address}
+            idDocument={idDocument}
+            onFirstNameChange={setFirstName}
+            onLastNameChange={setLastName}
+            onEmailChange={setEmail}
+            onPhoneChange={setPhone}
+            onPasswordChange={setPassword}
+            onConfirmPasswordChange={setConfirmPassword}
+            onBirthDateChange={setBirthDate}
+            onAddressChange={setAddress}
+            onIdDocumentChange={setIdDocument}
+          />
 
-        <RegisterTerms
-          acceptedConsents={acceptedConsents}
-          onConsentChange={handleConsentChange}
-        />
-      </form>
+          <RegisterTerms
+            acceptedConsents={acceptedConsents}
+            onConsentChange={handleConsentChange}
+          />
+        </form>
+      </div>
 
-      <div className="pt-4 space-y-4 border-t mt-4">
+      <div className="sticky bottom-0 pt-4 space-y-4 border-t mt-4 bg-white">
         <Button
           type="submit"
           className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"

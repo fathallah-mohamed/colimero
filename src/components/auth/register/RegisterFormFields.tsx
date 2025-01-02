@@ -60,12 +60,11 @@ export function RegisterFormFields({
   const OptionalLabel = ({ children, htmlFor, ...props }: LabelProps) => (
     <Label htmlFor={htmlFor} className="flex items-center gap-1" {...props}>
       {children}
-      <span className="text-sm text-gray-500">(Recommandé)</span>
     </Label>
   );
 
   return (
-    <>
+    <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <RequiredLabel htmlFor="firstName">Prénom</RequiredLabel>
@@ -175,6 +174,6 @@ export function RegisterFormFields({
           onChange={(e) => onIdDocumentChange(e.target.files?.[0] || null)}
         />
       </div>
-    </>
+    </div>
   );
 }
