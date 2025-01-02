@@ -1,6 +1,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface RegisterTermsProps {
   acceptedConsents: string[];
@@ -45,10 +46,19 @@ export function RegisterTerms({
             onCheckedChange={(checked) => onConsentChange(consent.id, checked as boolean)}
             className="mt-1"
           />
-          <p
-            className="text-sm text-muted-foreground"
-            dangerouslySetInnerHTML={{ __html: consent.description }}
-          />
+          <div className="space-y-1">
+            <label
+              htmlFor={consent.id}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {consent.label}
+            </label>
+            <Alert>
+              <AlertDescription className="text-sm text-muted-foreground">
+                {consent.description}
+              </AlertDescription>
+            </Alert>
+          </div>
         </div>
       ))}
     </div>

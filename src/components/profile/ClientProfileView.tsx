@@ -3,6 +3,8 @@ import { Check, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface ClientProfileViewProps {
   profile: any;
@@ -25,19 +27,22 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
     },
   });
 
-  const CommitmentStatus = ({ accepted, acceptedAt, description }: { accepted: boolean, acceptedAt?: string, description: string }) => (
+  const CommitmentStatus = ({ accepted, acceptedAt, label, description }: { accepted: boolean, acceptedAt?: string, label: string, description: string }) => (
     <div className="space-y-2">
-      <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
-        {accepted ? (
-          <Check className="w-5 h-5 mr-2 stroke-2" />
-        ) : (
-          <X className="w-5 h-5 mr-2 stroke-2" />
-        )}
-        <span>{accepted ? 'Accepté' : 'Non accepté'}</span>
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{label}</span>
+        <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
+          {accepted ? (
+            <Check className="w-5 h-5 mr-2 stroke-2" />
+          ) : (
+            <X className="w-5 h-5 mr-2 stroke-2" />
+          )}
+          <span>{accepted ? 'Accepté' : 'Non accepté'}</span>
+        </div>
       </div>
       {accepted && acceptedAt && (
         <p className="text-sm text-muted-foreground">
-          Accepté le {new Date(acceptedAt).toLocaleDateString()}
+          Accepté le {format(new Date(acceptedAt), 'dd MMMM yyyy', { locale: fr })}
         </p>
       )}
       <Alert>
@@ -71,11 +76,21 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
             <p className="text-sm text-gray-500 mb-1">Téléphone</p>
             <p className="text-gray-900 font-medium">{profile.phone || "-"}</p>
           </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Date de naissance</p>
+            <p className="text-gray-900 font-medium">
+              {profile.birth_date ? format(new Date(profile.birth_date), 'dd MMMM yyyy', { locale: fr }) : "-"}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Adresse</p>
+            <p className="text-gray-900 font-medium">{profile.address || "-"}</p>
+          </div>
         </div>
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements et consentements</h2>
         <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
           {isLoadingConsents ? (
             <div className="animate-pulse space-y-4">
@@ -86,10 +101,10 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
           ) : (
             consents?.map((consent) => (
               <div key={consent.id}>
-                <p className="text-sm text-gray-500 mb-2">{consent.consent_type.label}</p>
                 <CommitmentStatus 
                   accepted={consent.accepted} 
                   acceptedAt={consent.accepted_at}
+                  label={consent.consent_type.label}
                   description={consent.consent_type.description}
                 />
               </div>
