@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { HTMLAttributes } from "react";
 
 interface RegisterFormFieldsProps {
   firstName: string;
@@ -24,6 +25,11 @@ interface RegisterFormFieldsProps {
   onIdDocumentChange: (file: File | null) => void;
 }
 
+interface LabelProps extends HTMLAttributes<HTMLLabelElement> {
+  children: React.ReactNode;
+  htmlFor?: string;
+}
+
 export function RegisterFormFields({
   firstName,
   lastName,
@@ -44,15 +50,15 @@ export function RegisterFormFields({
   onAddressChange,
   onIdDocumentChange,
 }: RegisterFormFieldsProps) {
-  const RequiredLabel = ({ children }: { children: React.ReactNode }) => (
-    <Label className="flex items-center gap-1">
+  const RequiredLabel = ({ children, htmlFor, ...props }: LabelProps) => (
+    <Label htmlFor={htmlFor} className="flex items-center gap-1" {...props}>
       {children}
       <span className="text-red-500">*</span>
     </Label>
   );
 
-  const OptionalLabel = ({ children }: { children: React.ReactNode }) => (
-    <Label className="flex items-center gap-1">
+  const OptionalLabel = ({ children, htmlFor, ...props }: LabelProps) => (
+    <Label htmlFor={htmlFor} className="flex items-center gap-1" {...props}>
       {children}
       <span className="text-sm text-gray-500">(Recommandé)</span>
     </Label>
