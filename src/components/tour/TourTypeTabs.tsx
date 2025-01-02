@@ -1,10 +1,8 @@
-import { TourType } from "@/types/tour";
-
 interface TourTypeTabsProps {
-  tourType: TourType;
+  tourType: string;
   publicToursCount: number;
   privateToursCount: number;
-  onTypeChange: (type: TourType) => void;
+  onTypeChange: (type: string) => void;
 }
 
 export function TourTypeTabs({

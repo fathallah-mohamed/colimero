@@ -5,18 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import type { Tour, TourType } from "@/types/tour";
+import type { Tour } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
-  const [tourType, setTourType] = useState<TourType>("public");
+  const [tourType, setTourType] = useState("public");
 
-  const { data: tours = [], isLoading } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, tourType],
+  const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
+    queryKey: ["tours", departureCountry, destinationCountry, "public"],
     queryFn: async () => {
-      console.log("Fetching tours with type:", tourType);
-
       const { data, error } = await supabase
         .from("tours")
         .select(`
@@ -31,17 +29,12 @@ export default function EnvoyerColis() {
         `)
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
-        .eq("type", tourType)
+        .eq("type", "public")
         .gte("departure_date", new Date().toISOString())
         .order("departure_date", { ascending: true });
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log("Fetched tours:", data);
-
       return data.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
@@ -55,18 +48,47 @@ export default function EnvoyerColis() {
     },
   });
 
-  const publicTours = tours.filter(tour => tour.type === "public");
-  const privateTours = tours.filter(tour => tour.type === "private");
+  const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
+    queryKey: ["tours", departureCountry, destinationCountry, "private"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          )
+        `)
+        .eq("departure_country", departureCountry)
+        .eq("destination_country", destinationCountry)
+        .eq("type", "private")
+        .gte("departure_date", new Date().toISOString())
+        .order("departure_date", { ascending: true });
+
+      if (error) throw error;
+      
+      return data.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
+        carriers: {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers?.carrier_capacities) 
+            ? tour.carriers.carrier_capacities 
+            : [tour.carriers?.carrier_capacities]
+        }
+      })) as Tour[];
+    },
+  });
 
   const handleDepartureChange = (value: string) => {
     setDepartureCountry(value);
     if (["TN", "DZ", "MA"].includes(value)) {
       setDestinationCountry("FR");
     }
-  };
-
-  const handleTourTypeChange = (type: TourType) => {
-    setTourType(type);
   };
 
   return (
@@ -88,14 +110,22 @@ export default function EnvoyerColis() {
             tourType={tourType}
             publicToursCount={publicTours.length}
             privateToursCount={privateTours.length}
-            onTypeChange={handleTourTypeChange}
+            onTypeChange={setTourType}
           />
 
-          <TransporteurTours 
-            tours={tourType === "public" ? publicTours : privateTours}
-            type={tourType}
-            isLoading={isLoading}
-          />
+          {tourType === "public" ? (
+            <TransporteurTours 
+              tours={publicTours} 
+              type="public"
+              isLoading={isLoadingPublic}
+            />
+          ) : (
+            <TransporteurTours 
+              tours={privateTours} 
+              type="private"
+              isLoading={isLoadingPrivate}
+            />
+          )}
         </div>
       </div>
     </div>
