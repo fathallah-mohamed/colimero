@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { MapPin } from "lucide-react";
 
 interface TourHeaderProps {
   tour: any;
@@ -13,12 +14,27 @@ const countryNames: { [key: string]: string } = {
   'MA': 'Maroc'
 };
 
+const countryFlags: { [key: string]: string } = {
+  'FR': '🇫🇷',
+  'TN': '🇹🇳',
+  'DZ': '🇩🇿',
+  'MA': '🇲🇦'
+};
+
 export function TourHeader({ tour }: TourHeaderProps) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-2">
-        <h2 className="text-lg font-semibold">
-          {countryNames[tour.departure_country]} → {countryNames[tour.destination_country]}
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <span className="flex items-center">
+            <span className="text-xl mr-1">{countryFlags[tour.departure_country]}</span>
+            {countryNames[tour.departure_country]}
+          </span>
+          <MapPin className="h-4 w-4 text-gray-400 mx-1" />
+          <span className="flex items-center">
+            <span className="text-xl mr-1">{countryFlags[tour.destination_country]}</span>
+            {countryNames[tour.destination_country]}
+          </span>
         </h2>
         <Badge variant={tour.type === 'public' ? 'default' : 'secondary'}>
           {tour.type === 'public' ? 'Publique' : 'Privée'}
