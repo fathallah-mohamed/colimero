@@ -28,11 +28,11 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         <Button 
           variant="outline" 
           size="sm"
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200 whitespace-nowrap"
+          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
           onClick={() => setShowAuthDialog(true)}
         >
           <UserCircle2 className="w-4 h-4 mr-1.5" />
-          <span className="hidden sm:inline">Se connecter</span>
+          Se connecter
         </Button>
 
         <AuthDialog 
@@ -52,10 +52,10 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         <Button 
           variant="outline" 
           size="sm"
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200 whitespace-nowrap"
+          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
         >
           <UserCircle2 className="w-4 h-4 mr-1.5" />
-          <span className="hidden sm:inline">Mon compte</span>
+          Mon compte
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">

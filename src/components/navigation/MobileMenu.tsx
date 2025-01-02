@@ -19,12 +19,12 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   
   const icons = {
-    "Planifier une tournée": <Calendar className="w-4 h-4" />,
-    "Envoyer un colis": <Package className="w-4 h-4" />,
-    "Transporteurs": <Truck className="w-4 h-4" />,
-    "Actualités": <MessageSquare className="w-4 h-4" />,
-    "À propos": <Info className="w-4 h-4" />,
-    "Contact": <Users className="w-4 h-4" />,
+    "Planifier une tournée": <Calendar className="w-5 h-5" />,
+    "Envoyer un colis": <Package className="w-5 h-5" />,
+    "Transporteurs": <Truck className="w-5 h-5" />,
+    "Actualités": <MessageSquare className="w-5 h-5" />,
+    "À propos": <Info className="w-5 h-5" />,
+    "Contact": <Users className="w-5 h-5" />,
   };
 
   return (
@@ -32,93 +32,74 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
       <div
         className={`${
           isOpen ? "block" : "hidden"
-        } md:hidden fixed top-16 inset-x-0 bg-white shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-y-auto`}
+        } md:hidden fixed inset-0 bg-black bg-opacity-50 z-40`}
+        onClick={onClose}
+      />
+      <div
+        className={`${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } md:hidden fixed top-16 left-0 bottom-0 w-64 bg-white shadow-lg z-50 transform transition-transform duration-200 ease-in-out overflow-y-auto`}
       >
         <div className="px-2 pt-2 pb-3 space-y-1">
-          {items.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={(e) => {
-                onClose();
-                if (item.onClick) item.onClick(e);
-              }}
-              className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                item.highlight
-                  ? "text-[#00B0F0] hover:text-[#0082b3] hover:bg-gray-50"
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-              }`}
-            >
-              {icons[item.name as keyof typeof icons]}
-              <span>{item.name}</span>
-            </Link>
-          ))}
           {user ? (
             <>
-              <Link
-                to="/profil"
-                className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                onClick={onClose}
-              >
-                <UserCircle2 className="w-4 h-4" />
-                <span>Profil</span>
-              </Link>
-              {userType === 'carrier' ? (
-                <>
-                  <Link
-                    to="/mes-tournees"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={onClose}
-                  >
-                    Mes tournées
-                  </Link>
-                  <Link
-                    to="/demandes-approbation"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={onClose}
-                  >
-                    Demandes d'approbation
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/mes-reservations"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={onClose}
-                  >
-                    Mes réservations
-                  </Link>
-                  <Link
-                    to="/demandes-approbation"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-                    onClick={onClose}
-                  >
-                    Mes demandes d'approbation
-                  </Link>
-                </>
-              )}
-              <button
-                onClick={() => {
-                  onClose();
-                  onLogout();
-                }}
-                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
-              >
-                Déconnexion
-              </button>
+              <div className="px-3 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <UserCircle2 className="w-8 h-8 text-gray-400" />
+                  <div className="ml-3">
+                    <div className="text-sm font-medium text-gray-900">
+                      {user.email}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {userType === 'carrier' ? 'Transporteur' : 'Client'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {items.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => {
+                    onClose();
+                    if (item.onClick) item.onClick;
+                  }}
+                  className={`flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors duration-200 ${
+                    item.highlight
+                      ? "text-[#00B0F0] hover:text-[#0082b3] hover:bg-gray-50"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  {icons[item.name as keyof typeof icons]}
+                  <span className="ml-3">{item.name}</span>
+                </Link>
+              ))}
+
+              <div className="px-3 pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-gray-700 hover:text-gray-900"
+                  onClick={() => {
+                    onClose();
+                    onLogout();
+                  }}
+                >
+                  <UserCircle2 className="w-5 h-5 mr-3" />
+                  Déconnexion
+                </Button>
+              </div>
             </>
           ) : (
-            <div className="mt-4 px-3">
-              <Button 
-                variant="outline" 
-                className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
+            <div className="px-3 pt-2">
+              <Button
+                className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
                 onClick={() => {
                   onClose();
                   setShowAuthDialog(true);
                 }}
               >
-                <UserCircle2 className="w-4 h-4 mr-2" />
+                <UserCircle2 className="w-5 h-5 mr-2" />
                 Se connecter
               </Button>
             </div>

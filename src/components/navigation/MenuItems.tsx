@@ -26,7 +26,7 @@ export function MenuItems({ items, className = "", onItemClick }: MenuItemsProps
             if (onItemClick) onItemClick();
             if (item.onClick) item.onClick(e);
           }}
-          className={`${className} group flex items-center whitespace-nowrap px-2 lg:px-3 py-2 rounded-md transition-all duration-200 ${
+          className={`${className} group relative flex items-center whitespace-nowrap px-3 py-2 rounded-md transition-all duration-200 ${
             item.highlight
               ? "text-[#00B0F0] hover:text-[#0082b3] font-medium"
               : "text-gray-700 hover:text-gray-900"
