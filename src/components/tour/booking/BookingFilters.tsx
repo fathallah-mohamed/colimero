@@ -66,6 +66,8 @@ export function BookingFilters({
             <SelectItem value="date_asc">Date (ancien → récent)</SelectItem>
             <SelectItem value="city_asc">Ville (A → Z)</SelectItem>
             <SelectItem value="city_desc">Ville (Z → A)</SelectItem>
+            <SelectItem value="status_asc">Statut (A → Z)</SelectItem>
+            <SelectItem value="status_desc">Statut (Z → A)</SelectItem>
           </SelectContent>
         </Select>
       </div>

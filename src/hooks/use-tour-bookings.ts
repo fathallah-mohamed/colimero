@@ -71,6 +71,10 @@ export function useTourBookings(tourId: number) {
           return (a.delivery_city || '').localeCompare(b.delivery_city || '');
         case 'city_desc':
           return (b.delivery_city || '').localeCompare(a.delivery_city || '');
+        case 'status_asc':
+          return (a.status || '').localeCompare(b.status || '');
+        case 'status_desc':
+          return (b.status || '').localeCompare(a.status || '');
         default:
           return 0;
       }
