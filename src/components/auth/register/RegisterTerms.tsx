@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useConsents } from "@/hooks/useConsents";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface RegisterTermsProps {
   acceptedConsents: string[];
@@ -11,32 +11,27 @@ export function RegisterTerms({
   acceptedConsents,
   onConsentChange,
 }: RegisterTermsProps) {
-  const { data: consentTypes, isLoading } = useQuery({
-    queryKey: ['client-consent-types'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_consent_types')
-        .select('*')
-        .order('created_at', { ascending: true });
+  const { consentTypes, isLoading } = useConsents();
 
-      if (error) throw error;
-      return data;
-    },
-  });
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex items-start space-x-2">
+            <Skeleton className="h-4 w-4 mt-1" />
+            <Skeleton className="h-4 flex-1" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
-  if (isLoading || !consentTypes) {
-    return <div className="animate-pulse space-y-4">
-      {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} className="flex items-center space-x-2">
-          <div className="h-4 w-4 bg-gray-200 rounded" />
-          <div className="h-4 w-full bg-gray-200 rounded" />
-        </div>
-      ))}
-    </div>;
+  if (!consentTypes) {
+    return null;
   }
 
   return (
-    <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2">
+    <div className="space-y-4">
       {consentTypes.map((consent) => (
         <div key={consent.id} className="flex items-start space-x-2">
           <Checkbox
