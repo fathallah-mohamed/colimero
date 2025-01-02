@@ -26,17 +26,29 @@ export function ServicesSection({ profile, onUpdate }: ServicesSectionProps) {
 
   const onSubmit = async (values: { services: string[] }) => {
     try {
-      // Supprimer les services existants
-      const { error: deleteError } = await supabase
-        .from('carrier_services')
-        .delete()
-        .eq('carrier_id', profile.id);
+      const currentServices = profile.carrier_services?.map((s: any) => s.service_type) || [];
+      const newServices = values.services;
 
-      if (deleteError) throw deleteError;
+      // Services à supprimer (présents dans currentServices mais pas dans newServices)
+      const servicesToRemove = currentServices.filter(s => !newServices.includes(s));
+      
+      // Services à ajouter (présents dans newServices mais pas dans currentServices)
+      const servicesToAdd = newServices.filter(s => !currentServices.includes(s));
 
-      if (values.services.length > 0) {
-        // Insérer les nouveaux services
-        const servicesToInsert = values.services.map(serviceType => ({
+      // Supprimer les services qui ne sont plus sélectionnés
+      if (servicesToRemove.length > 0) {
+        const { error: deleteError } = await supabase
+          .from('carrier_services')
+          .delete()
+          .eq('carrier_id', profile.id)
+          .in('service_type', servicesToRemove);
+
+        if (deleteError) throw deleteError;
+      }
+
+      // Ajouter les nouveaux services sélectionnés
+      if (servicesToAdd.length > 0) {
+        const servicesToInsert = servicesToAdd.map(serviceType => ({
           carrier_id: profile.id,
           service_type: serviceType,
           icon: {
@@ -48,11 +60,11 @@ export function ServicesSection({ profile, onUpdate }: ServicesSectionProps) {
           }[serviceType] || 'package'
         }));
 
-        const { error: servicesError } = await supabase
+        const { error: insertError } = await supabase
           .from('carrier_services')
           .insert(servicesToInsert);
 
-        if (servicesError) throw servicesError;
+        if (insertError) throw insertError;
       }
 
       toast({
