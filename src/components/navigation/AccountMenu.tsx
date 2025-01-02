@@ -27,11 +27,12 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
       <>
         <Button 
           variant="outline" 
-          className="ml-4 border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200 rounded-md px-6"
+          size="sm"
+          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200 whitespace-nowrap"
           onClick={() => setShowAuthDialog(true)}
         >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Se connecter
+          <UserCircle2 className="w-4 h-4 mr-1.5" />
+          <span className="hidden sm:inline">Se connecter</span>
         </Button>
 
         <AuthDialog 
@@ -48,9 +49,13 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200">
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Mon compte
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200 whitespace-nowrap"
+        >
+          <UserCircle2 className="w-4 h-4 mr-1.5" />
+          <span className="hidden sm:inline">Mon compte</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
