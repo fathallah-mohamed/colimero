@@ -26,7 +26,7 @@ export function useProfile() {
         const userType = session.user.user_metadata?.user_type;
         
         if (userType === 'admin') {
-          // Récupérer le profil administrateur
+          // Récupérer uniquement le profil administrateur
           const { data, error } = await supabase
             .from('administrators')
             .select('*')
@@ -92,9 +92,10 @@ export function useProfile() {
             setProfile(profileData);
           }
         } else {
+          // Pour les clients, on ne récupère que leurs propres données
           const { data, error } = await supabase
             .from('clients')
-            .select('id, first_name, last_name, phone, created_at, birth_date, address, id_document')
+            .select('*')
             .eq('id', session.user.id)
             .single();
 
