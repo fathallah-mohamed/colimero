@@ -16,17 +16,7 @@ export default function Navigation() {
             Colimero
           </Link>
 
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00B0F0]"
-            aria-expanded={isOpen}
-            aria-label="Toggle menu"
-          >
-            <span className="sr-only">Open main menu</span>
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-
-          <div className="hidden md:flex md:items-center md:space-x-8">
+          <div className="hidden md:flex md:items-center md:space-x-4">
             <MenuItems 
               items={[
                 { 
@@ -64,11 +54,24 @@ export default function Navigation() {
               ]} 
               className="text-base" 
             />
+          </div>
+
+          <div className="flex items-center space-x-4">
             <AccountMenu 
               user={user} 
               userType={userType} 
               onLogout={handleLogout} 
             />
+            
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00B0F0]"
+              aria-expanded={isOpen}
+              aria-label="Toggle menu"
+            >
+              <span className="sr-only">Open main menu</span>
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
       </div>
