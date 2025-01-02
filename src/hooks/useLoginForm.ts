@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client' | 'carrier' | 'admin') {
+export function useLoginForm(onSuccess?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +15,18 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    if (!email.trim()) {
+      setError("Veuillez saisir votre adresse email");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Veuillez saisir votre mot de passe");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       console.log("Tentative de connexion pour:", email.trim());
@@ -30,26 +42,26 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
-        if (signInError.message === "Invalid login credentials") {
-          setError("Email ou mot de passe incorrect");
-        } else if (signInError.message === "Email not confirmed") {
-          setError("Veuillez confirmer votre email avant de vous connecter");
-        } else {
-          setError("Une erreur est survenue lors de la connexion");
+        switch (signInError.message) {
+          case "Invalid login credentials":
+            setError("Email ou mot de passe incorrect. Veuillez vérifier vos identifiants et réessayer.");
+            break;
+          case "Email not confirmed":
+            setError("Votre email n'a pas été confirmé. Veuillez vérifier votre boîte mail et cliquer sur le lien de confirmation.");
+            break;
+          case "Invalid email":
+            setError("Format d'email invalide. Veuillez vérifier votre adresse email.");
+            break;
+          default:
+            setError("Une erreur est survenue lors de la connexion. Veuillez réessayer plus tard.");
         }
+        setPassword("");
+        setIsLoading(false);
         return;
       }
 
       if (!data.user) {
         throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      // Vérifier le type d'utilisateur requis
-      const userType = data.user.user_metadata?.user_type;
-      if (requiredUserType && userType !== requiredUserType) {
-        setError(`Ce formulaire est réservé aux ${requiredUserType}s`);
-        await supabase.auth.signOut();
-        return;
       }
 
       // Vérifier si l'utilisateur est un admin
@@ -72,6 +84,8 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         return;
       }
 
+      // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
+      const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
       
       toast({
@@ -94,7 +108,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
     } catch (error: any) {
       console.error("Erreur complète:", error);
-      setError("Une erreur inattendue est survenue");
+      setError("Une erreur inattendue est survenue. Veuillez réessayer plus tard.");
     } finally {
       setIsLoading(false);
     }
