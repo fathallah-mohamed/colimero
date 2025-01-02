@@ -1,3 +1,4 @@
+export type TourType = 'public' | 'private';
 export type TourStatus = 'planned' | 'collecting' | 'in_transit' | 'completed' | 'cancelled';
 
 export interface TourStatusInfo {
@@ -31,7 +32,7 @@ export interface Tour {
   route: RouteStop[];
   total_capacity: number;
   remaining_capacity: number;
-  type: string;
+  type: TourType;
   departure_date: string;
   collection_date: string;
   created_at: string;

@@ -10,7 +10,7 @@ import type { Tour } from "@/types/tour";
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
-  const [tourType, setTourType] = useState("public");
+  const [tourType, setTourType] = useState<"public" | "private">("public");
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, "public"],
@@ -29,7 +29,7 @@ export default function EnvoyerColis() {
         `)
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
-        .eq("type", "public")
+        .eq("type", tourType)
         .gte("departure_date", new Date().toISOString())
         .order("departure_date", { ascending: true });
 
@@ -65,7 +65,7 @@ export default function EnvoyerColis() {
         `)
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
-        .eq("type", "private")
+        .eq("type", tourType)
         .gte("departure_date", new Date().toISOString())
         .order("departure_date", { ascending: true });
 
