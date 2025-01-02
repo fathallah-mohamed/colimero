@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { MenuItem } from "./MenuItems";
-import { Package2, Truck, Calendar } from "lucide-react";
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,20 +49,15 @@ export function useNavigation() {
 
   const menuItems: MenuItem[] = [
     { 
-      name: "Envoyer un colis", 
-      href: "/envoyer-colis",
-      icon: Package2
+      name: "Planifier une tournée", 
+      href: "/planifier-une-tournee", 
+      highlight: true,
     },
-    { 
-      name: "Transporteurs", 
-      href: "/transporteurs",
-      icon: Truck
-    },
-    { 
-      name: "Tournées", 
-      href: "/tours",
-      icon: Calendar
-    }
+    { name: "Envoyer un colis", href: "/envoyer-un-colis", highlight: true },
+    { name: "Transporteurs", href: "/nos-transporteurs" },
+    { name: "Actualités", href: "/actualites" },
+    { name: "À propos", href: "/a-propos" },
+    { name: "Contact", href: "/nous-contacter" },
   ];
 
   return {
