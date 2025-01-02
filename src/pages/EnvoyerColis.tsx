@@ -15,7 +15,7 @@ export default function EnvoyerColis() {
   const { data: tours = [], isLoading } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, tourType],
     queryFn: async () => {
-      console.log("Fetching tours with type:", tourType); // Debug log
+      console.log("Fetching tours with type:", tourType);
 
       const { data, error } = await supabase
         .from("tours")
@@ -36,11 +36,11 @@ export default function EnvoyerColis() {
         .order("departure_date", { ascending: true });
 
       if (error) {
-        console.error("Supabase error:", error); // Debug log
+        console.error("Supabase error:", error);
         throw error;
       }
       
-      console.log("Fetched tours:", data); // Debug log
+      console.log("Fetched tours:", data);
 
       return data.map(tour => ({
         ...tour,
@@ -65,6 +65,10 @@ export default function EnvoyerColis() {
     }
   };
 
+  const handleTourTypeChange = (type: TourType) => {
+    setTourType(type);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -84,7 +88,7 @@ export default function EnvoyerColis() {
             tourType={tourType}
             publicToursCount={publicTours.length}
             privateToursCount={privateTours.length}
-            onTypeChange={setTourType}
+            onTypeChange={handleTourTypeChange}
           />
 
           <TransporteurTours 
