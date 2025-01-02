@@ -55,24 +55,21 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
     }
   };
 
-  const CommitmentStatus = ({ accepted, acceptedAt, label, description }: { accepted: boolean, acceptedAt?: string, label: string, description: string }) => (
+  const CommitmentStatus = ({ accepted, label, description }: { accepted: boolean, label: string, description: string }) => (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="font-medium">{label}</span>
-        <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
-          {accepted ? (
-            <Check className="w-5 h-5 mr-2 stroke-2" />
-          ) : (
-            <X className="w-5 h-5 mr-2 stroke-2" />
-          )}
-          <span>{accepted ? 'Accepté' : 'Non accepté'}</span>
+        <div className="flex items-center gap-4">
+          <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
+            {accepted ? (
+              <Check className="w-5 h-5 mr-2 stroke-2" />
+            ) : (
+              <X className="w-5 h-5 mr-2 stroke-2" />
+            )}
+            <span>{accepted ? 'Accepté' : 'Non accepté'}</span>
+          </div>
+          <span className="font-medium">{label}</span>
         </div>
       </div>
-      {accepted && acceptedAt && (
-        <p className="text-sm text-muted-foreground">
-          Accepté le {format(new Date(acceptedAt), 'dd MMMM yyyy', { locale: fr })}
-        </p>
-      )}
       <Alert>
         <AlertDescription className="text-sm text-muted-foreground">
           {description}
@@ -80,6 +77,13 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
       </Alert>
     </div>
   );
+
+  // Find the most recent acceptance date
+  const mostRecentAcceptanceDate = consents?.reduce((latest, consent) => {
+    if (!consent.accepted_at || !latest) return latest;
+    const currentDate = new Date(consent.accepted_at);
+    return !latest || currentDate > new Date(latest) ? consent.accepted_at : latest;
+  }, null as string | null);
 
   return (
     <div className="space-y-8">
@@ -152,6 +156,11 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
 
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements et consentements</h2>
+        {mostRecentAcceptanceDate && (
+          <p className="text-sm text-gray-500 mb-4">
+            Accepté le {format(new Date(mostRecentAcceptanceDate), 'dd MMMM yyyy', { locale: fr })}
+          </p>
+        )}
         <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
           {isLoadingConsents ? (
             <div className="animate-pulse space-y-4">
@@ -163,8 +172,7 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
             consents?.map((consent) => (
               <div key={consent.id}>
                 <CommitmentStatus 
-                  accepted={consent.accepted} 
-                  acceptedAt={consent.accepted_at}
+                  accepted={consent.accepted}
                   label={consent.consent_type.label}
                   description={consent.consent_type.description}
                 />
