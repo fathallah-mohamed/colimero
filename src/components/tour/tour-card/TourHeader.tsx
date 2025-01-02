@@ -22,6 +22,14 @@ const countryFlags: { [key: string]: string } = {
 };
 
 export function TourHeader({ tour }: TourHeaderProps) {
+  const getDepartureCity = () => {
+    if (!tour.route || !Array.isArray(tour.route)) return null;
+    const pickupPoints = tour.route.filter((point: any) => point.type === 'pickup');
+    return pickupPoints[pickupPoints.length - 1]?.name;
+  };
+
+  const departureCity = getDepartureCity();
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-2">
@@ -43,6 +51,11 @@ export function TourHeader({ tour }: TourHeaderProps) {
       <p className="text-gray-600 mb-1">
         Départ : {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
       </p>
+      {departureCity && (
+        <p className="text-gray-600 mb-1">
+          Ville de départ : {departureCity}
+        </p>
+      )}
       <div className="flex items-center gap-4">
         <p className="text-gray-600">
           Capacité restante : {tour.remaining_capacity} kg
