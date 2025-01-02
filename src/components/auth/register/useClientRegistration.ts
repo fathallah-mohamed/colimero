@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RegisterFormState } from "./types";
 
 export async function registerClient(formData: RegisterFormState) {
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: formData.email.trim(),
     password: formData.password.trim(),
     options: {
@@ -14,16 +14,16 @@ export async function registerClient(formData: RegisterFormState) {
     },
   });
 
-  if (signUpError) throw signUpError;
-  if (!signUpData.user) throw new Error("Erreur lors de la création du compte");
+  if (error) throw error;
+  if (!data.user) throw new Error("Erreur lors de la création du compte");
 
-  await updateClientProfile(signUpData.user.id, formData);
+  await updateClientProfile(data.user.id, formData);
   if (formData.idDocument) {
-    await uploadIdDocument(signUpData.user.id, formData.idDocument);
+    await uploadIdDocument(data.user.id, formData.idDocument);
   }
-  await insertClientConsents(signUpData.user.id, formData.acceptedConsents);
+  await insertClientConsents(data.user.id, formData.acceptedConsents);
 
-  return signUpData;
+  return data;
 }
 
 async function updateClientProfile(userId: string, formData: RegisterFormState) {

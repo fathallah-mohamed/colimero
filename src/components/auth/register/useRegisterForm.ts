@@ -60,7 +60,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         acceptedConsents,
       };
 
-      const { error } = await registerClient(formData);
+      const { data, error } = await registerClient(formData);
 
       if (error?.message.includes("User already registered") || 
           error?.message === "User already registered" ||
