@@ -11,20 +11,26 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const validateInputs = () => {
+    if (!email.trim()) {
+      setError("L'adresse email est requise");
+      return false;
+    }
+
+    if (!password.trim()) {
+      setError("Le mot de passe est requis");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    // Validation des champs
-    if (!email.trim()) {
-      setError("L'adresse email est requise");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!password.trim()) {
-      setError("Le mot de passe est requis");
+    if (!validateInputs()) {
       setIsLoading(false);
       return;
     }
@@ -44,14 +50,12 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         
         if (signInError.message === "Invalid login credentials") {
           setError("Email ou mot de passe incorrect");
-          console.log("Échec de l'authentification: identifiants invalides");
         } else if (signInError.message === "Email not confirmed") {
           setError("Veuillez confirmer votre email avant de vous connecter");
         } else {
           setError("Une erreur est survenue lors de la connexion");
         }
         setPassword("");
-        setIsLoading(false);
         return;
       }
 
@@ -70,7 +74,6 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
             ? "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
             : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
         );
-        setIsLoading(false);
         return;
       }
 
