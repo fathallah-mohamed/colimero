@@ -10,7 +10,6 @@ import Transporteurs from "./pages/Transporteurs";
 import TransporteurDetails from "./pages/TransporteurDetails";
 import Tours from "./pages/Tours";
 import Blog from "./pages/Blog";
-import APropos from "./pages/APropos";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -42,7 +41,6 @@ const App = () => (
           <Route path="/nos-transporteurs/:id" element={<TransporteurDetails />} />
           <Route path="/tournees" element={<Tours />} />
           <Route path="/actualites" element={<Blog />} />
-          <Route path="/a-propos" element={<APropos />} />
           <Route path="/nous-contacter" element={<Contact />} />
           <Route path="/connexion" element={<Login />} />
           <Route path="/profil" element={<Profile />} />

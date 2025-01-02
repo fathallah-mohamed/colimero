@@ -8,7 +8,8 @@ import { useNavigation } from "./navigation/useNavigation";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, userType, showAuthDialog, setShowAuthDialog } = useNavigation();
+  const { user, userType } = useNavigation();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const menuItems = [
     { 
