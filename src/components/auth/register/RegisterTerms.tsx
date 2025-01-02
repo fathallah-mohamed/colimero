@@ -47,12 +47,6 @@ export function RegisterTerms({
             className="mt-1"
           />
           <div className="space-y-1">
-            <label
-              htmlFor={consent.id}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {consent.label}
-            </label>
             <Alert>
               <AlertDescription className="text-sm text-muted-foreground">
                 {consent.description}
