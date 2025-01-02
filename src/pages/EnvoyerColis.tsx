@@ -15,6 +15,8 @@ export default function EnvoyerColis() {
   const { data: tours = [], isLoading } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, tourType],
     queryFn: async () => {
+      console.log("Fetching tours with type:", tourType); // Debug log
+
       const { data, error } = await supabase
         .from("tours")
         .select(`
@@ -33,8 +35,13 @@ export default function EnvoyerColis() {
         .gte("departure_date", new Date().toISOString())
         .order("departure_date", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error); // Debug log
+        throw error;
+      }
       
+      console.log("Fetched tours:", data); // Debug log
+
       return data.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
