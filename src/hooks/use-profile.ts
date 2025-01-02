@@ -24,10 +24,29 @@ export function useProfile() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const userType = session.user.user_metadata?.user_type;
-        const table = userType === 'carrier' ? 'carriers' : 'clients';
         
-        let query;
-        if (userType === 'carrier') {
+        if (userType === 'admin') {
+          // Récupérer le profil administrateur
+          const { data, error } = await supabase
+            .from('administrators')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (error) throw error;
+          if (data) {
+            const profileData: ProfileData = {
+              id: data.id,
+              first_name: data.first_name,
+              last_name: data.last_name,
+              phone: data.phone,
+              email: session.user.email,
+              address: data.address,
+              created_at: data.created_at
+            };
+            setProfile(profileData);
+          }
+        } else if (userType === 'carrier') {
           const { data, error } = await supabase
             .from('carriers')
             .select(`
