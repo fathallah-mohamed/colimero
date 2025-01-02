@@ -3,6 +3,8 @@ import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommitmentsSection } from "./CommitmentsSection";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface ClientProfileViewProps {
   profile: any;
@@ -61,7 +63,9 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-1">Date de naissance</p>
-            <p className="text-gray-900 font-medium">{profile.birth_date || "-"}</p>
+            <p className="text-gray-900 font-medium">
+              {profile.birth_date ? format(new Date(profile.birth_date), 'dd MMMM yyyy', { locale: fr }) : "-"}
+            </p>
           </div>
           <div>
             <p className="text-sm text-gray-500 mb-1">Adresse</p>
