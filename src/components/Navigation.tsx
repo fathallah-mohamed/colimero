@@ -9,19 +9,24 @@ export default function Navigation() {
   const { isOpen, setIsOpen, user, userType, handleLogout, menuItems } = useNavigation();
 
   return (
-    <nav className="relative bg-white">
+    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-2xl font-bold text-[#00B0F0]">
+          <Link to="/" className="text-2xl font-bold text-primary hover:text-primary-hover transition-colors">
             Colimero
           </Link>
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors"
+            aria-expanded="false"
           >
-            <span className="sr-only">Open main menu</span>
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <span className="sr-only">Ouvrir le menu principal</span>
+            {isOpen ? (
+              <X className="block h-6 w-6" aria-hidden="true" />
+            ) : (
+              <Menu className="block h-6 w-6" aria-hidden="true" />
+            )}
           </button>
 
           <div className="hidden md:flex md:items-center md:space-x-8">
