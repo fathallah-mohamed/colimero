@@ -12,13 +12,11 @@ export default function Navigation() {
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-[#00B0F0] hover:text-[#0082b3] transition-colors">
-              Colimero
-            </Link>
-          </div>
+          <Link to="/" className="text-2xl font-bold text-[#00B0F0] hover:text-[#0082b3] transition-colors">
+            Colimero
+          </Link>
 
-          <div className="hidden md:flex md:items-center md:space-x-1 lg:space-x-2">
+          <div className="hidden md:flex md:items-center md:space-x-4">
             <MenuItems 
               items={[
                 { 
@@ -54,11 +52,11 @@ export default function Navigation() {
                   icon: <Users className="w-4 h-4" />
                 }
               ]} 
-              className="text-sm lg:text-base" 
+              className="text-base" 
             />
           </div>
 
-          <div className="flex items-center space-x-2 lg:space-x-4">
+          <div className="flex items-center space-x-4">
             <AccountMenu 
               user={user} 
               userType={userType} 
@@ -67,11 +65,12 @@ export default function Navigation() {
             
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00B0F0]"
+              className="md:hidden rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00B0F0]"
               aria-expanded={isOpen}
+              aria-label="Toggle menu"
             >
               <span className="sr-only">Open main menu</span>
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
