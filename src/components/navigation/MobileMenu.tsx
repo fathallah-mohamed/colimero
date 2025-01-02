@@ -3,6 +3,8 @@ import { MenuItem } from "./MenuItems";
 import { User } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useLocation } from "react-router-dom";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -14,6 +16,8 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }: MobileMenuProps) {
+  const location = useLocation();
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -35,16 +39,20 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
             <div className="flex flex-col p-6 space-y-4">
               {items.map((item) => {
                 const Icon = item.icon;
+                const isActive = location.pathname === item.href;
+                
                 return (
                   <Link
                     key={item.name}
                     to={item.href}
                     onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium transition-colors ${
-                      item.highlight
-                        ? "text-primary bg-blue-50 hover:bg-blue-100"
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium",
+                      "transition-all duration-300",
+                      isActive 
+                        ? "text-primary bg-primary/5" 
                         : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                    }`}
+                    )}
                   >
                     {Icon && <Icon className="h-5 w-5" />}
                     {item.name}
@@ -57,7 +65,7 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                   <div className="space-y-3">
                     <Link
                       to="/profil"
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors"
                       onClick={onClose}
                     >
                       Profil
@@ -66,14 +74,14 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                       <>
                         <Link
                           to="/mes-tournees"
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors"
                           onClick={onClose}
                         >
                           Mes tournées
                         </Link>
                         <Link
                           to="/demandes-approbation"
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors"
                           onClick={onClose}
                         >
                           Demandes d'approbation
@@ -83,14 +91,14 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                       <>
                         <Link
                           to="/mes-reservations"
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors"
                           onClick={onClose}
                         >
                           Mes réservations
                         </Link>
                         <Link
                           to="/demandes-approbation"
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors"
                           onClick={onClose}
                         >
                           Mes demandes d'approbation
@@ -102,7 +110,7 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                         onClose();
                         onLogout();
                       }}
-                      className="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50"
+                      className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50 transition-colors"
                     >
                       Déconnexion
                     </button>
@@ -110,7 +118,11 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                 </div>
               ) : (
                 <div className="pt-4 mt-4 border-t border-gray-100">
-                  <Button asChild variant="default" className="w-full justify-center">
+                  <Button 
+                    asChild 
+                    variant="default" 
+                    className="w-full justify-center hover:bg-primary/90 transition-colors"
+                  >
                     <Link to="/connexion" onClick={onClose}>
                       Se connecter
                     </Link>

@@ -11,6 +11,7 @@ import {
 import { User } from "@supabase/supabase-js";
 import { useState } from "react";
 import AuthDialog from "../auth/AuthDialog";
+import { cn } from "@/lib/utils";
 
 interface AccountMenuProps {
   user: User | null;
@@ -25,9 +26,14 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
     return (
       <>
         <Button 
-          variant="default"
+          variant="outline"
           size="sm"
-          className="font-medium shadow-sm hover:shadow-md transition-all duration-200"
+          className={cn(
+            "font-medium border-gray-200 transition-all duration-300",
+            "hover:bg-primary hover:text-white hover:border-transparent",
+            "hover:shadow-md hover:shadow-primary/20",
+            "active:scale-[0.98]"
+          )}
           onClick={() => setShowAuthDialog(true)}
         >
           Se connecter
@@ -50,7 +56,12 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         <Button 
           variant="outline" 
           size="sm"
-          className="font-medium border-gray-200 shadow-sm hover:shadow-md transition-all duration-200"
+          className={cn(
+            "font-medium border-gray-200 transition-all duration-300",
+            "hover:bg-primary hover:text-white hover:border-transparent",
+            "hover:shadow-md hover:shadow-primary/20",
+            "active:scale-[0.98]"
+          )}
         >
           Mon compte
         </Button>
