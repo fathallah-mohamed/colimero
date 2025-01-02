@@ -78,8 +78,8 @@ export function TourCard({
     if (tour.status !== 'planned') {
       toast({
         variant: "destructive",
-        title: "Réservation impossible",
-        description: "Cette tournée n'est plus disponible pour les réservations.",
+        title: "Tournée démarrée",
+        description: "Cette tournée a déjà démarré et n'accepte plus de réservations.",
       });
       return;
     }
@@ -127,6 +127,12 @@ export function TourCard({
 
   const isBookingDisabled = tour.status !== 'planned';
 
+  const getButtonText = () => {
+    if (!selectedPoint) return "Sélectionnez un point de collecte";
+    if (isBookingDisabled) return "Cette tournée a démarré et n'accepte plus de réservations";
+    return "Réserver";
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -165,12 +171,7 @@ export function TourCard({
         onClick={handleBookingClick}
         disabled={!selectedPoint || isBookingDisabled}
       >
-        {!selectedPoint 
-          ? "Sélectionnez un point de collecte" 
-          : isBookingDisabled 
-            ? "Cette tournée n'est plus disponible" 
-            : "Réserver"
-        }
+        {getButtonText()}
       </Button>
 
       <AuthDialog 
