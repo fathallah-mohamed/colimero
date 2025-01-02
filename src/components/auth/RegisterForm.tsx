@@ -72,28 +72,28 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
             acceptedConsents={acceptedConsents}
             onConsentChange={handleConsentChange}
           />
+
+          <div className="sticky bottom-0 pt-4 space-y-4 border-t mt-4 bg-white">
+            <Button
+              type="submit"
+              className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+              disabled={isLoading || !areRequiredFieldsFilled()}
+              onClick={handleSubmit}
+            >
+              {isLoading ? "Création en cours..." : "Créer mon compte"}
+            </Button>
+
+            <div className="text-center text-sm pb-2">
+              <button
+                type="button"
+                className="text-[#00B0F0] hover:underline"
+                onClick={onLogin}
+              >
+                Déjà un compte ? Se connecter
+              </button>
+            </div>
+          </div>
         </form>
-      </div>
-
-      <div className="sticky bottom-0 pt-4 space-y-4 border-t mt-4 bg-white px-4">
-        <Button
-          type="submit"
-          className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
-          disabled={isLoading || !areRequiredFieldsFilled()}
-          onClick={handleSubmit}
-        >
-          {isLoading ? "Création en cours..." : "Créer mon compte"}
-        </Button>
-
-        <div className="text-center text-sm pb-2">
-          <button
-            type="button"
-            className="text-[#00B0F0] hover:underline"
-            onClick={onLogin}
-          >
-            Déjà un compte ? Se connecter
-          </button>
-        </div>
       </div>
     </div>
   );
