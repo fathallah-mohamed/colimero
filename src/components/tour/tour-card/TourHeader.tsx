@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface TourHeaderProps {
   tour: any;
@@ -30,7 +30,7 @@ export function TourHeader({ tour }: TourHeaderProps) {
             <span className="text-xl mr-1">{countryFlags[tour.departure_country]}</span>
             {countryNames[tour.departure_country]}
           </span>
-          <MapPin className="h-4 w-4 text-gray-400 mx-1" />
+          <ArrowRight className="h-5 w-5 text-primary mx-1 stroke-2" />
           <span className="flex items-center">
             <span className="text-xl mr-1">{countryFlags[tour.destination_country]}</span>
             {countryNames[tour.destination_country]}
