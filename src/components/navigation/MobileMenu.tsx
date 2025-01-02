@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { MenuItem } from "./MenuItems";
 import { User } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
@@ -17,8 +16,8 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }: MobileMenuProps) {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  
-  const icons = {
+
+  const icons: { [key: string]: JSX.Element } = {
     "Planifier une tournée": <Calendar className="w-4 h-4" />,
     "Envoyer un colis": <Package className="w-4 h-4" />,
     "Transporteurs": <Truck className="w-4 h-4" />,
@@ -26,69 +25,48 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
     "Contact": <Users className="w-4 h-4" />,
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
-      <div
-        className={`${
-          isOpen ? "block" : "hidden"
-        } md:hidden fixed top-16 inset-x-0 bg-white shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-y-auto`}
-      >
-        <div className="px-2 pt-2 pb-3 space-y-1">
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 w-64 bg-white shadow-lg z-50 overflow-y-auto">
+        <div className="py-6">
           {items.map((item) => (
             <Link
-              key={item.name}
+              key={item.href}
               to={item.href}
-              onClick={(e) => {
-                onClose();
-                if (item.onClick) item.onClick(e);
-              }}
-              className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                item.highlight
-                  ? "text-[#00B0F0] hover:text-[#0082b3] hover:bg-gray-50"
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-              }`}
+              className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              onClick={onClose}
             >
-              {icons[item.name as keyof typeof icons]}
+              {icons[item.name] && (
+                <span className="mr-2">{icons[item.name]}</span>
+              )}
               <span>{item.name}</span>
             </Link>
           ))}
-          {!user && (
-            <div className="mt-4 px-3">
-              <Button 
-                variant="outline" 
-                className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
-                onClick={() => {
-                  onClose();
-                  setShowAuthDialog(true);
-                }}
-              >
-                <UserCircle2 className="w-4 h-4 mr-2" />
-                Se connecter
-              </Button>
-            </div>
-          )}
-          {user && (
+          {user ? (
             <>
               <Link
                 to="/profil"
-                className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                className="flex items-center px-3 py-2 mt-4 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={onClose}
               >
-                <UserCircle2 className="w-4 h-4" />
-                <span>Profil</span>
+                <UserCircle2 className="w-4 h-4 mr-2" />
+                Mon profil
               </Link>
               {userType === 'carrier' ? (
                 <>
                   <Link
                     to="/mes-tournees"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={onClose}
                   >
                     Mes tournées
                   </Link>
                   <Link
                     to="/demandes-approbation"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={onClose}
                   >
                     Demandes d'approbation
@@ -98,14 +76,14 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                 <>
                   <Link
                     to="/mes-reservations"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={onClose}
                   >
                     Mes réservations
                   </Link>
                   <Link
                     to="/demandes-approbation"
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                    className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={onClose}
                   >
                     Mes demandes d'approbation
@@ -114,18 +92,29 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
               )}
               <button
                 onClick={() => {
-                  onClose();
                   onLogout();
+                  onClose();
                 }}
-                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
                 Déconnexion
               </button>
             </>
+          ) : (
+            <Button 
+              variant="outline" 
+              className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
+              onClick={() => {
+                onClose();
+                setShowAuthDialog(true);
+              }}
+            >
+              <UserCircle2 className="w-4 h-4 mr-2" />
+              Se connecter
+            </Button>
           )}
         </div>
       </div>
-
       <AuthDialog 
         isOpen={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)} 
