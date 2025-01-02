@@ -26,7 +26,7 @@ export function LoginForm({
     setPassword,
     error,
     handleSubmit,
-  } = useLoginForm(onSuccess, requiredUserType);
+  } = useLoginForm(onSuccess);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

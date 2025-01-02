@@ -22,7 +22,7 @@ export function CarrierLoginForm({
     setPassword,
     error,
     handleSubmit,
-  } = useLoginForm(onSuccess, 'carrier');
+  } = useLoginForm(onSuccess);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

@@ -22,7 +22,7 @@ export function ClientLoginForm({
     setPassword,
     error,
     handleSubmit,
-  } = useLoginForm(onSuccess, 'client');
+  } = useLoginForm(onSuccess);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
