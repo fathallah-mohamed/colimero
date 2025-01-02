@@ -11,11 +11,12 @@ export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
+  const [sortBy, setSortBy] = useState("date_desc");
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, "public"],
+    queryKey: ["tours", departureCountry, destinationCountry, "public", sortBy],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("tours")
         .select(`
           *,
@@ -30,8 +31,25 @@ export default function EnvoyerColis() {
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
         .eq("type", "public")
-        .gte("departure_date", new Date().toISOString())
-        .order("departure_date", { ascending: true });
+        .gte("departure_date", new Date().toISOString());
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'date_asc':
+          query = query.order('departure_date', { ascending: true });
+          break;
+        case 'date_desc':
+          query = query.order('departure_date', { ascending: false });
+          break;
+        case 'capacity_asc':
+          query = query.order('remaining_capacity', { ascending: true });
+          break;
+        case 'capacity_desc':
+          query = query.order('remaining_capacity', { ascending: false });
+          break;
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       
@@ -49,9 +67,9 @@ export default function EnvoyerColis() {
   });
 
   const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, "private"],
+    queryKey: ["tours", departureCountry, destinationCountry, "private", sortBy],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("tours")
         .select(`
           *,
@@ -66,8 +84,25 @@ export default function EnvoyerColis() {
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
         .eq("type", "private")
-        .gte("departure_date", new Date().toISOString())
-        .order("departure_date", { ascending: true });
+        .gte("departure_date", new Date().toISOString());
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'date_asc':
+          query = query.order('departure_date', { ascending: true });
+          break;
+        case 'date_desc':
+          query = query.order('departure_date', { ascending: false });
+          break;
+        case 'capacity_asc':
+          query = query.order('remaining_capacity', { ascending: true });
+          break;
+        case 'capacity_desc':
+          query = query.order('remaining_capacity', { ascending: false });
+          break;
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       
@@ -102,8 +137,10 @@ export default function EnvoyerColis() {
           <TourFilters
             departureCountry={departureCountry}
             destinationCountry={destinationCountry}
+            sortBy={sortBy}
             onDepartureChange={handleDepartureChange}
             onDestinationChange={setDestinationCountry}
+            onSortChange={setSortBy}
           />
 
           <TourTypeTabs
