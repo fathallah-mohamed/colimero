@@ -36,7 +36,7 @@ export function RegisterTerms({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2">
       {consentTypes.map((consent) => (
         <div key={consent.id} className="flex items-start space-x-2">
           <Checkbox
@@ -45,18 +45,10 @@ export function RegisterTerms({
             onCheckedChange={(checked) => onConsentChange(consent.id, checked as boolean)}
             className="mt-1"
           />
-          <div className="space-y-1">
-            <label
-              htmlFor={consent.id}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {consent.label}
-            </label>
-            <p
-              className="text-sm text-muted-foreground"
-              dangerouslySetInnerHTML={{ __html: consent.description }}
-            />
-          </div>
+          <p
+            className="text-sm text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: consent.description }}
+          />
         </div>
       ))}
     </div>
