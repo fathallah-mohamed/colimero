@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LoginFormFields } from "./login/LoginFormFields";
 import { LoginFormActions } from "./login/LoginFormActions";
 import { useLoginForm } from "./login/useLoginForm";
@@ -7,7 +8,7 @@ interface LoginFormProps {
   onRegister: () => void;
   onCarrierRegister: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: 'client' | 'carrier' | 'admin';
 }
 
 export function LoginForm({
@@ -15,7 +16,7 @@ export function LoginForm({
   onRegister,
   onCarrierRegister,
   onSuccess,
-  requiredUserType
+  requiredUserType,
 }: LoginFormProps) {
   const {
     isLoading,
@@ -43,6 +44,7 @@ export function LoginForm({
         onForgotPassword={onForgotPassword}
         onRegister={onRegister}
         onCarrierRegister={onCarrierRegister}
+        requiredUserType={requiredUserType}
       />
     </form>
   );

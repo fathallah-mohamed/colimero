@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client' | 'carrier') {
+export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client' | 'carrier' | 'admin') {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,7 +16,6 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     setIsLoading(true);
     setError(null);
 
-    // Validation des champs
     if (!email.trim()) {
       setError("L'adresse email est requise");
       setIsLoading(false);
@@ -40,7 +39,6 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
-        // Messages d'erreur spécifiques
         switch (signInError.message) {
           case "Invalid login credentials":
             setError("Email ou mot de passe incorrect");
@@ -66,13 +64,14 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
-      // Vérification du type d'utilisateur requis
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
         setError(
           requiredUserType === 'client' 
             ? "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
-            : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
+            : requiredUserType === 'carrier'
+            ? "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
+            : "Cette fonctionnalité est réservée aux administrateurs. Veuillez vous connecter avec un compte administrateur."
         );
         setIsLoading(false);
         return;
@@ -83,7 +82,6 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         description: "Vous êtes maintenant connecté",
       });
 
-      // Redirection selon le type d'utilisateur
       switch (userType) {
         case 'admin':
           navigate("/admin");
