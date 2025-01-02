@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useLoginForm(onSuccess?: () => void) {
+export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client' | 'carrier') {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +16,7 @@ export function useLoginForm(onSuccess?: () => void) {
     setIsLoading(true);
     setError(null);
 
+    // Validation des champs
     if (!email.trim()) {
       setError("L'adresse email est requise");
       setIsLoading(false);
@@ -31,9 +32,6 @@ export function useLoginForm(onSuccess?: () => void) {
     try {
       console.log("Tentative de connexion pour:", email.trim());
 
-      // Clear any existing session first
-      await supabase.auth.signOut();
-
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -42,6 +40,7 @@ export function useLoginForm(onSuccess?: () => void) {
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
+        // Messages d'erreur spécifiques
         switch (signInError.message) {
           case "Invalid login credentials":
             setError("Email ou mot de passe incorrect");
@@ -64,36 +63,31 @@ export function useLoginForm(onSuccess?: () => void) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // Vérifier si l'utilisateur est un admin
-      const { data: adminData } = await supabase
-        .from('administrators')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
 
-      console.log("Résultat de la vérification admin:", adminData);
-
-      if (adminData) {
-        console.log("Utilisateur admin trouvé");
-        toast({
-          title: "Connexion réussie",
-          description: "Bienvenue dans votre espace administrateur",
-        });
-        navigate("/admin");
-        onSuccess?.();
+      // Vérification du type d'utilisateur requis
+      if (requiredUserType && userType !== requiredUserType) {
+        await supabase.auth.signOut();
+        setError(
+          requiredUserType === 'client' 
+            ? "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
+            : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
+        );
+        setIsLoading(false);
         return;
       }
 
-      // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
-      const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
-      
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",
       });
 
+      // Redirection selon le type d'utilisateur
       switch (userType) {
+        case 'admin':
+          navigate("/admin");
+          break;
         case 'carrier':
           navigate("/mes-tournees");
           break;

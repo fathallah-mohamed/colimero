@@ -8,6 +8,8 @@ import { useState } from "react";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { RegisterForm } from "./RegisterForm";
 import CarrierAuthDialog from "./CarrierAuthDialog";
+import { ClientLoginForm } from "./login/ClientLoginForm";
+import { CarrierLoginForm } from "./login/CarrierLoginForm";
 import { GeneralLoginForm } from "./login/GeneralLoginForm";
 
 type View = "login" | "register" | "forgot-password";
@@ -16,7 +18,7 @@ interface AuthDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier' | 'admin';
+  requiredUserType?: 'client' | 'carrier';
   onRegisterClick?: () => void;
 }
 
@@ -49,8 +51,6 @@ export default function AuthDialog({
         return "Connexion requise pour réserver";
       } else if (requiredUserType === 'carrier') {
         return "Connexion requise pour créer une tournée";
-      } else if (requiredUserType === 'admin') {
-        return "Connexion administrateur";
       }
       return "Connexion";
     }
@@ -63,12 +63,38 @@ export default function AuthDialog({
         return "Connectez-vous pour réserver cette tournée.";
       } else if (requiredUserType === 'carrier') {
         return "Connectez-vous pour créer une tournée.";
-      } else if (requiredUserType === 'admin') {
-        return "Connectez-vous pour accéder au tableau de bord administrateur.";
       }
       return "Connectez-vous à votre compte.";
     }
     return "Créez votre compte client pour commencer à expédier vos colis";
+  };
+
+  const renderLoginForm = () => {
+    if (requiredUserType === 'client') {
+      return (
+        <ClientLoginForm
+          onForgotPassword={() => setView("forgot-password")}
+          onRegister={handleRegisterClick}
+          onSuccess={onSuccess}
+        />
+      );
+    } else if (requiredUserType === 'carrier') {
+      return (
+        <CarrierLoginForm
+          onForgotPassword={() => setView("forgot-password")}
+          onCarrierRegister={handleCarrierRegisterClick}
+          onSuccess={onSuccess}
+        />
+      );
+    }
+    return (
+      <GeneralLoginForm
+        onForgotPassword={() => setView("forgot-password")}
+        onRegister={handleRegisterClick}
+        onCarrierRegister={handleCarrierRegisterClick}
+        onSuccess={onSuccess}
+      />
+    );
   };
 
   return (
@@ -87,12 +113,7 @@ export default function AuthDialog({
           </DialogHeader>
 
           {view === "login" ? (
-            <GeneralLoginForm
-              onForgotPassword={() => setView("forgot-password")}
-              onRegister={handleRegisterClick}
-              onCarrierRegister={handleCarrierRegisterClick}
-              onSuccess={onSuccess}
-            />
+            renderLoginForm()
           ) : view === "register" ? (
             <RegisterForm onLogin={() => setView("login")} />
           ) : (

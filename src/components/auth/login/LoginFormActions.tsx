@@ -6,7 +6,7 @@ interface LoginFormActionsProps {
   onForgotPassword: () => void;
   onRegister: () => void;
   onCarrierRegister: () => void;
-  requiredUserType?: 'client' | 'carrier' | 'admin';
+  requiredUserType?: 'client' | 'carrier';
 }
 
 export function LoginFormActions({
@@ -40,6 +40,7 @@ export function LoginFormActions({
           </div>
 
           <div className="grid gap-2">
+            {/* Afficher "Créer un compte client" uniquement si aucun type n'est requis ou si on demande un client */}
             {(!requiredUserType || requiredUserType === 'client') && (
               <Button
                 type="button"
@@ -50,6 +51,7 @@ export function LoginFormActions({
                 Créer un compte client
               </Button>
             )}
+            {/* Afficher "Devenir transporteur" uniquement si aucun type n'est requis ou si on demande un transporteur */}
             {(!requiredUserType || requiredUserType === 'carrier') && (
               <Button
                 type="button"
@@ -64,17 +66,15 @@ export function LoginFormActions({
         </>
       )}
 
-      {requiredUserType !== 'admin' && (
-        <div className="text-center">
-          <button
-            type="button"
-            className="text-sm text-[#00B0F0] hover:underline"
-            onClick={onForgotPassword}
-          >
-            Mot de passe oublié ?
-          </button>
-        </div>
-      )}
+      <div className="text-center">
+        <button
+          type="button"
+          className="text-sm text-[#00B0F0] hover:underline"
+          onClick={onForgotPassword}
+        >
+          Mot de passe oublié ?
+        </button>
+      </div>
     </div>
   );
 }

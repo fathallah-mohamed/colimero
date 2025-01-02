@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { useLoginForm } from "./useLoginForm";
+import { Separator } from "@/components/ui/separator";
 import { LoginFormFields } from "./LoginFormFields";
+import { useLoginForm } from "./useLoginForm";
 
 interface GeneralLoginFormProps {
   onForgotPassword: () => void;
@@ -26,7 +27,7 @@ export function GeneralLoginForm({
   } = useLoginForm(onSuccess);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <LoginFormFields
         email={email}
         password={password}
@@ -36,35 +37,52 @@ export function GeneralLoginForm({
         onPasswordChange={setPassword}
       />
 
-      <div className="flex flex-col space-y-4">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Connexion en cours..." : "Se connecter"}
+      <div className="space-y-4">
+        <Button
+          type="submit"
+          className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+          disabled={isLoading}
+        >
+          {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
 
-        <div className="flex justify-between text-sm">
-          <button
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <Separator />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Pas encore de compte ?
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-2">
+          <Button
             type="button"
-            onClick={onForgotPassword}
-            className="text-primary hover:underline"
-          >
-            Mot de passe oublié ?
-          </button>
-          <button
-            type="button"
+            variant="outline"
             onClick={onRegister}
-            className="text-primary hover:underline"
+            className="w-full"
           >
             Créer un compte client
-          </button>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCarrierRegister}
+            className="w-full"
+          >
+            Devenir transporteur
+          </Button>
         </div>
 
         <div className="text-center">
           <button
             type="button"
-            onClick={onCarrierRegister}
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-[#00B0F0] hover:underline"
+            onClick={onForgotPassword}
           >
-            Vous êtes transporteur ? Inscrivez-vous ici
+            Mot de passe oublié ?
           </button>
         </div>
       </div>
