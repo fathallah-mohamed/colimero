@@ -11,6 +11,9 @@ export function useRegisterForm(onLogin: () => void) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [address, setAddress] = useState("");
+  const [idDocument, setIdDocument] = useState<File | null>(null);
   const [acceptedConsents, setAcceptedConsents] = useState<string[]>([]);
   const { toast } = useToast();
 
@@ -33,22 +36,26 @@ export function useRegisterForm(onLogin: () => void) {
   const requiredConsentsCount = consentTypes?.length || 0;
   const allRequiredConsentsAccepted = acceptedConsents.length === requiredConsentsCount;
 
+  const areRequiredFieldsFilled = () => {
+    return (
+      firstName.trim() !== "" &&
+      lastName.trim() !== "" &&
+      email.trim() !== "" &&
+      phone.trim() !== "" &&
+      password.trim() !== "" &&
+      confirmPassword.trim() !== "" &&
+      password === confirmPassword &&
+      allRequiredConsentsAccepted
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
+    if (!areRequiredFieldsFilled()) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-      });
-      return;
-    }
-
-    if (!allRequiredConsentsAccepted) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez accepter tous les consentements requis",
+        description: "Veuillez remplir tous les champs obligatoires",
       });
       return;
     }
@@ -64,6 +71,8 @@ export function useRegisterForm(onLogin: () => void) {
             first_name: firstName,
             last_name: lastName,
             phone: phone,
+            birth_date: birthDate || null,
+            address: address || null,
             user_type: 'client'
           },
         },
@@ -151,10 +160,17 @@ export function useRegisterForm(onLogin: () => void) {
     setPassword,
     confirmPassword,
     setConfirmPassword,
+    birthDate,
+    setBirthDate,
+    address,
+    setAddress,
+    idDocument,
+    setIdDocument,
     acceptedConsents,
     handleConsentChange,
     handleSubmit,
     requiredConsentsCount,
     allRequiredConsentsAccepted,
+    areRequiredFieldsFilled,
   };
 }

@@ -22,15 +22,22 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     setPassword,
     confirmPassword,
     setConfirmPassword,
+    birthDate,
+    setBirthDate,
+    address,
+    setAddress,
+    idDocument,
+    setIdDocument,
     acceptedConsents,
     handleConsentChange,
     handleSubmit,
     requiredConsentsCount,
     allRequiredConsentsAccepted,
+    areRequiredFieldsFilled,
   } = useRegisterForm(onLogin);
 
   return (
-    <div className="flex flex-col h-full max-h-[60vh]">
+    <div className="flex flex-col h-full">
       <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
         <RegisterFormFields
           firstName={firstName}
@@ -39,12 +46,18 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
           phone={phone}
           password={password}
           confirmPassword={confirmPassword}
+          birthDate={birthDate}
+          address={address}
+          idDocument={idDocument}
           onFirstNameChange={setFirstName}
           onLastNameChange={setLastName}
           onEmailChange={setEmail}
           onPhoneChange={setPhone}
           onPasswordChange={setPassword}
           onConfirmPasswordChange={setConfirmPassword}
+          onBirthDateChange={setBirthDate}
+          onAddressChange={setAddress}
+          onIdDocumentChange={setIdDocument}
         />
 
         <RegisterTerms
@@ -57,7 +70,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         <Button
           type="submit"
           className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
-          disabled={isLoading || !allRequiredConsentsAccepted}
+          disabled={isLoading || !areRequiredFieldsFilled()}
           onClick={handleSubmit}
         >
           {isLoading ? "Création en cours..." : "Créer mon compte"}
