@@ -23,13 +23,57 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (session.user.email !== "admin@colimero.fr") {
+    // Vérifier si l'utilisateur est un administrateur
+    const { data: adminData, error: adminError } = await supabase
+      .from('administrators')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (adminError || !adminData) {
       toast({
         variant: "destructive",
         title: "Accès refusé",
         description: "Vous n'avez pas les droits d'accès à cette page.",
       });
       navigate("/");
+      return;
+    }
+
+    // Si l'email est admin@colimero.fr, supprimer le compte
+    if (session.user.email === 'admin@colimero.fr') {
+      try {
+        // Supprimer d'abord les données de la table administrators
+        await supabase
+          .from('administrators')
+          .delete()
+          .eq('id', session.user.id);
+
+        // Supprimer le compte auth
+        const { error: deleteError } = await supabase.auth.admin.deleteUser(
+          session.user.id
+        );
+
+        if (deleteError) throw deleteError;
+
+        // Déconnecter l'utilisateur
+        await supabase.auth.signOut();
+        
+        toast({
+          title: "Compte supprimé",
+          description: "Le compte admin a été supprimé avec succès.",
+        });
+        
+        navigate("/connexion");
+      } catch (error: any) {
+        console.error('Erreur lors de la suppression:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la suppression du compte.",
+        });
+      }
+      return;
     }
   };
 
