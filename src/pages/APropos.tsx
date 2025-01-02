@@ -1,6 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Building, Users, Shield, TrendingUp, Globe, Truck, Clock, HandShake } from "lucide-react";
+import { Building, Users, Shield, TrendingUp, Globe, Truck, Clock, Handshake } from "lucide-react";
 
 export default function APropos() {
   const companyValues = [
@@ -20,7 +20,7 @@ export default function APropos() {
       description: "Des délais optimisés et une gestion simplifiée de vos expéditions."
     },
     {
-      icon: HandShake,
+      icon: Handshake,
       title: "Partenariat",
       description: "Une relation de confiance avec nos transporteurs et nos clients."
     }
