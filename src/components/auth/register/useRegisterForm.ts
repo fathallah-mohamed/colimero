@@ -63,10 +63,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
       const { data, error } = await registerClient(formData);
 
       if (error) {
-        // Check specifically for user already exists error
-        if (error.message.includes("User already registered") || 
-            error.message === "User already registered" ||
-            error.message.includes("already exists")) {
+        if (error.message === "User already registered") {
           toast({
             title: "Compte existant",
             description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",

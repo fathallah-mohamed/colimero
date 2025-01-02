@@ -2,28 +2,43 @@ import { supabase } from "@/integrations/supabase/client";
 import { RegisterFormState } from "./types";
 
 export async function registerClient(formData: RegisterFormState) {
-  const { data, error } = await supabase.auth.signUp({
-    email: formData.email.trim(),
-    password: formData.password.trim(),
-    options: {
-      data: {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        user_type: 'client'
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email.trim(),
+      password: formData.password.trim(),
+      options: {
+        data: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          user_type: 'client'
+        },
       },
-    },
-  });
+    });
 
-  if (error) throw error;
-  if (!data.user) throw new Error("Erreur lors de la création du compte");
+    if (error) {
+      // Check specifically for user already exists error
+      if (error.message.includes("User already registered") || 
+          error.message === "User already registered" ||
+          error.message.includes("already exists")) {
+        return { data: null, error: { message: "User already registered" } };
+      }
+      throw error;
+    }
 
-  await updateClientProfile(data.user.id, formData);
-  if (formData.idDocument) {
-    await uploadIdDocument(data.user.id, formData.idDocument);
+    if (!data.user) {
+      throw new Error("Erreur lors de la création du compte");
+    }
+
+    await updateClientProfile(data.user.id, formData);
+    if (formData.idDocument) {
+      await uploadIdDocument(data.user.id, formData.idDocument);
+    }
+    await insertClientConsents(data.user.id, formData.acceptedConsents);
+
+    return { data, error: null };
+  } catch (error: any) {
+    return { data: null, error };
   }
-  await insertClientConsents(data.user.id, formData.acceptedConsents);
-
-  return { data, error: null };
 }
 
 async function updateClientProfile(userId: string, formData: RegisterFormState) {
