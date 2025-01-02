@@ -1,6 +1,7 @@
 import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
 
 const serviceOptions = [
   { id: "livraison_express", label: "Livraison Express", icon: "truck" },
@@ -15,13 +16,15 @@ interface ServiceOptionsProps {
 }
 
 export function ServiceOptions({ form }: ServiceOptionsProps) {
+  const { toast } = useToast();
+
   return (
     <FormField
       control={form.control}
       name="services"
       render={() => (
         <FormItem className="col-span-2">
-          <FormLabel>Services proposés</FormLabel>
+          <FormLabel>Services proposés (maximum 5)</FormLabel>
           <div className="grid grid-cols-2 gap-4">
             {serviceOptions.map((service) => (
               <FormField
@@ -36,8 +39,16 @@ export function ServiceOptions({ form }: ServiceOptionsProps) {
                     <Checkbox
                       checked={field.value?.includes(service.id)}
                       onCheckedChange={(checked) => {
+                        if (checked && field.value?.length >= 5) {
+                          toast({
+                            variant: "destructive",
+                            title: "Limite atteinte",
+                            description: "Vous ne pouvez pas sélectionner plus de 5 services",
+                          });
+                          return;
+                        }
                         const updatedValue = checked
-                          ? [...field.value, service.id]
+                          ? [...(field.value || []), service.id]
                           : field.value?.filter((value: string) => value !== service.id);
                         field.onChange(updatedValue);
                       }}

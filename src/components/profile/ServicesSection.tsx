@@ -34,24 +34,26 @@ export function ServicesSection({ profile, onUpdate }: ServicesSectionProps) {
 
       if (deleteError) throw deleteError;
 
-      // Insérer les nouveaux services
-      const servicesToInsert = values.services.map(serviceType => ({
-        carrier_id: profile.id,
-        service_type: serviceType,
-        icon: {
-          'livraison_express': 'truck',
-          'livraison_domicile': 'home',
-          'transport_standard': 'package',
-          'transport_volumineux': 'sofa',
-          'collecte_programmee': 'calendar'
-        }[serviceType] || 'package'
-      }));
+      if (values.services.length > 0) {
+        // Insérer les nouveaux services
+        const servicesToInsert = values.services.map(serviceType => ({
+          carrier_id: profile.id,
+          service_type: serviceType,
+          icon: {
+            'livraison_express': 'truck',
+            'livraison_domicile': 'home',
+            'transport_standard': 'package',
+            'transport_volumineux': 'sofa',
+            'collecte_programmee': 'calendar'
+          }[serviceType] || 'package'
+        }));
 
-      const { error: servicesError } = await supabase
-        .from('carrier_services')
-        .insert(servicesToInsert);
+        const { error: servicesError } = await supabase
+          .from('carrier_services')
+          .insert(servicesToInsert);
 
-      if (servicesError) throw servicesError;
+        if (servicesError) throw servicesError;
+      }
 
       toast({
         title: "Succès",
@@ -109,6 +111,11 @@ export function ServicesSection({ profile, onUpdate }: ServicesSectionProps) {
               </span>
             </div>
           ))}
+          {(!profile.carrier_services || profile.carrier_services.length === 0) && (
+            <p className="text-gray-500 text-center py-4">
+              Aucun service sélectionné
+            </p>
+          )}
         </div>
       </Card>
 
