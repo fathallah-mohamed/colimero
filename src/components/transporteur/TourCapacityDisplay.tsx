@@ -16,7 +16,19 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
   return (
     <div className="p-4 bg-white border rounded-lg">
       <div className="space-y-4">
-        {/* Barre de progression simple */}
+        {/* Informations de capacité */}
+        <div className="flex justify-between text-sm">
+          <div>
+            <span className="text-gray-600">Capacité occupée :</span>
+            <span className="font-medium text-gray-900 ml-1">{usedCapacity} kg</span>
+          </div>
+          <div>
+            <span className="text-gray-600">Disponible :</span>
+            <span className="font-medium text-gray-900 ml-1">{remainingCapacity} kg</span>
+          </div>
+        </div>
+
+        {/* Barre de progression */}
         <div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
@@ -26,14 +38,9 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
           </div>
         </div>
 
-        {/* Information simple et claire */}
-        <div className="text-sm text-center space-y-1">
-          <p className="text-gray-600">
-            Espace disponible : <span className="font-medium text-gray-900">{remainingCapacity} kg</span>
-          </p>
-          <p className="text-xs text-gray-500">
-            sur {totalCapacity} kg au total
-          </p>
+        {/* Capacité totale */}
+        <div className="text-xs text-center text-gray-500">
+          Capacité totale : {totalCapacity} kg
         </div>
       </div>
     </div>
