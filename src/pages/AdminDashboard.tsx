@@ -23,7 +23,13 @@ export default function AdminDashboard() {
       return;
     }
 
-    if (session.user.email !== "admin@colimero.fr") {
+    const { data: adminData } = await supabase
+      .from('administrators')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!adminData) {
       toast({
         variant: "destructive",
         title: "Accès refusé",

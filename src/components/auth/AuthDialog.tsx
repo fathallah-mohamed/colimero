@@ -11,6 +11,8 @@ import CarrierAuthDialog from "./CarrierAuthDialog";
 import { ClientLoginForm } from "./login/ClientLoginForm";
 import { CarrierLoginForm } from "./login/CarrierLoginForm";
 import { GeneralLoginForm } from "./login/GeneralLoginForm";
+import { AdminLoginForm } from "./login/AdminLoginForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type View = "login" | "register" | "forgot-password";
 
@@ -18,7 +20,7 @@ interface AuthDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: 'client' | 'carrier' | 'admin';
   onRegisterClick?: () => void;
 }
 
@@ -31,6 +33,7 @@ export default function AuthDialog({
 }: AuthDialogProps) {
   const [view, setView] = useState<View>("login");
   const [showCarrierDialog, setShowCarrierDialog] = useState(false);
+  const [loginType, setLoginType] = useState<'general' | 'client' | 'carrier' | 'admin'>('general');
 
   const handleRegisterClick = () => {
     if (requiredUserType === 'carrier' && onRegisterClick) {
@@ -51,6 +54,8 @@ export default function AuthDialog({
         return "Connexion requise pour réserver";
       } else if (requiredUserType === 'carrier') {
         return "Connexion requise pour créer une tournée";
+      } else if (requiredUserType === 'admin') {
+        return "Connexion administrateur";
       }
       return "Connexion";
     }
@@ -63,38 +68,12 @@ export default function AuthDialog({
         return "Connectez-vous pour réserver cette tournée.";
       } else if (requiredUserType === 'carrier') {
         return "Connectez-vous pour créer une tournée.";
+      } else if (requiredUserType === 'admin') {
+        return "Connectez-vous pour accéder au tableau de bord administrateur.";
       }
       return "Connectez-vous à votre compte.";
     }
     return "Créez votre compte client pour commencer à expédier vos colis";
-  };
-
-  const renderLoginForm = () => {
-    if (requiredUserType === 'client') {
-      return (
-        <ClientLoginForm
-          onForgotPassword={() => setView("forgot-password")}
-          onRegister={handleRegisterClick}
-          onSuccess={onSuccess}
-        />
-      );
-    } else if (requiredUserType === 'carrier') {
-      return (
-        <CarrierLoginForm
-          onForgotPassword={() => setView("forgot-password")}
-          onCarrierRegister={handleCarrierRegisterClick}
-          onSuccess={onSuccess}
-        />
-      );
-    }
-    return (
-      <GeneralLoginForm
-        onForgotPassword={() => setView("forgot-password")}
-        onRegister={handleRegisterClick}
-        onCarrierRegister={handleCarrierRegisterClick}
-        onSuccess={onSuccess}
-      />
-    );
   };
 
   return (
@@ -113,7 +92,57 @@ export default function AuthDialog({
           </DialogHeader>
 
           {view === "login" ? (
-            renderLoginForm()
+            requiredUserType ? (
+              requiredUserType === 'admin' ? (
+                <AdminLoginForm />
+              ) : requiredUserType === 'client' ? (
+                <ClientLoginForm
+                  onForgotPassword={() => setView("forgot-password")}
+                  onRegister={handleRegisterClick}
+                  onSuccess={onSuccess}
+                />
+              ) : (
+                <CarrierLoginForm
+                  onForgotPassword={() => setView("forgot-password")}
+                  onCarrierRegister={handleCarrierRegisterClick}
+                  onSuccess={onSuccess}
+                />
+              )
+            ) : (
+              <Tabs defaultValue="general" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="general">Général</TabsTrigger>
+                  <TabsTrigger value="client">Client</TabsTrigger>
+                  <TabsTrigger value="carrier">Transporteur</TabsTrigger>
+                  <TabsTrigger value="admin">Admin</TabsTrigger>
+                </TabsList>
+                <TabsContent value="general">
+                  <GeneralLoginForm
+                    onForgotPassword={() => setView("forgot-password")}
+                    onRegister={handleRegisterClick}
+                    onCarrierRegister={handleCarrierRegisterClick}
+                    onSuccess={onSuccess}
+                  />
+                </TabsContent>
+                <TabsContent value="client">
+                  <ClientLoginForm
+                    onForgotPassword={() => setView("forgot-password")}
+                    onRegister={handleRegisterClick}
+                    onSuccess={onSuccess}
+                  />
+                </TabsContent>
+                <TabsContent value="carrier">
+                  <CarrierLoginForm
+                    onForgotPassword={() => setView("forgot-password")}
+                    onCarrierRegister={handleCarrierRegisterClick}
+                    onSuccess={onSuccess}
+                  />
+                </TabsContent>
+                <TabsContent value="admin">
+                  <AdminLoginForm />
+                </TabsContent>
+              </Tabs>
+            )
           ) : view === "register" ? (
             <RegisterForm onLogin={() => setView("login")} />
           ) : (
