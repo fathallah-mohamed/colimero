@@ -8,7 +8,7 @@ interface EditServicesDialogProps {
   isOpen: boolean;
   onClose: () => void;
   form: UseFormReturn<any>;
-  onSubmit: (values: any) => Promise<void>;
+  onSubmit: (values: { services: string[] }) => Promise<void>;
 }
 
 export function EditServicesDialog({ isOpen, onClose, form, onSubmit }: EditServicesDialogProps) {

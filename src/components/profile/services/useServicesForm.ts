@@ -10,7 +10,7 @@ export function useServicesForm(profile: any, onUpdate: () => void) {
     },
   });
 
-  const onSubmit = async (values: { services: string[] }) => {
+  const onSubmit = async (values: { services: string[] }): Promise<void> => {
     try {
       const currentServices = profile.carrier_services?.map((s: any) => s.service_type) || [];
       const newServices = values.services;
@@ -59,14 +59,12 @@ export function useServicesForm(profile: any, onUpdate: () => void) {
       });
       
       onUpdate();
-      return true;
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erreur",
         description: error.message,
       });
-      return false;
     }
   };
 
