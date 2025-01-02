@@ -1,48 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-const countryOptions = [
-  { id: "FR", label: "France" },
-  { id: "TN", label: "Tunisie" },
-  { id: "MA", label: "Maroc" },
-  { id: "DZ", label: "Algérie" },
-];
-
-const serviceOptions = [
-  { id: "livraison_express", label: "Livraison Express", icon: "truck" },
-  { id: "livraison_domicile", label: "Livraison à domicile", icon: "home" },
-  { id: "transport_standard", label: "Transport de colis standard", icon: "package" },
-  { id: "transport_volumineux", label: "Transport d'objets volumineux", icon: "sofa" },
-  { id: "collecte_programmee", label: "Collecte programmée", icon: "calendar" },
-];
-
-const formSchema = z.object({
-  first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
-  siret: z.string().length(14, "Le numéro SIRET doit contenir 14 chiffres"),
-  phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
-  phone_secondary: z.string().optional(),
-  address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
-  coverage_area: z.array(z.string()).min(1, "Sélectionnez au moins un pays"),
-  total_capacity: z.number().min(1, "La capacité totale doit être supérieure à 0"),
-  price_per_kg: z.number().min(0, "Le prix par kg doit être positif"),
-  services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
-});
+import { PersonalInfoFields } from "./form/PersonalInfoFields";
+import { CompanyInfoFields } from "./form/CompanyInfoFields";
+import { ContactInfoFields } from "./form/ContactInfoFields";
+import { CoverageAreaFields } from "./form/CoverageAreaFields";
+import { CapacityFields } from "./form/CapacityFields";
+import { ServicesFields } from "./form/ServicesFields";
+import { formSchema, type FormValues } from "./form/formSchema";
 
 interface ProfileFormProps {
   initialData: any;
@@ -52,7 +20,7 @@ interface ProfileFormProps {
 export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       first_name: initialData.first_name || "",
@@ -69,7 +37,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -108,7 +76,6 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (capacityError) throw capacityError;
 
-      // Supprimer les services existants
       const { error: deleteError } = await supabase
         .from('carrier_services')
         .delete()
@@ -116,7 +83,6 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (deleteError) throw deleteError;
 
-      // Insérer les nouveaux services
       const servicesToInsert = values.services.map(serviceType => ({
         carrier_id: session.user.id,
         service_type: serviceType,
@@ -147,223 +113,12 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="first_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Prénom</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="last_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <FormField
-          control={form.control}
-          name="company_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom de l'entreprise</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="siret"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>SIRET</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone principal</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="phone_secondary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="coverage_area"
-          render={() => (
-            <FormItem>
-              <FormLabel>Zones de couverture</FormLabel>
-              <div className="grid grid-cols-2 gap-4">
-                {countryOptions.map((country) => (
-                  <FormField
-                    key={country.id}
-                    control={form.control}
-                    name="coverage_area"
-                    render={({ field }) => (
-                      <FormItem
-                        key={country.id}
-                        className="flex flex-row items-start space-x-3 space-y-0"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(country.id)}
-                            onCheckedChange={(checked) => {
-                              const updatedValue = checked
-                                ? [...field.value, country.id]
-                                : field.value?.filter((value) => value !== country.id);
-                              field.onChange(updatedValue);
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {country.label}
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="total_capacity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Capacité totale (kg)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="price_per_kg"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Prix par kg (€)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="services"
-          render={() => (
-            <FormItem className="col-span-2">
-              <FormLabel>Services proposés</FormLabel>
-              <div className="grid grid-cols-2 gap-4">
-                {serviceOptions.map((service) => (
-                  <FormField
-                    key={service.id}
-                    control={form.control}
-                    name="services"
-                    render={({ field }) => (
-                      <FormItem
-                        key={service.id}
-                        className="flex flex-row items-start space-x-3 space-y-0"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(service.id)}
-                            onCheckedChange={(checked) => {
-                              const updatedValue = checked
-                                ? [...field.value, service.id]
-                                : field.value?.filter((value) => value !== service.id);
-                              field.onChange(updatedValue);
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {service.label}
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <PersonalInfoFields form={form} />
+        <CompanyInfoFields form={form} />
+        <ContactInfoFields form={form} />
+        <CoverageAreaFields form={form} />
+        <CapacityFields form={form} />
+        <ServicesFields form={form} />
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>

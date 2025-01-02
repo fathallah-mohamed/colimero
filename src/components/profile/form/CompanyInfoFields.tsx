@@ -4,19 +4,19 @@ import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { formSchema } from "./formSchema";
 
-interface ContactInfoFieldsProps {
+interface CompanyInfoFieldsProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
 }
 
-export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
+export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
   return (
     <>
       <FormField
         control={form.control}
-        name="phone"
+        name="company_name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Téléphone principal</FormLabel>
+            <FormLabel>Nom de l'entreprise</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -27,24 +27,10 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
 
       <FormField
         control={form.control}
-        name="phone_secondary"
+        name="siret"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
-            <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="address"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Adresse</FormLabel>
+            <FormLabel>SIRET</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>

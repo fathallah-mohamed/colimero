@@ -4,21 +4,25 @@ import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { formSchema } from "./formSchema";
 
-interface ContactInfoFieldsProps {
+interface CapacityFieldsProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
 }
 
-export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
+export function CapacityFields({ form }: CapacityFieldsProps) {
   return (
     <>
       <FormField
         control={form.control}
-        name="phone"
+        name="total_capacity"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Téléphone principal</FormLabel>
+            <FormLabel>Capacité totale (kg)</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input 
+                type="number" 
+                {...field}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -27,26 +31,16 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
 
       <FormField
         control={form.control}
-        name="phone_secondary"
+        name="price_per_kg"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
+            <FormLabel>Prix par kg (€)</FormLabel>
             <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="address"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Adresse</FormLabel>
-            <FormControl>
-              <Input {...field} />
+              <Input 
+                type="number" 
+                {...field}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
