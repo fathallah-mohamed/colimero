@@ -46,7 +46,6 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
 
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
-        console.error("Erreur détaillée:", signInError);
         
         if (signInError.message.includes("Invalid login credentials")) {
           setError("Email ou mot de passe incorrect");
