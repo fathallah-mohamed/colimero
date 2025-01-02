@@ -30,44 +30,49 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
   } = useRegisterForm(onLogin);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 py-4">
-      <RegisterFormFields
-        firstName={firstName}
-        lastName={lastName}
-        email={email}
-        phone={phone}
-        password={password}
-        confirmPassword={confirmPassword}
-        onFirstNameChange={setFirstName}
-        onLastNameChange={setLastName}
-        onEmailChange={setEmail}
-        onPhoneChange={setPhone}
-        onPasswordChange={setPassword}
-        onConfirmPasswordChange={setConfirmPassword}
-      />
+    <div className="flex flex-col h-full max-h-[60vh]">
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
+        <RegisterFormFields
+          firstName={firstName}
+          lastName={lastName}
+          email={email}
+          phone={phone}
+          password={password}
+          confirmPassword={confirmPassword}
+          onFirstNameChange={setFirstName}
+          onLastNameChange={setLastName}
+          onEmailChange={setEmail}
+          onPhoneChange={setPhone}
+          onPasswordChange={setPassword}
+          onConfirmPasswordChange={setConfirmPassword}
+        />
 
-      <RegisterTerms
-        acceptedConsents={acceptedConsents}
-        onConsentChange={handleConsentChange}
-      />
+        <RegisterTerms
+          acceptedConsents={acceptedConsents}
+          onConsentChange={handleConsentChange}
+        />
+      </form>
 
-      <Button
-        type="submit"
-        className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
-        disabled={isLoading || !allRequiredConsentsAccepted}
-      >
-        {isLoading ? "Création en cours..." : "Créer mon compte"}
-      </Button>
-
-      <div className="text-center text-sm">
-        <button
-          type="button"
-          className="text-[#00B0F0] hover:underline"
-          onClick={onLogin}
+      <div className="pt-4 space-y-4 border-t mt-4">
+        <Button
+          type="submit"
+          className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+          disabled={isLoading || !allRequiredConsentsAccepted}
+          onClick={handleSubmit}
         >
-          Déjà un compte ? Se connecter
-        </button>
+          {isLoading ? "Création en cours..." : "Créer mon compte"}
+        </Button>
+
+        <div className="text-center text-sm">
+          <button
+            type="button"
+            className="text-[#00B0F0] hover:underline"
+            onClick={onLogin}
+          >
+            Déjà un compte ? Se connecter
+          </button>
+        </div>
       </div>
-    </form>
+    </div>
   );
 }
