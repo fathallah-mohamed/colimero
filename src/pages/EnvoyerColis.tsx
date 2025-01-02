@@ -5,15 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourType } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
-  const [tourType, setTourType] = useState<"public" | "private">("public");
+  const [tourType, setTourType] = useState<TourType>("public");
 
-  const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, "public"],
+  const { data: tours = [], isLoading } = useQuery({
+    queryKey: ["tours", departureCountry, destinationCountry, tourType],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tours")
@@ -48,41 +48,8 @@ export default function EnvoyerColis() {
     },
   });
 
-  const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, "private"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tours")
-        .select(`
-          *,
-          carriers (
-            company_name,
-            avatar_url,
-            carrier_capacities (
-              price_per_kg
-            )
-          )
-        `)
-        .eq("departure_country", departureCountry)
-        .eq("destination_country", destinationCountry)
-        .eq("type", tourType)
-        .gte("departure_date", new Date().toISOString())
-        .order("departure_date", { ascending: true });
-
-      if (error) throw error;
-      
-      return data.map(tour => ({
-        ...tour,
-        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
-        carriers: {
-          ...tour.carriers,
-          carrier_capacities: Array.isArray(tour.carriers?.carrier_capacities) 
-            ? tour.carriers.carrier_capacities 
-            : [tour.carriers?.carrier_capacities]
-        }
-      })) as Tour[];
-    },
-  });
+  const publicTours = tours.filter(tour => tour.type === "public");
+  const privateTours = tours.filter(tour => tour.type === "private");
 
   const handleDepartureChange = (value: string) => {
     setDepartureCountry(value);
@@ -113,19 +80,11 @@ export default function EnvoyerColis() {
             onTypeChange={setTourType}
           />
 
-          {tourType === "public" ? (
-            <TransporteurTours 
-              tours={publicTours} 
-              type="public"
-              isLoading={isLoadingPublic}
-            />
-          ) : (
-            <TransporteurTours 
-              tours={privateTours} 
-              type="private"
-              isLoading={isLoadingPrivate}
-            />
-          )}
+          <TransporteurTours 
+            tours={tourType === "public" ? publicTours : privateTours}
+            type={tourType}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>
