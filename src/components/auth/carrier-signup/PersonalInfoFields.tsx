@@ -1,17 +1,15 @@
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./FormSchema";
 
-export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }) {
+interface PersonalInfoFieldsProps {
+  form: UseFormReturn<FormValues>;
+}
+
+export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
   return (
-    <div className="space-y-4">
+    <>
       <FormField
         control={form.control}
         name="email"
@@ -19,21 +17,7 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
           <FormItem>
             <FormLabel>Email</FormLabel>
             <FormControl>
-              <Input placeholder="votre@email.fr" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="password"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Mot de passe</FormLabel>
-            <FormControl>
-              <Input type="password" placeholder="Votre mot de passe" {...field} />
+              <Input type="email" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -47,7 +31,7 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
           <FormItem>
             <FormLabel>Prénom</FormLabel>
             <FormControl>
-              <Input placeholder="Votre prénom" {...field} />
+              <Input {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -61,40 +45,12 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
           <FormItem>
             <FormLabel>Nom</FormLabel>
             <FormControl>
-              <Input placeholder="Votre nom" {...field} />
+              <Input {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
-      <FormField
-        control={form.control}
-        name="phone"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Téléphone</FormLabel>
-            <FormControl>
-              <Input placeholder="+33 6 12 34 56 78" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="phoneSecondary"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
-            <FormControl>
-              <Input placeholder="+33 6 12 34 56 78" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </div>
+    </>
   );
 }

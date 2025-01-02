@@ -19,30 +19,9 @@ export function useNavigation() {
       setUserType(session?.user?.user_metadata?.user_type ?? null);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      const userType = session?.user?.user_metadata?.user_type;
-      setUserType(userType);
-
-      // Vérifier si l'utilisateur est un administrateur
-      if (userType === 'admin' && session?.user) {
-        const { data: adminData, error } = await supabase
-          .from('administrators')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (error || !adminData) {
-          console.error('Erreur de vérification admin:', error);
-          toast({
-            variant: "destructive",
-            title: "Accès refusé",
-            description: "Vous n'avez pas les droits d'accès administrateur.",
-          });
-          handleLogout();
-          return;
-        }
-      }
+      setUserType(session?.user?.user_metadata?.user_type ?? null);
     });
 
     return () => subscription.unsubscribe();

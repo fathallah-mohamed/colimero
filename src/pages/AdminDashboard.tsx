@@ -23,25 +23,14 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Vérifier si l'utilisateur est un administrateur
-    const { data: adminData, error: adminError } = await supabase
-      .from('administrators')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-
-    if (adminError || !adminData) {
-      console.error('Erreur de vérification admin:', adminError);
+    if (session.user.email !== "admin@colimero.fr") {
       toast({
         variant: "destructive",
         title: "Accès refusé",
         description: "Vous n'avez pas les droits d'accès à cette page.",
       });
       navigate("/");
-      return;
     }
-
-    console.log('Données admin trouvées:', adminData);
   };
 
   return (

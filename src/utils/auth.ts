@@ -8,32 +8,6 @@ interface AuthResponse {
 
 export const authenticateUser = async (email: string, password: string): Promise<AuthResponse> => {
   try {
-    // Vérifier d'abord si l'utilisateur est un transporteur en attente
-    const { data: registrationRequest } = await supabase
-      .from('carrier_registration_requests')
-      .select('status')
-      .eq('email', email.trim())
-      .single();
-
-    if (registrationRequest) {
-      if (registrationRequest.status === 'pending') {
-        toast({
-          variant: "destructive",
-          title: "Compte en attente de validation",
-          description: "Votre demande d'inscription est en cours d'examen par notre équipe.",
-        });
-        return { success: false };
-      } else if (registrationRequest.status === 'rejected') {
-        toast({
-          variant: "destructive",
-          title: "Compte rejeté",
-          description: "Votre demande d'inscription a été rejetée. Veuillez nous contacter pour plus d'informations.",
-        });
-        return { success: false };
-      }
-    }
-
-    // Procéder à la connexion si le compte est approuvé ou si ce n'est pas un transporteur
     const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password.trim(),
@@ -41,27 +15,7 @@ export const authenticateUser = async (email: string, password: string): Promise
 
     if (signInError) {
       console.error("Erreur d'authentification:", signInError);
-      
-      if (signInError.message === "Invalid login credentials") {
-        toast({
-          variant: "destructive",
-          title: "Identifiants incorrects",
-          description: "Veuillez vérifier votre email et mot de passe.",
-        });
-      } else if (signInError.message === "Email not confirmed") {
-        toast({
-          variant: "destructive",
-          title: "Email non confirmé",
-          description: "Veuillez confirmer votre email avant de vous connecter.",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: "Une erreur est survenue lors de la connexion.",
-        });
-      }
-      return { success: false };
+      throw signInError;
     }
 
     if (!signInData.user) {
@@ -96,11 +50,20 @@ export const authenticateUser = async (email: string, password: string): Promise
     }
   } catch (error: any) {
     console.error("Erreur complète:", error);
+    let errorMessage = "Une erreur est survenue lors de la connexion";
+    
+    if (error.message === "Invalid login credentials") {
+      errorMessage = "Email ou mot de passe incorrect";
+    } else if (error.message === "Email not confirmed") {
+      errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+    }
+
     toast({
       variant: "destructive",
       title: "Erreur de connexion",
-      description: "Une erreur est survenue lors de la connexion.",
+      description: errorMessage,
     });
+
     return { success: false };
   }
 };

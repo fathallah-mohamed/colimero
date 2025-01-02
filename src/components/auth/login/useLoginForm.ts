@@ -11,35 +11,28 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const validateInputs = () => {
-    if (!email.trim()) {
-      setError("L'adresse email est requise");
-      return false;
-    }
-
-    if (!password.trim()) {
-      setError("Le mot de passe est requis");
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    if (!validateInputs()) {
+    // Validation des champs
+    if (!email.trim()) {
+      setError("L'adresse email est requise");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Le mot de passe est requis");
       setIsLoading(false);
       return;
     }
 
     try {
       console.log("Tentative de connexion pour:", email.trim());
-      console.log("Tentative d'authentification avec Supabase...");
 
-      const { data: { user, session }, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -47,22 +40,30 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
-        if (signInError.message.includes("Invalid login credentials")) {
-          setError("Veuillez vérifier votre email et mot de passe");
-        } else if (signInError.message.includes("Email not confirmed")) {
-          setError("Veuillez confirmer votre email avant de vous connecter");
-        } else {
-          setError("Une erreur est survenue lors de la connexion");
+        // Messages d'erreur spécifiques
+        switch (signInError.message) {
+          case "Invalid login credentials":
+            setError("Email ou mot de passe incorrect");
+            break;
+          case "Email not confirmed":
+            setError("Veuillez confirmer votre email avant de vous connecter");
+            break;
+          case "Invalid email":
+            setError("Format d'email invalide");
+            break;
+          default:
+            setError("Une erreur est survenue lors de la connexion");
         }
         setPassword("");
+        setIsLoading(false);
         return;
       }
 
-      if (!user) {
+      if (!data.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = user.user_metadata?.user_type;
+      const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
       // Vérification du type d'utilisateur requis
@@ -73,10 +74,10 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
             ? "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
             : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur."
         );
+        setIsLoading(false);
         return;
       }
 
-      console.log("Connexion réussie pour l'utilisateur:", user.email);
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",

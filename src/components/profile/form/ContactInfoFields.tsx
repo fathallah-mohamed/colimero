@@ -1,11 +1,9 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import * as z from "zod";
-import { formSchema } from "./formSchema";
 
 interface ContactInfoFieldsProps {
-  form: UseFormReturn<z.infer<typeof formSchema>>;
+  form: UseFormReturn<any>;
 }
 
 export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
@@ -16,7 +14,7 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
         name="phone"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Téléphone principal</FormLabel>
+            <FormLabel>Téléphone</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -27,12 +25,12 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
 
       <FormField
         control={form.control}
-        name="phone_secondary"
+        name="birth_date"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
+            <FormLabel>Date de naissance</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input type="date" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -46,7 +44,7 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
           <FormItem>
             <FormLabel>Adresse</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} placeholder="Entrez votre adresse complète" />
             </FormControl>
             <FormMessage />
           </FormItem>

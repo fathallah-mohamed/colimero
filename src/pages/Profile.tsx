@@ -7,7 +7,6 @@ import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ClientProfileForm } from "@/components/profile/ClientProfileForm";
 import { ClientProfileView } from "@/components/profile/ClientProfileView";
 import { CarrierProfileView } from "@/components/profile/CarrierProfileView";
-import { AdminProfileView } from "@/components/profile/AdminProfileView";
 import { ProfileLoading } from "@/components/profile/ProfileLoading";
 import { ProfileNotFound } from "@/components/profile/ProfileNotFound";
 import { useProfile } from "@/hooks/use-profile";
@@ -46,17 +45,11 @@ export default function Profile() {
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
               <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                  <DialogTitle>Modifier mon profil</DialogTitle>
+                  <DialogTitle className="text-2xl font-semibold text-primary">
+                    Modifier mon profil
+                  </DialogTitle>
                 </DialogHeader>
                 {userType === 'carrier' ? (
-                  <ProfileForm 
-                    initialData={profile} 
-                    onClose={() => {
-                      setIsEditing(false);
-                      fetchProfile();
-                    }} 
-                  />
-                ) : userType === 'admin' ? (
                   <ProfileForm 
                     initialData={profile} 
                     onClose={() => {
@@ -78,8 +71,6 @@ export default function Profile() {
 
             {userType === 'carrier' ? (
               <CarrierProfileView profile={profile as ProfileData} />
-            ) : userType === 'admin' ? (
-              <AdminProfileView profile={profile as ProfileData} />
             ) : (
               <ClientProfileView profile={profile as ProfileData} />
             )}
