@@ -17,7 +17,6 @@ export function useRegisterForm(onLogin: () => void) {
   const [acceptedConsents, setAcceptedConsents] = useState<string[]>([]);
   const { toast } = useToast();
 
-  // Récupérer les types de consentements requis
   const { data: consentTypes } = useQuery({
     queryKey: ['client-consent-types'],
     queryFn: async () => {
@@ -32,7 +31,6 @@ export function useRegisterForm(onLogin: () => void) {
     },
   });
 
-  // Calculer le nombre de consentements requis et si tous sont acceptés
   const requiredConsentsCount = consentTypes?.length || 0;
   const allRequiredConsentsAccepted = acceptedConsents.length === requiredConsentsCount;
 
@@ -63,6 +61,7 @@ export function useRegisterForm(onLogin: () => void) {
     setIsLoading(true);
 
     try {
+      // 1. Créer l'utilisateur dans auth.users
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
@@ -70,19 +69,15 @@ export function useRegisterForm(onLogin: () => void) {
           data: {
             first_name: firstName,
             last_name: lastName,
-            phone: phone,
-            birth_date: birthDate || null,
-            address: address || null,
             user_type: 'client'
           },
         },
       });
 
       if (signUpError) {
-        const errorMessage = signUpError.message;
-        if (errorMessage.includes("User already registered") || 
+        if (signUpError.message.includes("User already registered") || 
             signUpError.message === "User already registered" ||
-            errorMessage.includes("already exists")) {
+            signUpError.message.includes("already exists")) {
           toast({
             title: "Compte existant",
             description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
@@ -94,18 +89,43 @@ export function useRegisterForm(onLogin: () => void) {
       }
 
       if (signUpData.user) {
+        // 2. Mettre à jour la table clients avec toutes les informations
         const { error: clientError } = await supabase
           .from('clients')
           .update({
             first_name: firstName,
             last_name: lastName,
             phone: phone,
+            birth_date: birthDate || null,
+            address: address || null,
           })
           .eq('id', signUpData.user.id);
 
         if (clientError) throw clientError;
 
-        // Insérer les consentements
+        // 3. Si un document d'identité a été fourni, le télécharger
+        if (idDocument) {
+          const fileExt = idDocument.name.split('.').pop();
+          const fileName = `${signUpData.user.id}-${Date.now()}.${fileExt}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('id-documents')
+            .upload(fileName, idDocument);
+
+          if (uploadError) throw uploadError;
+
+          // Mettre à jour le champ id_document dans la table clients
+          const { error: updateError } = await supabase
+            .from('clients')
+            .update({
+              id_document: fileName
+            })
+            .eq('id', signUpData.user.id);
+
+          if (updateError) throw updateError;
+        }
+
+        // 4. Insérer les consentements
         const consentsToInsert = acceptedConsents.map(consentId => ({
           client_id: signUpData.user!.id,
           consent_type_id: consentId,
