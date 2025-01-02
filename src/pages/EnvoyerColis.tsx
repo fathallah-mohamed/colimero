@@ -1,159 +1,132 @@
-import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
+import { supabase } from "@/integrations/supabase/client";
+import { TourFilters } from "@/components/tour/TourFilters";
+import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import type { Tour } from "@/types/tour";
 
 export default function EnvoyerColis() {
-  const [publicTours, setPublicTours] = useState<any[]>([]);
-  const [privateTours, setPrivateTours] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const [departureCountry, setDepartureCountry] = useState("FR");
+  const [destinationCountry, setDestinationCountry] = useState("TN");
+  const [tourType, setTourType] = useState("public");
 
-  const updateTourStatus = async () => {
-    try {
-      const { data: tours, error: fetchError } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('type', 'private');
+  const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
+    queryKey: ["tours", departureCountry, destinationCountry, "public"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          )
+        `)
+        .eq("departure_country", departureCountry)
+        .eq("destination_country", destinationCountry)
+        .eq("type", "public")
+        .gte("departure_date", new Date().toISOString())
+        .order("departure_date", { ascending: true });
 
-      if (fetchError) {
-        throw fetchError;
-      }
+      if (error) throw error;
+      
+      return data.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
+        carriers: {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers?.carrier_capacities) 
+            ? tour.carriers.carrier_capacities 
+            : [tour.carriers?.carrier_capacities]
+        }
+      })) as Tour[];
+    },
+  });
 
-      if (!tours || tours.length === 0) {
-        toast({
-          variant: "default",
-          title: "Info",
-          description: "Aucune tournée privée trouvée",
-        });
-        return;
-      }
+  const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
+    queryKey: ["tours", departureCountry, destinationCountry, "private"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          )
+        `)
+        .eq("departure_country", departureCountry)
+        .eq("destination_country", destinationCountry)
+        .eq("type", "private")
+        .gte("departure_date", new Date().toISOString())
+        .order("departure_date", { ascending: true });
 
-      const { error: updateError } = await supabase
-        .from('tours')
-        .update({ status: 'planned' })
-        .eq('id', tours[0].id);
+      if (error) throw error;
+      
+      return data.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
+        carriers: {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers?.carrier_capacities) 
+            ? tour.carriers.carrier_capacities 
+            : [tour.carriers?.carrier_capacities]
+        }
+      })) as Tour[];
+    },
+  });
 
-      if (updateError) {
-        throw updateError;
-      }
-
-      toast({
-        title: "Succès",
-        description: "Le statut de la tournée a été mis à jour",
-      });
-    } catch (error) {
-      console.error('Error updating tour status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la tournée",
-      });
+  const handleDepartureChange = (value: string) => {
+    setDepartureCountry(value);
+    if (["TN", "DZ", "MA"].includes(value)) {
+      setDestinationCountry("FR");
     }
   };
-
-  useEffect(() => {
-    updateTourStatus();
-  }, []);
-
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        const { data: publicToursData, error: publicError } = await supabase
-          .from("tours")
-          .select(`
-            *,
-            carriers (
-              company_name,
-              avatar_url,
-              carrier_capacities (
-                price_per_kg
-              )
-            )
-          `)
-          .eq("type", "public")
-          .gte("departure_date", new Date().toISOString())
-          .order("departure_date", { ascending: true });
-
-        const { data: privateToursData, error: privateError } = await supabase
-          .from("tours")
-          .select(`
-            *,
-            carriers (
-              company_name,
-              avatar_url,
-              carrier_capacities (
-                price_per_kg
-              )
-            )
-          `)
-          .eq("type", "private")
-          .gte("departure_date", new Date().toISOString())
-          .order("departure_date", { ascending: true });
-
-        if (publicError) throw publicError;
-        if (privateError) throw privateError;
-
-        setPublicTours(publicToursData || []);
-        setPrivateTours(privateToursData || []);
-      } catch (error) {
-        console.error("Error fetching tours:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger les tournées",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTours();
-  }, [toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold mb-8">Envoyer un colis</h1>
 
-        <Tabs defaultValue="public" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="public">Tournées publiques</TabsTrigger>
-            <TabsTrigger value="private">Tournées privées</TabsTrigger>
-          </TabsList>
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
 
-          <TabsContent value="public">
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
-            ) : (
-              <TransporteurTours
-                tours={publicTours}
-                type="public"
-                isLoading={isLoading}
-              />
-            )}
-          </TabsContent>
+        <div className="space-y-6">
+          <TourFilters
+            departureCountry={departureCountry}
+            destinationCountry={destinationCountry}
+            onDepartureChange={handleDepartureChange}
+            onDestinationChange={setDestinationCountry}
+          />
 
-          <TabsContent value="private">
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
-            ) : (
-              <TransporteurTours
-                tours={privateTours}
-                type="private"
-                isLoading={isLoading}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+          <TourTypeTabs
+            tourType={tourType}
+            publicToursCount={publicTours.length}
+            privateToursCount={privateTours.length}
+            onTypeChange={setTourType}
+          />
+
+          {tourType === "public" ? (
+            <TransporteurTours 
+              tours={publicTours} 
+              type="public"
+              isLoading={isLoadingPublic}
+            />
+          ) : (
+            <TransporteurTours 
+              tours={privateTours} 
+              type="private"
+              isLoading={isLoadingPrivate}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
