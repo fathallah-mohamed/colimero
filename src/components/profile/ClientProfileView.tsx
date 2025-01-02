@@ -1,33 +1,13 @@
 import React from 'react';
-import { Check, X, Upload } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CommitmentsSection } from "./CommitmentsSection";
 
 interface ClientProfileViewProps {
   profile: any;
 }
 
 export function ClientProfileView({ profile }: ClientProfileViewProps) {
-  const { data: consents, isLoading: isLoadingConsents } = useQuery({
-    queryKey: ['client-consents', profile.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_consents')
-        .select(`
-          *,
-          consent_type:client_consent_types(*)
-        `)
-        .eq('client_id', profile.id);
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const handleIdDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = event.target.files?.[0];
@@ -54,30 +34,6 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
       console.error('Error uploading document:', error);
     }
   };
-
-  const CommitmentStatus = ({ description, label }: { description: string, label: string }) => (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-3">
-        <div className="flex items-center text-green-600 font-medium">
-          <Check className="w-5 h-5 mr-2 stroke-2" />
-          <span>Accepté</span>
-        </div>
-        <span className="text-sm text-gray-700">{label}</span>
-      </div>
-      <Alert>
-        <AlertDescription className="text-sm text-muted-foreground">
-          {description}
-        </AlertDescription>
-      </Alert>
-    </div>
-  );
-
-  // Find the most recent acceptance date
-  const mostRecentAcceptanceDate = consents?.reduce((latest, consent) => {
-    if (!consent.accepted_at || !latest) return latest;
-    const currentDate = new Date(consent.accepted_at);
-    return !latest || currentDate > new Date(latest) ? consent.accepted_at : latest;
-  }, null as string | null);
 
   return (
     <div className="space-y-8">
@@ -148,34 +104,7 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
         </div>
       </div>
 
-      <div>
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Engagements</h2>
-          {mostRecentAcceptanceDate && (
-            <p className="text-base text-gray-500">
-              Engagements acceptés le {format(new Date(mostRecentAcceptanceDate), "dd/MM/yyyy", { locale: fr })}
-            </p>
-          )}
-        </div>
-        <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
-          {isLoadingConsents ? (
-            <div className="animate-pulse space-y-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-24 bg-gray-200 rounded" />
-              ))}
-            </div>
-          ) : (
-            consents?.map((consent) => (
-              <div key={consent.id}>
-                <CommitmentStatus 
-                  label={consent.consent_type.label}
-                  description={consent.consent_type.description}
-                />
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      <CommitmentsSection profile={profile} />
     </div>
   );
 }
