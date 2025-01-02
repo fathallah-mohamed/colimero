@@ -14,28 +14,36 @@ export function TourCapacityDisplay({ remainingCapacity, totalCapacity }: TourCa
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-sm text-gray-600">
-        <div>
-          Capacité utilisée : {usedCapacity} kg
+    <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+      <h3 className="font-medium text-gray-900">Capacité de la tournée</h3>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="text-sm">
+          <p className="text-gray-500">Espace utilisé</p>
+          <p className="font-medium text-gray-900">{usedCapacity} kg</p>
         </div>
-        <div>
-          Capacité disponible : {remainingCapacity} kg
+        <div className="text-sm">
+          <p className="text-gray-500">Espace disponible</p>
+          <p className="font-medium text-gray-900">{remainingCapacity} kg</p>
         </div>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden flex">
-        <div
-          className="h-full bg-gray-300"
-          style={{ width: `${100 - remainingPercentage}%` }}
-        />
-        <div
-          className={`h-full ${getColorClass(remainingPercentage)}`}
-          style={{ width: `${remainingPercentage}%` }}
-        />
+
+      <div>
+        <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <span>Points de ramassage</span>
+          <span>{Math.round(remainingPercentage)}% disponible</span>
+        </div>
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className={`h-full transition-all ${getColorClass(remainingPercentage)}`}
+            style={{ width: `${remainingPercentage}%` }}
+          />
+        </div>
       </div>
-      <div className="text-xs text-gray-500 text-center">
-        Capacité totale : {totalCapacity} kg
-      </div>
+
+      <p className="text-xs text-center text-gray-500">
+        Capacité totale de la tournée : {totalCapacity} kg
+      </p>
     </div>
   );
 }
