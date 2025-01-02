@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Package, Users } from "lucide-react";
+import { Menu, X, Package, Users, Calendar, MessageSquare, Info, Phone } from "lucide-react";
 import { AccountMenu } from "./navigation/AccountMenu";
 import { MenuItems } from "./navigation/MenuItems";
 import { MobileMenu } from "./navigation/MobileMenu";
@@ -13,6 +13,12 @@ export default function Navigation() {
 
   const menuItems = [
     { 
+      name: "Planifier une tournée",
+      href: "/planifier-une-tournee",
+      highlight: true,
+      icon: <Calendar className="w-4 h-4" />
+    },
+    { 
       name: "Envoyer un colis",
       href: "/envoyer-un-colis",
       highlight: true,
@@ -22,6 +28,21 @@ export default function Navigation() {
       name: "Nos transporteurs",
       href: "/nos-transporteurs",
       icon: <Users className="w-4 h-4" />
+    },
+    { 
+      name: "Actualités",
+      href: "/actualites",
+      icon: <MessageSquare className="w-4 h-4" />
+    },
+    { 
+      name: "À propos",
+      href: "/a-propos",
+      icon: <Info className="w-4 h-4" />
+    },
+    { 
+      name: "Contact",
+      href: "/nous-contacter",
+      icon: <Phone className="w-4 h-4" />
     }
   ];
 
@@ -68,7 +89,6 @@ export default function Navigation() {
           items={menuItems}
           user={user}
           userType={userType}
-          onLogout={() => {}}
           onClose={handleClose}
         />
       </div>
