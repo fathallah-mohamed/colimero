@@ -641,7 +641,7 @@ export type Database = {
           status: string | null
           terms_accepted: boolean | null
           total_capacity: number
-          type: string
+          type: Database["public"]["Enums"]["tour_type"]
           updated_at: string
         }
         Insert: {
@@ -658,7 +658,7 @@ export type Database = {
           status?: string | null
           terms_accepted?: boolean | null
           total_capacity: number
-          type: string
+          type?: Database["public"]["Enums"]["tour_type"]
           updated_at?: string
         }
         Update: {
@@ -675,7 +675,7 @@ export type Database = {
           status?: string | null
           terms_accepted?: boolean | null
           total_capacity?: number
-          type?: string
+          type?: Database["public"]["Enums"]["tour_type"]
           updated_at?: string
         }
         Relationships: [
@@ -835,6 +835,7 @@ export type Database = {
         | "in_transit"
         | "completed"
         | "cancelled"
+      tour_type: "public" | "private"
       tunisian_city: "Tunis" | "Sfax" | "Sousse" | "Bizerte" | "Kairouan"
     }
     CompositeTypes: {
