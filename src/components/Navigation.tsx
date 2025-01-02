@@ -10,7 +10,7 @@ export default function Navigation() {
   const { isOpen, setIsOpen, user, userType, handleLogout, menuItems } = useNavigation();
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/95 border-b border-gray-100">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/95 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link 
@@ -32,7 +32,8 @@ export default function Navigation() {
               "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
               "transition-all duration-300"
             )}
-            aria-expanded="false"
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
             <span className="sr-only">Ouvrir le menu principal</span>
             {isOpen ? (
