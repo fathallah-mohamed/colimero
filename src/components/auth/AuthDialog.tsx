@@ -1,8 +1,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
@@ -45,30 +43,6 @@ export default function AuthDialog({
     setShowCarrierDialog(true);
   };
 
-  const getDialogTitle = () => {
-    if (view === "login") {
-      if (requiredUserType === 'client') {
-        return "Connexion requise pour réserver";
-      } else if (requiredUserType === 'carrier') {
-        return "Connexion requise pour créer une tournée";
-      }
-      return "Connexion";
-    }
-    return "Créer un compte client";
-  };
-
-  const getDialogDescription = () => {
-    if (view === "login") {
-      if (requiredUserType === 'client') {
-        return "Connectez-vous pour réserver cette tournée.";
-      } else if (requiredUserType === 'carrier') {
-        return "Connectez-vous pour créer une tournée.";
-      }
-      return "Connectez-vous à votre compte.";
-    }
-    return "Créez votre compte client pour commencer à expédier vos colis";
-  };
-
   const renderLoginForm = () => {
     if (requiredUserType === 'client') {
       return (
@@ -100,27 +74,36 @@ export default function AuthDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <div className="flex justify-between items-center">
-              <DialogTitle className="text-2xl font-bold">
-                {getDialogTitle()}
-              </DialogTitle>
-            </div>
-            <p className="text-lg text-gray-600">
-              {getDialogDescription()}
-            </p>
-          </DialogHeader>
-
+        <DialogContent className="sm:max-w-[500px] p-0 gap-0">
           {view === "login" ? (
-            renderLoginForm()
+            <div className="p-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold">
+                  {requiredUserType === 'client'
+                    ? "Connexion requise pour réserver"
+                    : requiredUserType === 'carrier'
+                    ? "Connexion requise pour créer une tournée"
+                    : "Connexion"}
+                </h2>
+                <p className="text-gray-600">
+                  {requiredUserType === 'client'
+                    ? "Connectez-vous pour réserver cette tournée."
+                    : requiredUserType === 'carrier'
+                    ? "Connectez-vous pour créer une tournée."
+                    : "Connectez-vous à votre compte."}
+                </p>
+              </div>
+              {renderLoginForm()}
+            </div>
           ) : view === "register" ? (
             <RegisterForm onLogin={() => setView("login")} />
           ) : (
-            <ForgotPasswordForm
-              onSuccess={() => setView("login")}
-              onCancel={() => setView("login")}
-            />
+            <div className="p-6">
+              <ForgotPasswordForm
+                onSuccess={() => setView("login")}
+                onCancel={() => setView("login")}
+              />
+            </div>
           )}
         </DialogContent>
       </Dialog>
