@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Package, Users, UserCircle2 } from "lucide-react";
+import { Menu, X, Package, Users } from "lucide-react";
 import { AccountMenu } from "./navigation/AccountMenu";
 import { MenuItems } from "./navigation/MenuItems";
 import { MobileMenu } from "./navigation/MobileMenu";
@@ -9,6 +9,22 @@ import { useNavigation } from "./navigation/useNavigation";
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, userType, showAuthDialog, setShowAuthDialog } = useNavigation();
+
+  const menuItems = [
+    { 
+      name: "Envoyer un colis",
+      href: "/envoyer-un-colis",
+      highlight: true,
+      icon: <Package className="w-4 h-4" />
+    },
+    { 
+      name: "Nos transporteurs",
+      href: "/nos-transporteurs",
+      icon: <Users className="w-4 h-4" />
+    }
+  ];
+
+  const handleClose = () => setIsOpen(false);
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -22,19 +38,7 @@ export default function Navigation() {
 
           <div className="hidden md:flex md:items-center md:space-x-1 lg:space-x-2">
             <MenuItems 
-              items={[
-                { 
-                  name: "Envoyer un colis",
-                  to: "/envoyer-un-colis",
-                  highlight: true,
-                  icon: <Package className="w-4 h-4" />
-                },
-                { 
-                  name: "Nos transporteurs",
-                  to: "/nos-transporteurs",
-                  icon: <Users className="w-4 h-4" />
-                }
-              ]} 
+              items={menuItems}
               className="text-sm lg:text-base" 
             />
           </div>
@@ -58,7 +62,14 @@ export default function Navigation() {
           </div>
         </div>
 
-        <MobileMenu isOpen={isOpen} />
+        <MobileMenu 
+          isOpen={isOpen} 
+          items={menuItems}
+          user={user}
+          userType={userType}
+          onLogout={() => {}}
+          onClose={handleClose}
+        />
       </div>
     </nav>
   );
