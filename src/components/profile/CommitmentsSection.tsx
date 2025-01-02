@@ -1,24 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProfileData } from "@/types/profile";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface CommitmentStatusProps {
-  accepted: boolean;
   description: string;
 }
 
-const CommitmentStatus = ({ accepted, description }: CommitmentStatusProps) => (
+const CommitmentStatus = ({ description }: CommitmentStatusProps) => (
   <div className="space-y-2">
-    <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
-      {accepted ? (
-        <Check className="w-5 h-5 mr-2 stroke-2" />
-      ) : (
-        <X className="w-5 h-5 mr-2 stroke-2" />
-      )}
-      <span>{accepted ? 'Accepté' : 'Non accepté'}</span>
-    </div>
     <Alert>
       <AlertDescription className="text-sm text-muted-foreground">
         {description}
@@ -41,6 +34,7 @@ interface CommitmentType {
 interface CarrierCommitment {
   commitment_type_id: string;
   accepted: boolean;
+  accepted_at: string;
   commitment_type: CommitmentType;
 }
 
@@ -49,16 +43,31 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
     queryKey: ['carrier-commitments', profile.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('carrier_commitments')
+        .from('client_consents')
         .select(`
-          commitment_type_id,
-          accepted,
-          commitment_type:commitment_types(*)
+          accepted_at,
+          consent_type:client_consent_types(*)
         `)
-        .eq('carrier_id', profile.id);
+        .eq('client_id', profile.id)
+        .eq('accepted', true)
+        .order('accepted_at', { ascending: false })
+        .limit(1);
 
       if (error) throw error;
-      return data as CarrierCommitment[];
+      
+      const acceptedAt = data?.[0]?.accepted_at;
+
+      const { data: consents, error: consentsError } = await supabase
+        .from('client_consents')
+        .select(`
+          accepted,
+          consent_type:client_consent_types(*)
+        `)
+        .eq('client_id', profile.id);
+
+      if (consentsError) throw consentsError;
+      
+      return { consents, acceptedAt };
     },
   });
 
@@ -76,22 +85,31 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
     );
   }
 
+  if (!commitments?.consents?.length) {
+    return null;
+  }
+
   return (
     <div>
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Engagements</h2>
-        <p className="text-sm text-gray-500">
-          Engagements acceptés le {new Date(profile.created_at).toLocaleDateString()}
-        </p>
+        {commitments.acceptedAt && (
+          <p className="text-sm text-gray-500">
+            Engagements acceptés le {format(new Date(commitments.acceptedAt), "d MMMM yyyy", { locale: fr })}
+          </p>
+        )}
       </div>
       <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
-        {commitments?.map((commitment) => (
-          <div key={commitment.commitment_type_id}>
-            <p className="text-sm text-gray-500 mb-2">{commitment.commitment_type.label}</p>
-            <CommitmentStatus 
-              accepted={commitment.accepted}
-              description={commitment.commitment_type.description}
-            />
+        {commitments.consents.map((commitment) => (
+          <div key={commitment.consent_type.id}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">{commitment.consent_type.label}</p>
+              <div className="flex items-center text-green-600 font-medium">
+                <Check className="w-5 h-5 mr-2 stroke-2" />
+                <span>Accepté</span>
+              </div>
+            </div>
+            <CommitmentStatus description={commitment.consent_type.description} />
           </div>
         ))}
       </div>
