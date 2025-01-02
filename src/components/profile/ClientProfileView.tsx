@@ -86,6 +86,21 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
             <p className="text-sm text-gray-500 mb-1">Adresse</p>
             <p className="text-gray-900 font-medium">{profile.address || "-"}</p>
           </div>
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Pièce d'identité</p>
+            <p className="text-gray-900 font-medium">
+              {profile.id_document ? (
+                <a 
+                  href={profile.id_document} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  Voir le document
+                </a>
+              ) : "-"}
+            </p>
+          </div>
         </div>
       </div>
 
