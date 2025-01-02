@@ -6,12 +6,19 @@ interface TourHeaderProps {
   tour: any;
 }
 
+const countryNames: { [key: string]: string } = {
+  'FR': 'France',
+  'TN': 'Tunisie',
+  'DZ': 'Algérie',
+  'MA': 'Maroc'
+};
+
 export function TourHeader({ tour }: TourHeaderProps) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-2">
         <h2 className="text-lg font-semibold">
-          {tour.departure_country} → {tour.destination_country}
+          {countryNames[tour.departure_country]} → {countryNames[tour.destination_country]}
         </h2>
         <Badge variant={tour.type === 'public' ? 'default' : 'secondary'}>
           {tour.type === 'public' ? 'Public' : 'Privé'}
