@@ -150,10 +150,10 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
 
       <div>
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Engagements</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Engagements</h2>
           {mostRecentAcceptanceDate && (
-            <p className="text-sm text-gray-500">
-              Engagements acceptés le {format(new Date(mostRecentAcceptanceDate), "d MMMM yyyy", { locale: fr })}
+            <p className="text-base text-gray-500">
+              Engagements acceptés le {format(new Date(mostRecentAcceptanceDate), "dd/MM/yyyy", { locale: fr })}
             </p>
           )}
         </div>
