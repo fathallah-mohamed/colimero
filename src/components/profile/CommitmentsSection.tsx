@@ -8,10 +8,18 @@ import { fr } from "date-fns/locale";
 
 interface CommitmentStatusProps {
   description: string;
+  label: string;
 }
 
-const CommitmentStatus = ({ description }: CommitmentStatusProps) => (
-  <div className="space-y-2">
+const CommitmentStatus = ({ description, label }: CommitmentStatusProps) => (
+  <div className="space-y-4">
+    <div className="flex items-center space-x-3">
+      <div className="flex items-center text-green-600 font-medium">
+        <Check className="w-5 h-5 mr-2 stroke-2" />
+        <span>Accepté</span>
+      </div>
+      <span className="text-sm text-gray-700">{label}</span>
+    </div>
     <Alert>
       <AlertDescription className="text-sm text-muted-foreground">
         {description}
@@ -22,20 +30,6 @@ const CommitmentStatus = ({ description }: CommitmentStatusProps) => (
 
 interface CommitmentsSectionProps {
   profile: ProfileData;
-}
-
-interface CommitmentType {
-  id: string;
-  code: string;
-  label: string;
-  description: string;
-}
-
-interface CarrierCommitment {
-  commitment_type_id: string;
-  accepted: boolean;
-  accepted_at: string;
-  commitment_type: CommitmentType;
 }
 
 export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
@@ -101,16 +95,11 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
       </div>
       <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
         {commitments.consents.map((commitment) => (
-          <div key={commitment.consent_type.id}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-500">{commitment.consent_type.label}</p>
-              <div className="flex items-center text-green-600 font-medium">
-                <Check className="w-5 h-5 mr-2 stroke-2" />
-                <span>Accepté</span>
-              </div>
-            </div>
-            <CommitmentStatus description={commitment.consent_type.description} />
-          </div>
+          <CommitmentStatus
+            key={commitment.consent_type.id}
+            label={commitment.consent_type.label}
+            description={commitment.consent_type.description}
+          />
         ))}
       </div>
     </div>
