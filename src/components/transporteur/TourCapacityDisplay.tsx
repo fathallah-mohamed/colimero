@@ -19,12 +19,12 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
         {/* Informations de capacité */}
         <div className="flex justify-between text-sm">
           <div>
-            <span className="text-slate-600">Capacité occupée :</span>
-            <span className="font-medium text-slate-900 ml-1">{usedCapacity} kg</span>
+            <span className="text-slate-600">Capacité disponible :</span>
+            <span className="font-medium text-slate-900 ml-1">{remainingCapacity} kg</span>
           </div>
           <div>
-            <span className="text-slate-600">Disponible :</span>
-            <span className="font-medium text-slate-900 ml-1">{remainingCapacity} kg</span>
+            <span className="text-slate-600">Capacité occupée :</span>
+            <span className="font-medium text-slate-900 ml-1">{usedCapacity} kg</span>
           </div>
         </div>
 
@@ -32,8 +32,8 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
         <div>
           <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all ${getColorClass(remainingPercentage)}`}
-              style={{ width: `${remainingPercentage}%` }}
+              className="h-full transition-all bg-[#ea384c]"
+              style={{ width: `${100 - remainingPercentage}%` }}
             />
           </div>
         </div>
