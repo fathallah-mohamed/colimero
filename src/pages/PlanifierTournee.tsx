@@ -4,9 +4,10 @@ import Navigation from "@/components/Navigation";
 import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
 import AuthDialog from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
-import { TrendingUp, Users, Shield } from "lucide-react";
+import { TrendingUp, Users, Shield, Clock, Target, BarChart3, Bell, HeadphonesIcon } from "lucide-react";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function PlanifierTournee() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -68,6 +69,78 @@ export default function PlanifierTournee() {
     }
   };
 
+  const benefits = [
+    {
+      title: "Rentabilité maximale",
+      description: [
+        "Chargez votre véhicule avant même de démarrer",
+        "Remplissez vos trajets aller et retour pour maximiser vos revenus"
+      ],
+      icon: BarChart3
+    },
+    {
+      title: "Planification simplifiée",
+      description: [
+        "Accédez à des demandes d'expédition à l'avance",
+        "Réduisez le temps passé à attendre en France"
+      ],
+      icon: Clock
+    },
+    {
+      title: "Flexibilité et contrôle",
+      description: [
+        "Créez des tournées adaptées à votre trajet",
+        "Acceptez uniquement les demandes qui vous correspondent"
+      ],
+      icon: Target
+    },
+    {
+      title: "Plus d'allers-retours",
+      description: [
+        "Optimisez votre planning pour multiplier les trajets",
+        "Réduisez vos temps morts sur tout votre itinéraire"
+      ],
+      icon: TrendingUp
+    }
+  ];
+
+  const steps = [
+    {
+      title: "Créez une tournée en quelques clics",
+      description: "Indiquez votre trajet et vos disponibilités (lieux de collecte, date, heure)"
+    },
+    {
+      title: "Recevez des demandes d'expédition",
+      description: "Consultez les expéditeurs intéressés par votre tournée"
+    },
+    {
+      title: "Optimisez votre véhicule",
+      description: "Remplissez votre camion selon votre capacité"
+    },
+    {
+      title: "Repartez chargé",
+      description: "Planifiez votre retour avec des expéditions pour maximiser vos revenus"
+    }
+  ];
+
+  const tools = [
+    {
+      title: "Tableau de bord personnalisé",
+      description: "Suivez vos tournées, vos revenus, et vos expéditions",
+      icon: BarChart3
+    },
+    {
+      title: "Notifications instantanées",
+      description: "Recevez les demandes en temps réel pour rester réactif",
+      icon: Bell
+    },
+    {
+      title: "Support dédié",
+      description: "Une équipe à votre écoute pour vous accompagner",
+      icon: HeadphonesIcon
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -80,59 +153,108 @@ export default function PlanifierTournee() {
             <CreateTourForm />
           </div>
         ) : (
-          <div className="max-w-6xl mx-auto px-4 py-12 text-center">
-            <h1 className="text-4xl font-bold text-[#0091FF] mb-6">
-              Planifiez une tournée et connectez-vous à notre réseau d'expéditeurs !
-            </h1>
-            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-              Créez facilement une tournée pour vos trajets, remplissez votre véhicule et optimisez vos revenus. 
-              Grâce à Colimero, vous accédez à un large réseau d'expéditeurs prêts à collaborer.
-            </p>
+          <div className="space-y-16">
+            {/* Hero Section */}
+            <div className="text-center space-y-6">
+              <h1 className="text-4xl font-bold text-blue-600 md:text-5xl">
+                Planifiez votre tournée et maximisez vos trajets !
+              </h1>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Gagnez du temps et optimisez vos revenus grâce à Colimero. En planifiant vos tournées à l'avance, 
+                connectez-vous à un réseau d'expéditeurs prêts à expédier leurs colis, et réduisez vos kilomètres à vide.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              <div className="p-6 bg-white rounded-lg shadow-md">
-                <TrendingUp className="w-12 h-12 text-[#0091FF] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  Revenus optimisés
-                </h3>
-                <p className="text-gray-600">
-                  Maximisez vos profits en remplissant votre véhicule sur vos trajets existants.
-                </p>
-              </div>
-
-              <div className="p-6 bg-white rounded-lg shadow-md">
-                <Users className="w-12 h-12 text-[#0091FF] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  Réseau d'expéditeurs
-                </h3>
-                <p className="text-gray-600">
-                  Accédez à une large base de clients vérifiés prêts à expédier.
-                </p>
-              </div>
-
-              <div className="p-6 bg-white rounded-lg shadow-md">
-                <Shield className="w-12 h-12 text-[#0091FF] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  Gestion simplifiée
-                </h3>
-                <p className="text-gray-600">
-                  Gérez facilement vos tournées et vos clients via notre plateforme intuitive.
-                </p>
+            {/* Benefits Section */}
+            <div className="space-y-8">
+              <h2 className="text-3xl font-bold text-center">
+                Pourquoi planifier une tournée avec Colimero ?
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <div className="bg-blue-50 w-12 h-12 rounded-lg flex items-center justify-center">
+                      <benefit.icon className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold">{benefit.title}</h3>
+                    <ul className="space-y-2">
+                      {benefit.description.map((item, idx) => (
+                        <li key={idx} className="text-gray-600">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <Button
-              onClick={handleCreateTourClick}
-              className="bg-[#0091FF] text-white px-8 py-6 rounded-lg font-semibold hover:bg-[#007ACC] transition-colors text-lg"
-            >
-              Créer une tournée
-            </Button>
+            {/* How it works Section */}
+            <div className="space-y-8">
+              <h2 className="text-3xl font-bold text-center">Comment ça marche ?</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {steps.map((step, index) => (
+                  <div key={index} className="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <div className="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold">
+                      {index + 1}
+                    </div>
+                    <h3 className="text-xl font-semibold">{step.title}</h3>
+                    <p className="text-gray-600">{step.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-            {!isAuthenticated && (
-              <p className="text-sm text-gray-500 mt-4">
-                Vous devez être connecté pour planifier une tournée
+            {/* Example Section */}
+            <div className="bg-blue-50 p-8 rounded-lg space-y-4">
+              <h2 className="text-2xl font-bold">Exemple concret :</h2>
+              <p className="text-gray-700">
+                Vous êtes un transporteur qui part de Tunisie vers la France. Grâce à Colimero :
               </p>
-            )}
+              <ul className="list-disc list-inside space-y-2 text-gray-700">
+                <li>Vous pouvez collecter des colis sur votre trajet aller</li>
+                <li>Une fois arrivé en France, vous recevez les demandes des expéditeurs pour le retour</li>
+                <li>Vous passez moins de temps en attente et réalisez plus d'aller-retours</li>
+              </ul>
+            </div>
+
+            {/* CTA Section */}
+            <div className="text-center space-y-6">
+              <h2 className="text-3xl font-bold">Optimisez votre trajet dès aujourd'hui</h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Chez Colimero, nous savons que chaque minute compte. Planifiez à l'avance, minimisez vos trajets 
+                à vide et connectez-vous à un large réseau d'expéditeurs fiables.
+              </p>
+              <Button
+                onClick={handleCreateTourClick}
+                size="lg"
+                className={cn(
+                  "bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-lg font-semibold text-lg",
+                  "transform transition hover:scale-105"
+                )}
+              >
+                Créer une tournée
+              </Button>
+              {!isAuthenticated && (
+                <p className="text-sm text-gray-500">
+                  Vous devez être connecté pour planifier une tournée
+                </p>
+              )}
+            </div>
+
+            {/* Tools Section */}
+            <div className="space-y-8">
+              <h2 className="text-3xl font-bold text-center">Des outils pensés pour vous</h2>
+              <div className="grid md:grid-cols-3 gap-8">
+                {tools.map((tool, index) => (
+                  <div key={index} className="bg-white p-6 rounded-lg shadow-md space-y-4">
+                    <div className="bg-blue-50 w-12 h-12 rounded-lg flex items-center justify-center">
+                      <tool.icon className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold">{tool.title}</h3>
+                    <p className="text-gray-600">{tool.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
