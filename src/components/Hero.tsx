@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Package2, Search } from "lucide-react";
+import { Package2, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Hero() {
@@ -18,7 +18,7 @@ export default function Hero() {
           <Button
             asChild
             size="lg"
-            className="bg-white text-blue-600 hover:bg-gray-50 hover:scale-[1.02] transform transition-all duration-200 shadow-md"
+            className="bg-white text-blue-600 hover:bg-gray-50 hover:scale-[1.02] transform transition-all duration-200 shadow-md rounded-xl"
           >
             <Link 
               to="/envoyer-un-colis" 
@@ -32,13 +32,13 @@ export default function Hero() {
             asChild
             size="lg"
             variant="outline"
-            className="bg-transparent text-white border-2 border-white hover:bg-white/10 hover:scale-[1.02] transform transition-all duration-200 shadow-md"
+            className="bg-transparent text-white border-2 border-white hover:bg-white/10 hover:scale-[1.02] transform transition-all duration-200 shadow-md rounded-xl"
           >
             <Link 
               to="/planifier-une-tournee" 
               className="flex items-center gap-3 px-6 py-3"
             >
-              <Search className="h-5 w-5" />
+              <Truck className="h-5 w-5" />
               Je suis transporteur
             </Link>
           </Button>
