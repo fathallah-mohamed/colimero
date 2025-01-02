@@ -10,7 +10,7 @@ export function useRegisterForm(onLogin: () => void) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [acceptedConsents, setAcceptedConsents] = useState<string[]>([]);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,15 +20,6 @@ export function useRegisterForm(onLogin: () => void) {
         variant: "destructive",
         title: "Erreur",
         description: "Les mots de passe ne correspondent pas",
-      });
-      return;
-    }
-
-    if (!termsAccepted) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez accepter les conditions pour continuer",
       });
       return;
     }
@@ -50,7 +41,6 @@ export function useRegisterForm(onLogin: () => void) {
       });
 
       if (signUpError) {
-        // Vérifier si l'erreur est due à un utilisateur déjà existant
         const errorMessage = signUpError.message;
         if (errorMessage.includes("User already registered") || 
             signUpError.message === "User already registered" ||
@@ -72,12 +62,24 @@ export function useRegisterForm(onLogin: () => void) {
             first_name: firstName,
             last_name: lastName,
             phone: phone,
-            terms_accepted: true,
-            terms_accepted_at: new Date().toISOString(),
           })
           .eq('id', signUpData.user.id);
 
         if (clientError) throw clientError;
+
+        // Insérer les consentements
+        const consentsToInsert = acceptedConsents.map(consentId => ({
+          client_id: signUpData.user!.id,
+          consent_type_id: consentId,
+          accepted: true,
+          accepted_at: new Date().toISOString()
+        }));
+
+        const { error: consentsError } = await supabase
+          .from('client_consents')
+          .insert(consentsToInsert);
+
+        if (consentsError) throw consentsError;
 
         toast({
           title: "Compte créé avec succès",
@@ -98,6 +100,14 @@ export function useRegisterForm(onLogin: () => void) {
     }
   };
 
+  const handleConsentChange = (consentId: string, accepted: boolean) => {
+    setAcceptedConsents(prev => 
+      accepted 
+        ? [...prev, consentId]
+        : prev.filter(id => id !== consentId)
+    );
+  };
+
   return {
     isLoading,
     firstName,
@@ -112,8 +122,8 @@ export function useRegisterForm(onLogin: () => void) {
     setPassword,
     confirmPassword,
     setConfirmPassword,
-    termsAccepted,
-    setTermsAccepted,
+    acceptedConsents,
+    handleConsentChange,
     handleSubmit,
   };
 }

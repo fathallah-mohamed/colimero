@@ -22,8 +22,8 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     setPassword,
     confirmPassword,
     setConfirmPassword,
-    termsAccepted,
-    setTermsAccepted,
+    acceptedConsents,
+    handleConsentChange,
     handleSubmit,
   } = useRegisterForm(onLogin);
 
@@ -45,14 +45,14 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
       />
 
       <RegisterTerms
-        termsAccepted={termsAccepted}
-        onTermsAcceptedChange={setTermsAccepted}
+        acceptedConsents={acceptedConsents}
+        onConsentChange={handleConsentChange}
       />
 
       <Button
         type="submit"
         className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
-        disabled={isLoading || !termsAccepted}
+        disabled={isLoading || acceptedConsents.length === 0}
       >
         {isLoading ? "Création en cours..." : "Créer mon compte"}
       </Button>
