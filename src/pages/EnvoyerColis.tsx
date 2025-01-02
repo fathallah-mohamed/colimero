@@ -13,26 +13,38 @@ export default function EnvoyerColis() {
   const { toast } = useToast();
 
   const updateTourStatus = async () => {
-    const { error } = await supabase
-      .from('tours')
-      .update({ status: 'planned' })
-      .eq('type', 'private')
-      .single();
+    try {
+      const { data: tours, error: fetchError } = await supabase
+        .from('tours')
+        .select('*')
+        .eq('type', 'private');
 
-    if (error) {
+      if (fetchError) throw fetchError;
+
+      if (!tours || tours.length === 0) {
+        console.log('No private tours found to update');
+        return;
+      }
+
+      const { error: updateError } = await supabase
+        .from('tours')
+        .update({ status: 'planned' })
+        .eq('id', tours[0].id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Succès",
+        description: "Le statut de la tournée a été mis à jour",
+      });
+    } catch (error) {
+      console.error('Error updating tour status:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de mettre à jour le statut de la tournée",
       });
-      console.error('Error updating tour status:', error);
-      return;
     }
-
-    toast({
-      title: "Succès",
-      description: "Le statut de la tournée a été mis à jour",
-    });
   };
 
   useEffect(() => {
@@ -94,10 +106,6 @@ export default function EnvoyerColis() {
     fetchTours();
   }, [toast]);
 
-  const handleBookingClick = (tourId: number, pickupCity: string) => {
-    console.log("Booking clicked for tour:", tourId, "pickup city:", pickupCity);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -120,7 +128,6 @@ export default function EnvoyerColis() {
                 tours={publicTours}
                 type="public"
                 isLoading={isLoading}
-                onBookingClick={handleBookingClick}
               />
             )}
           </TabsContent>
@@ -135,7 +142,6 @@ export default function EnvoyerColis() {
                 tours={privateTours}
                 type="private"
                 isLoading={isLoading}
-                onBookingClick={handleBookingClick}
               />
             )}
           </TabsContent>
