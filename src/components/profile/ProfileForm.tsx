@@ -86,7 +86,7 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
       const servicesToInsert = values.services.map(serviceType => ({
         carrier_id: session.user.id,
         service_type: serviceType,
-        icon: serviceOptions.find(opt => opt.id === serviceType)?.icon || 'package'
+        icon: 'package'
       }));
 
       const { error: servicesError } = await supabase
