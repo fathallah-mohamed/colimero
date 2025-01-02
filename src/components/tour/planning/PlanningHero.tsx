@@ -6,7 +6,7 @@ interface PlanningHeroProps {
 
 export function PlanningHero({ onCreateTourClick }: PlanningHeroProps) {
   return (
-    <div className="text-center space-y-6 py-12">
+    <div className="text-center space-y-6 py-12 mt-8">
       <h1 className="text-4xl font-bold">Planifiez une tournée en un clic !</h1>
       <Button
         onClick={onCreateTourClick}
