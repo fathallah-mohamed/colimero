@@ -31,6 +31,7 @@ export default function AdminDashboard() {
       .single();
 
     if (adminError || !adminData) {
+      console.error('Erreur de vérification admin:', adminError);
       toast({
         variant: "destructive",
         title: "Accès refusé",
@@ -40,41 +41,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Si l'email est admin@colimero.fr, supprimer le compte
-    if (session.user.email === 'admin@colimero.fr') {
-      try {
-        // Supprimer d'abord les données de la table administrators
-        await supabase
-          .from('administrators')
-          .delete()
-          .eq('id', session.user.id);
-
-        // Supprimer le compte auth
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(
-          session.user.id
-        );
-
-        if (deleteError) throw deleteError;
-
-        // Déconnecter l'utilisateur
-        await supabase.auth.signOut();
-        
-        toast({
-          title: "Compte supprimé",
-          description: "Le compte admin a été supprimé avec succès.",
-        });
-        
-        navigate("/connexion");
-      } catch (error: any) {
-        console.error('Erreur lors de la suppression:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de la suppression du compte.",
-        });
-      }
-      return;
-    }
+    console.log('Données admin trouvées:', adminData);
   };
 
   return (
