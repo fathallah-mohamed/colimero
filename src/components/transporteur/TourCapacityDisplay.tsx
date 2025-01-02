@@ -13,20 +13,20 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
         {/* Informations de capacité */}
         <div className="flex justify-between text-sm">
           <div>
-            <span className="text-slate-600">Capacité disponible :</span>
-            <span className="font-medium text-emerald-600 ml-1">{remainingCapacity} kg</span>
+            <span className="text-slate-900">Capacité disponible :</span>
+            <span className="font-medium text-slate-900 ml-1">{remainingCapacity} kg</span>
           </div>
           <div>
-            <span className="text-slate-600">Capacité occupée :</span>
-            <span className="font-medium text-rose-600 ml-1">{usedCapacity} kg</span>
+            <span className="text-slate-900">Capacité occupée :</span>
+            <span className="font-medium text-slate-900 ml-1">{usedCapacity} kg</span>
           </div>
         </div>
 
         {/* Barre de progression */}
         <div>
-          <div className="h-2.5 bg-emerald-100 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-emerald-500 rounded-full overflow-hidden">
             <div
-              className="h-full transition-all bg-[#ea384c]"
+              className="h-full transition-all bg-slate-400"
               style={{ width: `${100 - remainingPercentage}%` }}
             />
           </div>
@@ -34,7 +34,7 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
 
         {/* Capacité totale */}
         <div className="text-sm text-center">
-          <span className="text-slate-600">Capacité totale du camion : </span>
+          <span className="text-slate-900">Capacité totale du camion : </span>
           <span className="font-medium text-slate-900">{totalCapacity} kg</span>
         </div>
       </div>
