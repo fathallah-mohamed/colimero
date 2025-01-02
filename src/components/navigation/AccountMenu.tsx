@@ -9,24 +9,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@supabase/supabase-js";
+import { useState } from "react";
 import AuthDialog from "../auth/AuthDialog";
 import { UserCircle2 } from "lucide-react";
 
 interface AccountMenuProps {
   user: User | null;
   userType: string | null;
-  onLogout?: () => void;
-  showAuthDialog: boolean;
-  setShowAuthDialog: (show: boolean) => void;
+  onLogout: () => void;
 }
 
-export function AccountMenu({ 
-  user, 
-  userType, 
-  onLogout, 
-  showAuthDialog, 
-  setShowAuthDialog 
-}: AccountMenuProps) {
+export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
   if (!user) {
     return (
       <>

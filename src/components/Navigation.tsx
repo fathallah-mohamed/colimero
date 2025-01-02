@@ -1,47 +1,12 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Package, Users, MessageSquare, Truck, Calendar } from "lucide-react";
-import { AccountMenu } from "./navigation/AccountMenu";
+import { Menu, X, Package, Truck, Calendar, Users, Info, MessageSquare } from "lucide-react";
 import { MenuItems } from "./navigation/MenuItems";
+import { AccountMenu } from "./navigation/AccountMenu";
 import { MobileMenu } from "./navigation/MobileMenu";
 import { useNavigation } from "./navigation/useNavigation";
 
 export default function Navigation() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { user, userType, handleLogout } = useNavigation();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-
-  const menuItems = [
-    { 
-      name: "Planifier une tournée",
-      href: "/planifier-une-tournee",
-      highlight: true,
-      icon: <Calendar className="w-4 h-4" />
-    },
-    { 
-      name: "Envoyer un colis",
-      href: "/envoyer-un-colis",
-      highlight: true,
-      icon: <Package className="w-4 h-4" />
-    },
-    { 
-      name: "Nos transporteurs",
-      href: "/nos-transporteurs",
-      icon: <Truck className="w-4 h-4" />
-    },
-    { 
-      name: "Actualités",
-      href: "/actualites",
-      icon: <MessageSquare className="w-4 h-4" />
-    },
-    { 
-      name: "Contact",
-      href: "/nous-contacter",
-      icon: <Users className="w-4 h-4" />
-    }
-  ];
-
-  const handleClose = () => setIsOpen(false);
+  const { isOpen, setIsOpen, user, userType, handleLogout, menuItems } = useNavigation();
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -55,7 +20,40 @@ export default function Navigation() {
 
           <div className="hidden md:flex md:items-center md:space-x-1 lg:space-x-2">
             <MenuItems 
-              items={menuItems}
+              items={[
+                { 
+                  name: "Planifier une tournée", 
+                  href: "/planifier-une-tournee", 
+                  highlight: true,
+                  icon: <Calendar className="w-4 h-4" />
+                },
+                { 
+                  name: "Envoyer un colis", 
+                  href: "/envoyer-un-colis", 
+                  highlight: true,
+                  icon: <Package className="w-4 h-4" />
+                },
+                { 
+                  name: "Transporteurs", 
+                  href: "/nos-transporteurs",
+                  icon: <Truck className="w-4 h-4" />
+                },
+                { 
+                  name: "Actualités", 
+                  href: "/actualites",
+                  icon: <MessageSquare className="w-4 h-4" />
+                },
+                { 
+                  name: "À propos", 
+                  href: "/a-propos",
+                  icon: <Info className="w-4 h-4" />
+                },
+                { 
+                  name: "Contact", 
+                  href: "/nous-contacter",
+                  icon: <Users className="w-4 h-4" />
+                }
+              ]} 
               className="text-sm lg:text-base" 
             />
           </div>
@@ -64,9 +62,7 @@ export default function Navigation() {
             <AccountMenu 
               user={user} 
               userType={userType} 
-              showAuthDialog={showAuthDialog}
-              setShowAuthDialog={setShowAuthDialog}
-              onLogout={handleLogout}
+              onLogout={handleLogout} 
             />
             
             <button
@@ -79,16 +75,16 @@ export default function Navigation() {
             </button>
           </div>
         </div>
-
-        <MobileMenu 
-          isOpen={isOpen} 
-          items={menuItems}
-          user={user}
-          userType={userType}
-          onLogout={handleLogout}
-          onClose={handleClose}
-        />
       </div>
+
+      <MobileMenu
+        isOpen={isOpen}
+        items={menuItems}
+        user={user}
+        userType={userType}
+        onLogout={handleLogout}
+        onClose={() => setIsOpen(false)}
+      />
     </nav>
   );
 }
