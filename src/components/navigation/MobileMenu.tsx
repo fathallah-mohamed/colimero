@@ -27,7 +27,7 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
             onClick={onClose}
           />
           <motion.div
@@ -36,12 +36,12 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
             exit={{ x: "100%" }}
             transition={{ type: "spring", bounce: 0, duration: 0.3 }}
             className={cn(
-              "fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white z-50",
+              "fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white z-[101]",
               "shadow-[0_0_30px_10px_rgba(0,0,0,0.1)]",
-              "overflow-y-auto pt-16"
+              "overflow-y-auto"
             )}
           >
-            <div className="flex flex-col p-6 space-y-4">
+            <div className="flex flex-col p-6 space-y-4 pt-20">
               {items.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
