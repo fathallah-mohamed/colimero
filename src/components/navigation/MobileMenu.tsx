@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { MenuItem } from "./MenuItems";
 import { User } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
-import { Package, Truck, Calendar, Users, Info, MessageSquare, UserCircle2 } from "lucide-react";
+import { Package, Truck, Calendar, Users, MessageSquare, UserCircle2 } from "lucide-react";
 import { useState } from "react";
 import AuthDialog from "../auth/AuthDialog";
 
@@ -23,7 +23,6 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
     "Envoyer un colis": <Package className="w-4 h-4" />,
     "Transporteurs": <Truck className="w-4 h-4" />,
     "Actualités": <MessageSquare className="w-4 h-4" />,
-    "À propos": <Info className="w-4 h-4" />,
     "Contact": <Users className="w-4 h-4" />,
   };
 
@@ -53,7 +52,22 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
               <span>{item.name}</span>
             </Link>
           ))}
-          {user ? (
+          {!user && (
+            <div className="mt-4 px-3">
+              <Button 
+                variant="outline" 
+                className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
+                onClick={() => {
+                  onClose();
+                  setShowAuthDialog(true);
+                }}
+              >
+                <UserCircle2 className="w-4 h-4 mr-2" />
+                Se connecter
+              </Button>
+            </div>
+          )}
+          {user && (
             <>
               <Link
                 to="/profil"
@@ -108,20 +122,6 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                 Déconnexion
               </button>
             </>
-          ) : (
-            <div className="mt-4 px-3">
-              <Button 
-                variant="outline" 
-                className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
-                onClick={() => {
-                  onClose();
-                  setShowAuthDialog(true);
-                }}
-              >
-                <UserCircle2 className="w-4 h-4 mr-2" />
-                Se connecter
-              </Button>
-            </div>
           )}
         </div>
       </div>
