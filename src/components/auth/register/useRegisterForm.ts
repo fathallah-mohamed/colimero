@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useConsentValidation } from "./useConsentValidation";
 import { registerClient } from "./useClientRegistration";
 import { UseRegisterFormReturn } from "./types";
@@ -60,17 +60,21 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         acceptedConsents,
       };
 
-      const result = await registerClient(formData);
+      const { data, error } = await registerClient(formData);
 
-      if (result.error?.message.includes("User already registered") || 
-          result.error?.message === "User already registered" ||
-          result.error?.message.includes("already exists")) {
-        toast({
-          title: "Compte existant",
-          description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
-        });
-        onLogin();
-        return;
+      if (error) {
+        // Check specifically for user already exists error
+        if (error.message.includes("User already registered") || 
+            error.message === "User already registered" ||
+            error.message.includes("already exists")) {
+          toast({
+            title: "Compte existant",
+            description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
+          });
+          onLogin();
+          return;
+        }
+        throw error;
       }
 
       toast({
@@ -81,10 +85,18 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
       onLogin();
     } catch (error: any) {
       console.error("Erreur complète:", error);
+      let errorMessage = "Une erreur est survenue lors de l'inscription";
+      
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "Email ou mot de passe incorrect";
+      } else if (error.message === "Email not confirmed") {
+        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+      }
+
       toast({
         variant: "destructive",
         title: "Erreur d'inscription",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
