@@ -8,11 +8,7 @@ import { useState } from "react";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { RegisterForm } from "./RegisterForm";
 import CarrierAuthDialog from "./CarrierAuthDialog";
-import { ClientLoginForm } from "./login/ClientLoginForm";
-import { CarrierLoginForm } from "./login/CarrierLoginForm";
 import { GeneralLoginForm } from "./login/GeneralLoginForm";
-import { AdminLoginForm } from "./login/AdminLoginForm";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type View = "login" | "register" | "forgot-password";
 
@@ -33,7 +29,6 @@ export default function AuthDialog({
 }: AuthDialogProps) {
   const [view, setView] = useState<View>("login");
   const [showCarrierDialog, setShowCarrierDialog] = useState(false);
-  const [loginType, setLoginType] = useState<'general' | 'client' | 'carrier' | 'admin'>('general');
 
   const handleRegisterClick = () => {
     if (requiredUserType === 'carrier' && onRegisterClick) {
@@ -92,57 +87,12 @@ export default function AuthDialog({
           </DialogHeader>
 
           {view === "login" ? (
-            requiredUserType ? (
-              requiredUserType === 'admin' ? (
-                <AdminLoginForm />
-              ) : requiredUserType === 'client' ? (
-                <ClientLoginForm
-                  onForgotPassword={() => setView("forgot-password")}
-                  onRegister={handleRegisterClick}
-                  onSuccess={onSuccess}
-                />
-              ) : (
-                <CarrierLoginForm
-                  onForgotPassword={() => setView("forgot-password")}
-                  onCarrierRegister={handleCarrierRegisterClick}
-                  onSuccess={onSuccess}
-                />
-              )
-            ) : (
-              <Tabs defaultValue="general" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="general">Général</TabsTrigger>
-                  <TabsTrigger value="client">Client</TabsTrigger>
-                  <TabsTrigger value="carrier">Transporteur</TabsTrigger>
-                  <TabsTrigger value="admin">Admin</TabsTrigger>
-                </TabsList>
-                <TabsContent value="general">
-                  <GeneralLoginForm
-                    onForgotPassword={() => setView("forgot-password")}
-                    onRegister={handleRegisterClick}
-                    onCarrierRegister={handleCarrierRegisterClick}
-                    onSuccess={onSuccess}
-                  />
-                </TabsContent>
-                <TabsContent value="client">
-                  <ClientLoginForm
-                    onForgotPassword={() => setView("forgot-password")}
-                    onRegister={handleRegisterClick}
-                    onSuccess={onSuccess}
-                  />
-                </TabsContent>
-                <TabsContent value="carrier">
-                  <CarrierLoginForm
-                    onForgotPassword={() => setView("forgot-password")}
-                    onCarrierRegister={handleCarrierRegisterClick}
-                    onSuccess={onSuccess}
-                  />
-                </TabsContent>
-                <TabsContent value="admin">
-                  <AdminLoginForm />
-                </TabsContent>
-              </Tabs>
-            )
+            <GeneralLoginForm
+              onForgotPassword={() => setView("forgot-password")}
+              onRegister={handleRegisterClick}
+              onCarrierRegister={handleCarrierRegisterClick}
+              onSuccess={onSuccess}
+            />
           ) : view === "register" ? (
             <RegisterForm onLogin={() => setView("login")} />
           ) : (
