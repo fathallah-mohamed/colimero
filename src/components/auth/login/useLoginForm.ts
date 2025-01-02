@@ -39,7 +39,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       console.log("Tentative de connexion pour:", email.trim());
       console.log("Tentative d'authentification avec Supabase...");
 
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: { user, session }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -48,9 +48,9 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         console.error("Erreur d'authentification:", signInError);
         console.error("Erreur détaillée:", signInError);
         
-        if (signInError.message === "Invalid login credentials") {
+        if (signInError.message.includes("Invalid login credentials")) {
           setError("Email ou mot de passe incorrect");
-        } else if (signInError.message === "Email not confirmed") {
+        } else if (signInError.message.includes("Email not confirmed")) {
           setError("Veuillez confirmer votre email avant de vous connecter");
         } else {
           setError("Une erreur est survenue lors de la connexion");
@@ -59,11 +59,11 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         return;
       }
 
-      if (!data.user) {
+      if (!user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = data.user.user_metadata?.user_type;
+      const userType = user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
 
       // Vérification du type d'utilisateur requis
@@ -77,7 +77,7 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         return;
       }
 
-      console.log("Connexion réussie pour l'utilisateur:", data.user.email);
+      console.log("Connexion réussie pour l'utilisateur:", user.email);
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",
