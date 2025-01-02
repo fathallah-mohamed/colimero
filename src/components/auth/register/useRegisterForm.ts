@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export function useRegisterForm(onLogin: () => void) {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +14,25 @@ export function useRegisterForm(onLogin: () => void) {
   const [acceptedConsents, setAcceptedConsents] = useState<string[]>([]);
   const { toast } = useToast();
 
+  // Récupérer les types de consentements requis
+  const { data: consentTypes } = useQuery({
+    queryKey: ['client-consent-types'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('client_consent_types')
+        .select('*')
+        .eq('required', true)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Calculer le nombre de consentements requis et si tous sont acceptés
+  const requiredConsentsCount = consentTypes?.length || 0;
+  const allRequiredConsentsAccepted = acceptedConsents.length === requiredConsentsCount;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -20,6 +40,15 @@ export function useRegisterForm(onLogin: () => void) {
         variant: "destructive",
         title: "Erreur",
         description: "Les mots de passe ne correspondent pas",
+      });
+      return;
+    }
+
+    if (!allRequiredConsentsAccepted) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Vous devez accepter tous les consentements requis",
       });
       return;
     }
@@ -125,5 +154,7 @@ export function useRegisterForm(onLogin: () => void) {
     acceptedConsents,
     handleConsentChange,
     handleSubmit,
+    requiredConsentsCount,
+    allRequiredConsentsAccepted,
   };
 }
