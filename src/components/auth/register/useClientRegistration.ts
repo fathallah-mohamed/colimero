@@ -23,7 +23,7 @@ export async function registerClient(formData: RegisterFormState) {
   }
   await insertClientConsents(data.user.id, formData.acceptedConsents);
 
-  return data;
+  return { data, error: null };
 }
 
 async function updateClientProfile(userId: string, formData: RegisterFormState) {

@@ -60,11 +60,11 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         acceptedConsents,
       };
 
-      const { data, error } = await registerClient(formData);
+      const result = await registerClient(formData);
 
-      if (error?.message.includes("User already registered") || 
-          error?.message === "User already registered" ||
-          error?.message.includes("already exists")) {
+      if (result.error?.message.includes("User already registered") || 
+          result.error?.message === "User already registered" ||
+          result.error?.message.includes("already exists")) {
         toast({
           title: "Compte existant",
           description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
