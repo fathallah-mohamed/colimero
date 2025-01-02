@@ -17,13 +17,13 @@ export function useLoginForm(onSuccess?: () => void) {
     setError(null);
 
     if (!email.trim()) {
-      setError("Veuillez saisir votre adresse email");
+      setError("L'adresse email est requise");
       setIsLoading(false);
       return;
     }
 
     if (!password.trim()) {
-      setError("Veuillez saisir votre mot de passe");
+      setError("Le mot de passe est requis");
       setIsLoading(false);
       return;
     }
@@ -42,19 +42,16 @@ export function useLoginForm(onSuccess?: () => void) {
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
-        switch (signInError.message) {
-          case "Invalid login credentials":
-            setError("Email ou mot de passe incorrect. Veuillez vérifier vos identifiants et réessayer.");
-            break;
-          case "Email not confirmed":
-            setError("Votre email n'a pas été confirmé. Veuillez vérifier votre boîte mail et cliquer sur le lien de confirmation.");
-            break;
-          case "Invalid email":
-            setError("Format d'email invalide. Veuillez vérifier votre adresse email.");
-            break;
-          default:
-            setError("Une erreur est survenue lors de la connexion. Veuillez réessayer plus tard.");
+        if (signInError.message === "Invalid login credentials") {
+          setError("Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.");
+        } else if (signInError.message === "Email not confirmed") {
+          setError("Veuillez confirmer votre email avant de vous connecter.");
+        } else if (signInError.message.includes("Invalid email")) {
+          setError("Format d'email invalide. Veuillez vérifier votre adresse email.");
+        } else {
+          setError("Une erreur est survenue lors de la connexion. Veuillez réessayer.");
         }
+        
         setPassword("");
         setIsLoading(false);
         return;
