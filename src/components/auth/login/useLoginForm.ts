@@ -36,6 +36,27 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     }
 
     try {
+      // Si c'est un transporteur, vérifier d'abord le statut de la demande
+      if (requiredUserType === 'carrier') {
+        const { data: registrationRequest } = await supabase
+          .from('carrier_registration_requests')
+          .select('status')
+          .eq('email', email.trim())
+          .single();
+
+        if (registrationRequest) {
+          if (registrationRequest.status === 'pending') {
+            setError("Votre demande d'inscription est en cours d'examen par notre équipe.");
+            setIsLoading(false);
+            return;
+          } else if (registrationRequest.status === 'rejected') {
+            setError("Votre demande d'inscription a été rejetée. Veuillez nous contacter pour plus d'informations.");
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+
       console.log("Tentative de connexion pour:", email.trim());
       console.log("Tentative d'authentification avec Supabase...");
 
