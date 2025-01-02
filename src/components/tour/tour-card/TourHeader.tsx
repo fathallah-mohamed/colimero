@@ -21,7 +21,7 @@ export function TourHeader({ tour }: TourHeaderProps) {
           {countryNames[tour.departure_country]} → {countryNames[tour.destination_country]}
         </h2>
         <Badge variant={tour.type === 'public' ? 'default' : 'secondary'}>
-          {tour.type === 'public' ? 'Public' : 'Privée'}
+          {tour.type === 'public' ? 'Publique' : 'Privée'}
         </Badge>
       </div>
       <p className="text-gray-600 mb-1">
