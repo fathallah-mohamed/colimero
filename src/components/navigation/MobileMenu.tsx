@@ -2,9 +2,6 @@ import { Link } from "react-router-dom";
 import { MenuItem } from "./MenuItems";
 import { User } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useLocation } from "react-router-dom";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -16,129 +13,92 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }: MobileMenuProps) {
-  const location = useLocation();
-
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[998]"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-            className={cn(
-              "fixed right-0 top-16 bottom-0 w-full max-w-sm bg-white z-[999]",
-              "shadow-xl",
-              "overflow-y-auto"
-            )}
+    <div
+      className={`${
+        isOpen ? "block" : "hidden"
+      } md:hidden absolute top-16 inset-x-0 bg-white shadow-lg z-50`}
+    >
+      <div className="px-2 pt-2 pb-3 space-y-1">
+        {items.map((item) => (
+          <Link
+            key={item.name}
+            to={item.href}
+            onClick={(e) => {
+              onClose();
+              if (item.onClick) item.onClick(e);
+            }}
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              item.highlight
+                ? "text-[#00B0F0]"
+                : "text-gray-700 hover:text-gray-900"
+            }`}
           >
-            <div className="flex flex-col p-6 space-y-4">
-              {items.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.href;
-                
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={onClose}
-                    className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium",
-                      "transition-all duration-300",
-                      "hover:text-primary hover:bg-primary/5",
-                      isActive 
-                        ? "text-primary bg-primary/5" 
-                        : "text-gray-600"
-                    )}
-                  >
-                    {Icon && <Icon className="h-5 w-5" />}
-                    {item.name}
-                  </Link>
-                );
-              })}
-
-              {user ? (
-                <div className="pt-4 mt-4 border-t border-gray-100">
-                  <div className="space-y-3">
-                    <Link
-                      to="/profil"
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-primary/5 transition-colors"
-                      onClick={onClose}
-                    >
-                      Profil
-                    </Link>
-                    {userType === 'carrier' ? (
-                      <>
-                        <Link
-                          to="/mes-tournees"
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-primary/5 transition-colors"
-                          onClick={onClose}
-                        >
-                          Mes tournées
-                        </Link>
-                        <Link
-                          to="/demandes-approbation"
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-primary/5 transition-colors"
-                          onClick={onClose}
-                        >
-                          Demandes d'approbation
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <Link
-                          to="/mes-reservations"
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-primary/5 transition-colors"
-                          onClick={onClose}
-                        >
-                          Mes réservations
-                        </Link>
-                        <Link
-                          to="/demandes-approbation"
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-primary/5 transition-colors"
-                          onClick={onClose}
-                        >
-                          Mes demandes d'approbation
-                        </Link>
-                      </>
-                    )}
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onLogout();
-                      }}
-                      className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-600 hover:text-primary hover:bg-primary/5 transition-colors"
-                    >
-                      Déconnexion
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="pt-4 mt-4 border-t border-gray-100">
-                  <Button 
-                    asChild 
-                    variant="default" 
-                    className="w-full justify-center bg-primary hover:bg-primary/90 text-white transition-colors shadow-lg hover:shadow-xl"
-                  >
-                    <Link to="/connexion" onClick={onClose}>
-                      Se connecter
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+            {item.name}
+          </Link>
+        ))}
+        {user ? (
+          <>
+            <Link
+              to="/profil"
+              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+              onClick={onClose}
+            >
+              Profil
+            </Link>
+            {userType === 'carrier' ? (
+              <>
+                <Link
+                  to="/mes-tournees"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                  onClick={onClose}
+                >
+                  Mes tournées
+                </Link>
+                <Link
+                  to="/demandes-approbation"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                  onClick={onClose}
+                >
+                  Demandes d'approbation
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/mes-reservations"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                  onClick={onClose}
+                >
+                  Mes réservations
+                </Link>
+                <Link
+                  to="/demandes-approbation"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+                  onClick={onClose}
+                >
+                  Mes demandes d'approbation
+                </Link>
+              </>
+            )}
+            <button
+              onClick={() => {
+                onClose();
+                onLogout();
+              }}
+              className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+            >
+              Déconnexion
+            </button>
+          </>
+        ) : (
+          <div className="mt-4 px-3">
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/connexion">Se connecter</Link>
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
