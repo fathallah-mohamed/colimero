@@ -33,22 +33,26 @@ export function useLoginForm(onSuccess?: () => void) {
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password.trim()
+        password: password.trim(),
       });
 
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
+        let errorMessage = "Une erreur est survenue lors de la connexion";
         
-        if (signInError.message === "Invalid login credentials") {
-          setError("Email ou mot de passe incorrect");
-        } else if (signInError.message === "Email not confirmed") {
-          setError("Veuillez confirmer votre email avant de vous connecter");
-        } else if (signInError.message.includes("Invalid email")) {
-          setError("Format d'email invalide");
-        } else {
-          setError("Une erreur est survenue lors de la connexion");
+        switch (signInError.message) {
+          case "Invalid login credentials":
+            errorMessage = "Email ou mot de passe incorrect";
+            break;
+          case "Email not confirmed":
+            errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+            break;
+          case "Invalid email":
+            errorMessage = "Format d'email invalide";
+            break;
         }
         
+        setError(errorMessage);
         setPassword("");
         setIsLoading(false);
         return;
@@ -65,10 +69,7 @@ export function useLoginForm(onSuccess?: () => void) {
         .eq('id', data.user.id)
         .single();
 
-      console.log("Résultat de la vérification admin:", adminData);
-
       if (adminData) {
-        console.log("Utilisateur admin trouvé");
         toast({
           title: "Connexion réussie",
           description: "Bienvenue dans votre espace administrateur",
@@ -78,7 +79,6 @@ export function useLoginForm(onSuccess?: () => void) {
         return;
       }
 
-      // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
       const userType = data.user.user_metadata?.user_type;
       console.log("Type d'utilisateur:", userType);
       
