@@ -31,6 +31,9 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
     try {
       console.log("Tentative de connexion pour:", email.trim());
 
+      // Clear any existing session first
+      await supabase.auth.signOut();
+
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
