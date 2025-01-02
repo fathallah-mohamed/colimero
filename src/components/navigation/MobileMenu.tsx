@@ -26,6 +26,7 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
             onClick={onClose}
           />
@@ -34,9 +35,13 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl z-50 overflow-y-auto"
+            className={cn(
+              "fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white z-50",
+              "shadow-[0_0_30px_10px_rgba(0,0,0,0.1)]",
+              "overflow-y-auto pt-16"
+            )}
           >
-            <div className="flex flex-col p-6 space-y-4 mt-16">
+            <div className="flex flex-col p-6 space-y-4">
               {items.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
@@ -49,11 +54,10 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium",
                       "transition-all duration-300",
-                      "relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:origin-bottom-right",
                       "hover:text-primary hover:bg-primary/5",
                       isActive 
-                        ? "text-primary bg-primary/5 after:bg-primary after:scale-x-100" 
-                        : "text-gray-600 after:bg-primary after:scale-x-0 hover:after:scale-x-100 hover:after:origin-bottom-left"
+                        ? "text-primary bg-primary/5" 
+                        : "text-gray-600"
                     )}
                   >
                     {Icon && <Icon className="h-5 w-5" />}
