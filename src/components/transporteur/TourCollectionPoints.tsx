@@ -1,5 +1,5 @@
 import { MapPin } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface TourCollectionPointsProps {
@@ -22,46 +22,39 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
         <span>Jour et Heure</span>
         <span className="text-center">Sélection</span>
       </div>
-      {route.map((stop, index) => {
-        // Vérifier si collection_date est une chaîne ISO valide
-        const collectionDate = stop.collection_date ? parseISO(stop.collection_date) : null;
-        
-        return (
-          <div key={index} className="grid grid-cols-4 items-center text-sm">
-            <span className="font-medium">{stop.name}</span>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-gray-400" />
-              <a 
-                href={getGoogleMapsUrl(stop.location, stop.name)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 hover:text-blue-500 transition-colors"
-              >
-                {stop.location}
-              </a>
-            </div>
-            <div className="text-gray-600">
-              {collectionDate && (
-                <div>
-                  {format(collectionDate, "EEEE d MMMM yyyy", {
-                    locale: fr,
-                  })}
-                </div>
-              )}
-              <div>{stop.time}</div>
-            </div>
-            <div className="flex justify-center">
-              <input
-                type="radio"
-                name={`tour-${index}`}
-                className="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                onChange={() => onPointSelect(stop.name)}
-                checked={selectedPoint === stop.name}
-              />
-            </div>
+      {route.map((stop, index) => (
+        <div key={index} className="grid grid-cols-4 items-center text-sm">
+          <span className="font-medium">{stop.name}</span>
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-gray-400" />
+            <a 
+              href={getGoogleMapsUrl(stop.location, stop.name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-blue-500 transition-colors"
+            >
+              {stop.location}
+            </a>
           </div>
-        );
-      })}
+          <div className="text-gray-600">
+            <div>
+              {format(new Date(stop.collection_date), "EEEE d MMMM yyyy", {
+                locale: fr,
+              })}
+            </div>
+            <div>{stop.time}</div>
+          </div>
+          <div className="flex justify-center">
+            <input
+              type="radio"
+              name={`tour-${index}`}
+              className="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
+              onChange={() => onPointSelect(stop.name)}
+              checked={selectedPoint === stop.name}
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
