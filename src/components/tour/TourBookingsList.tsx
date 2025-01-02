@@ -12,8 +12,8 @@ interface TourBookingsListProps {
 
 export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) {
   const [bookings, setBookings] = useState<any[]>([]);
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<BookingStatus | ''>('');
+  const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState<BookingStatus | ''>('all');
   const [selectedSort, setSelectedSort] = useState('date_desc');
   const { toast } = useToast();
 
@@ -60,11 +60,11 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
   const filteredAndSortedBookings = useMemo(() => {
     let filtered = [...bookings];
 
-    if (selectedCity) {
+    if (selectedCity && selectedCity !== 'all') {
       filtered = filtered.filter(b => b.delivery_city === selectedCity);
     }
 
-    if (selectedStatus) {
+    if (selectedStatus && selectedStatus !== 'all') {
       filtered = filtered.filter(b => b.status === selectedStatus);
     }
 

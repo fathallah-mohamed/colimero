@@ -4,7 +4,7 @@ import type { BookingStatus } from "@/types/booking";
 interface BookingFiltersProps {
   cities: string[];
   onCityChange: (city: string) => void;
-  onStatusChange: (status: BookingStatus) => void;
+  onStatusChange: (status: BookingStatus | '') => void;
   onSortChange: (sort: string) => void;
   selectedCity: string;
   selectedStatus: BookingStatus | '';
@@ -28,7 +28,7 @@ export function BookingFilters({
             <SelectValue placeholder="Filtrer par ville" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Toutes les villes</SelectItem>
+            <SelectItem value="all">Toutes les villes</SelectItem>
             {cities.map((city) => (
               <SelectItem key={city} value={city}>
                 {city}
@@ -44,7 +44,7 @@ export function BookingFilters({
             <SelectValue placeholder="Filtrer par statut" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les statuts</SelectItem>
+            <SelectItem value="all">Tous les statuts</SelectItem>
             <SelectItem value="pending">En attente</SelectItem>
             <SelectItem value="accepted">Acceptée</SelectItem>
             <SelectItem value="rejected">Refusée</SelectItem>
