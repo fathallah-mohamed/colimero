@@ -51,7 +51,7 @@ export function TransporteurServices({ services }: TransporteurServicesProps) {
           return (
             <div key={service.id} className="flex items-start gap-4">
               <div className="h-12 w-12 rounded-xl bg-[#E5DEFF] flex items-center justify-center flex-shrink-0">
-                <IconComponent className="h-6 w-6 text-[#00B0F0]" />
+                <IconComponent className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">{serviceLabel}</h3>
