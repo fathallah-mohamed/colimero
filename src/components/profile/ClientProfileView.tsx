@@ -55,20 +55,14 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
     }
   };
 
-  const CommitmentStatus = ({ accepted, label, description }: { accepted: boolean, label: string, description: string }) => (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className={`flex items-center ${accepted ? 'text-green-600' : 'text-red-600'} font-medium`}>
-            {accepted ? (
-              <Check className="w-5 h-5 mr-2 stroke-2" />
-            ) : (
-              <X className="w-5 h-5 mr-2 stroke-2" />
-            )}
-            <span>{accepted ? 'Accepté' : 'Non accepté'}</span>
-          </div>
-          <span className="font-medium">{label}</span>
+  const CommitmentStatus = ({ description, label }: { description: string, label: string }) => (
+    <div className="space-y-4">
+      <div className="flex items-center space-x-3">
+        <div className="flex items-center text-green-600 font-medium">
+          <Check className="w-5 h-5 mr-2 stroke-2" />
+          <span>Accepté</span>
         </div>
+        <span className="text-sm text-gray-700">{label}</span>
       </div>
       <Alert>
         <AlertDescription className="text-sm text-muted-foreground">
@@ -155,12 +149,14 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Engagements et consentements</h2>
-        {mostRecentAcceptanceDate && (
-          <p className="text-sm text-gray-500 mb-4">
-            Accepté le {format(new Date(mostRecentAcceptanceDate), 'dd MMMM yyyy', { locale: fr })}
-          </p>
-        )}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Engagements</h2>
+          {mostRecentAcceptanceDate && (
+            <p className="text-sm text-gray-500">
+              Engagements acceptés le {format(new Date(mostRecentAcceptanceDate), "d MMMM yyyy", { locale: fr })}
+            </p>
+          )}
+        </div>
         <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
           {isLoadingConsents ? (
             <div className="animate-pulse space-y-4">
@@ -172,7 +168,6 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
             consents?.map((consent) => (
               <div key={consent.id}>
                 <CommitmentStatus 
-                  accepted={consent.accepted}
                   label={consent.consent_type.label}
                   description={consent.consent_type.description}
                 />
