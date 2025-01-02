@@ -28,12 +28,33 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       terms_accepted: false,
       customs_terms_accepted: false,
       responsibility_terms_accepted: false,
+      password: "",
     },
   });
 
   async function onSubmit(values: FormValues) {
     try {
-      const { error } = await supabase
+      // Créer d'abord l'utilisateur avec Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            first_name: values.firstName,
+            last_name: values.lastName,
+            user_type: 'carrier'
+          },
+        }
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
+
+      // Ensuite, créer la demande d'inscription
+      const { error: registrationError } = await supabase
         .from('carrier_registration_requests')
         .insert({
           email: values.email,
@@ -52,7 +73,26 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
           avatar_url: values.avatar_url,
         });
 
-      if (error) throw error;
+      if (registrationError) throw registrationError;
+
+      // Créer l'entrée dans la table carriers
+      const { error: carrierError } = await supabase
+        .from('carriers')
+        .insert({
+          id: authData.user.id,
+          email: values.email,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          company_name: values.companyName,
+          siret: values.siret,
+          phone: values.phone,
+          phone_secondary: values.phoneSecondary,
+          address: values.address,
+          coverage_area: values.coverageArea,
+          status: 'pending'
+        });
+
+      if (carrierError) throw carrierError;
 
       toast({
         title: "Demande envoyée avec succès",
@@ -61,6 +101,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       
       onSuccess();
     } catch (error: any) {
+      console.error("Erreur complète:", error);
       toast({
         variant: "destructive",
         title: "Erreur",

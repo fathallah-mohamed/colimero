@@ -1,5 +1,5 @@
 import { MapPin } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 
 interface TourCollectionPointsProps {
@@ -17,14 +17,12 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
   const formatDate = (dateString: string) => {
     try {
       // Ensure we have a valid date string
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        console.error("Invalid date:", dateString);
-        return "Date non disponible";
-      }
-      return format(date, "EEEE d MMMM yyyy", { locale: fr });
+      const date = typeof dateString === 'string' ? parseISO(dateString) : new Date(dateString);
+      return format(date, "EEEE d MMMM yyyy", {
+        locale: fr,
+      });
     } catch (error) {
-      console.error("Error formatting date:", error);
+      console.error("Error formatting date:", error, dateString);
       return "Date non disponible";
     }
   };
@@ -52,8 +50,10 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
             </a>
           </div>
           <div className="text-gray-600">
-            <div>{formatDate(stop.collection_date)}</div>
-            <div>{stop.time}</div>
+            <div>
+              {stop.collection_date ? formatDate(stop.collection_date) : "Date non disponible"}
+            </div>
+            <div>{stop.time || "Heure non disponible"}</div>
           </div>
           <div className="flex justify-center">
             <input
