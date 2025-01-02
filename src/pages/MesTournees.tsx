@@ -46,49 +46,51 @@ export default function MesTournees() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-12">
           <h1 className="text-3xl font-bold">Mes tournées</h1>
           <Button onClick={() => navigate('/planifier-une-tournee')}>
             Créer une nouvelle tournée
           </Button>
         </div>
 
-        <div className="mb-6">
-          <TourFilters
-            departureCountry={departureCountry}
-            destinationCountry={destinationCountry}
-            sortBy={sortBy}
-            onDepartureChange={setDepartureCountry}
-            onDestinationChange={setDestinationCountry}
-            onSortChange={setSortBy}
-          />
+        <div className="space-y-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <TourFilters
+              departureCountry={departureCountry}
+              destinationCountry={destinationCountry}
+              sortBy={sortBy}
+              onDepartureChange={setDepartureCountry}
+              onDestinationChange={setDestinationCountry}
+              onSortChange={setSortBy}
+            />
+          </div>
+
+          <Tabs defaultValue="upcoming" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upcoming">Tournées à venir</TabsTrigger>
+              <TabsTrigger value="completed">Tournées terminées</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upcoming" className="space-y-6">
+              <ToursList
+                tours={upcomingTours}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onStatusChange={handleStatusChange}
+              />
+            </TabsContent>
+
+            <TabsContent value="completed" className="space-y-6">
+              <ToursList
+                tours={completedTours}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onStatusChange={handleStatusChange}
+                isCompleted={true}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-
-        <Tabs defaultValue="upcoming" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="upcoming">Tournées à venir</TabsTrigger>
-            <TabsTrigger value="completed">Tournées terminées</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="upcoming">
-            <ToursList
-              tours={upcomingTours}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onStatusChange={handleStatusChange}
-            />
-          </TabsContent>
-
-          <TabsContent value="completed">
-            <ToursList
-              tours={completedTours}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onStatusChange={handleStatusChange}
-              isCompleted={true}
-            />
-          </TabsContent>
-        </Tabs>
 
         <TourEditDialog
           isOpen={isEditDialogOpen}
