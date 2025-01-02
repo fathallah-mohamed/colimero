@@ -1,6 +1,7 @@
 import { ProfileData } from "@/types/profile";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
 import { CommitmentsSection } from "./CommitmentsSection";
+import { ServicesSection } from "./ServicesSection";
 import { Building2, Mail, MapPin, Phone, User, Wallet, Weight, Euro } from "lucide-react";
 
 interface CarrierProfileViewProps {
@@ -119,6 +120,9 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
           value={`${profile.carrier_capacities?.price_per_kg || "-"} €`} 
         />
       </div>
+
+      {/* Section Services */}
+      <ServicesSection profile={profile} onUpdate={() => window.location.reload()} />
 
       <CommitmentsSection profile={profile} />
     </div>
