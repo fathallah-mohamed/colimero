@@ -24,10 +24,10 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
 
         {/* Barre de progression */}
         <div>
-          <div className="h-2.5 bg-emerald-500 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className="h-full transition-all bg-slate-400"
-              style={{ width: `${100 - remainingPercentage}%` }}
+              className="h-full transition-all bg-emerald-500"
+              style={{ width: `${remainingPercentage}%` }}
             />
           </div>
         </div>
