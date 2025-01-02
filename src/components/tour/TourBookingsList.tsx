@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCard } from "../booking/BookingCard";
 import { BookingFilters } from "./booking/BookingFilters";
-import type { BookingStatus } from "@/types/booking";
+import type { BookingStatus, BookingFilterStatus } from "@/types/booking";
 
 interface TourBookingsListProps {
   tourId: number;
@@ -13,7 +13,7 @@ interface TourBookingsListProps {
 export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) {
   const [bookings, setBookings] = useState<any[]>([]);
   const [selectedCity, setSelectedCity] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState<BookingStatus | ''>('all');
+  const [selectedStatus, setSelectedStatus] = useState<BookingFilterStatus>('all');
   const [selectedSort, setSelectedSort] = useState('date_desc');
   const { toast } = useToast();
 
@@ -64,7 +64,7 @@ export function TourBookingsList({ tourId, tourStatus }: TourBookingsListProps) 
       filtered = filtered.filter(b => b.delivery_city === selectedCity);
     }
 
-    if (selectedStatus && selectedStatus !== 'all') {
+    if (selectedStatus !== 'all') {
       filtered = filtered.filter(b => b.status === selectedStatus);
     }
 

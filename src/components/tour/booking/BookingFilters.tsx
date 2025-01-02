@@ -1,13 +1,13 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { BookingStatus } from "@/types/booking";
+import type { BookingStatus, BookingFilterStatus } from "@/types/booking";
 
 interface BookingFiltersProps {
   cities: string[];
   onCityChange: (city: string) => void;
-  onStatusChange: (status: BookingStatus | '') => void;
+  onStatusChange: (status: BookingFilterStatus) => void;
   onSortChange: (sort: string) => void;
   selectedCity: string;
-  selectedStatus: BookingStatus | '';
+  selectedStatus: BookingFilterStatus;
   selectedSort: string;
 }
 
@@ -39,7 +39,7 @@ export function BookingFilters({
       </div>
 
       <div className="flex-1">
-        <Select value={selectedStatus} onValueChange={(value) => onStatusChange(value as BookingStatus)}>
+        <Select value={selectedStatus} onValueChange={onStatusChange}>
           <SelectTrigger>
             <SelectValue placeholder="Filtrer par statut" />
           </SelectTrigger>
