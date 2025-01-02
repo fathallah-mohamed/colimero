@@ -36,7 +36,7 @@ export function RegisterTerms({
   }
 
   return (
-    <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2">
+    <div className="space-y-4">
       {consentTypes.map((consent) => (
         <div key={consent.id} className="flex items-start space-x-2">
           <Checkbox
