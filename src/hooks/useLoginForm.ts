@@ -31,25 +31,22 @@ export function useLoginForm(onSuccess?: () => void) {
     try {
       console.log("Tentative de connexion pour:", email.trim());
 
-      // Clear any existing session first
-      await supabase.auth.signOut();
-
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password.trim(),
+        password: password.trim()
       });
 
       if (signInError) {
         console.error("Erreur d'authentification:", signInError);
         
         if (signInError.message === "Invalid login credentials") {
-          setError("Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.");
+          setError("Email ou mot de passe incorrect");
         } else if (signInError.message === "Email not confirmed") {
-          setError("Veuillez confirmer votre email avant de vous connecter.");
+          setError("Veuillez confirmer votre email avant de vous connecter");
         } else if (signInError.message.includes("Invalid email")) {
-          setError("Format d'email invalide. Veuillez vérifier votre adresse email.");
+          setError("Format d'email invalide");
         } else {
-          setError("Une erreur est survenue lors de la connexion. Veuillez réessayer.");
+          setError("Une erreur est survenue lors de la connexion");
         }
         
         setPassword("");
@@ -94,9 +91,6 @@ export function useLoginForm(onSuccess?: () => void) {
         case 'carrier':
           navigate("/mes-tournees");
           break;
-        case 'client':
-          navigate("/mes-reservations");
-          break;
         default:
           navigate("/");
       }
@@ -105,7 +99,7 @@ export function useLoginForm(onSuccess?: () => void) {
 
     } catch (error: any) {
       console.error("Erreur complète:", error);
-      setError("Une erreur inattendue est survenue. Veuillez réessayer plus tard.");
+      setError("Une erreur inattendue est survenue");
     } finally {
       setIsLoading(false);
     }
