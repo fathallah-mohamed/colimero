@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
+import { LucideIcon } from "lucide-react";
 
 export interface MenuItem {
   name: string;
   href: string;
   highlight?: boolean;
+  icon?: LucideIcon;
   onClick?: (e: React.MouseEvent) => void;
 }
 
@@ -24,13 +26,10 @@ export function MenuItems({ items, className = "", onItemClick }: MenuItemsProps
             if (onItemClick) onItemClick();
             if (item.onClick) item.onClick(e);
           }}
-          className={`${className} ${
-            item.highlight
-              ? "text-[#00B0F0] font-medium"
-              : "text-gray-700 hover:text-gray-900"
-          }`}
+          className={`${className} flex items-center space-x-2`}
         >
-          {item.name}
+          {item.icon && <item.icon className="w-4 h-4" />}
+          <span>{item.name}</span>
         </Link>
       ))}
     </>

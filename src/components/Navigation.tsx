@@ -26,31 +26,7 @@ export default function Navigation() {
           </button>
 
           <div className="hidden md:flex md:items-center md:space-x-8">
-            <Link 
-              to="/envoyer-colis" 
-              className="flex items-center space-x-2 text-gray-700 hover:text-[#00B0F0] transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-[#00B0F0] after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left"
-            >
-              <Package2 className="w-4 h-4" />
-              <span>Envoyer un colis</span>
-            </Link>
-            
-            <Link 
-              to="/transporteurs" 
-              className="flex items-center space-x-2 text-gray-700 hover:text-[#00B0F0] transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-[#00B0F0] after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left"
-            >
-              <Truck className="w-4 h-4" />
-              <span>Transporteurs</span>
-            </Link>
-            
-            <Link 
-              to="/tours" 
-              className="flex items-center space-x-2 text-gray-700 hover:text-[#00B0F0] transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-[#00B0F0] after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left"
-            >
-              <Calendar className="w-4 h-4" />
-              <span>Tournées</span>
-            </Link>
-
-            <MenuItems items={menuItems} className="flex items-center space-x-2 text-gray-700 hover:text-[#00B0F0] transition-all duration-300" />
+            <MenuItems items={menuItems} className="flex items-center space-x-2 text-gray-700 hover:text-[#00B0F0] transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-[#00B0F0] after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left" />
             
             {!user ? (
               <Button 
