@@ -6,7 +6,7 @@ import { AlertCircle } from "lucide-react";
 interface LoginFormFieldsProps {
   email: string;
   password: string;
-  isLoading: boolean;
+  isLoading?: boolean;
   error?: string | null;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -15,7 +15,7 @@ interface LoginFormFieldsProps {
 export function LoginFormFields({
   email,
   password,
-  isLoading,
+  isLoading = false,
   error,
   onEmailChange,
   onPasswordChange,

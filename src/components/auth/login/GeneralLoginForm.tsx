@@ -29,10 +29,11 @@ export function GeneralLoginForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <LoginFormFields
         email={email}
-        setEmail={setEmail}
         password={password}
-        setPassword={setPassword}
+        isLoading={isLoading}
         error={error}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
       />
 
       <div className="flex flex-col space-y-4">
