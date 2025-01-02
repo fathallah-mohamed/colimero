@@ -20,31 +20,24 @@ export const DeleteAccountButton = () => {
   const { toast } = useToast();
 
   const handleDeleteProfile = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez être connecté pour supprimer votre profil",
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { deleted: true }
       });
-      return;
-    }
 
-    const { error } = await supabase.auth.admin.deleteUser(session.user.id);
+      if (error) throw error;
 
-    if (error) {
+      await supabase.auth.signOut();
+      navigate('/');
+      toast({
+        title: "Compte désactivé",
+        description: "Votre compte a été désactivé avec succès",
+      });
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de supprimer le profil",
-      });
-    } else {
-      await supabase.auth.signOut();
-      navigate('/');
-      toast({
-        title: "Compte supprimé",
-        description: "Votre compte a été définitivement supprimé",
       });
     }
   };
@@ -65,10 +58,10 @@ export const DeleteAccountButton = () => {
           <AlertDialogTitle className="text-xl font-semibold text-gray-900">
             Êtes-vous absolument sûr ?
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2 text-gray-500">
-            <p>Cette action est irréversible et entraînera :</p>
-            <ul className="list-disc pl-4">
-              <li>La suppression définitive de votre compte</li>
+          <AlertDialogDescription>
+            <p className="text-gray-500 mb-2">Cette action est irréversible et entraînera :</p>
+            <ul className="list-disc pl-6 text-gray-500 space-y-1">
+              <li>La désactivation définitive de votre compte</li>
               <li>La perte de toutes vos données</li>
               <li>La déconnexion immédiate</li>
               <li>La redirection vers la page d'accueil</li>
