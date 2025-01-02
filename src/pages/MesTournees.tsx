@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { TourEditDialog } from "@/components/tour/TourEditDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToursList } from "@/components/tour/ToursList";
+import { TourFilters } from "@/components/tour/TourFilters";
 import { useTours } from "@/hooks/use-tours";
 import { useNavigate } from "react-router-dom";
 
@@ -14,6 +15,12 @@ export default function MesTournees() {
     tours,
     selectedTour,
     isEditDialogOpen,
+    departureCountry,
+    destinationCountry,
+    sortBy,
+    setDepartureCountry,
+    setDestinationCountry,
+    setSortBy,
     setIsEditDialogOpen,
     handleDelete,
     handleEdit,
@@ -44,6 +51,17 @@ export default function MesTournees() {
           <Button onClick={() => navigate('/planifier-une-tournee')}>
             Créer une nouvelle tournée
           </Button>
+        </div>
+
+        <div className="mb-6">
+          <TourFilters
+            departureCountry={departureCountry}
+            destinationCountry={destinationCountry}
+            sortBy={sortBy}
+            onDepartureChange={setDepartureCountry}
+            onDestinationChange={setDestinationCountry}
+            onSortChange={setSortBy}
+          />
         </div>
 
         <Tabs defaultValue="upcoming" className="space-y-6">

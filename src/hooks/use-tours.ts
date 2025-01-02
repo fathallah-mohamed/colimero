@@ -9,12 +9,15 @@ export function useTours() {
   const [tours, setTours] = useState<any[]>([]);
   const [selectedTour, setSelectedTour] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [departureCountry, setDepartureCountry] = useState("FR");
+  const [destinationCountry, setDestinationCountry] = useState("TN");
+  const [sortBy, setSortBy] = useState("date_desc");
   const { toast } = useToast();
 
   useEffect(() => {
     checkUser();
     fetchTours();
-  }, []);
+  }, [departureCountry, destinationCountry, sortBy]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -26,7 +29,7 @@ export function useTours() {
   const fetchTours = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
-      const { data: toursData, error: toursError } = await supabase
+      let query = supabase
         .from('tours')
         .select(`
           *,
@@ -42,7 +45,26 @@ export function useTours() {
           )
         `)
         .eq('carrier_id', session.user.id)
-        .order('departure_date', { ascending: true });
+        .eq('departure_country', departureCountry)
+        .eq('destination_country', destinationCountry);
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'date_asc':
+          query = query.order('departure_date', { ascending: true });
+          break;
+        case 'date_desc':
+          query = query.order('departure_date', { ascending: false });
+          break;
+        case 'capacity_asc':
+          query = query.order('remaining_capacity', { ascending: true });
+          break;
+        case 'capacity_desc':
+          query = query.order('remaining_capacity', { ascending: false });
+          break;
+      }
+
+      const { data: toursData, error: toursError } = await query;
 
       if (toursError) {
         console.error('Error fetching tours:', toursError);
@@ -145,6 +167,12 @@ export function useTours() {
     tours,
     selectedTour,
     isEditDialogOpen,
+    departureCountry,
+    destinationCountry,
+    sortBy,
+    setDepartureCountry,
+    setDestinationCountry,
+    setSortBy,
     setIsEditDialogOpen,
     handleDelete,
     handleEdit,

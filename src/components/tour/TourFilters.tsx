@@ -4,8 +4,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface TourFiltersProps {
   departureCountry: string;
   destinationCountry: string;
+  sortBy: string;
   onDepartureChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
+  onSortChange: (value: string) => void;
 }
 
 const MAGHREB_COUNTRIES = ["TN", "DZ", "MA"];
@@ -20,8 +22,10 @@ const countryNames: { [key: string]: string } = {
 export function TourFilters({
   departureCountry,
   destinationCountry,
+  sortBy,
   onDepartureChange,
   onDestinationChange,
+  onSortChange,
 }: TourFiltersProps) {
   const handleSwitch = () => {
     // Allow switching if either country is France, or if one is France and the other is Maghreb
@@ -88,6 +92,23 @@ export function TourFilters({
               ) : (
                 <SelectItem value="FR">{countryNames.FR}</SelectItem>
               )}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1">
+          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+            Trier par
+          </label>
+          <Select value={sortBy} onValueChange={onSortChange}>
+            <SelectTrigger className="w-full bg-white">
+              <SelectValue placeholder="Trier par" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date_asc">Date (ancien → récent)</SelectItem>
+              <SelectItem value="date_desc">Date (récent → ancien)</SelectItem>
+              <SelectItem value="capacity_asc">Capacité (croissant)</SelectItem>
+              <SelectItem value="capacity_desc">Capacité (décroissant)</SelectItem>
             </SelectContent>
           </Select>
         </div>
