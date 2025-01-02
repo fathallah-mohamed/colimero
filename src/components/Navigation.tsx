@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Package, Users } from "lucide-react";
+import { Menu, X, Package, Users, MessageSquare, Truck, Calendar } from "lucide-react";
 import { AccountMenu } from "./navigation/AccountMenu";
 import { MenuItems } from "./navigation/MenuItems";
 import { MobileMenu } from "./navigation/MobileMenu";
@@ -8,10 +8,16 @@ import { useNavigation } from "./navigation/useNavigation";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, userType } = useNavigation();
+  const { user, userType, handleLogout } = useNavigation();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const menuItems = [
+    { 
+      name: "Planifier une tournée",
+      href: "/planifier-une-tournee",
+      highlight: true,
+      icon: <Calendar className="w-4 h-4" />
+    },
     { 
       name: "Envoyer un colis",
       href: "/envoyer-un-colis",
@@ -21,6 +27,16 @@ export default function Navigation() {
     { 
       name: "Nos transporteurs",
       href: "/nos-transporteurs",
+      icon: <Truck className="w-4 h-4" />
+    },
+    { 
+      name: "Actualités",
+      href: "/actualites",
+      icon: <MessageSquare className="w-4 h-4" />
+    },
+    { 
+      name: "Contact",
+      href: "/nous-contacter",
       icon: <Users className="w-4 h-4" />
     }
   ];
@@ -50,6 +66,7 @@ export default function Navigation() {
               userType={userType} 
               showAuthDialog={showAuthDialog}
               setShowAuthDialog={setShowAuthDialog}
+              onLogout={handleLogout}
             />
             
             <button
@@ -68,7 +85,7 @@ export default function Navigation() {
           items={menuItems}
           user={user}
           userType={userType}
-          onLogout={() => {}}
+          onLogout={handleLogout}
           onClose={handleClose}
         />
       </div>
