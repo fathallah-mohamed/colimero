@@ -28,14 +28,17 @@ export function MenuItems({ items, className = "", onItemClick }: MenuItemsProps
               if (onItemClick) onItemClick();
               if (item.onClick) item.onClick(e);
             }}
-            className={`${className} flex items-center gap-2 transition-colors duration-200 hover:text-primary ${
+            className={`${className} group flex items-center gap-2 py-2 transition-colors duration-200 hover:text-primary relative ${
               item.highlight
                 ? "text-primary font-medium"
-                : "text-gray-700 hover:text-primary"
+                : "text-gray-600 hover:text-primary"
             }`}
           >
             {Icon && <Icon className="h-4 w-4" />}
-            <span>{item.name}</span>
+            <span className="relative">
+              {item.name}
+              <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover:w-full" />
+            </span>
           </Link>
         );
       })}
