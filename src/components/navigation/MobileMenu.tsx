@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { MenuItem } from "./MenuItems";
 import { User } from "@supabase/supabase-js";
 import { Button } from "../ui/button";
+import { Package, Truck, Calendar, Users, Info, MessageSquare, UserCircle2 } from "lucide-react";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -13,11 +14,20 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }: MobileMenuProps) {
+  const icons = {
+    "Planifier une tournée": <Calendar className="w-4 h-4" />,
+    "Envoyer un colis": <Package className="w-4 h-4" />,
+    "Transporteurs": <Truck className="w-4 h-4" />,
+    "Actualités": <MessageSquare className="w-4 h-4" />,
+    "À propos": <Info className="w-4 h-4" />,
+    "Contact": <Users className="w-4 h-4" />,
+  };
+
   return (
     <div
       className={`${
         isOpen ? "block" : "hidden"
-      } md:hidden absolute top-16 inset-x-0 bg-white shadow-lg z-50`}
+      } md:hidden fixed top-16 inset-x-0 bg-white shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-y-auto`}
     >
       <div className="px-2 pt-2 pb-3 space-y-1">
         {items.map((item) => (
@@ -28,23 +38,25 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
               onClose();
               if (item.onClick) item.onClick(e);
             }}
-            className={`block px-3 py-2 rounded-md text-base font-medium ${
+            className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
               item.highlight
-                ? "text-[#00B0F0]"
-                : "text-gray-700 hover:text-gray-900"
+                ? "text-[#00B0F0] hover:text-[#0082b3] hover:bg-gray-50"
+                : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
-            {item.name}
+            {icons[item.name as keyof typeof icons]}
+            <span>{item.name}</span>
           </Link>
         ))}
         {user ? (
           <>
             <Link
               to="/profil"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900"
+              className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
               onClick={onClose}
             >
-              Profil
+              <UserCircle2 className="w-4 h-4" />
+              <span>Profil</span>
             </Link>
             {userType === 'carrier' ? (
               <>
@@ -93,8 +105,11 @@ export function MobileMenu({ isOpen, items, user, userType, onLogout, onClose }:
           </>
         ) : (
           <div className="mt-4 px-3">
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/connexion">Se connecter</Link>
+            <Button asChild variant="outline" className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white">
+              <Link to="/connexion" className="flex items-center justify-center">
+                <UserCircle2 className="w-4 h-4 mr-2" />
+                Se connecter
+              </Link>
             </Button>
           </div>
         )}

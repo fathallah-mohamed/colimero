@@ -11,6 +11,7 @@ import {
 import { User } from "@supabase/supabase-js";
 import { useState } from "react";
 import AuthDialog from "../auth/AuthDialog";
+import { UserCircle2 } from "lucide-react";
 
 interface AccountMenuProps {
   user: User | null;
@@ -26,9 +27,10 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
       <>
         <Button 
           variant="outline" 
-          className="ml-4"
+          className="ml-4 border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200 rounded-md px-6"
           onClick={() => setShowAuthDialog(true)}
         >
+          <UserCircle2 className="w-4 h-4 mr-2" />
           Se connecter
         </Button>
 
@@ -46,7 +48,10 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Mon compte</Button>
+        <Button variant="outline" className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200">
+          <UserCircle2 className="w-4 h-4 mr-2" />
+          Mon compte
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>{menuLabel}</DropdownMenuLabel>
