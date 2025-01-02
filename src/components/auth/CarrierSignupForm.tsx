@@ -28,6 +28,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       terms_accepted: false,
       customs_terms_accepted: false,
       responsibility_terms_accepted: false,
+      password: "",
     },
   });
 
