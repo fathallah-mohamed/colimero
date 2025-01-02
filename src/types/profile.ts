@@ -10,6 +10,8 @@ export interface ProfileData {
   coverage_area?: string[];
   avatar_url?: string | null;
   created_at: string;
+  birth_date?: string;
+  id_document?: string;
   carrier_capacities?: {
     total_capacity: number;
     price_per_kg: number;

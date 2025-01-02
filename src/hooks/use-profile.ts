@@ -75,7 +75,7 @@ export function useProfile() {
         } else {
           const { data, error } = await supabase
             .from('clients')
-            .select('id, first_name, last_name, phone, created_at')
+            .select('id, first_name, last_name, phone, created_at, birth_date, address, id_document')
             .eq('id', session.user.id)
             .single();
 
@@ -87,7 +87,10 @@ export function useProfile() {
               last_name: data.last_name,
               phone: data.phone,
               email: session.user.email,
-              created_at: data.created_at
+              created_at: data.created_at,
+              birth_date: data.birth_date,
+              address: data.address,
+              id_document: data.id_document
             };
             setProfile(profileData);
           }

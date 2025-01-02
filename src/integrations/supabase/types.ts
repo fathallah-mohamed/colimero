@@ -538,30 +538,39 @@ export type Database = {
       }
       clients: {
         Row: {
+          address: string | null
+          birth_date: string | null
           created_at: string
           email_verified: boolean | null
           first_name: string | null
           id: string
+          id_document: string | null
           last_name: string | null
           phone: string | null
           terms_accepted: boolean | null
           terms_accepted_at: string | null
         }
         Insert: {
+          address?: string | null
+          birth_date?: string | null
           created_at?: string
           email_verified?: boolean | null
           first_name?: string | null
           id: string
+          id_document?: string | null
           last_name?: string | null
           phone?: string | null
           terms_accepted?: boolean | null
           terms_accepted_at?: string | null
         }
         Update: {
+          address?: string | null
+          birth_date?: string | null
           created_at?: string
           email_verified?: boolean | null
           first_name?: string | null
           id?: string
+          id_document?: string | null
           last_name?: string | null
           phone?: string | null
           terms_accepted?: boolean | null
