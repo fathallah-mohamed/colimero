@@ -2,6 +2,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import CarrierSignupForm from "./CarrierSignupForm";
+import { Heading } from "@/components/ui/heading";
 
 interface CarrierAuthDialogProps {
   isOpen: boolean;
@@ -29,6 +30,9 @@ export default function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialog
           }}
         >
           <div className="pb-20 md:pb-6">
+            <Heading level={2} className="mb-6 text-center">
+              Créer un compte transporteur
+            </Heading>
             <CarrierSignupForm onSuccess={onClose} />
           </div>
         </ScrollArea>
