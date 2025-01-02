@@ -13,10 +13,10 @@ interface TransporteurServicesProps {
 }
 
 const SERVICE_LABELS: { [key: string]: string } = {
-  'transport_standard': 'Transport standard',
-  'transport_volumineux': 'Transport volumineux',
   'livraison_express': 'Livraison express',
   'livraison_domicile': 'Livraison à domicile',
+  'transport_standard': 'Transport standard',
+  'transport_volumineux': 'Transport volumineux',
   'collecte_programmee': 'Collecte programmée'
 };
 
