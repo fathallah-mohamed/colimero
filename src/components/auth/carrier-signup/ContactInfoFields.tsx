@@ -3,23 +3,23 @@ import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import type { CarrierSignupFormValues } from "./FormSchema";
 
-interface CompanyInfoFieldsProps {
+interface ContactInfoFieldsProps {
   form: UseFormReturn<CarrierSignupFormValues>;
 }
 
-export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
+export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Informations de l'entreprise</h3>
-      <div className="grid grid-cols-1 gap-4">
+      <h3 className="text-lg font-medium">Informations de contact</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="company_name"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom de l'entreprise</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="Nom de votre entreprise" {...field} />
+                <Input type="email" placeholder="votre@email.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -27,12 +27,12 @@ export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
         />
         <FormField
           control={form.control}
-          name="siret"
+          name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>SIRET</FormLabel>
+              <FormLabel>Mot de passe</FormLabel>
               <FormControl>
-                <Input placeholder="Numéro SIRET" {...field} />
+                <Input type="password" placeholder="********" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -40,12 +40,25 @@ export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
         />
         <FormField
           control={form.control}
-          name="address"
+          name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Adresse</FormLabel>
+              <FormLabel>Téléphone principal</FormLabel>
               <FormControl>
-                <Input placeholder="Adresse complète" {...field} />
+                <Input placeholder="+33 6 XX XX XX XX" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone_secondary"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
+              <FormControl>
+                <Input placeholder="+33 6 XX XX XX XX" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
