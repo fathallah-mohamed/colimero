@@ -33,6 +33,9 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
       phone_secondary: "",
       coverage_area: [],
       services: [],
+      total_capacity: 0,
+      price_per_kg: 0,
+      avatar_url: null,
       terms_accepted: false,
       customs_declaration: false,
       responsibility_terms_accepted: false,
@@ -88,6 +91,9 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
     }
   };
 
+  const allTermsAccepted = form.watch(['terms_accepted', 'customs_declaration', 'responsibility_terms_accepted'])
+    .every(value => value === true);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -103,7 +109,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
         <Button 
           type="submit" 
           className="w-full"
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || !allTermsAccepted}
         >
           S'inscrire
         </Button>
