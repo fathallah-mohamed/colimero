@@ -11,31 +11,34 @@ export type Database = {
     Tables: {
       administrators: {
         Row: {
-          address: string | null
+          address: string
           created_at: string
           email: string
-          first_name: string | null
+          first_name: string
           id: string
-          last_name: string | null
+          last_name: string
           phone: string | null
+          updated_at: string
         }
         Insert: {
-          address?: string | null
+          address: string
           created_at?: string
           email: string
-          first_name?: string | null
+          first_name: string
           id: string
-          last_name?: string | null
+          last_name: string
           phone?: string | null
+          updated_at?: string
         }
         Update: {
-          address?: string | null
+          address?: string
           created_at?: string
           email?: string
-          first_name?: string | null
+          first_name?: string
           id?: string
-          last_name?: string | null
+          last_name?: string
           phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -312,11 +315,15 @@ export type Database = {
       carrier_registration_requests: {
         Row: {
           address: string
+          authorized_routes: Json | null
           avatar_url: string | null
+          cities_covered: number | null
+          company_details: Json | null
           company_name: string
-          coverage_area: string[] | null
+          coverage_area: string[]
           created_at: string
           email: string
+          email_verified: boolean | null
           first_name: string
           id: string
           last_name: string
@@ -328,15 +335,20 @@ export type Database = {
           siret: string
           status: string
           total_capacity: number | null
+          total_deliveries: number | null
           updated_at: string
         }
         Insert: {
           address: string
+          authorized_routes?: Json | null
           avatar_url?: string | null
+          cities_covered?: number | null
+          company_details?: Json | null
           company_name: string
-          coverage_area?: string[] | null
+          coverage_area?: string[]
           created_at?: string
           email: string
+          email_verified?: boolean | null
           first_name: string
           id?: string
           last_name: string
@@ -348,15 +360,20 @@ export type Database = {
           siret: string
           status?: string
           total_capacity?: number | null
+          total_deliveries?: number | null
           updated_at?: string
         }
         Update: {
           address?: string
+          authorized_routes?: Json | null
           avatar_url?: string | null
+          cities_covered?: number | null
+          company_details?: Json | null
           company_name?: string
-          coverage_area?: string[] | null
+          coverage_area?: string[]
           created_at?: string
           email?: string
+          email_verified?: boolean | null
           first_name?: string
           id?: string
           last_name?: string
@@ -368,6 +385,7 @@ export type Database = {
           siret?: string
           status?: string
           total_capacity?: number | null
+          total_deliveries?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -412,64 +430,64 @@ export type Database = {
       }
       carriers: {
         Row: {
-          address: string | null
-          authorized_routes: Json | null
-          avatar_url: string | null
-          cities_covered: number | null
-          company_details: Json | null
-          company_name: string | null
-          coverage_area: string[] | null
+          address: string
+          authorized_routes: Json
+          avatar_url: string
+          cities_covered: number
+          company_details: Json
+          company_name: string
+          coverage_area: string[]
           created_at: string
-          email: string | null
-          email_verified: boolean | null
-          first_name: string | null
+          email: string
+          email_verified: boolean
+          first_name: string
           id: string
-          last_name: string | null
-          phone: string | null
-          phone_secondary: string | null
-          siret: string | null
-          status: string | null
-          total_deliveries: number | null
+          last_name: string
+          phone: string
+          phone_secondary: string
+          siret: string
+          status: string
+          total_deliveries: number
         }
         Insert: {
-          address?: string | null
-          authorized_routes?: Json | null
-          avatar_url?: string | null
-          cities_covered?: number | null
-          company_details?: Json | null
-          company_name?: string | null
-          coverage_area?: string[] | null
+          address: string
+          authorized_routes?: Json
+          avatar_url?: string
+          cities_covered?: number
+          company_details?: Json
+          company_name: string
+          coverage_area?: string[]
           created_at?: string
-          email?: string | null
-          email_verified?: boolean | null
-          first_name?: string | null
+          email: string
+          email_verified?: boolean
+          first_name: string
           id: string
-          last_name?: string | null
-          phone?: string | null
-          phone_secondary?: string | null
-          siret?: string | null
-          status?: string | null
-          total_deliveries?: number | null
+          last_name: string
+          phone: string
+          phone_secondary?: string
+          siret: string
+          status?: string
+          total_deliveries?: number
         }
         Update: {
-          address?: string | null
-          authorized_routes?: Json | null
-          avatar_url?: string | null
-          cities_covered?: number | null
-          company_details?: Json | null
-          company_name?: string | null
-          coverage_area?: string[] | null
+          address?: string
+          authorized_routes?: Json
+          avatar_url?: string
+          cities_covered?: number
+          company_details?: Json
+          company_name?: string
+          coverage_area?: string[]
           created_at?: string
-          email?: string | null
-          email_verified?: boolean | null
-          first_name?: string | null
+          email?: string
+          email_verified?: boolean
+          first_name?: string
           id?: string
-          last_name?: string | null
-          phone?: string | null
-          phone_secondary?: string | null
-          siret?: string | null
-          status?: string | null
-          total_deliveries?: number | null
+          last_name?: string
+          phone?: string
+          phone_secondary?: string
+          siret?: string
+          status?: string
+          total_deliveries?: number
         }
         Relationships: []
       }
@@ -871,6 +889,12 @@ export type Database = {
         }
         Returns: undefined
       }
+      generate_company_name: {
+        Args: {
+          id: string
+        }
+        Returns: string
+      }
       generate_diverse_tours: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -925,6 +949,7 @@ export type Database = {
         | "Montpellier"
         | "Gênes"
       moroccan_city: "Casablanca" | "Rabat" | "Tanger" | "Marrakech" | "Agadir"
+      registration_status: "pending" | "approved" | "rejected"
       tour_status:
         | "planned"
         | "collecting"
