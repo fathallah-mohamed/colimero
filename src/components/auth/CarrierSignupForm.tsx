@@ -30,7 +30,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
       phone_secondary: "",
       avatar_url: null,
       terms_accepted: false,
-      customs_terms_accepted: false,
+      customs_declaration: false,
       responsibility_terms_accepted: false,
       password: "",
     },
@@ -111,7 +111,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
     }
   };
 
-  const allTermsAccepted = form.watch(['terms_accepted', 'customs_terms_accepted', 'responsibility_terms_accepted'])
+  const allTermsAccepted = form.watch(['terms_accepted', 'customs_declaration', 'responsibility_terms_accepted'])
     .every(value => value === true);
 
   return (
