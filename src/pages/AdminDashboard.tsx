@@ -16,32 +16,47 @@ export default function AdminDashboard() {
   }, []);
 
   const checkAdminAccess = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      navigate("/connexion");
-      return;
-    }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/connexion");
+        return;
+      }
 
-    // Vérifier si l'utilisateur est un administrateur
-    const { data: adminData, error: adminError } = await supabase
-      .from('administrators')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
+      // Vérifier si l'utilisateur est un administrateur
+      const { data: adminData, error: adminError } = await supabase
+        .from('administrators')
+        .select('*')
+        .eq('id', session.user.id)
+        .maybeSingle();
 
-    if (adminError || !adminData) {
-      console.error('Erreur de vérification admin:', adminError);
+      if (adminError) {
+        console.error('Erreur de vérification admin:', adminError);
+        throw adminError;
+      }
+
+      if (!adminData) {
+        console.error('Accès refusé: utilisateur non administrateur');
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Vous n'avez pas les droits d'accès à cette page.",
+        });
+        navigate("/");
+        return;
+      }
+
+      console.log('Données admin trouvées:', adminData);
+    } catch (error) {
+      console.error('Erreur de vérification admin:', error);
       toast({
         variant: "destructive",
-        title: "Accès refusé",
-        description: "Vous n'avez pas les droits d'accès à cette page.",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la vérification de vos droits d'accès.",
       });
       navigate("/");
-      return;
     }
-
-    console.log('Données admin trouvées:', adminData);
   };
 
   return (
