@@ -34,6 +34,7 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="hidden md:flex md:items-center md:space-x-4">
+                <span className="text-sm text-gray-600">{user.email}</span>
                 {userMenuItems.map((item) => (
                   <Link
                     key={item.name}

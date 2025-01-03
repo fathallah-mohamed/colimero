@@ -42,6 +42,9 @@ export default function MobileMenu({
 
         {user ? (
           <div className="border-t border-gray-200 pt-4 mt-4">
+            <div className="px-3 py-2 text-sm text-gray-600">
+              {user.email}
+            </div>
             {userMenuItems.map((item) => (
               <Link
                 key={item.name}
