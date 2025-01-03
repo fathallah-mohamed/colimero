@@ -1,44 +1,58 @@
 import { Link } from "react-router-dom";
-import { ReactNode } from "react";
-import { LucideIcon } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
 
-export interface MenuItem {
-  name: string;
-  href: string;
-  highlight?: boolean;
-  icon?: ReactNode;
-  submenu?: MenuItem[];
-  onClick?: (e: React.MouseEvent) => void;
-}
+export const menuItems = [
+  { 
+    name: "Planifier une tournée", 
+    href: "/planifier-une-tournee", 
+    icon: <Calendar className="w-4 h-4" />,
+    highlight: true
+  },
+  { 
+    name: "Envoyer un colis", 
+    href: "/envoyer-un-colis", 
+    icon: <Package className="w-4 h-4" />,
+    highlight: true
+  },
+  { 
+    name: "Transporteurs", 
+    href: "/nos-transporteurs",
+    icon: <Truck className="w-4 h-4" />
+  },
+  { 
+    name: "Actualités", 
+    href: "/actualites",
+    icon: <MessageSquare className="w-4 h-4" />
+  },
+  { 
+    name: "À propos", 
+    href: "/a-propos",
+    icon: <Info className="w-4 h-4" />
+  },
+  { 
+    name: "Contact", 
+    href: "/nous-contacter",
+    icon: <Users className="w-4 h-4" />
+  }
+];
 
-interface MenuItemsProps {
-  items: MenuItem[];
-  className?: string;
-  onItemClick?: () => void;
-}
-
-export function MenuItems({ items, className = "", onItemClick }: MenuItemsProps) {
+export default function MenuItems() {
   return (
-    <>
-      {items.map((item) => (
+    <div className="hidden md:flex md:items-center md:space-x-4">
+      {menuItems.map((item) => (
         <Link
           key={item.name}
           to={item.href}
-          onClick={(e) => {
-            if (onItemClick) onItemClick();
-            if (item.onClick) item.onClick(e);
-          }}
-          className={`${className} group relative flex items-center whitespace-nowrap px-3 py-2 rounded-md transition-all duration-200 ${
-            item.highlight
-              ? "text-[#00B0F0] hover:text-[#0082b3] font-medium"
+          className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors
+            ${item.highlight 
+              ? "text-[#00B0F0] hover:text-[#0082b3]" 
               : "text-gray-700 hover:text-gray-900"
-          }`}
+            }`}
         >
           {item.icon}
-          <span>{item.name}</span>
-          <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#00B0F0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
+          <span className="ml-2">{item.name}</span>
         </Link>
       ))}
-    </>
+    </div>
   );
 }
