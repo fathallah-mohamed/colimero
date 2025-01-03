@@ -2,42 +2,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { CalendarIcon, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { TourFormHeader } from "./form/TourFormHeader";
+import { RouteInformation } from "./form/RouteInformation";
+import { CapacityInformation } from "./form/CapacityInformation";
 import { CollectionPointForm } from "./CollectionPointForm";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Plus } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const formSchema = z.object({
   departure_country: z.string(),
   destination_country: z.string(),
-  departure_date: z.date(),
   total_capacity: z.number().min(1),
   remaining_capacity: z.number().min(0),
   type: z.enum(["public", "private"]),
@@ -93,9 +72,7 @@ export default function CreateTourForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
         toast({
@@ -106,7 +83,6 @@ export default function CreateTourForm() {
         return;
       }
 
-      // Vérifier que toutes les dates de collecte sont antérieures à la date de départ
       const hasInvalidDates = values.route.some(point => {
         const collectionDate = new Date(point.collection_date);
         return collectionDate > values.departure_date;
@@ -134,7 +110,7 @@ export default function CreateTourForm() {
         departure_country: values.departure_country,
         destination_country: values.destination_country,
         departure_date: values.departure_date.toISOString(),
-        collection_date: new Date(values.route[0].collection_date).toISOString(), // Utiliser la première date de collecte comme date de référence
+        collection_date: new Date(values.route[0].collection_date).toISOString(),
         total_capacity: values.total_capacity,
         remaining_capacity: values.remaining_capacity,
         type: values.type,
@@ -161,245 +137,112 @@ export default function CreateTourForm() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="departure_country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Pays de départ</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez un pays" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="FR">France</SelectItem>
-                    <SelectItem value="TN">Tunisie</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <ScrollArea className="h-[calc(100vh-4rem)] px-4">
+      <div className="max-w-3xl mx-auto py-8">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <TourFormHeader />
+            
+            <div className="space-y-6">
+              <RouteInformation form={form} />
+              <CapacityInformation form={form} />
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">Points de collecte</h2>
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      append({
+                        name: "",
+                        location: "",
+                        time: "",
+                        type: "pickup",
+                        collection_date: new Date().toISOString().split('T')[0],
+                      })
+                    }
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Ajouter un point
+                  </Button>
+                </div>
 
-          <FormField
-            control={form.control}
-            name="destination_country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Pays de destination</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez un pays" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="FR">France</SelectItem>
-                    <SelectItem value="TN">Tunisie</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="departure_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date de départ</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: fr })
-                        ) : (
-                          <span>Choisir une date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || date < new Date("1900-01-01")
-                      }
-                      initialFocus
+                <div className="space-y-4">
+                  {fields.map((field, index) => (
+                    <CollectionPointForm
+                      key={field.id}
+                      index={index}
+                      onRemove={remove}
+                      form={form}
+                      departureDate={departureDate}
                     />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="total_capacity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Capacité totale (kg)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="remaining_capacity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Capacité disponible (kg)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type de tournée</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez un type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="public">Publique</SelectItem>
-                    <SelectItem value="private">Privée</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Points de collecte</h2>
-            <Button
-              type="button"
-              onClick={() =>
-                append({
-                  name: "",
-                  location: "",
-                  time: "",
-                  type: "pickup",
-                  collection_date: new Date().toISOString().split('T')[0],
-                })
-              }
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un point
-            </Button>
-          </div>
-
-          {fields.map((field, index) => (
-            <CollectionPointForm
-              key={field.id}
-              index={index}
-              onRemove={remove}
-              form={form}
-              departureDate={departureDate}
-            />
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="customs_declaration"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Je déclare que je respecterai toutes les lois douanières et réglementations applicables, et que je suis responsable des objets que je transporte.
-                  </FormLabel>
-                  <FormMessage />
+                  ))}
                 </div>
-              </FormItem>
-            )}
-          />
+              </div>
 
-          <FormField
-            control={form.control}
-            name="terms_accepted"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
+              <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm border">
+                <h2 className="text-xl font-semibold">Déclarations</h2>
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="customs_declaration"
+                    render={({ field }) => (
+                      <div className="flex items-start space-x-3 space-y-0 rounded-md p-4 bg-gray-50">
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                        <div className="space-y-1 leading-none">
+                          <label className="text-sm font-medium leading-none">
+                            Je déclare que je respecterai toutes les lois douanières et réglementations applicables
+                          </label>
+                          <p className="text-sm text-gray-500">
+                            Je suis responsable des objets que je transporte
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    J'accepte les conditions générales d'utilisation et comprends que je suis responsable du respect des lois applicables.
-                  </FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
-        </div>
 
-        <div className="flex justify-center">
-          <Button 
-            type="submit" 
-            className="w-full max-w-md"
-            disabled={!form.getValues("terms_accepted") || !form.getValues("customs_declaration")}
-          >
-            Créer la tournée
-          </Button>
-        </div>
-      </form>
-    </Form>
+                  <FormField
+                    control={form.control}
+                    name="terms_accepted"
+                    render={({ field }) => (
+                      <div className="flex items-start space-x-3 space-y-0 rounded-md p-4 bg-gray-50">
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                        <div className="space-y-1 leading-none">
+                          <label className="text-sm font-medium leading-none">
+                            J'accepte les conditions générales d'utilisation
+                          </label>
+                          <p className="text-sm text-gray-500">
+                            Je comprends que je suis responsable du respect des lois applicables
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-white p-4 border-t mt-8 -mx-4">
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={!form.getValues("terms_accepted") || !form.getValues("customs_declaration")}
+              >
+                Créer la tournée
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </ScrollArea>
   );
 }
