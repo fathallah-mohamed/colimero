@@ -8,8 +8,12 @@ interface FormSectionProps {
 
 export function FormSection({ title, children, className }: FormSectionProps) {
   return (
-    <div className={cn("space-y-4 bg-white p-6 rounded-lg shadow-sm border", className)}>
-      <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+    <div className={cn(
+      "bg-white rounded-lg shadow-sm border p-4 md:p-6",
+      "transform transition-all duration-200 hover:shadow-md",
+      className
+    )}>
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
       {children}
     </div>
   );
