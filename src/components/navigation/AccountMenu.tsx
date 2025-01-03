@@ -11,7 +11,7 @@ import {
 import { User } from "@supabase/supabase-js";
 import { useState } from "react";
 import AuthDialog from "../auth/AuthDialog";
-import { UserCircle2, ClipboardList, Users2 } from "lucide-react";
+import { UserCircle2, ClipboardList, Users2, Truck, Bell } from "lucide-react";
 
 interface AccountMenuProps {
   user: User | null;
@@ -77,13 +77,22 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         return (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/profil">Profil</Link>
+              <Link to="/profil" className="flex items-center">
+                <UserCircle2 className="w-4 h-4 mr-2" />
+                Profil
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/mes-tournees">Mes tournées</Link>
+              <Link to="/mes-tournees" className="flex items-center">
+                <Truck className="w-4 h-4 mr-2" />
+                Mes tournées
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/demandes-approbation">Demandes d'approbation</Link>
+              <Link to="/demandes-approbation" className="flex items-center">
+                <Bell className="w-4 h-4 mr-2" />
+                Demandes d'approbation
+              </Link>
             </DropdownMenuItem>
           </>
         );
@@ -91,13 +100,16 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         return (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/profil">Profil</Link>
+              <Link to="/profil" className="flex items-center">
+                <UserCircle2 className="w-4 h-4 mr-2" />
+                Profil
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/mes-reservations">Mes réservations</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/demandes-approbation">Mes demandes d'approbation</Link>
+              <Link to="/mes-reservations" className="flex items-center">
+                <ClipboardList className="w-4 h-4 mr-2" />
+                Mes réservations
+              </Link>
             </DropdownMenuItem>
           </>
         );
