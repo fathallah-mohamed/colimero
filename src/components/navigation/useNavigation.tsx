@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
-import { MenuItem } from "./MenuItems";
-import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useNavigation() {
@@ -77,47 +75,11 @@ export function useNavigation() {
     }
   };
 
-  const menuItems: MenuItem[] = [
-    { 
-      name: "Planifier une tournée", 
-      href: "/planifier-une-tournee", 
-      highlight: true,
-      icon: <Calendar className="w-4 h-4 mr-1.5" />
-    },
-    { 
-      name: "Envoyer un colis", 
-      href: "/envoyer-un-colis", 
-      highlight: true,
-      icon: <Package className="w-4 h-4 mr-1.5" />
-    },
-    { 
-      name: "Transporteurs", 
-      href: "/nos-transporteurs",
-      icon: <Truck className="w-4 h-4 mr-1.5" />
-    },
-    { 
-      name: "Actualités", 
-      href: "/actualites",
-      icon: <MessageSquare className="w-4 h-4 mr-1.5" />
-    },
-    { 
-      name: "À propos", 
-      href: "/a-propos",
-      icon: <Info className="w-4 h-4 mr-1.5" />
-    },
-    { 
-      name: "Contact", 
-      href: "/nous-contacter",
-      icon: <Users className="w-4 h-4 mr-1.5" />
-    }
-  ];
-
   return {
     isOpen,
     setIsOpen,
     user,
     userType,
     handleLogout,
-    menuItems,
   };
 }
