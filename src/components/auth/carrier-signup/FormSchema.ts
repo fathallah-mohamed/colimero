@@ -20,4 +20,9 @@ export const carrierSignupSchema = z.object({
   responsibility_terms_accepted: z.boolean(),
 });
 
+// Export the type
 export type CarrierSignupFormValues = z.infer<typeof carrierSignupSchema>;
+
+// Export the schema with the name that's being imported
+export const formSchema = carrierSignupSchema;
+export type FormValues = CarrierSignupFormValues;

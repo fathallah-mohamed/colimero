@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload, X } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
-import { FormValues } from "./FormSchema";
+import { type CarrierSignupFormValues as FormValues } from "./FormSchema";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AvatarUploadProps {
