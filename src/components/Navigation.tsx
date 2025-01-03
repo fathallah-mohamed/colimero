@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Menu, X, Package, Truck, Calendar, Users, Info, MessageSquare, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import AuthDialog from "../auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { useNavigation } from "./navigation/useNavigation";
 
 export default function Navigation() {
