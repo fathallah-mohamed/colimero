@@ -6,7 +6,7 @@ export interface MenuItem {
   name: string;
   href: string;
   highlight?: boolean;
-  IconComponent?: LucideIcon;
+  icon?: ReactNode;
   submenu?: MenuItem[];
   onClick?: (e: React.MouseEvent) => void;
 }
@@ -34,7 +34,7 @@ export function MenuItems({ items, className = "", onItemClick }: MenuItemsProps
               : "text-gray-700 hover:text-gray-900"
           }`}
         >
-          {item.IconComponent && <item.IconComponent className="w-4 h-4 mr-1.5" />}
+          {item.icon}
           <span>{item.name}</span>
           <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#00B0F0] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left" />
         </Link>
