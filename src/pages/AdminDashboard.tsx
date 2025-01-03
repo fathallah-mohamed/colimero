@@ -20,10 +20,13 @@ export default function AdminDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        console.log("No session found, redirecting to login");
         navigate("/connexion");
         return;
       }
 
+      console.log("Checking admin access for user:", session.user.id);
+      
       // Vérifier si l'utilisateur est un administrateur
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
@@ -37,7 +40,7 @@ export default function AdminDashboard() {
       }
 
       if (!adminData) {
-        console.error('Accès refusé: utilisateur non administrateur');
+        console.log('No admin data found for user:', session.user.id);
         toast({
           variant: "destructive",
           title: "Accès refusé",
@@ -47,7 +50,7 @@ export default function AdminDashboard() {
         return;
       }
 
-      console.log('Données admin trouvées:', adminData);
+      console.log('Admin data found:', adminData);
     } catch (error) {
       console.error('Erreur de vérification admin:', error);
       toast({
