@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Check } from "lucide-react";
+import { Shield, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ProfileData } from "@/types/profile";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,10 +15,13 @@ const CommitmentStatus = ({ description, label }: CommitmentStatusProps) => (
   <div className="space-y-4">
     <div className="flex items-center space-x-3">
       <div className="flex items-center text-green-600 font-medium">
-        <Check className="w-5 h-5 mr-2 stroke-2" />
-        <span>Accepté</span>
+        <Shield className="w-5 h-5 mr-2 stroke-2" />
+        <span>{label}</span>
       </div>
-      <span className="text-sm text-gray-700">{label}</span>
+      <div className="flex items-center text-green-600">
+        <Check className="w-4 h-4 mr-1" />
+        <span className="text-sm text-gray-600">Accepté</span>
+      </div>
     </div>
     <Alert>
       <AlertDescription className="text-sm text-muted-foreground">
@@ -37,12 +40,12 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
     queryKey: ['carrier-commitments', profile.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('client_consents')
+        .from('carrier_commitments')
         .select(`
           accepted_at,
-          consent_type:client_consent_types(*)
+          commitment_type:commitment_types(*)
         `)
-        .eq('client_id', profile.id)
+        .eq('carrier_id', profile.id)
         .eq('accepted', true)
         .order('accepted_at', { ascending: false })
         .limit(1);
@@ -52,12 +55,12 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
       const acceptedAt = data?.[0]?.accepted_at;
 
       const { data: consents, error: consentsError } = await supabase
-        .from('client_consents')
+        .from('carrier_commitments')
         .select(`
           accepted,
-          consent_type:client_consent_types(*)
+          commitment_type:commitment_types(*)
         `)
-        .eq('client_id', profile.id);
+        .eq('carrier_id', profile.id);
 
       if (consentsError) throw consentsError;
       
@@ -96,9 +99,9 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
       <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
         {commitments.consents.map((commitment) => (
           <CommitmentStatus
-            key={commitment.consent_type.id}
-            label={commitment.consent_type.label}
-            description={commitment.consent_type.description}
+            key={commitment.commitment_type.id}
+            label={commitment.commitment_type.label}
+            description={commitment.commitment_type.description}
           />
         ))}
       </div>

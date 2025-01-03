@@ -2,13 +2,14 @@ import { FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/for
 import { Checkbox } from "@/components/ui/checkbox";
 import { UseFormReturn } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { Truck, Home, Package, Sofa, Calendar } from "lucide-react";
 
 const serviceOptions = [
-  { id: "livraison_express", label: "Livraison Express", icon: "truck" },
-  { id: "livraison_domicile", label: "Livraison à domicile", icon: "home" },
-  { id: "transport_standard", label: "Transport de colis standard", icon: "package" },
-  { id: "transport_volumineux", label: "Transport d'objets volumineux", icon: "sofa" },
-  { id: "collecte_programmee", label: "Collecte programmée", icon: "calendar" },
+  { id: "livraison_express", label: "Livraison Express", icon: Truck },
+  { id: "livraison_domicile", label: "Livraison à domicile", icon: Home },
+  { id: "transport_standard", label: "Transport de colis standard", icon: Package },
+  { id: "transport_volumineux", label: "Transport d'objets volumineux", icon: Sofa },
+  { id: "collecte_programmee", label: "Collecte programmée", icon: Calendar },
 ];
 
 interface ServiceOptionsProps {
@@ -53,9 +54,12 @@ export function ServiceOptions({ form }: ServiceOptionsProps) {
                         field.onChange(updatedValue);
                       }}
                     />
-                    <FormLabel className="font-normal">
-                      {service.label}
-                    </FormLabel>
+                    <div className="flex items-center space-x-2">
+                      <service.icon className="h-4 w-4 text-gray-500" />
+                      <FormLabel className="font-normal">
+                        {service.label}
+                      </FormLabel>
+                    </div>
                   </FormItem>
                 )}
               />
