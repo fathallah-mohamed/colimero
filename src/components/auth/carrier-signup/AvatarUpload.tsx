@@ -73,7 +73,7 @@ export function AvatarUpload({ form }: AvatarUploadProps) {
         <FormItem>
           <FormLabel>Photo de profil</FormLabel>
           <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20">
+            <Avatar className="h-24 w-24">
               <AvatarImage src={preview || field.value || ""} />
               <AvatarFallback className="bg-blue-500 text-white">
                 <Upload className="h-8 w-8" />
