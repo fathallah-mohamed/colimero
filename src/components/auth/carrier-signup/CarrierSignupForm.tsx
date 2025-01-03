@@ -1,58 +1,64 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FormSchema, FormValues } from "./FormSchema";
+import { ServiceOptions } from "../ServiceOptions";
+import { CoverageAreaSelect } from "../CoverageAreaSelect";
+import { formSchema, type FormValues } from "./FormSchema";
 import { PersonalInfoFields } from "./PersonalInfoFields";
 import { CompanyInfoFields } from "./CompanyInfoFields";
 import { CapacityFields } from "./CapacityFields";
-import { CoverageAreaSelect } from "../CoverageAreaSelect";
-import { ServiceOptions } from "../ServiceOptions";
-import { TermsCheckboxes } from "./TermsCheckboxes";
 import { AvatarUpload } from "./AvatarUpload";
-import { Card } from "@/components/ui/card";
+import { TermsCheckboxes } from "./TermsCheckboxes";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Truck } from "lucide-react";
 
-interface CarrierSignupFormProps {
-  onSuccess: () => void;
-}
-
-export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
+export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(FormSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
+      total_capacity: 1000,
+      price_per_kg: 12,
       coverage_area: ["FR", "TN"],
       services: [],
+      phone_secondary: "",
+      avatar_url: null,
       terms_accepted: false,
+      customs_terms_accepted: false,
+      responsibility_terms_accepted: false,
       customs_declaration: false,
+      password: "",
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
+  async function onSubmit(values: FormValues) {
     try {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
           data: {
             first_name: values.first_name,
             last_name: values.last_name,
-            user_type: "carrier",
+            user_type: 'carrier'
           },
-        },
+        }
       });
 
-      if (signUpError) throw signUpError;
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
 
       const { error: registrationError } = await supabase
-        .from("carrier_registration_requests")
+        .from('carrier_registration_requests')
         .insert({
           email: values.email,
           first_name: values.first_name,
@@ -66,38 +72,61 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg,
           services: values.services,
+          status: 'pending',
           avatar_url: values.avatar_url,
         });
 
       if (registrationError) throw registrationError;
 
-      toast({
-        title: "Inscription réussie",
-        description: "Votre demande d'inscription a été envoyée avec succès.",
-      });
+      const { error: carrierError } = await supabase
+        .from('carriers')
+        .insert({
+          id: authData.user.id,
+          email: values.email,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          company_name: values.company_name,
+          siret: values.siret,
+          phone: values.phone,
+          phone_secondary: values.phone_secondary,
+          address: values.address,
+          coverage_area: values.coverage_area,
+          status: 'pending'
+        });
 
+      if (carrierError) throw carrierError;
+
+      toast({
+        title: "Demande envoyée avec succès",
+        description: "Votre demande d'inscription a été envoyée pour validation. Vous serez informé par email une fois votre compte activé.",
+      });
+      
       onSuccess();
-      navigate("/");
     } catch (error: any) {
-      console.error("Registration error:", error);
+      console.error("Erreur complète:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'inscription.",
+        description: error.message,
       });
     }
-  };
+  }
+
+  const allTermsAccepted = form.watch(['terms_accepted', 'customs_terms_accepted', 'responsibility_terms_accepted'])
+    .every(value => value === true);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid gap-8">
-          <Card className="p-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
             <div className="space-y-6">
               <div className="flex justify-center">
                 <AvatarUpload form={form} />
               </div>
+              
               <Separator />
+              
               <ScrollArea className="h-[calc(100vh-20rem)] pr-4">
                 <div className="space-y-8">
                   <div className="space-y-4">
@@ -141,19 +170,18 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
                   </div>
                 </div>
               </ScrollArea>
-            </div>
-          </Card>
-        </div>
 
-        <div className="flex justify-center">
-          <Button 
-            type="submit" 
-            className="w-full max-w-md"
-            disabled={!form.getValues("terms_accepted") || !form.getValues("customs_declaration")}
-          >
-            Créer mon compte
-          </Button>
-        </div>
+              <Button 
+                type="submit" 
+                className="w-full mt-6"
+                disabled={!form.formState.isValid || !allTermsAccepted}
+              >
+                <Truck className="mr-2 h-4 w-4" />
+                Envoyer ma demande d'inscription
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
     </Form>
   );
