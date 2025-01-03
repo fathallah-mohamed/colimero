@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { MenuItem } from "./MenuItems";
 import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,56 +15,64 @@ export function useNavigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setUserType(session?.user?.user_metadata?.user_type ?? null);
-    });
+    // Initial session check
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        setUserType(session?.user?.user_metadata?.user_type ?? null);
+      } catch (error) {
+        console.error("Session check error:", error);
+        setUser(null);
+        setUserType(null);
+      }
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      const userType = session?.user?.user_metadata?.user_type;
-      setUserType(userType);
+    checkSession();
 
-      // Vérifier si l'utilisateur est un administrateur
-      if (userType === 'admin' && session?.user) {
-        const { data: adminData, error } = await supabase
-          .from('administrators')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
-        if (error || !adminData) {
-          console.error('Erreur de vérification admin:', error);
-          toast({
-            variant: "destructive",
-            title: "Accès refusé",
-            description: "Vous n'avez pas les droits d'accès administrateur.",
-          });
-          handleLogout();
-          return;
-        }
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+        setUserType(session?.user?.user_metadata?.user_type ?? null);
+      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        setUser(null);
+        setUserType(null);
+        navigate('/');
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleLogout = async () => {
-    const result = await handleLogoutFlow();
-    
-    if (result.success) {
-      setUser(null);
-      setUserType(null);
-      toast({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
-      });
-      navigate('/');
-    } else {
+    try {
+      const result = await handleLogoutFlow();
+      
+      if (result.success) {
+        setUser(null);
+        setUserType(null);
+        toast({
+          title: "Déconnexion réussie",
+          description: "Vous avez été déconnecté avec succès",
+        });
+        navigate('/');
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: result.error || "Une erreur est survenue lors de la déconnexion",
+        });
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: result.error || "Une erreur est survenue lors de la déconnexion",
+        description: "Une erreur est survenue lors de la déconnexion",
       });
     }
   };
