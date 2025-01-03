@@ -51,7 +51,7 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
         </div>
       </div>
 
-      <ServicesSection profile={profile} />
+      <ServicesSection profile={profile} onUpdate={() => window.location.reload()} />
       <CommitmentsSection profile={profile} />
     </div>
   );

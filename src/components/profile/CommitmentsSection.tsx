@@ -56,7 +56,6 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
       
       return {
         commitments,
-        acceptedAt: commitments?.[0]?.accepted_at,
       };
     },
   });
