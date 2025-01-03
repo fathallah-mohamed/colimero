@@ -11,7 +11,6 @@ import { AdminProfileView } from "@/components/profile/AdminProfileView";
 import { ProfileLoading } from "@/components/profile/ProfileLoading";
 import { ProfileNotFound } from "@/components/profile/ProfileNotFound";
 import { useProfile } from "@/hooks/use-profile";
-import { ProfileData } from "@/types/profile";
 
 export default function Profile() {
   const { profile, loading, userType, fetchProfile } = useProfile();
@@ -77,16 +76,18 @@ export default function Profile() {
             </Dialog>
 
             {userType === 'carrier' ? (
-              <CarrierProfileView profile={profile as ProfileData} />
+              <CarrierProfileView profile={profile} />
             ) : userType === 'admin' ? (
-              <AdminProfileView profile={profile as ProfileData} />
+              <AdminProfileView profile={profile} />
             ) : (
-              <ClientProfileView profile={profile as ProfileData} />
+              <ClientProfileView profile={profile} />
             )}
 
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <DeleteAccountButton />
-            </div>
+            {userType !== 'carrier' && (
+              <div className="mt-8 pt-8 border-t border-gray-200">
+                <DeleteAccountButton />
+              </div>
+            )}
           </div>
         </div>
       </div>
