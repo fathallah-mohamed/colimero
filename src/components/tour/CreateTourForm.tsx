@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Form, FormField } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,6 +20,7 @@ const formSchema = z.object({
   total_capacity: z.number().min(1),
   remaining_capacity: z.number().min(0),
   type: z.enum(["public", "private"]),
+  departure_date: z.date(),
   route: z.array(
     z.object({
       name: z.string().min(1, "La ville est requise"),
@@ -37,11 +38,13 @@ const formSchema = z.object({
   }),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 export default function CreateTourForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       departure_country: "FR",
@@ -49,6 +52,7 @@ export default function CreateTourForm() {
       total_capacity: 1000,
       remaining_capacity: 1000,
       type: "public",
+      departure_date: new Date(),
       terms_accepted: false,
       customs_declaration: false,
       route: [
@@ -70,7 +74,7 @@ export default function CreateTourForm() {
 
   const departureDate = form.watch('departure_date');
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
