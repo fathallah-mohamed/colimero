@@ -27,3 +27,6 @@ export const formSchema = z.object({
 });
 
 export type FormValues = z.infer<typeof formSchema>;
+// For backward compatibility
+export const carrierSignupSchema = formSchema;
+export type CarrierSignupFormValues = FormValues;
