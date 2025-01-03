@@ -15,18 +15,11 @@ export const formSchema = z.object({
   price_per_kg: z.number().min(1, "Le prix par kg doit être supérieur à 0"),
   services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
   avatar_url: z.string().nullable(),
-  terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions générales",
-  }),
-  customs_terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions douanières",
-  }),
-  responsibility_terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions de responsabilité",
-  }),
+  terms_accepted: z.boolean(),
+  customs_declaration: z.boolean(),
+  responsibility_terms_accepted: z.boolean(),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-// For backward compatibility
 export const carrierSignupSchema = formSchema;
 export type CarrierSignupFormValues = FormValues;
