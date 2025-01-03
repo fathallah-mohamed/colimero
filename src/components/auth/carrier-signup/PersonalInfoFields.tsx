@@ -1,3 +1,4 @@
+import { UseFormReturn } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -6,12 +7,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { UseFormReturn } from "react-hook-form";
-import { FormValues } from "./FormSchema";
 
-export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }) {
+interface PersonalInfoFieldsProps {
+  form: UseFormReturn<any>;
+}
+
+export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
   return (
-    <div className="space-y-4">
+    <div className="grid gap-4 md:grid-cols-2">
       <FormField
         control={form.control}
         name="email"
@@ -28,12 +31,12 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
 
       <FormField
         control={form.control}
-        name="password"
+        name="phone"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Mot de passe</FormLabel>
+            <FormLabel>Téléphone</FormLabel>
             <FormControl>
-              <Input type="password" placeholder="Votre mot de passe" {...field} />
+              <Input placeholder="+33 6 12 34 56 78" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -62,20 +65,6 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
             <FormLabel>Nom</FormLabel>
             <FormControl>
               <Input placeholder="Votre nom" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="phone"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Téléphone</FormLabel>
-            <FormControl>
-              <Input placeholder="+33 6 12 34 56 78" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

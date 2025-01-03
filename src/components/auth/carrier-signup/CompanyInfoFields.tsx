@@ -1,19 +1,29 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { FormValues } from "./FormSchema";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-export function CompanyInfoFields({ form }: { form: UseFormReturn<FormValues> }) {
+interface CompanyInfoFieldsProps {
+  form: UseFormReturn<any>;
+}
+
+export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
   return (
-    <>
+    <div className="grid gap-4 md:grid-cols-2">
       <FormField
         control={form.control}
         name="company_name"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="col-span-2">
             <FormLabel>Nom de l'entreprise</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input placeholder="Nom de votre entreprise" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -27,7 +37,7 @@ export function CompanyInfoFields({ form }: { form: UseFormReturn<FormValues> })
           <FormItem>
             <FormLabel>SIRET</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input placeholder="Numéro SIRET" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -41,7 +51,7 @@ export function CompanyInfoFields({ form }: { form: UseFormReturn<FormValues> })
           <FormItem>
             <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input placeholder="+33 6 12 34 56 78" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -52,15 +62,19 @@ export function CompanyInfoFields({ form }: { form: UseFormReturn<FormValues> })
         control={form.control}
         name="address"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="col-span-2">
             <FormLabel>Adresse</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Textarea 
+                placeholder="Adresse complète de l'entreprise"
+                className="resize-none"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 }

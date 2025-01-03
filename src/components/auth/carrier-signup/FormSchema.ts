@@ -2,32 +2,16 @@ import * as z from "zod";
 
 export const formSchema = z.object({
   email: z.string().email("Email invalide"),
-  password: z.string()
-    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
-    .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
-    .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
-  first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
-  siret: z.string().length(14, "Le numéro SIRET doit contenir 14 chiffres"),
-  phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
+  phone: z.string().min(10, "Numéro de téléphone invalide"),
+  first_name: z.string().min(2, "Le prénom est requis"),
+  last_name: z.string().min(2, "Le nom est requis"),
+  company_name: z.string().min(2, "Le nom de l'entreprise est requis"),
+  siret: z.string().min(14, "SIRET invalide").max(14, "SIRET invalide"),
+  address: z.string().min(10, "L'adresse est requise"),
   phone_secondary: z.string().optional(),
-  address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
-  total_capacity: z.number().min(1, "La capacité totale doit être supérieure à 0"),
-  price_per_kg: z.number().min(0, "Le prix par kg doit être positif"),
-  coverage_area: z.array(z.string()).min(1, "Sélectionnez au moins un pays"),
-  services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
-  avatar_url: z.string().nullable().optional(),
-  terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions générales",
-  }),
-  customs_terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions douanières",
-  }),
-  responsibility_terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions de responsabilité",
-  }),
-  customs_declaration: z.boolean().optional(),
+  total_capacity: z.number().min(1, "La capacité doit être supérieure à 0"),
+  price_per_kg: z.number().min(0.1, "Le prix doit être supérieur à 0"),
+  coverage_area: z.array(z.string()).min(1, "Sélectionnez au moins une zone"),
+  terms_accepted: z.boolean(),
+  customs_declaration: z.boolean(),
 });
-
-export type FormValues = z.infer<typeof formSchema>;
