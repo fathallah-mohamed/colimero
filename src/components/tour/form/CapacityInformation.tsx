@@ -2,6 +2,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { Package2, Weight } from "lucide-react";
+import { FormSection } from "./FormSection";
 
 interface CapacityInformationProps {
   form: UseFormReturn<any>;
@@ -9,8 +10,7 @@ interface CapacityInformationProps {
 
 export function CapacityInformation({ form }: CapacityInformationProps) {
   return (
-    <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm border">
-      <h2 className="text-xl font-semibold">Capacité de transport</h2>
+    <FormSection title="Capacité de transport">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
@@ -54,6 +54,6 @@ export function CapacityInformation({ form }: CapacityInformationProps) {
           )}
         />
       </div>
-    </div>
+    </FormSection>
   );
 }

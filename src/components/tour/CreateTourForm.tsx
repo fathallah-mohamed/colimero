@@ -13,6 +13,7 @@ import { CollectionPointForm } from "./CollectionPointForm";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FormSection } from "./form/FormSection";
 
 const formSchema = z.object({
   departure_country: z.string(),
@@ -151,9 +152,8 @@ export default function CreateTourForm() {
               <RouteInformation form={form} />
               <CapacityInformation form={form} />
               
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold">Points de collecte</h2>
+              <FormSection title="Points de collecte">
+                <div className="flex justify-end">
                   <Button
                     type="button"
                     onClick={() =>
@@ -174,7 +174,7 @@ export default function CreateTourForm() {
                   </Button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 mt-4">
                   {fields.map((field, index) => (
                     <CollectionPointForm
                       key={field.id}
@@ -185,10 +185,9 @@ export default function CreateTourForm() {
                     />
                   ))}
                 </div>
-              </div>
+              </FormSection>
 
-              <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm border">
-                <h2 className="text-xl font-semibold">Déclarations</h2>
+              <FormSection title="Déclarations" className="bg-white">
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
@@ -232,7 +231,7 @@ export default function CreateTourForm() {
                     )}
                   />
                 </div>
-              </div>
+              </FormSection>
             </div>
 
             <div className="sticky bottom-0 bg-white p-4 border-t mt-8 -mx-4">
