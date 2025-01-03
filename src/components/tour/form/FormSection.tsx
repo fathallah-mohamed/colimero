@@ -9,12 +9,14 @@ interface FormSectionProps {
 export function FormSection({ title, children, className }: FormSectionProps) {
   return (
     <div className={cn(
-      "bg-white rounded-lg shadow-sm border p-4 md:p-6",
+      "bg-white rounded-lg shadow-sm border p-6",
       "transform transition-all duration-200 hover:shadow-md",
       className
     )}>
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
-      {children}
+      <h2 className="text-lg font-semibold mb-4 text-gray-800">{title}</h2>
+      <div className="space-y-4">
+        {children}
+      </div>
     </div>
   );
 }
