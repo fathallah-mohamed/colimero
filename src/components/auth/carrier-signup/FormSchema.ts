@@ -1,26 +1,23 @@
 import * as z from "zod";
 
-export const carrierSignupSchema = z.object({
+export const formSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
-  first_name: z.string().min(1, "Le prénom est requis"),
-  last_name: z.string().min(1, "Le nom est requis"),
-  company_name: z.string().min(1, "Le nom de l'entreprise est requis"),
-  siret: z.string().min(14, "Le numéro SIRET doit contenir 14 chiffres").max(14),
-  phone: z.string().min(1, "Le numéro de téléphone est requis"),
+  phone: z.string().min(10, "Numéro de téléphone invalide"),
   phone_secondary: z.string().optional(),
-  address: z.string().min(1, "L'adresse est requise"),
-  coverage_area: z.array(z.string()).min(1, "Au moins une zone de couverture est requise"),
-  total_capacity: z.number().min(0, "La capacité totale doit être positive"),
-  price_per_kg: z.number().min(0, "Le prix par kg doit être positif"),
-  services: z.array(z.string()).min(1, "Au moins un service est requis"),
+  first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+  last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
+  siret: z.string().min(14, "Le numéro SIRET doit contenir 14 chiffres"),
+  address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
+  coverage_area: z.array(z.string()).min(1, "Sélectionnez au moins une zone"),
+  services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
+  total_capacity: z.number().min(0),
+  price_per_kg: z.number().min(0),
   avatar_url: z.string().nullable(),
   terms_accepted: z.boolean(),
   customs_declaration: z.boolean(),
   responsibility_terms_accepted: z.boolean(),
 });
 
-// Export the schema with the name that's being imported
-export const formSchema = carrierSignupSchema;
 export type FormValues = z.infer<typeof formSchema>;
-export type CarrierSignupFormValues = FormValues;
