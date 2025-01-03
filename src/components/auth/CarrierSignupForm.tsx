@@ -12,6 +12,9 @@ import { CompanyInfoFields } from "./carrier-signup/CompanyInfoFields";
 import { CapacityFields } from "./carrier-signup/CapacityFields";
 import { AvatarUpload } from "./carrier-signup/AvatarUpload";
 import { TermsCheckboxes } from "./carrier-signup/TermsCheckboxes";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Truck, User, Building2, Map, Scale } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
@@ -34,7 +37,6 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
 
   async function onSubmit(values: FormValues) {
     try {
-      // Créer d'abord l'utilisateur avec Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -53,7 +55,6 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // Ensuite, créer la demande d'inscription
       const { error: registrationError } = await supabase
         .from('carrier_registration_requests')
         .insert({
@@ -75,7 +76,6 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
 
       if (registrationError) throw registrationError;
 
-      // Créer l'entrée dans la table carriers
       const { error: carrierError } = await supabase
         .from('carriers')
         .insert({
@@ -116,25 +116,88 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <AvatarUpload form={form} />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <PersonalInfoFields form={form} />
-          <CompanyInfoFields form={form} />
-          <CapacityFields form={form} />
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Inscription Transporteur</CardTitle>
+            <CardDescription>
+              Rejoignez notre réseau de transporteurs et développez votre activité
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-8">
+              <AvatarUpload form={form} />
+            </div>
 
-        <CoverageAreaSelect form={form} />
-        <ServiceOptions form={form} />
-        <TermsCheckboxes form={form} />
+            <Tabs defaultValue="personal" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="personal" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Personnel
+                </TabsTrigger>
+                <TabsTrigger value="company" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Entreprise
+                </TabsTrigger>
+                <TabsTrigger value="coverage" className="flex items-center gap-2">
+                  <Map className="h-4 w-4" />
+                  Couverture
+                </TabsTrigger>
+                <TabsTrigger value="capacity" className="flex items-center gap-2">
+                  <Scale className="h-4 w-4" />
+                  Capacités
+                </TabsTrigger>
+              </TabsList>
 
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={!form.formState.isValid || !allTermsAccepted}
-        >
-          Envoyer ma demande d'inscription
-        </Button>
+              <TabsContent value="personal" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <PersonalInfoFields form={form} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="company" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <CompanyInfoFields form={form} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="coverage" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <CoverageAreaSelect form={form} />
+                    <div className="mt-6">
+                      <ServiceOptions form={form} />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="capacity" className="mt-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <CapacityFields form={form} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+
+            <div className="mt-8">
+              <TermsCheckboxes form={form} />
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full mt-6"
+              disabled={!form.formState.isValid || !allTermsAccepted}
+            >
+              <Truck className="mr-2 h-4 w-4" />
+              Envoyer ma demande d'inscription
+            </Button>
+          </CardContent>
+        </Card>
       </form>
     </Form>
   );
