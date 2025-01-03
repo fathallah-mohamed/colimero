@@ -39,6 +39,8 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
   const { data: commitments, isLoading } = useQuery({
     queryKey: ['carrier-commitments', profile.id],
     queryFn: async () => {
+      console.log("Fetching commitments for carrier:", profile.id);
+      
       const { data: commitments, error: commitmentsError } = await supabase
         .from('carrier_commitments')
         .select(`
@@ -52,11 +54,13 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
         .eq('carrier_id', profile.id)
         .eq('accepted', true);
 
-      if (commitmentsError) throw commitmentsError;
+      if (commitmentsError) {
+        console.error("Error fetching commitments:", commitmentsError);
+        throw commitmentsError;
+      }
       
-      return {
-        commitments,
-      };
+      console.log("Fetched commitments:", commitments);
+      return commitments;
     },
   });
 
@@ -73,7 +77,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
     );
   }
 
-  if (!commitments?.commitments?.length) {
+  if (!commitments?.length) {
     return null;
   }
 
@@ -81,7 +85,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Engagements acceptés</h3>
       <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
-        {commitments.commitments.map((commitment) => (
+        {commitments.map((commitment) => (
           <CommitmentStatus
             key={commitment.commitment_type.id}
             label={commitment.commitment_type.label}
