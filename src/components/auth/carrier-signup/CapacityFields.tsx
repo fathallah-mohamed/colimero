@@ -3,16 +3,12 @@ import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./FormSchema";
 
-interface CapacityFieldsProps {
-  form: UseFormReturn<FormValues>;
-}
-
-export function CapacityFields({ form }: CapacityFieldsProps) {
+export function CapacityFields({ form }: { form: UseFormReturn<FormValues> }) {
   return (
     <>
       <FormField
         control={form.control}
-        name="totalCapacity"
+        name="total_capacity"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Capacité totale (kg)</FormLabel>
@@ -30,7 +26,7 @@ export function CapacityFields({ form }: CapacityFieldsProps) {
 
       <FormField
         control={form.control}
-        name="pricePerKg"
+        name="price_per_kg"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Prix par kg (€)</FormLabel>

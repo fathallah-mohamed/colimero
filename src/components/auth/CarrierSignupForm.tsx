@@ -13,8 +13,9 @@ import { CapacityFields } from "./carrier-signup/CapacityFields";
 import { AvatarUpload } from "./carrier-signup/AvatarUpload";
 import { TermsCheckboxes } from "./carrier-signup/TermsCheckboxes";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Truck, User, Building2, Map, Scale } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Truck } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
@@ -22,11 +23,11 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      totalCapacity: 1000,
-      pricePerKg: 12,
-      coverageArea: ["FR", "TN"],
+      total_capacity: 1000,
+      price_per_kg: 12,
+      coverage_area: ["FR", "TN"],
       services: [],
-      phoneSecondary: "",
+      phone_secondary: "",
       avatar_url: null,
       terms_accepted: false,
       customs_terms_accepted: false,
@@ -42,8 +43,8 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
         password: values.password,
         options: {
           data: {
-            first_name: values.firstName,
-            last_name: values.lastName,
+            first_name: values.first_name,
+            last_name: values.last_name,
             user_type: 'carrier'
           },
         }
@@ -59,16 +60,16 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
         .from('carrier_registration_requests')
         .insert({
           email: values.email,
-          first_name: values.firstName,
-          last_name: values.lastName,
-          company_name: values.companyName,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          company_name: values.company_name,
           siret: values.siret,
           phone: values.phone,
-          phone_secondary: values.phoneSecondary,
+          phone_secondary: values.phone_secondary,
           address: values.address,
-          coverage_area: values.coverageArea,
-          total_capacity: values.totalCapacity,
-          price_per_kg: values.pricePerKg,
+          coverage_area: values.coverage_area,
+          total_capacity: values.total_capacity,
+          price_per_kg: values.price_per_kg,
           services: values.services,
           status: 'pending',
           avatar_url: values.avatar_url,
@@ -81,14 +82,14 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
         .insert({
           id: authData.user.id,
           email: values.email,
-          first_name: values.firstName,
-          last_name: values.lastName,
-          company_name: values.companyName,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          company_name: values.company_name,
           siret: values.siret,
           phone: values.phone,
-          phone_secondary: values.phoneSecondary,
+          phone_secondary: values.phone_secondary,
           address: values.address,
-          coverage_area: values.coverageArea,
+          coverage_area: values.coverage_area,
           status: 'pending'
         });
 
@@ -128,65 +129,49 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
               <AvatarUpload form={form} />
             </div>
 
-            <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="personal" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Personnel
-                </TabsTrigger>
-                <TabsTrigger value="company" className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Entreprise
-                </TabsTrigger>
-                <TabsTrigger value="coverage" className="flex items-center gap-2">
-                  <Map className="h-4 w-4" />
-                  Couverture
-                </TabsTrigger>
-                <TabsTrigger value="capacity" className="flex items-center gap-2">
-                  <Scale className="h-4 w-4" />
-                  Capacités
-                </TabsTrigger>
-              </TabsList>
+            <ScrollArea className="h-[calc(100vh-20rem)] pr-4">
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Informations personnelles</h3>
+                  <PersonalInfoFields form={form} />
+                </div>
 
-              <TabsContent value="personal" className="mt-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <PersonalInfoFields form={form} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                <Separator />
 
-              <TabsContent value="company" className="mt-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <CompanyInfoFields form={form} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Informations entreprise</h3>
+                  <CompanyInfoFields form={form} />
+                </div>
 
-              <TabsContent value="coverage" className="mt-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <CoverageAreaSelect form={form} />
-                    <div className="mt-6">
-                      <ServiceOptions form={form} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                <Separator />
 
-              <TabsContent value="capacity" className="mt-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <CapacityFields form={form} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Capacités et tarifs</h3>
+                  <CapacityFields form={form} />
+                </div>
 
-            <div className="mt-8">
-              <TermsCheckboxes form={form} />
-            </div>
+                <Separator />
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Zone de couverture</h3>
+                  <CoverageAreaSelect form={form} />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Services proposés</h3>
+                  <ServiceOptions form={form} />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Engagements</h3>
+                  <TermsCheckboxes form={form} />
+                </div>
+              </div>
+            </ScrollArea>
 
             <Button 
               type="submit" 

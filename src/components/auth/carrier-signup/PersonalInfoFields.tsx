@@ -42,7 +42,7 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
 
       <FormField
         control={form.control}
-        name="firstName"
+        name="first_name"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Prénom</FormLabel>
@@ -56,7 +56,7 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
 
       <FormField
         control={form.control}
-        name="lastName"
+        name="last_name"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Nom</FormLabel>
@@ -74,20 +74,6 @@ export function PersonalInfoFields({ form }: { form: UseFormReturn<FormValues> }
         render={({ field }) => (
           <FormItem>
             <FormLabel>Téléphone</FormLabel>
-            <FormControl>
-              <Input placeholder="+33 6 12 34 56 78" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="phoneSecondary"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
             <FormControl>
               <Input placeholder="+33 6 12 34 56 78" {...field} />
             </FormControl>

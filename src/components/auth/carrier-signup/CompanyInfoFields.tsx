@@ -3,16 +3,12 @@ import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { FormValues } from "./FormSchema";
 
-interface CompanyInfoFieldsProps {
-  form: UseFormReturn<FormValues>;
-}
-
-export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
+export function CompanyInfoFields({ form }: { form: UseFormReturn<FormValues> }) {
   return (
     <>
       <FormField
         control={form.control}
-        name="companyName"
+        name="company_name"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Nom de l'entreprise</FormLabel>
@@ -40,21 +36,7 @@ export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
 
       <FormField
         control={form.control}
-        name="phone"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Téléphone principal</FormLabel>
-            <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="phoneSecondary"
+        name="phone_secondary"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
