@@ -1,8 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { Shield, Check } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ProfileData } from "@/types/profile";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ProfileData } from "@/types/profile";
+
+interface CommitmentsSectionProps {
+  profile: ProfileData;
+}
 
 interface CommitmentStatusProps {
   label: string;
@@ -11,28 +14,19 @@ interface CommitmentStatusProps {
 
 function CommitmentStatus({ label, description }: CommitmentStatusProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Shield className="w-5 h-5 text-primary" />
-          <span className="font-medium">{label}</span>
-        </div>
-        <div className="flex items-center text-green-600">
-          <Check className="w-4 h-4 mr-1" />
-          <span className="text-sm">Accepté</span>
-        </div>
+    <div className="flex items-start gap-4">
+      <div className="mt-1">
+        <Shield className="h-5 w-5 text-primary" />
       </div>
-      <Alert>
-        <AlertDescription className="text-sm text-muted-foreground">
-          {description}
-        </AlertDescription>
-      </Alert>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{label}</span>
+          <Check className="h-4 w-4 text-green-500" />
+        </div>
+        <p className="text-sm text-gray-500">{description}</p>
+      </div>
     </div>
   );
-}
-
-interface CommitmentsSectionProps {
-  profile: ProfileData;
 }
 
 export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
@@ -45,7 +39,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
         .from('carrier_commitments')
         .select(`
           accepted,
-          commitment_type:commitment_types(
+          commitment_type:commitment_types (
             id,
             label,
             description
@@ -67,11 +61,10 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Engagements acceptés</h3>
-        <div className="animate-pulse space-y-4">
-          <div className="h-20 bg-gray-100 rounded-lg" />
-          <div className="h-20 bg-gray-100 rounded-lg" />
-          <div className="h-20 bg-gray-100 rounded-lg" />
+        <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+        <div className="bg-gray-50/50 rounded-lg p-6 space-y-6 border border-gray-100">
+          <div className="h-16 bg-gray-200 rounded animate-pulse" />
+          <div className="h-16 bg-gray-200 rounded animate-pulse" />
         </div>
       </div>
     );
