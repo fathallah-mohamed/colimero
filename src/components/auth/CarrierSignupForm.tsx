@@ -36,7 +36,7 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
     },
   });
 
-  async function onSubmit(values: FormValues) {
+  const handleSubmit = async (values: FormValues) => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
@@ -109,14 +109,14 @@ export default function CarrierSignupForm({ onSuccess }: { onSuccess: () => void
         description: error.message,
       });
     }
-  }
+  };
 
   const allTermsAccepted = form.watch(['terms_accepted', 'customs_terms_accepted', 'responsibility_terms_accepted'])
     .every(value => value === true);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Inscription Transporteur</CardTitle>
