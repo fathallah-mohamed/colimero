@@ -48,6 +48,13 @@ export function TourTimelineCard({
     }
   };
 
+  // Get price with fallback to 4 or 5 euros randomly if not set
+  const getPrice = () => {
+    const price = tour.carriers?.carrier_capacities?.[0]?.price_per_kg;
+    if (price) return price;
+    return Math.random() < 0.5 ? 4 : 5;
+  };
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -68,7 +75,7 @@ export function TourTimelineCard({
         <div className="text-right">
           <p className="text-sm text-gray-500">Prix au kilo</p>
           <p className="font-medium">
-            {tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0}€
+            {getPrice()}€
           </p>
         </div>
       </div>
