@@ -16,17 +16,16 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
 
   const isBookingEnabled = () => {
-    return selectedPickupCity && tour.status === 'collecting' && userType !== 'admin';
+    return selectedPickupCity && (tour.status === 'collecting' || tour.status === 'planned') && userType !== 'admin';
   };
 
   const isPickupSelectionEnabled = () => {
-    return tour.status === 'collecting' && userType !== 'admin';
+    return (tour.status === 'collecting' || tour.status === 'planned') && userType !== 'admin';
   };
 
   const getBookingButtonText = () => {
     if (tour.status === 'cancelled') return "Cette tournée a été annulée";
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
-    if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
     if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
     if (tour.status === 'completed') return "Cette tournée est terminée";
     if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
