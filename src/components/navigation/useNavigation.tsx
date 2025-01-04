@@ -13,9 +13,12 @@ export function useNavigation() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Initial session check
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
         setUser(session?.user ?? null);
         setUserType(session?.user?.user_metadata?.user_type ?? null);
       } catch (error) {
@@ -27,7 +30,10 @@ export function useNavigation() {
 
     checkSession();
 
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.email);
+      
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setUser(session?.user ?? null);
         setUserType(session?.user?.user_metadata?.user_type ?? null);
