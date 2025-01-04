@@ -1,56 +1,55 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
-import { Routes, Route } from "react-router-dom";
-
-// Import your pages
-import Index from "@/pages/Index";
-import Login from "@/pages/Login";
-import Profile from "@/pages/Profile";
+import Navigation from "@/components/Navigation";
+import Home from "@/pages/Home";
+import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";
-import APropos from "@/pages/APropos";
+import Profile from "@/pages/Profile";
 import AdminDashboard from "@/pages/AdminDashboard";
-import Tours from "@/pages/Tours";
-import PlanifierTournee from "@/pages/PlanifierTournee";
-import MesTournees from "@/pages/MesTournees";
-import EnvoyerColis from "@/pages/EnvoyerColis";
-import Transporteurs from "@/pages/Transporteurs";
-import TransporteurDetails from "@/pages/TransporteurDetails";
-import MesReservations from "@/pages/MesReservations";
-import DemandesApprobation from "@/pages/DemandesApprobation";
-import MesDemandesApprobation from "@/pages/MesDemandesApprobation";
+import AdminCarriers from "@/pages/AdminCarriers";
+import AdminClients from "@/pages/AdminClients";
+import Carriers from "@/pages/Carriers";
+import CarrierProfile from "@/pages/CarrierProfile";
+import CarrierDashboard from "@/pages/CarrierDashboard";
+import CarrierApprovalRequests from "@/pages/CarrierApprovalRequests";
+import ClientReservations from "@/pages/ClientReservations";
+import ClientApprovalRequests from "@/pages/ClientApprovalRequests";
+import PlanDelivery from "@/pages/PlanDelivery";
+import SendPackage from "@/pages/SendPackage";
 
-// Create a client
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" attribute="class">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profil" element={<Profile />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/a-propos" element={<APropos />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/tours" element={<Tours />} />
-            <Route path="/planifier-tournee" element={<PlanifierTournee />} />
-            <Route path="/mes-tournees" element={<MesTournees />} />
-            <Route path="/envoyer-colis" element={<EnvoyerColis />} />
-            <Route path="/transporteurs" element={<Transporteurs />} />
-            <Route path="/transporteur/:id" element={<TransporteurDetails />} />
-            <Route path="/mes-reservations" element={<MesReservations />} />
-            <Route path="/demandes-approbation" element={<DemandesApprobation />} />
-            <Route path="/mes-demandes-approbation" element={<MesDemandesApprobation />} />
-          </Routes>
-          <Toaster />
-        </BrowserRouter>
-      </ThemeProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-50">
+          <Navigation />
+          <main className="pt-16">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/a-propos" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/profil" element={<Profile />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/transporteurs" element={<AdminCarriers />} />
+              <Route path="/admin/clients" element={<AdminClients />} />
+              <Route path="/transporteurs" element={<Carriers />} />
+              <Route path="/nos-transporteurs/:id" element={<CarrierProfile />} />
+              <Route path="/mes-tournees" element={<CarrierDashboard />} />
+              <Route path="/demandes-approbation" element={<CarrierApprovalRequests />} />
+              <Route path="/mes-reservations" element={<ClientReservations />} />
+              <Route path="/mes-demandes-approbation" element={<ClientApprovalRequests />} />
+              <Route path="/planifier-tournee" element={<PlanDelivery />} />
+              <Route path="/envoyer-colis" element={<SendPackage />} />
+            </Routes>
+          </main>
+        </div>
+        <Toaster />
+      </Router>
     </QueryClientProvider>
   );
 }

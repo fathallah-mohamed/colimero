@@ -38,6 +38,13 @@ export const menuItems = [
   },
 ];
 
+export const adminMenuItems = [
+  { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
+  { name: "Demandes d'inscription", href: "/admin", icon: <ClipboardList className="w-4 h-4" /> },
+  { name: "Transporteurs", href: "/admin/transporteurs", icon: <Truck className="w-4 h-4" /> },
+  { name: "Clients", href: "/admin/clients", icon: <Users className="w-4 h-4" /> }
+];
+
 export default function MenuItems() {
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
