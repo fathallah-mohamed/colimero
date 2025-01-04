@@ -8,13 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { TourCard } from "@/components/tour/TourCard";
+import { Tour, RouteStop } from "@/types/tour";
 
 export default function Tours() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
-  const [selectedTour, setSelectedTour] = useState<any>(null);
+  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
 
@@ -39,7 +40,22 @@ export default function Tours() {
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
-      return data;
+      
+      // Transform the data to match the Tour interface
+      return data.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) 
+          ? tour.route 
+          : typeof tour.route === 'string' 
+            ? JSON.parse(tour.route) 
+            : tour.route as RouteStop[],
+        carriers: tour.carriers ? {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+            ? tour.carriers.carrier_capacities
+            : [tour.carriers.carrier_capacities]
+        } : null
+      })) as Tour[];
     },
   });
 
