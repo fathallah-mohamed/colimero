@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,7 @@ import { BookingForm } from "@/components/booking/BookingForm";
 export default function SendPackage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedTourId, setSelectedTourId] = useState<number | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -31,14 +32,52 @@ export default function SendPackage() {
         });
         navigate("/");
       }
+
+      // Fetch the first available tour for testing
+      const { data: tours } = await supabase
+        .from('tours')
+        .select('*')
+        .eq('status', 'planned')
+        .limit(1)
+        .single();
+
+      if (tours) {
+        setSelectedTourId(tours.id);
+      }
     };
 
     checkSession();
   }, [navigate, toast]);
 
+  const handleSuccess = () => {
+    toast({
+      title: "Réservation effectuée",
+      description: "Votre réservation a été effectuée avec succès.",
+    });
+    navigate("/mes-reservations");
+  };
+
+  const handleCancel = () => {
+    navigate("/");
+  };
+
+  if (!selectedTourId) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p>Chargement...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <BookingForm />
+      <BookingForm 
+        tourId={selectedTourId}
+        pickupCity="Paris"
+        destinationCountry="TN"
+        onSuccess={handleSuccess}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }
