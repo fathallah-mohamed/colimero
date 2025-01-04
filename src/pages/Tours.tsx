@@ -49,31 +49,29 @@ export default function Tours() {
   });
 
   const handleBookingClick = (tour: any) => {
-    if (!selectedPickupCity) {
+    if (!selectedPickupCity || !isBookingEnabled(tour)) {
       return;
     }
     setSelectedTour(tour);
     setIsBookingFormOpen(true);
   };
 
-  const isBookingDisabled = (tour: any) => {
-    // Désactiver pour les administrateurs
-    if (userType === 'admin') return true;
-    
-    // Désactiver si la tournée n'est pas en cours de collecte
-    if (tour.status !== 'collecting') return true;
+  const isBookingEnabled = (tour: any) => {
+    return tour.status === 'collecting' && userType !== 'admin';
+  };
 
-    // Désactiver si aucun point de collecte n'est sélectionné
-    if (!selectedPickupCity) return true;
-
-    return false;
+  const isPickupSelectionEnabled = (tour: any) => {
+    return tour.status === 'collecting' && userType !== 'admin';
   };
 
   const getBookingButtonText = (tour: any) => {
-    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    if (tour.status !== 'collecting') return "Indisponible";
-    if (userType === 'admin') return "Réservation non autorisée";
-    return "Réserver";
+    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+    if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
+    if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
+    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
+    if (tour.status === 'completed') return "Cette tournée est terminée";
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
+    return "Réserver sur cette tournée";
   };
 
   return (
@@ -183,11 +181,13 @@ export default function Tours() {
                     {(tour.route as any[]).map((stop, index) => (
                       <div
                         key={index}
-                        onClick={() => setSelectedPickupCity(stop.name)}
-                        className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                        onClick={() => isPickupSelectionEnabled(tour) && setSelectedPickupCity(stop.name)}
+                        className={`p-3 rounded-lg ${isPickupSelectionEnabled(tour) ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'} border transition-colors ${
                           selectedPickupCity === stop.name
                             ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-200"
+                            : isPickupSelectionEnabled(tour)
+                              ? "border-gray-200 hover:border-blue-200"
+                              : "border-gray-200"
                         }`}
                       >
                         <div className="grid grid-cols-4 items-center text-sm">
@@ -203,8 +203,9 @@ export default function Tours() {
                               type="radio"
                               name={`tour-${tour.id}`}
                               checked={selectedPickupCity === stop.name}
-                              onChange={() => setSelectedPickupCity(stop.name)}
+                              onChange={() => isPickupSelectionEnabled(tour) && setSelectedPickupCity(stop.name)}
                               className="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
+                              disabled={!isPickupSelectionEnabled(tour)}
                             />
                           </div>
                         </div>
@@ -215,7 +216,7 @@ export default function Tours() {
                   <Button 
                     onClick={() => handleBookingClick(tour)}
                     className="w-full"
-                    disabled={isBookingDisabled(tour)}
+                    disabled={!isBookingEnabled(tour)}
                   >
                     {getBookingButtonText(tour)}
                   </Button>
