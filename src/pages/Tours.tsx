@@ -3,15 +3,24 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import Navigation from "@/components/Navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeftRight, Calendar } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { TourTimeline } from "@/components/transporteur/TourTimeline";
+import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { BookingForm } from "@/components/booking/BookingForm";
+import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
 
 export default function Tours() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
-  const [tourType, setTourType] = useState("public"); // "public" ou "private"
+  const [tourType, setTourType] = useState("public");
+  const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
+  const [selectedTour, setSelectedTour] = useState<any>(null);
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
 
   const { data: tours, isLoading } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, tourType],
@@ -37,6 +46,34 @@ export default function Tours() {
       return data;
     },
   });
+
+  const handleBookingClick = (tour: any) => {
+    if (!selectedPickupCity) {
+      return;
+    }
+    setSelectedTour(tour);
+    setIsBookingFormOpen(true);
+  };
+
+  const isBookingDisabled = (tour: any) => {
+    // Désactiver pour les administrateurs
+    if (userType === 'admin') return true;
+    
+    // Désactiver si la tournée n'est pas en cours de collecte
+    if (tour.status !== 'collecting') return true;
+
+    // Désactiver si aucun point de collecte n'est sélectionné
+    if (!selectedPickupCity) return true;
+
+    return false;
+  };
+
+  const getBookingButtonText = (tour: any) => {
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
+    if (tour.status !== 'collecting') return "Indisponible";
+    if (userType === 'admin') return "Réservation non autorisée";
+    return "Réserver";
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -105,46 +142,34 @@ export default function Tours() {
               </div>
             ) : (
               tours?.map((tour) => (
-                <div key={tour.id} className="bg-white rounded-lg shadow-sm p-4 space-y-4">
+                <div key={tour.id} className="bg-white rounded-lg shadow-sm p-6 space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Calendar className="h-5 w-5 text-blue-500" />
-                      <span className="font-medium">
-                        {format(new Date(tour.departure_date), "d MMMM", { locale: fr })}
-                      </span>
-                    </div>
-                    <span className="text-gray-600">
-                      {tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 5}€/kg
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-gray-100 flex-shrink-0">
-                      {tour.carriers?.avatar_url ? (
-                        <img
-                          src={tour.carriers.avatar_url}
-                          alt={tour.carriers.company_name}
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : null}
-                    </div>
-                    <span className="text-sm text-gray-600">{tour.carriers?.company_name}</span>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                      <span>Capacité restante : {tour.remaining_capacity} kg</span>
-                      <span>Total : {tour.total_capacity} kg</span>
-                    </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 rounded-full"
-                        style={{
-                          width: `${(tour.remaining_capacity / tour.total_capacity) * 100}%`,
-                        }}
+                    <div className="flex items-center gap-4">
+                      <TransporteurAvatar
+                        avatarUrl={tour.carriers?.avatar_url}
+                        companyName={tour.carriers?.company_name || ''}
                       />
+                      <div>
+                        <h3 className="font-medium">{tour.carriers?.company_name}</h3>
+                        <p className="text-sm text-gray-500">
+                          Départ le {format(new Date(tour.departure_date), "d MMMM", { locale: fr })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Prix au kilo</p>
+                      <p className="font-medium">
+                        {tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0}€
+                      </p>
                     </div>
                   </div>
+
+                  <TourTimeline status={tour.status} />
+                  
+                  <TourCapacityDisplay
+                    totalCapacity={tour.total_capacity}
+                    remainingCapacity={tour.remaining_capacity}
+                  />
 
                   {/* Points de collecte */}
                   <div className="space-y-3">
@@ -155,28 +180,43 @@ export default function Tours() {
                       <span>Sélection</span>
                     </div>
                     {(tour.route as any[]).map((stop, index) => (
-                      <div key={index} className="grid grid-cols-4 items-center text-sm">
-                        <span className="font-medium">{stop.name}</span>
-                        <span className="text-gray-600">{stop.location}</span>
-                        <span className="text-gray-600">
-                          {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
-                          <br />
-                          {stop.time}
-                        </span>
-                        <div className="flex justify-center">
-                          <button className="h-4 w-4 rounded-full border border-gray-300" />
+                      <div
+                        key={index}
+                        onClick={() => setSelectedPickupCity(stop.name)}
+                        className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                          selectedPickupCity === stop.name
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-blue-200"
+                        }`}
+                      >
+                        <div className="grid grid-cols-4 items-center text-sm">
+                          <span className="font-medium">{stop.name}</span>
+                          <span className="text-gray-600">{stop.location}</span>
+                          <span className="text-gray-600">
+                            {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
+                            <br />
+                            {stop.time}
+                          </span>
+                          <div className="flex justify-center">
+                            <input
+                              type="radio"
+                              name={`tour-${tour.id}`}
+                              checked={selectedPickupCity === stop.name}
+                              onChange={() => setSelectedPickupCity(stop.name)}
+                              className="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
+                            />
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="text-center text-sm text-gray-500">
-                    Départ pour la {destinationCountry === "TN" ? "Tunisie" : "France"} : {" "}
-                    {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}
-                  </div>
-
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
-                    Sélectionnez un point de collecte
+                  <Button 
+                    onClick={() => handleBookingClick(tour)}
+                    className="w-full"
+                    disabled={isBookingDisabled(tour)}
+                  >
+                    {getBookingButtonText(tour)}
                   </Button>
                 </div>
               ))
@@ -184,6 +224,20 @@ export default function Tours() {
           </div>
         </div>
       </div>
+
+      <Dialog open={isBookingFormOpen} onOpenChange={setIsBookingFormOpen}>
+        <DialogContent className="max-w-4xl h-[90vh]">
+          {selectedTour && selectedPickupCity && (
+            <BookingForm
+              tourId={selectedTour.id}
+              pickupCity={selectedPickupCity}
+              destinationCountry={selectedTour.destination_country}
+              onSuccess={() => setIsBookingFormOpen(false)}
+              onCancel={() => setIsBookingFormOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
