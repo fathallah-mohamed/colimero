@@ -42,24 +42,35 @@ export default function Tours() {
       if (error) throw error;
       
       // Transform the data to match the Tour interface
-      return data.map(tour => ({
-        ...tour,
-        route: Array.isArray(tour.route) 
-          ? tour.route 
-          : typeof tour.route === 'string' 
-            ? JSON.parse(tour.route) 
-            : tour.route as RouteStop[],
-        carriers: tour.carriers ? {
-          ...tour.carriers,
-          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
-            ? tour.carriers.carrier_capacities
-            : [tour.carriers.carrier_capacities]
-        } : null
-      })) as Tour[];
+      return data.map(tour => {
+        // Ensure route is properly parsed as RouteStop[]
+        let parsedRoute: RouteStop[];
+        if (typeof tour.route === 'string') {
+          parsedRoute = JSON.parse(tour.route);
+        } else if (Array.isArray(tour.route)) {
+          parsedRoute = tour.route;
+        } else if (typeof tour.route === 'object' && tour.route !== null) {
+          // If it's a JSONB object from Supabase, convert it to array
+          parsedRoute = Object.values(tour.route);
+        } else {
+          parsedRoute = [];
+        }
+
+        return {
+          ...tour,
+          route: parsedRoute,
+          carriers: tour.carriers ? {
+            ...tour.carriers,
+            carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+              ? tour.carriers.carrier_capacities
+              : [tour.carriers.carrier_capacities]
+          } : null
+        } as Tour;
+      });
     },
   });
 
-  const handleBookingClick = (tour: any) => {
+  const handleBookingClick = (tour: Tour) => {
     if (!selectedPickupCity || !isBookingEnabled(tour)) {
       return;
     }
@@ -67,15 +78,15 @@ export default function Tours() {
     setIsBookingFormOpen(true);
   };
 
-  const isBookingEnabled = (tour: any) => {
+  const isBookingEnabled = (tour: Tour) => {
     return tour.status === 'collecting' && userType !== 'admin';
   };
 
-  const isPickupSelectionEnabled = (tour: any) => {
+  const isPickupSelectionEnabled = (tour: Tour) => {
     return tour.status === 'collecting' && userType !== 'admin';
   };
 
-  const getBookingButtonText = (tour: any) => {
+  const getBookingButtonText = (tour: Tour) => {
     if (tour.status === 'cancelled') return "Cette tournée a été annulée";
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
     if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
