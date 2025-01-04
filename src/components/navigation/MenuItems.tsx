@@ -20,7 +20,7 @@ export const menuItems = [
     icon: <Users className="w-4 h-4" />
   },
   {
-    name: "Demandes d'approbation",
+    name: "Mes demandes d'approbation",
     href: "/mes-demandes-approbation",
     icon: <ClipboardList className="w-4 h-4" />
   }
