@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { TourStatus } from "@/types/tour";
 
 export function useTours() {
   const navigate = useNavigate();
@@ -12,12 +13,13 @@ export function useTours() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [sortBy, setSortBy] = useState("date_desc");
+  const [status, setStatus] = useState<TourStatus | "all">("planned");
   const { toast } = useToast();
 
   useEffect(() => {
     checkUser();
     fetchTours();
-  }, [departureCountry, destinationCountry, sortBy]);
+  }, [departureCountry, destinationCountry, sortBy, status]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -47,6 +49,10 @@ export function useTours() {
         .eq('carrier_id', session.user.id)
         .eq('departure_country', departureCountry)
         .eq('destination_country', destinationCountry);
+
+      if (status !== 'all') {
+        query = query.eq('status', status);
+      }
 
       // Apply sorting
       switch (sortBy) {
@@ -170,9 +176,11 @@ export function useTours() {
     departureCountry,
     destinationCountry,
     sortBy,
+    status,
     setDepartureCountry,
     setDestinationCountry,
     setSortBy,
+    setStatus,
     setIsEditDialogOpen,
     handleDelete,
     handleEdit,
