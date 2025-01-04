@@ -1,78 +1,43 @@
-import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { BookingForm } from "@/components/booking/BookingForm";
-import { Tour } from "@/types/tour";
-import { Loader2 } from "lucide-react";
 import { TourTimelineCard } from "./tour/TourTimelineCard";
+import { Tour } from "@/types/tour";
+import { useNavigate } from "react-router-dom";
 
 interface TransporteurToursProps {
   tours: Tour[];
   type: "public" | "private";
-  isLoading: boolean;
-  hideAvatar?: boolean;
+  isLoading?: boolean;
 }
 
-export function TransporteurTours({ tours, type, isLoading, hideAvatar }: TransporteurToursProps) {
-  const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
-  const [currentTourId, setCurrentTourId] = useState<number | null>(null);
-  const [selectedPoints, setSelectedPoints] = useState<Record<number, { pickupCity: string }>>({});
+export function TransporteurTours({ tours, type, isLoading }: TransporteurToursProps) {
+  const navigate = useNavigate();
 
   const handleBookingClick = (tourId: number, pickupCity: string) => {
-    setCurrentTourId(tourId);
-    setSelectedPoints(prev => ({ ...prev, [tourId]: { pickupCity } }));
-    setIsBookingFormOpen(true);
+    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
-  const currentTour = tours.find(tour => tour.id === currentTourId);
-
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <div>Chargement des tournées...</div>;
   }
 
-  if (tours.length === 0) {
+  if (!tours.length) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">
-          {type === "public" 
-            ? "Aucune tournée publique disponible pour le moment."
-            : "Aucune tournée privée disponible pour le moment."}
+          Aucune tournée {type === "public" ? "publique" : "privée"} disponible
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4">
-        {tours.map((tour) => (
-          <TourTimelineCard
-            key={tour.id}
-            tour={tour}
-            hideAvatar={hideAvatar}
-            onBookingClick={handleBookingClick}
-          />
-        ))}
-      </div>
-
-      <Dialog open={isBookingFormOpen} onOpenChange={setIsBookingFormOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0">
-          {currentTourId && selectedPoints[currentTourId] && currentTour && (
-            <div className="h-full">
-              <BookingForm
-                tourId={currentTourId}
-                pickupCity={selectedPoints[currentTourId].pickupCity}
-                destinationCountry={currentTour.destination_country}
-                onSuccess={() => setIsBookingFormOpen(false)}
-                onCancel={() => setIsBookingFormOpen(false)}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+    <div className="space-y-6">
+      {tours.map((tour) => (
+        <TourTimelineCard
+          key={tour.id}
+          tour={tour}
+          onBookingClick={handleBookingClick}
+        />
+      ))}
     </div>
   );
 }

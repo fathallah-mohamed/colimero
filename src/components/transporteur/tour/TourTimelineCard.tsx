@@ -3,7 +3,7 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
-import { TourStatusTimeline } from "@/components/tour/TourStatusTimeline";
+import { TourTimeline } from "@/components/CurrentTours";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -15,7 +15,6 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
 
   const isBookingEnabled = () => {
-    // Activer seulement si une ville est sélectionnée et le statut est "planned"
     return selectedPickupCity && tour.status === 'planned';
   };
 
@@ -32,11 +31,8 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
         hideAvatar={hideAvatar}
       />
       
-      <TourStatusTimeline 
-        tourId={tour.id}
-        currentStatus={tour.status || 'planned'}
-        onStatusChange={() => {}}
-        isCompleted={false}
+      <TourTimeline 
+        status={tour.status || 'planned'}
       />
       
       <TourCapacityDisplay 
