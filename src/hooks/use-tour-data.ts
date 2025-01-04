@@ -10,6 +10,14 @@ interface UseTourDataProps {
   status: TourStatus | "all";
 }
 
+interface RouteStopRaw {
+  name?: string;
+  location?: string;
+  time?: string;
+  type?: string;
+  collection_date?: string;
+}
+
 export function useTourData({
   departureCountry,
   destinationCountry,
@@ -32,30 +40,31 @@ export function useTourData({
     }
   };
 
-  const parseRoute = (route: any): RouteStop[] => {
+  const parseRoute = (route: unknown): RouteStop[] => {
     if (typeof route === 'string') {
-      return JSON.parse(route);
+      try {
+        const parsed = JSON.parse(route) as RouteStopRaw[];
+        return parsed.map(parseRouteStop);
+      } catch {
+        return [];
+      }
     }
     if (Array.isArray(route)) {
-      return route.map(stop => ({
-        name: String(stop.name || ''),
-        location: String(stop.location || ''),
-        time: String(stop.time || ''),
-        type: stop.type === 'pickup' || stop.type === 'dropoff' ? stop.type : 'pickup',
-        collection_date: stop.collection_date || ''
-      }));
+      return route.map(parseRouteStop);
     }
     if (typeof route === 'object' && route !== null) {
-      return Object.values(route).map(stop => ({
-        name: String(stop.name || ''),
-        location: String(stop.location || ''),
-        time: String(stop.time || ''),
-        type: stop.type === 'pickup' || stop.type === 'dropoff' ? stop.type : 'pickup',
-        collection_date: stop.collection_date || ''
-      }));
+      return Object.values(route as Record<string, RouteStopRaw>).map(parseRouteStop);
     }
     return [];
   };
+
+  const parseRouteStop = (stop: RouteStopRaw): RouteStop => ({
+    name: String(stop.name || ''),
+    location: String(stop.location || ''),
+    time: String(stop.time || ''),
+    type: stop.type === 'pickup' || stop.type === 'dropoff' ? stop.type : 'pickup',
+    collection_date: String(stop.collection_date || '')
+  });
 
   const fetchTours = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -73,6 +82,13 @@ export function useTourData({
             status,
             recipient_name,
             recipient_phone
+          ),
+          carriers (
+            company_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
           )
         `)
         .eq('carrier_id', session.user.id)
@@ -102,6 +118,7 @@ export function useTourData({
       const transformedTours: Tour[] = (toursData || []).map(tour => ({
         ...tour,
         route: parseRoute(tour.route),
+        status: tour.status as TourStatus,
         carriers: tour.carriers ? {
           ...tour.carriers,
           carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
