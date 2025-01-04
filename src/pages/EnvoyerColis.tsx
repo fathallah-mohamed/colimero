@@ -12,7 +12,7 @@ export default function EnvoyerColis() {
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
   const [sortBy, setSortBy] = useState("departure_asc");
-  const [status, setStatus] = useState<TourStatus | "all">("all");
+  const [status, setStatus] = useState<TourStatus | "all">("planned");
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
