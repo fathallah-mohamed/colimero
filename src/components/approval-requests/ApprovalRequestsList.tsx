@@ -16,15 +16,17 @@ export function ApprovalRequestsList() {
 
   if (!requests?.length) {
     return (
-      <div className="text-center py-8 space-y-4">
-        <p className="text-gray-500">
-          Vous n'avez pas encore fait de demande d'approbation pour une tournée privée.
-        </p>
-        <Button asChild>
-          <Link to="/tours" className="inline-flex items-center">
-            Voir les tournées privées disponibles
-          </Link>
-        </Button>
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="text-center space-y-4">
+          <p className="text-gray-500">
+            Vous n'avez pas encore fait de demande d'approbation pour une tournée privée.
+          </p>
+          <Button asChild>
+            <Link to="/tours" className="inline-flex items-center">
+              Voir les tournées privées disponibles
+            </Link>
+          </Button>
+        </div>
       </div>
     );
   }
