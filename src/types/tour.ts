@@ -22,7 +22,7 @@ interface CarrierCapacity {
 interface Carrier {
   company_name: string | null;
   avatar_url: string | null;
-  carrier_capacities?: CarrierCapacity[];
+  carrier_capacities: CarrierCapacity[];
 }
 
 export interface Tour {
