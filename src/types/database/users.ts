@@ -8,6 +8,8 @@ export interface UserTables {
     email_verified: boolean | null;
     terms_accepted: boolean | null;
     terms_accepted_at: string | null;
+    email: string | null;
+    status: string;
   };
 
   commitment_types: {
