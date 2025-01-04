@@ -5,7 +5,7 @@ interface CollectionPoint {
   name: string;
   location: string;
   time: string;
-  collection_date: string;
+  collection_date?: string;
 }
 
 interface CollectionPointsListProps {
@@ -13,13 +13,15 @@ interface CollectionPointsListProps {
   selectedPoint: string | null;
   onPointSelect: (cityName: string) => void;
   isSelectionEnabled: boolean;
+  tourDepartureDate: string;
 }
 
 export function CollectionPointsList({
   points,
   selectedPoint,
   onPointSelect,
-  isSelectionEnabled
+  isSelectionEnabled,
+  tourDepartureDate
 }: CollectionPointsListProps) {
   return (
     <div className="space-y-3">
@@ -48,7 +50,11 @@ export function CollectionPointsList({
             <span className="font-medium">{point.name}</span>
             <span className="text-gray-600">{point.location}</span>
             <span className="text-gray-600">
-              {format(new Date(point.collection_date), "EEEE d MMMM", { locale: fr })}
+              {format(
+                new Date(point.collection_date || tourDepartureDate), 
+                "EEEE d MMMM", 
+                { locale: fr }
+              )}
             </span>
             <span className="text-gray-600">{point.time}</span>
             <div className="flex justify-center">

@@ -8,6 +8,7 @@ import AuthDialog from "@/components/auth/AuthDialog";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { CollectionPointsList } from "@/components/tour/CollectionPointsList";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -74,31 +75,13 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
 
       <div className="mt-6">
         <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
-        <div className="space-y-2">
-          {(tour.route || []).map((stop, index) => (
-            <div
-              key={index}
-              onClick={() => isPickupSelectionEnabled() && setSelectedPickupCity(stop.name)}
-              className={`p-3 rounded-lg transition-colors ${
-                !isPickupSelectionEnabled() ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
-              } ${
-                selectedPickupCity === stop.name
-                  ? "border-2 border-primary bg-primary/10"
-                  : isPickupSelectionEnabled()
-                    ? "border border-gray-200 hover:border-primary/50"
-                    : "border border-gray-200"
-              }`}
-            >
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="font-medium">{stop.name}</p>
-                  <p className="text-sm text-gray-500">{stop.location}</p>
-                </div>
-                <p className="text-sm text-gray-500">{stop.time}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <CollectionPointsList
+          points={tour.route}
+          selectedPoint={selectedPickupCity}
+          onPointSelect={setSelectedPickupCity}
+          isSelectionEnabled={isPickupSelectionEnabled()}
+          tourDepartureDate={tour.departure_date}
+        />
       </div>
 
       <div className="mt-4">
