@@ -34,7 +34,11 @@ export function ApprovalRequestsList() {
   return (
     <div className="space-y-4">
       {requests?.map((request) => (
-        <ApprovalRequestCard key={request.id} request={request} />
+        <ApprovalRequestCard 
+          key={request.id} 
+          request={request} 
+          userType="client"
+        />
       ))}
     </div>
   );

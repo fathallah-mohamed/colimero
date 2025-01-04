@@ -10,9 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface TourCardProps {
   tour: any;
   hideAvatar?: boolean;
+  onBookingClick?: (tourId: number, pickupCity: string) => void;
 }
 
-export function TourCard({ tour, hideAvatar = false }: TourCardProps) {
+export function TourCard({ tour, hideAvatar = false, onBookingClick }: TourCardProps) {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const { toast } = useToast();
 
@@ -27,6 +28,14 @@ export function TourCard({ tour, hideAvatar = false }: TourCardProps) {
       return;
     }
     setShowApprovalDialog(true);
+  };
+
+  const handleBookingClick = (pickupCity: string) => {
+    if (onBookingClick) {
+      onBookingClick(tour.id, pickupCity);
+    } else {
+      window.location.href = `/reserver/${tour.id}`;
+    }
   };
 
   return (
@@ -51,7 +60,7 @@ export function TourCard({ tour, hideAvatar = false }: TourCardProps) {
           </Button>
         ) : (
           <Button 
-            onClick={() => window.location.href = `/reserver/${tour.id}`}
+            onClick={() => handleBookingClick(tour.route?.[0]?.name || '')}
             className="w-full"
           >
             Réserver
