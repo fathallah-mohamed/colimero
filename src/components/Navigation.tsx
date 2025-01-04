@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Menu, X, Package, Truck, UserCircle2, Users, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -11,8 +11,6 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const userMenuItems = userType === 'carrier' ? [
     { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
@@ -26,14 +24,6 @@ export default function Navigation() {
     { name: "Mes réservations", href: "/mes-reservations", icon: <Package className="w-4 h-4" /> },
     { name: "Mes demandes d'approbation", href: "/mes-demandes-approbation", icon: <ClipboardList className="w-4 h-4" /> }
   ];
-
-  const handleProtectedLink = (href: string) => {
-    if (!user) {
-      navigate("/login", { state: { from: location } });
-    } else {
-      navigate(href);
-    }
-  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -50,14 +40,14 @@ export default function Navigation() {
               <div className="hidden md:flex md:items-center md:space-x-4">
                 <span className="text-sm text-gray-600">{user.email}</span>
                 {userMenuItems.map((item) => (
-                  <button
+                  <Link
                     key={item.name}
-                    onClick={() => handleProtectedLink(item.href)}
+                    to={item.href}
                     className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   >
                     {item.icon}
                     <span className="ml-2">{item.name}</span>
-                  </button>
+                  </Link>
                 ))}
                 <Button 
                   variant="outline" 
