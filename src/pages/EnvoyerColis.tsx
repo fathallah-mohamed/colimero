@@ -157,8 +157,8 @@ export default function EnvoyerColis() {
 
           <TourTypeTabs
             tourType={tourType}
-            publicToursCount={publicTours.length}
-            privateToursCount={privateTours.length}
+            publicToursCount={publicTours?.length || 0}
+            privateToursCount={privateTours?.length || 0}
             onTypeChange={setTourType}
           />
 
