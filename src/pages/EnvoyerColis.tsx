@@ -6,12 +6,24 @@ import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import type { Tour } from "@/types/tour";
+import { useEffect } from "react";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
   const [sortBy, setSortBy] = useState("date_desc");
+  const [userType, setUserType] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUserType = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserType(user.user_metadata?.user_type);
+      }
+    };
+    checkUserType();
+  }, []);
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, "public", sortBy],
@@ -155,12 +167,14 @@ export default function EnvoyerColis() {
               tours={publicTours} 
               type="public"
               isLoading={isLoadingPublic}
+              userType={userType}
             />
           ) : (
             <TransporteurTours 
               tours={privateTours} 
               type="private"
               isLoading={isLoadingPrivate}
+              userType={userType}
             />
           )}
         </div>

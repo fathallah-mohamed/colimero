@@ -9,19 +9,28 @@ interface TourTimelineCardProps {
   tour: Tour;
   onBookingClick: (tourId: number, pickupCity: string) => void;
   hideAvatar?: boolean;
+  userType?: string | null;
 }
 
-export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimelineCardProps) {
+export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }: TourTimelineCardProps) {
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
 
   const isBookingEnabled = () => {
-    return selectedPickupCity && tour.status === 'planned';
+    return selectedPickupCity && tour.status === 'collecting' && userType !== 'admin';
+  };
+
+  const isPickupSelectionEnabled = () => {
+    return tour.status === 'collecting' && userType !== 'admin';
   };
 
   const getBookingButtonText = () => {
-    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    if (tour.status !== 'planned') return "Indisponible";
-    return "Réserver";
+    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+    if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
+    if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
+    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
+    if (tour.status === 'completed') return "Cette tournée est terminée";
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
+    return "Réserver sur cette tournée";
   };
 
   return (
@@ -46,11 +55,15 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
           {(tour.route || []).map((stop, index) => (
             <div
               key={index}
-              onClick={() => setSelectedPickupCity(stop.name)}
+              onClick={() => isPickupSelectionEnabled() && setSelectedPickupCity(stop.name)}
               className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                !isPickupSelectionEnabled() ? 'cursor-not-allowed opacity-75' : ''
+              } ${
                 selectedPickupCity === stop.name
                   ? "border-green-500 bg-green-50"
-                  : "border-gray-200 hover:border-green-200"
+                  : isPickupSelectionEnabled()
+                    ? "border-gray-200 hover:border-green-200"
+                    : "border-gray-200"
               }`}
             >
               <div className="flex justify-between items-center">

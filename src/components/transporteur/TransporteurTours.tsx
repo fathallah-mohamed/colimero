@@ -7,9 +7,10 @@ interface TransporteurToursProps {
   type: "public" | "private";
   isLoading?: boolean;
   hideAvatar?: boolean;
+  userType?: string | null;
 }
 
-export function TransporteurTours({ tours, type, isLoading, hideAvatar }: TransporteurToursProps) {
+export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType }: TransporteurToursProps) {
   const navigate = useNavigate();
 
   const handleBookingClick = (tourId: number, pickupCity: string) => {
@@ -38,6 +39,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
           tour={tour}
           onBookingClick={handleBookingClick}
           hideAvatar={hideAvatar}
+          userType={userType}
         />
       ))}
     </div>
