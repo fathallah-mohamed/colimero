@@ -1,25 +1,10 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { CarrierSearchBar } from "./carriers/CarrierSearchBar";
+import { CarrierTable } from "./carriers/CarrierTable";
+import { CarrierDetailsDialog } from "./carriers/CarrierDetailsDialog";
 
 export default function ApprovedCarriers() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,7 +28,6 @@ export default function ApprovedCarriers() {
 
   const handleSuspendCarrier = async (carrierId: string) => {
     try {
-      // 1. First update the carrier status
       const { error: updateError } = await supabase
         .from("carriers")
         .update({ status: "suspended" })
@@ -51,7 +35,6 @@ export default function ApprovedCarriers() {
 
       if (updateError) throw updateError;
 
-      // 2. Get the carrier details
       const { data: carrier, error: carrierError } = await supabase
         .from("carriers")
         .select("*")
@@ -60,7 +43,6 @@ export default function ApprovedCarriers() {
 
       if (carrierError) throw carrierError;
 
-      // 3. Check if a rejected request already exists
       const { data: existingRequest, error: checkError } = await supabase
         .from("carrier_registration_requests")
         .select("id")
@@ -71,7 +53,6 @@ export default function ApprovedCarriers() {
       if (checkError && checkError.code !== 'PGRST116') throw checkError;
 
       if (!existingRequest) {
-        // 4. Only create a new rejected request if one doesn't exist
         const { error: requestError } = await supabase
           .from("carrier_registration_requests")
           .insert([{
@@ -92,7 +73,6 @@ export default function ApprovedCarriers() {
         if (requestError) throw requestError;
       }
 
-      // 5. Refresh the data
       await queryClient.invalidateQueries({ queryKey: ["approved-carriers"] });
       await queryClient.invalidateQueries({ queryKey: ["rejected-requests"] });
 
@@ -117,92 +97,24 @@ export default function ApprovedCarriers() {
   );
 
   if (isLoading) {
-    return <div>Chargement...</div>;
+    return <div className="p-4 text-center">Chargement...</div>;
   }
 
   return (
-    <div className="space-y-4">
-      <Input
-        placeholder="Rechercher par nom ou email..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="max-w-sm"
+    <div className="space-y-4 p-4">
+      <CarrierSearchBar value={searchTerm} onChange={setSearchTerm} />
+      
+      <CarrierTable 
+        carriers={filteredCarriers || []}
+        onViewDetails={setSelectedCarrier}
+        onSuspend={handleSuspendCarrier}
       />
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Entreprise</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Téléphone</TableHead>
-            <TableHead>Date d'inscription</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredCarriers?.map((carrier) => (
-            <TableRow key={carrier.id}>
-              <TableCell>{carrier.company_name}</TableCell>
-              <TableCell>{carrier.email}</TableCell>
-              <TableCell>{carrier.phone}</TableCell>
-              <TableCell>
-                {format(new Date(carrier.created_at), "dd MMMM yyyy", {
-                  locale: fr,
-                })}
-              </TableCell>
-              <TableCell className="space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedCarrier(carrier)}
-                >
-                  Voir les détails
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleSuspendCarrier(carrier.id)}
-                >
-                  Suspendre
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <Dialog open={!!selectedCarrier} onOpenChange={() => setSelectedCarrier(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              Détails du transporteur - {selectedCarrier?.company_name}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div>
-              <h3 className="font-semibold mb-2">Informations personnelles</h3>
-              <p>Prénom : {selectedCarrier?.first_name}</p>
-              <p>Nom : {selectedCarrier?.last_name}</p>
-              <p>Email : {selectedCarrier?.email}</p>
-              <p>Téléphone : {selectedCarrier?.phone}</p>
-              {selectedCarrier?.phone_secondary && (
-                <p>Téléphone secondaire : {selectedCarrier?.phone_secondary}</p>
-              )}
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">Informations entreprise</h3>
-              <p>Nom : {selectedCarrier?.company_name}</p>
-              <p>SIRET : {selectedCarrier?.siret}</p>
-              <p>Adresse : {selectedCarrier?.address}</p>
-            </div>
-
-            <div className="col-span-2">
-              <h3 className="font-semibold mb-2">Zone de couverture</h3>
-              <p>{selectedCarrier?.coverage_area?.join(", ")}</p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CarrierDetailsDialog
+        carrier={selectedCarrier}
+        isOpen={!!selectedCarrier}
+        onClose={() => setSelectedCarrier(null)}
+      />
     </div>
   );
 }
