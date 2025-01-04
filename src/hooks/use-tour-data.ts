@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus } from "@/types/tour";
+import type { Tour, TourStatus, RouteStop } from "@/types/tour";
 
 interface UseTourDataProps {
   departureCountry: string;
@@ -32,6 +32,31 @@ export function useTourData({
     }
   };
 
+  const parseRoute = (route: any): RouteStop[] => {
+    if (typeof route === 'string') {
+      return JSON.parse(route);
+    }
+    if (Array.isArray(route)) {
+      return route.map(stop => ({
+        name: String(stop.name || ''),
+        location: String(stop.location || ''),
+        time: String(stop.time || ''),
+        type: stop.type === 'pickup' || stop.type === 'dropoff' ? stop.type : 'pickup',
+        collection_date: stop.collection_date || ''
+      }));
+    }
+    if (typeof route === 'object' && route !== null) {
+      return Object.values(route).map(stop => ({
+        name: String(stop.name || ''),
+        location: String(stop.location || ''),
+        time: String(stop.time || ''),
+        type: stop.type === 'pickup' || stop.type === 'dropoff' ? stop.type : 'pickup',
+        collection_date: stop.collection_date || ''
+      }));
+    }
+    return [];
+  };
+
   const fetchTours = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
@@ -58,7 +83,6 @@ export function useTourData({
         query = query.eq('status', status);
       }
 
-      // Apply sorting
       switch (sortBy) {
         case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
@@ -75,7 +99,18 @@ export function useTourData({
         return;
       }
 
-      setTours(toursData || []);
+      const transformedTours: Tour[] = (toursData || []).map(tour => ({
+        ...tour,
+        route: parseRoute(tour.route),
+        carriers: tour.carriers ? {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+            ? tour.carriers.carrier_capacities
+            : [tour.carriers.carrier_capacities]
+        } : null
+      }));
+
+      setTours(transformedTours);
     }
     setLoading(false);
   };
