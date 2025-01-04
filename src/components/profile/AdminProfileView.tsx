@@ -3,6 +3,7 @@ import { ProfileData } from '@/types/profile';
 import { User, Mail, Phone, MapPin, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import NewRegistrationRequests from '@/components/admin/NewRegistrationRequests';
 
 interface AdminProfileViewProps {
   profile: ProfileData;
@@ -64,6 +65,13 @@ export function AdminProfileView({ profile }: AdminProfileViewProps) {
             value={formattedDate} 
           />
         </div>
+      </div>
+
+      <div className="mt-12">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          Demandes d'inscription des transporteurs
+        </h2>
+        <NewRegistrationRequests />
       </div>
     </div>
   );

@@ -83,7 +83,8 @@ export default function Profile() {
               <ClientProfileView profile={profile} />
             )}
 
-            {userType !== 'carrier' && (
+            {/* Only show delete button for clients */}
+            {userType === 'client' && (
               <div className="mt-8 pt-8 border-t border-gray-200">
                 <DeleteAccountButton />
               </div>

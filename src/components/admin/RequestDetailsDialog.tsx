@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Check, X } from "lucide-react";
 
 interface RequestDetailsDialogProps {
   request: any;
@@ -31,6 +32,26 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
         .eq("id", request.id);
 
       if (updateError) throw updateError;
+
+      // Créer le profil transporteur
+      const { error: carrierError } = await supabase
+        .from("carriers")
+        .insert([{
+          id: request.id,
+          email: request.email,
+          first_name: request.first_name,
+          last_name: request.last_name,
+          phone: request.phone,
+          company_name: request.company_name,
+          siret: request.siret,
+          address: request.address,
+          coverage_area: request.coverage_area,
+          avatar_url: request.avatar_url || '',
+          phone_secondary: request.phone_secondary || '',
+          status: 'active'
+        }]);
+
+      if (carrierError) throw carrierError;
 
       // Envoyer l'email de confirmation via l'edge function
       const response = await fetch("/api/send-approval-email", {
@@ -169,16 +190,20 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
           {request.status === "pending" && (
             <>
               <Button
-                variant="outline"
+                variant="destructive"
                 onClick={handleReject}
                 disabled={isSubmitting}
+                className="flex items-center gap-2"
               >
+                <X className="h-4 w-4" />
                 Rejeter
               </Button>
               <Button
                 onClick={handleApprove}
                 disabled={isSubmitting}
+                className="flex items-center gap-2"
               >
+                <Check className="h-4 w-4" />
                 Approuver
               </Button>
             </>
