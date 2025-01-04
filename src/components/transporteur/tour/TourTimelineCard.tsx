@@ -3,7 +3,7 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
-import { TourTimeline } from "@/components/CurrentTours";
+import { TourTimeline } from "@/components/transporteur/TourTimeline";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -21,7 +21,7 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
   const getBookingButtonText = () => {
     if (!selectedPickupCity) return "Sélectionnez un point de collecte";
     if (tour.status !== 'planned') return "Indisponible";
-    return tour.type === 'private' ? "Demander l'approbation" : "Réserver";
+    return "Réserver";
   };
 
   return (
