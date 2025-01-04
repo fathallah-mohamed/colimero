@@ -1,9 +1,9 @@
+import { useState } from "react";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
 import { TourTimeline } from "@/components/transporteur/TourTimeline";
-import { useState } from "react";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -17,6 +17,12 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
   const isBookingEnabled = () => {
     // Activer seulement si une ville est sélectionnée et le statut est "planned"
     return selectedPickupCity && tour.status === 'planned';
+  };
+
+  const getBookingButtonText = () => {
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
+    if (tour.status !== 'planned') return "Indisponible";
+    return tour.type === 'private' ? "Demander l'approbation" : "Réserver";
   };
 
   return (
@@ -60,15 +66,11 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
 
       <div className="mt-4">
         <Button 
-          onClick={() => onBookingClick(tour.id, selectedPickupCity!)}
+          onClick={() => selectedPickupCity && onBookingClick(tour.id, selectedPickupCity)}
           className="w-full"
           disabled={!isBookingEnabled()}
         >
-          {!selectedPickupCity 
-            ? "Sélectionnez un point de collecte" 
-            : tour.type === 'private' 
-              ? "Demander l'approbation" 
-              : "Réserver"}
+          {getBookingButtonText()}
         </Button>
       </div>
     </div>
