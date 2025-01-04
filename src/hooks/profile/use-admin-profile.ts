@@ -9,9 +9,13 @@ export async function fetchAdminProfile(userId: string, userEmail: string | unde
       .from('administrators')
       .select('*')
       .eq('id', userId)
-      .maybeSingle();
+      .single();
 
     if (adminError) {
+      if (adminError.code === 'PGRST116') {
+        console.log('No admin profile found');
+        return null;
+      }
       console.error('Error fetching admin profile:', adminError);
       throw adminError;
     }
@@ -41,20 +45,20 @@ export async function createAdminProfile(userId: string, userEmail: string | und
   try {
     console.log('Creating admin profile with metadata:', metadata);
     
+    const adminData = {
+      id: userId,
+      email: userEmail,
+      first_name: metadata?.first_name || '',
+      last_name: metadata?.last_name || '',
+      address: metadata?.address || 'À renseigner',
+      phone: metadata?.phone || ''
+    };
+
     const { data: newAdminData, error: insertError } = await supabase
       .from('administrators')
-      .insert([
-        {
-          id: userId,
-          email: userEmail,
-          first_name: metadata?.first_name || '',
-          last_name: metadata?.last_name || '',
-          address: metadata?.address || 'À renseigner',
-          phone: metadata?.phone || ''
-        }
-      ])
+      .insert([adminData])
       .select()
-      .maybeSingle();
+      .single();
 
     if (insertError) {
       console.error('Error creating admin profile:', insertError);

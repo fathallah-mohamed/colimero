@@ -63,7 +63,13 @@ export function useProfile() {
         
         if (!profileData) {
           console.log('No admin profile found, creating one...');
-          profileData = await createAdminProfile(session.user.id, session.user.email, session.user.user_metadata);
+          const metadata = {
+            first_name: session.user.user_metadata?.first_name || 'Admin',
+            last_name: session.user.user_metadata?.last_name || 'User',
+            address: session.user.user_metadata?.address,
+            phone: session.user.user_metadata?.phone
+          };
+          profileData = await createAdminProfile(session.user.id, session.user.email, metadata);
         }
       } else if (userType === 'carrier') {
         profileData = await fetchCarrierProfile(session.user.id, session.user.email);
