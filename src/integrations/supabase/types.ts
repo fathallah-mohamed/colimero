@@ -948,6 +948,7 @@ export type Database = {
         | "Bordeaux"
         | "Montpellier"
         | "Gênes"
+      maghreb_country: "TN" | "MA" | "DZ"
       moroccan_city: "Casablanca" | "Rabat" | "Tanger" | "Marrakech" | "Agadir"
       registration_status: "pending" | "approved" | "rejected"
       tour_status:

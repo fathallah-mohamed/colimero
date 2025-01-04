@@ -2,12 +2,15 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import type { CarrierSignupFormValues } from "./FormSchema";
+import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 
 interface ContactInfoFieldsProps {
   form: UseFormReturn<CarrierSignupFormValues>;
 }
 
 export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
+  const password = form.watch("password");
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Informations de contact</h3>
@@ -17,9 +20,19 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>
+                Email <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input type="email" placeholder="votre@email.com" {...field} />
+                <Input 
+                  type="email" 
+                  placeholder="votre@email.com" 
+                  {...field} 
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("email");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -30,10 +43,21 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>
+                Mot de passe <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input type="password" placeholder="********" {...field} />
+                <Input 
+                  type="password" 
+                  placeholder="********" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("password");
+                  }}
+                />
               </FormControl>
+              <PasswordStrengthIndicator password={password} />
               <FormMessage />
             </FormItem>
           )}
@@ -43,9 +67,18 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Téléphone principal</FormLabel>
+              <FormLabel>
+                Téléphone principal <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="+33 6 XX XX XX XX" {...field} />
+                <Input 
+                  placeholder="+33 6 XX XX XX XX" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("phone");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -58,7 +91,14 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
             <FormItem>
               <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
               <FormControl>
-                <Input placeholder="+33 6 XX XX XX XX" {...field} />
+                <Input 
+                  placeholder="+33 6 XX XX XX XX" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("phone_secondary");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

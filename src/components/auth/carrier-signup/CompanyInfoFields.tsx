@@ -17,9 +17,18 @@ export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
           name="company_name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom de l'entreprise</FormLabel>
+              <FormLabel>
+                Nom de l'entreprise <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Nom de votre entreprise" {...field} />
+                <Input 
+                  placeholder="Nom de votre entreprise" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("company_name");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -30,9 +39,18 @@ export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
           name="siret"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>SIRET</FormLabel>
+              <FormLabel>
+                SIRET <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Numéro SIRET" {...field} />
+                <Input 
+                  placeholder="Numéro SIRET" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("siret");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -43,9 +61,18 @@ export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Adresse</FormLabel>
+              <FormLabel>
+                Adresse <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Adresse complète" {...field} />
+                <Input 
+                  placeholder="Adresse complète" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("address");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

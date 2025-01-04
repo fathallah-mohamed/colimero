@@ -17,9 +17,18 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
           name="first_name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Prénom</FormLabel>
+              <FormLabel>
+                Prénom <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Votre prénom" {...field} />
+                <Input 
+                  placeholder="Votre prénom" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("first_name");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -30,9 +39,18 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
           name="last_name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel>
+                Nom <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Votre nom" {...field} />
+                <Input 
+                  placeholder="Votre nom" 
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("last_name");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
