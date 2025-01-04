@@ -70,19 +70,15 @@ export default function CurrentTours() {
   };
 
   const isBookingDisabled = (tour: Tour) => {
-    // Désactiver pour les administrateurs
+    if (tour.status === 'cancelled') return true;
     if (userType === 'admin') return true;
-    
-    // Désactiver si la tournée n'est pas en cours de collecte
     if (tour.status !== 'collecting') return true;
-
-    // Désactiver si aucun point de collecte n'est sélectionné
     if (!selectedPickupCity) return true;
-
     return false;
   };
 
   const getBookingButtonText = (tour: Tour) => {
+    if (tour.status === 'cancelled') return "Tournée annulée";
     if (!selectedPickupCity) return "Sélectionnez un point de collecte";
     if (tour.status !== 'collecting') return "Indisponible";
     if (userType === 'admin') return "Réservation non autorisée";
