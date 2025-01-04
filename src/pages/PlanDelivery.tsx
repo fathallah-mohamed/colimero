@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import PlanningHero from "@/components/tour/planning/PlanningHero";
-import PlanningSteps from "@/components/tour/planning/PlanningSteps";
-import PlanningBenefits from "@/components/tour/planning/PlanningBenefits";
-import PlanningAdvantages from "@/components/tour/planning/PlanningAdvantages";
-import PlanningExample from "@/components/tour/planning/PlanningExample";
+import { PlanningHero } from "@/components/tour/planning/PlanningHero";
+import { PlanningSteps } from "@/components/tour/planning/PlanningSteps";
+import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
+import { PlanningAdvantages } from "@/components/tour/planning/PlanningAdvantages";
+import { PlanningExample } from "@/components/tour/planning/PlanningExample";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function PlanDelivery() {
@@ -42,7 +42,7 @@ export default function PlanDelivery() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PlanningHero />
+      <PlanningHero onCreateTourClick={() => navigate("/planifier-tournee")} />
       <PlanningSteps />
       <PlanningBenefits />
       <PlanningAdvantages />
