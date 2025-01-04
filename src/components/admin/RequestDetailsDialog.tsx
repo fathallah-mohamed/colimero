@@ -2,15 +2,17 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, X } from "lucide-react";
+import { RequestHeader } from "./request-details/RequestHeader";
+import { PersonalInfo } from "./request-details/PersonalInfo";
+import { CompanyInfo } from "./request-details/CompanyInfo";
+import { CapacityInfo } from "./request-details/CapacityInfo";
+import { RequestActions } from "./request-details/RequestActions";
 
 interface RequestDetailsDialogProps {
   request: any;
@@ -33,26 +35,6 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
 
       if (updateError) throw updateError;
 
-      // Créer le profil transporteur
-      const { error: carrierError } = await supabase
-        .from("carriers")
-        .insert([{
-          id: request.id,
-          email: request.email,
-          first_name: request.first_name,
-          last_name: request.last_name,
-          phone: request.phone,
-          company_name: request.company_name,
-          siret: request.siret,
-          address: request.address,
-          coverage_area: request.coverage_area,
-          avatar_url: request.avatar_url || '',
-          phone_secondary: request.phone_secondary || '',
-          status: 'active'
-        }]);
-
-      if (carrierError) throw carrierError;
-
       // Envoyer l'email de confirmation via l'edge function
       const response = await fetch("/api/send-approval-email", {
         method: "POST",
@@ -73,6 +55,7 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
       });
       onClose();
     } catch (error: any) {
+      console.error("Error approving request:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -95,7 +78,6 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
 
     setIsSubmitting(true);
     try {
-      // Mettre à jour le statut de la demande
       const { error: updateError } = await supabase
         .from("carrier_registration_requests")
         .update({
@@ -106,7 +88,6 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
 
       if (updateError) throw updateError;
 
-      // Envoyer l'email de rejet via l'edge function
       const { data, error } = await supabase.functions.invoke("send-rejection-email", {
         body: JSON.stringify({
           email: request.email,
@@ -139,36 +120,33 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
   return (
     <Dialog open={!!request} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Détails de la demande - {request.company_name}</DialogTitle>
-        </DialogHeader>
+        <DialogDescription>
+          Examinez les détails de la demande avant de l'approuver ou la rejeter.
+        </DialogDescription>
+        
+        <RequestHeader companyName={request.company_name} />
 
         <div className="grid grid-cols-2 gap-4 py-4">
-          <div>
-            <h3 className="font-semibold mb-2">Informations personnelles</h3>
-            <p>Prénom : {request.first_name}</p>
-            <p>Nom : {request.last_name}</p>
-            <p>Email : {request.email}</p>
-            <p>Téléphone : {request.phone}</p>
-            {request.phone_secondary && (
-              <p>Téléphone secondaire : {request.phone_secondary}</p>
-            )}
-          </div>
+          <PersonalInfo
+            firstName={request.first_name}
+            lastName={request.last_name}
+            email={request.email}
+            phone={request.phone}
+            phoneSecondary={request.phone_secondary}
+          />
 
-          <div>
-            <h3 className="font-semibold mb-2">Informations entreprise</h3>
-            <p>Nom : {request.company_name}</p>
-            <p>SIRET : {request.siret}</p>
-            <p>Adresse : {request.address}</p>
-          </div>
+          <CompanyInfo
+            companyName={request.company_name}
+            siret={request.siret}
+            address={request.address}
+          />
 
-          <div className="col-span-2">
-            <h3 className="font-semibold mb-2">Capacités</h3>
-            <p>Capacité totale : {request.total_capacity} kg</p>
-            <p>Prix par kg : {request.price_per_kg} €</p>
-            <p>Zone de couverture : {request.coverage_area?.join(", ")}</p>
-            <p>Services : {request.services?.join(", ")}</p>
-          </div>
+          <CapacityInfo
+            totalCapacity={request.total_capacity}
+            pricePerKg={request.price_per_kg}
+            coverageArea={request.coverage_area}
+            services={request.services}
+          />
 
           {request.status === "pending" && (
             <div className="col-span-2">
@@ -185,25 +163,11 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
 
         <DialogFooter>
           {request.status === "pending" && (
-            <>
-              <Button
-                variant="destructive"
-                onClick={handleReject}
-                disabled={isSubmitting}
-                className="flex items-center gap-2"
-              >
-                <X className="h-4 w-4" />
-                Rejeter
-              </Button>
-              <Button
-                onClick={handleApprove}
-                disabled={isSubmitting}
-                className="flex items-center gap-2"
-              >
-                <Check className="h-4 w-4" />
-                Approuver
-              </Button>
-            </>
+            <RequestActions
+              onApprove={handleApprove}
+              onReject={handleReject}
+              isSubmitting={isSubmitting}
+            />
           )}
         </DialogFooter>
       </DialogContent>

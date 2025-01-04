@@ -3,7 +3,7 @@ import { User } from "lucide-react";
 
 interface TransporteurAvatarProps {
   avatarUrl?: string | null;
-  name: string;
+  companyName: string;
   size?: "sm" | "md" | "lg" | "xl";
 }
 
@@ -14,21 +14,21 @@ const sizes = {
   xl: "h-32 w-32"
 };
 
-export function TransporteurAvatar({ avatarUrl, name, size = "md" }: TransporteurAvatarProps) {
-  const initials = name
-    ? name.split(" ")
+export function TransporteurAvatar({ avatarUrl, companyName, size = "md" }: TransporteurAvatarProps) {
+  const initials = companyName
+    ? companyName.split(" ")
         .map((n) => n[0])
         .join("")
         .toUpperCase()
     : "";
 
-  const defaultAvatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`;
+  const defaultAvatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${companyName}`;
 
   return (
     <Avatar className={`${sizes[size]} bg-white/10`}>
       <AvatarImage
         src={avatarUrl || defaultAvatarUrl}
-        alt={name}
+        alt={companyName}
         className="object-cover"
       />
       <AvatarFallback className="bg-blue-500 text-white">
