@@ -9,13 +9,9 @@ export async function fetchAdminProfile(userId: string, userEmail: string | unde
       .from('administrators')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (adminError) {
-      if (adminError.code === 'PGRST116') {
-        console.log('No admin profile found');
-        return null;
-      }
       console.error('Error fetching admin profile:', adminError);
       throw adminError;
     }
@@ -58,7 +54,7 @@ export async function createAdminProfile(userId: string, userEmail: string | und
       .from('administrators')
       .insert([adminData])
       .select()
-      .single();
+      .maybeSingle();
 
     if (insertError) {
       console.error('Error creating admin profile:', insertError);
