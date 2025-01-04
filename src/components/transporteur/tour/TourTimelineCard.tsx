@@ -7,6 +7,7 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -18,6 +19,7 @@ interface TourTimelineCardProps {
 export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }: TourTimelineCardProps) {
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const navigate = useNavigate();
 
   const isBookingEnabled = () => {
@@ -35,7 +37,7 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
     if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison et n'est pas ouverte à la réservation";
     if (tour.status === 'completed') return "Cette tournée est terminée et n'est pas ouverte à la réservation";
     if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
-    return "Réserver sur cette tournée";
+    return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
   };
 
   const handleBookingClick = async () => {
@@ -46,7 +48,11 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
     if (!user) {
       setShowAuthDialog(true);
     } else {
-      onBookingClick(tour.id, selectedPickupCity);
+      if (tour.type === 'private') {
+        setShowApprovalDialog(true);
+      } else {
+        onBookingClick(tour.id, selectedPickupCity);
+      }
     }
   };
 
@@ -98,7 +104,7 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
       <div className="mt-4">
         <Button 
           onClick={handleBookingClick}
-          className="w-full bg-primary hover:bg-primary-hover text-white transition-colors"
+          className="w-full"
           disabled={!isBookingEnabled()}
         >
           {getBookingButtonText()}
@@ -111,10 +117,21 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
         onSuccess={() => {
           setShowAuthDialog(false);
           if (selectedPickupCity) {
-            onBookingClick(tour.id, selectedPickupCity);
+            if (tour.type === 'private') {
+              setShowApprovalDialog(true);
+            } else {
+              onBookingClick(tour.id, selectedPickupCity);
+            }
           }
         }}
         requiredUserType="client"
+      />
+
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={tour.id}
+        pickupCity={selectedPickupCity || ''}
       />
     </div>
   );
