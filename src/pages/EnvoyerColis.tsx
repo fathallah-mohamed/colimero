@@ -11,7 +11,7 @@ export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
-  const [sortBy, setSortBy] = useState("date_desc");
+  const [sortBy, setSortBy] = useState("departure_asc");
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,10 +46,10 @@ export default function EnvoyerColis() {
 
       // Apply sorting
       switch (sortBy) {
-        case 'date_asc':
+        case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
           break;
-        case 'date_desc':
+        case 'departure_desc':
           query = query.order('departure_date', { ascending: false });
           break;
         case 'capacity_asc':
@@ -99,10 +99,10 @@ export default function EnvoyerColis() {
 
       // Apply sorting
       switch (sortBy) {
-        case 'date_asc':
+        case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
           break;
-        case 'date_desc':
+        case 'departure_desc':
           query = query.order('departure_date', { ascending: false });
           break;
         case 'capacity_asc':
