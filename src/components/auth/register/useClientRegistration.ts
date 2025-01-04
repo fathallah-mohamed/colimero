@@ -77,7 +77,7 @@ async function uploadIdDocument(userId: string, idDocument: File) {
 }
 
 async function insertClientConsents(userId: string, acceptedConsents: string[]) {
-  const consentsToInsert = acceptedConsents.map(consentId => ({
+  const consentsToUpsert = acceptedConsents.map(consentId => ({
     client_id: userId,
     consent_type_id: consentId,
     accepted: true,
@@ -86,7 +86,10 @@ async function insertClientConsents(userId: string, acceptedConsents: string[]) 
 
   const { error: consentsError } = await supabase
     .from('client_consents')
-    .insert(consentsToInsert);
+    .upsert(consentsToUpsert, {
+      onConflict: 'client_id,consent_type_id',
+      ignoreDuplicates: false
+    });
 
   if (consentsError) throw consentsError;
 }
