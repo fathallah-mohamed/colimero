@@ -61,34 +61,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     }
   };
 
-  const handleApproval = async (requestId: string, isApproved: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('approval_requests')
-        .update({
-          status: isApproved ? 'approved' : 'rejected',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', requestId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: `La demande a été ${isApproved ? 'approuvée' : 'rejetée'} avec succès`,
-      });
-
-      await fetchRequests();
-    } catch (error) {
-      console.error('Error handling approval:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors du traitement de la demande",
-      });
-    }
-  };
-
   const handleCancelRequest = async (requestId: string) => {
     try {
       const { error } = await supabase
@@ -166,7 +138,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   return { 
     requests, 
     loading,
-    handleApproval,
     handleCancelRequest,
     handleDeleteRequest
   };

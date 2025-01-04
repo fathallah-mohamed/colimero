@@ -16,9 +16,8 @@ export default function DemandesApprobation() {
   const { 
     requests, 
     loading, 
-    handleApproval,
-    handleCancelRequest,
-    handleDeleteRequest
+    handleApproval, 
+    handleCancelRequest 
   } = useApprovalRequests(userType, userId);
 
   useEffect(() => {
@@ -59,10 +58,9 @@ export default function DemandesApprobation() {
               key={request.id}
               request={request}
               userType={userType}
-              onApprove={userType === 'carrier' ? () => handleApproval(request.id, true) : undefined}
-              onReject={userType === 'carrier' ? () => handleApproval(request.id, false) : undefined}
+              onApprove={userType === 'carrier' ? (id) => handleApproval(id, true) : undefined}
+              onReject={userType === 'carrier' ? (id) => handleApproval(id, false) : undefined}
               onCancel={userType !== 'carrier' ? handleCancelRequest : undefined}
-              onDelete={userType !== 'carrier' ? handleDeleteRequest : undefined}
             />
           ))}
           {requests.length === 0 && (
