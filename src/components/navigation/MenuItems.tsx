@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Package, Truck, Users, ClipboardList } from "lucide-react";
 
 export const menuItems = [
@@ -29,9 +30,9 @@ export default function MenuItems() {
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
       {menuItems.map((item) => (
-        <a
+        <Link
           key={item.name}
-          href={item.href}
+          to={item.href}
           className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             item.highlight
               ? "text-primary hover:text-primary-hover hover:bg-primary/10" +
@@ -41,7 +42,7 @@ export default function MenuItems() {
         >
           {item.icon}
           <span className="ml-2">{item.name}</span>
-        </a>
+        </Link>
       ))}
     </div>
   );
