@@ -25,25 +25,36 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#00B0F0",
+          DEFAULT: "#9b87f5",
           foreground: "#FFFFFF",
-          hover: "#0082b3",
+          hover: "#8670f4",
+          light: "#D6BCFA",
+          dark: "#1A1F2C",
         },
         secondary: {
-          DEFAULT: "#F3F4F6",
-          foreground: "#1F2937",
+          DEFAULT: "#F2FCE2",
+          foreground: "#1A1F2C",
+          hover: "#E5F5D5",
+        },
+        success: {
+          DEFAULT: "#10B981",
+          foreground: "#FFFFFF",
+        },
+        warning: {
+          DEFAULT: "#F59E0B",
+          foreground: "#FFFFFF",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#EF4444",
+          foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#F1F0FB",
+          foreground: "#8E9196",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#D6BCFA",
+          foreground: "#1A1F2C",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -70,6 +81,10 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-primary': 'linear-gradient(to right, #9b87f5, #D6BCFA)',
       },
     },
   },
