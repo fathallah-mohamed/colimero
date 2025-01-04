@@ -22,7 +22,7 @@ export function TourCardHeader({ tour, hideAvatar }: TourCardHeaderProps) {
             <div className="flex items-center gap-2">
               <TransporteurAvatar
                 avatarUrl={tour.carriers?.avatar_url}
-                name={tour.carriers?.company_name || ""}
+                companyName={tour.carriers?.company_name || ""}
                 size="sm"
               />
               <div className="flex flex-col">

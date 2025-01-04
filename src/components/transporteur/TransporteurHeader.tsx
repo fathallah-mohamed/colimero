@@ -36,7 +36,7 @@ export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }:
         <div className="flex items-center gap-6">
           <TransporteurAvatar
             avatarUrl={avatarUrl}
-            name={name}
+            companyName={name}
             size="lg"
           />
           <div>

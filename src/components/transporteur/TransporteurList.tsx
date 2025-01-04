@@ -72,7 +72,7 @@ export function TransporteurList() {
                   <div className="h-16 w-16">
                     <TransporteurAvatar
                       avatarUrl={carrier.avatar_url}
-                      name={carrier.company_name || `${carrier.first_name} ${carrier.last_name}`}
+                      companyName={carrier.company_name || `${carrier.first_name} ${carrier.last_name}`}
                       size="md"
                     />
                   </div>
