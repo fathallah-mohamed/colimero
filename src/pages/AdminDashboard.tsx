@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import NewRegistrationRequests from "@/components/admin/NewRegistrationRequests";
 import ApprovedCarriers from "@/components/admin/ApprovedCarriers";
 import RejectedRequests from "@/components/admin/RejectedRequests";
+import { ClientsList } from "@/components/admin/clients/ClientsList";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -27,7 +28,6 @@ export default function AdminDashboard() {
 
       console.log("Checking admin access for user:", session.user.id);
       
-      // Vérifier si l'utilisateur est un administrateur
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('*')
@@ -67,10 +67,11 @@ export default function AdminDashboard() {
       <h1 className="text-3xl font-bold mb-8">Tableau de bord administrateur</h1>
       
       <Tabs defaultValue="new" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="new">Nouvelles demandes</TabsTrigger>
           <TabsTrigger value="approved">Transporteurs validés</TabsTrigger>
           <TabsTrigger value="rejected">Transporteurs rejetés</TabsTrigger>
+          <TabsTrigger value="clients">Clients</TabsTrigger>
         </TabsList>
         
         <TabsContent value="new">
@@ -83,6 +84,10 @@ export default function AdminDashboard() {
         
         <TabsContent value="rejected">
           <RejectedRequests />
+        </TabsContent>
+
+        <TabsContent value="clients">
+          <ClientsList />
         </TabsContent>
       </Tabs>
     </div>
