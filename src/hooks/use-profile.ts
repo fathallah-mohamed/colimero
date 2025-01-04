@@ -37,9 +37,12 @@ export function useProfile() {
           .from('administrators')
           .select('*')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
-        if (adminError) throw adminError;
+        if (adminError) {
+          console.error('Error fetching admin profile:', adminError);
+          throw adminError;
+        }
         
         if (adminData) {
           const profileData: ProfileData = {
@@ -53,6 +56,9 @@ export function useProfile() {
           };
           console.log("Admin profile data:", profileData);
           setProfile(profileData);
+        } else {
+          console.log("No admin profile found");
+          setProfile(null);
         }
       } else if (userType === 'carrier') {
         const { data: carrierData, error: carrierError } = await supabase

@@ -14,7 +14,7 @@ export function AdminProfileView({ profile }: AdminProfileViewProps) {
       </div>
       <div className="space-y-1 min-w-0">
         <p className="text-sm text-gray-500">{label}</p>
-        <p className="text-gray-900 font-medium break-words">{value}</p>
+        <p className="text-gray-900 font-medium break-words">{value || "-"}</p>
       </div>
     </div>
   );
