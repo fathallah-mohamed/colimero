@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
 import { TourTimeline } from "@/components/transporteur/TourTimeline";
+import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -49,8 +49,8 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
               onClick={() => setSelectedPickupCity(stop.name)}
               className={`p-3 rounded-lg cursor-pointer border transition-colors ${
                 selectedPickupCity === stop.name
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-blue-200"
+                  ? "border-green-500 bg-green-50"
+                  : "border-gray-200 hover:border-green-200"
               }`}
             >
               <div className="flex justify-between items-center">
@@ -68,7 +68,7 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
       <div className="mt-4">
         <Button 
           onClick={() => selectedPickupCity && onBookingClick(tour.id, selectedPickupCity)}
-          className="w-full"
+          className="w-full bg-blue-500 hover:bg-blue-600"
           disabled={!isBookingEnabled()}
         >
           {getBookingButtonText()}
