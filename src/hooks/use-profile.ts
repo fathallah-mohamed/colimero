@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileData } from "@/types/profile";
-import { fetchAdminProfile, createAdminProfile, useAdminProfile } from "./profile/use-admin-profile";
+import { fetchAdminProfile, createAdminProfile } from "./profile/use-admin-profile";
 import { fetchCarrierProfile } from "./profile/use-carrier-profile";
 import { fetchClientProfile } from "./profile/use-client-profile";
 
@@ -13,7 +13,6 @@ export function useProfile() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
-  const adminProfile = useAdminProfile();
 
   const checkUser = async () => {
     try {
@@ -56,11 +55,9 @@ export function useProfile() {
       let profileData = null;
 
       if (userType === 'admin') {
-        // Try to fetch existing admin profile
         profileData = await fetchAdminProfile(session.user.id, session.user.email);
         
         if (!profileData) {
-          // Create new admin profile if none exists
           profileData = await createAdminProfile(session.user.id, session.user.email, session.user.user_metadata);
         }
       } else if (userType === 'carrier') {

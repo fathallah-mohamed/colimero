@@ -13,7 +13,6 @@ export function useNavigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initial session check
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -28,7 +27,6 @@ export function useNavigation() {
 
     checkSession();
 
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setUser(session?.user ?? null);
@@ -40,7 +38,6 @@ export function useNavigation() {
       }
     });
 
-    // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };

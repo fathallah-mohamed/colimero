@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileData } from "@/types/profile";
 import { useToast } from "@/hooks/use-toast";
@@ -39,7 +38,7 @@ export async function createAdminProfile(userId: string, userEmail: string | und
         email: userEmail,
         first_name: metadata?.first_name || '',
         last_name: metadata?.last_name || '',
-        address: 'À renseigner'
+        address: metadata?.address || 'À renseigner'
       }
     ])
     .select()
@@ -63,28 +62,4 @@ export async function createAdminProfile(userId: string, userEmail: string | und
   }
 
   return null;
-}
-
-export function useAdminProfile() {
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const { toast } = useToast();
-
-  const handleError = (error: any) => {
-    console.error('Error in admin profile:', error);
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Impossible de charger votre profil administrateur",
-    });
-    setLoading(false);
-  };
-
-  return {
-    loading,
-    setLoading,
-    profile,
-    setProfile,
-    handleError
-  };
 }
