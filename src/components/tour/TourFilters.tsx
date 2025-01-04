@@ -107,10 +107,6 @@ export function TourFilters({
             <SelectContent>
               <SelectItem value="departure_asc">Date de départ (ancien → récent)</SelectItem>
               <SelectItem value="departure_desc">Date de départ (récent → ancien)</SelectItem>
-              <SelectItem value="date_asc">Date de collecte (ancien → récent)</SelectItem>
-              <SelectItem value="date_desc">Date de collecte (récent → ancien)</SelectItem>
-              <SelectItem value="capacity_asc">Capacité (croissant)</SelectItem>
-              <SelectItem value="capacity_desc">Capacité (décroissant)</SelectItem>
             </SelectContent>
           </Select>
         </div>
