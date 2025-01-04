@@ -79,9 +79,11 @@ export default function CurrentTours() {
 
   const getBookingButtonText = (tour: Tour) => {
     if (tour.status === 'cancelled') return "Tournée annulée";
-    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    if (tour.status !== 'collecting') return "Indisponible";
     if (userType === 'admin') return "Réservation non autorisée";
+    if (tour.status === 'planned') return "Tournée pas encore ouverte aux réservations";
+    if (tour.status === 'in_transit') return "Tournée en cours de livraison";
+    if (tour.status === 'completed') return "Tournée terminée";
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
     return "Réserver";
   };
 
