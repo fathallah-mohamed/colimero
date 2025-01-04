@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { TourCapacityDisplay } from "./transporteur/TourCapacityDisplay";
 import { TourTimeline } from "./transporteur/TourTimeline";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "./booking/BookingForm";
 import { Tour, TourStatus, RouteStop } from "@/types/tour";
@@ -14,6 +14,17 @@ import { Tour, TourStatus, RouteStop } from "@/types/tour";
 export default function CurrentTours() {
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUserType = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserType(user.user_metadata?.user_type);
+      }
+    };
+    checkUserType();
+  }, []);
 
   const { data: tours, isLoading } = useQuery({
     queryKey: ["current-tours"],
@@ -62,6 +73,16 @@ export default function CurrentTours() {
     setIsBookingFormOpen(true);
   };
 
+  const isBookingDisabled = (tour: Tour) => {
+    // Désactiver pour les administrateurs
+    if (userType === 'admin') return true;
+    
+    // Désactiver si la tournée n'est pas en cours de collecte
+    if (tour.status !== 'collecting') return true;
+
+    return false;
+  };
+
   return (
     <div className="bg-gray-50 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -104,7 +125,7 @@ export default function CurrentTours() {
                   <Button 
                     onClick={() => handleBookingClick(tour)}
                     className="w-full"
-                    disabled={tour.status !== 'collecting'}
+                    disabled={isBookingDisabled(tour)}
                   >
                     {tour.status === 'collecting' ? 'Réserver' : 'Indisponible'}
                   </Button>
