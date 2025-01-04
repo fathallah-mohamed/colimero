@@ -46,21 +46,30 @@ export default function Tours() {
         // Ensure route is properly parsed as RouteStop[]
         let parsedRoute: RouteStop[];
         if (typeof tour.route === 'string') {
-          parsedRoute = JSON.parse(tour.route) as RouteStop[];
-        } else if (Array.isArray(tour.route)) {
-          parsedRoute = tour.route.map(stop => ({
+          const parsed = JSON.parse(tour.route);
+          parsedRoute = parsed.map((stop: any) => ({
             name: String(stop.name || ''),
             location: String(stop.location || ''),
             time: String(stop.time || ''),
-            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup'
+            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup',
+            collection_date: tour.collection_date // Use the tour's collection date for each stop
+          }));
+        } else if (Array.isArray(tour.route)) {
+          parsedRoute = tour.route.map((stop: any) => ({
+            name: String(stop.name || ''),
+            location: String(stop.location || ''),
+            time: String(stop.time || ''),
+            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup',
+            collection_date: tour.collection_date // Use the tour's collection date for each stop
           }));
         } else if (typeof tour.route === 'object' && tour.route !== null) {
           // If it's a JSONB object from Supabase, convert it to array
-          parsedRoute = Object.values(tour.route).map(stop => ({
+          parsedRoute = Object.values(tour.route).map((stop: any) => ({
             name: String(stop.name || ''),
             location: String(stop.location || ''),
             time: String(stop.time || ''),
-            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup'
+            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup',
+            collection_date: tour.collection_date // Use the tour's collection date for each stop
           }));
         } else {
           parsedRoute = [];
