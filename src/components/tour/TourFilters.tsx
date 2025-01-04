@@ -1,13 +1,16 @@
 import { ArrowLeftRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { TourStatus } from "@/types/tour";
 
 interface TourFiltersProps {
   departureCountry: string;
   destinationCountry: string;
   sortBy: string;
+  status: TourStatus | "all";
   onDepartureChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onSortChange: (value: string) => void;
+  onStatusChange: (value: TourStatus | "all") => void;
 }
 
 const MAGHREB_COUNTRIES = ["TN", "DZ", "MA"];
@@ -23,12 +26,13 @@ export function TourFilters({
   departureCountry,
   destinationCountry,
   sortBy,
+  status,
   onDepartureChange,
   onDestinationChange,
   onSortChange,
+  onStatusChange,
 }: TourFiltersProps) {
   const handleSwitch = () => {
-    // Allow switching if either country is France, or if one is France and the other is Maghreb
     const isValidSwitch = 
       departureCountry === 'FR' || 
       destinationCountry === 'FR' ||
@@ -92,6 +96,25 @@ export function TourFilters({
               ) : (
                 <SelectItem value="FR">{countryNames.FR}</SelectItem>
               )}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1">
+          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+            Statut
+          </label>
+          <Select value={status} onValueChange={onStatusChange}>
+            <SelectTrigger className="w-full bg-white">
+              <SelectValue placeholder="Filtrer par statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              <SelectItem value="planned">Planifiée</SelectItem>
+              <SelectItem value="collecting">En collecte</SelectItem>
+              <SelectItem value="in_transit">En transit</SelectItem>
+              <SelectItem value="completed">Terminée</SelectItem>
+              <SelectItem value="cancelled">Annulée</SelectItem>
             </SelectContent>
           </Select>
         </div>

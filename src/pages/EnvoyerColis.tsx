@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
   const [sortBy, setSortBy] = useState("departure_asc");
+  const [status, setStatus] = useState<TourStatus | "all">("all");
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function EnvoyerColis() {
   }, []);
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, "public", sortBy],
+    queryKey: ["tours", departureCountry, destinationCountry, "public", sortBy, status],
     queryFn: async () => {
       let query = supabase
         .from("tours")
@@ -43,6 +44,10 @@ export default function EnvoyerColis() {
         .eq("destination_country", destinationCountry)
         .eq("type", "public")
         .gte("departure_date", new Date().toISOString());
+
+      if (status !== "all") {
+        query = query.eq("status", status);
+      }
 
       // Apply sorting
       switch (sortBy) {
@@ -78,7 +83,7 @@ export default function EnvoyerColis() {
   });
 
   const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, "private", sortBy],
+    queryKey: ["tours", departureCountry, destinationCountry, "private", sortBy, status],
     queryFn: async () => {
       let query = supabase
         .from("tours")
@@ -96,6 +101,10 @@ export default function EnvoyerColis() {
         .eq("destination_country", destinationCountry)
         .eq("type", "private")
         .gte("departure_date", new Date().toISOString());
+
+      if (status !== "all") {
+        query = query.eq("status", status);
+      }
 
       // Apply sorting
       switch (sortBy) {
@@ -149,9 +158,11 @@ export default function EnvoyerColis() {
             departureCountry={departureCountry}
             destinationCountry={destinationCountry}
             sortBy={sortBy}
+            status={status}
             onDepartureChange={handleDepartureChange}
             onDestinationChange={setDestinationCountry}
             onSortChange={setSortBy}
+            onStatusChange={setStatus}
           />
 
           <TourTypeTabs
