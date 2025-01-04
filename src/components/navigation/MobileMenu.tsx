@@ -29,11 +29,11 @@ export default function MobileMenu({
             key={item.name}
             to={item.href}
             onClick={() => setIsOpen(false)}
-            className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
-              item.highlight
-                ? "text-[#00B0F0] hover:text-[#0082b3]"
+            className={`flex items-center px-3 py-2 rounded-md text-base font-medium 
+              ${item.highlight 
+                ? "text-[#00B0F0] hover:text-[#0082b3] " + (item.className || "")
                 : "text-gray-700 hover:text-gray-900"
-            }`}
+              } ${item.highlight ? "bg-blue-50" : ""}`}
           >
             {item.icon}
             <span className="ml-2">{item.name}</span>
