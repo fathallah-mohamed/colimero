@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { UserCircle2 } from "lucide-react";
+import { UserCircle2, X } from "lucide-react";
 import { menuItems } from "./MenuItems";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,14 @@ export default function MobileMenu({
       )}
     >
       <div className="h-full overflow-y-auto">
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+          aria-label="Fermer le menu"
+        >
+          <X className="h-6 w-6 text-gray-500" />
+        </button>
+
         <div className="px-2 pt-20 pb-3 space-y-1">
           {menuItems.map((item) => (
             <Link
