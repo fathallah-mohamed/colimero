@@ -29,11 +29,11 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
   };
 
   const getBookingButtonText = () => {
-    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+    if (tour.status === 'cancelled') return "Cette tournée a été annulée et n'est pas ouverte à la réservation";
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
-    if (tour.status === 'collecting') return "Cette tournée est en cours de collecte";
-    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
-    if (tour.status === 'completed') return "Cette tournée est terminée";
+    if (tour.status === 'collecting') return "Cette tournée est en cours de collecte et n'est pas ouverte à la réservation";
+    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison et n'est pas ouverte à la réservation";
+    if (tour.status === 'completed') return "Cette tournée est terminée et n'est pas ouverte à la réservation";
     if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
     return "Réserver sur cette tournée";
   };
