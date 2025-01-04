@@ -1,67 +1,76 @@
-import { useToast } from "@/hooks/use-toast";
-import { TourStatusTimeline } from "./TourStatusTimeline";
-import { TourBookingsList } from "./TourBookingsList";
-import { TourHeader } from "./tour-card/TourHeader";
-import { TourActions } from "./tour-card/TourActions";
-import { generateTourPDF } from "./tour-card/PDFGenerator";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { TourTimeline } from "@/components/transporteur/TourTimeline";
+import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
+import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
+import { CollectionPointsList } from "./CollectionPointsList";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Tour, TourStatus } from "@/types/tour";
 
 interface TourCardProps {
-  tour: any;
-  onEdit: (tour: any) => void;
-  onDelete: (tourId: number) => void;
-  onStatusChange: (tourId: number, newStatus: string) => void;
-  isCompleted?: boolean;
+  tour: Tour;
+  selectedPickupCity: string | null;
+  onPickupCitySelect: (city: string) => void;
+  onBookingClick: () => void;
+  isBookingEnabled: boolean;
+  isPickupSelectionEnabled: boolean;
+  bookingButtonText: string;
 }
 
-export function TourCard({ 
-  tour, 
-  onEdit, 
-  onDelete, 
-  onStatusChange,
-  isCompleted = false
+export function TourCard({
+  tour,
+  selectedPickupCity,
+  onPickupCitySelect,
+  onBookingClick,
+  isBookingEnabled,
+  isPickupSelectionEnabled,
+  bookingButtonText
 }: TourCardProps) {
-  const { toast } = useToast();
-
-  const handleDownloadPDF = async () => {
-    const success = await generateTourPDF(tour);
-    
-    if (success) {
-      toast({
-        title: "Succès",
-        description: "Le PDF a été généré avec succès",
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de générer le PDF",
-      });
-    }
-  };
-
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex justify-between items-start">
-        <TourHeader tour={tour} />
-        <TourActions
-          onEdit={() => onEdit(tour)}
-          onDelete={() => onDelete(tour.id)}
-          onDownloadPDF={handleDownloadPDF}
-          isCompleted={isCompleted}
-        />
+    <Card className="p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <TransporteurAvatar
+            avatarUrl={tour.carriers?.avatar_url}
+            companyName={tour.carriers?.company_name || ''}
+          />
+          <div>
+            <h3 className="font-medium">{tour.carriers?.company_name}</h3>
+            <p className="text-sm text-gray-500">
+              Départ le {format(new Date(tour.departure_date), "d MMMM", { locale: fr })}
+            </p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Prix au kilo</p>
+          <p className="font-medium">
+            {tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 5}€
+          </p>
+        </div>
       </div>
 
-      <TourStatusTimeline 
-        tourId={tour.id}
-        currentStatus={tour.status}
-        onStatusChange={(newStatus) => onStatusChange(tour.id, newStatus)}
-        isCompleted={isCompleted}
+      <TourTimeline status={tour.status as TourStatus} />
+      
+      <TourCapacityDisplay
+        totalCapacity={tour.total_capacity}
+        remainingCapacity={tour.remaining_capacity}
       />
 
-      <TourBookingsList 
-        tourId={tour.id}
-        tourStatus={tour.status}
+      <CollectionPointsList
+        points={tour.route}
+        selectedPoint={selectedPickupCity}
+        onPointSelect={onPickupCitySelect}
+        isSelectionEnabled={isPickupSelectionEnabled}
       />
-    </div>
+
+      <Button 
+        onClick={onBookingClick}
+        className="w-full"
+        disabled={!isBookingEnabled}
+      >
+        {bookingButtonText}
+      </Button>
+    </Card>
   );
 }
