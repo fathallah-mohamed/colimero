@@ -22,7 +22,8 @@ export function useProfile() {
         return;
       }
       
-      if (!session.user.user_metadata.user_type) {
+      const currentUserType = session.user.user_metadata.user_type;
+      if (!currentUserType) {
         const { error: updateError } = await supabase.auth.updateUser({
           data: { user_type: 'admin' }
         });
@@ -33,7 +34,7 @@ export function useProfile() {
         }
       }
       
-      setUserType(session.user.user_metadata.user_type || null);
+      setUserType(currentUserType || 'admin');
     } catch (error) {
       console.error('Error checking user:', error);
       navigate('/connexion');
@@ -49,7 +50,7 @@ export function useProfile() {
         return;
       }
 
-      const userType = session.user.user_metadata?.user_type;
+      const userType = session.user.user_metadata?.user_type || 'admin';
       console.log("Fetching profile for user type:", userType);
       
       let profileData = null;
@@ -67,6 +68,7 @@ export function useProfile() {
       }
 
       if (profileData) {
+        console.log('Profile data loaded:', profileData);
         setProfile(profileData);
       }
     } catch (error: any) {

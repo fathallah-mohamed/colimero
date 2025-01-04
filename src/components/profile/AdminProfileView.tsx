@@ -1,6 +1,8 @@
 import React from 'react';
 import { ProfileData } from '@/types/profile';
-import { User, Mail, Phone, MapPin } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface AdminProfileViewProps {
   profile: ProfileData;
@@ -18,6 +20,10 @@ export function AdminProfileView({ profile }: AdminProfileViewProps) {
       </div>
     </div>
   );
+
+  const formattedDate = profile.created_at 
+    ? format(new Date(profile.created_at), 'PPP', { locale: fr })
+    : '-';
 
   return (
     <div className="space-y-8">
@@ -51,6 +57,11 @@ export function AdminProfileView({ profile }: AdminProfileViewProps) {
             icon={MapPin} 
             label="Adresse" 
             value={profile.address || "-"} 
+          />
+          <InfoItem 
+            icon={Calendar} 
+            label="Membre depuis" 
+            value={formattedDate} 
           />
         </div>
       </div>
