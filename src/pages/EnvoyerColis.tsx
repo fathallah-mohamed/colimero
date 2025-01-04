@@ -13,7 +13,7 @@ export default function EnvoyerColis() {
   const [departureCity, setDepartureCity] = useState<string>("");
   const [tourType, setTourType] = useState("public");
   const [sortBy, setSortBy] = useState("departure_asc"); // Modifié ici
-  const [tourStatus, setTourStatus] = useState<string>("");
+  const [tourStatus, setTourStatus] = useState<string>("all");
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function EnvoyerColis() {
         query = query.contains('route', [{ name: departureCity }]);
       }
 
-      if (tourStatus) {
+      if (tourStatus && tourStatus !== 'all') {
         query = query.eq('status', tourStatus);
       }
 
@@ -105,7 +105,7 @@ export default function EnvoyerColis() {
         query = query.contains('route', [{ name: departureCity }]);
       }
 
-      if (tourStatus) {
+      if (tourStatus && tourStatus !== 'all') {
         query = query.eq('status', tourStatus);
       }
 

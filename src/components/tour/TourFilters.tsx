@@ -149,7 +149,7 @@ export function TourFilters({
               <SelectValue placeholder="Tous les statuts" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les statuts</SelectItem>
+              <SelectItem value="all">Tous les statuts</SelectItem>
               {TOUR_STATUSES.map((status) => (
                 <SelectItem key={status.code} value={status.code}>
                   {status.label}
