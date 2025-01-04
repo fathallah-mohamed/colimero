@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
-import { TourCard } from "./TourCard";
 import { Tour } from "@/types/tour";
 import { Loader2 } from "lucide-react";
+import { TourTimelineCard } from "./tour/TourTimelineCard";
 
 interface TransporteurToursProps {
   tours: Tour[];
@@ -49,7 +49,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar }: Transp
     <div className="space-y-4">
       <div className="grid gap-4">
         {tours.map((tour) => (
-          <TourCard
+          <TourTimelineCard
             key={tour.id}
             tour={tour}
             hideAvatar={hideAvatar}
