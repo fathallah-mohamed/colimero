@@ -12,6 +12,7 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
+import { TourStatus } from "@/types/tour";
 
 export default function Tours() {
   const [departureCountry, setDepartureCountry] = useState("FR");
@@ -164,7 +165,7 @@ export default function Tours() {
                     </div>
                   </div>
 
-                  <TourTimeline status={tour.status} />
+                  <TourTimeline status={tour.status as TourStatus} />
                   
                   <TourCapacityDisplay
                     totalCapacity={tour.total_capacity}
