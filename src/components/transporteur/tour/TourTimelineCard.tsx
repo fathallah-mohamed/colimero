@@ -1,136 +1,138 @@
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useState } from "react";
+import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { TransporteurAvatar } from "../TransporteurAvatar";
-import { TourTimeline } from "../TourTimeline";
-import { TourCapacityDisplay } from "../TourCapacityDisplay";
-import { Tour, TourStatus } from "@/types/tour";
+import { Tour } from "@/types/tour";
+import { TourTimeline } from "@/components/transporteur/TourTimeline";
+import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
+import AuthDialog from "@/components/auth/AuthDialog";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface TourTimelineCardProps {
   tour: Tour;
   onBookingClick: (tourId: number, pickupCity: string) => void;
   hideAvatar?: boolean;
   userType?: string | null;
-  showCollectionPoints?: boolean;
 }
 
-export function TourTimelineCard({
-  tour,
-  onBookingClick,
-  hideAvatar = false,
-  userType,
-  showCollectionPoints = false,
-}: TourTimelineCardProps) {
-  const isBookingEnabled = (tour: Tour) => {
-    return tour.status === 'collecting' && userType !== 'admin';
+export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }: TourTimelineCardProps) {
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const navigate = useNavigate();
+
+  const isBookingEnabled = () => {
+    return selectedPickupCity && tour.status === 'planned' && userType !== 'admin';
   };
 
-  const isPickupSelectionEnabled = (tour: Tour) => {
-    return tour.status === 'collecting' && userType !== 'admin';
+  const isPickupSelectionEnabled = () => {
+    return tour.status === 'planned' && userType !== 'admin';
   };
 
-  const getBookingButtonText = (tour: Tour) => {
-    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+  const getBookingButtonText = () => {
+    if (tour.status === 'cancelled') return "Cette tournée a été annulée et n'est pas ouverte à la réservation";
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
-    if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
-    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
-    if (tour.status === 'completed') return "Cette tournée est terminée";
-    return "Sélectionnez un point de collecte pour réserver";
+    if (tour.status === 'collecting') return "Cette tournée est en cours de collecte et n'est pas ouverte à la réservation";
+    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison et n'est pas ouverte à la réservation";
+    if (tour.status === 'completed') return "Cette tournée est terminée et n'est pas ouverte à la réservation";
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
+    return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), "EEEE d MMMM yyyy", { locale: fr });
-    } catch (error) {
-      console.error("Error formatting date:", error, dateString);
-      return "Date à confirmer";
+  const handleBookingClick = async () => {
+    if (!selectedPickupCity) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      setShowAuthDialog(true);
+    } else {
+      if (tour.type === 'private') {
+        setShowApprovalDialog(true);
+      } else {
+        onBookingClick(tour.id, selectedPickupCity);
+      }
     }
   };
 
-  // Get price with fallback to 4 or 5 euros randomly if not set
-  const getPrice = () => {
-    const price = tour.carriers?.carrier_capacities?.[0]?.price_per_kg;
-    if (price) return price;
-    return Math.random() < 0.5 ? 4 : 5;
-  };
-
   return (
-    <Card className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {!hideAvatar && (
-            <TransporteurAvatar
-              avatarUrl={tour.carriers?.avatar_url}
-              companyName={tour.carriers?.company_name || ''}
-            />
-          )}
-          <div>
-            <h3 className="font-medium">{tour.carriers?.company_name}</h3>
-            <p className="text-sm text-gray-500">
-              Départ le {format(new Date(tour.departure_date), "d MMMM", { locale: fr })}
-            </p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-500">Prix au kilo</p>
-          <p className="font-medium">
-            {getPrice()}€
-          </p>
-        </div>
-      </div>
-
-      <TourTimeline status={tour.status as TourStatus} />
+    <div className="bg-white shadow-sm rounded-lg p-6">
+      <TourCardHeader 
+        tour={tour}
+        hideAvatar={hideAvatar}
+      />
       
-      <TourCapacityDisplay
-        totalCapacity={tour.total_capacity}
-        remainingCapacity={tour.remaining_capacity}
+      <TourTimeline 
+        status={tour.status || 'planned'}
+      />
+      
+      <TourCapacityDisplay 
+        totalCapacity={tour.total_capacity} 
+        remainingCapacity={tour.remaining_capacity} 
       />
 
-      {showCollectionPoints && (
-        <div className="space-y-3">
-          <div className="grid grid-cols-4 text-sm text-gray-500 px-2">
-            <span>Ville</span>
-            <span>Adresse</span>
-            <span>Date et Heure</span>
-            <span>Sélection</span>
-          </div>
-          {(tour.route as any[]).map((stop, index) => (
+      <div className="mt-6">
+        <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
+        <div className="space-y-2">
+          {(tour.route || []).map((stop, index) => (
             <div
               key={index}
-              className={`p-3 rounded-lg cursor-pointer border transition-colors hover:border-blue-200`}
-              onClick={() => isPickupSelectionEnabled(tour) && onBookingClick(tour.id, stop.name)}
+              onClick={() => isPickupSelectionEnabled() && setSelectedPickupCity(stop.name)}
+              className={`p-3 rounded-lg transition-colors ${
+                !isPickupSelectionEnabled() ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+              } ${
+                selectedPickupCity === stop.name
+                  ? "border-2 border-primary bg-primary/10"
+                  : isPickupSelectionEnabled()
+                    ? "border border-gray-200 hover:border-primary/50"
+                    : "border border-gray-200"
+              }`}
             >
-              <div className="grid grid-cols-4 items-center text-sm">
-                <span className="font-medium">{stop.name}</span>
-                <span className="text-gray-600">{stop.location}</span>
-                <div className="text-gray-600">
-                  <div>
-                    {stop.collection_date ? formatDate(stop.collection_date) : "Date à confirmer"}
-                  </div>
-                  <div>{stop.time || "Heure à confirmer"}</div>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{stop.name}</p>
+                  <p className="text-sm text-gray-500">{stop.location}</p>
                 </div>
-                <div className="flex justify-center">
-                  <input
-                    type="radio"
-                    name={`tour-${tour.id}`}
-                    className="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                    disabled={!isPickupSelectionEnabled(tour)}
-                  />
-                </div>
+                <p className="text-sm text-gray-500">{stop.time}</p>
               </div>
             </div>
           ))}
         </div>
-      )}
+      </div>
 
-      <Button 
-        onClick={() => onBookingClick(tour.id, '')}
-        className="w-full"
-        disabled={!isBookingEnabled(tour)}
-      >
-        {getBookingButtonText(tour)}
-      </Button>
-    </Card>
+      <div className="mt-4">
+        <Button 
+          onClick={handleBookingClick}
+          className="w-full"
+          disabled={!isBookingEnabled()}
+        >
+          {getBookingButtonText()}
+        </Button>
+      </div>
+
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          if (selectedPickupCity) {
+            if (tour.type === 'private') {
+              setShowApprovalDialog(true);
+            } else {
+              onBookingClick(tour.id, selectedPickupCity);
+            }
+          }
+        }}
+        requiredUserType="client"
+      />
+
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={tour.id}
+        pickupCity={selectedPickupCity || ''}
+      />
+    </div>
   );
 }

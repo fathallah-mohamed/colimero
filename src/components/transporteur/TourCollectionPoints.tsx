@@ -23,7 +23,7 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
       });
     } catch (error) {
       console.error("Error formatting date:", error, dateString);
-      return "Date à confirmer";
+      return "Date non disponible";
     }
   };
 
@@ -32,7 +32,7 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
       <div className="grid grid-cols-4 text-sm text-gray-500 px-2">
         <span>Ville</span>
         <span>Adresse</span>
-        <span>Date et Heure</span>
+        <span>Jour et Heure</span>
         <span className="text-center">Sélection</span>
       </div>
       {route.map((stop, index) => (
@@ -51,9 +51,9 @@ export function TourCollectionPoints({ route, selectedPoint, onPointSelect }: To
           </div>
           <div className="text-gray-600">
             <div>
-              {stop.collection_date ? formatDate(stop.collection_date) : "Date à confirmer"}
+              {stop.collection_date ? formatDate(stop.collection_date) : "Date non disponible"}
             </div>
-            <div>{stop.time || "Heure à confirmer"}</div>
+            <div>{stop.time || "Heure non disponible"}</div>
           </div>
           <div className="flex justify-center">
             <input
