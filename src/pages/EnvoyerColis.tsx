@@ -12,7 +12,8 @@ export default function EnvoyerColis() {
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [departureCity, setDepartureCity] = useState<string>("");
   const [tourType, setTourType] = useState("public");
-  const [sortBy, setSortBy] = useState("departure_desc");
+  const [sortBy, setSortBy] = useState("departure_asc"); // Modifié ici
+  const [tourStatus, setTourStatus] = useState<string>("");
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function EnvoyerColis() {
   }, []);
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, departureCity, "public", sortBy],
+    queryKey: ["tours", departureCountry, destinationCountry, departureCity, tourStatus, "public", sortBy],
     queryFn: async () => {
       let query = supabase
         .from("tours")
@@ -47,6 +48,10 @@ export default function EnvoyerColis() {
 
       if (departureCity) {
         query = query.contains('route', [{ name: departureCity }]);
+      }
+
+      if (tourStatus) {
+        query = query.eq('status', tourStatus);
       }
 
       // Apply sorting
@@ -77,7 +82,7 @@ export default function EnvoyerColis() {
   });
 
   const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
-    queryKey: ["tours", departureCountry, destinationCountry, departureCity, "private", sortBy],
+    queryKey: ["tours", departureCountry, destinationCountry, departureCity, tourStatus, "private", sortBy],
     queryFn: async () => {
       let query = supabase
         .from("tours")
@@ -98,6 +103,10 @@ export default function EnvoyerColis() {
 
       if (departureCity) {
         query = query.contains('route', [{ name: departureCity }]);
+      }
+
+      if (tourStatus) {
+        query = query.eq('status', tourStatus);
       }
 
       // Apply sorting
@@ -148,10 +157,12 @@ export default function EnvoyerColis() {
             destinationCountry={destinationCountry}
             sortBy={sortBy}
             departureCity={departureCity}
+            tourStatus={tourStatus}
             onDepartureChange={handleDepartureChange}
             onDestinationChange={setDestinationCountry}
             onSortChange={setSortBy}
             onDepartureCityChange={setDepartureCity}
+            onStatusChange={setTourStatus}
           />
 
           <TourTypeTabs
