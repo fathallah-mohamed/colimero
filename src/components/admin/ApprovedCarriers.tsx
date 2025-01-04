@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function ApprovedCarriers() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: carriers, isLoading } = useQuery({
     queryKey: ["approved-carriers"],
@@ -34,24 +35,55 @@ export default function ApprovedCarriers() {
   });
 
   const handleSuspendCarrier = async (carrierId: string) => {
-    const { error } = await supabase
-      .from("carriers")
-      .update({ status: "suspended" })
-      .eq("id", carrierId);
+    try {
+      // Mettre à jour le statut du transporteur
+      const { error: updateError } = await supabase
+        .from("carriers")
+        .update({ status: "suspended" })
+        .eq("id", carrierId);
 
-    if (error) {
+      if (updateError) throw updateError;
+
+      // Créer une demande rejetée
+      const carrier = carriers?.find(c => c.id === carrierId);
+      if (!carrier) throw new Error("Transporteur non trouvé");
+
+      const { error: requestError } = await supabase
+        .from("carrier_registration_requests")
+        .insert({
+          id: carrierId,
+          email: carrier.email,
+          first_name: carrier.first_name,
+          last_name: carrier.last_name,
+          company_name: carrier.company_name,
+          siret: carrier.siret,
+          phone: carrier.phone,
+          phone_secondary: carrier.phone_secondary,
+          address: carrier.address,
+          coverage_area: carrier.coverage_area,
+          status: "rejected",
+          reason: "Compte suspendu par un administrateur",
+          avatar_url: carrier.avatar_url,
+        });
+
+      if (requestError) throw requestError;
+
+      // Rafraîchir les données
+      await queryClient.invalidateQueries({ queryKey: ["approved-carriers"] });
+      await queryClient.invalidateQueries({ queryKey: ["rejected-requests"] });
+
+      toast({
+        title: "Transporteur suspendu",
+        description: "Le compte du transporteur a été suspendu avec succès.",
+      });
+    } catch (error: any) {
+      console.error("Error suspending carrier:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de suspendre le transporteur.",
       });
-      return;
     }
-
-    toast({
-      title: "Transporteur suspendu",
-      description: "Le compte du transporteur a été suspendu avec succès.",
-    });
   };
 
   const filteredCarriers = carriers?.filter(

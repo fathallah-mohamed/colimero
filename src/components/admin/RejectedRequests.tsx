@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -19,10 +19,13 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: requests, isLoading } = useQuery({
     queryKey: ["rejected-requests"],
@@ -37,6 +40,42 @@ export default function RejectedRequests() {
       return data;
     },
   });
+
+  const handleReapprove = async (request: any) => {
+    try {
+      // Mettre à jour le statut de la demande
+      const { error: requestError } = await supabase
+        .from("carrier_registration_requests")
+        .update({ status: "approved" })
+        .eq("id", request.id);
+
+      if (requestError) throw requestError;
+
+      // Réactiver le compte transporteur
+      const { error: carrierError } = await supabase
+        .from("carriers")
+        .update({ status: "active" })
+        .eq("id", request.id);
+
+      if (carrierError) throw carrierError;
+
+      // Rafraîchir les données
+      await queryClient.invalidateQueries({ queryKey: ["rejected-requests"] });
+      await queryClient.invalidateQueries({ queryKey: ["approved-carriers"] });
+
+      toast({
+        title: "Transporteur réapprouvé",
+        description: "Le compte du transporteur a été réactivé avec succès.",
+      });
+    } catch (error: any) {
+      console.error("Error reapproving carrier:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de réapprouver le transporteur.",
+      });
+    }
+  };
 
   const filteredRequests = requests?.filter(
     (request) =>
@@ -78,12 +117,18 @@ export default function RejectedRequests() {
                   locale: fr,
                 })}
               </TableCell>
-              <TableCell>
+              <TableCell className="space-x-2">
                 <Button
                   variant="outline"
                   onClick={() => setSelectedRequest(request)}
                 >
                   Voir les détails
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => handleReapprove(request)}
+                >
+                  Réapprouver
                 </Button>
               </TableCell>
             </TableRow>
