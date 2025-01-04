@@ -1,43 +1,34 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@supabase/auth-helpers-react";
 import { ApprovalRequestCard } from "./ApprovalRequestCard";
+import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 
 export function ApprovalRequestsList() {
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [page] = useState(1);
+  const user = useUser();
+  const { requests, loading, handleCancelRequest, handleDeleteRequest } = useApprovalRequests('client', user?.id);
 
-  const { data: requests, isLoading } = useQuery({
-    queryKey: ['approval-requests', page],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('approval_requests')
-        .select(`
-          *,
-          tours (
-            *,
-            carrier:carriers (*)
-          )
-        `)
-        .range((page - 1) * pageSize, page * pageSize - 1)
-        .order('created_at', { ascending: false });
+  if (loading) {
+    return <div className="text-center py-8">Chargement...</div>;
+  }
 
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  if (isLoading) {
-    return <div>Chargement...</div>;
+  if (!requests?.length) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Aucune demande d'approbation trouvée
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
-      {requests?.map((request) => (
+      {requests.map((request) => (
         <ApprovalRequestCard 
           key={request.id} 
           request={request} 
           userType="client"
+          onCancel={handleCancelRequest}
+          onDelete={handleDeleteRequest}
         />
       ))}
     </div>

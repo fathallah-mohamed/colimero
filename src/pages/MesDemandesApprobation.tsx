@@ -1,22 +1,18 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
-import { supabase } from "@/integrations/supabase/client";
 import { ApprovalRequestsList } from "@/components/approval-requests/ApprovalRequestsList";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
+  const user = useUser();
 
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!user) {
       navigate('/connexion');
     }
-  };
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50">
