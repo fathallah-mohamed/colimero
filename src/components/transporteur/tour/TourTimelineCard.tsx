@@ -3,7 +3,7 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
-import { TourTimeline } from "@/components/transporteur/TourTimeline";
+import { TourStatusTimeline } from "@/components/tour/TourStatusTimeline";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -32,7 +32,12 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
         hideAvatar={hideAvatar}
       />
       
-      <TourTimeline status={tour.status || 'planned'} />
+      <TourStatusTimeline 
+        tourId={tour.id}
+        currentStatus={tour.status || 'planned'}
+        onStatusChange={() => {}}
+        isCompleted={false}
+      />
       
       <TourCapacityDisplay 
         totalCapacity={tour.total_capacity} 
