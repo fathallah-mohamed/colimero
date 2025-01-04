@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
+import { Link } from "react-router-dom";
 import { ApprovalRequestCard } from "./ApprovalRequestCard";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
+import { Button } from "@/components/ui/button";
 
 export function ApprovalRequestsList() {
   const [page] = useState(1);
@@ -14,8 +16,15 @@ export function ApprovalRequestsList() {
 
   if (!requests?.length) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        Aucune demande d'approbation trouvée
+      <div className="text-center py-8 space-y-4">
+        <p className="text-gray-500">
+          Vous n'avez pas encore fait de demande d'approbation pour une tournée privée.
+        </p>
+        <Button asChild>
+          <Link to="/tours" className="inline-flex items-center">
+            Voir les tournées privées disponibles
+          </Link>
+        </Button>
       </div>
     );
   }
