@@ -12,12 +12,30 @@ export function useProfile() {
   const [userType, setUserType] = useState<string | null>(null);
 
   const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/connexion');
+        return;
+      }
+      
+      // Ensure user_type is set in metadata
+      if (!session.user.user_metadata.user_type) {
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: { user_type: 'admin' }
+        });
+
+        if (updateError) {
+          console.error('Error updating user metadata:', updateError);
+          throw updateError;
+        }
+      }
+      
+      setUserType(session.user.user_metadata.user_type || null);
+    } catch (error) {
+      console.error('Error checking user:', error);
       navigate('/connexion');
-      return;
     }
-    setUserType(session?.user?.user_metadata?.user_type || null);
   };
 
   const fetchProfile = async () => {
