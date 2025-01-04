@@ -46,7 +46,13 @@ export default function CurrentTours() {
           time: stop.time,
           type: stop.type,
           collection_date: stop.collection_date || tour.collection_date
-        }))
+        })),
+        carriers: tour.carriers ? {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities) 
+            ? tour.carriers.carrier_capacities 
+            : [tour.carriers.carrier_capacities]
+        } : null
       })) as Tour[];
     },
   });
