@@ -65,11 +65,13 @@ export function TourCard({
       return;
     }
 
-    if (userType === 'carrier') {
+    if (userType === 'carrier' || userType === 'admin') {
       toast({
         variant: "destructive",
         title: "Réservation impossible",
-        description: "Les transporteurs ne peuvent pas effectuer de réservations.",
+        description: userType === 'admin' 
+          ? "Les administrateurs ne peuvent pas effectuer de réservations."
+          : "Les transporteurs ne peuvent pas effectuer de réservations.",
       });
       return;
     }
@@ -125,10 +127,11 @@ export function TourCard({
     }
   };
 
-  const isBookingDisabled = tour.status !== 'planned';
+  const isBookingDisabled = tour.status !== 'planned' || userType === 'admin';
 
   const getButtonText = () => {
     if (!selectedPoint) return "Sélectionnez un point de collecte";
+    if (userType === 'admin') return "Les administrateurs ne peuvent pas réserver";
     if (isBookingDisabled) return "Cette tournée a démarré et n'accepte plus de réservations";
     return "Réserver";
   };

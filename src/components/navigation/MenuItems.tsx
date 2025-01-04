@@ -1,18 +1,21 @@
 import { Link } from "react-router-dom";
 import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
+import { useNavigation } from "./useNavigation";
 
 export const menuItems = [
   { 
     name: "Planifier une tournée", 
     href: "/planifier-une-tournee", 
     icon: <Calendar className="w-4 h-4" />,
-    highlight: true
+    highlight: true,
+    hideForUserTypes: ['admin']
   },
   { 
     name: "Envoyer un colis", 
     href: "/envoyer-un-colis", 
     icon: <Package className="w-4 h-4" />,
-    highlight: true
+    highlight: true,
+    hideForUserTypes: ['admin']
   },
   { 
     name: "Transporteurs", 
@@ -37,9 +40,15 @@ export const menuItems = [
 ];
 
 export default function MenuItems() {
+  const { userType } = useNavigation();
+
+  const filteredMenuItems = menuItems.filter(
+    item => !item.hideForUserTypes?.includes(userType || '')
+  );
+
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
-      {menuItems.map((item) => (
+      {filteredMenuItems.map((item) => (
         <Link
           key={item.name}
           to={item.href}

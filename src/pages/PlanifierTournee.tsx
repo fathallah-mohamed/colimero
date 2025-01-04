@@ -11,14 +11,18 @@ import { PlanningSteps } from "@/components/tour/planning/PlanningSteps";
 import { PlanningExample } from "@/components/tour/planning/PlanningExample";
 import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PlanifierTournee() {
+  const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isCarrierAuthDialogOpen, setIsCarrierAuthDialogOpen] = useState(false);
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState<'client' | 'carrier' | null>(null);
+  const [userType, setUserType] = useState<'client' | 'carrier' | 'admin' | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -26,7 +30,17 @@ export default function PlanifierTournee() {
       setIsAuthenticated(!!session);
       if (session?.user) {
         const userMetadata = session.user.user_metadata;
-        setUserType(userMetadata.user_type as 'client' | 'carrier');
+        setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
+        
+        // Redirect admins to home page
+        if (userMetadata.user_type === 'admin') {
+          navigate('/');
+          toast({
+            variant: "destructive",
+            title: "Accès refusé",
+            description: "Les administrateurs ne peuvent pas créer de tournées.",
+          });
+        }
       } else {
         setUserType(null);
       }
@@ -38,7 +52,17 @@ export default function PlanifierTournee() {
       setIsAuthenticated(!!session);
       if (session?.user) {
         const userMetadata = session.user.user_metadata;
-        setUserType(userMetadata.user_type as 'client' | 'carrier');
+        setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
+        
+        // Redirect admins to home page
+        if (userMetadata.user_type === 'admin') {
+          navigate('/');
+          toast({
+            variant: "destructive",
+            title: "Accès refusé",
+            description: "Les administrateurs ne peuvent pas créer de tournées.",
+          });
+        }
       } else {
         setUserType(null);
       }
@@ -47,7 +71,7 @@ export default function PlanifierTournee() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const handleCreateTourClick = () => {
     if (!isAuthenticated) {
