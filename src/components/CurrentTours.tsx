@@ -44,7 +44,8 @@ export default function CurrentTours() {
         `)
         .eq("type", "public")
         .gte("departure_date", new Date().toISOString())
-        .order("departure_date", { ascending: true });
+        .order("departure_date", { ascending: true })
+        .limit(1); // Only get the first tour since they're ordered by departure_date
 
       if (error) throw error;
       
@@ -90,80 +91,79 @@ export default function CurrentTours() {
   return (
     <div className="bg-gray-50 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold mb-8">Tournées en cours</h2>
+        <h2 className="text-2xl font-bold mb-8">Prochaine tournée</h2>
         {isLoading ? (
           <div>Chargement des tournées...</div>
         ) : !tours?.length ? (
           <div>Aucune tournée disponible</div>
         ) : (
           <div className="grid gap-6">
-            {tours.map((tour) => (
-              <div key={tour.id} className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <TransporteurAvatar
-                      avatarUrl={tour.carriers?.avatar_url}
-                      companyName={tour.carriers?.company_name || ''}
-                    />
-                    <div>
-                      <h3 className="font-medium">{tour.carriers?.company_name}</h3>
-                      <p className="text-sm text-gray-500">
-                        Départ le {format(new Date(tour.departure_date), "d MMMM", { locale: fr })}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">Prix au kilo</p>
-                    <p className="font-medium">
-                      {tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0}€
+            {/* We only show the first tour since it's the most imminent one */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <TransporteurAvatar
+                    avatarUrl={tours[0].carriers?.avatar_url}
+                    companyName={tours[0].carriers?.company_name || ''}
+                  />
+                  <div>
+                    <h3 className="font-medium">{tours[0].carriers?.company_name}</h3>
+                    <p className="text-sm text-gray-500">
+                      Départ le {format(new Date(tours[0].departure_date), "d MMMM", { locale: fr })}
                     </p>
                   </div>
                 </div>
-
-                <TourTimeline status={tour.status as TourStatus} />
-                <TourCapacityDisplay
-                  totalCapacity={tour.total_capacity}
-                  remainingCapacity={tour.remaining_capacity}
-                />
-
-                <div className="mt-6">
-                  <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
-                  <div className="space-y-2">
-                    {(tour.route as RouteStop[]).map((stop, index) => (
-                      <div
-                        key={index}
-                        onClick={() => isPickupSelectionEnabled(tour) && setSelectedPickupCity(stop.name)}
-                        className={`p-3 rounded-lg ${isPickupSelectionEnabled(tour) ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'} border transition-colors ${
-                          selectedPickupCity === stop.name
-                            ? "border-blue-500 bg-blue-50"
-                            : isPickupSelectionEnabled(tour)
-                              ? "border-gray-200 hover:border-blue-200"
-                              : "border-gray-200"
-                        }`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">{stop.name}</p>
-                            <p className="text-sm text-gray-500">{stop.location}</p>
-                          </div>
-                          <p className="text-sm text-gray-500">{stop.time}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <Button 
-                    onClick={() => handleBookingClick(tour)}
-                    className="w-full"
-                    disabled={!isBookingEnabled(tour)}
-                  >
-                    {getBookingButtonText(tour)}
-                  </Button>
+                <div className="text-right">
+                  <p className="text-sm text-gray-500">Prix au kilo</p>
+                  <p className="font-medium">
+                    {tours[0].carriers?.carrier_capacities?.[0]?.price_per_kg || 0}€
+                  </p>
                 </div>
               </div>
-            ))}
+
+              <TourTimeline status={tours[0].status as TourStatus} />
+              <TourCapacityDisplay
+                totalCapacity={tours[0].total_capacity}
+                remainingCapacity={tours[0].remaining_capacity}
+              />
+
+              <div className="mt-6">
+                <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
+                <div className="space-y-2">
+                  {(tours[0].route as RouteStop[]).map((stop, index) => (
+                    <div
+                      key={index}
+                      onClick={() => isPickupSelectionEnabled(tours[0]) && setSelectedPickupCity(stop.name)}
+                      className={`p-3 rounded-lg ${isPickupSelectionEnabled(tours[0]) ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'} border transition-colors ${
+                        selectedPickupCity === stop.name
+                          ? "border-blue-500 bg-blue-50"
+                          : isPickupSelectionEnabled(tours[0])
+                            ? "border-gray-200 hover:border-blue-200"
+                            : "border-gray-200"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">{stop.name}</p>
+                          <p className="text-sm text-gray-500">{stop.location}</p>
+                        </div>
+                        <p className="text-sm text-gray-500">{stop.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Button 
+                  onClick={() => handleBookingClick(tours[0])}
+                  className="w-full"
+                  disabled={!isBookingEnabled(tours[0])}
+                >
+                  {getBookingButtonText(tours[0])}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>
