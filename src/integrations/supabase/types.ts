@@ -571,12 +571,14 @@ export type Database = {
           address: string | null
           birth_date: string | null
           created_at: string
+          email: string | null
           email_verified: boolean | null
           first_name: string | null
           id: string
           id_document: string | null
           last_name: string | null
           phone: string | null
+          status: string
           terms_accepted: boolean | null
           terms_accepted_at: string | null
         }
@@ -584,12 +586,14 @@ export type Database = {
           address?: string | null
           birth_date?: string | null
           created_at?: string
+          email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
           id: string
           id_document?: string | null
           last_name?: string | null
           phone?: string | null
+          status?: string
           terms_accepted?: boolean | null
           terms_accepted_at?: string | null
         }
@@ -597,12 +601,14 @@ export type Database = {
           address?: string | null
           birth_date?: string | null
           created_at?: string
+          email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
           id?: string
           id_document?: string | null
           last_name?: string | null
           phone?: string | null
+          status?: string
           terms_accepted?: boolean | null
           terms_accepted_at?: string | null
         }

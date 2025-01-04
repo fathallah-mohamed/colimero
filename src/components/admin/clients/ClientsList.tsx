@@ -115,6 +115,7 @@ export default function ClientsList() {
           <TableRow>
             <TableHead>Nom</TableHead>
             <TableHead>Prénom</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead>Téléphone</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Date d'inscription</TableHead>
@@ -126,8 +127,9 @@ export default function ClientsList() {
             <TableRow key={client.id}>
               <TableCell>{client.last_name}</TableCell>
               <TableCell>{client.first_name}</TableCell>
+              <TableCell>{client.email}</TableCell>
               <TableCell>{client.phone}</TableCell>
-              <TableCell>{client.status || 'active'}</TableCell>
+              <TableCell>{client.status}</TableCell>
               <TableCell>
                 {format(new Date(client.created_at), "dd MMMM yyyy", {
                   locale: fr,
@@ -140,7 +142,7 @@ export default function ClientsList() {
                 >
                   Voir les détails
                 </Button>
-                {(!client.status || client.status === 'active') ? (
+                {client.status === 'active' ? (
                   <Button
                     variant="destructive"
                     onClick={() => handleSuspendClient(client.id)}
@@ -174,6 +176,7 @@ export default function ClientsList() {
               <h3 className="font-semibold mb-2">Informations personnelles</h3>
               <p>Prénom : {selectedClient?.first_name}</p>
               <p>Nom : {selectedClient?.last_name}</p>
+              <p>Email : {selectedClient?.email}</p>
               <p>Téléphone : {selectedClient?.phone}</p>
               <p>Date de naissance : {selectedClient?.birth_date}</p>
             </div>
@@ -183,6 +186,7 @@ export default function ClientsList() {
               <p>Adresse : {selectedClient?.address}</p>
               <p>Email vérifié : {selectedClient?.email_verified ? 'Oui' : 'Non'}</p>
               <p>CGU acceptées : {selectedClient?.terms_accepted ? 'Oui' : 'Non'}</p>
+              <p>Statut : {selectedClient?.status}</p>
             </div>
           </div>
         </DialogContent>
