@@ -7,8 +7,9 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import AuthDialog from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { CollectionPointsList } from "@/components/tour/CollectionPointsList";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -57,67 +58,74 @@ export function TourTimelineCard({
   };
 
   return (
-    <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-      {/* En-tête toujours visible */}
-      <div 
-        className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center justify-between">
+    <div className="bg-white shadow-sm rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
+      <div className="p-6">
+        <div 
+          className="flex items-center justify-between cursor-pointer group"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
           <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
+            className="ml-4 transition-colors duration-200 hover:bg-primary/10"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
           >
+            <span className="mr-2 text-sm font-medium text-muted-foreground">
+              {isExpanded ? "Moins de détails" : "Plus de détails"}
+            </span>
             {isExpanded ? (
-              <ChevronUp className="h-6 w-6" />
+              <Minus className="h-4 w-4 text-primary" />
             ) : (
-              <ChevronDown className="h-6 w-6" />
+              <Plus className="h-4 w-4 text-primary" />
             )}
           </Button>
         </div>
-      </div>
 
-      {/* Contenu dépliable */}
-      <div
-        className={cn(
-          "overflow-hidden transition-all duration-300",
-          isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-        )}
-      >
-        <div className="p-6 pt-0 space-y-6">
-          <TourTimeline status={tour.status} />
-          
-          <TourCapacityDisplay 
-            totalCapacity={tour.total_capacity} 
-            remainingCapacity={tour.remaining_capacity} 
-          />
-
-          <div className="mt-6">
-            <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
-            <CollectionPointsList
-              points={tour.route}
-              selectedPoint={selectedPickupCity}
-              onPointSelect={setSelectedPickupCity}
-              isSelectionEnabled={isPickupSelectionEnabled()}
-              tourDepartureDate={tour.departure_date}
-            />
-          </div>
-
-          <div className="mt-4">
-            <Button 
-              onClick={handleBookingClick}
-              className="w-full"
-              disabled={!isBookingEnabled()}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
             >
-              {getBookingButtonText()}
-            </Button>
-          </div>
-        </div>
+              <div className="pt-6 space-y-6">
+                <TourTimeline status={tour.status} />
+                
+                <TourCapacityDisplay 
+                  totalCapacity={tour.total_capacity} 
+                  remainingCapacity={tour.remaining_capacity} 
+                />
+
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
+                  <CollectionPointsList
+                    points={tour.route}
+                    selectedPoint={selectedPickupCity}
+                    onPointSelect={setSelectedPickupCity}
+                    isSelectionEnabled={isPickupSelectionEnabled()}
+                    tourDepartureDate={tour.departure_date}
+                  />
+                </div>
+
+                <div>
+                  <Button 
+                    onClick={handleBookingClick}
+                    className="w-full"
+                    disabled={!isBookingEnabled()}
+                  >
+                    {getBookingButtonText()}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <AuthDialog 
