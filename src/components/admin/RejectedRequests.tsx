@@ -43,7 +43,26 @@ export default function RejectedRequests() {
 
   const handleReapprove = async (request: any) => {
     try {
-      // Mettre à jour le statut de la demande
+      // 1. Check if carrier exists
+      const { data: existingCarrier, error: checkError } = await supabase
+        .from("carriers")
+        .select("id")
+        .eq("email", request.email)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
+
+      if (existingCarrier) {
+        // If carrier exists, just update their status
+        const { error: updateError } = await supabase
+          .from("carriers")
+          .update({ status: "active" })
+          .eq("id", existingCarrier.id);
+
+        if (updateError) throw updateError;
+      }
+
+      // 2. Update the request status
       const { error: requestError } = await supabase
         .from("carrier_registration_requests")
         .update({ status: "approved" })
@@ -51,15 +70,7 @@ export default function RejectedRequests() {
 
       if (requestError) throw requestError;
 
-      // Réactiver le compte transporteur
-      const { error: carrierError } = await supabase
-        .from("carriers")
-        .update({ status: "active" })
-        .eq("id", request.id);
-
-      if (carrierError) throw carrierError;
-
-      // Rafraîchir les données
+      // 3. Refresh the data
       await queryClient.invalidateQueries({ queryKey: ["rejected-requests"] });
       await queryClient.invalidateQueries({ queryKey: ["approved-carriers"] });
 

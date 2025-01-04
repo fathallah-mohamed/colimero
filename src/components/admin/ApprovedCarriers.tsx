@@ -59,16 +59,15 @@ export default function ApprovedCarriers() {
         .select("id")
         .eq("email", carrier.email)
         .eq("status", "rejected")
-        .maybeSingle();
+        .single();
 
-      if (checkError) throw checkError;
+      if (checkError && checkError.code !== 'PGRST116') throw checkError;
 
       if (!existingRequest) {
         // 4. Only create a new rejected request if one doesn't exist
         const { error: requestError } = await supabase
           .from("carrier_registration_requests")
-          .insert({
-            id: carrier.id,
+          .insert([{
             email: carrier.email,
             first_name: carrier.first_name,
             last_name: carrier.last_name,
@@ -81,7 +80,7 @@ export default function ApprovedCarriers() {
             status: "rejected",
             reason: "Compte suspendu par un administrateur",
             avatar_url: carrier.avatar_url,
-          });
+          }]);
 
         if (requestError) throw requestError;
       }
