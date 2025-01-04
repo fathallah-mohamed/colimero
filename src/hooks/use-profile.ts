@@ -37,7 +37,7 @@ export function useProfile() {
           .from('administrators')
           .select('*')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (adminError) {
           console.error('Error fetching admin profile:', adminError);
@@ -56,6 +56,40 @@ export function useProfile() {
           };
           console.log("Admin profile data:", profileData);
           setProfile(profileData);
+        } else {
+          // Si aucun profil admin n'est trouvé, on en crée un
+          const { data: newAdminData, error: insertError } = await supabase
+            .from('administrators')
+            .insert([
+              {
+                id: session.user.id,
+                email: session.user.email,
+                first_name: session.user.user_metadata?.first_name || '',
+                last_name: session.user.user_metadata?.last_name || '',
+                address: 'À renseigner'
+              }
+            ])
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error('Error creating admin profile:', insertError);
+            throw insertError;
+          }
+
+          if (newAdminData) {
+            const profileData: ProfileData = {
+              id: newAdminData.id,
+              first_name: newAdminData.first_name || '',
+              last_name: newAdminData.last_name || '',
+              phone: newAdminData.phone || '',
+              email: session.user.email || '',
+              address: newAdminData.address || '',
+              created_at: newAdminData.created_at
+            };
+            console.log("New admin profile data:", profileData);
+            setProfile(profileData);
+          }
         }
       } else if (userType === 'carrier') {
         const { data: carrierData, error: carrierError } = await supabase
