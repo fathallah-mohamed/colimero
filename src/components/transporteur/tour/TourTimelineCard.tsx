@@ -2,7 +2,7 @@ import { TourStatusTimeline } from "@/components/tour/TourStatusTimeline";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
-import { Tour, TourStatus } from "@/types/tour";
+import { Tour } from "@/types/tour";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -22,11 +22,14 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar }: TourTimel
 
   return (
     <div className="bg-white shadow-sm rounded-lg p-6">
-      <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
+      <TourCardHeader 
+        tour={tour}
+        hideAvatar={hideAvatar}
+      />
       
       <TourStatusTimeline 
         tourId={tour.id}
-        currentStatus={tour.status as TourStatus}
+        currentStatus={tour.status || 'planned'}
         onStatusChange={() => {}}
         isCompleted={tour.status === 'completed'}
       />
