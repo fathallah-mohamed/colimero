@@ -26,18 +26,6 @@ export function CollectionPointRow({
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return format(date, "EEEE d MMMM yyyy", {
-        locale: fr,
-      });
-    } catch (error) {
-      console.error("Error formatting date:", error, dateString);
-      return "Date non disponible";
-    }
-  };
-
   return (
     <div className="grid grid-cols-5 items-center text-sm">
       <span className="font-medium">{name}</span>
@@ -53,7 +41,7 @@ export function CollectionPointRow({
         </a>
       </div>
       <div className="text-gray-600">
-        {formatDate(collectionDate)}
+        {format(new Date(collectionDate), "EEEE d MMMM yyyy", { locale: fr })}
       </div>
       <div className="text-gray-600">
         {time}
