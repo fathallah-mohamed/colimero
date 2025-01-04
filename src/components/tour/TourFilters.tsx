@@ -5,9 +5,11 @@ interface TourFiltersProps {
   departureCountry: string;
   destinationCountry: string;
   sortBy: string;
+  departureCity?: string;
   onDepartureChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onSortChange: (value: string) => void;
+  onDepartureCityChange?: (value: string) => void;
 }
 
 const MAGHREB_COUNTRIES = ["TN", "DZ", "MA"];
@@ -19,13 +21,24 @@ const countryNames: { [key: string]: string } = {
   'MA': 'Maroc'
 };
 
+const FRENCH_CITIES = [
+  "Paris",
+  "Lyon",
+  "Marseille",
+  "Toulouse",
+  "Bordeaux",
+  "Montpellier"
+];
+
 export function TourFilters({
   departureCountry,
   destinationCountry,
-  sortBy,
+  sortBy = "departure_desc", // Valeur par défaut
+  departureCity,
   onDepartureChange,
   onDestinationChange,
   onSortChange,
+  onDepartureCityChange,
 }: TourFiltersProps) {
   const handleSwitch = () => {
     // Allow switching if either country is France, or if one is France and the other is Maghreb
@@ -60,6 +73,26 @@ export function TourFilters({
             </SelectContent>
           </Select>
         </div>
+
+        {departureCountry === 'FR' && onDepartureCityChange && (
+          <div className="flex-1">
+            <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+              Ville de départ
+            </label>
+            <Select value={departureCity} onValueChange={onDepartureCityChange}>
+              <SelectTrigger className="w-full bg-white">
+                <SelectValue placeholder="Ville de départ" />
+              </SelectTrigger>
+              <SelectContent>
+                {FRENCH_CITIES.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <div className="flex items-center justify-center pt-6">
           <button 
