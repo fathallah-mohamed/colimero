@@ -7,6 +7,7 @@ import RequestDetailsDialog from "./RequestDetailsDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NewRequestCard } from "./new-requests/NewRequestCard";
 import { NewRequestsTable } from "./new-requests/NewRequestsTable";
+import { Link } from "react-router-dom";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,6 +43,12 @@ export default function NewRegistrationRequests() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center mb-8">
+        <Link to="/" className="text-2xl font-bold text-[#00B0F0] hover:text-[#0082b3] transition-colors">
+          Colimero
+        </Link>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-4 items-center mb-6">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
