@@ -62,29 +62,29 @@ export default function CurrentTours() {
   });
 
   const handleBookingClick = (tour: Tour) => {
-    if (!selectedPickupCity) {
+    if (!selectedPickupCity || !isBookingEnabled(tour)) {
       return;
     }
     setSelectedTour(tour);
     setIsBookingFormOpen(true);
   };
 
-  const isBookingDisabled = (tour: Tour) => {
-    if (tour.status === 'cancelled') return true;
-    if (userType === 'admin') return true;
-    if (tour.status !== 'collecting') return true;
-    if (!selectedPickupCity) return true;
-    return false;
+  const isBookingEnabled = (tour: Tour) => {
+    return tour.status === 'collecting' && userType !== 'admin';
   };
 
   const getBookingButtonText = (tour: Tour) => {
-    if (tour.status === 'cancelled') return "Tournée annulée";
-    if (userType === 'admin') return "Réservation non autorisée";
-    if (tour.status === 'planned') return "Tournée pas encore ouverte aux réservations";
-    if (tour.status === 'in_transit') return "Tournée en cours de livraison";
-    if (tour.status === 'completed') return "Tournée terminée";
-    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    return "Réserver";
+    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+    if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
+    if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
+    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
+    if (tour.status === 'completed') return "Cette tournée est terminée";
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
+    return "Réserver sur cette tournée";
+  };
+
+  const isPickupSelectionEnabled = (tour: Tour) => {
+    return tour.status === 'collecting' && userType !== 'admin';
   };
 
   return (
@@ -132,11 +132,13 @@ export default function CurrentTours() {
                     {(tour.route as RouteStop[]).map((stop, index) => (
                       <div
                         key={index}
-                        onClick={() => setSelectedPickupCity(stop.name)}
-                        className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                        onClick={() => isPickupSelectionEnabled(tour) && setSelectedPickupCity(stop.name)}
+                        className={`p-3 rounded-lg ${isPickupSelectionEnabled(tour) ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'} border transition-colors ${
                           selectedPickupCity === stop.name
                             ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-200"
+                            : isPickupSelectionEnabled(tour)
+                              ? "border-gray-200 hover:border-blue-200"
+                              : "border-gray-200"
                         }`}
                       >
                         <div className="flex justify-between items-center">
@@ -155,7 +157,7 @@ export default function CurrentTours() {
                   <Button 
                     onClick={() => handleBookingClick(tour)}
                     className="w-full"
-                    disabled={isBookingDisabled(tour)}
+                    disabled={!isBookingEnabled(tour)}
                   >
                     {getBookingButtonText(tour)}
                   </Button>
