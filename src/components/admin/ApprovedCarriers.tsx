@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ApprovedCarriers() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCarrier, setSelectedCarrier] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -143,7 +150,13 @@ export default function ApprovedCarriers() {
                   locale: fr,
                 })}
               </TableCell>
-              <TableCell>
+              <TableCell className="space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedCarrier(carrier)}
+                >
+                  Voir les détails
+                </Button>
                 <Button
                   variant="destructive"
                   onClick={() => handleSuspendCarrier(carrier.id)}
@@ -155,6 +168,41 @@ export default function ApprovedCarriers() {
           ))}
         </TableBody>
       </Table>
+
+      <Dialog open={!!selectedCarrier} onOpenChange={() => setSelectedCarrier(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Détails du transporteur - {selectedCarrier?.company_name}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div>
+              <h3 className="font-semibold mb-2">Informations personnelles</h3>
+              <p>Prénom : {selectedCarrier?.first_name}</p>
+              <p>Nom : {selectedCarrier?.last_name}</p>
+              <p>Email : {selectedCarrier?.email}</p>
+              <p>Téléphone : {selectedCarrier?.phone}</p>
+              {selectedCarrier?.phone_secondary && (
+                <p>Téléphone secondaire : {selectedCarrier?.phone_secondary}</p>
+              )}
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">Informations entreprise</h3>
+              <p>Nom : {selectedCarrier?.company_name}</p>
+              <p>SIRET : {selectedCarrier?.siret}</p>
+              <p>Adresse : {selectedCarrier?.address}</p>
+            </div>
+
+            <div className="col-span-2">
+              <h3 className="font-semibold mb-2">Zone de couverture</h3>
+              <p>{selectedCarrier?.coverage_area?.join(", ")}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
