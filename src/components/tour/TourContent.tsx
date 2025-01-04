@@ -13,9 +13,11 @@ export function TourContent() {
     departureCountry,
     destinationCountry,
     sortBy,
+    status,
     setDepartureCountry,
     setDestinationCountry,
     setSortBy,
+    setStatus,
     setIsEditDialogOpen,
     handleDelete,
     handleEdit,
@@ -41,9 +43,11 @@ export function TourContent() {
           departureCountry={departureCountry}
           destinationCountry={destinationCountry}
           sortBy={sortBy}
+          status={status}
           onDepartureChange={setDepartureCountry}
           onDestinationChange={setDestinationCountry}
           onSortChange={setSortBy}
+          onStatusChange={setStatus}
         />
       </div>
 
