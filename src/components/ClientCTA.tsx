@@ -40,7 +40,7 @@ export default function ClientCTA() {
         </div>
         <div className="text-center space-x-4">
           <Button asChild size="lg" variant="default" className="bg-blue-600 hover:bg-blue-700">
-            <Link to="/envoyer-un-colis">Expédier maintenant</Link>
+            <Link to="/envoyer-colis">Expédier maintenant</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
             <Link to="/profil">Mon compte</Link>

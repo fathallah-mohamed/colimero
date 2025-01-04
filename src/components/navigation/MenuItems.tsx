@@ -23,7 +23,7 @@ export const menuItems = [
   },
   { 
     name: "Actualités", 
-    href: "/actualites", 
+    href: "/blog", 
     icon: <MessageSquare className="w-4 h-4" /> 
   },
   { 
