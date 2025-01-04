@@ -9,7 +9,7 @@ import { TourTimeline } from "./transporteur/TourTimeline";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "./booking/BookingForm";
-import { Tour, TourStatus } from "@/types/tour";
+import { Tour, TourStatus, RouteStop } from "@/types/tour";
 
 export default function CurrentTours() {
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
@@ -36,7 +36,18 @@ export default function CurrentTours() {
         .limit(2);
 
       if (error) throw error;
-      return data as Tour[];
+      
+      // Transform the data to match the Tour type
+      return (data || []).map(tour => ({
+        ...tour,
+        route: (tour.route as any[]).map((stop: any): RouteStop => ({
+          name: stop.name,
+          location: stop.location,
+          time: stop.time,
+          type: stop.type,
+          collection_date: stop.collection_date || tour.collection_date
+        }))
+      })) as Tour[];
     },
   });
 
