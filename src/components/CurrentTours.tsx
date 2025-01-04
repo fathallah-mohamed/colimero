@@ -5,8 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { TourCapacityDisplay } from "./transporteur/TourCapacityDisplay";
+import { TourTimeline } from "./transporteur/TourTimeline";
+import { useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { BookingForm } from "./booking/BookingForm";
 
 export default function CurrentTours() {
+  const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
+  const [selectedTour, setSelectedTour] = useState<any>(null);
+
   const { data: tours, isLoading } = useQuery({
     queryKey: ["current-tours"],
     queryFn: async () => {
@@ -31,6 +38,11 @@ export default function CurrentTours() {
       return data;
     },
   });
+
+  const handleBookingClick = (tour: any) => {
+    setSelectedTour(tour);
+    setIsBookingFormOpen(true);
+  };
 
   return (
     <div className="bg-gray-50 py-16">
@@ -70,6 +82,14 @@ export default function CurrentTours() {
                     remainingCapacity={tour.remaining_capacity}
                     totalCapacity={tour.total_capacity}
                   />
+                  <TourTimeline status={tour.status} />
+                  <Button 
+                    onClick={() => handleBookingClick(tour)}
+                    className="w-full"
+                    disabled={tour.status !== 'collecting'}
+                  >
+                    {tour.status === 'collecting' ? 'Réserver' : 'Indisponible'}
+                  </Button>
                 </div>
               </div>
             ))
@@ -85,6 +105,20 @@ export default function CurrentTours() {
           </Button>
         </div>
       </div>
+
+      <Dialog open={isBookingFormOpen} onOpenChange={setIsBookingFormOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0">
+          {selectedTour && (
+            <BookingForm
+              tourId={selectedTour.id}
+              pickupCity={selectedTour.route?.[0]?.name || ''}
+              destinationCountry={selectedTour.destination_country}
+              onSuccess={() => setIsBookingFormOpen(false)}
+              onCancel={() => setIsBookingFormOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
