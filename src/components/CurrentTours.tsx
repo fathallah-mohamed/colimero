@@ -9,10 +9,11 @@ import { TourTimeline } from "./transporteur/TourTimeline";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "./booking/BookingForm";
+import { Tour, TourStatus } from "@/types/tour";
 
 export default function CurrentTours() {
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
-  const [selectedTour, setSelectedTour] = useState<any>(null);
+  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
 
   const { data: tours, isLoading } = useQuery({
     queryKey: ["current-tours"],
@@ -35,11 +36,11 @@ export default function CurrentTours() {
         .limit(2);
 
       if (error) throw error;
-      return data;
+      return data as Tour[];
     },
   });
 
-  const handleBookingClick = (tour: any) => {
+  const handleBookingClick = (tour: Tour) => {
     setSelectedTour(tour);
     setIsBookingFormOpen(true);
   };
@@ -82,7 +83,7 @@ export default function CurrentTours() {
                     remainingCapacity={tour.remaining_capacity}
                     totalCapacity={tour.total_capacity}
                   />
-                  <TourTimeline status={tour.status} />
+                  <TourTimeline status={tour.status as TourStatus} />
                   <Button 
                     onClick={() => handleBookingClick(tour)}
                     className="w-full"
