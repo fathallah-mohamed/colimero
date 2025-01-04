@@ -21,7 +21,7 @@ export default function Hero() {
             className="bg-white text-blue-600 hover:bg-gray-50 hover:scale-[1.02] transform transition-all duration-200 shadow-md rounded-xl"
           >
             <Link 
-              to="/envoyer-un-colis" 
+              to="/envoyer-colis" 
               className="flex items-center gap-3 px-6 py-3"
             >
               <Package2 className="h-5 w-5" />
@@ -35,7 +35,7 @@ export default function Hero() {
             className="bg-transparent text-white border-2 border-white hover:bg-white/10 hover:scale-[1.02] transform transition-all duration-200 shadow-md rounded-xl"
           >
             <Link 
-              to="/planifier-une-tournee" 
+              to="/planifier-tournee" 
               className="flex items-center gap-3 px-6 py-3"
             >
               <Truck className="h-5 w-5" />

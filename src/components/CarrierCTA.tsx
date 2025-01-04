@@ -44,7 +44,7 @@ export default function CarrierCTA() {
         </div>
         <div className="text-center">
           <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
-            <Link to="/planifier-une-tournee">Commencer maintenant</Link>
+            <Link to="/planifier-tournee">Commencer maintenant</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="mt-4 border-blue-600 text-blue-600 hover:bg-blue-50">
             <Link to="/profil">Mon compte</Link>
