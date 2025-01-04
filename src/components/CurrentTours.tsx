@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { TourTimelineCard } from "@/components/transporteur/tour/TourTimelineCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tour, TourStatus } from "@/types/tour";
 
 export default function CurrentTours() {
   const { data: nextTour, isLoading } = useQuery({
@@ -30,18 +31,19 @@ export default function CurrentTours() {
 
       if (error) throw error;
       
-      // Parse the route if it's a string
+      // Parse the route if it's a string and ensure proper typing
       if (data) {
         return {
           ...data,
           route: Array.isArray(data.route) ? data.route : JSON.parse(data.route as string),
+          status: data.status as TourStatus, // Explicitly type the status
           carriers: {
             ...data.carriers,
             carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
               ? data.carriers.carrier_capacities 
               : [data.carriers?.carrier_capacities]
           }
-        };
+        } as Tour; // Assert the entire object as Tour type
       }
       return null;
     },
