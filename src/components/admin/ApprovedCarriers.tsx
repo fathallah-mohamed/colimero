@@ -36,7 +36,7 @@ export default function ApprovedCarriers() {
 
   const handleSuspendCarrier = async (carrierId: string) => {
     try {
-      // Mettre à jour le statut du transporteur
+      // 1. First update the carrier status
       const { error: updateError } = await supabase
         .from("carriers")
         .update({ status: "suspended" })
@@ -44,31 +44,49 @@ export default function ApprovedCarriers() {
 
       if (updateError) throw updateError;
 
-      // Créer une demande rejetée
-      const carrier = carriers?.find(c => c.id === carrierId);
-      if (!carrier) throw new Error("Transporteur non trouvé");
+      // 2. Get the carrier details
+      const { data: carrier, error: carrierError } = await supabase
+        .from("carriers")
+        .select("*")
+        .eq("id", carrierId)
+        .single();
 
-      const { error: requestError } = await supabase
+      if (carrierError) throw carrierError;
+
+      // 3. Check if a rejected request already exists
+      const { data: existingRequest, error: checkError } = await supabase
         .from("carrier_registration_requests")
-        .insert({
-          id: carrierId,
-          email: carrier.email,
-          first_name: carrier.first_name,
-          last_name: carrier.last_name,
-          company_name: carrier.company_name,
-          siret: carrier.siret,
-          phone: carrier.phone,
-          phone_secondary: carrier.phone_secondary,
-          address: carrier.address,
-          coverage_area: carrier.coverage_area,
-          status: "rejected",
-          reason: "Compte suspendu par un administrateur",
-          avatar_url: carrier.avatar_url,
-        });
+        .select("id")
+        .eq("email", carrier.email)
+        .eq("status", "rejected")
+        .maybeSingle();
 
-      if (requestError) throw requestError;
+      if (checkError) throw checkError;
 
-      // Rafraîchir les données
+      if (!existingRequest) {
+        // 4. Only create a new rejected request if one doesn't exist
+        const { error: requestError } = await supabase
+          .from("carrier_registration_requests")
+          .insert({
+            id: carrier.id,
+            email: carrier.email,
+            first_name: carrier.first_name,
+            last_name: carrier.last_name,
+            company_name: carrier.company_name,
+            siret: carrier.siret,
+            phone: carrier.phone,
+            phone_secondary: carrier.phone_secondary,
+            address: carrier.address,
+            coverage_area: carrier.coverage_area,
+            status: "rejected",
+            reason: "Compte suspendu par un administrateur",
+            avatar_url: carrier.avatar_url,
+          });
+
+        if (requestError) throw requestError;
+      }
+
+      // 5. Refresh the data
       await queryClient.invalidateQueries({ queryKey: ["approved-carriers"] });
       await queryClient.invalidateQueries({ queryKey: ["rejected-requests"] });
 
