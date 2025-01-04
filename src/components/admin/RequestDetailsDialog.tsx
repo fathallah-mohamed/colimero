@@ -107,9 +107,7 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
       if (updateError) throw updateError;
 
       // Envoyer l'email de rejet via l'edge function
-      const response = await fetch("/api/send-rejection-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const { data, error } = await supabase.functions.invoke("send-rejection-email", {
         body: JSON.stringify({
           email: request.email,
           company_name: request.company_name,
@@ -117,9 +115,7 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'envoi de l'email");
-      }
+      if (error) throw error;
 
       toast({
         title: "Demande rejetée",
@@ -127,6 +123,7 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
       });
       onClose();
     } catch (error: any) {
+      console.error("Error rejecting request:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
