@@ -16,6 +16,10 @@ interface TourCardProps {
   isBookingEnabled: boolean;
   isPickupSelectionEnabled: boolean;
   bookingButtonText: string;
+  onEdit?: (tour: Tour) => void;
+  onDelete?: (tourId: number) => void;
+  onStatusChange?: (tourId: number, newStatus: string) => void;
+  isCompleted?: boolean;
 }
 
 export function TourCard({
@@ -25,7 +29,11 @@ export function TourCard({
   onBookingClick,
   isBookingEnabled,
   isPickupSelectionEnabled,
-  bookingButtonText
+  bookingButtonText,
+  onEdit,
+  onDelete,
+  onStatusChange,
+  isCompleted
 }: TourCardProps) {
   return (
     <Card className="p-6 space-y-4">

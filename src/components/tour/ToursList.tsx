@@ -3,11 +3,12 @@ import { TourEditDialog } from "./TourEditDialog";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Tour } from "@/types/tour";
 
 interface ToursListProps {
-  tours: any[];
+  tours: Tour[];
   isCompleted?: boolean;
-  onEdit: (tour: any) => void;
+  onEdit: (tour: Tour) => void;
   onDelete: (tourId: number) => void;
   onStatusChange: (tourId: number, newStatus: string) => void;
 }
@@ -48,6 +49,12 @@ export function ToursList({
         <TourCard
           key={tour.id}
           tour={tour}
+          selectedPickupCity={null}
+          onPickupCitySelect={() => {}}
+          onBookingClick={() => {}}
+          isBookingEnabled={false}
+          isPickupSelectionEnabled={false}
+          bookingButtonText="Réserver"
           onEdit={onEdit}
           onDelete={onDelete}
           onStatusChange={onStatusChange}
