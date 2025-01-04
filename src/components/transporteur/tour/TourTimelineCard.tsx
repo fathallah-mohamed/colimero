@@ -60,9 +60,9 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
                 !isPickupSelectionEnabled() ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
               } ${
                 selectedPickupCity === stop.name
-                  ? "border-2 border-blue-500 bg-blue-50"
+                  ? "border-2 border-primary bg-primary/10"
                   : isPickupSelectionEnabled()
-                    ? "border border-gray-200 hover:border-blue-200"
+                    ? "border border-gray-200 hover:border-primary/50"
                     : "border border-gray-200"
               }`}
             >
@@ -81,7 +81,7 @@ export function TourTimelineCard({ tour, onBookingClick, hideAvatar, userType }:
       <div className="mt-4">
         <Button 
           onClick={() => selectedPickupCity && onBookingClick(tour.id, selectedPickupCity)}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+          className="w-full button-gradient text-white"
           disabled={!isBookingEnabled()}
         >
           {getBookingButtonText()}

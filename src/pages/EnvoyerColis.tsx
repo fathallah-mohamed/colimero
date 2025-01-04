@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +6,6 @@ import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import type { Tour } from "@/types/tour";
-import { useEffect } from "react";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
