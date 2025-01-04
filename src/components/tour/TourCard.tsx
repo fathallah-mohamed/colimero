@@ -70,6 +70,7 @@ export function TourCard({
         selectedPoint={selectedPickupCity}
         onPointSelect={onPickupCitySelect}
         isSelectionEnabled={isPickupSelectionEnabled}
+        tourDepartureDate={tour.departure_date}
       />
 
       <Button 
