@@ -46,12 +46,22 @@ export default function Tours() {
         // Ensure route is properly parsed as RouteStop[]
         let parsedRoute: RouteStop[];
         if (typeof tour.route === 'string') {
-          parsedRoute = JSON.parse(tour.route);
+          parsedRoute = JSON.parse(tour.route) as RouteStop[];
         } else if (Array.isArray(tour.route)) {
-          parsedRoute = tour.route;
+          parsedRoute = tour.route.map(stop => ({
+            name: String(stop.name || ''),
+            location: String(stop.location || ''),
+            time: String(stop.time || ''),
+            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup'
+          }));
         } else if (typeof tour.route === 'object' && tour.route !== null) {
           // If it's a JSONB object from Supabase, convert it to array
-          parsedRoute = Object.values(tour.route);
+          parsedRoute = Object.values(tour.route).map(stop => ({
+            name: String(stop.name || ''),
+            location: String(stop.location || ''),
+            time: String(stop.time || ''),
+            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup'
+          }));
         } else {
           parsedRoute = [];
         }
