@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
-import { Package, Truck } from "lucide-react";
+import { Package, Truck, Info, MessageSquare } from "lucide-react";
 
 export const menuItems = [
   { name: "Envoyer un colis", href: "/envoyer-colis", icon: <Package className="w-4 h-4" />, highlight: true },
   { name: "Transporteurs", href: "/transporteurs", icon: <Truck className="w-4 h-4" /> },
+  { name: "À propos", href: "/a-propos", icon: <Info className="w-4 h-4" /> },
+  { name: "Contact", href: "/contact", icon: <MessageSquare className="w-4 h-4" /> },
 ];
 
 export default function MenuItems() {
