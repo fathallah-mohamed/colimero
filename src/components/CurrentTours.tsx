@@ -105,7 +105,7 @@ export default function CurrentTours() {
                   <div className="flex items-center gap-4">
                     <TransporteurAvatar
                       avatarUrl={tour.carriers?.avatar_url}
-                      companyName={tour.carriers?.company_name}
+                      companyName={tour.carriers?.company_name || ''}
                     />
                     <div>
                       <h3 className="font-medium">{tour.carriers?.company_name}</h3>
