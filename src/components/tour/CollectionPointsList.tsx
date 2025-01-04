@@ -23,12 +23,12 @@ export function CollectionPointsList({
 }: CollectionPointsListProps) {
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-5 text-sm text-gray-500 px-2">
+      <div className="grid grid-cols-6 text-sm text-gray-500 px-2">
         <span>Ville</span>
         <span>Adresse</span>
         <span>Date</span>
         <span>Heure</span>
-        <span>Sélection</span>
+        <span className="text-center">Sélection</span>
       </div>
       {points.map((point, index) => (
         <div
@@ -44,11 +44,11 @@ export function CollectionPointsList({
                 : "border-gray-200"
           }`}
         >
-          <div className="grid grid-cols-5 items-center text-sm">
+          <div className="grid grid-cols-6 items-center text-sm">
             <span className="font-medium">{point.name}</span>
             <span className="text-gray-600">{point.location}</span>
             <span className="text-gray-600">
-              {format(new Date(point.collection_date), "EEEE d MMMM yyyy", { locale: fr })}
+              {format(new Date(point.collection_date), "EEEE d MMMM", { locale: fr })}
             </span>
             <span className="text-gray-600">{point.time}</span>
             <div className="flex justify-center">
