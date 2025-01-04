@@ -6,12 +6,10 @@ interface TourFiltersProps {
   destinationCountry: string;
   sortBy: string;
   departureCity?: string;
-  tourStatus?: string;
   onDepartureChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onSortChange: (value: string) => void;
   onDepartureCityChange?: (value: string) => void;
-  onStatusChange?: (value: string) => void;
 }
 
 const MAGHREB_COUNTRIES = ["TN", "DZ", "MA"];
@@ -32,27 +30,18 @@ const FRENCH_CITIES = [
   "Montpellier"
 ];
 
-const TOUR_STATUSES = [
-  { code: "planned", label: "Planifiée" },
-  { code: "collecting", label: "En collecte" },
-  { code: "in_transit", label: "En transit" },
-  { code: "completed", label: "Terminée" },
-  { code: "cancelled", label: "Annulée" }
-];
-
 export function TourFilters({
   departureCountry,
   destinationCountry,
-  sortBy = "departure_asc", // Valeur par défaut modifiée
+  sortBy = "departure_desc", // Valeur par défaut
   departureCity,
-  tourStatus,
   onDepartureChange,
   onDestinationChange,
   onSortChange,
   onDepartureCityChange,
-  onStatusChange,
 }: TourFiltersProps) {
   const handleSwitch = () => {
+    // Allow switching if either country is France, or if one is France and the other is Maghreb
     const isValidSwitch = 
       departureCountry === 'FR' || 
       destinationCountry === 'FR' ||
@@ -136,25 +125,6 @@ export function TourFilters({
               ) : (
                 <SelectItem value="FR">{countryNames.FR}</SelectItem>
               )}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex-1">
-          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-            Statut
-          </label>
-          <Select value={tourStatus} onValueChange={onStatusChange}>
-            <SelectTrigger className="w-full bg-white">
-              <SelectValue placeholder="Tous les statuts" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les statuts</SelectItem>
-              {TOUR_STATUSES.map((status) => (
-                <SelectItem key={status.code} value={status.code}>
-                  {status.label}
-                </SelectItem>
-              ))}
             </SelectContent>
           </Select>
         </div>
