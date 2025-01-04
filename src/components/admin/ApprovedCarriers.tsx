@@ -8,12 +8,14 @@ import { ApprovedCarrierCard } from "./approved-carriers/ApprovedCarrierCard";
 import { ApprovedCarriersTable } from "./approved-carriers/ApprovedCarriersTable";
 import Navigation from "@/components/Navigation";
 import ApprovedCarrierDetails from "./approved-carriers/ApprovedCarrierDetails";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ApprovedCarriers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCarrier, setSelectedCarrier] = useState<any>(null);
+  const { toast } = useToast();
 
-  const { data: carriers, isLoading } = useQuery({
+  const { data: carriers, isLoading, refetch } = useQuery({
     queryKey: ["carrier-requests", "approved"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -25,6 +27,31 @@ export default function ApprovedCarriers() {
       return data;
     },
   });
+
+  const handleSuspend = async (carrierId: string) => {
+    try {
+      const { error } = await supabase
+        .from("carriers")
+        .update({ status: "suspended" })
+        .eq("id", carrierId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Transporteur suspendu",
+        description: "Le transporteur a été suspendu avec succès.",
+      });
+
+      refetch();
+    } catch (error) {
+      console.error("Error suspending carrier:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suspension du transporteur.",
+      });
+    }
+  };
 
   const filteredCarriers = carriers?.filter(
     (carrier) =>
@@ -62,6 +89,7 @@ export default function ApprovedCarriers() {
             <ApprovedCarriersTable
               carriers={filteredCarriers}
               onViewDetails={setSelectedCarrier}
+              onSuspend={handleSuspend}
             />
           </ScrollArea>
         </div>
@@ -72,6 +100,7 @@ export default function ApprovedCarriers() {
               key={carrier.id}
               carrier={carrier}
               onViewDetails={() => setSelectedCarrier(carrier)}
+              onSuspend={() => handleSuspend(carrier.id)}
             />
           ))}
         </div>

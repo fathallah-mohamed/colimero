@@ -8,15 +8,14 @@ import { UserCheck } from "lucide-react";
 
 interface ApprovedCarrierDetailsProps {
   carrier: any;
-  open: boolean;
   onClose: () => void;
 }
 
-export function ApprovedCarrierDetails({ carrier, open, onClose }: ApprovedCarrierDetailsProps) {
+export default function ApprovedCarrierDetails({ carrier, onClose }: ApprovedCarrierDetailsProps) {
   if (!carrier) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={carrier !== null} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
