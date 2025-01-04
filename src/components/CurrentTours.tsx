@@ -7,9 +7,17 @@ import { Tour, TourStatus } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import AuthDialog from "@/components/auth/AuthDialog";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 
 export default function CurrentTours() {
   const navigate = useNavigate();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
+  const [selectedTourId, setSelectedTourId] = useState<number | null>(null);
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
+
   const { data: nextTour, isLoading } = useQuery({
     queryKey: ['next-planned-tour'],
     queryFn: async () => {
@@ -53,6 +61,35 @@ export default function CurrentTours() {
     },
   });
 
+  const handleBookingClick = async (tourId: number, pickupCity: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      setSelectedTourId(tourId);
+      setSelectedPickupCity(pickupCity);
+      setShowAuthDialog(true);
+      return;
+    }
+
+    // Vérifier le type d'utilisateur
+    const userType = user.user_metadata?.user_type;
+    
+    if (userType === 'carrier') {
+      setShowAccessDeniedDialog(true);
+      return;
+    }
+
+    // Si c'est un client, rediriger vers le formulaire de réservation
+    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthDialog(false);
+    if (selectedTourId && selectedPickupCity) {
+      navigate(`/reserver/${selectedTourId}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="py-8 px-4">
@@ -76,10 +113,6 @@ export default function CurrentTours() {
       </div>
     );
   }
-
-  const handleBookingClick = (tourId: number, pickupCity: string) => {
-    window.location.href = `/reserver/${tourId}`;
-  };
 
   return (
     <div className="py-8 px-4">
@@ -106,6 +139,19 @@ export default function CurrentTours() {
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
+
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={handleAuthSuccess}
+        requiredUserType="client"
+      />
+
+      <AccessDeniedMessage
+        userType="carrier"
+        isOpen={showAccessDeniedDialog}
+        onClose={() => setShowAccessDeniedDialog(false)}
+      />
     </div>
   );
 }
