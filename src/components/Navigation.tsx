@@ -21,7 +21,8 @@ export default function Navigation() {
     { name: "Demandes d'inscription", href: "/admin", icon: <ClipboardList className="w-4 h-4" /> }
   ] : [
     { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
-    { name: "Mes réservations", href: "/mes-reservations", icon: <Package className="w-4 h-4" /> }
+    { name: "Mes réservations", href: "/mes-reservations", icon: <Package className="w-4 h-4" /> },
+    { name: "Mes demandes d'approbation", href: "/mes-demandes-approbation", icon: <ClipboardList className="w-4 h-4" /> }
   ];
 
   return (
