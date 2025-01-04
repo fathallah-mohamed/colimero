@@ -40,6 +40,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType
           onBookingClick={handleBookingClick}
           hideAvatar={hideAvatar}
           userType={userType}
+          showCollectionPoints={true}
         />
       ))}
     </div>
