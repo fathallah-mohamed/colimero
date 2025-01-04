@@ -9,9 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TourCardProps {
   tour: any;
+  hideAvatar?: boolean;
 }
 
-export function TourCard({ tour }: TourCardProps) {
+export function TourCard({ tour, hideAvatar = false }: TourCardProps) {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const { toast } = useToast();
 
@@ -30,7 +31,7 @@ export function TourCard({ tour }: TourCardProps) {
 
   return (
     <div className="bg-white shadow-sm rounded-lg p-6">
-      <TourCardHeader tour={tour} />
+      <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
       <TourCollectionPoints 
         route={tour.route} 
         onPointSelect={() => {}} 
