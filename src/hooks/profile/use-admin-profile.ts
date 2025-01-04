@@ -9,7 +9,7 @@ export async function fetchAdminProfile(userId: string, userEmail: string | unde
       .from('administrators')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (adminError) {
       console.error('Error fetching admin profile:', adminError);
@@ -54,7 +54,7 @@ export async function createAdminProfile(userId: string, userEmail: string | und
         }
       ])
       .select()
-      .single();
+      .maybeSingle();
 
     if (insertError) {
       console.error('Error creating admin profile:', insertError);

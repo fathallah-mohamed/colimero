@@ -22,8 +22,9 @@ export function useProfile() {
         return;
       }
       
-      const currentUserType = session.user.user_metadata.user_type;
+      const currentUserType = session.user.user_metadata?.user_type;
       if (!currentUserType) {
+        console.log('No user type found, setting default to admin');
         const { error: updateError } = await supabase.auth.updateUser({
           data: { user_type: 'admin' }
         });
@@ -32,9 +33,11 @@ export function useProfile() {
           console.error('Error updating user metadata:', updateError);
           throw updateError;
         }
+
+        setUserType('admin');
+      } else {
+        setUserType(currentUserType);
       }
-      
-      setUserType(currentUserType || 'admin');
     } catch (error) {
       console.error('Error checking user:', error);
       navigate('/connexion');
@@ -59,6 +62,7 @@ export function useProfile() {
         profileData = await fetchAdminProfile(session.user.id, session.user.email);
         
         if (!profileData) {
+          console.log('No admin profile found, creating one...');
           profileData = await createAdminProfile(session.user.id, session.user.email, session.user.user_metadata);
         }
       } else if (userType === 'carrier') {
@@ -70,6 +74,8 @@ export function useProfile() {
       if (profileData) {
         console.log('Profile data loaded:', profileData);
         setProfile(profileData);
+      } else {
+        console.log('No profile data found');
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
