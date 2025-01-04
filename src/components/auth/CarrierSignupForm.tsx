@@ -11,6 +11,7 @@ import { PersonalInfoFields } from "./carrier-signup/PersonalInfoFields";
 import { CompanyInfoFields } from "./carrier-signup/CompanyInfoFields";
 import { ContactInfoFields } from "./carrier-signup/ContactInfoFields";
 import { TermsCheckboxes } from "./carrier-signup/TermsCheckboxes";
+import { useNavigate } from "react-router-dom";
 
 interface CarrierSignupFormProps {
   onSuccess: () => void;
@@ -18,6 +19,7 @@ interface CarrierSignupFormProps {
 
 export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,20 +46,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            first_name: values.first_name,
-            last_name: values.last_name,
-            user_type: "carrier",
-          },
-        },
-      });
-
-      if (authError) throw authError;
-
+      // Create registration request without signing up the user
       const { error: registrationError } = await supabase
         .from("carrier_registration_requests")
         .insert({
@@ -71,22 +60,26 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           address: values.address,
           coverage_area: values.coverage_area,
           services: values.services,
+          total_capacity: values.total_capacity,
+          price_per_kg: values.price_per_kg,
         });
 
       if (registrationError) throw registrationError;
 
       toast({
-        title: "Inscription réussie",
-        description: "Votre demande d'inscription a été envoyée avec succès",
+        title: "Demande envoyée avec succès",
+        description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
       });
 
+      // Close the dialog and redirect to home page
       onSuccess();
+      navigate("/");
     } catch (error) {
-      console.error("Error during signup:", error);
+      console.error("Error during registration:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'inscription",
+        description: "Une erreur est survenue lors de l'envoi de votre demande",
       });
     }
   };
@@ -111,7 +104,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           className="w-full"
           disabled={!form.formState.isValid || !allTermsAccepted}
         >
-          S'inscrire
+          Envoyer la demande
         </Button>
       </form>
     </Form>
