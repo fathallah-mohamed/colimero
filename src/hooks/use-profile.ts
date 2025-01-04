@@ -33,6 +33,7 @@ export function useProfile() {
       console.log("Fetching profile for user type:", userType);
       
       if (userType === 'admin') {
+        // Try to fetch existing admin profile
         const { data: adminData, error: adminError } = await supabase
           .from('administrators')
           .select('*')
@@ -57,7 +58,7 @@ export function useProfile() {
           console.log("Admin profile data:", profileData);
           setProfile(profileData);
         } else {
-          // Si aucun profil admin n'est trouvé, on en crée un
+          // Create new admin profile if none exists
           const { data: newAdminData, error: insertError } = await supabase
             .from('administrators')
             .insert([
