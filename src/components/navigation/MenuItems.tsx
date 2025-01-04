@@ -1,29 +1,41 @@
 import { Link } from "react-router-dom";
-import { Package, Truck, Users, ClipboardList } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
 
 export const menuItems = [
-  {
-    name: "Envoyer un colis",
-    href: "/envoyer-colis",
-    icon: <Package className="w-4 h-4" />,
+  { 
+    name: "Planifier une tournée", 
+    href: "/planifier-tournee", 
+    icon: <Calendar className="w-4 h-4" />, 
     highlight: true,
-    className: " text-[#00B0F0] hover:text-[#0082b3]"
+    className: "bg-blue-50" 
   },
-  {
-    name: "Tournées",
-    href: "/tours",
-    icon: <Truck className="w-4 h-4" />
+  { 
+    name: "Envoyer un colis", 
+    href: "/envoyer-colis", 
+    icon: <Package className="w-4 h-4" />, 
+    highlight: true,
+    className: "bg-blue-50" 
   },
-  {
-    name: "Transporteurs",
-    href: "/transporteurs",
-    icon: <Users className="w-4 h-4" />
+  { 
+    name: "Transporteurs", 
+    href: "/transporteurs", 
+    icon: <Truck className="w-4 h-4" /> 
   },
-  {
-    name: "Mes demandes d'approbation",
-    href: "/mes-demandes-approbation",
-    icon: <ClipboardList className="w-4 h-4" />
-  }
+  { 
+    name: "Actualités", 
+    href: "/blog", 
+    icon: <MessageSquare className="w-4 h-4" /> 
+  },
+  { 
+    name: "À propos", 
+    href: "/a-propos", 
+    icon: <Info className="w-4 h-4" /> 
+  },
+  { 
+    name: "Contact", 
+    href: "/contact", 
+    icon: <Users className="w-4 h-4" /> 
+  },
 ];
 
 export default function MenuItems() {
@@ -33,12 +45,11 @@ export default function MenuItems() {
         <Link
           key={item.name}
           to={item.href}
-          className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            item.highlight
-              ? "text-primary hover:text-primary-hover hover:bg-primary/10" +
-                (item.className || "")
-              : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-          }`}
+          className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
+            ${item.highlight
+              ? "text-[#00B0F0] hover:text-[#0082b3] " + (item.className || "")
+              : "text-gray-700 hover:text-gray-900"
+            }`}
         >
           {item.icon}
           <span className="ml-2">{item.name}</span>

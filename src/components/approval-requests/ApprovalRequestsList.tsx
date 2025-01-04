@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { ApprovalRequestCard } from "./ApprovalRequestCard";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 
 export function ApprovalRequestsList() {
   const [page] = useState(1);
@@ -12,11 +11,7 @@ export function ApprovalRequestsList() {
   const { requests, loading, handleCancelRequest, handleDeleteRequest } = useApprovalRequests('client', user?.id);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-      </div>
-    );
+    return <div className="text-center py-8">Chargement...</div>;
   }
 
   if (!requests?.length) {

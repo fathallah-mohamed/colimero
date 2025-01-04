@@ -10,13 +10,9 @@ export default function MesDemandesApprobation() {
 
   useEffect(() => {
     if (!user) {
-      navigate('/');
+      navigate('/connexion');
     }
   }, [user, navigate]);
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
