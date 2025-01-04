@@ -1,194 +1,63 @@
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Tour } from "@/types/tour";
-import { TourCapacityDisplay } from "./TourCapacityDisplay";
-import { TourCardHeader } from "./TourCardHeader";
-import { TourCollectionPoints } from "./TourCollectionPoints";
-import { TourTimeline } from "./TourTimeline";
-import { TourStatusSelect } from "@/components/tour/TourStatusSelect";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
-import { useApprovalRequests } from "@/hooks/useApprovalRequests";
+import { TourCardHeader } from "./TourCardHeader";
+import { TourCollectionPoints } from "./TourCollectionPoints";
+import { TourCapacityDisplay } from "./TourCapacityDisplay";
 
 interface TourCardProps {
-  tour: Tour;
-  hideAvatar?: boolean;
-  onBookingClick: (tourId: number, pickupCity: string) => void;
-  onStatusChange?: (newStatus: string) => void;
+  tour: any;
 }
 
-export function TourCard({ 
-  tour, 
-  hideAvatar,
-  onBookingClick,
-  onStatusChange 
-}: TourCardProps) {
-  const [isCarrierOwner, setIsCarrierOwner] = useState(false);
-  const [selectedPoint, setSelectedPoint] = useState<string>();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
+export function TourCard({ tour }: TourCardProps) {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { checkExistingRequest } = useApprovalRequests(userType, userId);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-      setIsCarrierOwner(session?.user?.id === tour.carrier_id);
-      setUserType(session?.user?.user_metadata?.user_type || null);
-      setUserId(session?.user?.id || null);
-    };
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      setIsCarrierOwner(session?.user?.id === tour.carrier_id);
-      setUserType(session?.user?.user_metadata?.user_type || null);
-      setUserId(session?.user?.id || null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [tour.carrier_id]);
-
-  const handleBookingClick = async () => {
-    if (!selectedPoint) return;
-    
-    if (!isAuthenticated) {
-      setShowAuthDialog(true);
-      return;
-    }
-
-    if (userType === 'carrier' || userType === 'admin') {
+  const handleRequestApproval = () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       toast({
-        variant: "destructive",
-        title: "Réservation impossible",
-        description: userType === 'admin' 
-          ? "Les administrateurs ne peuvent pas effectuer de réservations."
-          : "Les transporteurs ne peuvent pas effectuer de réservations.",
+        title: "Connexion requise",
+        description: "Vous devez être connecté pour faire une demande d'approbation",
+        variant: "destructive"
       });
       return;
     }
-
-    // Vérifier si la tournée n'est pas planifiée
-    if (tour.status !== 'planned') {
-      toast({
-        variant: "destructive",
-        title: "Tournée démarrée",
-        description: "Cette tournée a déjà démarré et n'accepte plus de réservations.",
-      });
-      return;
-    }
-
-    if (tour.type === 'private') {
-      const { exists, status } = await checkExistingRequest(tour.id.toString());
-      
-      if (exists) {
-        if (status === 'rejected') {
-          toast({
-            variant: "destructive",
-            title: "Demande rejetée",
-            description: "Votre demande d'approbation pour cette tournée a été rejetée par le transporteur.",
-          });
-          return;
-        } else if (status === 'pending') {
-          toast({
-            variant: "destructive",
-            title: "Demande en attente",
-            description: "Vous avez déjà une demande d'approbation en attente pour cette tournée.",
-          });
-          return;
-        } else if (status === 'approved') {
-          onBookingClick(tour.id, selectedPoint);
-          return;
-        }
-      }
-      
-      setShowApprovalDialog(true);
-    } else {
-      onBookingClick(tour.id, selectedPoint);
-    }
-  };
-
-  const handleAuthSuccess = () => {
-    setShowAuthDialog(false);
-    if (selectedPoint) {
-      if (tour.type === 'private') {
-        setShowApprovalDialog(true);
-      } else {
-        onBookingClick(tour.id, selectedPoint);
-      }
-    }
-  };
-
-  const isBookingDisabled = tour.status !== 'planned' || userType === 'admin';
-
-  const getButtonText = () => {
-    if (!selectedPoint) return "Sélectionnez un point de collecte";
-    if (userType === 'admin') return "Les administrateurs ne peuvent pas réserver";
-    if (isBookingDisabled) return "Cette tournée a démarré et n'accepte plus de réservations";
-    return "Réserver";
+    setShowApprovalDialog(true);
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-        <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
-        {isCarrierOwner && onStatusChange && (
-          <div className="w-full md:w-auto">
-            <TourStatusSelect
-              tourId={tour.id}
-              currentStatus={tour.status}
-              onStatusChange={onStatusChange}
-            />
-          </div>
+    <div className="bg-white shadow-sm rounded-lg p-6">
+      <TourCardHeader tour={tour} />
+      <TourCollectionPoints tour={tour} />
+      <TourCapacityDisplay tour={tour} />
+      
+      <div className="mt-6">
+        {tour.type === 'private' ? (
+          <Button 
+            onClick={handleRequestApproval}
+            className="w-full"
+          >
+            Demander l'approbation
+          </Button>
+        ) : (
+          <Button 
+            onClick={() => window.location.href = `/reserver/${tour.id}`}
+            className="w-full"
+          >
+            Réserver
+          </Button>
         )}
       </div>
-
-      <TourTimeline status={tour.status} />
-
-      <TourCapacityDisplay 
-        remainingCapacity={tour.remaining_capacity} 
-        totalCapacity={tour.total_capacity}
-      />
-
-      <TourCollectionPoints
-        route={tour.route}
-        selectedPoint={selectedPoint}
-        onPointSelect={setSelectedPoint}
-      />
-
-      <div className="text-center text-sm text-gray-500">
-        Départ pour la {tour.destination_country === "TN" ? "Tunisie" : "France"} le{" "}
-        {format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr })}
-      </div>
-
-      <Button 
-        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300"
-        onClick={handleBookingClick}
-        disabled={!selectedPoint || isBookingDisabled}
-      >
-        {getButtonText()}
-      </Button>
-
-      <AuthDialog 
-        isOpen={showAuthDialog} 
-        onClose={() => setShowAuthDialog(false)}
-        onSuccess={handleAuthSuccess}
-        requiredUserType="client"
-      />
 
       <ApprovalRequestDialog
         isOpen={showApprovalDialog}
         onClose={() => setShowApprovalDialog(false)}
         tourId={tour.id}
-        pickupCity={selectedPoint || ''}
+        pickupCity={tour.route?.[0]?.name || ''}
       />
     </div>
   );
