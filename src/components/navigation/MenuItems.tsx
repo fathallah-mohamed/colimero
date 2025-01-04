@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, Package, Truck, MessageSquare, Info, Users, User, Clipboard } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
 
 export const menuItems = [
   { 
@@ -36,13 +36,6 @@ export const menuItems = [
     href: "/contact", 
     icon: <Users className="w-4 h-4" /> 
   },
-];
-
-export const adminMenuItems = [
-  { name: "Profil", href: "/profil", icon: <User className="w-4 h-4" /> },
-  { name: "Demandes d'inscription", href: "/admin", icon: <Clipboard className="w-4 h-4" /> },
-  { name: "Transporteurs", href: "/admin/transporteurs", icon: <Truck className="w-4 h-4" /> },
-  { name: "Clients", href: "/admin/clients", icon: <Users className="w-4 h-4" /> }
 ];
 
 export default function MenuItems() {

@@ -18,9 +18,7 @@ export default function Navigation() {
     { name: "Demandes d'approbation", href: "/demandes-approbation", icon: <Users className="w-4 h-4" /> }
   ] : userType === 'admin' ? [
     { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
-    { name: "Demandes d'inscription", href: "/admin", icon: <ClipboardList className="w-4 h-4" /> },
-    { name: "Transporteurs", href: "/admin/transporteurs", icon: <Truck className="w-4 h-4" /> },
-    { name: "Clients", href: "/admin/clients", icon: <Users className="w-4 h-4" /> }
+    { name: "Demandes d'inscription", href: "/admin", icon: <ClipboardList className="w-4 h-4" /> }
   ] : [
     { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
     { name: "Mes réservations", href: "/mes-reservations", icon: <Package className="w-4 h-4" /> },

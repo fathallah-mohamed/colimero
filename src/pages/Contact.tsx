@@ -1,135 +1,103 @@
-import { Button } from "@/components/ui/button";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { Mail, Phone, Building } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Contact() {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Here you would typically send the form data to your backend
-    console.log("Form submitted:", formData);
-    
     toast({
       title: "Message envoyé",
       description: "Nous vous répondrons dans les plus brefs délais.",
     });
-    
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    });
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-8">Contactez-nous</h1>
-          
-          <div className="bg-white shadow-sm rounded-lg p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Email</h3>
-                <p className="text-gray-600">contact@colimero.com</p>
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+      <main className="flex-grow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex items-center gap-3 mb-8">
+            <Mail className="h-8 w-8 text-primary" />
+            <h1 className="text-4xl font-bold">Nous Contacter</h1>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12">
+            <div>
+              <h2 className="text-2xl font-semibold mb-6">Envoyez-nous un message</h2>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Nom complet</label>
+                  <Input placeholder="Votre nom" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Email</label>
+                  <Input type="email" placeholder="votre@email.com" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Message</label>
+                  <Textarea 
+                    placeholder="Comment pouvons-nous vous aider ?"
+                    className="min-h-[150px]"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full">
+                  Envoyer le message
+                </Button>
+              </form>
+            </div>
+
+            <div className="space-y-8">
+              <h2 className="text-2xl font-semibold mb-6">Nos Coordonnées</h2>
+              
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <Mail className="h-6 w-6 text-primary mt-1" />
+                  <div>
+                    <h3 className="font-medium">Email</h3>
+                    <p className="text-gray-600">contact@colimero.com</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <Phone className="h-6 w-6 text-primary mt-1" />
+                  <div>
+                    <h3 className="font-medium">Téléphone</h3>
+                    <p className="text-gray-600">+33 (0)1 23 45 67 89</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <Building className="h-6 w-6 text-primary mt-1" />
+                  <div>
+                    <h3 className="font-medium">Adresse</h3>
+                    <p className="text-gray-600">
+                      123 Avenue des Champs-Élysées<br />
+                      75008 Paris, France
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Téléphone</h3>
-                <p className="text-gray-600">+33 1 23 45 67 89</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Adresse</h3>
-                <p className="text-gray-600">123 Rue de Paris<br />75000 Paris, France</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Horaires</h3>
-                <p className="text-gray-600">Lun-Ven: 9h-18h<br />Sam: 9h-12h</p>
+
+              <div className="bg-gray-100 p-6 rounded-lg mt-8">
+                <h3 className="font-medium mb-2">Horaires d'ouverture</h3>
+                <p className="text-gray-600">
+                  Lundi - Vendredi: 9h00 - 18h00<br />
+                  Samedi: 9h00 - 12h00<br />
+                  Dimanche: Fermé
+                </p>
               </div>
             </div>
           </div>
-
-          <form onSubmit={handleSubmit} className="bg-white shadow-sm rounded-lg p-6">
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nom
-                </label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                  Sujet
-                </label>
-                <Input
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={5}
-                  required
-                />
-              </div>
-              
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                Envoyer
-              </Button>
-            </div>
-          </form>
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }
