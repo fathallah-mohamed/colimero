@@ -50,10 +50,14 @@ export function CollectionPointsList({
             <span className="font-medium">{point.name}</span>
             <span className="text-gray-600">{point.location}</span>
             <span className="text-gray-600">
-              {format(
-                new Date(point.collection_date || tourDepartureDate), 
-                "EEEE d MMMM", 
-                { locale: fr }
+              {point.collection_date ? (
+                format(
+                  new Date(point.collection_date), 
+                  "EEEE d MMMM", 
+                  { locale: fr }
+                )
+              ) : (
+                <span className="text-yellow-600 italic">Date à confirmer</span>
               )}
             </span>
             <span className="text-gray-600">{point.time}</span>
