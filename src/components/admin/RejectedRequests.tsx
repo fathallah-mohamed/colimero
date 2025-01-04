@@ -7,12 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { RejectedRequestCard } from "./rejected-requests/RejectedRequestCard";
 import { RejectedRequestsTable } from "./rejected-requests/RejectedRequestsTable";
 import { RejectedRequestDetails } from "./rejected-requests/RejectedRequestDetails";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: requests, isLoading } = useQuery({
     queryKey: ["rejected-requests"],
@@ -87,38 +89,34 @@ export default function RejectedRequests() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-center mb-6">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Rechercher par nom ou email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full"
-          />
-        </div>
+      <div className="relative w-full">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Rechercher par nom ou email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
-      {/* Desktop view */}
-      <div className="hidden md:block">
+      {isMobile ? (
+        <div className="grid grid-cols-1 gap-4">
+          {filteredRequests?.map((request) => (
+            <RejectedRequestCard
+              key={request.id}
+              request={request}
+              onViewDetails={setSelectedRequest}
+              onReapprove={handleReapprove}
+            />
+          ))}
+        </div>
+      ) : (
         <RejectedRequestsTable
           requests={filteredRequests || []}
           onViewDetails={setSelectedRequest}
           onReapprove={handleReapprove}
         />
-      </div>
-
-      {/* Mobile view */}
-      <div className="grid grid-cols-1 gap-4 md:hidden">
-        {filteredRequests?.map((request) => (
-          <RejectedRequestCard
-            key={request.id}
-            request={request}
-            onViewDetails={setSelectedRequest}
-            onReapprove={handleReapprove}
-          />
-        ))}
-      </div>
+      )}
 
       <RejectedRequestDetails
         request={selectedRequest}

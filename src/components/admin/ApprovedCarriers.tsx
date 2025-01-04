@@ -5,12 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { CarrierSearchBar } from "./carriers/CarrierSearchBar";
 import { CarrierTable } from "./carriers/CarrierTable";
 import { CarrierDetailsDialog } from "./carriers/CarrierDetailsDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ApprovedCarriers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCarrier, setSelectedCarrier] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: carriers, isLoading } = useQuery({
     queryKey: ["approved-carriers"],
@@ -97,11 +99,15 @@ export default function ApprovedCarriers() {
   );
 
   if (isLoading) {
-    return <div className="p-4 text-center">Chargement...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
       <CarrierSearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <CarrierTable 
