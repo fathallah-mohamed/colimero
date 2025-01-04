@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import BookingForm from "@/components/booking/BookingForm";
+import { BookingForm } from "@/components/booking/BookingForm";
 
 export default function SendPackage() {
   const navigate = useNavigate();
@@ -37,13 +37,8 @@ export default function SendPackage() {
   }, [navigate, toast]);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          Envoyer un colis
-        </h1>
-        <BookingForm />
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <BookingForm />
     </div>
   );
 }
