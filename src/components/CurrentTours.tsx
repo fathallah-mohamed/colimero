@@ -1,13 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { TourCard } from "@/components/tour/TourCard";
+import { TourTimelineCard } from "@/components/transporteur/tour/TourTimelineCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
 
 export default function CurrentTours() {
-  const { toast } = useToast();
-
   const { data: nextTour, isLoading } = useQuery({
     queryKey: ['next-planned-tour'],
     queryFn: async () => {
@@ -19,7 +16,10 @@ export default function CurrentTours() {
             company_name,
             first_name,
             last_name,
-            avatar_url
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
           )
         `)
         .eq('status', 'planned')
@@ -29,36 +29,29 @@ export default function CurrentTours() {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Parse the route if it's a string
+      if (data) {
+        return {
+          ...data,
+          route: Array.isArray(data.route) ? data.route : JSON.parse(data.route as string),
+          carriers: {
+            ...data.carriers,
+            carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
+              ? data.carriers.carrier_capacities 
+              : [data.carriers?.carrier_capacities]
+          }
+        };
+      }
+      return null;
     },
   });
-
-  const handleEdit = () => {
-    toast({
-      title: "Modification non disponible",
-      description: "Cette action n'est pas disponible sur la page d'accueil",
-    });
-  };
-
-  const handleDelete = () => {
-    toast({
-      title: "Suppression non disponible",
-      description: "Cette action n'est pas disponible sur la page d'accueil",
-    });
-  };
-
-  const handleStatusChange = () => {
-    toast({
-      title: "Changement de statut non disponible",
-      description: "Cette action n'est pas disponible sur la page d'accueil",
-    });
-  };
 
   if (isLoading) {
     return (
       <div className="py-8 px-4">
         <h2 className="text-2xl font-bold mb-6">Prochaine tournée planifiée</h2>
-        <Skeleton className="h-[200px] w-full" />
+        <Skeleton className="h-[400px] w-full" />
       </div>
     );
   }
@@ -78,14 +71,17 @@ export default function CurrentTours() {
     );
   }
 
+  const handleBookingClick = (tourId: number, pickupCity: string) => {
+    window.location.href = `/reserver/${tourId}`;
+  };
+
   return (
     <div className="py-8 px-4">
       <h2 className="text-2xl font-bold mb-6">Prochaine tournée planifiée</h2>
-      <TourCard 
+      <TourTimelineCard 
         tour={nextTour}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onStatusChange={handleStatusChange}
+        onBookingClick={handleBookingClick}
+        hideAvatar={false}
       />
     </div>
   );
