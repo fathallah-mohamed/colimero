@@ -6,10 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import NewRegistrationRequests from "@/components/admin/NewRegistrationRequests";
 import ApprovedCarriers from "@/components/admin/ApprovedCarriers";
 import RejectedRequests from "@/components/admin/RejectedRequests";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     checkAdminAccess();
@@ -27,7 +29,6 @@ export default function AdminDashboard() {
 
       console.log("Checking admin access for user:", session.user.id);
       
-      // Vérifier si l'utilisateur est un administrateur
       const { data: adminData, error: adminError } = await supabase
         .from('administrators')
         .select('*')
@@ -63,25 +64,42 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Tableau de bord administrateur</h1>
+    <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">
+        Tableau de bord administrateur
+      </h1>
       
-      <Tabs defaultValue="new" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="new">Nouvelles demandes</TabsTrigger>
-          <TabsTrigger value="approved">Transporteurs validés</TabsTrigger>
-          <TabsTrigger value="rejected">Transporteurs rejetés</TabsTrigger>
+      <Tabs defaultValue="new" className="w-full space-y-6">
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 gap-2' : 'grid-cols-3'}`}>
+          <TabsTrigger 
+            value="new"
+            className="px-4 py-2 text-sm md:text-base whitespace-nowrap"
+          >
+            Nouvelles demandes
+          </TabsTrigger>
+          <TabsTrigger 
+            value="approved"
+            className="px-4 py-2 text-sm md:text-base whitespace-nowrap"
+          >
+            Transporteurs validés
+          </TabsTrigger>
+          <TabsTrigger 
+            value="rejected"
+            className="px-4 py-2 text-sm md:text-base whitespace-nowrap"
+          >
+            Transporteurs rejetés
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="new">
+        <TabsContent value="new" className="mt-6">
           <NewRegistrationRequests />
         </TabsContent>
         
-        <TabsContent value="approved">
+        <TabsContent value="approved" className="mt-6">
           <ApprovedCarriers />
         </TabsContent>
         
-        <TabsContent value="rejected">
+        <TabsContent value="rejected" className="mt-6">
           <RejectedRequests />
         </TabsContent>
       </Tabs>
