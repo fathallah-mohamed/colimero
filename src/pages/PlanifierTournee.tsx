@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
-import { CarrierSignupForm } from "@/components/auth/CarrierSignupForm";
 import AuthDialog from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
@@ -13,13 +12,11 @@ import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function PlanifierTournee() {
   const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
-  const [isCarrierSignupOpen, setIsCarrierSignupOpen] = useState(false);
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<'client' | 'carrier' | 'admin' | null>(null);
@@ -97,14 +94,6 @@ export default function PlanifierTournee() {
     }
   };
 
-  const handleCarrierSignupSuccess = () => {
-    setIsCarrierSignupOpen(false);
-    toast({
-      title: "Demande envoyée avec succès",
-      description: "Nous examinerons votre demande dans les plus brefs délais.",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -137,7 +126,7 @@ export default function PlanifierTournee() {
                   Créer une tournée
                 </Button>
                 <Button
-                  onClick={() => setIsCarrierSignupOpen(true)}
+                  onClick={() => setIsAuthDialogOpen(true)}
                   variant="outline"
                   size="lg"
                   className="w-full max-w-md"
@@ -162,15 +151,8 @@ export default function PlanifierTournee() {
         requiredUserType="carrier"
         onRegisterClick={() => {
           setIsAuthDialogOpen(false);
-          setIsCarrierSignupOpen(true);
         }}
       />
-
-      <Dialog open={isCarrierSignupOpen} onOpenChange={setIsCarrierSignupOpen}>
-        <DialogContent className="max-w-4xl">
-          <CarrierSignupForm onSuccess={handleCarrierSignupSuccess} />
-        </DialogContent>
-      </Dialog>
 
       <AccessDeniedMessage 
         userType="client" 
