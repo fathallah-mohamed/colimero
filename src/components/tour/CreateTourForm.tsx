@@ -13,7 +13,11 @@ import { tourFormSchema } from "./form/tourFormSchema";
 
 type FormValues = z.infer<typeof tourFormSchema>;
 
-export default function CreateTourForm() {
+interface CreateTourFormProps {
+  onSuccess: () => void;
+}
+
+export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -87,6 +91,8 @@ export default function CreateTourForm() {
         title: "Succès",
         description: "La tournée a été créée avec succès",
       });
+      
+      onSuccess();
       navigate("/transporteur/tournees");
     } catch (error) {
       console.error("Error creating tour:", error);
