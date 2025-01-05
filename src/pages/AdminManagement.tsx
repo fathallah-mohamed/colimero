@@ -31,7 +31,17 @@ export default function AdminManagement() {
     }
   });
 
-  const handleDeleteAdmin = async (adminId: string) => {
+  const handleDeleteAdmin = async (adminId: string, adminEmail: string) => {
+    // Prevent deletion of the main admin account
+    if (adminEmail === 'admin@colimero.com') {
+      toast({
+        title: "Action non autorisée",
+        description: "Impossible de supprimer le compte administrateur principal",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('administrators')
@@ -86,7 +96,8 @@ export default function AdminManagement() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDeleteAdmin(admin.id)}
+                    onClick={() => handleDeleteAdmin(admin.id, admin.email)}
+                    disabled={admin.email === 'admin@colimero.com'}
                     className="flex items-center gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
