@@ -5,15 +5,15 @@ import CarrierSignupForm from "./CarrierSignupForm";
 import { Heading } from "@/components/ui/heading";
 
 interface CarrierAuthDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
 }
 
-export default function CarrierAuthDialog({ isOpen, onClose }: CarrierAuthDialogProps) {
+export function CarrierAuthDialog({ open, onClose }: CarrierAuthDialogProps) {
   const isMobile = useIsMobile();
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent 
         className={`
           ${isMobile ? 'h-[95vh] p-4' : 'max-h-[90vh]'} 
