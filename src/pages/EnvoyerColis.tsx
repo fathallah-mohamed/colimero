@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { RegisterForm } from "@/components/auth/RegisterForm";
-import AuthDialog from "@/components/auth/AuthDialog";
 import TourPageHeader from "@/components/tour/TourPageHeader";
 import TourPageContent from "@/components/tour/TourPageContent";
+import { TourAuthDialogs } from "@/components/tour/auth/TourAuthDialogs";
 import type { Tour, TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
@@ -18,16 +16,6 @@ export default function EnvoyerColis() {
   const [userType, setUserType] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
-
-  useEffect(() => {
-    const checkUserType = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserType(user.user_metadata?.user_type);
-      }
-    };
-    checkUserType();
-  }, []);
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, "public", sortBy, status],
@@ -148,6 +136,7 @@ export default function EnvoyerColis() {
 
   const handleAuthRequired = () => {
     setShowAuthDialog(true);
+    setShowRegisterForm(false);
   };
 
   const handleRegisterClick = () => {
@@ -155,10 +144,14 @@ export default function EnvoyerColis() {
     setShowRegisterForm(true);
   };
 
+  const handleLoginClick = () => {
+    setShowRegisterForm(false);
+    setShowAuthDialog(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-
       <div className="max-w-3xl mx-auto px-4 py-8">
         <TourPageHeader />
         
@@ -180,22 +173,16 @@ export default function EnvoyerColis() {
           onTypeChange={setTourType}
           onAuthRequired={handleAuthRequired}
         />
+
+        <TourAuthDialogs 
+          showAuthDialog={showAuthDialog}
+          showRegisterForm={showRegisterForm}
+          onAuthClose={() => setShowAuthDialog(false)}
+          onRegisterClose={() => setShowRegisterForm(false)}
+          onRegisterClick={handleRegisterClick}
+          onLoginClick={handleLoginClick}
+        />
       </div>
-
-      <AuthDialog 
-        isOpen={showAuthDialog} 
-        onClose={() => setShowAuthDialog(false)}
-        onRegisterClick={handleRegisterClick}
-      />
-
-      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
-        <DialogContent className="max-w-2xl">
-          <RegisterForm onLogin={() => {
-            setShowRegisterForm(false);
-            setShowAuthDialog(true);
-          }} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
