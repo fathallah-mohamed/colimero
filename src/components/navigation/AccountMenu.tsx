@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@supabase/supabase-js";
 import { useState } from "react";
-import { AuthDialog } from "../auth/AuthDialog";
+import AuthDialog from "../auth/AuthDialog";
 import { UserCircle2, ClipboardList, Users2, Truck, Bell } from "lucide-react";
 
 interface AccountMenuProps {
@@ -36,7 +36,7 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         </Button>
 
         <AuthDialog 
-          open={showAuthDialog} 
+          isOpen={showAuthDialog} 
           onClose={() => setShowAuthDialog(false)} 
         />
       </>

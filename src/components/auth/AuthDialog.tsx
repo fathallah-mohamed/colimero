@@ -1,69 +1,168 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClientLoginForm } from "./login/ClientLoginForm";
+import { CarrierLoginForm } from "./login/CarrierLoginForm";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LoginForm } from "./LoginForm";
-import { RegisterForm } from "./RegisterForm";
 
 interface AuthDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
-  fromHeader?: boolean;
-  onRegisterClick?: () => void;
-  onCarrierRegisterClick?: () => void;
+  defaultTab?: string;
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
+  onRegisterClick?: () => void;
+  onCarrierRegisterClick?: () => void;
+  fromHeader?: boolean;
 }
 
-export function AuthDialog({
-  open,
-  onClose,
-  fromHeader = false,
+export default function AuthDialog({ 
+  isOpen, 
+  onClose, 
+  defaultTab = "client",
+  onSuccess,
+  requiredUserType,
   onRegisterClick,
   onCarrierRegisterClick,
-  onSuccess,
-  requiredUserType
+  fromHeader = false
 }: AuthDialogProps) {
-  const handleForgotPassword = () => {
-    // Implement forgot password logic
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  const location = useLocation();
+
+  const handleSuccess = () => {
+    onSuccess?.();
+    onClose();
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Connexion</TabsTrigger>
-            <TabsTrigger value="register">Inscription</TabsTrigger>
-          </TabsList>
-          <TabsContent value="login">
-            <LoginForm 
-              onSuccess={onSuccess}
-              requiredUserType={requiredUserType}
-              onForgotPassword={handleForgotPassword}
+  if (location.pathname.includes('/reserver/')) {
+    sessionStorage.setItem('returnPath', location.pathname + location.search);
+  }
+
+  // Si appelé depuis le header, afficher une version simplifiée
+  if (fromHeader) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogTitle>Connexion</DialogTitle>
+          <div className="space-y-6">
+            <ClientLoginForm
+              onForgotPassword={() => {}}
               onRegister={onRegisterClick}
-              onCarrierRegister={onCarrierRegisterClick}
+              onSuccess={handleSuccess}
+              hideRegisterButton
             />
-          </TabsContent>
-          <TabsContent value="register" className="space-y-4">
-            <div className="space-y-4 text-center">
-              <h2 className="text-lg font-semibold">Choisissez votre profil</h2>
-              <div className="flex flex-col gap-4">
-                <Button 
-                  variant="outline" 
-                  onClick={onRegisterClick}
-                  className="w-full"
-                >
-                  Je suis un client
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={onCarrierRegisterClick}
-                  className="w-full"
-                >
-                  Je suis un transporteur
-                </Button>
-              </div>
+            <div className="space-y-4 mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onRegisterClick}
+                className="w-full"
+              >
+                Créer un compte client
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCarrierRegisterClick}
+                className="w-full"
+              >
+                Devenir transporteur
+              </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Si un type d'utilisateur spécifique est requis, ne pas afficher les onglets
+  if (requiredUserType) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogTitle>
+            {requiredUserType === 'client' ? 'Connexion Client' : 'Connexion Transporteur'}
+          </DialogTitle>
+          {requiredUserType === 'client' ? (
+            <div className="space-y-6">
+              <ClientLoginForm
+                onForgotPassword={() => {}}
+                onRegister={onRegisterClick}
+                onSuccess={handleSuccess}
+                requiredUserType={requiredUserType}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onRegisterClick}
+                className="w-full"
+              >
+                Créer un compte client
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <CarrierLoginForm
+                onForgotPassword={() => {}}
+                onCarrierRegister={onCarrierRegisterClick}
+                onSuccess={handleSuccess}
+                requiredUserType={requiredUserType}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCarrierRegisterClick}
+                className="w-full"
+              >
+                Devenir transporteur
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Sinon, afficher les onglets avec les deux options
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogTitle>Connexion</DialogTitle>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="client">Client</TabsTrigger>
+            <TabsTrigger value="carrier">Transporteur</TabsTrigger>
+          </TabsList>
+          <TabsContent value="client" className="space-y-6">
+            <ClientLoginForm
+              onForgotPassword={() => {}}
+              onRegister={onRegisterClick}
+              onSuccess={handleSuccess}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onRegisterClick}
+              className="w-full"
+            >
+              Créer un compte client
+            </Button>
+          </TabsContent>
+          <TabsContent value="carrier" className="space-y-6">
+            <CarrierLoginForm
+              onForgotPassword={() => {}}
+              onCarrierRegister={onCarrierRegisterClick}
+              onSuccess={handleSuccess}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCarrierRegisterClick}
+              className="w-full"
+            >
+              Devenir transporteur
+            </Button>
           </TabsContent>
         </Tabs>
       </DialogContent>

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Tour } from "@/types/tour";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { AuthDialog } from "../auth/AuthDialog";
+import AuthDialog from "../auth/AuthDialog";
 
 interface TourCardProps {
   tour: Tour;
@@ -64,7 +64,7 @@ export function TourCard({
       </div>
 
       <AuthDialog
-        open={showAuthDialog}
+        isOpen={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"
