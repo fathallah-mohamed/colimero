@@ -79,7 +79,8 @@ export default function Navigation() {
 
       <AuthDialog 
         isOpen={showAuthDialog} 
-        onClose={() => setShowAuthDialog(false)} 
+        onClose={() => setShowAuthDialog(false)}
+        fromHeader={true}
       />
     </nav>
   );

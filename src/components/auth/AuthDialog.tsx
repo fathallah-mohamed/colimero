@@ -4,6 +4,7 @@ import { ClientLoginForm } from "./login/ClientLoginForm";
 import { CarrierLoginForm } from "./login/CarrierLoginForm";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface AuthDialogProps {
   requiredUserType?: 'client' | 'carrier';
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
+  fromHeader?: boolean;
 }
 
 export default function AuthDialog({ 
@@ -22,7 +24,8 @@ export default function AuthDialog({
   onSuccess,
   requiredUserType,
   onRegisterClick,
-  onCarrierRegisterClick
+  onCarrierRegisterClick,
+  fromHeader = false
 }: AuthDialogProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const location = useLocation();
@@ -35,6 +38,43 @@ export default function AuthDialog({
   // Sauvegarder le chemin actuel si on est sur une page de réservation
   if (location.pathname.includes('/reserver/')) {
     sessionStorage.setItem('returnPath', location.pathname + location.search);
+  }
+
+  // Si appelé depuis le header, afficher une version simplifiée
+  if (fromHeader) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogTitle>Connexion</DialogTitle>
+          <div className="space-y-6">
+            <ClientLoginForm
+              onForgotPassword={() => {}}
+              onRegister={onRegisterClick}
+              onSuccess={handleSuccess}
+              hideRegisterButton
+            />
+            <div className="space-y-4 mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onRegisterClick}
+                className="w-full"
+              >
+                Créer un compte client
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCarrierRegisterClick}
+                className="w-full"
+              >
+                Devenir transporteur
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
 
   // Si un type d'utilisateur spécifique est requis, ne pas afficher les onglets

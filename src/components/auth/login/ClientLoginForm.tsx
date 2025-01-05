@@ -8,6 +8,7 @@ interface ClientLoginFormProps {
   onRegister: () => void;
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
+  hideRegisterButton?: boolean;
 }
 
 export function ClientLoginForm({
@@ -15,6 +16,7 @@ export function ClientLoginForm({
   onRegister,
   onSuccess,
   requiredUserType,
+  hideRegisterButton = false,
 }: ClientLoginFormProps) {
   const {
     isLoading,
@@ -46,7 +48,7 @@ export function ClientLoginForm({
           {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
 
-        {(!requiredUserType || requiredUserType === 'client') && (
+        {(!requiredUserType || requiredUserType === 'client') && !hideRegisterButton && (
           <>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
