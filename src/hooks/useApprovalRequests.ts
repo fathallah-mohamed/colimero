@@ -8,7 +8,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   const { toast } = useToast();
 
   const fetchRequests = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.log('No user ID provided');
+      setLoading(false);
+      return;
+    }
 
     try {
       console.log('Fetching requests for user:', userId, 'type:', userType);
@@ -22,6 +26,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             departure_country,
             destination_country,
             departure_date,
+            collection_date,
             route,
             total_capacity,
             remaining_capacity,
@@ -37,19 +42,17 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
-      // Appliquer le filtre en fonction du type d'utilisateur
+      // Apply filter based on user type
       if (userType === 'carrier') {
         query = query.eq('tours.carrier_id', userId);
       } else if (userType === 'client') {
         query = query.eq('user_id', userId);
       }
 
-      query = query.order('created_at', { ascending: false });
-
       const { data: approvalData, error } = await query;
 
       if (error) {
-        console.error('Error details:', error);
+        console.error('Error fetching approval requests:', error);
         throw error;
       }
 
