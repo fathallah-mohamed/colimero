@@ -92,7 +92,7 @@ export default function Navigation() {
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog} 
+        open={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
         fromHeader={true}
         onRegisterClick={handleRegisterClick}

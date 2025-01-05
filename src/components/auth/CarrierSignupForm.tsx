@@ -17,7 +17,7 @@ interface CarrierSignupFormProps {
   onSuccess: () => void;
 }
 
-export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
+export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   
