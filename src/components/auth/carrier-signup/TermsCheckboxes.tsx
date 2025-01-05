@@ -51,32 +51,31 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
             name={`consents.${consent.code}`}
             render={({ field }) => (
               <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <div 
-                  className="flex-1 cursor-pointer" 
-                  onClick={() => {
-                    field.onChange(!field.value);
-                  }}
-                >
+                <div className="flex-1">
                   <div className="flex items-start gap-3">
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
+                      id={`consent-${consent.code}`}
                     />
-                    <div className="space-y-1 flex-1">
+                    <div 
+                      className="space-y-1 flex-1 cursor-pointer" 
+                      onClick={() => field.onChange(!field.value)}
+                    >
                       <div className="text-sm font-medium flex items-center gap-2">
-                        {consent.label}
+                        <label 
+                          htmlFor={`consent-${consent.code}`}
+                          className="cursor-pointer"
+                        >
+                          {consent.label}
+                        </label>
                         {getDocumentLink(consent.code) && (
                           <Link 
                             to={getDocumentLink(consent.code)!}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline text-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
+                            onClick={(e) => e.stopPropagation()}
                           >
                             (Voir le document)
                           </Link>
