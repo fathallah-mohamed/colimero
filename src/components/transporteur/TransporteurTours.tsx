@@ -19,16 +19,12 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <div>Chargement des tournées...</div>;
   }
 
   if (!tours.length) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-8">
         <p className="text-gray-500">
           Aucune tournée {type === "public" ? "publique" : "privée"} disponible
         </p>
@@ -37,7 +33,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType
   }
 
   return (
-    <div className="grid gap-8 md:gap-6">
+    <div className="space-y-8">
       {tours.map((tour) => {
         const daysUntilDeparture = differenceInDays(
           new Date(tour.departure_date),
@@ -46,14 +42,18 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType
         const isUpcoming = daysUntilDeparture <= 7 && daysUntilDeparture >= 0;
 
         return (
-          <TourTimelineCard
+          <div
             key={tour.id}
-            tour={tour}
-            onBookingClick={handleBookingClick}
-            hideAvatar={hideAvatar}
-            userType={userType}
-            isUpcoming={isUpcoming}
-          />
+            className="transform transition-all duration-200 hover:translate-y-[-4px]"
+          >
+            <TourTimelineCard
+              tour={tour}
+              onBookingClick={handleBookingClick}
+              hideAvatar={hideAvatar}
+              userType={userType}
+              isUpcoming={isUpcoming}
+            />
+          </div>
         );
       })}
     </div>
