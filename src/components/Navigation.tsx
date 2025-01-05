@@ -5,7 +5,7 @@ import { AuthSection } from "./navigation/AuthSection";
 import { MobileMenuButton } from "./navigation/MobileMenuButton";
 import MenuItems from "./navigation/MenuItems";
 import MobileMenu from "./navigation/MobileMenu";
-import AuthDialog from "./auth/AuthDialog";
+import { AuthDialog } from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";

@@ -61,8 +61,7 @@ export function AuthDialog({
     return (
       <Dialog open={open} onOpenChange={onClose}>
         <RegisterForm
-          onSuccess={handleSuccess}
-          onBack={() => setShowRegisterForm(false)}
+          onLogin={() => setShowRegisterForm(false)}
         />
       </Dialog>
     );
