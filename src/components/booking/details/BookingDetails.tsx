@@ -46,6 +46,35 @@ export function BookingDetails({ booking }: BookingDetailsProps) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-sm text-gray-500">Date de collecte</p>
+          <p className="font-medium">
+            {format(new Date(booking.tours?.collection_date), "d MMMM yyyy", { locale: fr })}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Date de départ</p>
+          <p className="font-medium">
+            {format(new Date(booking.tours?.departure_date), "d MMMM yyyy", { locale: fr })}
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-sm text-gray-500 mb-2">Transporteur</p>
+        <div className="flex items-center gap-2">
+          {booking.tours?.carriers?.avatar_url && (
+            <img 
+              src={booking.tours.carriers.avatar_url} 
+              alt="Avatar du transporteur"
+              className="w-8 h-8 rounded-full"
+            />
+          )}
+          <p className="font-medium">{booking.tours?.carriers?.company_name}</p>
+        </div>
+      </div>
+
       {booking.special_items && booking.special_items.length > 0 && (
         <div>
           <p className="text-sm text-gray-500 mb-2">Objets spéciaux</p>
@@ -69,13 +98,6 @@ export function BookingDetails({ booking }: BookingDetailsProps) {
           </div>
         </div>
       )}
-
-      <div>
-        <p className="text-sm text-gray-500">Date de départ</p>
-        <p className="font-medium">
-          {format(new Date(booking.tours?.departure_date), "d MMMM yyyy", { locale: fr })}
-        </p>
-      </div>
 
       {booking.package_description && (
         <div>
