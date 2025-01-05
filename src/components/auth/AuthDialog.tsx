@@ -85,21 +85,33 @@ export default function AuthDialog({
           <DialogTitle>
             {requiredUserType === 'client' ? 'Connexion Client' : 'Connexion Transporteur'}
           </DialogTitle>
-          {requiredUserType === 'client' ? (
-            <ClientLoginForm
-              onForgotPassword={() => {}}
-              onRegister={onRegisterClick}
-              onSuccess={handleSuccess}
-              requiredUserType={requiredUserType}
-            />
-          ) : (
-            <CarrierLoginForm
-              onForgotPassword={() => {}}
-              onCarrierRegister={onCarrierRegisterClick}
-              onSuccess={handleSuccess}
-              requiredUserType={requiredUserType}
-            />
-          )}
+          <div className="space-y-6">
+            {requiredUserType === 'client' ? (
+              <ClientLoginForm
+                onForgotPassword={() => {}}
+                onRegister={onRegisterClick}
+                onSuccess={handleSuccess}
+                requiredUserType={requiredUserType}
+              />
+            ) : (
+              <CarrierLoginForm
+                onForgotPassword={() => {}}
+                onCarrierRegister={onCarrierRegisterClick}
+                onSuccess={handleSuccess}
+                requiredUserType={requiredUserType}
+              />
+            )}
+            <div className="space-y-4 mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onRegisterClick}
+                className="w-full"
+              >
+                Créer un compte client
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     );
