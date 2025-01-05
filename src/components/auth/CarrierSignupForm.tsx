@@ -14,6 +14,7 @@ import { TermsCheckboxes } from "./carrier-signup/TermsCheckboxes";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 
 export interface CarrierSignupFormProps {
   onSuccess: () => void;
@@ -22,6 +23,7 @@ export interface CarrierSignupFormProps {
 export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { data: consents } = useCarrierConsents();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -40,9 +42,10 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
       total_capacity: 0,
       price_per_kg: 0,
       avatar_url: null,
-      terms_accepted: false,
-      customs_declaration: false,
-      responsibility_terms_accepted: false,
+      consents: consents?.reduce((acc, consent) => ({
+        ...acc,
+        [consent.code]: false
+      }), {}) || {},
     },
   });
 
@@ -67,6 +70,18 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
 
       if (registrationError) throw registrationError;
 
+      // Insert consents
+      const consentPromises = Object.entries(values.consents).map(([code, accepted]) => 
+        supabase.from("user_consents").insert({
+          user_id: values.email, // Using email as temporary ID since we don't have user_id yet
+          consent_type_id: consents?.find(c => c.code === code)?.id,
+          accepted,
+          accepted_at: accepted ? new Date().toISOString() : null,
+        })
+      );
+
+      await Promise.all(consentPromises);
+
       toast({
         title: "Demande envoyée avec succès",
         description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
@@ -84,8 +99,7 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
     }
   };
 
-  const allTermsAccepted = form.watch(['terms_accepted', 'customs_declaration', 'responsibility_terms_accepted'])
-    .every(value => value === true);
+  const allConsentsAccepted = Object.values(form.watch("consents")).every(value => value === true);
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -138,7 +152,7 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
               <Button 
                 type="submit" 
                 className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
-                disabled={!form.formState.isValid || !allTermsAccepted}
+                disabled={!form.formState.isValid || !allConsentsAccepted}
               >
                 Envoyer ma demande d'inscription
               </Button>

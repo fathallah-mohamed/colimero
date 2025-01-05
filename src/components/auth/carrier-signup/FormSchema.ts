@@ -24,9 +24,10 @@ export const formSchema = z.object({
   total_capacity: z.number().min(0),
   price_per_kg: z.number().min(0),
   avatar_url: z.string().nullable(),
-  terms_accepted: z.boolean(),
-  customs_declaration: z.boolean(),
-  responsibility_terms_accepted: z.boolean(),
+  consents: z.record(z.string(), z.boolean()).refine(
+    (consents) => Object.values(consents).every(value => value === true),
+    "Vous devez accepter tous les consentements pour continuer"
+  ),
 });
 
 export type FormValues = z.infer<typeof formSchema>;

@@ -1,6 +1,9 @@
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useCarrierConsents } from "@/hooks/useCarrierConsents";
+import { Link } from "react-router-dom";
 import type { CarrierSignupFormValues } from "./FormSchema";
 
 interface TermsCheckboxesProps {
@@ -8,70 +11,69 @@ interface TermsCheckboxesProps {
 }
 
 export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
+  const { data: consents, isLoading } = useCarrierConsents();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="animate-pulse">
+            <div className="h-4 w-3/4 bg-gray-200 rounded mb-2" />
+            <div className="h-16 bg-gray-100 rounded" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const getDocumentLink = (code: string) => {
+    switch (code) {
+      case 'carrier_terms':
+        return '/cgu';
+      case 'carrier_data_processing':
+        return '/privacy';
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <FormField
-        control={form.control}
-        name="terms_accepted"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-            <Checkbox
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-            <div className="space-y-1 leading-none">
-              <label className="text-sm font-medium">
-                J'accepte les conditions générales
-              </label>
-              <p className="text-sm text-gray-500">
-                Je comprends et j'accepte les conditions d'utilisation
-              </p>
-            </div>
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="customs_declaration"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-            <Checkbox
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-            <div className="space-y-1 leading-none">
-              <label className="text-sm font-medium">
-                Je déclare que je respecterai toutes les lois douanières
-              </label>
-              <p className="text-sm text-gray-500">
-                Je suis responsable des objets que je transporte
-              </p>
-            </div>
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="responsibility_terms_accepted"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-            <Checkbox
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-            <div className="space-y-1 leading-none">
-              <label className="text-sm font-medium">
-                J'accepte les termes de responsabilité
-              </label>
-              <p className="text-sm text-gray-500">
-                Je comprends mes responsabilités en tant que transporteur
-              </p>
-            </div>
-          </FormItem>
-        )}
-      />
+    <div className="space-y-6">
+      {consents?.map((consent) => (
+        <FormField
+          key={consent.id}
+          control={form.control}
+          name={`consents.${consent.code}`}
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+              <div className="space-y-1 flex-1">
+                <div className="text-sm font-medium flex items-center gap-2">
+                  {consent.label}
+                  {getDocumentLink(consent.code) && (
+                    <Link 
+                      to={getDocumentLink(consent.code)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm"
+                    >
+                      (Voir le document)
+                    </Link>
+                  )}
+                </div>
+                <Alert>
+                  <AlertDescription className="text-sm text-muted-foreground">
+                    {consent.description}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </FormItem>
+          )}
+        />
+      ))}
     </div>
   );
 }
