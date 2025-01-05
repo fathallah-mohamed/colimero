@@ -37,43 +37,49 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
     }
   };
 
+  if (!consents?.length) return null;
+
   return (
     <div className="space-y-6">
-      {consents?.map((consent) => (
-        <FormField
-          key={consent.id}
-          control={form.control}
-          name={`consents.${consent.code}`}
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-              <div className="space-y-1 flex-1">
-                <div className="text-sm font-medium flex items-center gap-2">
-                  {consent.label}
-                  {getDocumentLink(consent.code) && (
-                    <Link 
-                      to={getDocumentLink(consent.code)!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline text-sm"
-                    >
-                      (Voir le document)
-                    </Link>
-                  )}
+      {consents.map((consent) => {
+        if (!consent.label || !consent.description) return null;
+        
+        return (
+          <FormField
+            key={consent.id}
+            control={form.control}
+            name={`consents.${consent.code}`}
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <div className="space-y-1 flex-1">
+                  <div className="text-sm font-medium flex items-center gap-2">
+                    {consent.label}
+                    {getDocumentLink(consent.code) && (
+                      <Link 
+                        to={getDocumentLink(consent.code)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline text-sm"
+                      >
+                        (Voir le document)
+                      </Link>
+                    )}
+                  </div>
+                  <Alert>
+                    <AlertDescription className="text-sm text-muted-foreground">
+                      {consent.description}
+                    </AlertDescription>
+                  </Alert>
                 </div>
-                <Alert>
-                  <AlertDescription className="text-sm text-muted-foreground">
-                    {consent.description}
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </FormItem>
-          )}
-        />
-      ))}
+              </FormItem>
+            )}
+          />
+        );
+      })}
     </div>
   );
 }
