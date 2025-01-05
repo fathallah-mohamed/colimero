@@ -78,6 +78,10 @@ export default function CurrentTours() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
+      // Sauvegarder le chemin complet avec les paramètres
+      const bookingPath = `/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`;
+      sessionStorage.setItem('returnPath', bookingPath);
+      
       setSelectedTourId(tourId);
       setSelectedPickupCity(pickupCity);
       setShowAuthDialog(true);
