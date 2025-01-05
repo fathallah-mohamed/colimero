@@ -49,24 +49,3 @@ export const adminMenuItem = {
   icon: UserCog,
   allowedUserTypes: ["admin"]
 };
-
-export const adminMenuItems = [
-  {
-    name: "Administrateurs",
-    href: "/admin",
-    icon: UserCog,
-    allowedUserTypes: ["admin"]
-  },
-  {
-    name: "Clients",
-    href: "/admin/clients",
-    icon: Users,
-    allowedUserTypes: ["admin"]
-  },
-  {
-    name: "Demandes d'inscription",
-    href: "/admin/demandes-inscription",
-    icon: UserCog,
-    allowedUserTypes: ["admin"]
-  }
-];

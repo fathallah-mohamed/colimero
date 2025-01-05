@@ -20,7 +20,7 @@ interface NewRequestsTableProps {
 
 export function NewRequestsTable({ 
   requests, 
-  onViewDetails,
+  onViewDetails, 
   showApproveButton = false,
   onApprove 
 }: NewRequestsTableProps) {
