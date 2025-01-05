@@ -1,3 +1,5 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,14 +15,12 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 export interface CarrierSignupFormProps {
   onSuccess: () => void;
 }
 
-export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
+export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { data: consentTypes } = useCarrierConsents();
@@ -168,3 +168,5 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
     </div>
   );
 }
+
+export default CarrierSignupForm;
