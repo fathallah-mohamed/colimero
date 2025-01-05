@@ -6,10 +6,15 @@ import { MobileMenuButton } from "./navigation/MobileMenuButton";
 import MenuItems from "./navigation/MenuItems";
 import MobileMenu from "./navigation/MobileMenu";
 import AuthDialog from "./auth/AuthDialog";
+import { RegisterForm } from "./auth/RegisterForm";
+import CarrierSignupForm from "./auth/CarrierSignupForm";
+import { Dialog, DialogContent } from "./ui/dialog";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
@@ -32,12 +37,21 @@ export default function Navigation() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // Sauvegarder le chemin actuel si on est sur une page de réservation
   useEffect(() => {
     if (location.pathname.includes('/reserver/')) {
       sessionStorage.setItem('returnPath', location.pathname);
     }
   }, [location.pathname]);
+
+  const handleRegisterClick = () => {
+    setShowAuthDialog(false);
+    setShowRegisterForm(true);
+  };
+
+  const handleCarrierRegisterClick = () => {
+    setShowAuthDialog(false);
+    setShowCarrierSignupForm(true);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -81,7 +95,26 @@ export default function Navigation() {
         isOpen={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
         fromHeader={true}
+        onRegisterClick={handleRegisterClick}
+        onCarrierRegisterClick={handleCarrierRegisterClick}
       />
+
+      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
+        <DialogContent className="max-w-2xl">
+          <RegisterForm onLogin={() => {
+            setShowRegisterForm(false);
+            setShowAuthDialog(true);
+          }} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCarrierSignupForm} onOpenChange={setShowCarrierSignupForm}>
+        <DialogContent className="max-w-2xl">
+          <CarrierSignupForm onSuccess={() => {
+            setShowCarrierSignupForm(false);
+          }} />
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
