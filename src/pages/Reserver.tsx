@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/booking/BookingForm";
 import Navigation from "@/components/Navigation";
-import { Tour } from "@/types/tour";
+import { Tour, RouteStop } from "@/types/tour";
 
 export default function Reserver() {
   const { tourId } = useParams();
@@ -29,7 +29,33 @@ export default function Reserver() {
         .single();
 
       if (error) throw error;
-      return data as Tour;
+
+      if (data) {
+        // Transform the route data from JSON to RouteStop[]
+        const parsedRoute = Array.isArray(data.route) 
+          ? data.route 
+          : JSON.parse(data.route as string);
+
+        const transformedRoute = parsedRoute.map((stop: any): RouteStop => ({
+          name: stop.name,
+          location: stop.location,
+          time: stop.time,
+          type: stop.type,
+          collection_date: stop.collection_date
+        }));
+
+        return {
+          ...data,
+          route: transformedRoute,
+          carriers: {
+            ...data.carriers,
+            carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
+              ? data.carriers.carrier_capacities 
+              : [data.carriers?.carrier_capacities]
+          }
+        } as Tour;
+      }
+      return null;
     },
   });
 
