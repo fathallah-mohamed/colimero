@@ -1,18 +1,19 @@
 import { TourFilters } from "./TourFilters";
 import { TourTypeTabs } from "./TourTypeTabs";
+import type { TourStatus } from "@/types/tour";
 
 interface TourPageHeaderProps {
   departureCountry: string;
   destinationCountry: string;
   tourType: string;
   sortBy: string;
-  status: string;
+  status: TourStatus | "all";
   publicToursCount: number;
   privateToursCount: number;
   onDepartureChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onSortChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
+  onStatusChange: (value: TourStatus | "all") => void;
   onTypeChange: (value: string) => void;
 }
 

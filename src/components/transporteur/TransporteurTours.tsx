@@ -5,8 +5,9 @@ interface TransporteurToursProps {
   tours: Tour[];
   type: "public" | "private";
   isLoading: boolean;
-  userType: string | null;
-  onAuthRequired: () => void;
+  userType?: string | null;
+  onAuthRequired?: () => void;
+  hideAvatar?: boolean;
 }
 
 export function TransporteurTours({ 
@@ -14,7 +15,8 @@ export function TransporteurTours({
   type,
   isLoading,
   userType,
-  onAuthRequired
+  onAuthRequired,
+  hideAvatar = false
 }: TransporteurToursProps) {
   if (isLoading) {
     return <div className="animate-pulse space-y-4">
@@ -41,11 +43,11 @@ export function TransporteurTours({
           key={tour.id}
           tour={tour}
           onBookingClick={() => {
-            if (!userType) {
+            if (!userType && onAuthRequired) {
               onAuthRequired();
             }
           }}
-          hideAvatar={false}
+          hideAvatar={hideAvatar}
         />
       ))}
     </div>

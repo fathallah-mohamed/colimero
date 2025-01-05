@@ -5,14 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import { TourPageHeader } from "@/components/tour/TourPageHeader";
 import { TourAuthDialogs } from "@/components/tour/TourAuthDialogs";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
   const [sortBy, setSortBy] = useState("departure_asc");
-  const [status, setStatus] = useState<"planned" | "all">("planned");
+  const [status, setStatus] = useState<TourStatus | "all">("planned");
   const [userType, setUserType] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
@@ -162,7 +162,7 @@ export default function EnvoyerColis() {
           onDepartureChange={handleDepartureChange}
           onDestinationChange={setDestinationCountry}
           onSortChange={setSortBy}
-          onStatusChange={setStatus}
+          onStatusChange={(value: TourStatus | "all") => setStatus(value)}
           onTypeChange={setTourType}
         />
 
