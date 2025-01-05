@@ -50,7 +50,6 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType
               tour={tour}
               onBookingClick={handleBookingClick}
               hideAvatar={hideAvatar}
-              userType={userType}
               isUpcoming={isUpcoming}
             />
           </div>
