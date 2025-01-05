@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigation } from "./navigation/useNavigation";
 import { AuthSection } from "./navigation/AuthSection";
 import { MobileMenuButton } from "./navigation/MobileMenuButton";
@@ -11,6 +11,25 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        mobileButtonRef.current &&
+        !mobileButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -31,6 +50,7 @@ export default function Navigation() {
             />
             
             <MobileMenuButton 
+              ref={mobileButtonRef}
               isOpen={isOpen}
               onClick={() => setIsOpen(!isOpen)}
             />
@@ -38,14 +58,16 @@ export default function Navigation() {
         </div>
       </div>
 
-      <MobileMenu
-        isOpen={isOpen}
-        user={user}
-        userType={userType}
-        handleLogout={handleLogout}
-        setIsOpen={setIsOpen}
-        setShowAuthDialog={setShowAuthDialog}
-      />
+      <div ref={mobileMenuRef}>
+        <MobileMenu
+          isOpen={isOpen}
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setIsOpen={setIsOpen}
+          setShowAuthDialog={setShowAuthDialog}
+        />
+      </div>
 
       <AuthDialog 
         isOpen={showAuthDialog} 
