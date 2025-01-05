@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { Link } from "react-router-dom";
 import type { FormValues } from "./FormSchema";
-import { Shield, FileText, User, Info } from "lucide-react";
+import { Shield, FileText, User, PackageCheck } from "lucide-react";
 
 interface TermsCheckboxesProps {
   form: UseFormReturn<FormValues>;
@@ -36,12 +36,12 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
   const categories: ConsentCategory[] = [
     {
       title: "Informations générales",
-      icon: <Info className="h-5 w-5" />,
+      icon: <Shield className="h-5 w-5" />,
       codes: ['carrier_info_accuracy']
     },
     {
       title: "Responsabilités",
-      icon: <Shield className="h-5 w-5" />,
+      icon: <PackageCheck className="h-5 w-5" />,
       codes: ['carrier_responsibility']
     },
     {
