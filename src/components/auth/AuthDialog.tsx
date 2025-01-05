@@ -51,26 +51,8 @@ export default function AuthDialog({
               onForgotPassword={() => {}}
               onRegister={onRegisterClick}
               onSuccess={handleSuccess}
-              hideRegisterButton
+              hideRegisterButton={false}
             />
-            <div className="space-y-4 mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onRegisterClick}
-                className="w-full"
-              >
-                Créer un compte client
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCarrierRegisterClick}
-                className="w-full"
-              >
-                Devenir transporteur
-              </Button>
-            </div>
           </div>
         </DialogContent>
       </Dialog>
