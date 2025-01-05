@@ -7,8 +7,6 @@ export function useBookingFlow() {
   const navigate = useNavigate();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
-  const [selectedTourId, setSelectedTourId] = useState<number | null>(null);
-  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
 
   const handleBookingClick = async (tourId: number, pickupCity: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -17,9 +15,6 @@ export function useBookingFlow() {
       // Sauvegarder le chemin complet avec les paramètres
       const bookingPath = `/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`;
       sessionStorage.setItem('returnPath', bookingPath);
-      
-      setSelectedTourId(tourId);
-      setSelectedPickupCity(pickupCity);
       setShowAuthDialog(true);
       return;
     }
@@ -64,8 +59,10 @@ export function useBookingFlow() {
 
   const handleAuthSuccess = () => {
     setShowAuthDialog(false);
-    if (selectedTourId && selectedPickupCity) {
-      navigate(`/reserver/${selectedTourId}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+    const returnPath = sessionStorage.getItem('returnPath');
+    if (returnPath) {
+      sessionStorage.removeItem('returnPath');
+      navigate(returnPath);
     }
   };
 
@@ -75,8 +72,6 @@ export function useBookingFlow() {
     showAccessDeniedDialog,
     setShowAccessDeniedDialog,
     handleBookingClick,
-    handleAuthSuccess,
-    selectedTourId,
-    selectedPickupCity
+    handleAuthSuccess
   };
 }

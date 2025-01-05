@@ -35,6 +35,7 @@ export function useLoginForm(props?: UseLoginFormProps) {
         // Si onSuccess est fourni, l'appeler
         if (onSuccess) {
           onSuccess();
+          return; // Important: arrêter ici pour laisser onSuccess gérer la redirection
         }
 
         // Vérifier s'il y a un chemin de retour stocké
