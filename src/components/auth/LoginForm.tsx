@@ -36,19 +36,21 @@ export function LoginForm({
           title: "Champs requis",
           description: "Veuillez remplir tous les champs",
         });
+        setIsLoading(false);
         return;
       }
 
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password: password.trim(),
       });
 
       if (signInError) {
+        console.error("Erreur de connexion:", signInError);
         let errorTitle = "Erreur de connexion";
         let errorMessage = "Une erreur est survenue lors de la connexion";
 
-        if (signInError.message === "Invalid login credentials") {
+        if (signInError.message.includes("Invalid login credentials")) {
           errorTitle = "Identifiants incorrects";
           errorMessage = "L'email ou le mot de passe est incorrect";
         } else if (signInError.message.includes("Email not confirmed")) {
@@ -57,9 +59,6 @@ export function LoginForm({
         } else if (signInError.message.includes("Invalid email")) {
           errorTitle = "Email invalide";
           errorMessage = "Le format de l'email est incorrect";
-        } else if (signInError.message.includes("Password")) {
-          errorTitle = "Mot de passe incorrect";
-          errorMessage = "Le mot de passe fourni est incorrect";
         }
 
         toast({
@@ -68,36 +67,41 @@ export function LoginForm({
           description: errorMessage,
         });
         setPassword("");
+        setIsLoading(false);
         return;
       }
 
-      if (user) {
-        const userType = user.user_metadata?.user_type;
-
-        if (requiredUserType && userType !== requiredUserType) {
-          toast({
-            variant: "destructive",
-            title: "Accès refusé",
-            description: `Cette section est réservée aux ${requiredUserType}s.`,
-          });
-          return;
-        }
-
-        toast({
-          title: "Connexion réussie",
-          description: "Vous êtes maintenant connecté",
-        });
-
-        const returnPath = sessionStorage.getItem('returnPath');
-        if (returnPath) {
-          sessionStorage.removeItem('returnPath');
-          navigate(returnPath);
-        }
-
-        onSuccess?.();
+      if (!user) {
+        throw new Error("Aucune donnée utilisateur reçue");
       }
+
+      const userType = user.user_metadata?.user_type;
+      console.log("Type d'utilisateur connecté:", userType);
+
+      if (requiredUserType && userType !== requiredUserType) {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: `Cette section est réservée aux ${requiredUserType}s.`,
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
+
+      const returnPath = sessionStorage.getItem('returnPath');
+      if (returnPath) {
+        sessionStorage.removeItem('returnPath');
+        navigate(returnPath);
+      }
+
+      onSuccess?.();
     } catch (error: any) {
-      console.error("Erreur de connexion:", error);
+      console.error("Erreur complète:", error);
       toast({
         variant: "destructive",
         title: "Erreur inattendue",
@@ -120,6 +124,7 @@ export function LoginForm({
           required
           placeholder="exemple@email.com"
           className="w-full"
+          disabled={isLoading}
         />
       </div>
 
@@ -133,6 +138,7 @@ export function LoginForm({
           required
           placeholder="••••••••"
           className="w-full"
+          disabled={isLoading}
         />
       </div>
 
@@ -151,6 +157,7 @@ export function LoginForm({
             variant="outline"
             onClick={onRegisterClick}
             className="w-full"
+            disabled={isLoading}
           >
             Créer un compte client
           </Button>
@@ -162,6 +169,7 @@ export function LoginForm({
             variant="outline"
             onClick={onCarrierRegisterClick}
             className="w-full"
+            disabled={isLoading}
           >
             Devenir transporteur
           </Button>
