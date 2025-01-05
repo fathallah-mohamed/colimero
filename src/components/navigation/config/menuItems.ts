@@ -2,12 +2,6 @@ import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCog } from "l
 
 export const menuItems = [
   { 
-    name: "Administrateurs", 
-    href: "/admin", 
-    icon: <UserCog className="w-4 h-4" />,
-    allowedUserTypes: ["admin"]
-  },
-  { 
     name: "Planifier une tournée", 
     href: "/planifier-tournee", 
     icon: <Calendar className="w-4 h-4" />, 
@@ -28,6 +22,12 @@ export const menuItems = [
     href: "/transporteurs", 
     icon: <Truck className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
+  },
+  { 
+    name: "Administrateurs", 
+    href: "/admin", 
+    icon: <UserCog className="w-4 h-4" />,
+    allowedUserTypes: ["admin"]
   },
   { 
     name: "Actualités", 
