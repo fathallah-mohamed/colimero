@@ -99,7 +99,7 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
     }
   };
 
-  const allConsentsAccepted = Object.values(form.watch("consents")).every(value => value === true);
+  const allConsentsAccepted = Object.values(form.watch("consents") || {}).every(value => value === true);
 
   return (
     <div className="w-full max-w-4xl mx-auto">

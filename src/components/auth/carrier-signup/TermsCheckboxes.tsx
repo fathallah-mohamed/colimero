@@ -4,10 +4,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { Link } from "react-router-dom";
-import type { CarrierSignupFormValues } from "./FormSchema";
+import type { FormValues } from "./FormSchema";
 
 interface TermsCheckboxesProps {
-  form: UseFormReturn<CarrierSignupFormValues>;
+  form: UseFormReturn<FormValues>;
 }
 
 export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
