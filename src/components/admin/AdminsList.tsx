@@ -50,7 +50,17 @@ export function AdminsList() {
     }
   };
 
-  const handleDeleteAdmin = async (adminId: string) => {
+  const handleDeleteAdmin = async (adminId: string, adminEmail: string) => {
+    // Ne pas permettre la suppression de l'admin principal
+    if (adminEmail === 'admin@colimero.com') {
+      toast({
+        title: "Action non autorisée",
+        description: "L'administrateur principal ne peut pas être supprimé",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('administrators')
@@ -104,7 +114,8 @@ export function AdminsList() {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleDeleteAdmin(admin.id)}
+                  onClick={() => handleDeleteAdmin(admin.id, admin.email)}
+                  disabled={admin.email === 'admin@colimero.com'}
                 >
                   Supprimer
                 </Button>
