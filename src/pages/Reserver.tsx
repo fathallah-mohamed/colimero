@@ -1,14 +1,61 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/booking/BookingForm";
 import Navigation from "@/components/Navigation";
 import { Tour, RouteStop } from "@/types/tour";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Reserver() {
   const { tourId } = useParams();
   const [searchParams] = useSearchParams();
   const pickupCity = searchParams.get("pickupCity");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Vérifier le type d'utilisateur
+  useEffect(() => {
+    const checkUserType = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        navigate('/connexion');
+        return;
+      }
+
+      // Vérifier si l'utilisateur est un admin
+      const { data: adminData } = await supabase
+        .from('administrators')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (adminData) {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Les administrateurs ne peuvent pas effectuer de réservations",
+        });
+        navigate('/profil');
+        return;
+      }
+
+      // Vérifier si l'utilisateur est un transporteur
+      const userType = user.user_metadata?.user_type;
+      if (userType === 'carrier') {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Les transporteurs ne peuvent pas effectuer de réservations",
+        });
+        navigate('/mes-tournees');
+        return;
+      }
+    };
+
+    checkUserType();
+  }, [navigate]);
 
   const { data: tour, isLoading, error } = useQuery({
     queryKey: ["tour", tourId],
