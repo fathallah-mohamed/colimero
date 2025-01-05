@@ -10,7 +10,7 @@ export default function Reserver() {
   const [searchParams] = useSearchParams();
   const pickupCity = searchParams.get("pickupCity");
 
-  const { data: tour, isLoading } = useQuery({
+  const { data: tour, isLoading, error } = useQuery({
     queryKey: ["tour", tourId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -26,36 +26,37 @@ export default function Reserver() {
           )
         `)
         .eq("id", tourId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
-      if (data) {
-        // Transform the route data from JSON to RouteStop[]
-        const parsedRoute = Array.isArray(data.route) 
-          ? data.route 
-          : JSON.parse(data.route as string);
-
-        const transformedRoute = parsedRoute.map((stop: any): RouteStop => ({
-          name: stop.name,
-          location: stop.location,
-          time: stop.time,
-          type: stop.type,
-          collection_date: stop.collection_date
-        }));
-
-        return {
-          ...data,
-          route: transformedRoute,
-          carriers: {
-            ...data.carriers,
-            carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
-              ? data.carriers.carrier_capacities 
-              : [data.carriers?.carrier_capacities]
-          }
-        } as Tour;
+      if (!data) {
+        return null;
       }
-      return null;
+
+      // Transform the route data from JSON to RouteStop[]
+      const parsedRoute = Array.isArray(data.route) 
+        ? data.route 
+        : JSON.parse(data.route as string);
+
+      const transformedRoute = parsedRoute.map((stop: any): RouteStop => ({
+        name: stop.name,
+        location: stop.location,
+        time: stop.time,
+        type: stop.type,
+        collection_date: stop.collection_date
+      }));
+
+      return {
+        ...data,
+        route: transformedRoute,
+        carriers: {
+          ...data.carriers,
+          carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
+            ? data.carriers.carrier_capacities 
+            : [data.carriers?.carrier_capacities]
+        }
+      } as Tour;
     },
   });
 
@@ -70,12 +71,14 @@ export default function Reserver() {
     );
   }
 
-  if (!tour) {
+  if (error || !tour) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">Tournée non trouvée</div>
+          <div className="text-center">
+            Cette tournée n'existe pas ou n'est plus disponible
+          </div>
         </div>
       </div>
     );
