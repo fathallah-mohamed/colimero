@@ -9,19 +9,30 @@ interface AuthDialogProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: string;
+  onSuccess?: () => void;
+  requiredUserType?: string;
+  onRegisterClick?: () => void;
 }
 
-export default function AuthDialog({ isOpen, onClose, defaultTab = "client" }: AuthDialogProps) {
+export default function AuthDialog({ 
+  isOpen, 
+  onClose, 
+  defaultTab = "client",
+  onSuccess,
+  requiredUserType,
+  onRegisterClick 
+}: AuthDialogProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const location = useLocation();
 
   const handleSuccess = () => {
+    onSuccess?.();
     onClose();
   };
 
   // Sauvegarder le chemin actuel si on est sur une page de réservation
   if (location.pathname.includes('/reserver/')) {
-    sessionStorage.setItem('returnPath', location.pathname);
+    sessionStorage.setItem('returnPath', location.pathname + location.search);
   }
 
   return (
@@ -35,14 +46,14 @@ export default function AuthDialog({ isOpen, onClose, defaultTab = "client" }: A
           <TabsContent value="client">
             <ClientLoginForm
               onForgotPassword={() => {}}
-              onRegister={() => {}}
+              onRegister={onRegisterClick}
               onSuccess={handleSuccess}
             />
           </TabsContent>
           <TabsContent value="carrier">
             <CarrierLoginForm
               onForgotPassword={() => {}}
-              onCarrierRegister={() => {}}
+              onCarrierRegister={onRegisterClick}
               onSuccess={handleSuccess}
             />
           </TabsContent>
