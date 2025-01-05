@@ -13,11 +13,13 @@ export function BookingList() {
         .select(`
           *,
           tours (
+            collection_date,
             departure_date,
             destination_country,
             carriers (
               company_name,
-              avatar_url
+              avatar_url,
+              phone
             )
           )
         `)

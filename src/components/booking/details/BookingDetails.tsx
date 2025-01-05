@@ -1,114 +1,43 @@
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { SpecialItemDisplay } from "../form/SpecialItemDisplay";
-
-interface BookingDetailsProps {
-  booking: any;
-}
+import { BookingDetailsProps } from "@/types/booking";
+import { SenderRecipientSection } from "./sections/SenderRecipientSection";
+import { LocationSection } from "./sections/LocationSection";
+import { DatesSection } from "./sections/DatesSection";
+import { CarrierSection } from "./sections/CarrierSection";
+import { SpecialItemsSection } from "./sections/SpecialItemsSection";
 
 export function BookingDetails({ booking }: BookingDetailsProps) {
-  // Helper function to safely format dates
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return "Non définie";
-    try {
-      return format(new Date(dateString), "d MMMM yyyy", { locale: fr });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Date invalide";
-    }
-  };
-
   return (
-    <div className="mt-4 space-y-4 border-t pt-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm text-gray-500">Expéditeur</p>
-          <p className="font-medium">{booking.sender_name}</p>
-          <p className="text-sm text-gray-500">{booking.sender_phone}</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Destinataire</p>
-          <p className="font-medium">{booking.recipient_name}</p>
-          <p className="text-sm text-gray-500">{booking.recipient_phone}</p>
-          <p className="text-sm text-gray-500">{booking.recipient_address}</p>
-        </div>
-      </div>
+    <div className="mt-4 space-y-6 border-t pt-4">
+      <SenderRecipientSection
+        senderName={booking.sender_name}
+        senderPhone={booking.sender_phone}
+        recipientName={booking.recipient_name}
+        recipientPhone={booking.recipient_phone}
+        recipientAddress={booking.recipient_address}
+      />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm text-gray-500">Ville de collecte</p>
-          <p className="font-medium">{booking.pickup_city}</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Ville de livraison</p>
-          <p className="font-medium">{booking.delivery_city}</p>
-        </div>
-      </div>
+      <LocationSection
+        pickupCity={booking.pickup_city}
+        deliveryCity={booking.delivery_city}
+        weight={booking.weight}
+        trackingNumber={booking.tracking_number}
+      />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm text-gray-500">Poids</p>
-          <p className="font-medium">{booking.weight} kg</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Numéro de suivi</p>
-          <p className="font-medium">{booking.tracking_number}</p>
-        </div>
-      </div>
+      <DatesSection
+        collectionDate={booking.tours?.collection_date}
+        departureDate={booking.tours?.departure_date}
+      />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm text-gray-500">Date de collecte</p>
-          <p className="font-medium">
-            {formatDate(booking.tours?.collection_date)}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Date de départ</p>
-          <p className="font-medium">
-            {formatDate(booking.tours?.departure_date)}
-          </p>
-        </div>
-      </div>
+      <CarrierSection
+        carrierName={booking.tours?.carriers?.company_name}
+        carrierPhone={booking.tours?.carriers?.phone}
+        carrierAvatar={booking.tours?.carriers?.avatar_url}
+      />
 
-      <div>
-        <p className="text-sm text-gray-500 mb-2">Transporteur</p>
-        <div className="flex items-center gap-2">
-          {booking.tours?.carriers?.avatar_url && (
-            <img 
-              src={booking.tours.carriers.avatar_url} 
-              alt="Avatar du transporteur"
-              className="w-8 h-8 rounded-full"
-            />
-          )}
-          <p className="font-medium">{booking.tours?.carriers?.company_name || "Non assigné"}</p>
-        </div>
-      </div>
-
-      {booking.special_items && booking.special_items.length > 0 && (
-        <div>
-          <p className="text-sm text-gray-500 mb-2">Objets spéciaux</p>
-          <div className="flex flex-wrap gap-2">
-            {booking.special_items.map((item: any, index: number) => (
-              <SpecialItemDisplay key={index} item={item} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {booking.content_types && booking.content_types.length > 0 && (
-        <div>
-          <p className="text-sm text-gray-500 mb-2">Types de contenu</p>
-          <div className="flex flex-wrap gap-2">
-            {booking.content_types.map((type: string, index: number) => (
-              <Badge key={index} variant="secondary">
-                {type}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+      <SpecialItemsSection
+        specialItems={booking.special_items || []}
+        contentTypes={booking.content_types || []}
+      />
 
       {booking.package_description && (
         <div>
