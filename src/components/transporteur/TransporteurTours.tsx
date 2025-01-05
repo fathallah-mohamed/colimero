@@ -1,6 +1,7 @@
 import { TourTimelineCard } from "./tour/TourTimelineCard";
 import { Tour } from "@/types/tour";
 import { useNavigate } from "react-router-dom";
+import { differenceInDays } from "date-fns";
 
 interface TransporteurToursProps {
   tours: Tour[];
@@ -32,16 +33,29 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType
   }
 
   return (
-    <div className="space-y-6">
-      {tours.map((tour) => (
-        <TourTimelineCard
-          key={tour.id}
-          tour={tour}
-          onBookingClick={handleBookingClick}
-          hideAvatar={hideAvatar}
-          userType={userType}
-        />
-      ))}
+    <div className="space-y-8">
+      {tours.map((tour) => {
+        const daysUntilDeparture = differenceInDays(
+          new Date(tour.departure_date),
+          new Date()
+        );
+        const isUpcoming = daysUntilDeparture <= 7 && daysUntilDeparture >= 0;
+
+        return (
+          <div
+            key={tour.id}
+            className="transform transition-all duration-200 hover:translate-y-[-4px]"
+          >
+            <TourTimelineCard
+              tour={tour}
+              onBookingClick={handleBookingClick}
+              hideAvatar={hideAvatar}
+              userType={userType}
+              isUpcoming={isUpcoming}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

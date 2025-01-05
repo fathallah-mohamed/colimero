@@ -10,19 +10,22 @@ import { CollectionPointsList } from "@/components/tour/CollectionPointsList";
 import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 interface TourTimelineCardProps {
   tour: Tour;
   onBookingClick: (tourId: number, pickupCity: string) => void;
   hideAvatar?: boolean;
   userType?: string | null;
+  isUpcoming?: boolean;
 }
 
 export function TourTimelineCard({ 
   tour, 
   onBookingClick, 
   hideAvatar, 
-  userType 
+  userType,
+  isUpcoming = false
 }: TourTimelineCardProps) {
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -58,17 +61,30 @@ export function TourTimelineCard({
   };
 
   return (
-    <div className="bg-white shadow-sm rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <div className={cn(
+      "bg-white rounded-xl overflow-hidden transition-all duration-200",
+      "border border-gray-100",
+      "hover:shadow-lg shadow-md",
+      "transform hover:-translate-y-1"
+    )}>
       <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
+          {isUpcoming && (
+            <Badge className="bg-success/10 text-success hover:bg-success/20 transition-colors">
+              Prochaine tournée
+            </Badge>
+          )}
+        </div>
+
         <div 
           className="flex items-center justify-between cursor-pointer group"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
           <Button
             variant="ghost"
             size="sm"
-            className="ml-4 transition-colors duration-200 hover:bg-primary/10"
+            className="ml-auto transition-colors duration-200 hover:bg-primary/10"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
