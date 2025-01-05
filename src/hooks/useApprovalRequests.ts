@@ -13,7 +13,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     try {
       console.log('Fetching requests for user:', userId, 'type:', userType);
       
-      const query = supabase
+      let query = supabase
         .from('approval_requests')
         .select(`
           *,
@@ -30,20 +30,21 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               company_name
             )
           ),
-          user:clients!approval_requests_user_id_fkey (
+          user:clients (
             first_name,
             last_name,
             phone
           )
-        `)
-        .order('created_at', { ascending: false });
+        `);
 
       // Appliquer le filtre en fonction du type d'utilisateur
       if (userType === 'carrier') {
-        query.eq('tour.carrier_id', userId);
+        query = query.eq('tours.carrier_id', userId);
       } else if (userType === 'client') {
-        query.eq('user_id', userId);
+        query = query.eq('user_id', userId);
       }
+
+      query = query.order('created_at', { ascending: false });
 
       const { data: approvalData, error } = await query;
 
