@@ -77,20 +77,23 @@ export const authenticateUser = async (email: string, password: string): Promise
       .eq('id', signInData.user.id)
       .single();
 
-    console.log("Résultat de la vérification admin:", { adminData, adminError });
-
     if (adminData) {
-      console.log("Utilisateur admin trouvé:", adminData);
       return { success: true, redirectTo: "/admin" };
     }
 
     // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
     const userType = signInData.user.user_metadata?.user_type;
-    console.log("Type d'utilisateur:", userType);
     
     switch (userType) {
       case 'carrier':
         return { success: true, redirectTo: "/mes-tournees" };
+      case 'client':
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath');
+          return { success: true, redirectTo: returnPath };
+        }
+        return { success: true, redirectTo: "/" };
       default:
         return { success: true, redirectTo: "/" };
     }

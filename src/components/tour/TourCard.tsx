@@ -40,12 +40,17 @@ export function TourCard({
     navigate(`/reserver/${tour.id}`);
   };
 
+  // Calculate price based on carrier capacities
+  const price = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
+
   return (
     <Card className="p-4 space-y-4">
       <div className="flex flex-col">
-        <h3 className="text-lg font-semibold">{tour.title}</h3>
-        <p className="text-gray-600">{tour.description}</p>
-        <p className="text-gray-800 font-bold">{tour.price} €</p>
+        <h3 className="text-lg font-semibold">Tournée #{tour.id}</h3>
+        <p className="text-gray-600">
+          {tour.departure_country} → {tour.destination_country}
+        </p>
+        <p className="text-gray-800 font-bold">{price} € / kg</p>
       </div>
       
       <div className="flex justify-end">

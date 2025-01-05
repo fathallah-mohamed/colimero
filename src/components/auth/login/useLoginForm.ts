@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { authenticateUser } from "@/utils/auth";
 
-interface UseLoginFormProps {
+export interface UseLoginFormProps {
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
   redirectTo?: string;
 }
 
-export function useLoginForm({ onSuccess, requiredUserType, redirectTo }: UseLoginFormProps = {}) {
+export function useLoginForm(props?: UseLoginFormProps) {
+  const { onSuccess, requiredUserType, redirectTo } = props || {};
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,27 +42,10 @@ export function useLoginForm({ onSuccess, requiredUserType, redirectTo }: UseLog
           navigate(redirectTo);
         } else {
           // Sinon, utiliser la redirection par défaut basée sur le type d'utilisateur
-          switch (response.userType) {
-            case 'admin':
-              navigate("/admin");
-              break;
-            case 'carrier':
-              navigate("/mes-tournees");
-              break;
-            case 'client':
-              if (requiredUserType === 'client') {
-                // Si on était sur une page qui nécessite d'être client, y retourner
-                const returnPath = sessionStorage.getItem('returnPath');
-                if (returnPath) {
-                  sessionStorage.removeItem('returnPath');
-                  navigate(returnPath);
-                }
-              } else {
-                navigate("/");
-              }
-              break;
-            default:
-              navigate("/");
+          if (response.redirectTo) {
+            navigate(response.redirectTo);
+          } else {
+            navigate("/");
           }
         }
       }
