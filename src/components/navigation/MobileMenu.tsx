@@ -55,8 +55,8 @@ export default function MobileMenu({
                   : "text-gray-700 hover:text-gray-900"
                 }`}
             >
-              {item.icon}
-              <span className="ml-2">{item.name}</span>
+              {item.icon && <item.icon className="w-4 h-4 mr-2" />}
+              <span>{item.name}</span>
             </Link>
           );
         })}
