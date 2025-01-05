@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { UserCircle2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { menuItems, adminMenuItem } from "./config/menuItems";
+import { menuItems } from "./config/menuItems";
 import { MenuItem } from "./MenuItem";
 import { UserMenuItems } from "./UserMenuItems";
 
@@ -55,13 +55,6 @@ export default function MobileMenu({
               {user.email}
             </div>
             <UserMenuItems userType={userType} />
-            {userType === "admin" && (
-              <MenuItem
-                {...adminMenuItem}
-                userType={userType}
-                onClick={() => setIsOpen(false)}
-              />
-            )}
             <Button 
               variant="outline" 
               size="sm" 

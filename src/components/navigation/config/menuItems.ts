@@ -2,9 +2,15 @@ import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCog } from "l
 
 export const menuItems = [
   { 
+    name: "Administrateurs", 
+    href: "/admin", 
+    icon: <UserCog className="w-4 h-4" />,
+    allowedUserTypes: ["admin"]
+  },
+  { 
     name: "Planifier une tournée", 
     href: "/planifier-tournee", 
-    icon: Calendar,
+    icon: <Calendar className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
     allowedUserTypes: ["carrier"]
@@ -12,7 +18,7 @@ export const menuItems = [
   { 
     name: "Envoyer un colis", 
     href: "/envoyer-colis", 
-    icon: Package,
+    icon: <Package className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
     allowedUserTypes: ["client"]
@@ -20,32 +26,25 @@ export const menuItems = [
   { 
     name: "Transporteurs", 
     href: "/transporteurs", 
-    icon: Truck,
+    icon: <Truck className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "Actualités", 
     href: "/blog", 
-    icon: MessageSquare,
+    icon: <MessageSquare className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "À propos", 
     href: "/a-propos", 
-    icon: Info,
+    icon: <Info className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "Contact", 
     href: "/contact", 
-    icon: Users,
+    icon: <Users className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
 ];
-
-export const adminMenuItem = {
-  name: "Administrateurs",
-  href: "/admin",
-  icon: UserCog,
-  allowedUserTypes: ["admin"]
-};
