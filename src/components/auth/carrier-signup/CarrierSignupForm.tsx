@@ -20,7 +20,7 @@ export interface CarrierSignupFormProps {
   onSuccess: () => void;
 }
 
-export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
+const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { data: consentTypes } = useCarrierConsents();
@@ -167,6 +167,6 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
       </Form>
     </div>
   );
-}
+};
 
 export default CarrierSignupForm;
