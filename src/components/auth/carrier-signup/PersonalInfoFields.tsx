@@ -1,10 +1,10 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import type { CarrierSignupFormValues } from "./FormSchema";
+import type { FormValues } from "./FormSchema";
 
 interface PersonalInfoFieldsProps {
-  form: UseFormReturn<CarrierSignupFormValues>;
+  form: UseFormReturn<FormValues>;
 }
 
 export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {

@@ -24,28 +24,12 @@ export function useCarrierSignup(onSuccess: () => void) {
       total_capacity: 0,
       price_per_kg: 0,
       avatar_url: null,
-      terms_accepted: false,
-      customs_declaration: false,
-      responsibility_terms_accepted: false,
+      consents: {},
     },
   });
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            first_name: values.first_name,
-            last_name: values.last_name,
-            user_type: "carrier",
-          },
-        },
-      });
-
-      if (authError) throw authError;
-
       const { error: registrationError } = await supabase
         .from("carrier_registration_requests")
         .insert({
