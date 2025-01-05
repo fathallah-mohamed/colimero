@@ -24,12 +24,6 @@ export const menuItems = [
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
-    name: "Administrateurs", 
-    href: "/admin", 
-    icon: UserCog,
-    allowedUserTypes: ["admin"]
-  },
-  { 
     name: "Actualités", 
     href: "/blog", 
     icon: MessageSquare,
@@ -48,3 +42,10 @@ export const menuItems = [
     allowedUserTypes: ["client", "carrier", "admin"]
   },
 ];
+
+export const adminMenuItem = {
+  name: "Administrateurs",
+  href: "/admin",
+  icon: UserCog,
+  allowedUserTypes: ["admin"]
+};
