@@ -10,6 +10,7 @@ import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
+import { toast } from "@/components/ui/use-toast";
 
 export default function CurrentTours() {
   const navigate = useNavigate();
@@ -45,7 +46,6 @@ export default function CurrentTours() {
       if (error) throw error;
       
       if (data) {
-        // Transform the route data from JSON to RouteStop[]
         const parsedRoute = Array.isArray(data.route) 
           ? data.route 
           : JSON.parse(data.route as string);
@@ -92,7 +92,34 @@ export default function CurrentTours() {
       return;
     }
 
-    // If client, redirect to booking form
+    // Vérifier si l'utilisateur a déjà une réservation en cours
+    const { data: existingBookings, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('user_id', user.id)
+      .in('status', ['pending', 'confirmed', 'in_transit'])
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing bookings:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la vérification de vos réservations",
+      });
+      return;
+    }
+
+    if (existingBookings) {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Vous avez déjà une réservation en cours. Veuillez attendre que votre colis soit livré avant d'effectuer une nouvelle réservation.",
+      });
+      return;
+    }
+
+    // Si pas de réservation en cours, rediriger vers le formulaire de réservation
     navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
