@@ -39,6 +39,10 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
 
   if (!consents?.length) return null;
 
+  const handleRowClick = (onChange: (value: boolean) => void, currentValue: boolean) => {
+    onChange(!currentValue);
+  };
+
   return (
     <div className="space-y-6">
       {consents.map((consent) => {
@@ -53,13 +57,17 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
               <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                 <div 
                   className="flex-1 cursor-pointer" 
-                  onClick={() => field.onChange(!field.value)}
+                  onClick={() => handleRowClick(field.onChange, field.value)}
                 >
                   <div className="flex items-start gap-3">
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={field.onChange}
-                      onClick={(e) => e.stopPropagation()}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked);
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
                     />
                     <div className="space-y-1 flex-1">
                       <div className="text-sm font-medium flex items-center gap-2">
@@ -70,7 +78,9 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline text-sm"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
                           >
                             (Voir le document)
                           </Link>
