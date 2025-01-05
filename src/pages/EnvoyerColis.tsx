@@ -2,12 +2,11 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { TourFilters } from "@/components/tour/TourFilters";
-import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
-import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { TourList } from "@/components/tour/TourList";
+import { TourFiltersSection } from "@/components/tour/TourFiltersSection";
 import type { Tour, TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
@@ -156,41 +155,29 @@ export default function EnvoyerColis() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
 
-        <div className="space-y-6">
-          <TourFilters
-            departureCountry={departureCountry}
-            destinationCountry={destinationCountry}
-            sortBy={sortBy}
-            status={status}
-            onDepartureChange={handleDepartureChange}
-            onDestinationChange={setDestinationCountry}
-            onSortChange={setSortBy}
-            onStatusChange={setStatus}
-          />
+        <TourFiltersSection
+          departureCountry={departureCountry}
+          destinationCountry={destinationCountry}
+          tourType={tourType}
+          sortBy={sortBy}
+          status={status}
+          publicToursCount={publicTours?.length || 0}
+          privateToursCount={privateTours?.length || 0}
+          onDepartureChange={handleDepartureChange}
+          onDestinationChange={setDestinationCountry}
+          onTypeChange={setTourType}
+          onSortChange={setSortBy}
+          onStatusChange={setStatus}
+        />
 
-          <TourTypeTabs
-            tourType={tourType}
-            publicToursCount={publicTours?.length || 0}
-            privateToursCount={privateTours?.length || 0}
-            onTypeChange={setTourType}
-          />
-
-          {tourType === "public" ? (
-            <TransporteurTours 
-              tours={publicTours} 
-              type="public"
-              isLoading={isLoadingPublic}
-              userType={userType}
-            />
-          ) : (
-            <TransporteurTours 
-              tours={privateTours} 
-              type="private"
-              isLoading={isLoadingPrivate}
-              userType={userType}
-            />
-          )}
-        </div>
+        <TourList
+          tourType={tourType}
+          publicTours={publicTours}
+          privateTours={privateTours}
+          isLoadingPublic={isLoadingPublic}
+          isLoadingPrivate={isLoadingPrivate}
+          userType={userType}
+        />
       </div>
 
       <AuthDialog 
@@ -200,6 +187,7 @@ export default function EnvoyerColis() {
           setShowAuthDialog(false);
           setShowRegisterForm(true);
         }}
+        requiredUserType="client"
       />
 
       <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
