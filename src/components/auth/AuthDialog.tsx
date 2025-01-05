@@ -32,7 +32,13 @@ export function AuthDialog({
             <TabsTrigger value="register">Inscription</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
-            <LoginForm onSuccess={onSuccess} requiredUserType={requiredUserType} />
+            <LoginForm 
+              onSuccess={onSuccess} 
+              requiredUserType={requiredUserType}
+              onForgotPassword={() => {}}
+              onRegister={onRegisterClick}
+              onCarrierRegister={onCarrierRegisterClick}
+            />
           </TabsContent>
           <TabsContent value="register" className="space-y-4">
             <div className="space-y-4 text-center">

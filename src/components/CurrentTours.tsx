@@ -44,7 +44,7 @@ export default function CurrentTours() {
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog} 
+        open={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"
