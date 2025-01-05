@@ -13,7 +13,7 @@ export const authenticateUser = async (email: string, password: string): Promise
       .from('carrier_registration_requests')
       .select('status')
       .eq('email', email.trim())
-      .single();
+      .maybeSingle();
 
     if (registrationRequest) {
       if (registrationRequest.status === 'pending') {
@@ -71,11 +71,11 @@ export const authenticateUser = async (email: string, password: string): Promise
     console.log("Connexion réussie, données utilisateur:", signInData.user);
     
     // Vérifier si l'utilisateur est un admin
-    const { data: adminData, error: adminError } = await supabase
+    const { data: adminData } = await supabase
       .from('administrators')
       .select('*')
       .eq('id', signInData.user.id)
-      .single();
+      .maybeSingle();
 
     if (adminData) {
       return { success: true, redirectTo: "/admin" };
