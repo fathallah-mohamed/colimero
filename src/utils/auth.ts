@@ -78,7 +78,7 @@ export const authenticateUser = async (email: string, password: string): Promise
       .maybeSingle();
 
     if (adminData) {
-      return { success: true, redirectTo: "/admin" };
+      return { success: true, redirectTo: "/profil" };
     }
 
     // Si ce n'est pas un admin, vérifier le type d'utilisateur normal
