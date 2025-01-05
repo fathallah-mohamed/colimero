@@ -108,17 +108,13 @@ export default function TransporteurDetails() {
             tours={publicTours} 
             type="public" 
             isLoading={isLoadingPublic}
-            userType={null}
-            onAuthRequired={() => {}}
-            hideAvatar={true}
+            hideAvatar
           />
           <TransporteurTours 
             tours={privateTours} 
             type="private" 
             isLoading={isLoadingPrivate}
-            userType={null}
-            onAuthRequired={() => {}}
-            hideAvatar={true}
+            hideAvatar
           />
         </div>
       </div>
