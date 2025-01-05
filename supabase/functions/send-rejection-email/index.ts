@@ -15,6 +15,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not set");
+      throw new Error("Email service configuration is missing");
+    }
+
     const { email, company_name, reason } = await req.json();
     console.log("Sending rejection email to:", email, "for company:", company_name);
 
@@ -38,27 +43,29 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      console.log("Email sent successfully:", data);
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } else {
-      const error = await res.text();
-      console.error("Error sending email:", error);
-      return new Response(JSON.stringify({ error }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!res.ok) {
+      const errorData = await res.text();
+      console.error("Error response from Resend:", errorData);
+      throw new Error(`Failed to send email: ${errorData}`);
     }
-  } catch (error: any) {
-    console.error("Error in send-rejection-email function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+
+    const data = await res.json();
+    console.log("Email sent successfully:", data);
+    
+    return new Response(JSON.stringify(data), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  } catch (error: any) {
+    console.error("Error in send-rejection-email function:", error);
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || "An error occurred while sending the email" 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 };
 
