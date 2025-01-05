@@ -6,9 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AddAdminForm } from "@/components/admin/AddAdminForm";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminManagement() {
   const [showAddAdminDialog, setShowAddAdminDialog] = useState(false);
+  const { toast } = useToast();
 
   const { data: administrators, refetch } = useQuery({
     queryKey: ['administrators'],
@@ -17,23 +19,41 @@ export default function AdminManagement() {
         .from('administrators')
         .select('*');
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger la liste des administrateurs",
+          variant: "destructive",
+        });
+        throw error;
+      }
       return data;
     }
   });
 
   const handleDeleteAdmin = async (adminId: string) => {
-    const { error } = await supabase
-      .from('administrators')
-      .delete()
-      .eq('id', adminId);
+    try {
+      const { error } = await supabase
+        .from('administrators')
+        .delete()
+        .eq('id', adminId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "L'administrateur a été supprimé",
+      });
+      
+      refetch();
+    } catch (error) {
       console.error('Error deleting admin:', error);
-      return;
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'administrateur",
+        variant: "destructive",
+      });
     }
-
-    refetch();
   };
 
   return (
@@ -87,6 +107,10 @@ export default function AdminManagement() {
           <AddAdminForm onSuccess={() => {
             setShowAddAdminDialog(false);
             refetch();
+            toast({
+              title: "Succès",
+              description: "L'administrateur a été ajouté",
+            });
           }} />
         </DialogContent>
       </Dialog>
