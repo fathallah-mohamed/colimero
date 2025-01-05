@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { TourFilters } from "@/components/tour/TourFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import AuthDialog from "@/components/auth/AuthDialog";
 import type { Tour, TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
@@ -14,6 +17,8 @@ export default function EnvoyerColis() {
   const [sortBy, setSortBy] = useState("departure_asc");
   const [status, setStatus] = useState<TourStatus | "all">("planned");
   const [userType, setUserType] = useState<string | null>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
 
   useEffect(() => {
     const checkUserType = async () => {
@@ -187,6 +192,24 @@ export default function EnvoyerColis() {
           )}
         </div>
       </div>
+
+      <AuthDialog 
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        onRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowRegisterForm(true);
+        }}
+      />
+
+      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
+        <DialogContent className="max-w-2xl">
+          <RegisterForm onLogin={() => {
+            setShowRegisterForm(false);
+            setShowAuthDialog(true);
+          }} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
