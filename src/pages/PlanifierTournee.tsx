@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
-import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
+import { CarrierSignupForm } from "@/components/auth/CarrierSignupForm";
 import AuthDialog from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
@@ -13,12 +13,13 @@ import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function PlanifierTournee() {
   const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
-  const [isCarrierAuthDialogOpen, setIsCarrierAuthDialogOpen] = useState(false);
+  const [isCarrierSignupOpen, setIsCarrierSignupOpen] = useState(false);
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<'client' | 'carrier' | 'admin' | null>(null);
@@ -96,6 +97,14 @@ export default function PlanifierTournee() {
     }
   };
 
+  const handleCarrierSignupSuccess = () => {
+    setIsCarrierSignupOpen(false);
+    toast({
+      title: "Demande envoyée avec succès",
+      description: "Nous examinerons votre demande dans les plus brefs délais.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -119,13 +128,23 @@ export default function PlanifierTournee() {
               <p className="text-xl text-gray-600 mb-8">
                 Prêt à commencer ? Cliquez sur le bouton ci-dessous :
               </p>
-              <Button
-                onClick={handleCreateTourClick}
-                size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-lg font-semibold text-lg transform transition hover:scale-105"
-              >
-                Créer une tournée
-              </Button>
+              <div className="space-y-4">
+                <Button
+                  onClick={handleCreateTourClick}
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-lg font-semibold text-lg transform transition hover:scale-105"
+                >
+                  Créer une tournée
+                </Button>
+                <Button
+                  onClick={() => setIsCarrierSignupOpen(true)}
+                  variant="outline"
+                  size="lg"
+                  className="w-full max-w-md"
+                >
+                  Devenir transporteur
+                </Button>
+              </div>
               {!isAuthenticated && (
                 <p className="text-sm text-gray-500 mt-4">
                   Vous devez être connecté pour planifier une tournée
@@ -143,14 +162,15 @@ export default function PlanifierTournee() {
         requiredUserType="carrier"
         onRegisterClick={() => {
           setIsAuthDialogOpen(false);
-          setIsCarrierAuthDialogOpen(true);
+          setIsCarrierSignupOpen(true);
         }}
       />
 
-      <CarrierAuthDialog
-        isOpen={isCarrierAuthDialogOpen}
-        onClose={() => setIsCarrierAuthDialogOpen(false)}
-      />
+      <Dialog open={isCarrierSignupOpen} onOpenChange={setIsCarrierSignupOpen}>
+        <DialogContent className="max-w-4xl">
+          <CarrierSignupForm onSuccess={handleCarrierSignupSuccess} />
+        </DialogContent>
+      </Dialog>
 
       <AccessDeniedMessage 
         userType="client" 
