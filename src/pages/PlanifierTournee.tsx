@@ -13,7 +13,7 @@ import { PlanningExample } from "@/components/tour/planning/PlanningExample";
 import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { CarrierSignupForm } from "@/components/auth/CarrierSignupForm";
+import { CarrierSignupForm, type CarrierSignupFormProps } from "@/components/auth/CarrierSignupForm";
 
 export default function PlanifierTournee() {
   const navigate = useNavigate();
