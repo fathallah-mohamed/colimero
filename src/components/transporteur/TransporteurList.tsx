@@ -32,7 +32,8 @@ export function TransporteurList() {
             price_per_kg,
             offers_home_delivery
           )
-        `);
+        `)
+        .eq('status', 'active');
 
       if (error) {
         toast({
@@ -107,7 +108,7 @@ export function TransporteurList() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => navigate(`/nos-transporteurs/${carrier.id}`)}
+                    onClick={() => navigate(`/transporteurs/${carrier.id}`)}
                     className="text-blue-600 border-blue-600 hover:bg-blue-50"
                   >
                     Voir le profil
