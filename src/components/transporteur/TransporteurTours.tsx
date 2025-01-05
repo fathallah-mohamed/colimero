@@ -2,7 +2,6 @@ import { TourTimelineCard } from "./tour/TourTimelineCard";
 import { Tour } from "@/types/tour";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays } from "date-fns";
-import { useBookingFlow } from "@/components/tour/useBookingFlow";
 
 interface TransporteurToursProps {
   tours: Tour[];
@@ -10,26 +9,13 @@ interface TransporteurToursProps {
   isLoading?: boolean;
   hideAvatar?: boolean;
   userType?: string | null;
-  onAuthRequired?: () => void;
 }
 
-export function TransporteurTours({ 
-  tours, 
-  type, 
-  isLoading, 
-  hideAvatar, 
-  userType,
-  onAuthRequired 
-}: TransporteurToursProps) {
+export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType }: TransporteurToursProps) {
   const navigate = useNavigate();
-  const { handleBookingClick } = useBookingFlow();
 
-  const handleTourBooking = (tourId: number, pickupCity: string) => {
-    if (!userType) {
-      onAuthRequired?.();
-      return;
-    }
-    handleBookingClick(tourId, pickupCity);
+  const handleBookingClick = (tourId: number, pickupCity: string) => {
+    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
   if (isLoading) {
@@ -62,8 +48,9 @@ export function TransporteurTours({
           >
             <TourTimelineCard
               tour={tour}
-              onBookingClick={handleTourBooking}
+              onBookingClick={handleBookingClick}
               hideAvatar={hideAvatar}
+              userType={userType}
               isUpcoming={isUpcoming}
             />
           </div>

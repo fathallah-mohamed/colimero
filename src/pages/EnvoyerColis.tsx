@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import TourPageHeader from "@/components/tour/TourPageHeader";
-import TourPageContent from "@/components/tour/TourPageContent";
+import { TourFilters } from "@/components/tour/TourFilters";
+import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
+import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import AuthDialog from "@/components/auth/AuthDialog";
@@ -18,6 +19,16 @@ export default function EnvoyerColis() {
   const [userType, setUserType] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
+
+  useEffect(() => {
+    const checkUserType = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserType(user.user_metadata?.user_type);
+      }
+    };
+    checkUserType();
+  }, []);
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, "public", sortBy, status],
@@ -42,6 +53,7 @@ export default function EnvoyerColis() {
         query = query.eq("status", status);
       }
 
+      // Apply sorting
       switch (sortBy) {
         case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
@@ -97,6 +109,7 @@ export default function EnvoyerColis() {
         query = query.eq("status", status);
       }
 
+      // Apply sorting
       switch (sortBy) {
         case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
@@ -136,60 +149,67 @@ export default function EnvoyerColis() {
     }
   };
 
-  const handleAuthRequired = () => {
-    setShowAuthDialog(true);
-    setShowRegisterForm(false);
-  };
-
-  const handleRegisterClick = () => {
-    setShowAuthDialog(false);
-    setShowRegisterForm(true);
-  };
-
-  const handleLoginClick = () => {
-    setShowRegisterForm(false);
-    setShowAuthDialog(true);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
+
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <TourPageHeader />
-        
-        <TourPageContent
-          departureCountry={departureCountry}
-          destinationCountry={destinationCountry}
-          sortBy={sortBy}
-          status={status}
-          tourType={tourType}
-          publicTours={publicTours}
-          privateTours={privateTours}
-          isLoadingPublic={isLoadingPublic}
-          isLoadingPrivate={isLoadingPrivate}
-          userType={userType}
-          onDepartureChange={handleDepartureChange}
-          onDestinationChange={setDestinationCountry}
-          onSortChange={setSortBy}
-          onStatusChange={(value) => setStatus(value as TourStatus | "all")}
-          onTypeChange={setTourType}
-          onAuthRequired={handleAuthRequired}
-        />
+        <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
 
-        <AuthDialog 
-          isOpen={showAuthDialog}
-          onClose={() => setShowAuthDialog(false)}
-          onRegisterClick={handleRegisterClick}
-          onCarrierRegisterClick={handleRegisterClick}
-          requiredUserType="client"
-        />
+        <div className="space-y-6">
+          <TourFilters
+            departureCountry={departureCountry}
+            destinationCountry={destinationCountry}
+            sortBy={sortBy}
+            status={status}
+            onDepartureChange={handleDepartureChange}
+            onDestinationChange={setDestinationCountry}
+            onSortChange={setSortBy}
+            onStatusChange={setStatus}
+          />
 
-        <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
-          <DialogContent className="max-w-2xl">
-            <RegisterForm onLogin={handleLoginClick} />
-          </DialogContent>
-        </Dialog>
+          <TourTypeTabs
+            tourType={tourType}
+            publicToursCount={publicTours?.length || 0}
+            privateToursCount={privateTours?.length || 0}
+            onTypeChange={setTourType}
+          />
+
+          {tourType === "public" ? (
+            <TransporteurTours 
+              tours={publicTours} 
+              type="public"
+              isLoading={isLoadingPublic}
+              userType={userType}
+            />
+          ) : (
+            <TransporteurTours 
+              tours={privateTours} 
+              type="private"
+              isLoading={isLoadingPrivate}
+              userType={userType}
+            />
+          )}
+        </div>
       </div>
+
+      <AuthDialog 
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        onRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowRegisterForm(true);
+        }}
+      />
+
+      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
+        <DialogContent className="max-w-2xl">
+          <RegisterForm onLogin={() => {
+            setShowRegisterForm(false);
+            setShowAuthDialog(true);
+          }} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
