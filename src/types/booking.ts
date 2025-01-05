@@ -50,6 +50,20 @@ export interface Booking {
   sender_name?: string;
   sender_phone?: string;
   created_at: string;
+  tours?: {
+    collection_date: string;
+    departure_date: string;
+    destination_country: string;
+    carriers?: {
+      company_name: string | null;
+      avatar_url: string | null;
+      phone: string | null;
+    };
+  };
+}
+
+export interface BookingDetailsProps {
+  booking: Booking;
 }
 
 export type BookingFormData = Omit<Booking, 'id' | 'created_at'>;
