@@ -21,6 +21,7 @@ export default function ApprovedCarriers() {
       const { data, error } = await supabase
         .from("carriers")
         .select("*")
+        .eq("status", "active") // Ajout du filtre pour ne récupérer que les transporteurs actifs
         .order("created_at", { ascending: false });
 
       if (error) throw error;
