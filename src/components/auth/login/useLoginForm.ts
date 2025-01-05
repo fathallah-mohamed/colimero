@@ -98,18 +98,6 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
       // Si onSuccess est fourni, l'appeler avant toute redirection
       if (onSuccess) {
         onSuccess();
-      } else {
-        // Redirection selon le type d'utilisateur seulement si onSuccess n'est pas fourni
-        switch (userType) {
-          case 'admin':
-            navigate("/admin");
-            break;
-          case 'carrier':
-            navigate("/mes-tournees");
-            break;
-          default:
-            navigate("/");
-        }
       }
 
     } catch (error: any) {
