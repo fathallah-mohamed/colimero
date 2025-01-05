@@ -42,8 +42,7 @@ export default function EnvoyerColis() {
         `)
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
-        .eq("type", "public")
-        .gte("departure_date", new Date().toISOString());
+        .eq("type", "public");
 
       if (status !== "all") {
         query = query.eq("status", status);
@@ -99,8 +98,7 @@ export default function EnvoyerColis() {
         `)
         .eq("departure_country", departureCountry)
         .eq("destination_country", destinationCountry)
-        .eq("type", "private")
-        .gte("departure_date", new Date().toISOString());
+        .eq("type", "private");
 
       if (status !== "all") {
         query = query.eq("status", status);
