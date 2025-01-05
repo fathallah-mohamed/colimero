@@ -69,8 +69,8 @@ export default function MobileMenu({
                 onClick={() => setIsOpen(false)}
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
               >
-                <UserCog className="w-4 h-4" />
-                <span className="ml-2">Administrateurs</span>
+                <UserCog className="w-4 h-4 mr-2" />
+                <span>Administrateurs</span>
               </Link>
             )}
             <Link
