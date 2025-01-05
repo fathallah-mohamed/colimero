@@ -327,6 +327,7 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
+          password: string | null
           phone: string
           phone_secondary: string | null
           price_per_kg: number | null
@@ -352,6 +353,7 @@ export type Database = {
           first_name: string
           id?: string
           last_name: string
+          password?: string | null
           phone: string
           phone_secondary?: string | null
           price_per_kg?: number | null
@@ -377,6 +379,7 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string
+          password?: string | null
           phone?: string
           phone_secondary?: string | null
           price_per_kg?: number | null
