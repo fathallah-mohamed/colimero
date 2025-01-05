@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { UserCircle2, X } from "lucide-react";
 import { menuItems } from "./MenuItems";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -17,11 +18,39 @@ interface MobileMenuProps {
 export default function MobileMenu({
   isOpen,
   user,
+  userType,
   userMenuItems,
   handleLogout,
   setIsOpen,
   setShowAuthDialog
 }: MobileMenuProps) {
+  const { toast } = useToast();
+
+  const handleRestrictedClick = (itemName: string, allowedTypes: string[]) => {
+    if (!userType) {
+      toast({
+        title: "Accès restreint",
+        description: "Vous devez être connecté pour accéder à cette fonctionnalité.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!allowedTypes.includes(userType)) {
+      const messages = {
+        admin: "Les administrateurs n'ont pas accès à cette fonctionnalité.",
+        carrier: "Les transporteurs ne peuvent pas envoyer de colis.",
+        client: "Les clients ne peuvent pas créer de tournées."
+      };
+      
+      toast({
+        title: "Accès restreint",
+        description: messages[userType as keyof typeof messages],
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div 
       className={cn(
@@ -39,22 +68,33 @@ export default function MobileMenu({
         </button>
 
         <div className="px-2 pt-20 pb-3 space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                "flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200",
-                item.highlight 
-                  ? "text-primary hover:text-primary-hover hover:bg-primary/10" + (item.className || "")
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-              )}
-            >
-              {item.icon}
-              <span className="ml-2">{item.name}</span>
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isAllowed = !userType || item.allowedUserTypes.includes(userType);
+
+            return isAllowed ? (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={(e) => {
+                  if (!item.allowedUserTypes.includes(userType || '')) {
+                    e.preventDefault();
+                    handleRestrictedClick(item.name, item.allowedUserTypes);
+                  }
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200",
+                  item.highlight 
+                    ? "text-primary hover:text-primary-hover hover:bg-primary/10" + (item.className || "")
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100",
+                  !item.allowedUserTypes.includes(userType || '') && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                {item.icon}
+                <span className="ml-2">{item.name}</span>
+              </Link>
+            ) : null;
+          })}
 
           {user ? (
             <div className="border-t border-gray-200 pt-4 mt-4">
