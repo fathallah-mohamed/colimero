@@ -146,6 +146,15 @@ export default function EnvoyerColis() {
     }
   };
 
+  const handleAuthRequired = () => {
+    setShowAuthDialog(true);
+  };
+
+  const handleRegisterClick = () => {
+    setShowAuthDialog(false);
+    setShowRegisterForm(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -169,17 +178,14 @@ export default function EnvoyerColis() {
           onSortChange={setSortBy}
           onStatusChange={(value) => setStatus(value as TourStatus | "all")}
           onTypeChange={setTourType}
-          onAuthRequired={() => setShowAuthDialog(true)}
+          onAuthRequired={handleAuthRequired}
         />
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog}
+        isOpen={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
-        onRegisterClick={() => {
-          setShowAuthDialog(false);
-          setShowRegisterForm(true);
-        }}
+        onRegisterClick={handleRegisterClick}
       />
 
       <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
