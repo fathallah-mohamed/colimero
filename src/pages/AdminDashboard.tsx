@@ -1,11 +1,12 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import NewRegistrationRequests from "@/components/admin/NewRegistrationRequests";
 import ApprovedCarriers from "@/components/admin/ApprovedCarriers";
 import RejectedRequests from "@/components/admin/RejectedRequests";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -62,28 +63,31 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Tableau de bord administrateur</h1>
-      
-      <Tabs defaultValue="new" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="new">Nouvelles demandes</TabsTrigger>
-          <TabsTrigger value="approved">Transporteurs validés</TabsTrigger>
-          <TabsTrigger value="rejected">Transporteurs rejetés</TabsTrigger>
-        </TabsList>
+    <div className="min-h-screen">
+      <Navigation />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-20">
+        <h1 className="text-3xl font-bold mb-8">Tableau de bord administrateur</h1>
         
-        <TabsContent value="new">
-          <NewRegistrationRequests />
-        </TabsContent>
-        
-        <TabsContent value="approved">
-          <ApprovedCarriers />
-        </TabsContent>
-        
-        <TabsContent value="rejected">
-          <RejectedRequests />
-        </TabsContent>
-      </Tabs>
+        <Tabs defaultValue="new" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="new">Nouvelles demandes</TabsTrigger>
+            <TabsTrigger value="approved">Transporteurs validés</TabsTrigger>
+            <TabsTrigger value="rejected">Transporteurs rejetés</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="new">
+            <NewRegistrationRequests />
+          </TabsContent>
+          
+          <TabsContent value="approved">
+            <ApprovedCarriers />
+          </TabsContent>
+          
+          <TabsContent value="rejected">
+            <RejectedRequests />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
