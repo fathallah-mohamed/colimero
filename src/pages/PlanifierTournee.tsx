@@ -80,7 +80,7 @@ export default function PlanifierTournee() {
             });
           }
         }
-      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
         setUserType(null);
         setShowCreateForm(false);
