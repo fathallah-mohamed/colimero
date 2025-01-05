@@ -16,9 +16,13 @@ export default function CurrentTours() {
     setShowAuthDialog,
     showAccessDeniedDialog,
     setShowAccessDeniedDialog,
-    handleBookingClick,
+    handleBookingClick: handleBookingFlowClick,
     handleAuthSuccess
   } = useBookingFlow();
+
+  const handleBookingClick = (tourId: number, pickupCity: string) => {
+    handleBookingFlowClick(tourId, pickupCity);
+  };
 
   return (
     <div className="py-8 px-4">
