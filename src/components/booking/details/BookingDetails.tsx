@@ -8,6 +8,17 @@ interface BookingDetailsProps {
 }
 
 export function BookingDetails({ booking }: BookingDetailsProps) {
+  // Helper function to safely format dates
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return "Non définie";
+    try {
+      return format(new Date(dateString), "d MMMM yyyy", { locale: fr });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date invalide";
+    }
+  };
+
   return (
     <div className="mt-4 space-y-4 border-t pt-4">
       <div className="grid grid-cols-2 gap-4">
@@ -50,13 +61,13 @@ export function BookingDetails({ booking }: BookingDetailsProps) {
         <div>
           <p className="text-sm text-gray-500">Date de collecte</p>
           <p className="font-medium">
-            {format(new Date(booking.tours?.collection_date), "d MMMM yyyy", { locale: fr })}
+            {formatDate(booking.tours?.collection_date)}
           </p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Date de départ</p>
           <p className="font-medium">
-            {format(new Date(booking.tours?.departure_date), "d MMMM yyyy", { locale: fr })}
+            {formatDate(booking.tours?.departure_date)}
           </p>
         </div>
       </div>
@@ -71,7 +82,7 @@ export function BookingDetails({ booking }: BookingDetailsProps) {
               className="w-8 h-8 rounded-full"
             />
           )}
-          <p className="font-medium">{booking.tours?.carriers?.company_name}</p>
+          <p className="font-medium">{booking.tours?.carriers?.company_name || "Non assigné"}</p>
         </div>
       </div>
 
