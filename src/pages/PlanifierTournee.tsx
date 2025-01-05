@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
-import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { CarrierAuthDialog } from "@/components/auth/CarrierAuthDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { PlanningHero } from "@/components/tour/planning/PlanningHero";
