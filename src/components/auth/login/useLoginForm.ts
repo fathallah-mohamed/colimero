@@ -37,6 +37,14 @@ export function useLoginForm(props?: UseLoginFormProps) {
           onSuccess();
         }
 
+        // Vérifier s'il y a un chemin de retour stocké
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath'); // Nettoyer après utilisation
+          navigate(returnPath);
+          return;
+        }
+
         // Si un redirectTo est spécifié, l'utiliser
         if (redirectTo) {
           navigate(redirectTo);
