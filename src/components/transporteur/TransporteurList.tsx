@@ -63,6 +63,14 @@ export function TransporteurList() {
     );
   }
 
+  if (!carriers || carriers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Aucun transporteur disponible pour le moment.</p>
+      </div>
+    );
+  }
+
   return (
     <ScrollArea className="h-[calc(100vh-400px)]">
       <div className="grid gap-6">
