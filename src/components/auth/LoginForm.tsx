@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -12,73 +10,67 @@ interface LoginFormProps {
   onSuccess?: () => void;
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
+  requiredUserType?: 'client' | 'carrier' | 'admin';
 }
 
 export function LoginForm({
   onSuccess,
   onRegisterClick,
   onCarrierRegisterClick,
+  requiredUserType,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (error) throw error;
+      if (signInError) throw signInError;
 
-      if (!data.user) {
-        throw new Error("Erreur lors de la connexion");
-      }
+      if (user) {
+        const userType = user.user_metadata?.user_type;
 
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté",
-      });
+        if (requiredUserType && userType !== requiredUserType) {
+          toast({
+            variant: "destructive",
+            title: "Accès refusé",
+            description: `Cette section est réservée aux ${requiredUserType}s.`,
+          });
+          return;
+        }
 
-      const userType = data.user.user_metadata?.user_type;
-      
-      onSuccess?.();
+        toast({
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté",
+        });
 
-      // Redirection selon le type d'utilisateur
-      switch (userType) {
-        case 'admin':
-          navigate("/admin");
-          break;
-        case 'carrier':
-          navigate("/mes-tournees");
-          break;
-        default:
-          const returnPath = sessionStorage.getItem('returnPath');
-          if (returnPath) {
-            sessionStorage.removeItem('returnPath');
-            navigate(returnPath);
-          } else {
-            navigate("/");
-          }
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        }
+
+        onSuccess?.();
       }
     } catch (error: any) {
       let errorMessage = "Une erreur est survenue lors de la connexion";
       
       if (error.message === "Invalid login credentials") {
         errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message === "Email not confirmed") {
+      } else if (error.message.includes("Email not confirmed")) {
         errorMessage = "Veuillez confirmer votre email avant de vous connecter";
       }
 
-      setError(errorMessage);
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
@@ -90,14 +82,7 @@ export function LoginForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -105,9 +90,8 @@ export function LoginForm({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="votre@email.fr"
           required
-          disabled={isLoading}
+          placeholder="exemple@email.com"
         />
       </div>
 
@@ -119,7 +103,7 @@ export function LoginForm({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          disabled={isLoading}
+          placeholder="••••••••"
         />
       </div>
 

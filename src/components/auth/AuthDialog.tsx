@@ -7,6 +7,7 @@ interface AuthDialogProps {
   onSuccess?: () => void;
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
+  requiredUserType?: 'client' | 'carrier' | 'admin';
 }
 
 export default function AuthDialog({ 
@@ -15,6 +16,7 @@ export default function AuthDialog({
   onSuccess,
   onRegisterClick,
   onCarrierRegisterClick,
+  requiredUserType
 }: AuthDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -27,6 +29,7 @@ export default function AuthDialog({
           }}
           onRegisterClick={onRegisterClick}
           onCarrierRegisterClick={onCarrierRegisterClick}
+          requiredUserType={requiredUserType}
         />
       </DialogContent>
     </Dialog>
