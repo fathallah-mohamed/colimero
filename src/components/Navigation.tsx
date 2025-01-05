@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useNavigation } from "./navigation/useNavigation";
 import { AuthSection } from "./navigation/AuthSection";
@@ -13,6 +13,7 @@ export default function Navigation() {
   const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
+  const location = useLocation();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -30,6 +31,13 @@ export default function Navigation() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
+
+  // Sauvegarder le chemin actuel si on est sur une page de réservation
+  useEffect(() => {
+    if (location.pathname.includes('/reserver/')) {
+      sessionStorage.setItem('returnPath', location.pathname);
+    }
+  }, [location.pathname]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
