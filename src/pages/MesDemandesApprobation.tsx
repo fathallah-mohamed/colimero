@@ -63,7 +63,7 @@ export default function MesDemandesApprobation() {
       />
 
       <CarrierAuthDialog
-        isOpen={isCarrierAuthDialogOpen}
+        open={isCarrierAuthDialogOpen}
         onClose={() => setIsCarrierAuthDialogOpen(false)}
       />
 
