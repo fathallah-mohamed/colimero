@@ -12,6 +12,8 @@ import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CarrierSignupForm } from "@/components/auth/CarrierSignupForm";
 
 export default function PlanifierTournee() {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ export default function PlanifierTournee() {
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState<'client' | 'carrier' | 'admin' | null>(null);
+  const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -30,7 +33,6 @@ export default function PlanifierTournee() {
         const userMetadata = session.user.user_metadata;
         setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
         
-        // Redirect admins to home page
         if (userMetadata.user_type === 'admin') {
           navigate('/');
           toast({
@@ -52,7 +54,6 @@ export default function PlanifierTournee() {
         const userMetadata = session.user.user_metadata;
         setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
         
-        // Redirect admins to home page
         if (userMetadata.user_type === 'admin') {
           navigate('/');
           toast({
@@ -152,6 +153,7 @@ export default function PlanifierTournee() {
         }}
         onCarrierRegisterClick={() => {
           setIsAuthDialogOpen(false);
+          setShowCarrierSignupForm(true);
         }}
       />
 
@@ -160,6 +162,14 @@ export default function PlanifierTournee() {
         isOpen={isAccessDeniedOpen}
         onClose={() => setIsAccessDeniedOpen(false)}
       />
+
+      <Dialog open={showCarrierSignupForm} onOpenChange={setShowCarrierSignupForm}>
+        <DialogContent className="max-w-4xl">
+          <CarrierSignupForm onSuccess={() => {
+            setShowCarrierSignupForm(false);
+          }} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
