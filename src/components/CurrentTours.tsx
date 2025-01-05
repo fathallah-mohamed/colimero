@@ -44,7 +44,7 @@ export default function CurrentTours() {
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog} 
+        open={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"
@@ -52,7 +52,7 @@ export default function CurrentTours() {
 
       <AccessDeniedMessage
         userType="carrier"
-        isOpen={showAccessDeniedDialog}
+        open={showAccessDeniedDialog}
         onClose={() => setShowAccessDeniedDialog(false)}
       />
     </div>
