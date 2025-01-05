@@ -26,6 +26,8 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
     );
   }
 
+  if (!consents?.length) return null;
+
   const getDocumentLink = (code: string) => {
     switch (code) {
       case 'carrier_terms':
@@ -35,12 +37,6 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
       default:
         return null;
     }
-  };
-
-  if (!consents?.length) return null;
-
-  const handleRowClick = (onChange: (value: boolean) => void, currentValue: boolean) => {
-    onChange(!currentValue);
   };
 
   return (
@@ -57,14 +53,14 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
               <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                 <div 
                   className="flex-1 cursor-pointer" 
-                  onClick={() => handleRowClick(field.onChange, field.value)}
+                  onClick={() => {
+                    field.onChange(!field.value);
+                  }}
                 >
                   <div className="flex items-start gap-3">
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked);
-                      }}
+                      onCheckedChange={field.onChange}
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
