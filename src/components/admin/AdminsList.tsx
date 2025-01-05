@@ -10,6 +10,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
 
 interface Admin {
   id: string;
@@ -19,10 +29,19 @@ interface Admin {
   created_at: string;
 }
 
+interface AdminFormData {
+  email: string;
+  first_name: string;
+  last_name: string;
+  password: string;
+}
+
 export function AdminsList() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const { register, handleSubmit, reset } = useForm<AdminFormData>();
 
   useEffect(() => {
     fetchAdmins();
@@ -84,6 +103,44 @@ export function AdminsList() {
     }
   };
 
+  const onSubmit = async (data: AdminFormData) => {
+    try {
+      // Créer un nouvel utilisateur avec le rôle admin
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            user_type: 'admin'
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      toast({
+        title: "Succès",
+        description: "L'administrateur a été créé avec succès",
+      });
+
+      // Fermer le dialogue et réinitialiser le formulaire
+      setOpen(false);
+      reset();
+      
+      // Rafraîchir la liste des administrateurs
+      fetchAdmins();
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer l'administrateur",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div>Chargement...</div>;
   }
@@ -92,7 +149,55 @@ export function AdminsList() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Liste des administrateurs</h2>
-        <Button>Ajouter un administrateur</Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>Ajouter un administrateur</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ajouter un administrateur</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register("email")}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="first_name">Prénom</Label>
+                <Input
+                  id="first_name"
+                  {...register("first_name")}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Nom</Label>
+                <Input
+                  id="last_name"
+                  {...register("last_name")}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Mot de passe</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register("password")}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Créer l'administrateur
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Table>
