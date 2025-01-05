@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { TourTimelineCard } from "@/components/transporteur/tour/TourTimelineCard";
 import { NextTourSection } from "@/components/tour/NextTourSection";
@@ -44,7 +44,7 @@ export default function CurrentTours() {
       </div>
 
       <AuthDialog 
-        open={showAuthDialog} 
+        isOpen={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"

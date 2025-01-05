@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
-import { CarrierAuthDialog } from "@/components/auth/CarrierAuthDialog";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { PlanningHero } from "@/components/tour/planning/PlanningHero";
@@ -12,6 +11,7 @@ import { PlanningSteps } from "@/components/tour/planning/PlanningSteps";
 import { PlanningExample } from "@/components/tour/planning/PlanningExample";
 import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 export default function PlanifierTournee() {
@@ -137,7 +137,7 @@ export default function PlanifierTournee() {
       </div>
 
       <AuthDialog
-        open={isAuthDialogOpen}
+        isOpen={isAuthDialogOpen}
         onClose={() => setIsAuthDialogOpen(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="carrier"
@@ -148,7 +148,7 @@ export default function PlanifierTournee() {
       />
 
       <CarrierAuthDialog
-        open={isCarrierAuthDialogOpen}
+        isOpen={isCarrierAuthDialogOpen}
         onClose={() => setIsCarrierAuthDialogOpen(false)}
       />
 

@@ -6,15 +6,11 @@ import { useState } from "react";
 import { SimpleLoginView } from "./login/SimpleLoginView";
 import { TabbedLoginView } from "./login/TabbedLoginView";
 
-export interface AuthDialogProps {
+interface AuthDialogProps {
   open: boolean;
   onClose: () => void;
   requiredUserType?: "client" | "carrier";
   showTabs?: boolean;
-  onSuccess?: () => void;
-  fromHeader?: boolean;
-  onRegisterClick?: () => void;
-  onCarrierRegisterClick?: () => void;
 }
 
 export function AuthDialog({
@@ -22,10 +18,6 @@ export function AuthDialog({
   onClose,
   requiredUserType,
   showTabs = false,
-  onSuccess,
-  fromHeader,
-  onRegisterClick: externalOnRegisterClick,
-  onCarrierRegisterClick: externalOnCarrierRegisterClick,
 }: AuthDialogProps) {
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showCarrierAuthDialog, setShowCarrierAuthDialog] = useState(false);
@@ -38,7 +30,6 @@ export function AuthDialog({
       sessionStorage.removeItem("returnPath");
       navigate(returnPath);
     }
-    onSuccess?.();
     onClose();
   };
 
@@ -46,20 +37,12 @@ export function AuthDialog({
     sessionStorage.setItem("returnPath", location.pathname + location.search);
   }
 
-  const handleRegisterClick = () => {
-    if (externalOnRegisterClick) {
-      externalOnRegisterClick();
-    } else {
-      setShowRegisterForm(true);
-    }
+  const onRegisterClick = () => {
+    setShowRegisterForm(true);
   };
 
-  const handleCarrierRegisterClick = () => {
-    if (externalOnCarrierRegisterClick) {
-      externalOnCarrierRegisterClick();
-    } else {
-      setShowCarrierAuthDialog(true);
-    }
+  const onCarrierRegisterClick = () => {
+    setShowCarrierAuthDialog(true);
   };
 
   if (showCarrierAuthDialog) {
@@ -77,7 +60,10 @@ export function AuthDialog({
   if (showRegisterForm) {
     return (
       <Dialog open={open} onOpenChange={onClose}>
-        <RegisterForm onLogin={() => setShowRegisterForm(false)} />
+        <RegisterForm
+          onSuccess={handleSuccess}
+          onBack={() => setShowRegisterForm(false)}
+        />
       </Dialog>
     );
   }
@@ -87,20 +73,20 @@ export function AuthDialog({
       {requiredUserType ? (
         <SimpleLoginView
           requiredUserType={requiredUserType}
-          onRegisterClick={handleRegisterClick}
-          onCarrierRegisterClick={handleCarrierRegisterClick}
+          onRegisterClick={onRegisterClick}
+          onCarrierRegisterClick={onCarrierRegisterClick}
           handleSuccess={handleSuccess}
         />
       ) : showTabs ? (
         <TabbedLoginView
-          onRegisterClick={handleRegisterClick}
-          onCarrierRegisterClick={handleCarrierRegisterClick}
+          onRegisterClick={onRegisterClick}
+          onCarrierRegisterClick={onCarrierRegisterClick}
           handleSuccess={handleSuccess}
         />
       ) : (
         <SimpleLoginView
-          onRegisterClick={handleRegisterClick}
-          onCarrierRegisterClick={handleCarrierRegisterClick}
+          onRegisterClick={onRegisterClick}
+          onCarrierRegisterClick={onCarrierRegisterClick}
           handleSuccess={handleSuccess}
         />
       )}
