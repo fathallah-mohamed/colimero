@@ -9,4 +9,5 @@ export interface ProfileData {
   company_name?: string;
   siret?: string;
   avatar_url?: string;
+  created_at?: string;
 }
