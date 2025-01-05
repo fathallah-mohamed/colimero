@@ -1,120 +1,66 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
-import { TourTimeline } from "./TourTimeline";
-import { TourStatusBadge } from "./TourStatusBadge";
-import { TourActions } from "./TourActions";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useAuth } from "@/hooks/use-auth";
-import type { Tour } from "@/types/tour";
+import { Tour } from "@/types/tour";
 
-export function TourTimelineCard({ tour }: { tour: Tour }) {
-  const navigate = useNavigate();
+interface TourTimelineCardProps {
+  tour: Tour;
+  onBookingClick?: (tourId: number, pickupCity: string) => void;
+  hideAvatar?: boolean;
+  userType?: string;
+  isUpcoming?: boolean;
+}
+
+export function TourTimelineCard({ 
+  tour,
+  onBookingClick,
+  hideAvatar = false,
+  userType,
+  isUpcoming = false 
+}: TourTimelineCardProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
-  const handleBookingClick = async (pickupCity: string) => {
+  const handleBookingClick = () => {
     if (!user) {
-      setIsAuthDialogOpen(true);
+      setShowAuthDialog(true);
       return;
     }
-
-    if (user.user_metadata?.user_type === 'carrier') {
-      toast({
-        variant: "destructive",
-        title: "Action non autorisée",
-        description: "Les transporteurs ne peuvent pas effectuer de réservations",
-      });
-      return;
-    }
-
-    if (user.user_metadata?.user_type === 'admin') {
-      toast({
-        variant: "destructive",
-        title: "Action non autorisée",
-        description: "Les administrateurs ne peuvent pas effectuer de réservations",
-      });
-      return;
-    }
-
-    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(pickupCity)}`);
-  };
-
-  const handleAuthSuccess = () => {
-    setIsAuthDialogOpen(false);
-    toast({
-      title: "Connexion réussie",
-      description: "Vous pouvez maintenant effectuer votre réservation",
-    });
-  };
-
-  const isBookingEnabled = (status: string) => {
-    return status === 'collecting';
-  };
-
-  const getBookingButtonText = (status: string) => {
-    switch (status) {
-      case 'planned':
-        return "Cette tournée n'est pas encore ouverte aux réservations";
-      case 'collecting':
-        return "Réserver sur cette tournée";
-      case 'in_transit':
-        return "Cette tournée est en cours de livraison";
-      case 'completed':
-        return "Cette tournée est terminée";
-      case 'cancelled':
-        return "Cette tournée a été annulée";
-      default:
-        return "Statut inconnu";
+    if (onBookingClick) {
+      onBookingClick(tour.id, tour.route[0]?.name || '');
     }
   };
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold mb-1">
-            Tournée {tour.id}
-          </h3>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">
-              {tour.type === 'public' ? 'Publique' : 'Privée'}
-            </Badge>
-            <TourStatusBadge status={tour.status} />
-          </div>
+          <h3 className="text-lg font-semibold">{tour.carrier_id}</h3>
+          <p className="text-sm text-gray-500">{formatDate(tour.departure_date)}</p>
         </div>
-        <TourActions tour={tour} />
+        <Badge variant={isUpcoming ? "success" : "default"}>
+          {isUpcoming ? "À venir" : "Passé"}
+        </Badge>
       </div>
-
-      <div className="space-y-4">
-        <div>
-          <p className="text-sm text-gray-500">Date de départ</p>
-          <p className="font-medium">
-            {formatDate(tour.departure_date)}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-sm text-gray-500 mb-2">Itinéraire</p>
-          <TourTimeline
-            route={tour.route}
-            onBookingClick={(city) => handleBookingClick(city)}
-            isBookingEnabled={isBookingEnabled(tour.status)}
-            bookingButtonText={getBookingButtonText(tour.status)}
-          />
-        </div>
+      <div className="mt-4">
+        <p>{tour.route.map(stop => stop.name).join(', ')}</p>
       </div>
-
-      <AuthDialog
-        open={isAuthDialogOpen}
-        onClose={() => setIsAuthDialogOpen(false)}
-        onSuccess={handleAuthSuccess}
-        requiredUserType="client"
+      <div className="mt-6">
+        <button onClick={handleBookingClick} className="w-full bg-blue-500 text-white py-2 rounded">
+          Réserver
+        </button>
+      </div>
+      <AuthDialog 
+        open={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        fromHeader={false}
       />
     </Card>
   );
