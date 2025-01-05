@@ -23,6 +23,10 @@ export function AuthDialog({
   onSuccess,
   requiredUserType
 }: AuthDialogProps) {
+  const handleForgotPassword = () => {
+    // Implement forgot password logic
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -33,9 +37,9 @@ export function AuthDialog({
           </TabsList>
           <TabsContent value="login">
             <LoginForm 
-              onSuccess={onSuccess} 
+              onSuccess={onSuccess}
               requiredUserType={requiredUserType}
-              onForgotPassword={() => {}}
+              onForgotPassword={handleForgotPassword}
               onRegister={onRegisterClick}
               onCarrierRegister={onCarrierRegisterClick}
             />
