@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { UserCircle2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { menuItems } from "./MenuItems";
+import { menuItems } from "./config/menuItems";
+import { MenuItem } from "./MenuItem";
 import { UserMenuItems } from "./UserMenuItems";
 
 interface MobileMenuProps {
@@ -41,20 +41,12 @@ export default function MobileMenu({
 
       <div className="h-full overflow-y-auto px-2 pb-3 space-y-1">
         {menuItems.map((item) => (
-          <Link
+          <MenuItem
             key={item.name}
-            to={item.href}
+            {...item}
+            userType={userType}
             onClick={() => setIsOpen(false)}
-            className={cn(
-              "flex items-center px-3 py-2 rounded-md text-base font-medium",
-              item.highlight 
-                ? "text-primary hover:text-primary-hover hover:bg-primary/10" + (item.className || "")
-                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-            )}
-          >
-            {item.icon}
-            <span className="ml-2">{item.name}</span>
-          </Link>
+          />
         ))}
 
         {user ? (
