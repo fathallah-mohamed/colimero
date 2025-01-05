@@ -95,19 +95,22 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
         description: "Vous êtes maintenant connecté",
       });
 
-      // Redirection selon le type d'utilisateur
-      switch (userType) {
-        case 'admin':
-          navigate("/admin");
-          break;
-        case 'carrier':
-          navigate("/mes-tournees");
-          break;
-        default:
-          navigate("/");
+      // Si onSuccess est fourni, l'appeler avant toute redirection
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        // Redirection selon le type d'utilisateur seulement si onSuccess n'est pas fourni
+        switch (userType) {
+          case 'admin':
+            navigate("/admin");
+            break;
+          case 'carrier':
+            navigate("/mes-tournees");
+            break;
+          default:
+            navigate("/");
+        }
       }
-
-      onSuccess?.();
 
     } catch (error: any) {
       console.error("Erreur complète:", error);

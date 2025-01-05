@@ -43,13 +43,18 @@ export default function AuthDialog({
     setShowCarrierDialog(true);
   };
 
+  const handleLoginSuccess = () => {
+    onSuccess?.();
+    onClose();
+  };
+
   const renderLoginForm = () => {
     if (requiredUserType === 'client') {
       return (
         <ClientLoginForm
           onForgotPassword={() => setView("forgot-password")}
           onRegister={handleRegisterClick}
-          onSuccess={onSuccess}
+          onSuccess={handleLoginSuccess}
         />
       );
     } else if (requiredUserType === 'carrier') {
@@ -57,7 +62,7 @@ export default function AuthDialog({
         <CarrierLoginForm
           onForgotPassword={() => setView("forgot-password")}
           onCarrierRegister={handleCarrierRegisterClick}
-          onSuccess={onSuccess}
+          onSuccess={handleLoginSuccess}
         />
       );
     }
@@ -66,7 +71,7 @@ export default function AuthDialog({
         onForgotPassword={() => setView("forgot-password")}
         onRegister={handleRegisterClick}
         onCarrierRegister={handleCarrierRegisterClick}
-        onSuccess={onSuccess}
+        onSuccess={handleLoginSuccess}
       />
     );
   };

@@ -7,6 +7,10 @@ import { CollectionPointsList } from "./CollectionPointsList";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Tour, TourStatus } from "@/types/tour";
+import { useState } from "react";
+import AuthDialog from "@/components/auth/AuthDialog";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TourCardProps {
   tour: Tour;
@@ -16,25 +20,38 @@ interface TourCardProps {
   isBookingEnabled: boolean;
   isPickupSelectionEnabled: boolean;
   bookingButtonText: string;
-  onEdit?: (tour: Tour) => void;
-  onDelete?: (tourId: number) => void;
-  onStatusChange?: (tourId: number, newStatus: string) => void;
-  isCompleted?: boolean;
 }
 
 export function TourCard({
   tour,
   selectedPickupCity,
   onPickupCitySelect,
-  onBookingClick,
   isBookingEnabled,
   isPickupSelectionEnabled,
   bookingButtonText,
-  onEdit,
-  onDelete,
-  onStatusChange,
-  isCompleted
 }: TourCardProps) {
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const navigate = useNavigate();
+
+  const handleBookingClick = async () => {
+    if (!selectedPickupCity) return;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    const userType = session.user.user_metadata?.user_type;
+    if (userType !== 'client') {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+  };
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex items-center justify-between">
@@ -74,12 +91,24 @@ export function TourCard({
       />
 
       <Button 
-        onClick={onBookingClick}
+        onClick={handleBookingClick}
         className="w-full"
         disabled={!isBookingEnabled}
       >
         {bookingButtonText}
       </Button>
+
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          if (selectedPickupCity) {
+            navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+          }
+        }}
+        requiredUserType="client"
+      />
     </Card>
   );
 }
