@@ -1,112 +1,77 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { authenticateUser } from "@/utils/auth";
 
-export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client' | 'carrier') {
-  const [isLoading, setIsLoading] = useState(false);
+interface UseLoginFormProps {
+  onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier';
+  redirectTo?: string;
+}
+
+export function useLoginForm({ onSuccess, requiredUserType, redirectTo }: UseLoginFormProps = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
   const navigate = useNavigate();
-
-  const validateInputs = () => {
-    if (!email.trim()) {
-      setError("L'adresse email est requise");
-      return false;
-    }
-
-    if (!password.trim()) {
-      setError("Le mot de passe est requis");
-      return false;
-    }
-
-    return true;
-  };
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    if (!validateInputs()) {
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      console.log("Tentative de connexion pour:", email.trim());
-      console.log("Tentative d'authentification avec Supabase...");
+      const response = await authenticateUser(email, password);
+      
+      if (response.success) {
+        toast({
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté",
+        });
 
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        console.error("Erreur d'authentification:", signInError);
-        
-        let errorMessage = "Une erreur est survenue lors de la connexion";
-        
-        if (signInError.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou mot de passe incorrect";
-        } else if (signInError.message.includes("Email not confirmed")) {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (signInError.message.includes("Invalid email")) {
-          errorMessage = "Format d'email invalide";
-        } else if (signInError.message.includes("Password")) {
-          errorMessage = "Le mot de passe est incorrect";
+        // Si onSuccess est fourni, l'appeler
+        if (onSuccess) {
+          onSuccess();
         }
 
-        setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: errorMessage,
-        });
-        return;
+        // Si un redirectTo est spécifié, l'utiliser
+        if (redirectTo) {
+          navigate(redirectTo);
+        } else {
+          // Sinon, utiliser la redirection par défaut basée sur le type d'utilisateur
+          switch (response.userType) {
+            case 'admin':
+              navigate("/admin");
+              break;
+            case 'carrier':
+              navigate("/mes-tournees");
+              break;
+            case 'client':
+              if (requiredUserType === 'client') {
+                // Si on était sur une page qui nécessite d'être client, y retourner
+                const returnPath = sessionStorage.getItem('returnPath');
+                if (returnPath) {
+                  sessionStorage.removeItem('returnPath');
+                  navigate(returnPath);
+                }
+              } else {
+                navigate("/");
+              }
+              break;
+            default:
+              navigate("/");
+          }
+        }
       }
-
-      if (!data.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
-
-      // Vérification du type d'utilisateur requis
-      if (requiredUserType && userType !== requiredUserType) {
-        await supabase.auth.signOut();
-        const errorMessage = requiredUserType === 'client' 
-          ? "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
-          : "Cette fonctionnalité est réservée aux transporteurs. Veuillez vous connecter avec un compte transporteur.";
-        setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: "Accès refusé",
-          description: errorMessage,
-        });
-        return;
-      }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté",
-      });
-
-      // Si onSuccess est fourni, l'appeler avant toute redirection
-      if (onSuccess) {
-        onSuccess();
-      }
-
     } catch (error: any) {
-      console.error("Erreur complète:", error);
-      setError("Une erreur inattendue est survenue");
+      console.error("Login error:", error);
+      setError(error.message);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur inattendue est survenue lors de la connexion",
+        title: "Erreur de connexion",
+        description: error.message,
       });
     } finally {
       setIsLoading(false);
@@ -114,11 +79,11 @@ export function useLoginForm(onSuccess?: () => void, requiredUserType?: 'client'
   };
 
   return {
-    isLoading,
     email,
     setEmail,
     password,
     setPassword,
+    isLoading,
     error,
     handleSubmit,
   };
