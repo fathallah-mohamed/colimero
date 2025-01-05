@@ -88,6 +88,7 @@ export const authenticateUser = async (email: string, password: string): Promise
       case 'carrier':
         return { success: true, redirectTo: "/mes-tournees" };
       case 'client':
+        // Vérifier s'il y a un chemin de retour stocké
         const returnPath = sessionStorage.getItem('returnPath');
         if (returnPath) {
           sessionStorage.removeItem('returnPath');
