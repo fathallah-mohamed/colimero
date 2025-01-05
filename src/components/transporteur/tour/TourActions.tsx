@@ -13,6 +13,10 @@ interface TourActionsProps {
 }
 
 export function TourActions({ tour }: TourActionsProps) {
+  if (!tour || !tour.status) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

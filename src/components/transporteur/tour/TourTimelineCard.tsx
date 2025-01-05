@@ -28,40 +28,71 @@ export function TourTimelineCard({
 }: TourTimelineCardProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const toast = useToast();
+  const { toast } = useToast();
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
   const handleBookingClick = () => {
     if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Vous devez être connecté pour réserver.",
-      });
+      setIsAuthDialogOpen(true);
       return;
     }
+
+    const pickupCity = tour.route[0]?.name || '';
+    
     if (onBookingClick) {
-      onBookingClick(tour.id, tour.pickup_city);
+      onBookingClick(tour.id, pickupCity);
     } else {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(tour.pickup_city)}`);
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(pickupCity)}`);
     }
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthDialogOpen(false);
+    toast({
+      title: "Connexion réussie",
+      description: "Vous pouvez maintenant effectuer votre réservation"
+    });
   };
 
   return (
     <Card className="p-4">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold">{tour.title}</h3>
+          <h3 className="text-lg font-semibold">Tournée {tour.id}</h3>
           <p className="text-sm text-gray-500">{formatDate(tour.departure_date)}</p>
         </div>
         <TourStatusBadge status={tour.status} />
       </div>
-      <TourTimeline tour={tour} />
-      <TourActions 
-        onBookingClick={handleBookingClick} 
-        isUpcoming={isUpcoming} 
-        hideAvatar={hideAvatar} 
-        userType={userType} 
+      <TourTimeline 
+        route={tour.route}
+        onBookingClick={handleBookingClick}
+        isBookingEnabled={tour.status === 'collecting'}
+        bookingButtonText={getBookingButtonText(tour.status)}
+      />
+      <TourActions tour={tour} />
+      <AuthDialog 
+        open={isAuthDialogOpen}
+        onClose={() => setIsAuthDialogOpen(false)}
+        onSuccess={handleAuthSuccess}
+        requiredUserType="client"
       />
     </Card>
   );
+}
+
+function getBookingButtonText(status: Tour['status']) {
+  switch(status) {
+    case 'planned':
+      return "Cette tournée n'est pas encore ouverte aux réservations";
+    case 'collecting':
+      return "Réserver sur cette tournée";
+    case 'in_transit':
+      return "Cette tournée est en cours de livraison";
+    case 'completed':
+      return "Cette tournée est terminée";
+    case 'cancelled':
+      return "Cette tournée a été annulée";
+    default:
+      return "Statut inconnu";
+  }
 }

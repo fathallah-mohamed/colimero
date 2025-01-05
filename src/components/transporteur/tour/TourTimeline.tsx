@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Tour } from "@/types/tour";
+import type { RouteStop } from "@/types/tour";
 
 interface TourTimelineProps {
-  route: Tour['route'];
+  route: RouteStop[];
   onBookingClick: (city: string) => void;
   isBookingEnabled: boolean;
   bookingButtonText: string;
@@ -14,8 +14,12 @@ export function TourTimeline({
   isBookingEnabled,
   bookingButtonText 
 }: TourTimelineProps) {
+  if (!route || !Array.isArray(route)) {
+    return null;
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-4">
       {route.map((stop, index) => (
         <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
