@@ -1,17 +1,15 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { UserCircle2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { menuItems } from "./MenuItems";
-import { UserMenuItems } from "./UserMenuItems";
+import { menuItems } from "./config/menuItems";
+import { UserCog } from "lucide-react";
 
 interface MobileMenuProps {
   isOpen: boolean;
   user: any;
   userType: string | null;
   handleLogout: () => void;
-  setIsOpen: (value: boolean) => void;
-  setShowAuthDialog: (value: boolean) => void;
+  setIsOpen: (isOpen: boolean) => void;
+  setShowAuthDialog: (show: boolean) => void;
 }
 
 export default function MobileMenu({
@@ -20,78 +18,82 @@ export default function MobileMenu({
   userType,
   handleLogout,
   setIsOpen,
-  setShowAuthDialog
+  setShowAuthDialog,
 }: MobileMenuProps) {
+  if (!isOpen) return null;
+
   return (
-    <div 
-      className={cn(
-        "fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 shadow-lg transform transition-transform duration-300 ease-in-out md:hidden",
-        isOpen ? "translate-x-0" : "translate-x-full"
-      )}
-    >
-      <div className="flex justify-end p-4">
-        <button
-          onClick={() => setIsOpen(false)}
-          className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00B0F0]"
-        >
-          <X className="h-6 w-6" />
-          <span className="sr-only">Fermer le menu</span>
-        </button>
-      </div>
-
-      <div className="h-full overflow-y-auto px-2 pb-3 space-y-1">
-        {menuItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.href}
-            onClick={() => setIsOpen(false)}
-            className={cn(
-              "flex items-center px-3 py-2 rounded-md text-base font-medium",
-              item.highlight 
-                ? "text-primary hover:text-primary-hover hover:bg-primary/10" + (item.className || "")
-                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-            )}
+    <div className="md:hidden">
+      <div className="fixed inset-0 z-50 bg-black bg-opacity-25" />
+      <nav className="fixed top-16 right-0 bottom-0 left-0 z-50 flex flex-col p-4 bg-white space-y-2 overflow-y-auto">
+        {!user && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setShowAuthDialog(true);
+              setIsOpen(false);
+            }}
+            className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
           >
-            {item.icon}
-            <span className="ml-2">{item.name}</span>
-          </Link>
-        ))}
+            Se connecter
+          </Button>
+        )}
 
-        {user ? (
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="px-3 py-2 text-sm text-gray-600">
-              {user.email}
-            </div>
-            <UserMenuItems userType={userType} />
-            <Button 
-              variant="outline" 
-              size="sm" 
+        {menuItems.map((item) => {
+          const isAllowed = !userType || item.allowedUserTypes.includes(userType);
+          if (!isAllowed) return null;
+
+          return (
+            <Link
+              key={item.name}
+              to={item.href}
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
+                ${item.highlight
+                  ? "text-[#00B0F0] hover:text-[#0082b3] " + (item.className || "")
+                  : "text-gray-700 hover:text-gray-900"
+                }`}
+            >
+              {item.icon}
+              <span className="ml-2">{item.name}</span>
+            </Link>
+          );
+        })}
+
+        {user && (
+          <>
+            {userType === "admin" && (
+              <Link
+                to="/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+              >
+                <UserCog className="w-4 h-4" />
+                <span className="ml-2">Administrateurs</span>
+              </Link>
+            )}
+            <Link
+              to="/profile"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              Mon profil
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 handleLogout();
                 setIsOpen(false);
               }}
-              className="w-full mt-2 text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
+              className="w-full text-red-600 hover:text-red-700"
             >
               Déconnexion
             </Button>
-          </div>
-        ) : (
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setShowAuthDialog(true);
-                setIsOpen(false);
-              }}
-              className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-            >
-              <UserCircle2 className="w-4 h-4 mr-2" />
-              Se connecter
-            </Button>
-          </div>
+          </>
         )}
-      </div>
+      </nav>
     </div>
   );
 }
