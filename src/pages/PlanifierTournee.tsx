@@ -3,17 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
-import AuthDialog from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
-import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
-import { PlanningHero } from "@/components/tour/planning/PlanningHero";
-import { PlanningAdvantages } from "@/components/tour/planning/PlanningAdvantages";
-import { PlanningSteps } from "@/components/tour/planning/PlanningSteps";
-import { PlanningExample } from "@/components/tour/planning/PlanningExample";
-import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { CarrierSignupForm, type CarrierSignupFormProps } from "@/components/auth/CarrierSignupForm";
+import { PlanningContent } from "@/components/tour/planning/PlanningContent";
+import { PlanningDialogs } from "@/components/tour/planning/PlanningDialogs";
 
 export default function PlanifierTournee() {
   const navigate = useNavigate();
@@ -133,77 +125,27 @@ export default function PlanifierTournee() {
             }} />
           </div>
         ) : (
-          <>
-            <PlanningHero onCreateTourClick={handleCreateTourClick} />
-            <PlanningAdvantages />
-            <PlanningSteps />
-            <PlanningExample />
-            <PlanningBenefits />
-            
-            <div className="text-center py-16">
-              <p className="text-xl text-gray-600 mb-8">
-                Prêt à commencer ? Cliquez sur le bouton ci-dessous :
-              </p>
-              <div className="space-y-4">
-                <Button
-                  onClick={handleCreateTourClick}
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-lg font-semibold text-lg transform transition hover:scale-105"
-                >
-                  Créer une tournée
-                </Button>
-                {!isAuthenticated && (
-                  <Button
-                    onClick={() => setIsAuthDialogOpen(true)}
-                    variant="outline"
-                    size="lg"
-                    className="w-full max-w-md"
-                  >
-                    Devenir transporteur
-                  </Button>
-                )}
-              </div>
-              {!isAuthenticated && (
-                <p className="text-sm text-gray-500 mt-4">
-                  Vous devez être connecté pour planifier une tournée
-                </p>
-              )}
-            </div>
-          </>
+          <PlanningContent 
+            isAuthenticated={isAuthenticated}
+            onCreateTourClick={handleCreateTourClick}
+            onAuthClick={() => setIsAuthDialogOpen(true)}
+          />
         )}
       </div>
 
-      <AuthDialog
-        isOpen={isAuthDialogOpen}
-        onClose={() => setIsAuthDialogOpen(false)}
-        onSuccess={handleAuthSuccess}
-        requiredUserType="carrier"
-        onRegisterClick={() => {
-          setIsAuthDialogOpen(false);
-        }}
+      <PlanningDialogs 
+        isAuthDialogOpen={isAuthDialogOpen}
+        isAccessDeniedOpen={isAccessDeniedOpen}
+        showCarrierSignupForm={showCarrierSignupForm}
+        onAuthClose={() => setIsAuthDialogOpen(false)}
+        onAccessDeniedClose={() => setIsAccessDeniedOpen(false)}
+        onCarrierSignupClose={setShowCarrierSignupForm}
+        onAuthSuccess={handleAuthSuccess}
         onCarrierRegisterClick={() => {
           setIsAuthDialogOpen(false);
           setShowCarrierSignupForm(true);
         }}
       />
-
-      <AccessDeniedMessage 
-        userType="client" 
-        isOpen={isAccessDeniedOpen}
-        onClose={() => setIsAccessDeniedOpen(false)}
-      />
-
-      <Dialog open={showCarrierSignupForm} onOpenChange={setShowCarrierSignupForm}>
-        <DialogContent className="max-w-4xl">
-          <CarrierSignupForm onSuccess={() => {
-            setShowCarrierSignupForm(false);
-            toast({
-              title: "Inscription réussie",
-              description: "Votre demande d'inscription a été envoyée avec succès.",
-            });
-          }} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
