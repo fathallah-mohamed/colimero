@@ -1,5 +1,4 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { LoginForm } from "./LoginForm";
 
 interface AuthDialogProps {
@@ -17,23 +16,18 @@ export default function AuthDialog({
   onRegisterClick,
   onCarrierRegisterClick,
 }: AuthDialogProps) {
-  const handleSuccess = () => {
-    onSuccess?.();
-    onClose();
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogTitle className="text-center">Connexion</DialogTitle>
-        <div className="space-y-6">
-          <LoginForm
-            onForgotPassword={() => {}}
-            onRegister={onRegisterClick}
-            onCarrierRegister={onCarrierRegisterClick}
-            onSuccess={handleSuccess}
-          />
-        </div>
+        <LoginForm
+          onSuccess={() => {
+            onSuccess?.();
+            onClose();
+          }}
+          onRegisterClick={onRegisterClick}
+          onCarrierRegisterClick={onCarrierRegisterClick}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -9,17 +9,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
-  onForgotPassword: () => void;
-  onRegister: () => void;
-  onCarrierRegister: () => void;
   onSuccess?: () => void;
+  onRegisterClick?: () => void;
+  onCarrierRegisterClick?: () => void;
 }
 
 export function LoginForm({
-  onForgotPassword,
-  onRegister,
-  onCarrierRegister,
   onSuccess,
+  onRegisterClick,
+  onCarrierRegisterClick,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -72,7 +70,6 @@ export function LoginForm({
           }
       }
     } catch (error: any) {
-      console.error("Erreur complète:", error);
       let errorMessage = "Une erreur est survenue lors de la connexion";
       
       if (error.message === "Invalid login credentials") {
@@ -134,33 +131,28 @@ export function LoginForm({
         {isLoading ? "Connexion..." : "Se connecter"}
       </Button>
 
-      <div className="space-y-4 mt-6">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onRegister}
-          className="w-full"
-        >
-          Créer un compte client
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCarrierRegister}
-          className="w-full"
-        >
-          Devenir transporteur
-        </Button>
-      </div>
-
-      <div className="text-center">
-        <button
-          type="button"
-          className="text-sm text-[#00B0F0] hover:underline"
-          onClick={onForgotPassword}
-        >
-          Mot de passe oublié ?
-        </button>
+      <div className="space-y-4">
+        {onRegisterClick && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onRegisterClick}
+            className="w-full"
+          >
+            Créer un compte client
+          </Button>
+        )}
+        
+        {onCarrierRegisterClick && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCarrierRegisterClick}
+            className="w-full"
+          >
+            Devenir transporteur
+          </Button>
+        )}
       </div>
     </form>
   );

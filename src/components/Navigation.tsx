@@ -43,16 +43,6 @@ export default function Navigation() {
     }
   }, [location.pathname]);
 
-  const handleRegisterClick = () => {
-    setShowAuthDialog(false);
-    setShowRegisterForm(true);
-  };
-
-  const handleCarrierRegisterClick = () => {
-    setShowAuthDialog(false);
-    setShowCarrierSignupForm(true);
-  };
-
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,8 +85,14 @@ export default function Navigation() {
         isOpen={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
         onSuccess={() => setShowAuthDialog(false)}
-        onRegisterClick={handleRegisterClick}
-        onCarrierRegisterClick={handleCarrierRegisterClick}
+        onRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowRegisterForm(true);
+        }}
+        onCarrierRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowCarrierSignupForm(true);
+        }}
       />
 
       <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
