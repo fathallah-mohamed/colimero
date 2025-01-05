@@ -12,15 +12,35 @@ interface SpecialItemsSectionProps {
 }
 
 export function SpecialItemsSection({ specialItems, contentTypes }: SpecialItemsSectionProps) {
-  if (!specialItems?.length && !contentTypes?.length) return null;
+  // Vérification et conversion des special_items si nécessaire
+  const parsedSpecialItems = React.useMemo(() => {
+    if (!specialItems) return [];
+    
+    // Si c'est une chaîne JSON, on la parse
+    if (typeof specialItems === 'string') {
+      try {
+        return JSON.parse(specialItems);
+      } catch (e) {
+        console.error('Error parsing special items:', e);
+        return [];
+      }
+    }
+    
+    // Si c'est déjà un tableau, on le retourne tel quel
+    return Array.isArray(specialItems) ? specialItems : [];
+  }, [specialItems]);
+
+  console.log("Parsed special items:", parsedSpecialItems); // Debug log
+
+  if (!parsedSpecialItems?.length && !contentTypes?.length) return null;
 
   return (
     <div className="space-y-4">
-      {specialItems?.length > 0 && (
+      {parsedSpecialItems?.length > 0 && (
         <div>
           <p className="text-sm text-gray-500 mb-2">Objets spéciaux</p>
           <div className="flex flex-wrap gap-2">
-            {specialItems.map((item, index) => (
+            {parsedSpecialItems.map((item, index) => (
               <Badge key={index} variant="secondary" className="flex items-center gap-2">
                 <span>{item.name}</span>
                 <span className="text-xs bg-primary/10 px-1.5 py-0.5 rounded-full">
