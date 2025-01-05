@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientLoginForm } from "./login/ClientLoginForm";
 import { CarrierLoginForm } from "./login/CarrierLoginForm";
@@ -10,8 +10,9 @@ interface AuthDialogProps {
   onClose: () => void;
   defaultTab?: string;
   onSuccess?: () => void;
-  requiredUserType?: string;
+  requiredUserType?: 'client' | 'carrier';
   onRegisterClick?: () => void;
+  onCarrierRegisterClick?: () => void;
 }
 
 export default function AuthDialog({ 
@@ -20,7 +21,8 @@ export default function AuthDialog({
   defaultTab = "client",
   onSuccess,
   requiredUserType,
-  onRegisterClick 
+  onRegisterClick,
+  onCarrierRegisterClick
 }: AuthDialogProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const location = useLocation();
@@ -35,9 +37,39 @@ export default function AuthDialog({
     sessionStorage.setItem('returnPath', location.pathname + location.search);
   }
 
+  // Si un type d'utilisateur spécifique est requis, ne pas afficher les onglets
+  if (requiredUserType) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogTitle>
+            {requiredUserType === 'client' ? 'Connexion Client' : 'Connexion Transporteur'}
+          </DialogTitle>
+          {requiredUserType === 'client' ? (
+            <ClientLoginForm
+              onForgotPassword={() => {}}
+              onRegister={onRegisterClick}
+              onSuccess={handleSuccess}
+              requiredUserType={requiredUserType}
+            />
+          ) : (
+            <CarrierLoginForm
+              onForgotPassword={() => {}}
+              onCarrierRegister={onCarrierRegisterClick}
+              onSuccess={handleSuccess}
+              requiredUserType={requiredUserType}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Sinon, afficher les onglets avec les deux options
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
+        <DialogTitle>Connexion</DialogTitle>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="client">Client</TabsTrigger>
@@ -53,7 +85,7 @@ export default function AuthDialog({
           <TabsContent value="carrier">
             <CarrierLoginForm
               onForgotPassword={() => {}}
-              onCarrierRegister={onRegisterClick}
+              onCarrierRegister={onCarrierRegisterClick}
               onSuccess={handleSuccess}
             />
           </TabsContent>

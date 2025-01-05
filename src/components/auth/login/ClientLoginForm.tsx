@@ -7,12 +7,14 @@ interface ClientLoginFormProps {
   onForgotPassword: () => void;
   onRegister: () => void;
   onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier';
 }
 
 export function ClientLoginForm({
   onForgotPassword,
   onRegister,
   onSuccess,
+  requiredUserType,
 }: ClientLoginFormProps) {
   const {
     isLoading,
@@ -44,25 +46,29 @@ export function ClientLoginForm({
           {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Pas encore de compte ?
-            </span>
-          </div>
-        </div>
+        {(!requiredUserType || requiredUserType === 'client') && (
+          <>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Pas encore de compte ?
+                </span>
+              </div>
+            </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onRegister}
-          className="w-full"
-        >
-          Créer un compte client
-        </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onRegister}
+              className="w-full"
+            >
+              Créer un compte client
+            </Button>
+          </>
+        )}
 
         <div className="text-center">
           <button

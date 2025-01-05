@@ -7,12 +7,14 @@ interface CarrierLoginFormProps {
   onForgotPassword: () => void;
   onCarrierRegister: () => void;
   onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier';
 }
 
 export function CarrierLoginForm({
   onForgotPassword,
   onCarrierRegister,
   onSuccess,
+  requiredUserType,
 }: CarrierLoginFormProps) {
   const {
     isLoading,
@@ -44,25 +46,29 @@ export function CarrierLoginForm({
           {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Pas encore de compte ?
-            </span>
-          </div>
-        </div>
+        {(!requiredUserType || requiredUserType === 'carrier') && (
+          <>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Pas encore de compte ?
+                </span>
+              </div>
+            </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCarrierRegister}
-          className="w-full"
-        >
-          Devenir transporteur
-        </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCarrierRegister}
+              className="w-full"
+            >
+              Devenir transporteur
+            </Button>
+          </>
+        )}
 
         <div className="text-center">
           <button
