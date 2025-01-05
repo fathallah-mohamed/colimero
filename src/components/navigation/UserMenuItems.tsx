@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { UserCircle2, Package, Truck, Users, ClipboardList } from "lucide-react";
+import { UserCircle2, Package, Truck, Users, ClipboardList, UserCog } from "lucide-react";
 
 interface UserMenuItem {
   name: string;
@@ -19,7 +19,8 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
   ] : userType === 'admin' ? [
     { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
     { name: "Demandes d'inscription", href: "/admin", icon: <ClipboardList className="w-4 h-4" /> },
-    { name: "Clients", href: "/admin/clients", icon: <Users className="w-4 h-4" /> }
+    { name: "Clients", href: "/admin/clients", icon: <Users className="w-4 h-4" /> },
+    { name: "Administrateurs", href: "/admin/gestion", icon: <UserCog className="w-4 h-4" /> }
   ] : [
     { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
     { name: "Mes réservations", href: "/mes-reservations", icon: <Package className="w-4 h-4" /> },
