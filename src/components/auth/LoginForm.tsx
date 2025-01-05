@@ -30,12 +30,46 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
+      if (!email.trim() || !password.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Champs requis",
+          description: "Veuillez remplir tous les champs",
+        });
+        return;
+      }
+
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: email.trim(),
+        password: password.trim(),
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        let errorTitle = "Erreur de connexion";
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+
+        if (signInError.message === "Invalid login credentials") {
+          errorTitle = "Identifiants incorrects";
+          errorMessage = "L'email ou le mot de passe est incorrect";
+        } else if (signInError.message.includes("Email not confirmed")) {
+          errorTitle = "Email non confirmé";
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (signInError.message.includes("Invalid email")) {
+          errorTitle = "Email invalide";
+          errorMessage = "Le format de l'email est incorrect";
+        } else if (signInError.message.includes("Password")) {
+          errorTitle = "Mot de passe incorrect";
+          errorMessage = "Le mot de passe fourni est incorrect";
+        }
+
+        toast({
+          variant: "destructive",
+          title: errorTitle,
+          description: errorMessage,
+        });
+        setPassword("");
+        return;
+      }
 
       if (user) {
         const userType = user.user_metadata?.user_type;
@@ -63,18 +97,11 @@ export function LoginForm({
         onSuccess?.();
       }
     } catch (error: any) {
-      let errorMessage = "Une erreur est survenue lors de la connexion";
-      
-      if (error.message === "Invalid login credentials") {
-        errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message.includes("Email not confirmed")) {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      }
-
+      console.error("Erreur de connexion:", error);
       toast({
         variant: "destructive",
-        title: "Erreur de connexion",
-        description: errorMessage,
+        title: "Erreur inattendue",
+        description: "Une erreur inattendue s'est produite. Veuillez réessayer.",
       });
     } finally {
       setIsLoading(false);
@@ -92,6 +119,7 @@ export function LoginForm({
           onChange={(e) => setEmail(e.target.value)}
           required
           placeholder="exemple@email.com"
+          className="w-full"
         />
       </div>
 
@@ -104,6 +132,7 @@ export function LoginForm({
           onChange={(e) => setPassword(e.target.value)}
           required
           placeholder="••••••••"
+          className="w-full"
         />
       </div>
 
