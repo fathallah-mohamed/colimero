@@ -11,6 +11,8 @@ import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -31,6 +33,7 @@ export function TourTimelineCard({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
 
   const isBookingEnabled = () => {
     return selectedPickupCity && tour.status === 'planned' && userType !== 'admin';
@@ -53,10 +56,23 @@ export function TourTimelineCard({
   const handleBookingClick = async () => {
     if (!selectedPickupCity) return;
     
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    const userType = session.user.user_metadata?.user_type;
+    if (userType !== 'client') {
+      setShowAuthDialog(true);
+      return;
+    }
+
     if (tour.type === 'private') {
       setShowApprovalDialog(true);
     } else {
-      onBookingClick(tour.id, selectedPickupCity);
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
   };
 
@@ -153,7 +169,7 @@ export function TourTimelineCard({
             if (tour.type === 'private') {
               setShowApprovalDialog(true);
             } else {
-              onBookingClick(tour.id, selectedPickupCity);
+              navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
             }
           }
         }}
