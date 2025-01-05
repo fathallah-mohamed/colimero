@@ -4,7 +4,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import CarrierSignupForm from "./CarrierSignupForm";
 import { Heading } from "@/components/ui/heading";
 
-interface CarrierAuthDialogProps {
+export interface CarrierAuthDialogProps {
   open: boolean;
   onClose: () => void;
 }

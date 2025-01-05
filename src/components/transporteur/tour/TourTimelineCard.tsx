@@ -161,7 +161,7 @@ export function TourTimelineCard({
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog} 
+        open={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
         onSuccess={() => {
           setShowAuthDialog(false);
