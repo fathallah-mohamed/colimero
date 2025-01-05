@@ -41,12 +41,18 @@ export function useConsents() {
 
       const { data, error } = await supabase
         .from('user_consents')
-        .upsert({
-          user_id: user.id,
-          consent_type_id: consentTypeId,
-          accepted,
-          accepted_at: accepted ? new Date().toISOString() : null,
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            consent_type_id: consentTypeId,
+            accepted,
+            accepted_at: accepted ? new Date().toISOString() : null,
+          },
+          {
+            onConflict: 'user_id,consent_type_id',
+            ignoreDuplicates: false
+          }
+        )
         .select()
         .single();
 
