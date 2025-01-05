@@ -2,20 +2,17 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { TourFilters } from "@/components/tour/TourFilters";
-import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { RegisterForm } from "@/components/auth/RegisterForm";
-import AuthDialog from "@/components/auth/AuthDialog";
-import type { Tour, TourStatus } from "@/types/tour";
+import { TourPageHeader } from "@/components/tour/TourPageHeader";
+import { TourAuthDialogs } from "@/components/tour/TourAuthDialogs";
+import type { Tour } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [tourType, setTourType] = useState("public");
   const [sortBy, setSortBy] = useState("departure_asc");
-  const [status, setStatus] = useState<TourStatus | "all">("planned");
+  const [status, setStatus] = useState<"planned" | "all">("planned");
   const [userType, setUserType] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
@@ -53,7 +50,6 @@ export default function EnvoyerColis() {
         query = query.eq("status", status);
       }
 
-      // Apply sorting
       switch (sortBy) {
         case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
@@ -109,7 +105,6 @@ export default function EnvoyerColis() {
         query = query.eq("status", status);
       }
 
-      // Apply sorting
       switch (sortBy) {
         case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
@@ -156,60 +151,46 @@ export default function EnvoyerColis() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
 
-        <div className="space-y-6">
-          <TourFilters
-            departureCountry={departureCountry}
-            destinationCountry={destinationCountry}
-            sortBy={sortBy}
-            status={status}
-            onDepartureChange={handleDepartureChange}
-            onDestinationChange={setDestinationCountry}
-            onSortChange={setSortBy}
-            onStatusChange={setStatus}
-          />
+        <TourPageHeader
+          departureCountry={departureCountry}
+          destinationCountry={destinationCountry}
+          tourType={tourType}
+          sortBy={sortBy}
+          status={status}
+          publicToursCount={publicTours?.length || 0}
+          privateToursCount={privateTours?.length || 0}
+          onDepartureChange={handleDepartureChange}
+          onDestinationChange={setDestinationCountry}
+          onSortChange={setSortBy}
+          onStatusChange={setStatus}
+          onTypeChange={setTourType}
+        />
 
-          <TourTypeTabs
-            tourType={tourType}
-            publicToursCount={publicTours?.length || 0}
-            privateToursCount={privateTours?.length || 0}
-            onTypeChange={setTourType}
+        {tourType === "public" ? (
+          <TransporteurTours 
+            tours={publicTours} 
+            type="public"
+            isLoading={isLoadingPublic}
+            userType={userType}
+            onAuthRequired={() => setShowAuthDialog(true)}
           />
-
-          {tourType === "public" ? (
-            <TransporteurTours 
-              tours={publicTours} 
-              type="public"
-              isLoading={isLoadingPublic}
-              userType={userType}
-            />
-          ) : (
-            <TransporteurTours 
-              tours={privateTours} 
-              type="private"
-              isLoading={isLoadingPrivate}
-              userType={userType}
-            />
-          )}
-        </div>
+        ) : (
+          <TransporteurTours 
+            tours={privateTours} 
+            type="private"
+            isLoading={isLoadingPrivate}
+            userType={userType}
+            onAuthRequired={() => setShowAuthDialog(true)}
+          />
+        )}
       </div>
 
-      <AuthDialog 
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
-        onRegisterClick={() => {
-          setShowAuthDialog(false);
-          setShowRegisterForm(true);
-        }}
+      <TourAuthDialogs
+        showAuthDialog={showAuthDialog}
+        showRegisterForm={showRegisterForm}
+        setShowAuthDialog={setShowAuthDialog}
+        setShowRegisterForm={setShowRegisterForm}
       />
-
-      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
-        <DialogContent className="max-w-2xl">
-          <RegisterForm onLogin={() => {
-            setShowRegisterForm(false);
-            setShowAuthDialog(true);
-          }} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

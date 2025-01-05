@@ -1,61 +1,53 @@
-import { TourTimelineCard } from "./tour/TourTimelineCard";
-import { Tour } from "@/types/tour";
-import { useNavigate } from "react-router-dom";
-import { differenceInDays } from "date-fns";
+import { TourCard } from "./TourCard";
+import type { Tour } from "@/types/tour";
 
 interface TransporteurToursProps {
   tours: Tour[];
   type: "public" | "private";
-  isLoading?: boolean;
-  hideAvatar?: boolean;
-  userType?: string | null;
+  isLoading: boolean;
+  userType: string | null;
+  onAuthRequired: () => void;
 }
 
-export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType }: TransporteurToursProps) {
-  const navigate = useNavigate();
-
-  const handleBookingClick = (tourId: number, pickupCity: string) => {
-    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
-  };
-
+export function TransporteurTours({ 
+  tours, 
+  type,
+  isLoading,
+  userType,
+  onAuthRequired
+}: TransporteurToursProps) {
   if (isLoading) {
-    return <div>Chargement des tournées...</div>;
+    return <div className="animate-pulse space-y-4">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="bg-white rounded-lg p-6 h-48" />
+      ))}
+    </div>;
   }
 
-  if (!tours.length) {
+  if (!tours?.length) {
     return (
-      <div className="text-center py-8">
+      <div className="text-center py-12">
         <p className="text-gray-500">
-          Aucune tournée {type === "public" ? "publique" : "privée"} disponible
+          Aucune tournée {type === "public" ? "publique" : "privée"} disponible pour le moment
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {tours.map((tour) => {
-        const daysUntilDeparture = differenceInDays(
-          new Date(tour.departure_date),
-          new Date()
-        );
-        const isUpcoming = daysUntilDeparture <= 7 && daysUntilDeparture >= 0;
-
-        return (
-          <div
-            key={tour.id}
-            className="transform transition-all duration-200 hover:translate-y-[-4px]"
-          >
-            <TourTimelineCard
-              tour={tour}
-              onBookingClick={handleBookingClick}
-              hideAvatar={hideAvatar}
-              userType={userType}
-              isUpcoming={isUpcoming}
-            />
-          </div>
-        );
-      })}
+    <div className="space-y-4 mt-6">
+      {tours.map((tour) => (
+        <TourCard
+          key={tour.id}
+          tour={tour}
+          onBookingClick={() => {
+            if (!userType) {
+              onAuthRequired();
+            }
+          }}
+          hideAvatar={false}
+        />
+      ))}
     </div>
   );
 }
