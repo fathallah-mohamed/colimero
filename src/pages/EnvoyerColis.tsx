@@ -4,7 +4,9 @@ import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import TourPageHeader from "@/components/tour/TourPageHeader";
 import TourPageContent from "@/components/tour/TourPageContent";
-import { TourAuthDialogs } from "@/components/tour/auth/TourAuthDialogs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import AuthDialog from "@/components/auth/AuthDialog";
 import type { Tour, TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
@@ -174,14 +176,19 @@ export default function EnvoyerColis() {
           onAuthRequired={handleAuthRequired}
         />
 
-        <TourAuthDialogs 
-          showAuthDialog={showAuthDialog}
-          showRegisterForm={showRegisterForm}
-          onAuthClose={() => setShowAuthDialog(false)}
-          onRegisterClose={() => setShowRegisterForm(false)}
+        <AuthDialog 
+          isOpen={showAuthDialog}
+          onClose={() => setShowAuthDialog(false)}
           onRegisterClick={handleRegisterClick}
-          onLoginClick={handleLoginClick}
+          onCarrierRegisterClick={handleRegisterClick}
+          requiredUserType="client"
         />
+
+        <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
+          <DialogContent className="max-w-2xl">
+            <RegisterForm onLogin={handleLoginClick} />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

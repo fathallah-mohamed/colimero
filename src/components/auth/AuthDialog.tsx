@@ -31,12 +31,10 @@ export default function AuthDialog({
     onClose();
   };
 
-  // Sauvegarder le chemin actuel si on est sur une page de réservation
   if (location.pathname.includes('/reserver/')) {
     sessionStorage.setItem('returnPath', location.pathname + location.search);
   }
 
-  // Si appelé depuis le header, afficher une version simplifiée
   if (fromHeader) {
     return (
       <SimpleAuthDialog
@@ -49,7 +47,6 @@ export default function AuthDialog({
     );
   }
 
-  // Si un type d'utilisateur spécifique est requis, ne pas afficher les onglets
   if (requiredUserType) {
     return (
       <RequiredUserAuthDialog
@@ -63,7 +60,6 @@ export default function AuthDialog({
     );
   }
 
-  // Sinon, afficher les onglets avec les deux options
   return (
     <TabsAuthDialog
       isOpen={isOpen}
