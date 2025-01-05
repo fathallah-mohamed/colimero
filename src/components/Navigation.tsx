@@ -42,7 +42,6 @@ export default function Navigation() {
         isOpen={isOpen}
         user={user}
         userType={userType}
-        userMenuItems={[]}
         handleLogout={handleLogout}
         setIsOpen={setIsOpen}
         setShowAuthDialog={setShowAuthDialog}
