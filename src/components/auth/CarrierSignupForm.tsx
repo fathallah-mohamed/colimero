@@ -12,12 +12,14 @@ import { CompanyInfoFields } from "./carrier-signup/CompanyInfoFields";
 import { ContactInfoFields } from "./carrier-signup/ContactInfoFields";
 import { TermsCheckboxes } from "./carrier-signup/TermsCheckboxes";
 import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CarrierSignupFormProps {
   onSuccess: () => void;
 }
 
-export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
+export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -46,7 +48,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Create registration request without signing up the user
       const { error: registrationError } = await supabase
         .from("carrier_registration_requests")
         .insert({
@@ -71,7 +72,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
         description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
       });
 
-      // Close the dialog and redirect to home page
       onSuccess();
       navigate("/");
     } catch (error) {
@@ -88,25 +88,67 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
     .every(value => value === true);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid gap-8">
-          <ContactInfoFields form={form} />
-          <PersonalInfoFields form={form} />
-          <CompanyInfoFields form={form} />
-          <CoverageAreaSelect form={form} />
-          <ServiceOptions form={form} />
-          <TermsCheckboxes form={form} />
-        </div>
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="text-center mb-8 bg-gradient-primary p-8 rounded-lg text-white">
+        <h1 className="text-3xl font-bold mb-3">
+          Rejoignez notre réseau de transporteurs !
+        </h1>
+        <p className="text-lg opacity-90">
+          Inscrivez-vous dès aujourd'hui pour accéder à des tournées optimisées et développer votre activité. 
+          Remplissez les informations ci-dessous, et notre équipe examinera votre demande rapidement.
+        </p>
+      </div>
 
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={!form.formState.isValid || !allTermsAccepted}
-        >
-          Envoyer la demande
-        </Button>
-      </form>
-    </Form>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <ScrollArea className="h-[calc(100vh-300px)] pr-4">
+            <div className="grid gap-8">
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-6">Informations de contact</h2>
+                <ContactInfoFields form={form} />
+              </Card>
+
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-6">Informations personnelles</h2>
+                <PersonalInfoFields form={form} />
+              </Card>
+
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-6">Informations de l'entreprise</h2>
+                <CompanyInfoFields form={form} />
+              </Card>
+
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-6">Zone de couverture</h2>
+                <CoverageAreaSelect form={form} />
+              </Card>
+
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-6">Services proposés</h2>
+                <ServiceOptions form={form} />
+              </Card>
+
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-6">Conditions et engagements</h2>
+                <TermsCheckboxes form={form} />
+              </Card>
+            </div>
+
+            <div className="mt-8 text-center">
+              <Button 
+                type="submit" 
+                className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
+                disabled={!form.formState.isValid || !allTermsAccepted}
+              >
+                Envoyer ma demande d'inscription
+              </Button>
+              <p className="text-sm text-muted-foreground mt-4">
+                Une fois votre demande envoyée, nous vous contacterons pour finaliser votre inscription.
+              </p>
+            </div>
+          </ScrollArea>
+        </form>
+      </Form>
+    </div>
   );
 }
