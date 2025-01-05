@@ -1,7 +1,7 @@
 import { AdminsList } from "@/components/admin/AdminsList";
-import { ApprovedCarriers } from "@/components/admin/ApprovedCarriers";
-import { NewRegistrationRequests } from "@/components/admin/NewRegistrationRequests";
-import { RejectedRequests } from "@/components/admin/RejectedRequests";
+import ApprovedCarriers from "@/components/admin/ApprovedCarriers";
+import NewRegistrationRequests from "@/components/admin/NewRegistrationRequests";
+import RejectedRequests from "@/components/admin/RejectedRequests";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminDashboard() {
