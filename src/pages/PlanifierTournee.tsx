@@ -87,13 +87,6 @@ export default function PlanifierTournee() {
     }
   };
 
-  const handleAuthSuccess = () => {
-    setIsAuthDialogOpen(false);
-    if (userType === 'carrier') {
-      setShowCreateForm(true);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -147,9 +140,17 @@ export default function PlanifierTournee() {
       <AuthDialog
         isOpen={isAuthDialogOpen}
         onClose={() => setIsAuthDialogOpen(false)}
-        onSuccess={handleAuthSuccess}
+        onSuccess={() => {
+          setIsAuthDialogOpen(false);
+          if (userType === 'carrier') {
+            setShowCreateForm(true);
+          }
+        }}
         requiredUserType="carrier"
         onRegisterClick={() => {
+          setIsAuthDialogOpen(false);
+        }}
+        onCarrierRegisterClick={() => {
           setIsAuthDialogOpen(false);
         }}
       />
