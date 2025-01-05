@@ -51,14 +51,9 @@ export function ToursList({
           tour={tour}
           selectedPickupCity={null}
           onPickupCitySelect={() => {}}
-          onBookingClick={() => {}}
           isBookingEnabled={false}
           isPickupSelectionEnabled={false}
           bookingButtonText="Réserver"
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onStatusChange={onStatusChange}
-          isCompleted={isCompleted}
         />
       ))}
     </div>
