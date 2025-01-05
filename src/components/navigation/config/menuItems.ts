@@ -4,7 +4,7 @@ export const menuItems = [
   { 
     name: "Planifier une tournée", 
     href: "/planifier-tournee", 
-    icon: <Calendar className="w-4 h-4" />, 
+    icon: Calendar,
     highlight: true,
     className: "bg-blue-50",
     allowedUserTypes: ["carrier"]
@@ -12,7 +12,7 @@ export const menuItems = [
   { 
     name: "Envoyer un colis", 
     href: "/envoyer-colis", 
-    icon: <Package className="w-4 h-4" />, 
+    icon: Package,
     highlight: true,
     className: "bg-blue-50",
     allowedUserTypes: ["client"]
@@ -20,31 +20,31 @@ export const menuItems = [
   { 
     name: "Transporteurs", 
     href: "/transporteurs", 
-    icon: <Truck className="w-4 h-4" />,
+    icon: Truck,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "Administrateurs", 
     href: "/admin", 
-    icon: <UserCog className="w-4 h-4" />,
+    icon: UserCog,
     allowedUserTypes: ["admin"]
   },
   { 
     name: "Actualités", 
     href: "/blog", 
-    icon: <MessageSquare className="w-4 h-4" />,
+    icon: MessageSquare,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "À propos", 
     href: "/a-propos", 
-    icon: <Info className="w-4 h-4" />,
+    icon: Info,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "Contact", 
     href: "/contact", 
-    icon: <Users className="w-4 h-4" />,
+    icon: Users,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
 ];

@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 interface MenuItemProps {
   name: string;
   href: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<any>;
   highlight?: boolean;
   className?: string;
   allowedUserTypes: string[];
@@ -16,7 +16,7 @@ interface MenuItemProps {
 export function MenuItem({ 
   name, 
   href, 
-  icon, 
+  icon: Icon, 
   highlight, 
   className, 
   allowedUserTypes, 
@@ -64,7 +64,7 @@ export function MenuItem({
         className
       )}
     >
-      {icon}
+      <Icon className="w-4 h-4" />
       <span className="ml-2">{name}</span>
     </Link>
   );
