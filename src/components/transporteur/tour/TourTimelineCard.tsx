@@ -4,14 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { formatDate } from "@/lib/utils";
-import { Tour } from "@/types/tour";
 import { TourTimeline } from "./TourTimeline";
 import { TourStatusBadge } from "./TourStatusBadge";
 import { TourActions } from "./TourActions";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useAuth } from "@/hooks/use-auth";
+import type { Tour } from "@/types/tour";
 
 export function TourTimelineCard({ tour }: { tour: Tour }) {
   const navigate = useNavigate();
@@ -109,13 +108,6 @@ export function TourTimelineCard({ tour }: { tour: Tour }) {
             bookingButtonText={getBookingButtonText(tour.status)}
           />
         </div>
-
-        {tour.notes && (
-          <div>
-            <p className="text-sm text-gray-500">Notes</p>
-            <p>{tour.notes}</p>
-          </div>
-        )}
       </div>
 
       <AuthDialog
