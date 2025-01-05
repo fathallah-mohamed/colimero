@@ -32,13 +32,24 @@ export function BookingList() {
       
       // Log pour debug
       console.log("Bookings data:", data);
-      return data;
+      
+      // Normalisation des special_items pour chaque réservation
+      const normalizedData = data?.map(booking => ({
+        ...booking,
+        special_items: Array.isArray(booking.special_items) 
+          ? booking.special_items.map(item => {
+              if (typeof item === 'string') return { name: item, quantity: 1 };
+              return item;
+            })
+          : []
+      }));
+
+      return normalizedData;
     },
   });
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     console.log("Status change requested:", bookingId, newStatus);
-    // The actual update is handled in the BookingCard component
   };
 
   const handleUpdate = async (): Promise<void> => {

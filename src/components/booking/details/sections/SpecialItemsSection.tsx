@@ -7,45 +7,59 @@ interface SpecialItem {
 }
 
 interface SpecialItemsSectionProps {
-  specialItems: SpecialItem[];
+  specialItems: any[];
   contentTypes: string[];
 }
 
 export function SpecialItemsSection({ specialItems, contentTypes }: SpecialItemsSectionProps) {
-  // Vérification et conversion des special_items si nécessaire
-  const parsedSpecialItems = React.useMemo(() => {
+  // Normalisation des objets spéciaux
+  const normalizedItems = React.useMemo(() => {
     if (!specialItems) return [];
     
-    // Si c'est une chaîne JSON, on la parse
+    // Si c'est un tableau d'objets avec name et quantity
+    if (Array.isArray(specialItems) && specialItems.length > 0) {
+      if (typeof specialItems[0] === 'object' && 'name' in specialItems[0]) {
+        return specialItems;
+      }
+      
+      // Si c'est un tableau de strings, on ajoute une quantité par défaut
+      if (typeof specialItems[0] === 'string') {
+        return specialItems.map(name => ({ name, quantity: 1 }));
+      }
+    }
+    
+    // Si c'est une chaîne JSON, on essaie de la parser
     if (typeof specialItems === 'string') {
       try {
-        return JSON.parse(specialItems);
+        const parsed = JSON.parse(specialItems);
+        return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         console.error('Error parsing special items:', e);
         return [];
       }
     }
     
-    // Si c'est déjà un tableau, on le retourne tel quel
-    return Array.isArray(specialItems) ? specialItems : [];
+    return [];
   }, [specialItems]);
 
-  console.log("Parsed special items:", parsedSpecialItems); // Debug log
+  console.log("Normalized special items:", normalizedItems);
 
-  if (!parsedSpecialItems?.length && !contentTypes?.length) return null;
+  if (!normalizedItems?.length && !contentTypes?.length) return null;
 
   return (
     <div className="space-y-4">
-      {parsedSpecialItems?.length > 0 && (
+      {normalizedItems?.length > 0 && (
         <div>
           <p className="text-sm text-gray-500 mb-2">Objets spéciaux</p>
           <div className="flex flex-wrap gap-2">
-            {parsedSpecialItems.map((item, index) => (
+            {normalizedItems.map((item, index) => (
               <Badge key={index} variant="secondary" className="flex items-center gap-2">
                 <span>{item.name}</span>
-                <span className="text-xs bg-primary/10 px-1.5 py-0.5 rounded-full">
-                  {item.quantity}
-                </span>
+                {item.quantity && (
+                  <span className="text-xs bg-primary/10 px-1.5 py-0.5 rounded-full">
+                    {item.quantity}
+                  </span>
+                )}
               </Badge>
             ))}
           </div>
