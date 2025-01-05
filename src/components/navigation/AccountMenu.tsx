@@ -2,14 +2,15 @@ import { useState } from "react";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 
 export function AccountMenu() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    if (logout) {
+      await logout();
+    }
   };
 
   return (

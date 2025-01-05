@@ -4,63 +4,63 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
+import { TourTimeline } from "./TourTimeline";
+import { TourStatusBadge } from "./TourStatusBadge";
+import { TourActions } from "./TourActions";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useAuth } from "@/hooks/use-auth";
-import { Tour } from "@/types/tour";
+import type { Tour } from "@/types/tour";
 
 interface TourTimelineCardProps {
   tour: Tour;
-  onBookingClick?: (tourId: number, pickupCity: string) => void;
+  onBookingClick?: (tourId: number, pickupCity: string) => Promise<void> | void;
   hideAvatar?: boolean;
   userType?: string;
   isUpcoming?: boolean;
 }
 
 export function TourTimelineCard({ 
-  tour,
+  tour, 
   onBookingClick,
   hideAvatar = false,
   userType,
   isUpcoming = false 
 }: TourTimelineCardProps) {
-  const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const toast = useToast();
 
   const handleBookingClick = () => {
     if (!user) {
-      setShowAuthDialog(true);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Vous devez être connecté pour réserver.",
+      });
       return;
     }
     if (onBookingClick) {
-      onBookingClick(tour.id, tour.route[0]?.name || '');
+      onBookingClick(tour.id, tour.pickup_city);
+    } else {
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(tour.pickup_city)}`);
     }
   };
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between">
+    <Card className="p-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold">{tour.carrier_id}</h3>
+          <h3 className="text-lg font-semibold">{tour.title}</h3>
           <p className="text-sm text-gray-500">{formatDate(tour.departure_date)}</p>
         </div>
-        <Badge variant={isUpcoming ? "success" : "default"}>
-          {isUpcoming ? "À venir" : "Passé"}
-        </Badge>
+        <TourStatusBadge status={tour.status} />
       </div>
-      <div className="mt-4">
-        <p>{tour.route.map(stop => stop.name).join(', ')}</p>
-      </div>
-      <div className="mt-6">
-        <button onClick={handleBookingClick} className="w-full bg-blue-500 text-white py-2 rounded">
-          Réserver
-        </button>
-      </div>
-      <AuthDialog 
-        open={showAuthDialog} 
-        onClose={() => setShowAuthDialog(false)}
-        fromHeader={false}
+      <TourTimeline tour={tour} />
+      <TourActions 
+        onBookingClick={handleBookingClick} 
+        isUpcoming={isUpcoming} 
+        hideAvatar={hideAvatar} 
+        userType={userType} 
       />
     </Card>
   );
