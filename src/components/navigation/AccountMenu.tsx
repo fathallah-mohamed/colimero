@@ -36,7 +36,7 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         </Button>
 
         <AuthDialog 
-          isOpen={showAuthDialog} 
+          open={showAuthDialog} 
           onClose={() => setShowAuthDialog(false)} 
         />
       </>

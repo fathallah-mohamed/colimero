@@ -17,7 +17,7 @@ interface CarrierSignupFormProps {
   onSuccess: () => void;
 }
 
-export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
+export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -46,7 +46,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Create registration request without signing up the user
       const { error: registrationError } = await supabase
         .from("carrier_registration_requests")
         .insert({
@@ -71,7 +70,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
         description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
       });
 
-      // Close the dialog and redirect to home page
       onSuccess();
       navigate("/");
     } catch (error) {
