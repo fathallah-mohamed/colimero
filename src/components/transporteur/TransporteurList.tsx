@@ -31,9 +31,14 @@ export function TransporteurList() {
             total_capacity,
             price_per_kg,
             offers_home_delivery
+          ),
+          carrier_services (
+            service_type,
+            icon
           )
         `)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
 
       if (error) {
         toast({
@@ -43,6 +48,8 @@ export function TransporteurList() {
         });
         throw error;
       }
+
+      console.log("Carriers data:", data); // Debug log
       return data;
     },
   });
