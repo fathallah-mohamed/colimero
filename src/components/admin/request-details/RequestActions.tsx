@@ -5,20 +5,28 @@ interface RequestActionsProps {
   onApprove: () => Promise<void>;
   onReject: () => Promise<void>;
   isSubmitting: boolean;
+  showRejectButton?: boolean;
 }
 
-export function RequestActions({ onApprove, onReject, isSubmitting }: RequestActionsProps) {
+export function RequestActions({ 
+  onApprove, 
+  onReject, 
+  isSubmitting,
+  showRejectButton = true
+}: RequestActionsProps) {
   return (
     <>
-      <Button
-        variant="destructive"
-        onClick={onReject}
-        disabled={isSubmitting}
-        className="flex items-center gap-2"
-      >
-        <X className="h-4 w-4" />
-        Rejeter
-      </Button>
+      {showRejectButton && (
+        <Button
+          variant="destructive"
+          onClick={onReject}
+          disabled={isSubmitting}
+          className="flex items-center gap-2"
+        >
+          <X className="h-4 w-4" />
+          Rejeter
+        </Button>
+      )}
       <Button
         onClick={onApprove}
         disabled={isSubmitting}

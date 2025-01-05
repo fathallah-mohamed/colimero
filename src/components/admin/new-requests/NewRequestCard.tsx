@@ -2,14 +2,21 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Search, Settings } from "lucide-react";
+import { Search, Check } from "lucide-react";
 
 interface NewRequestCardProps {
   request: any;
   onViewDetails: () => void;
+  showApproveButton?: boolean;
+  onApprove?: () => void;
 }
 
-export function NewRequestCard({ request, onViewDetails }: NewRequestCardProps) {
+export function NewRequestCard({ 
+  request, 
+  onViewDetails,
+  showApproveButton = false,
+  onApprove 
+}: NewRequestCardProps) {
   return (
     <Card className="p-4">
       <div className="space-y-2">
@@ -30,6 +37,16 @@ export function NewRequestCard({ request, onViewDetails }: NewRequestCardProps) 
             <Search className="h-4 w-4" />
             Voir les détails
           </Button>
+          {showApproveButton && onApprove && (
+            <Button
+              variant="default"
+              onClick={onApprove}
+              className="w-full inline-flex items-center justify-center gap-2"
+            >
+              <Check className="h-4 w-4" />
+              Approuver
+            </Button>
+          )}
         </div>
       </div>
     </Card>

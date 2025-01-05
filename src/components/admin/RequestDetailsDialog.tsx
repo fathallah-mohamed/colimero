@@ -17,37 +17,34 @@ import { RequestActions } from "./request-details/RequestActions";
 interface RequestDetailsDialogProps {
   request: any;
   onClose: () => void;
+  onApprove?: (request: any) => void;
+  showApproveButton?: boolean;
 }
 
-export default function RequestDetailsDialog({ request, onClose }: RequestDetailsDialogProps) {
+export default function RequestDetailsDialog({ 
+  request, 
+  onClose,
+  onApprove,
+  showApproveButton = false
+}: RequestDetailsDialogProps) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleApprove = async () => {
+    if (onApprove) {
+      onApprove(request);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // Mettre à jour le statut de la demande
       const { error: updateError } = await supabase
         .from("carrier_registration_requests")
         .update({ status: "approved" })
         .eq("id", request.id);
 
       if (updateError) throw updateError;
-
-      // Envoyer l'email de confirmation via l'edge function
-      const response = await fetch("/api/send-approval-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: request.email,
-          company_name: request.company_name,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'envoi de l'email");
-      }
 
       toast({
         title: "Demande approuvée",
@@ -162,11 +159,12 @@ export default function RequestDetailsDialog({ request, onClose }: RequestDetail
         </div>
 
         <DialogFooter>
-          {request.status === "pending" && (
+          {(request.status === "pending" || showApproveButton) && (
             <RequestActions
               onApprove={handleApprove}
               onReject={handleReject}
               isSubmitting={isSubmitting}
+              showRejectButton={request.status === "pending"}
             />
           )}
         </DialogFooter>

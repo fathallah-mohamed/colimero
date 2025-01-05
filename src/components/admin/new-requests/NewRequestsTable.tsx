@@ -9,14 +9,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Search } from "lucide-react";
+import { Search, Check } from "lucide-react";
 
 interface NewRequestsTableProps {
   requests: any[];
   onViewDetails: (request: any) => void;
+  showApproveButton?: boolean;
+  onApprove?: (request: any) => void;
 }
 
-export function NewRequestsTable({ requests, onViewDetails }: NewRequestsTableProps) {
+export function NewRequestsTable({ 
+  requests, 
+  onViewDetails, 
+  showApproveButton = false,
+  onApprove 
+}: NewRequestsTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -39,7 +46,7 @@ export function NewRequestsTable({ requests, onViewDetails }: NewRequestsTablePr
                 locale: fr,
               })}
             </TableCell>
-            <TableCell>
+            <TableCell className="space-x-2">
               <Button
                 variant="outline"
                 onClick={() => onViewDetails(request)}
@@ -48,6 +55,16 @@ export function NewRequestsTable({ requests, onViewDetails }: NewRequestsTablePr
                 <Search className="h-4 w-4" />
                 Détails
               </Button>
+              {showApproveButton && onApprove && (
+                <Button
+                  variant="default"
+                  onClick={() => onApprove(request)}
+                  className="inline-flex items-center gap-2"
+                >
+                  <Check className="h-4 w-4" />
+                  Approuver
+                </Button>
+              )}
             </TableCell>
           </TableRow>
         ))}

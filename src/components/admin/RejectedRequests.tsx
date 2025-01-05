@@ -3,17 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { RefreshCw, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import RequestDetailsDialog from "./RequestDetailsDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NewRequestCard } from "./new-requests/NewRequestCard";
 import { NewRequestsTable } from "./new-requests/NewRequestsTable";
 import Navigation from "@/components/Navigation";
+import RequestDetailsDialog from "./RequestDetailsDialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const { toast } = useToast();
 
-  const { data: requests, isLoading } = useQuery({
+  const { data: requests, isLoading, refetch } = useQuery({
     queryKey: ["carrier-requests", "rejected"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -26,6 +28,32 @@ export default function RejectedRequests() {
       return data;
     },
   });
+
+  const handleApprove = async (request: any) => {
+    try {
+      const { error: updateError } = await supabase
+        .from("carrier_registration_requests")
+        .update({ status: "approved" })
+        .eq("id", request.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Demande approuvée",
+        description: "Le transporteur a été approuvé avec succès.",
+      });
+
+      refetch();
+      setSelectedRequest(null);
+    } catch (error) {
+      console.error("Error approving request:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'approbation de la demande.",
+      });
+    }
+  };
 
   const filteredRequests = requests?.filter(
     (request) =>
@@ -63,6 +91,8 @@ export default function RejectedRequests() {
             <NewRequestsTable
               requests={filteredRequests}
               onViewDetails={setSelectedRequest}
+              showApproveButton={true}
+              onApprove={handleApprove}
             />
           </ScrollArea>
         </div>
@@ -73,6 +103,8 @@ export default function RejectedRequests() {
               key={request.id}
               request={request}
               onViewDetails={() => setSelectedRequest(request)}
+              showApproveButton={true}
+              onApprove={() => handleApprove(request)}
             />
           ))}
         </div>
@@ -80,6 +112,8 @@ export default function RejectedRequests() {
         <RequestDetailsDialog
           request={selectedRequest}
           onClose={() => setSelectedRequest(null)}
+          onApprove={handleApprove}
+          showApproveButton={true}
         />
       </div>
     </div>
