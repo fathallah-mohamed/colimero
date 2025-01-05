@@ -53,7 +53,6 @@ export default function EnvoyerColis() {
         query = query.eq("status", status);
       }
 
-      // Apply sorting
       switch (sortBy) {
         case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
@@ -109,7 +108,6 @@ export default function EnvoyerColis() {
         query = query.eq("status", status);
       }
 
-      // Apply sorting
       switch (sortBy) {
         case 'departure_asc':
           query = query.order('departure_date', { ascending: true });
@@ -165,7 +163,7 @@ export default function EnvoyerColis() {
             onDepartureChange={handleDepartureChange}
             onDestinationChange={setDestinationCountry}
             onSortChange={setSortBy}
-            onStatusChange={setStatus}
+            onStatusChange={(value) => setStatus(value as TourStatus | "all")}
           />
 
           <TourTypeTabs
@@ -181,6 +179,7 @@ export default function EnvoyerColis() {
               type="public"
               isLoading={isLoadingPublic}
               userType={userType}
+              onAuthRequired={() => setShowAuthDialog(true)}
             />
           ) : (
             <TransporteurTours 
@@ -188,6 +187,7 @@ export default function EnvoyerColis() {
               type="private"
               isLoading={isLoadingPrivate}
               userType={userType}
+              onAuthRequired={() => setShowAuthDialog(true)}
             />
           )}
         </div>
