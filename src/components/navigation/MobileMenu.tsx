@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { UserCircle2 } from "lucide-react";
+import { UserCircle2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { menuItems } from "./MenuItems";
 import { UserMenuItems } from "./UserMenuItems";
@@ -29,7 +29,17 @@ export default function MobileMenu({
         isOpen ? "translate-x-0" : "translate-x-full"
       )}
     >
-      <div className="h-full overflow-y-auto px-2 pt-20 pb-3 space-y-1">
+      <div className="flex justify-end p-4">
+        <button
+          onClick={() => setIsOpen(false)}
+          className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00B0F0]"
+        >
+          <X className="h-6 w-6" />
+          <span className="sr-only">Fermer le menu</span>
+        </button>
+      </div>
+
+      <div className="h-full overflow-y-auto px-2 pb-3 space-y-1">
         {menuItems.map((item) => (
           <Link
             key={item.name}
