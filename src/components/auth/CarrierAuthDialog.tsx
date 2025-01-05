@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { CarrierSignupForm } from "./CarrierSignupForm";
+import { CarrierSignupForm } from "./carrier-signup/CarrierSignupForm";
 
 interface CarrierAuthDialogProps {
   isOpen: boolean;
