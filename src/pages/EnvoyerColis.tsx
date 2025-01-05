@@ -2,12 +2,11 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { TourFilters } from "@/components/tour/TourFilters";
-import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
-import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import AuthDialog from "@/components/auth/AuthDialog";
+import TourPageHeader from "@/components/tour/TourPageHeader";
+import TourPageContent from "@/components/tour/TourPageContent";
 import type { Tour, TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
@@ -152,45 +151,26 @@ export default function EnvoyerColis() {
       <Navigation />
 
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-center mb-8">Nos Tournées</h1>
-
-        <div className="space-y-6">
-          <TourFilters
-            departureCountry={departureCountry}
-            destinationCountry={destinationCountry}
-            sortBy={sortBy}
-            status={status}
-            onDepartureChange={handleDepartureChange}
-            onDestinationChange={setDestinationCountry}
-            onSortChange={setSortBy}
-            onStatusChange={(value) => setStatus(value as TourStatus | "all")}
-          />
-
-          <TourTypeTabs
-            tourType={tourType}
-            publicToursCount={publicTours?.length || 0}
-            privateToursCount={privateTours?.length || 0}
-            onTypeChange={setTourType}
-          />
-
-          {tourType === "public" ? (
-            <TransporteurTours 
-              tours={publicTours} 
-              type="public"
-              isLoading={isLoadingPublic}
-              userType={userType}
-              onAuthRequired={() => setShowAuthDialog(true)}
-            />
-          ) : (
-            <TransporteurTours 
-              tours={privateTours} 
-              type="private"
-              isLoading={isLoadingPrivate}
-              userType={userType}
-              onAuthRequired={() => setShowAuthDialog(true)}
-            />
-          )}
-        </div>
+        <TourPageHeader />
+        
+        <TourPageContent
+          departureCountry={departureCountry}
+          destinationCountry={destinationCountry}
+          sortBy={sortBy}
+          status={status}
+          tourType={tourType}
+          publicTours={publicTours}
+          privateTours={privateTours}
+          isLoadingPublic={isLoadingPublic}
+          isLoadingPrivate={isLoadingPrivate}
+          userType={userType}
+          onDepartureChange={handleDepartureChange}
+          onDestinationChange={setDestinationCountry}
+          onSortChange={setSortBy}
+          onStatusChange={(value) => setStatus(value as TourStatus | "all")}
+          onTypeChange={setTourType}
+          onAuthRequired={() => setShowAuthDialog(true)}
+        />
       </div>
 
       <AuthDialog 
