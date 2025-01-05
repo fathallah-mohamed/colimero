@@ -1,98 +1,187 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/lib/utils";
-import { TourTimeline } from "./TourTimeline";
-import { TourStatusBadge } from "./TourStatusBadge";
-import { TourActions } from "./TourActions";
+import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
+import { Button } from "@/components/ui/button";
+import { Tour } from "@/types/tour";
+import { TourTimeline } from "@/components/transporteur/TourTimeline";
+import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { useAuth } from "@/hooks/use-auth";
-import type { Tour } from "@/types/tour";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { CollectionPointsList } from "@/components/tour/CollectionPointsList";
+import { Plus, Minus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TourTimelineCardProps {
   tour: Tour;
-  onBookingClick?: (tourId: number, pickupCity: string) => Promise<void> | void;
+  onBookingClick: (tourId: number, pickupCity: string) => void;
   hideAvatar?: boolean;
-  userType?: string;
+  userType?: string | null;
   isUpcoming?: boolean;
 }
 
 export function TourTimelineCard({ 
   tour, 
-  onBookingClick,
-  hideAvatar = false,
+  onBookingClick, 
+  hideAvatar, 
   userType,
-  isUpcoming = false 
+  isUpcoming = false
 }: TourTimelineCardProps) {
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
-  const handleBookingClick = () => {
-    if (!user) {
-      setIsAuthDialogOpen(true);
+  const isBookingEnabled = () => {
+    return selectedPickupCity && tour.status === 'planned' && userType !== 'admin';
+  };
+
+  const isPickupSelectionEnabled = () => {
+    return tour.status === 'planned' && userType !== 'admin';
+  };
+
+  const getBookingButtonText = () => {
+    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+    if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
+    if (tour.status === 'collecting') return "Cette tournée est en cours de collecte";
+    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
+    if (tour.status === 'completed') return "Cette tournée est terminée";
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
+    return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
+  };
+
+  const handleBookingClick = async () => {
+    if (!selectedPickupCity) return;
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      setShowAuthDialog(true);
       return;
     }
 
-    const pickupCity = tour.route[0]?.name || '';
-    
-    if (onBookingClick) {
-      onBookingClick(tour.id, pickupCity);
+    const userType = session.user.user_metadata?.user_type;
+    if (userType !== 'client') {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    if (tour.type === 'private') {
+      setShowApprovalDialog(true);
     } else {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(pickupCity)}`);
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
   };
 
-  const handleAuthSuccess = () => {
-    setIsAuthDialogOpen(false);
-    toast({
-      title: "Connexion réussie",
-      description: "Vous pouvez maintenant effectuer votre réservation"
-    });
-  };
-
   return (
-    <Card className="p-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold">Tournée {tour.id}</h3>
-          <p className="text-sm text-gray-500">{formatDate(tour.departure_date)}</p>
+    <div className={cn(
+      "bg-white rounded-xl overflow-hidden transition-all duration-200",
+      "border border-gray-100",
+      "hover:shadow-lg shadow-md",
+      "transform hover:-translate-y-1"
+    )}>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
+          {isUpcoming && (
+            <Badge className="bg-success/10 text-success hover:bg-success/20 transition-colors">
+              Prochaine tournée
+            </Badge>
+          )}
         </div>
-        <TourStatusBadge status={tour.status} />
+
+        <div 
+          className="flex items-center justify-between cursor-pointer group"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto transition-colors duration-200 hover:bg-primary/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+          >
+            <span className="mr-2 text-sm font-medium text-muted-foreground">
+              {isExpanded ? "Moins de détails" : "Plus de détails"}
+            </span>
+            {isExpanded ? (
+              <Minus className="h-4 w-4 text-primary" />
+            ) : (
+              <Plus className="h-4 w-4 text-primary" />
+            )}
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-6 space-y-6">
+                <TourTimeline status={tour.status} />
+                
+                <TourCapacityDisplay 
+                  totalCapacity={tour.total_capacity} 
+                  remainingCapacity={tour.remaining_capacity} 
+                />
+
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
+                  <CollectionPointsList
+                    points={tour.route}
+                    selectedPoint={selectedPickupCity}
+                    onPointSelect={setSelectedPickupCity}
+                    isSelectionEnabled={isPickupSelectionEnabled()}
+                    tourDepartureDate={tour.departure_date}
+                  />
+                </div>
+
+                <div>
+                  <Button 
+                    onClick={handleBookingClick}
+                    className="w-full"
+                    disabled={!isBookingEnabled()}
+                  >
+                    {getBookingButtonText()}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      <TourTimeline 
-        route={tour.route}
-        onBookingClick={handleBookingClick}
-        isBookingEnabled={tour.status === 'collecting'}
-        bookingButtonText={getBookingButtonText(tour.status)}
-      />
-      <TourActions tour={tour} />
+
       <AuthDialog 
-        open={isAuthDialogOpen}
-        onClose={() => setIsAuthDialogOpen(false)}
-        onSuccess={handleAuthSuccess}
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          if (selectedPickupCity) {
+            if (tour.type === 'private') {
+              setShowApprovalDialog(true);
+            } else {
+              navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+            }
+          }
+        }}
         requiredUserType="client"
       />
-    </Card>
-  );
-}
 
-function getBookingButtonText(status: Tour['status']) {
-  switch(status) {
-    case 'planned':
-      return "Cette tournée n'est pas encore ouverte aux réservations";
-    case 'collecting':
-      return "Réserver sur cette tournée";
-    case 'in_transit':
-      return "Cette tournée est en cours de livraison";
-    case 'completed':
-      return "Cette tournée est terminée";
-    case 'cancelled':
-      return "Cette tournée a été annulée";
-    default:
-      return "Statut inconnu";
-  }
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={tour.id}
+        pickupCity={selectedPickupCity || ''}
+      />
+    </div>
+  );
 }

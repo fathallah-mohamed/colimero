@@ -30,6 +30,7 @@ export function TourCard({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const handleBookingClick = () => {
+    // Stocker le chemin de retour
     sessionStorage.setItem('returnPath', `/reserver/${tour.id}`);
     setShowAuthDialog(true);
   };
@@ -39,6 +40,7 @@ export function TourCard({
     navigate(`/reserver/${tour.id}`);
   };
 
+  // Calculate price based on carrier capacities
   const price = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
 
   return (
@@ -62,7 +64,7 @@ export function TourCard({
       </div>
 
       <AuthDialog
-        open={showAuthDialog}
+        isOpen={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"

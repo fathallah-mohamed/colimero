@@ -7,7 +7,7 @@ import MenuItems from "./navigation/MenuItems";
 import MobileMenu from "./navigation/MobileMenu";
 import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
-import { CarrierSignupForm } from "./auth/CarrierSignupForm";
+import CarrierSignupForm from "./auth/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";
 
 export default function Navigation() {
@@ -92,7 +92,7 @@ export default function Navigation() {
       </div>
 
       <AuthDialog 
-        open={showAuthDialog} 
+        isOpen={showAuthDialog} 
         onClose={() => setShowAuthDialog(false)}
         fromHeader={true}
         onRegisterClick={handleRegisterClick}
