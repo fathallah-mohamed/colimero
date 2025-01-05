@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 interface AuthDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
   defaultTab?: string;
   onSuccess?: () => void;
@@ -15,17 +15,19 @@ interface AuthDialogProps {
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
   fromHeader?: boolean;
+  fromTourCreation?: boolean;
 }
 
 export default function AuthDialog({ 
-  isOpen, 
+  open, 
   onClose, 
   defaultTab = "client",
   onSuccess,
   requiredUserType,
   onRegisterClick,
   onCarrierRegisterClick,
-  fromHeader = false
+  fromHeader = false,
+  fromTourCreation = false
 }: AuthDialogProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const location = useLocation();
@@ -39,10 +41,10 @@ export default function AuthDialog({
     sessionStorage.setItem('returnPath', location.pathname + location.search);
   }
 
-  // Si appelé depuis le header, afficher une version simplifiée
+  // Si appelé depuis le header, afficher une version avec les deux boutons
   if (fromHeader) {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={open} onOpenChange={onClose}>
         <DialogContent>
           <DialogTitle>Connexion</DialogTitle>
           <div className="space-y-6">
@@ -76,10 +78,36 @@ export default function AuthDialog({
     );
   }
 
+  // Si appelé depuis la création de tournée, afficher uniquement le bouton transporteur
+  if (fromTourCreation) {
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogTitle>Connexion Transporteur</DialogTitle>
+          <div className="space-y-6">
+            <CarrierLoginForm
+              onForgotPassword={() => {}}
+              onCarrierRegister={onCarrierRegisterClick}
+              onSuccess={handleSuccess}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCarrierRegisterClick}
+              className="w-full"
+            >
+              Devenir transporteur
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   // Si un type d'utilisateur spécifique est requis, ne pas afficher les onglets
   if (requiredUserType) {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={open} onOpenChange={onClose}>
         <DialogContent>
           <DialogTitle>
             {requiredUserType === 'client' ? 'Connexion Client' : 'Connexion Transporteur'}
@@ -126,7 +154,7 @@ export default function AuthDialog({
 
   // Sinon, afficher les onglets avec les deux options
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogTitle>Connexion</DialogTitle>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

@@ -137,24 +137,25 @@ export default function PlanifierTournee() {
       </div>
 
       <AuthDialog
-        isOpen={isAuthDialogOpen}
+        open={isAuthDialogOpen}
         onClose={() => setIsAuthDialogOpen(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="carrier"
-        onRegisterClick={() => {
+        onCarrierRegisterClick={() => {
           setIsAuthDialogOpen(false);
           setIsCarrierAuthDialogOpen(true);
         }}
+        fromTourCreation={true}
       />
 
       <CarrierAuthDialog
-        isOpen={isCarrierAuthDialogOpen}
+        open={isCarrierAuthDialogOpen}
         onClose={() => setIsCarrierAuthDialogOpen(false)}
       />
 
       <AccessDeniedMessage 
         userType="client" 
-        isOpen={isAccessDeniedOpen}
+        open={isAccessDeniedOpen}
         onClose={() => setIsAccessDeniedOpen(false)}
       />
     </div>
