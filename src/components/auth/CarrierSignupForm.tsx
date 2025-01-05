@@ -99,8 +99,9 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
     }
   };
 
-  const consentsValue = form.watch("consents");
-  const allConsentsAccepted = consentsValue ? Object.values(consentsValue).every(value => value === true) : false;
+  // Watch consents field and check if all consents are accepted
+  const consents = form.watch("consents");
+  const allConsentsAccepted = consents ? Object.values(consents).every(value => value === true) : false;
 
   return (
     <div className="w-full max-w-4xl mx-auto">
