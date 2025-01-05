@@ -1,171 +1,95 @@
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClientLoginForm } from "./login/ClientLoginForm";
-import { CarrierLoginForm } from "./login/CarrierLoginForm";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Dialog } from "@/components/ui/dialog";
+import { CarrierAuthDialog } from "./CarrierAuthDialog";
+import { RegisterForm } from "./RegisterForm";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { SimpleLoginView } from "./login/SimpleLoginView";
+import { TabbedLoginView } from "./login/TabbedLoginView";
 
 interface AuthDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  defaultTab?: string;
-  onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
-  onRegisterClick?: () => void;
-  onCarrierRegisterClick?: () => void;
-  fromHeader?: boolean;
+  requiredUserType?: "client" | "carrier";
+  showTabs?: boolean;
 }
 
-export default function AuthDialog({ 
-  isOpen, 
-  onClose, 
-  defaultTab = "client",
-  onSuccess,
+export function AuthDialog({
+  open,
+  onClose,
   requiredUserType,
-  onRegisterClick,
-  onCarrierRegisterClick,
-  fromHeader = false
+  showTabs = false,
 }: AuthDialogProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [showCarrierAuthDialog, setShowCarrierAuthDialog] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleSuccess = () => {
-    onSuccess?.();
+    const returnPath = sessionStorage.getItem("returnPath");
+    if (returnPath) {
+      sessionStorage.removeItem("returnPath");
+      navigate(returnPath);
+    }
     onClose();
   };
 
-  if (location.pathname.includes('/reserver/')) {
-    sessionStorage.setItem('returnPath', location.pathname + location.search);
+  if (location.pathname.includes("/reserver/")) {
+    sessionStorage.setItem("returnPath", location.pathname + location.search);
   }
 
-  // Si appelé depuis le header, afficher une version simplifiée
-  if (fromHeader) {
+  const onRegisterClick = () => {
+    setShowRegisterForm(true);
+  };
+
+  const onCarrierRegisterClick = () => {
+    setShowCarrierAuthDialog(true);
+  };
+
+  if (showCarrierAuthDialog) {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogTitle>Connexion</DialogTitle>
-          <div className="space-y-6">
-            <ClientLoginForm
-              onForgotPassword={() => {}}
-              onRegister={onRegisterClick}
-              onSuccess={handleSuccess}
-              hideRegisterButton
-            />
-            <div className="space-y-4 mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onRegisterClick}
-                className="w-full"
-              >
-                Créer un compte client
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCarrierRegisterClick}
-                className="w-full"
-              >
-                Devenir transporteur
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
+      <CarrierAuthDialog
+        open={open}
+        onClose={() => {
+          setShowCarrierAuthDialog(false);
+          onClose();
+        }}
+      />
+    );
+  }
+
+  if (showRegisterForm) {
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <RegisterForm
+          onSuccess={handleSuccess}
+          onBack={() => setShowRegisterForm(false)}
+        />
       </Dialog>
     );
   }
 
-  // Si un type d'utilisateur spécifique est requis, ne pas afficher les onglets
-  if (requiredUserType) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogTitle>
-            {requiredUserType === 'client' ? 'Connexion Client' : 'Connexion Transporteur'}
-          </DialogTitle>
-          {requiredUserType === 'client' ? (
-            <div className="space-y-6">
-              <ClientLoginForm
-                onForgotPassword={() => {}}
-                onRegister={onRegisterClick}
-                onSuccess={handleSuccess}
-                requiredUserType={requiredUserType}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onRegisterClick}
-                className="w-full"
-              >
-                Créer un compte client
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <CarrierLoginForm
-                onForgotPassword={() => {}}
-                onCarrierRegister={onCarrierRegisterClick}
-                onSuccess={handleSuccess}
-                requiredUserType={requiredUserType}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCarrierRegisterClick}
-                className="w-full"
-              >
-                Devenir transporteur
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  // Sinon, afficher les onglets avec les deux options
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogTitle>Connexion</DialogTitle>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="client">Client</TabsTrigger>
-            <TabsTrigger value="carrier">Transporteur</TabsTrigger>
-          </TabsList>
-          <TabsContent value="client" className="space-y-6">
-            <ClientLoginForm
-              onForgotPassword={() => {}}
-              onRegister={onRegisterClick}
-              onSuccess={handleSuccess}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onRegisterClick}
-              className="w-full"
-            >
-              Créer un compte client
-            </Button>
-          </TabsContent>
-          <TabsContent value="carrier" className="space-y-6">
-            <CarrierLoginForm
-              onForgotPassword={() => {}}
-              onCarrierRegister={onCarrierRegisterClick}
-              onSuccess={handleSuccess}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCarrierRegisterClick}
-              className="w-full"
-            >
-              Devenir transporteur
-            </Button>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
+    <Dialog open={open} onOpenChange={onClose}>
+      {requiredUserType ? (
+        <SimpleLoginView
+          requiredUserType={requiredUserType}
+          onRegisterClick={onRegisterClick}
+          onCarrierRegisterClick={onCarrierRegisterClick}
+          handleSuccess={handleSuccess}
+        />
+      ) : showTabs ? (
+        <TabbedLoginView
+          onRegisterClick={onRegisterClick}
+          onCarrierRegisterClick={onCarrierRegisterClick}
+          handleSuccess={handleSuccess}
+        />
+      ) : (
+        <SimpleLoginView
+          onRegisterClick={onRegisterClick}
+          onCarrierRegisterClick={onCarrierRegisterClick}
+          handleSuccess={handleSuccess}
+        />
+      )}
     </Dialog>
   );
 }
