@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { TourTimelineCard } from "@/components/transporteur/tour/TourTimelineCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tour, TourStatus } from "@/types/tour";
+import { Tour, TourStatus, RouteStop } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -40,14 +40,27 @@ export default function CurrentTours() {
         .gte('departure_date', new Date().toISOString())
         .order('departure_date', { ascending: true })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       
       if (data) {
+        // Transform the route data from JSON to RouteStop[]
+        const parsedRoute = Array.isArray(data.route) 
+          ? data.route 
+          : JSON.parse(data.route as string);
+
+        const transformedRoute = parsedRoute.map((stop: any): RouteStop => ({
+          name: stop.name,
+          location: stop.location,
+          time: stop.time,
+          type: stop.type,
+          collection_date: stop.collection_date
+        }));
+
         return {
           ...data,
-          route: Array.isArray(data.route) ? data.route : JSON.parse(data.route as string),
+          route: transformedRoute,
           status: data.status as TourStatus,
           carriers: {
             ...data.carriers,
@@ -71,7 +84,7 @@ export default function CurrentTours() {
       return;
     }
 
-    // Vérifier le type d'utilisateur
+    // Check user type
     const userType = user.user_metadata?.user_type;
     
     if (userType === 'carrier') {
@@ -79,7 +92,7 @@ export default function CurrentTours() {
       return;
     }
 
-    // Si c'est un client, rediriger vers le formulaire de réservation
+    // If client, redirect to booking form
     navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
