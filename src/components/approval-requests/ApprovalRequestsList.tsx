@@ -10,6 +10,9 @@ export function ApprovalRequestsList() {
   const user = useUser();
   const { requests, loading, handleCancelRequest, handleDeleteRequest } = useApprovalRequests('client', user?.id);
 
+  console.log('Current user:', user);
+  console.log('Approval requests:', requests);
+
   if (loading) {
     return <div className="text-center py-8">Chargement...</div>;
   }

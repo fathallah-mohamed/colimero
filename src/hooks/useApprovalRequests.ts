@@ -11,6 +11,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     if (!userId) return;
 
     try {
+      console.log('Fetching requests for user:', userId, 'type:', userType);
       let query = supabase
         .from('approval_requests')
         .select(`
@@ -48,6 +49,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         throw error;
       }
 
+      console.log('Fetched approval requests:', approvalData);
       setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error fetching requests:', error);
@@ -160,7 +162,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   };
 
   useEffect(() => {
-    fetchRequests();
+    console.log('useEffect triggered with userId:', userId);
+    if (userId) {
+      fetchRequests();
+    }
   }, [userId]);
 
   return { 
