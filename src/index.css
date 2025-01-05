@@ -112,4 +112,24 @@
   .status-badge-info {
     @apply bg-primary/10 text-primary;
   }
+
+  .tour-card {
+    @apply transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  .capacity-bar {
+    @apply h-2 bg-gray-100 rounded-full overflow-hidden;
+  }
+
+  .capacity-bar-fill {
+    @apply h-full bg-primary transition-all duration-300;
+  }
+
+  .favorite-button {
+    @apply text-gray-400 hover:text-primary transition-colors duration-200;
+  }
+
+  .tour-card-header {
+    @apply flex items-center gap-2 text-gray-600;
+  }
 }
