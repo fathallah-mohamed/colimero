@@ -9,12 +9,24 @@ interface TransporteurToursProps {
   isLoading?: boolean;
   hideAvatar?: boolean;
   userType?: string | null;
+  onAuthRequired?: () => void;
 }
 
-export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType }: TransporteurToursProps) {
+export function TransporteurTours({ 
+  tours, 
+  type, 
+  isLoading, 
+  hideAvatar, 
+  userType,
+  onAuthRequired 
+}: TransporteurToursProps) {
   const navigate = useNavigate();
 
   const handleBookingClick = (tourId: number, pickupCity: string) => {
+    if (!userType) {
+      onAuthRequired?.();
+      return;
+    }
     navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
