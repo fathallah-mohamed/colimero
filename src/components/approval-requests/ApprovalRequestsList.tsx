@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ApprovalRequestCard } from "./ApprovalRequestCard";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { Button } from "@/components/ui/button";
+import { ProfileLoading } from "@/components/profile/ProfileLoading";
 
 export function ApprovalRequestsList() {
   const [page] = useState(1);
@@ -14,7 +15,7 @@ export function ApprovalRequestsList() {
   console.log('Approval requests:', requests);
 
   if (loading) {
-    return <div className="text-center py-8">Chargement...</div>;
+    return <ProfileLoading />;
   }
 
   if (!requests?.length) {
