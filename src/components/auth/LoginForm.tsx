@@ -30,6 +30,7 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
+      // Basic validation
       if (!email.trim() || !password.trim()) {
         toast({
           variant: "destructive",
@@ -40,30 +41,28 @@ export function LoginForm({
         return;
       }
 
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      // Attempt authentication
+      console.log("Tentative de connexion avec:", email.trim().toLowerCase());
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password: password.trim(),
       });
 
-      if (signInError) {
-        console.error("Erreur de connexion:", signInError);
-        let errorTitle = "Erreur de connexion";
+      if (error) {
+        console.error("Erreur d'authentification:", error);
         let errorMessage = "Une erreur est survenue lors de la connexion";
-
-        if (signInError.message.includes("Invalid login credentials")) {
-          errorTitle = "Identifiants incorrects";
-          errorMessage = "L'email ou le mot de passe est incorrect";
-        } else if (signInError.message.includes("Email not confirmed")) {
-          errorTitle = "Email non confirmé";
+        
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (error.message.includes("Email not confirmed")) {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (signInError.message.includes("Invalid email")) {
-          errorTitle = "Email invalide";
-          errorMessage = "Le format de l'email est incorrect";
+        } else if (error.message.includes("Invalid email")) {
+          errorMessage = "Format d'email invalide";
         }
 
         toast({
           variant: "destructive",
-          title: errorTitle,
+          title: "Erreur de connexion",
           description: errorMessage,
         });
         setPassword("");
@@ -71,12 +70,12 @@ export function LoginForm({
         return;
       }
 
-      if (!user) {
+      if (!data.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = user.user_metadata?.user_type;
-      console.log("Type d'utilisateur connecté:", userType);
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
         toast({
@@ -102,6 +101,7 @@ export function LoginForm({
       onSuccess?.();
     } catch (error: any) {
       console.error("Erreur complète:", error);
+      setPassword("");
       toast({
         variant: "destructive",
         title: "Erreur inattendue",
