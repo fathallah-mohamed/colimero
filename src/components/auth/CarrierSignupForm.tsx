@@ -23,7 +23,7 @@ export interface CarrierSignupFormProps {
 export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { data: consents } = useCarrierConsents();
+  const { data: consentTypes } = useCarrierConsents();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -42,7 +42,7 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
       total_capacity: 0,
       price_per_kg: 0,
       avatar_url: null,
-      consents: consents?.reduce((acc, consent) => ({
+      consents: consentTypes?.reduce((acc, consent) => ({
         ...acc,
         [consent.code]: false
       }), {}) || {},
@@ -74,7 +74,7 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
       const consentPromises = Object.entries(values.consents).map(([code, accepted]) => 
         supabase.from("user_consents").insert({
           user_id: values.email, // Using email as temporary ID since we don't have user_id yet
-          consent_type_id: consents?.find(c => c.code === code)?.id,
+          consent_type_id: consentTypes?.find(c => c.code === code)?.id,
           accepted,
           accepted_at: accepted ? new Date().toISOString() : null,
         })
@@ -100,8 +100,8 @@ export function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   };
 
   // Watch consents field and check if all consents are accepted
-  const consents = form.watch("consents");
-  const allConsentsAccepted = consents ? Object.values(consents).every(value => value === true) : false;
+  const formConsents = form.watch("consents");
+  const allConsentsAccepted = formConsents ? Object.values(formConsents).every(value => value === true) : false;
 
   return (
     <div className="w-full max-w-4xl mx-auto">
