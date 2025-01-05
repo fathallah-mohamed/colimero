@@ -101,16 +101,6 @@ export default function AuthDialog({
                 requiredUserType={requiredUserType}
               />
             )}
-            <div className="space-y-4 mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onRegisterClick}
-                className="w-full"
-              >
-                Créer un compte client
-              </Button>
-            </div>
           </div>
         </DialogContent>
       </Dialog>

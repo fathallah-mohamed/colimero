@@ -48,7 +48,7 @@ export function ClientLoginForm({
           {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
 
-        {(!requiredUserType || requiredUserType === 'client') && !hideRegisterButton && (
+        {!hideRegisterButton && (
           <>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
