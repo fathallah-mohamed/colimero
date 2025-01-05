@@ -3,17 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { RefreshCw, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import RequestDetailsDialog from "./RequestDetailsDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NewRequestCard } from "./new-requests/NewRequestCard";
 import { NewRequestsTable } from "./new-requests/NewRequestsTable";
 import Navigation from "@/components/Navigation";
+import RequestDetailsDialog from "./RequestDetailsDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
 
-  const { data: requests, isLoading } = useQuery({
+  const { data: pendingRequests, isLoading: isPendingLoading } = useQuery({
     queryKey: ["carrier-requests", "pending"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,11 +28,44 @@ export default function NewRegistrationRequests() {
     },
   });
 
-  const filteredRequests = requests?.filter(
-    (request) =>
-      request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const { data: approvedRequests, isLoading: isApprovedLoading } = useQuery({
+    queryKey: ["carrier-requests", "approved"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("carrier_registration_requests")
+        .select("*")
+        .eq("status", "approved")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: rejectedRequests, isLoading: isRejectedLoading } = useQuery({
+    queryKey: ["carrier-requests", "rejected"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("carrier_registration_requests")
+        .select("*")
+        .eq("status", "rejected")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const filterRequests = (requests: any[] | null) => {
+    if (!requests) return [];
+    return requests.filter(
+      (request) =>
+        request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
+  const isLoading = isPendingLoading || isApprovedLoading || isRejectedLoading;
 
   if (isLoading) {
     return (
@@ -58,24 +92,78 @@ export default function NewRegistrationRequests() {
           </div>
         </div>
 
-        <div className="hidden md:block">
-          <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
-            <NewRequestsTable
-              requests={filteredRequests}
-              onViewDetails={setSelectedRequest}
-            />
-          </ScrollArea>
-        </div>
+        <Tabs defaultValue="pending">
+          <TabsList>
+            <TabsTrigger value="pending">En attente</TabsTrigger>
+            <TabsTrigger value="approved">Validés</TabsTrigger>
+            <TabsTrigger value="rejected">Rejetés</TabsTrigger>
+          </TabsList>
 
-        <div className="grid grid-cols-1 gap-4 md:hidden">
-          {filteredRequests?.map((request) => (
-            <NewRequestCard
-              key={request.id}
-              request={request}
-              onViewDetails={() => setSelectedRequest(request)}
-            />
-          ))}
-        </div>
+          <TabsContent value="pending">
+            <div className="hidden md:block">
+              <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
+                <NewRequestsTable
+                  requests={filterRequests(pendingRequests)}
+                  onViewDetails={setSelectedRequest}
+                />
+              </ScrollArea>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+              {filterRequests(pendingRequests)?.map((request) => (
+                <NewRequestCard
+                  key={request.id}
+                  request={request}
+                  onViewDetails={() => setSelectedRequest(request)}
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="approved">
+            <div className="hidden md:block">
+              <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
+                <NewRequestsTable
+                  requests={filterRequests(approvedRequests)}
+                  onViewDetails={setSelectedRequest}
+                />
+              </ScrollArea>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+              {filterRequests(approvedRequests)?.map((request) => (
+                <NewRequestCard
+                  key={request.id}
+                  request={request}
+                  onViewDetails={() => setSelectedRequest(request)}
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="rejected">
+            <div className="hidden md:block">
+              <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
+                <NewRequestsTable
+                  requests={filterRequests(rejectedRequests)}
+                  onViewDetails={setSelectedRequest}
+                  showApproveButton={true}
+                />
+              </ScrollArea>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+              {filterRequests(rejectedRequests)?.map((request) => (
+                <NewRequestCard
+                  key={request.id}
+                  request={request}
+                  onViewDetails={() => setSelectedRequest(request)}
+                  showApproveButton={true}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <RequestDetailsDialog
           request={selectedRequest}
