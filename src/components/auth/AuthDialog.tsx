@@ -35,7 +35,6 @@ export default function AuthDialog({
     onClose();
   };
 
-  // Sauvegarder le chemin actuel si on est sur une page de réservation
   if (location.pathname.includes('/reserver/')) {
     sessionStorage.setItem('returnPath', location.pathname + location.search);
   }
@@ -86,19 +85,39 @@ export default function AuthDialog({
             {requiredUserType === 'client' ? 'Connexion Client' : 'Connexion Transporteur'}
           </DialogTitle>
           {requiredUserType === 'client' ? (
-            <ClientLoginForm
-              onForgotPassword={() => {}}
-              onRegister={onRegisterClick}
-              onSuccess={handleSuccess}
-              requiredUserType={requiredUserType}
-            />
+            <div className="space-y-6">
+              <ClientLoginForm
+                onForgotPassword={() => {}}
+                onRegister={onRegisterClick}
+                onSuccess={handleSuccess}
+                requiredUserType={requiredUserType}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onRegisterClick}
+                className="w-full"
+              >
+                Créer un compte client
+              </Button>
+            </div>
           ) : (
-            <CarrierLoginForm
-              onForgotPassword={() => {}}
-              onCarrierRegister={onCarrierRegisterClick}
-              onSuccess={handleSuccess}
-              requiredUserType={requiredUserType}
-            />
+            <div className="space-y-6">
+              <CarrierLoginForm
+                onForgotPassword={() => {}}
+                onCarrierRegister={onCarrierRegisterClick}
+                onSuccess={handleSuccess}
+                requiredUserType={requiredUserType}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCarrierRegisterClick}
+                className="w-full"
+              >
+                Devenir transporteur
+              </Button>
+            </div>
           )}
         </DialogContent>
       </Dialog>
@@ -115,19 +134,35 @@ export default function AuthDialog({
             <TabsTrigger value="client">Client</TabsTrigger>
             <TabsTrigger value="carrier">Transporteur</TabsTrigger>
           </TabsList>
-          <TabsContent value="client">
+          <TabsContent value="client" className="space-y-6">
             <ClientLoginForm
               onForgotPassword={() => {}}
               onRegister={onRegisterClick}
               onSuccess={handleSuccess}
             />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onRegisterClick}
+              className="w-full"
+            >
+              Créer un compte client
+            </Button>
           </TabsContent>
-          <TabsContent value="carrier">
+          <TabsContent value="carrier" className="space-y-6">
             <CarrierLoginForm
               onForgotPassword={() => {}}
               onCarrierRegister={onCarrierRegisterClick}
               onSuccess={handleSuccess}
             />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCarrierRegisterClick}
+              className="w-full"
+            >
+              Devenir transporteur
+            </Button>
           </TabsContent>
         </Tabs>
       </DialogContent>
