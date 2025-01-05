@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
 import CreateTourForm from "@/components/tour/CreateTourForm";
@@ -10,8 +12,6 @@ import { PlanningSteps } from "@/components/tour/planning/PlanningSteps";
 import { PlanningExample } from "@/components/tour/planning/PlanningExample";
 import { PlanningBenefits } from "@/components/tour/planning/PlanningBenefits";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CarrierSignupForm } from "@/components/auth/CarrierSignupForm";
 
@@ -27,9 +27,23 @@ export default function PlanifierTournee() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-      if (session?.user) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session check error:", error);
+          setIsAuthenticated(false);
+          setUserType(null);
+          return;
+        }
+
+        if (!session) {
+          setIsAuthenticated(false);
+          setUserType(null);
+          return;
+        }
+
+        setIsAuthenticated(true);
         const userMetadata = session.user.user_metadata;
         setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
         
@@ -41,36 +55,42 @@ export default function PlanifierTournee() {
             description: "Les administrateurs ne peuvent pas créer de tournées.",
           });
         }
-      } else {
+      } catch (error) {
+        console.error("Error checking session:", error);
+        setIsAuthenticated(false);
         setUserType(null);
       }
     };
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      if (session?.user) {
-        const userMetadata = session.user.user_metadata;
-        setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
-        
-        if (userMetadata.user_type === 'admin') {
-          navigate('/');
-          toast({
-            variant: "destructive",
-            title: "Accès refusé",
-            description: "Les administrateurs ne peuvent pas créer de tournées.",
-          });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setIsAuthenticated(true);
+        if (session?.user) {
+          const userMetadata = session.user.user_metadata;
+          setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
+          
+          if (userMetadata.user_type === 'admin') {
+            navigate('/');
+            toast({
+              variant: "destructive",
+              title: "Accès refusé",
+              description: "Les administrateurs ne peuvent pas créer de tournées.",
+            });
+          }
         }
-      } else {
+      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        setIsAuthenticated(false);
         setUserType(null);
+        setShowCreateForm(false);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleCreateTourClick = () => {
     if (!isAuthenticated) {
@@ -88,6 +108,13 @@ export default function PlanifierTournee() {
     }
   };
 
+  const handleAuthSuccess = () => {
+    setIsAuthDialogOpen(false);
+    if (userType === 'carrier') {
+      setShowCreateForm(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -97,7 +124,13 @@ export default function PlanifierTournee() {
             <h1 className="text-3xl font-bold text-center">
               Créer une nouvelle tournée
             </h1>
-            <CreateTourForm />
+            <CreateTourForm onSuccess={() => {
+              toast({
+                title: "Tournée créée",
+                description: "Votre tournée a été créée avec succès.",
+              });
+              navigate('/mes-tournees');
+            }} />
           </div>
         ) : (
           <>
@@ -119,14 +152,16 @@ export default function PlanifierTournee() {
                 >
                   Créer une tournée
                 </Button>
-                <Button
-                  onClick={() => setIsAuthDialogOpen(true)}
-                  variant="outline"
-                  size="lg"
-                  className="w-full max-w-md"
-                >
-                  Devenir transporteur
-                </Button>
+                {!isAuthenticated && (
+                  <Button
+                    onClick={() => setIsAuthDialogOpen(true)}
+                    variant="outline"
+                    size="lg"
+                    className="w-full max-w-md"
+                  >
+                    Devenir transporteur
+                  </Button>
+                )}
               </div>
               {!isAuthenticated && (
                 <p className="text-sm text-gray-500 mt-4">
@@ -141,12 +176,7 @@ export default function PlanifierTournee() {
       <AuthDialog
         isOpen={isAuthDialogOpen}
         onClose={() => setIsAuthDialogOpen(false)}
-        onSuccess={() => {
-          setIsAuthDialogOpen(false);
-          if (userType === 'carrier') {
-            setShowCreateForm(true);
-          }
-        }}
+        onSuccess={handleAuthSuccess}
         requiredUserType="carrier"
         onRegisterClick={() => {
           setIsAuthDialogOpen(false);
@@ -167,6 +197,10 @@ export default function PlanifierTournee() {
         <DialogContent className="max-w-4xl">
           <CarrierSignupForm onSuccess={() => {
             setShowCarrierSignupForm(false);
+            toast({
+              title: "Inscription réussie",
+              description: "Votre demande d'inscription a été envoyée avec succès.",
+            });
           }} />
         </DialogContent>
       </Dialog>
