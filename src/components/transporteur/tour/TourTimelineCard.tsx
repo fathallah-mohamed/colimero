@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
 import { TourTimeline } from "@/components/transporteur/TourTimeline";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { CollectionPointsList } from "@/components/tour/CollectionPointsList";
+
 import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";

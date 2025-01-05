@@ -11,6 +11,10 @@ interface AuthDialogProps {
   onClose: () => void;
   requiredUserType?: "client" | "carrier";
   showTabs?: boolean;
+  onSuccess?: () => void;
+  fromHeader?: boolean;
+  onRegisterClick?: () => void;
+  onCarrierRegisterClick?: () => void;
 }
 
 export function AuthDialog({
@@ -18,6 +22,10 @@ export function AuthDialog({
   onClose,
   requiredUserType,
   showTabs = false,
+  onSuccess,
+  fromHeader,
+  onRegisterClick,
+  onCarrierRegisterClick,
 }: AuthDialogProps) {
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showCarrierAuthDialog, setShowCarrierAuthDialog] = useState(false);
@@ -31,18 +39,27 @@ export function AuthDialog({
       navigate(returnPath);
     }
     onClose();
+    onSuccess?.();
   };
 
   if (location.pathname.includes("/reserver/")) {
     sessionStorage.setItem("returnPath", location.pathname + location.search);
   }
 
-  const onRegisterClick = () => {
-    setShowRegisterForm(true);
+  const handleRegisterClick = () => {
+    if (onRegisterClick) {
+      onRegisterClick();
+    } else {
+      setShowRegisterForm(true);
+    }
   };
 
-  const onCarrierRegisterClick = () => {
-    setShowCarrierAuthDialog(true);
+  const handleCarrierRegisterClick = () => {
+    if (onCarrierRegisterClick) {
+      onCarrierRegisterClick();
+    } else {
+      setShowCarrierAuthDialog(true);
+    }
   };
 
   if (showCarrierAuthDialog) {
@@ -73,20 +90,20 @@ export function AuthDialog({
       {requiredUserType ? (
         <SimpleLoginView
           requiredUserType={requiredUserType}
-          onRegisterClick={onRegisterClick}
-          onCarrierRegisterClick={onCarrierRegisterClick}
+          onRegisterClick={handleRegisterClick}
+          onCarrierRegisterClick={handleCarrierRegisterClick}
           handleSuccess={handleSuccess}
         />
       ) : showTabs ? (
         <TabbedLoginView
-          onRegisterClick={onRegisterClick}
-          onCarrierRegisterClick={onCarrierRegisterClick}
+          onRegisterClick={handleRegisterClick}
+          onCarrierRegisterClick={handleCarrierRegisterClick}
           handleSuccess={handleSuccess}
         />
       ) : (
         <SimpleLoginView
-          onRegisterClick={onRegisterClick}
-          onCarrierRegisterClick={onCarrierRegisterClick}
+          onRegisterClick={handleRegisterClick}
+          onCarrierRegisterClick={handleCarrierRegisterClick}
           handleSuccess={handleSuccess}
         />
       )}
