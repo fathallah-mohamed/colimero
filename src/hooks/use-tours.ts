@@ -1,3 +1,7 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tour, TourStatus } from "@/types/tour";
 import { useTourFilters } from "./use-tour-filters";
 import { useTourManagement } from "./use-tour-management";
 import { useTourData } from "./use-tour-data";
@@ -24,12 +28,23 @@ export function useTours() {
     onEditComplete,
   } = useTourManagement();
 
-  const { loading, tours } = useTourData({
+  const { loading, tours, fetchTours } = useTourData({
     departureCountry,
     destinationCountry,
     sortBy,
     status,
   });
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/connexion');
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   return {
     loading,
