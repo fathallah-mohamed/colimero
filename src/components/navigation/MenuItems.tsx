@@ -6,12 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 
 export const menuItems = [
   { 
-    name: "Administrateurs", 
-    href: "/admin/gestion", 
-    icon: <UserCog className="w-4 h-4" />, 
-    allowedUserTypes: ["admin"]
-  },
-  { 
     name: "Planifier une tournée", 
     href: "/planifier-tournee", 
     icon: <Calendar className="w-4 h-4" />, 
