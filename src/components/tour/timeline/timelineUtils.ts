@@ -4,6 +4,8 @@ export const getStatusLabel = (status: TourStatus) => {
   switch (status) {
     case "planned":
       return "Programmée";
+    case "preparation_completed":
+      return "Préparation terminée";
     case "collecting":
       return "Ramassage en cours";
     case "collecting_completed":
@@ -15,7 +17,7 @@ export const getStatusLabel = (status: TourStatus) => {
     case "delivery_in_progress":
       return "Livraison en cours";
     case "completed_completed":
-      return "Livrée";
+      return "Livraison terminée";
     case "cancelled":
       return "Annulée";
     default:

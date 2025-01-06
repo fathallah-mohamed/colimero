@@ -1,5 +1,6 @@
 export type TourStatus = 
   | "planned"
+  | "preparation_completed"
   | "collecting"
   | "collecting_completed"
   | "in_transit"
