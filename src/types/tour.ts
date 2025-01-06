@@ -6,8 +6,7 @@ export type TourStatus =
   | "in_transit"
   | "transport_completed"
   | "delivery_in_progress"
-  | "completed_completed"
-  | "cancelled";
+  | "completed_completed";
 
 export type TourType = "public" | "private";
 

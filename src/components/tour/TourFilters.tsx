@@ -25,8 +25,11 @@ const countryNames: { [key: string]: string } = {
 const statusLabels: { [key: string]: string } = {
   'all': 'Tous les statuts',
   'planned': 'Programmée',
+  'preparation_completed': 'Préparation terminée',
   'collecting': 'Ramassage en cours',
+  'collecting_completed': 'Ramassage terminé',
   'in_transit': 'En transit',
+  'transport_completed': 'Transport terminé',
   'delivery_in_progress': 'Livraison en cours',
   'completed_completed': 'Livrée'
 };
