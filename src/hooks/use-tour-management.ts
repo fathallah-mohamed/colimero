@@ -5,27 +5,18 @@ import { useToast } from "@/hooks/use-toast";
 import type { Tour, TourStatus } from "@/types/tour";
 
 const getCompletedStatus = (currentStatus: TourStatus, newStatus: TourStatus): TourStatus | null => {
-  // Si le statut est "planned" (Programmé), il devient "planned_completed" (Préparation terminée)
-  if (currentStatus === 'planned') {
-    return 'planned_completed';
+  switch (currentStatus) {
+    case 'planned':
+      return 'planned_completed';
+    case 'collecting':
+      return 'collecting_completed';
+    case 'in_transit':
+      return 'in_transit_completed';
+    case 'completed':
+      return 'completed_completed';
+    default:
+      return null;
   }
-  
-  // Si on passe à "in_transit", "collecting" devient "collecting_completed"
-  if (newStatus === 'in_transit' && currentStatus === 'collecting') {
-    return 'collecting_completed';
-  }
-  
-  // Si on passe à "completed" (livraison), "in_transit" devient "in_transit_completed"
-  if (newStatus === 'completed' && currentStatus === 'in_transit') {
-    return 'in_transit_completed';
-  }
-  
-  // Si on termine la livraison
-  if (newStatus === 'completed_completed' && currentStatus === 'completed') {
-    return 'completed_completed';
-  }
-
-  return null;
 };
 
 const getNextStatus = (currentStatus: TourStatus): TourStatus => {

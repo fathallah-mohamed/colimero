@@ -1,11 +1,11 @@
 export type TourStatus = 
   | 'planned' 
-  | 'collecting' 
-  | 'in_transit' 
-  | 'completed'
   | 'planned_completed'
+  | 'collecting' 
   | 'collecting_completed'
+  | 'in_transit' 
   | 'in_transit_completed'
+  | 'completed'
   | 'completed_completed'
   | 'cancelled';
 

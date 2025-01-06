@@ -26,7 +26,7 @@ export function TimelineStatus({
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex || (status === 'planned' && currentStatus !== 'planned');
   const isCurrent = status === currentStatus;
-  const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed'].includes(currentStatus);
+  const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed_completed'].includes(currentStatus);
 
   // Fetch status labels from database
   const { data: statusLabels } = useQuery({
@@ -57,27 +57,32 @@ export function TimelineStatus({
 
   const getStatusLabel = (status: TourStatus) => {
     if (!statusLabels) {
-      if (status === 'planned' && isCompleted) {
-        return 'Préparation terminée';
-      }
-      
       switch (status) {
         case 'planned':
-          return 'Programmée';
+          return currentStatus !== 'planned' ? 'Préparation terminée' : 'Programmée';
         case 'collecting':
-          return 'Ramassage en cours';
+          return currentStatus === 'collecting' ? 'Ramassage en cours' : 'Ramassage terminé';
         case 'in_transit':
-          return 'En transit';
+          return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
         case 'completed':
-          return 'Livraison en cours';
+          return currentStatus === 'completed' ? 'Livraison en cours' : 'Livraison terminée';
         default:
           return status;
       }
     }
 
     const statusInfo = statusLabels[status];
-    if (status === 'planned' && isCompleted) {
+    if (status === 'planned' && currentStatus !== 'planned') {
       return 'Préparation terminée';
+    }
+    if (status === 'collecting' && currentStatus !== 'collecting' && currentStatus !== 'planned') {
+      return 'Ramassage terminé';
+    }
+    if (status === 'in_transit' && currentStatus !== 'in_transit' && !['planned', 'collecting'].includes(currentStatus)) {
+      return 'Transport terminé';
+    }
+    if (status === 'completed' && currentStatus === 'completed_completed') {
+      return 'Livraison terminée';
     }
     return statusInfo ? statusInfo.label : status;
   };
