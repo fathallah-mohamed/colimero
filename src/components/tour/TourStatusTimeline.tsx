@@ -10,7 +10,7 @@ interface TourStatusTimelineProps {
 
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
   console.log('TourStatusTimeline rendered with status:', status);
-  const statusOrder: TourStatus[] = ['planned', 'collecting', 'in_transit', 'completed', 'closed'];
+  const statusOrder: TourStatus[] = ['planned', 'collecting', 'in_transit', 'completed'];
   const currentIndex = statusOrder.indexOf(status);
 
   if (status === 'cancelled') {
