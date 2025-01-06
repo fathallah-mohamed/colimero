@@ -41,7 +41,7 @@ export function TimelineStatus({
   return (
     <div className="flex flex-col items-center relative">
       {isCompleted && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-green-500 rounded-full p-1">
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-green-500 rounded-full p-1 z-10">
           <Check className="w-4 h-4 text-white" />
         </div>
       )}
