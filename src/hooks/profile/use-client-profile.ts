@@ -1,23 +1,28 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export async function fetchClientProfile(userId: string, userEmail: string | undefined) {
-  // Vérifie d'abord si le profil existe
-  const { data: existingProfile, error: fetchError } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('id', userId)
-    .maybeSingle();
+  try {
+    // First attempt to get the existing profile
+    const { data: existingProfile, error: fetchError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
 
-  if (fetchError) throw fetchError;
+    if (fetchError) throw fetchError;
 
-  // Si le profil n'existe pas, on le crée
-  if (!existingProfile) {
+    // If profile exists, return it
+    if (existingProfile) {
+      return existingProfile;
+    }
+
+    // If no profile exists, try to create one
     const { data: userData } = await supabase.auth.getUser();
     const metadata = userData?.user?.user_metadata || {};
 
-    const { data: newProfile, error: insertError } = await supabase
+    const { data: newProfile, error: upsertError } = await supabase
       .from('clients')
-      .insert([
+      .upsert([
         {
           id: userId,
           email: userEmail,
@@ -27,13 +32,19 @@ export async function fetchClientProfile(userId: string, userEmail: string | und
           address: metadata.address || null,
           status: 'active'
         }
-      ])
+      ], 
+      { 
+        onConflict: 'id',
+        ignoreDuplicates: false
+      })
       .select()
       .single();
 
-    if (insertError) throw insertError;
+    if (upsertError) throw upsertError;
     return newProfile;
+    
+  } catch (error) {
+    console.error('Error in fetchClientProfile:', error);
+    throw error;
   }
-
-  return existingProfile;
 }
