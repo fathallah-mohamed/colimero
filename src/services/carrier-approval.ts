@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Create an admin client with the service role key
 const adminAuthClient = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY!,
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY!,
   {
     auth: {
       autoRefreshToken: false,
