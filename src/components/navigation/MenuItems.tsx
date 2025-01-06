@@ -50,7 +50,8 @@ export default function MenuItems() {
   const { userType } = useNavigation();
   const { toast } = useToast();
 
-  const handleRestrictedClick = (itemName: string, allowedTypes: string[]) => {
+  const handleRestrictedClick = (e: React.MouseEvent, itemName: string, allowedTypes: string[]) => {
+    e.preventDefault();
     if (!userType) {
       toast({
         title: "Accès restreint",
@@ -79,15 +80,15 @@ export default function MenuItems() {
     <div className="hidden md:flex md:items-center md:space-x-4">
       {menuItems.map((item) => {
         const isAllowed = !userType || item.allowedUserTypes.includes(userType);
+        const shouldPreventDefault = !item.allowedUserTypes.includes(userType || '');
 
-        return isAllowed ? (
+        return (
           <Link
             key={item.name}
             to={item.href}
             onClick={(e) => {
-              if (!item.allowedUserTypes.includes(userType || '')) {
-                e.preventDefault();
-                handleRestrictedClick(item.name, item.allowedUserTypes);
+              if (shouldPreventDefault) {
+                handleRestrictedClick(e, item.name, item.allowedUserTypes);
               }
             }}
             className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
@@ -95,13 +96,13 @@ export default function MenuItems() {
                 ? "text-[#00B0F0] hover:text-[#0082b3] " + (item.className || "")
                 : "text-gray-700 hover:text-gray-900"
               }
-              ${!item.allowedUserTypes.includes(userType || '') ? "opacity-50 cursor-not-allowed" : ""}
+              ${shouldPreventDefault ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
             {item.icon}
             <span className="ml-2">{item.name}</span>
           </Link>
-        ) : null;
+        );
       })}
     </div>
   );

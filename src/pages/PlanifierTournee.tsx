@@ -33,6 +33,7 @@ export default function PlanifierTournee() {
           toast({
             title: "Accès refusé",
             description: "Les administrateurs ne peuvent pas créer de tournées.",
+            variant: "destructive",
           });
           navigate('/');
           return;
@@ -94,7 +95,7 @@ export default function PlanifierTournee() {
         showCarrierSignupForm={showCarrierSignupForm}
         onAuthClose={() => setIsAuthDialogOpen(false)}
         onAccessDeniedClose={() => setIsAccessDeniedOpen(false)}
-        onCarrierSignupClose={setShowCarrierSignupForm}
+        onCarrierSignupClose={() => setShowCarrierSignupForm(false)}
         onAuthSuccess={handleAuthSuccess}
         onCarrierRegisterClick={handleCarrierRegisterClick}
       />
