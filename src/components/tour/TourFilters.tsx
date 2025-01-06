@@ -22,6 +22,19 @@ const countryNames: { [key: string]: string } = {
   'MA': 'Maroc'
 };
 
+const statusLabels: { [key: string]: string } = {
+  'all': 'Tous les statuts',
+  'planned': 'Programmée',
+  'planned_completed': 'Préparation terminée',
+  'collecting': 'Ramassage en cours',
+  'collecting_completed': 'Ramassage terminé',
+  'in_transit': 'En transit',
+  'in_transit_completed': 'Transport terminé',
+  'completed': 'Livraison en cours',
+  'completed_completed': 'Livrée',
+  'cancelled': 'Annulée'
+};
+
 export function TourFilters({
   departureCountry,
   destinationCountry,
@@ -109,12 +122,11 @@ export function TourFilters({
               <SelectValue placeholder="Filtrer par statut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="planned">Planifiée</SelectItem>
-              <SelectItem value="collecting">En collecte</SelectItem>
-              <SelectItem value="in_transit">En transit</SelectItem>
-              <SelectItem value="completed">Terminée</SelectItem>
-              <SelectItem value="cancelled">Annulée</SelectItem>
+              {Object.entries(statusLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
