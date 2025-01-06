@@ -70,21 +70,11 @@ export function TimelineStatus({
 
   const getStatusLabel = (status: TourStatus, isCompleted: boolean) => {
     if (!statusLabels) {
-      // Fallback labels if database fetch fails
-      switch (status) {
-        case 'in_transit':
-          return 'Livraison en cours';
-        default:
-          return status;
-      }
+      return status;
     }
 
     const statusInfo = statusLabels[status];
-    if (!statusInfo) {
-      // Use custom label for in_transit even if not in database
-      if (status === 'in_transit') return 'Livraison en cours';
-      return status;
-    }
+    if (!statusInfo) return status;
 
     return isCompleted ? (statusInfo.completedLabel || statusInfo.label) : statusInfo.label;
   };
