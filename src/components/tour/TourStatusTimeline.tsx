@@ -1,6 +1,9 @@
 import { TourStatus } from "@/types/tour";
 import { TimelineStatus } from "./timeline/TimelineStatus";
 import { TimelineProgress } from "./timeline/TimelineProgress";
+import { CancelledStatus } from "./timeline/CancelledStatus";
+import { Button } from "@/components/ui/button";
+import { XCircle } from "lucide-react";
 
 interface TourStatusTimelineProps {
   tourId: number;
@@ -9,52 +12,54 @@ interface TourStatusTimelineProps {
 }
 
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
-  console.log('TourStatusTimeline rendered with status:', status);
+  if (status === 'cancelled') {
+    return <CancelledStatus />;
+  }
   
-  // Initial status order shown at creation
-  const initialStatusOrder: TourStatus[] = [
+  const mainStatusOrder: TourStatus[] = [
     'planned',
-    'collecting_completed',
-    'transport_completed',
-    'completed_completed'
+    'collecting',
+    'in_transit',
+    'delivery_in_progress'
   ];
 
-  // Status transitions based on current status
-  const getStatusOrder = (currentStatus: TourStatus): TourStatus[] => {
-    switch (currentStatus) {
-      case 'collecting':
-        return ['planned', 'collecting', 'collecting_completed', 'completed_completed'];
-      case 'collecting_completed':
-        return ['planned', 'collecting_completed', 'in_transit', 'completed_completed'];
-      case 'in_transit':
-        return ['planned', 'collecting_completed', 'transport_completed', 'completed_completed'];
-      case 'transport_completed':
-        return ['planned', 'collecting_completed', 'transport_completed', 'delivery_in_progress'];
-      case 'delivery_in_progress':
-        return ['planned', 'collecting_completed', 'transport_completed', 'completed_completed'];
-      default:
-        return initialStatusOrder;
-    }
+  const currentIndex = mainStatusOrder.indexOf(status);
+
+  const handleCancel = () => {
+    onStatusChange('cancelled');
   };
 
-  const statusOrder = getStatusOrder(status);
-  const currentIndex = statusOrder.indexOf(status);
-
   return (
-    <div className="relative flex justify-between items-center w-full mt-4">
-      <TimelineProgress currentIndex={currentIndex} statusOrder={statusOrder} />
-      
-      {statusOrder.map((statusItem, index) => (
-        <TimelineStatus
-          key={statusItem}
-          tourId={tourId}
-          status={statusItem}
-          currentStatus={status}
-          currentIndex={currentIndex}
-          index={index}
-          onStatusChange={onStatusChange}
-        />
-      ))}
+    <div className="space-y-6">
+      <div className="relative flex justify-between items-center w-full mt-4">
+        <TimelineProgress currentIndex={currentIndex} statusOrder={mainStatusOrder} />
+        
+        {mainStatusOrder.map((statusItem, index) => (
+          <TimelineStatus
+            key={statusItem}
+            tourId={tourId}
+            status={statusItem}
+            currentStatus={status}
+            currentIndex={currentIndex}
+            index={index}
+            onStatusChange={onStatusChange}
+          />
+        ))}
+      </div>
+
+      {status !== 'completed_completed' && (
+        <div className="flex justify-end">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleCancel}
+            className="flex items-center gap-2"
+          >
+            <XCircle className="h-4 w-4" />
+            Annuler la tournée
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -61,11 +61,11 @@ export function useTourManagement() {
   };
 
   const handleEdit = (tour: Tour) => {
-    if (tour.status === 'completed_completed') {
+    if (tour.status === 'completed_completed' || tour.status === 'cancelled') {
       toast({
         variant: "destructive",
         title: "Action impossible",
-        description: "Les tournées terminées ne peuvent pas être modifiées",
+        description: "Les tournées terminées ou annulées ne peuvent pas être modifiées",
       });
       return;
     }
