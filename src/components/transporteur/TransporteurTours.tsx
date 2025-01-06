@@ -9,13 +9,25 @@ interface TransporteurToursProps {
   isLoading?: boolean;
   hideAvatar?: boolean;
   userType?: string | null;
+  handleBookingClick?: (tourId: number, pickupCity: string) => void;
 }
 
-export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType }: TransporteurToursProps) {
+export function TransporteurTours({ 
+  tours, 
+  type, 
+  isLoading, 
+  hideAvatar, 
+  userType,
+  handleBookingClick 
+}: TransporteurToursProps) {
   const navigate = useNavigate();
 
-  const handleBookingClick = (tourId: number, pickupCity: string) => {
-    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
+  const onBookingClick = (tourId: number, pickupCity: string) => {
+    if (handleBookingClick) {
+      handleBookingClick(tourId, pickupCity);
+    } else {
+      navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
+    }
   };
 
   if (isLoading) {
@@ -48,7 +60,7 @@ export function TransporteurTours({ tours, type, isLoading, hideAvatar, userType
           >
             <TourTimelineCard
               tour={tour}
-              onBookingClick={handleBookingClick}
+              onBookingClick={onBookingClick}
               hideAvatar={hideAvatar}
               userType={userType}
               isUpcoming={isUpcoming}

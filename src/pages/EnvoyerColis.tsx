@@ -10,8 +10,6 @@ export default function EnvoyerColis() {
   const {
     showAuthDialog,
     setShowAuthDialog,
-    showAccessDeniedDialog,
-    setShowAccessDeniedDialog,
     handleBookingClick,
     handleAuthSuccess
   } = useBookingFlow();
@@ -41,11 +39,22 @@ export default function EnvoyerColis() {
       const transformedTours = data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) 
-          ? tour.route 
-          : (typeof tour.route === 'string' 
-              ? JSON.parse(tour.route)
-              : tour.route
-            ),
+          ? tour.route.map(stop => ({
+              name: stop.name,
+              location: stop.location,
+              time: stop.time,
+              type: stop.type,
+              collection_date: stop.collection_date
+            }))
+          : typeof tour.route === 'string'
+            ? JSON.parse(tour.route).map((stop: any) => ({
+                name: stop.name,
+                location: stop.location,
+                time: stop.time,
+                type: stop.type,
+                collection_date: stop.collection_date
+              }))
+            : tour.route,
         carriers: tour.carriers ? {
           ...tour.carriers,
           carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
@@ -68,7 +77,7 @@ export default function EnvoyerColis() {
           type="public"
           isLoading={isLoading}
           userType={null}
-          onBookingClick={handleBookingClick}
+          handleBookingClick={handleBookingClick}
         />
       </div>
 
