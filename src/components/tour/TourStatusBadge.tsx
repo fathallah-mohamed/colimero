@@ -24,7 +24,7 @@ export function TourStatusBadge({ status }: TourStatusBadgeProps) {
         return "bg-teal-100 text-teal-800 hover:bg-teal-100";
       case "Transport terminé":
         return "bg-cyan-100 text-cyan-800 hover:bg-cyan-100";
-      case "Annulé":
+      case "Annulée":
         return "bg-red-100 text-red-800 hover:bg-red-100";
       default:
         return "bg-gray-100 text-gray-800 hover:bg-gray-100";
