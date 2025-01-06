@@ -1,7 +1,6 @@
 import { TourStatus } from "@/types/tour";
 import { TimelineStatus } from "./timeline/TimelineStatus";
 import { TimelineProgress } from "./timeline/TimelineProgress";
-import { CancelledTimeline } from "./timeline/CancelledTimeline";
 
 interface TourStatusTimelineProps {
   tourId: number;
@@ -14,17 +13,9 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
   const statusOrder: TourStatus[] = ['planned', 'collecting', 'in_transit', 'completed'];
   const currentIndex = statusOrder.indexOf(status);
 
-  if (status === 'cancelled') {
-    return <CancelledTimeline />;
-  }
-
   return (
     <div className="relative flex justify-between items-center w-full mt-4">
-      <TimelineProgress 
-        currentIndex={currentIndex} 
-        statusOrder={statusOrder}
-        currentStatus={status}
-      />
+      <TimelineProgress currentIndex={currentIndex} statusOrder={statusOrder} />
       
       {statusOrder.map((statusItem, index) => (
         <TimelineStatus

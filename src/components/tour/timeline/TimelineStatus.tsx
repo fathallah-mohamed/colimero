@@ -24,7 +24,7 @@ export function TimelineStatus({
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex;
   const isCurrent = status === currentStatus;
-  const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed'].includes(currentStatus);
+  const isClickable = Math.abs(index - currentIndex) === 1 && status !== 'cancelled';
 
   const handleClick = async () => {
     console.log('Click detected on status:', status);
@@ -37,23 +37,6 @@ export function TimelineStatus({
     }
   };
 
-  const getStatusLabel = (status: TourStatus): string => {
-    switch (status) {
-      case 'planned':
-        return "Planifiée";
-      case 'collecting':
-        return "Collecte";
-      case 'in_transit':
-        return "Livraison";
-      case 'completed':
-        return "Terminée";
-      case 'cancelled':
-        return "Annulée";
-      default:
-        return status;
-    }
-  };
-
   return (
     <div className="flex flex-col items-center relative">
       <Button
@@ -62,8 +45,7 @@ export function TimelineStatus({
         className={cn(
           "rounded-full p-0 h-16 w-16 transition-all duration-200",
           isClickable && "hover:bg-gray-100 cursor-pointer",
-          isCurrent && "ring-2 ring-primary ring-offset-2",
-          currentStatus === 'cancelled' && "opacity-50"
+          isCurrent && "ring-2 ring-primary ring-offset-2"
         )}
         onClick={handleClick}
         disabled={!isClickable}
@@ -77,11 +59,12 @@ export function TimelineStatus({
       </Button>
       <span className={cn(
         "text-sm mt-3 font-medium",
-        isCurrent ? "text-primary" : "text-gray-500",
-        isCompleted ? "text-primary" : "",
-        currentStatus === 'cancelled' && index > currentIndex && "line-through opacity-50"
+        isCurrent ? "text-primary" : "text-gray-500"
       )}>
-        {getStatusLabel(status)}
+        {status === 'planned' && "Planifiée"}
+        {status === 'collecting' && "Collecte"}
+        {status === 'in_transit' && "Livraison"}
+        {status === 'completed' && "Terminée"}
       </span>
     </div>
   );

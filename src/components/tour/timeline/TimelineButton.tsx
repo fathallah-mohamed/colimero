@@ -33,8 +33,6 @@ export function TimelineButton({
     >
       <TimelineIcon 
         status={status} 
-        isCompleted={isCompleted}
-        isCurrent={isCurrent}
         className={cn(
           "h-6 w-6",
           isCompleted && "text-primary-foreground",
