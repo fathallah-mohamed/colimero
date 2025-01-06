@@ -1,6 +1,8 @@
 import { ArrowLeftRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { TourStatus } from "@/types/tour";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TourFiltersProps {
   departureCountry: string;
@@ -22,19 +24,6 @@ const countryNames: { [key: string]: string } = {
   'MA': 'Maroc'
 };
 
-const statusLabels: { [key: string]: string } = {
-  'all': 'Tous les statuts',
-  'planned': 'Programmée',
-  'preparation_completed': 'Préparation terminée',
-  'collecting': 'Ramassage en cours',
-  'collecting_completed': 'Ramassage terminé',
-  'in_transit': 'En transit',
-  'transport_completed': 'Transport terminé',
-  'delivery_in_progress': 'Livraison en cours',
-  'completed_completed': 'Livrée',
-  'cancelled': 'Annulée'
-};
-
 export function TourFilters({
   departureCountry,
   destinationCountry,
@@ -45,6 +34,19 @@ export function TourFilters({
   onSortChange,
   onStatusChange,
 }: TourFiltersProps) {
+  const { data: tourStatuses } = useQuery({
+    queryKey: ['tourStatuses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tour_statuses')
+        .select('*')
+        .order('display_order', { ascending: true, nullsLast: true });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const handleSwitch = () => {
     const isValidSwitch = 
       departureCountry === 'FR' || 
@@ -122,9 +124,10 @@ export function TourFilters({
               <SelectValue placeholder="Filtrer par statut" />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(statusLabels).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              {tourStatuses?.map((status) => (
+                <SelectItem key={status.id} value={status.name}>
+                  {status.name}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -727,25 +727,31 @@ export type Database = {
       }
       tour_statuses: {
         Row: {
-          code: string
           created_at: string
-          description: string | null
+          display_order: number | null
           id: number
-          label: string
+          is_final: boolean
+          name: string
+          type: Database["public"]["Enums"]["status_type"]
+          updated_at: string
         }
         Insert: {
-          code: string
           created_at?: string
-          description?: string | null
+          display_order?: number | null
           id?: number
-          label: string
+          is_final?: boolean
+          name: string
+          type: Database["public"]["Enums"]["status_type"]
+          updated_at?: string
         }
         Update: {
-          code?: string
           created_at?: string
-          description?: string | null
+          display_order?: number | null
           id?: number
-          label?: string
+          is_final?: boolean
+          name?: string
+          type?: Database["public"]["Enums"]["status_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -807,7 +813,7 @@ export type Database = {
             columns: ["status"]
             isOneToOne: false
             referencedRelation: "tour_statuses"
-            referencedColumns: ["code"]
+            referencedColumns: ["name"]
           },
           {
             foreignKeyName: "tours_carrier_id_fkey"
@@ -964,6 +970,7 @@ export type Database = {
       maghreb_country: "TN" | "MA" | "DZ"
       moroccan_city: "Casablanca" | "Rabat" | "Tanger" | "Marrakech" | "Agadir"
       registration_status: "pending" | "approved" | "rejected"
+      status_type: "en_cours" | "terminé" | "annulé"
       tour_status:
         | "planned"
         | "collecting"
