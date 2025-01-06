@@ -39,12 +39,21 @@ export default function RequestDetailsDialog({
 
     setIsSubmitting(true);
     try {
+      // First update the request status
       const { error: updateError } = await supabase
         .from("carrier_registration_requests")
         .update({ status: "approved" })
-        .eq("id", request.id);
+        .eq("id", request.id)
+        .select()
+        .single();
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Error updating request:", updateError);
+        throw updateError;
+      }
+
+      // Wait a bit to ensure triggers have completed
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: "Demande approuvée",
