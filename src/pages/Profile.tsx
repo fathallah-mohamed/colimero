@@ -7,12 +7,11 @@ import { AdminProfileView } from "@/components/profile/AdminProfileView";
 import { CarrierProfileView } from "@/components/profile/CarrierProfileView";
 import { ClientProfileView } from "@/components/profile/ClientProfileView";
 import { useProfile } from "@/hooks/use-profile";
-import { ProfileLoading } from "@/components/profile/ProfileLoading";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { profile, loading, userType } = useProfile();
+  const { data: profile, isLoading, error } = useProfile();
 
   useEffect(() => {
     checkAuth();
@@ -30,8 +29,30 @@ export default function Profile() {
     }
   };
 
-  if (loading) {
-    return <ProfileLoading />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex justify-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <p className="text-red-500">Une erreur est survenue lors du chargement du profil.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
