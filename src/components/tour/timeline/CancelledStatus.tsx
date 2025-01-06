@@ -9,9 +9,9 @@ export function CancelledStatus() {
       className="flex items-center justify-center w-full py-6"
     >
       <div className="flex flex-col items-center">
-        <XCircle className="h-16 w-16 text-red-500" />
-        <span className="text-lg mt-4 text-red-500 font-medium">
-          Tournée annulée
+        <XCircle className="h-16 w-16 text-destructive" />
+        <span className="text-lg mt-4 text-destructive font-medium">
+          Commande annulée
         </span>
       </div>
     </motion.div>

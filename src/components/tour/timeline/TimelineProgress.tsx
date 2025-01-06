@@ -1,15 +1,11 @@
 import { cn } from "@/lib/utils";
-import { TourStatus } from "@/types/tour";
 import { motion } from "framer-motion";
 
 interface TimelineProgressProps {
-  currentIndex: number;
-  statusOrder: TourStatus[];
+  progress: number;
 }
 
-export function TimelineProgress({ currentIndex, statusOrder }: TimelineProgressProps) {
-  const progress = (currentIndex / (statusOrder.length - 1)) * 100;
-
+export function TimelineProgress({ progress }: TimelineProgressProps) {
   return (
     <>
       <div className="absolute top-6 left-0 w-full h-1 bg-gray-200 rounded-full -z-10" />

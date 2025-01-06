@@ -10,75 +10,67 @@ interface TourStatusTimelineProps {
 }
 
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
-  console.log('TourStatusTimeline rendered with status:', status);
-  
-  // Si la tournée est annulée, afficher uniquement le statut d'annulation
   if (status === "Annulée") {
     return <CancelledStatus />;
   }
 
-  const getStatusOrder = (currentStatus: TourStatus): TourStatus[] => {
-    switch (currentStatus) {
-      case "Programmé":
-        return [
-          "Programmé",
-          "Ramassage en cours",
-          "En transit",
-          "Livraison en cours"
-        ];
-      case "Ramassage en cours":
-        return [
-          "Préparation terminée",
-          "Ramassage en cours",
-          "En transit",
-          "Livraison en cours",
-          "Livraison terminée"
-        ];
-      case "En transit":
-        return [
-          "Ramassage terminé",
-          "En transit",
-          "Livraison en cours",
-          "Livraison terminée"
-        ];
-      case "Livraison en cours":
-        return [
-          "Transport terminé",
-          "Livraison en cours",
-          "Livraison terminée"
-        ];
-      case "Livraison terminée":
-        return [
-          "Livraison terminée"
-        ];
-      default:
-        return [
-          "Programmé",
-          "Ramassage en cours",
-          "En transit",
-          "Livraison en cours"
-        ];
-    }
-  };
+  if (status === "Livraison terminée") {
+    return null;
+  }
 
-  const statusOrder = getStatusOrder(status);
-  const currentIndex = statusOrder.indexOf(status);
+  // Les 4 étapes principales de la timeline
+  const mainStatuses: TourStatus[] = [
+    "Programmé",
+    "Ramassage en cours",
+    "En transit",
+    "Livraison en cours"
+  ];
+
+  // Trouver l'index du statut actuel
+  const currentIndex = mainStatuses.indexOf(status);
+
+  // Calculer le pourcentage de progression
+  const progress = ((currentIndex) / (mainStatuses.length - 1)) * 100;
 
   return (
-    <div className="relative flex justify-between items-center w-full mt-4">
-      <TimelineProgress currentIndex={currentIndex} statusOrder={statusOrder} />
+    <div className="relative flex justify-between items-center w-full mt-8 px-4">
+      <TimelineProgress progress={progress} />
       
-      {statusOrder.map((statusItem, index) => (
-        <TimelineStatus
-          key={statusItem}
-          tourId={tourId}
-          status={statusItem}
-          currentStatus={status}
-          currentIndex={currentIndex}
-          index={index}
-          onStatusChange={onStatusChange}
-        />
-      ))}
+      {mainStatuses.map((statusItem, index) => {
+        const isCompleted = index < currentIndex;
+        const isCurrent = index === currentIndex;
+        const isNext = index === currentIndex + 1;
+
+        let label = statusItem;
+        if (isCompleted) {
+          switch (statusItem) {
+            case "Programmé":
+              label = "Préparation terminée";
+              break;
+            case "Ramassage en cours":
+              label = "Ramassage terminé";
+              break;
+            case "En transit":
+              label = "Transport terminé";
+              break;
+            case "Livraison en cours":
+              label = "Livraison terminée";
+              break;
+          }
+        }
+
+        return (
+          <TimelineStatus
+            key={statusItem}
+            status={statusItem}
+            isCompleted={isCompleted}
+            isCurrent={isCurrent}
+            isNext={isNext}
+            onClick={() => isNext && onStatusChange(statusItem)}
+            label={label}
+          />
+        );
+      })}
     </div>
   );
 }

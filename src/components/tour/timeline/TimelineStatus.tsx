@@ -1,93 +1,52 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { TourStatus } from "@/types/tour";
-import { TimelineIcon } from "./TimelineIcon";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { TourStatus } from "@/types/tour";
+import { TimelineIcon } from "./TimelineIcon";
 
 interface TimelineStatusProps {
-  tourId: number;
   status: TourStatus;
-  currentStatus: TourStatus;
-  currentIndex: number;
-  index: number;
-  onStatusChange: (newStatus: TourStatus) => void;
+  isCompleted: boolean;
+  isCurrent: boolean;
+  isNext: boolean;
+  onClick: () => void;
+  label: string;
 }
 
-export function TimelineStatus({ 
-  tourId,
-  status, 
-  currentStatus, 
-  currentIndex, 
-  index,
-  onStatusChange 
+export function TimelineStatus({
+  status,
+  isCompleted,
+  isCurrent,
+  isNext,
+  onClick,
+  label
 }: TimelineStatusProps) {
-  const isCompleted = index < currentIndex;
-  const isCurrent = index === currentIndex;
-  const isNext = index === currentIndex + 1;
-
-  const handleClick = () => {
-    if (isNext) {
-      onStatusChange(status);
-    }
-  };
-
-  const getStatusLabel = (status: TourStatus): string => {
-    switch (status) {
-      case "Programmé":
-        return "Programmé";
-      case "Préparation terminée":
-        return "Préparation terminée";
-      case "Ramassage en cours":
-        return "Ramassage en cours";
-      case "Ramassage terminé":
-        return "Ramassage terminé";
-      case "En transit":
-        return "En transit";
-      case "Transport terminé":
-        return "Transport terminé";
-      case "Livraison en cours":
-        return "Livraison en cours";
-      case "Livraison terminée":
-        return "Livraison terminée";
-      default:
-        return status;
-    }
-  };
-
-  const buttonClasses = cn(
-    "flex flex-col items-center gap-2 relative",
-    isCompleted && "text-primary",
-    isCurrent && "text-primary",
-    !isCompleted && !isCurrent && "text-gray-500",
-    isNext && "cursor-pointer hover:text-primary"
-  );
-
   return (
-    <div className="relative z-10">
+    <div className="flex flex-col items-center gap-2">
       <Button
         variant="ghost"
-        className={buttonClasses}
-        onClick={handleClick}
-        disabled={!isNext || currentStatus === "Annulée"}
-      >
-        <div className={cn(
-          "h-12 w-12 rounded-full border-2 flex items-center justify-center",
-          isCompleted && "bg-primary border-primary",
+        className={cn(
+          "h-12 w-12 rounded-full border-2 p-0",
+          isCompleted && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
           isCurrent && "border-primary",
           !isCompleted && !isCurrent && "border-gray-200"
-        )}>
-          <TimelineIcon
-            status={status}
-            isCompleted={isCompleted}
-            isCurrent={isCurrent}
-            className="h-6 w-6"
-          />
-        </div>
-        <span className="text-xs font-medium whitespace-nowrap">
-          {getStatusLabel(status)}
-        </span>
+        )}
+        onClick={onClick}
+        disabled={!isNext}
+      >
+        <TimelineIcon 
+          status={status} 
+          isCompleted={isCompleted}
+          isCurrent={isCurrent}
+        />
       </Button>
+      <span className={cn(
+        "text-xs font-medium",
+        isCompleted && "text-primary",
+        isCurrent && "text-primary",
+        !isCompleted && !isCurrent && "text-gray-500"
+      )}>
+        {label}
+      </span>
     </div>
   );
 }
