@@ -25,10 +25,10 @@ export function TimelineStatus({
 }: TimelineStatusProps) {
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex || (status === 'planned' && currentStatus !== 'planned');
-  const isCurrent = status === currentStatus;
+  const isCurrent = status === currentStatus || 
+    (status === 'completed' && currentStatus === 'in_transit_completed');
   const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed_completed'].includes(currentStatus);
 
-  // Fetch status labels from database
   const { data: statusLabels } = useQuery({
     queryKey: ['tourStatuses'],
     queryFn: async () => {
@@ -106,7 +106,7 @@ export function TimelineStatus({
         className={cn(
           "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
           isCompleted && "bg-primary shadow-lg",
-          isCurrent && "ring-4 ring-primary/30 bg-white",
+          isCurrent && !isCompleted && "ring-4 ring-primary/30 bg-white",
           !isCompleted && !isCurrent && "bg-gray-100",
           isClickable && "cursor-pointer hover:shadow-md"
         )}
@@ -119,7 +119,7 @@ export function TimelineStatus({
           className={cn(
             "h-6 w-6",
             isCompleted && "text-white",
-            isCurrent && "text-primary",
+            isCurrent && !isCompleted && "text-primary",
             !isCompleted && !isCurrent && "text-gray-400"
           )}
         />
@@ -130,7 +130,7 @@ export function TimelineStatus({
           className={cn(
             "text-sm font-medium block",
             isCompleted && "text-primary",
-            isCurrent && "text-primary font-semibold",
+            isCurrent && !isCompleted && "text-primary font-semibold",
             !isCompleted && !isCurrent && "text-gray-500"
           )}
           animate={isCurrent ? { scale: 1.05 } : { scale: 1 }}
