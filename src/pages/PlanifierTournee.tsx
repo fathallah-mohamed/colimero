@@ -19,20 +19,7 @@ export default function PlanifierTournee() {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          setIsAuthenticated(false);
-          setIsLoading(false);
-          return;
-        }
-
-        setIsAuthenticated(true);
-        const userType = session.user?.user_metadata?.user_type;
-
-        if (userType === "admin") {
-          setIsAccessDeniedOpen(true);
-        }
-
+        setIsAuthenticated(!!session);
         setIsLoading(false);
       } catch (error) {
         console.error("Error checking session:", error);
