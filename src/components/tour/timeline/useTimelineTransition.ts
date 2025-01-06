@@ -31,7 +31,7 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         case 'in_transit':
           bookingStatus = 'collected';
           break;
-        case 'completed':
+        case 'completed_completed':
           bookingStatus = 'delivered';
           break;
         default:
@@ -54,7 +54,7 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
       const statusMessages = {
         'collecting': 'La programmation est terminée',
         'in_transit': 'Le ramassage est terminé',
-        'completed': 'La livraison est terminée'
+        'completed_completed': 'La livraison est terminée'
       };
 
       toast({

@@ -29,7 +29,7 @@ export function TimelineStatus({
     (status === 'collecting' && currentStatus !== 'collecting' && currentStatus !== 'planned') ||
     (status === 'in_transit' && currentStatus === 'in_transit_completed');
   const isCurrent = status === currentStatus || 
-    (status === 'completed' && currentStatus === 'in_transit_completed');
+    (status === 'completed_completed' && currentStatus === 'in_transit_completed');
   const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed_completed'].includes(currentStatus);
 
   const { data: statusLabels } = useQuery({
@@ -70,7 +70,7 @@ export function TimelineStatus({
             return 'Transport terminé';
           }
           return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
-        case 'completed':
+        case 'completed_completed':
           if (currentStatus === 'in_transit_completed') {
             return 'Livraison en cours';
           }
@@ -93,7 +93,7 @@ export function TimelineStatus({
       }
       return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
     }
-    if (status === 'completed') {
+    if (status === 'completed_completed') {
       if (currentStatus === 'in_transit_completed') {
         return 'Livraison en cours';
       }

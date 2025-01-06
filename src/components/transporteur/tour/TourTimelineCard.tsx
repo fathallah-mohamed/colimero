@@ -50,7 +50,7 @@ export function TourTimelineCard({
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
     if (tour.status === 'collecting') return "Cette tournée est en cours de collecte";
     if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
-    if (tour.status === 'completed') return "Cette tournée est terminée";
+    if (tour.status === 'completed_completed') return "Cette tournée est terminée";
     if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
     return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
   };
