@@ -38,13 +38,17 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     <div className="relative flex justify-between items-center w-full mt-8 px-4">
       <TimelineProgress progress={progress} />
       
-      {mainStatuses.slice(0, -1).map((statusItem, index) => {
-        const isCompletedStep = index < currentIndex || isCompleted;
-        const isCurrent = index === currentIndex && !isCompleted;
+      {mainStatuses.map((statusItem, index) => {
+        // Un statut est complété s'il est avant le statut actuel
+        const isCompletedStep = index < currentIndex;
+        // Le statut est actif s'il correspond au statut actuel
+        const isCurrent = index === currentIndex;
+        // Le prochain statut est celui qui suit le statut actuel
         const isNext = index === currentIndex + 1 && !isCompleted;
 
+        // Déterminer le label à afficher en fonction de l'état du statut
         let label = statusItem;
-        if (isCompletedStep || isCompleted) {
+        if (isCompletedStep) {
           switch (statusItem) {
             case "Programmé":
               label = "Préparation terminée";
