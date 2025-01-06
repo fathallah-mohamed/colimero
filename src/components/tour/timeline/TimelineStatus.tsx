@@ -30,7 +30,7 @@ export function TimelineStatus({
     (status === 'transport_completed' && currentStatus === 'delivery_in_progress');
   const isCurrent = status === currentStatus || 
     (status === 'completed_completed' && currentStatus === 'delivery_in_progress');
-  const isClickable = Math.abs(index - currentIndex) === 1 && currentStatus !== 'cancelled';
+  const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed_completed'].includes(currentStatus);
 
   const { data: statusLabels } = useQuery({
     queryKey: ['tourStatuses'],
@@ -48,7 +48,12 @@ export function TimelineStatus({
   });
 
   const handleClick = async () => {
+    console.log('Click detected on status:', status);
+    console.log('Current status:', currentStatus);
+    console.log('Is clickable:', isClickable);
+    
     if (isClickable) {
+      console.log('Attempting status change from', currentStatus, 'to', status);
       await handleStatusChange(currentStatus, status);
     }
   };
@@ -62,6 +67,8 @@ export function TimelineStatus({
           return 'Ramassage terminé';
         case 'transport_completed':
           return 'Transport terminé';
+        case 'preparation_completed':
+          return 'Préparation terminée';
         case 'collecting':
           return 'Ramassage en cours';
         case 'in_transit':
@@ -70,8 +77,6 @@ export function TimelineStatus({
           return 'Livraison en cours';
         case 'completed_completed':
           return 'Livrée';
-        case 'cancelled':
-          return 'Annulée';
         default:
           return status;
       }

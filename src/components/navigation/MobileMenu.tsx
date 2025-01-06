@@ -40,33 +40,22 @@ export default function MobileMenu({
       </div>
 
       <div className="h-full overflow-y-auto px-2 pb-3 space-y-1">
-        {menuItems.map((item) => {
-          const isAllowed = !userType || item.allowedUserTypes.includes(userType);
-          const shouldPreventDefault = !item.allowedUserTypes.includes(userType || '');
-
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={(e) => {
-                if (shouldPreventDefault) {
-                  e.preventDefault();
-                }
-                setIsOpen(false);
-              }}
-              className={cn(
-                "flex items-center px-3 py-2 rounded-md text-base font-medium",
-                item.highlight 
-                  ? "text-primary hover:text-primary-hover hover:bg-primary/10" + (item.className || "")
-                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-100",
-                shouldPreventDefault ? "opacity-50 cursor-not-allowed" : ""
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              <span className="ml-2">{item.name}</span>
-            </Link>
-          );
-        })}
+        {menuItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.href}
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "flex items-center px-3 py-2 rounded-md text-base font-medium",
+              item.highlight 
+                ? "text-primary hover:text-primary-hover hover:bg-primary/10" + (item.className || "")
+                : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+            )}
+          >
+            {item.icon}
+            <span className="ml-2">{item.name}</span>
+          </Link>
+        ))}
 
         {user ? (
           <div className="border-t border-gray-200 pt-4 mt-4">

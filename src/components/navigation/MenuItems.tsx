@@ -7,7 +7,7 @@ export const menuItems = [
   { 
     name: "Planifier une tournée", 
     href: "/planifier-tournee", 
-    icon: Calendar, 
+    icon: <Calendar className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
     allowedUserTypes: ["carrier"]
@@ -15,7 +15,7 @@ export const menuItems = [
   { 
     name: "Envoyer un colis", 
     href: "/envoyer-colis", 
-    icon: Package, 
+    icon: <Package className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
     allowedUserTypes: ["client"]
@@ -23,25 +23,25 @@ export const menuItems = [
   { 
     name: "Transporteurs", 
     href: "/transporteurs", 
-    icon: Truck,
+    icon: <Truck className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "Actualités", 
     href: "/blog", 
-    icon: MessageSquare,
+    icon: <MessageSquare className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "À propos", 
     href: "/a-propos", 
-    icon: Info,
+    icon: <Info className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
     name: "Contact", 
     href: "/contact", 
-    icon: Users,
+    icon: <Users className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
 ];
@@ -81,7 +81,6 @@ export default function MenuItems() {
       {menuItems.map((item) => {
         const isAllowed = !userType || item.allowedUserTypes.includes(userType);
         const shouldPreventDefault = !item.allowedUserTypes.includes(userType || '');
-        const Icon = item.icon;
 
         return (
           <Link
@@ -100,7 +99,7 @@ export default function MenuItems() {
               ${shouldPreventDefault ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
-            <Icon className="h-4 w-4" />
+            {item.icon}
             <span className="ml-2">{item.name}</span>
           </Link>
         );
