@@ -16,8 +16,8 @@ interface ApprovalRequestCardProps {
   userType?: string;
   onApprove?: () => void;
   onReject?: () => void;
-  onCancel?: (requestId: string) => void;
-  onDelete?: (requestId: string) => void;
+  onCancel?: () => void;
+  onDelete?: () => void;
 }
 
 export function ApprovalRequestCard({ 

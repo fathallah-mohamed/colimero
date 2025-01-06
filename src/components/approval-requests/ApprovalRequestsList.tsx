@@ -42,8 +42,9 @@ export function ApprovalRequestsList() {
           key={request.id} 
           request={request} 
           userType="client"
-          onCancel={handleCancelRequest}
-          onDelete={handleDeleteRequest}
+          onStatusChange={() => {}}
+          onCancel={() => handleCancelRequest(request.id)}
+          onDelete={() => handleDeleteRequest(request.id)}
         />
       ))}
     </div>

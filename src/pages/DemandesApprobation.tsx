@@ -59,10 +59,11 @@ export default function DemandesApprobation() {
               key={request.id}
               request={request}
               userType={userType}
-              onApprove={userType === 'carrier' ? () => handleApproval(request.id, true) : undefined}
-              onReject={userType === 'carrier' ? () => handleApproval(request.id, false) : undefined}
-              onCancel={userType !== 'carrier' ? handleCancelRequest : undefined}
-              onDelete={userType !== 'carrier' ? handleDeleteRequest : undefined}
+              onStatusChange={() => {}}
+              onApprove={() => handleApproval(request.id, true)}
+              onReject={() => handleApproval(request.id, false)}
+              onCancel={() => handleCancelRequest(request.id)}
+              onDelete={() => handleDeleteRequest(request.id)}
             />
           ))}
           {requests.length === 0 && (
