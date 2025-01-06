@@ -6,25 +6,12 @@ interface TourTimelineProps {
 }
 
 export function TourTimeline({ status, onStatusChange }: TourTimelineProps) {
-  // Si la tournée est annulée, afficher uniquement le statut annulé
-  if (status === 'cancelled') {
-    return (
-      <div className="flex items-center justify-center w-full py-6">
-        <div className="flex flex-col items-center gap-2">
-          <div className="bg-red-100 p-3 rounded-full">
-            <span className="text-red-500 text-lg">×</span>
-          </div>
-          <span className="text-sm font-medium text-red-500">Tournée annulée</span>
-        </div>
-      </div>
-    );
-  }
-
   const steps = [
     { key: 'planned', label: 'Planifiée', icon: '✓' },
-    { key: 'collecting', label: 'Collecte', icon: '✓' },
-    { key: 'in_transit', label: 'Livraison', icon: '🚛' },
-    { key: 'completed', label: 'Terminée', icon: '✓' }
+    { key: 'preparation_completed', label: 'Préparation terminée', icon: '✓' },
+    { key: 'collecting_completed', label: 'Ramassage terminé', icon: '✓' },
+    { key: 'transport_completed', label: 'Transport terminé', icon: '🚛' },
+    { key: 'completed_completed', label: 'Livrée', icon: '✓' }
   ];
 
   const currentStep = steps.findIndex(step => step.key === status);
