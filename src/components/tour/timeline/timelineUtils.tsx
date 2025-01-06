@@ -9,7 +9,7 @@ export const getIcon = (status: TourStatus) => {
       return <PackageSearch className="h-6 w-6" />;
     case "in_transit":
       return <Truck className="h-6 w-6" />;
-    case "completed":
+    case "delivery_in_progress":
       return <MapPin className="h-6 w-6" />;
     default:
       return null;
@@ -19,13 +19,23 @@ export const getIcon = (status: TourStatus) => {
 export const getStatusLabel = (status: TourStatus) => {
   switch (status) {
     case "planned":
-      return "Planifiée";
+      return "Programmée";
+    case "preparation_completed":
+      return "Préparation terminée";
     case "collecting":
-      return "Collecte";
+      return "Ramassage en cours";
+    case "collecting_completed":
+      return "Ramassage terminé";
     case "in_transit":
-      return "Livraison";
-    case "completed":
-      return "Terminée";
+      return "En transit";
+    case "transport_completed":
+      return "Transport terminé";
+    case "delivery_in_progress":
+      return "Livraison en cours";
+    case "completed_completed":
+      return "Livraison terminée";
+    case "cancelled":
+      return "Annulée";
     default:
       return status;
   }
