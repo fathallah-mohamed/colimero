@@ -880,10 +880,6 @@ export type Database = {
         }
         Returns: string
       }
-      create_test_tours_for_carriers: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       create_test_user: {
         Args: {
           email: string
