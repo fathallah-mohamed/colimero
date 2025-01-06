@@ -25,14 +25,10 @@ const countryNames: { [key: string]: string } = {
 const statusLabels: { [key: string]: string } = {
   'all': 'Tous les statuts',
   'planned': 'Programmée',
-  'planned_completed': 'Préparation terminée',
   'collecting': 'Ramassage en cours',
-  'collecting_completed': 'Ramassage terminé',
   'in_transit': 'En transit',
-  'in_transit_completed': 'Transport terminé',
   'completed': 'Livraison en cours',
-  'completed_completed': 'Livrée',
-  'cancelled': 'Annulée'
+  'completed_completed': 'Livrée'
 };
 
 export function TourFilters({
