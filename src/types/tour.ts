@@ -55,6 +55,7 @@ export interface Tour {
   terms_accepted: boolean;
   customs_declaration: boolean;
   status: TourStatus;
+  previous_status?: TourStatus;
   type: TourType;
   carriers?: Carrier;
   bookings?: Booking[];

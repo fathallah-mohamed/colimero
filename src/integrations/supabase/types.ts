@@ -765,6 +765,7 @@ export type Database = {
           departure_date: string
           destination_country: string
           id: number
+          previous_status: string | null
           remaining_capacity: number
           route: Json
           status: string | null
@@ -782,6 +783,7 @@ export type Database = {
           departure_date: string
           destination_country?: string
           id?: number
+          previous_status?: string | null
           remaining_capacity: number
           route: Json
           status?: string | null
@@ -799,6 +801,7 @@ export type Database = {
           departure_date?: string
           destination_country?: string
           id?: number
+          previous_status?: string | null
           remaining_capacity?: number
           route?: Json
           status?: string | null
@@ -821,6 +824,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "carriers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tours_previous_status_fkey"
+            columns: ["previous_status"]
+            isOneToOne: false
+            referencedRelation: "tour_statuses"
+            referencedColumns: ["name"]
           },
         ]
       }
