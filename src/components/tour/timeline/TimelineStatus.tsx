@@ -31,10 +31,10 @@ export function TimelineStatus({
         <Button
           variant="ghost"
           className={cn(
-            "relative h-14 w-14 rounded-full border-2 p-0 transition-all duration-300",
-            (isCompleted || status === "Livraison terminée") && "border-primary bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20",
-            isCurrent && "border-primary bg-white shadow-lg shadow-primary/20",
-            !isCompleted && !isCurrent && status !== "Livraison terminée" && "border-gray-200 hover:border-gray-300",
+            "relative h-14 w-14 rounded-full p-0 transition-all duration-300",
+            (isCompleted || status === "Livraison terminée") && "bg-[#34D399] border-none text-white hover:bg-[#34D399]/90",
+            isCurrent && "bg-[#34D399] border-none text-white hover:bg-[#34D399]/90",
+            !isCompleted && !isCurrent && status !== "Livraison terminée" && "border-2 border-gray-200 hover:border-gray-300",
             isNext && "animate-pulse"
           )}
           onClick={onClick}
@@ -49,8 +49,8 @@ export function TimelineStatus({
       </motion.div>
       <span className={cn(
         "text-sm font-medium transition-colors duration-300 text-center",
-        (isCompleted || status === "Livraison terminée") && "text-primary",
-        isCurrent && "text-primary",
+        (isCompleted || status === "Livraison terminée") && "text-[#34D399]",
+        isCurrent && "text-[#34D399]",
         !isCompleted && !isCurrent && status !== "Livraison terminée" && "text-gray-500"
       )}>
         {label}

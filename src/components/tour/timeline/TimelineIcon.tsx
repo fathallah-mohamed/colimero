@@ -13,7 +13,7 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
   const iconClass = cn(
     "h-6 w-6",
     className,
-    isCompleted ? "text-primary-foreground" : isCurrent ? "text-primary" : "text-gray-500"
+    isCompleted ? "text-white" : isCurrent ? "text-white" : "text-gray-500"
   );
 
   if (isCompleted) {
@@ -22,14 +22,16 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
 
   switch (status) {
     case "Programmé":
-      return <CalendarCheck className={iconClass} />;
+      return <Check className={iconClass} />;
     case "Ramassage en cours":
-      return <PackageSearch className={iconClass} />;
+      return <Check className={iconClass} />;
     case "En transit":
       return <Truck className={iconClass} />;
     case "Livraison en cours":
-      return <MapPin className={iconClass} />;
+      return <Truck className={iconClass} />;
+    case "Livraison terminée":
+      return <Check className={iconClass} />;
     default:
-      return <CalendarCheck className={iconClass} />;
+      return <Check className={iconClass} />;
   }
 }
