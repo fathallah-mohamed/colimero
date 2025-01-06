@@ -37,21 +37,8 @@ export function TimelineStatus({
         .select('code, label, description');
       
       if (error) throw error;
-      return data.reduce((acc: Record<string, { label: string, completedLabel?: string }>, curr) => {
-        if (curr.code.endsWith('_completed')) {
-          const baseStatus = curr.code.replace('_completed', '');
-          if (acc[baseStatus]) {
-            acc[baseStatus].completedLabel = curr.label;
-          } else {
-            acc[baseStatus] = { label: '', completedLabel: curr.label };
-          }
-        } else {
-          if (acc[curr.code]) {
-            acc[curr.code].label = curr.label;
-          } else {
-            acc[curr.code] = { label: curr.label };
-          }
-        }
+      return data.reduce((acc: Record<string, { label: string }>, curr) => {
+        acc[curr.code] = { label: curr.label };
         return acc;
       }, {});
     }
@@ -68,26 +55,24 @@ export function TimelineStatus({
     }
   };
 
-  const getStatusLabel = (status: TourStatus, isCompleted: boolean) => {
+  const getStatusLabel = (status: TourStatus) => {
     if (!statusLabels) {
       switch (status) {
         case 'planned':
-          return isCompleted ? 'Préparation terminée' : 'En préparation';
+          return 'Programmée';
         case 'collecting':
-          return isCompleted ? 'Programmé terminé' : 'En programmation';
+          return 'Ramassage en cours';
         case 'in_transit':
-          return isCompleted ? 'Ramassage terminé' : 'En ramassage';
+          return 'En transit';
         case 'completed':
-          return 'Livraison terminée';
+          return 'Livraison en cours';
         default:
           return status;
       }
     }
 
     const statusInfo = statusLabels[status];
-    if (!statusInfo) return status;
-
-    return isCompleted ? (statusInfo.completedLabel || statusInfo.label) : statusInfo.label;
+    return statusInfo ? statusInfo.label : status;
   };
 
   return (
@@ -126,7 +111,7 @@ export function TimelineStatus({
           )}
           animate={isCurrent ? { scale: 1.05 } : { scale: 1 }}
         >
-          {getStatusLabel(status, isCompleted)}
+          {getStatusLabel(status)}
         </motion.span>
       </div>
     </div>
