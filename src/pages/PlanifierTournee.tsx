@@ -45,7 +45,8 @@ export default function PlanifierTournee() {
             title: "Accès refusé",
             description: "Les administrateurs ne peuvent pas créer de tournées.",
           });
-          navigate('/');
+          setTimeout(() => navigate('/'), 1500);
+          return;
         }
       } catch (error) {
         console.error("Error checking session:", error);
