@@ -30,89 +30,74 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      const trimmedEmail = email.trim().toLowerCase();
-      const trimmedPassword = password.trim();
-
-      // Basic validation
-      if (!trimmedEmail || !trimmedPassword) {
+      if (!email.trim() || !password.trim()) {
         toast({
           variant: "destructive",
           title: "Champs requis",
           description: "Veuillez remplir tous les champs",
         });
-        setIsLoading(false);
         return;
       }
 
-      // First, check if the user exists
-      console.log("Tentative de connexion avec:", trimmedEmail);
-      
-      // Attempt authentication
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: trimmedEmail,
-        password: trimmedPassword,
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
       });
 
-      if (error) {
-        console.error("Détails de l'erreur d'authentification:", {
-          message: error.message,
-          status: error.status,
-          name: error.name
-        });
-        
+      if (signInError) {
+        let errorTitle = "Erreur de connexion";
         let errorMessage = "Une erreur est survenue lors de la connexion";
-        
-        if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou mot de passe incorrect. Veuillez vérifier vos identifiants.";
-        } else if (error.message.includes("Email not confirmed")) {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter. Vérifiez votre boîte de réception.";
-        } else if (error.message.includes("Invalid email")) {
-          errorMessage = "Format d'email invalide. Veuillez vérifier votre adresse email.";
+
+        if (signInError.message === "Invalid login credentials") {
+          errorTitle = "Identifiants incorrects";
+          errorMessage = "L'email ou le mot de passe est incorrect";
+        } else if (signInError.message.includes("Email not confirmed")) {
+          errorTitle = "Email non confirmé";
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (signInError.message.includes("Invalid email")) {
+          errorTitle = "Email invalide";
+          errorMessage = "Le format de l'email est incorrect";
+        } else if (signInError.message.includes("Password")) {
+          errorTitle = "Mot de passe incorrect";
+          errorMessage = "Le mot de passe fourni est incorrect";
         }
 
         toast({
           variant: "destructive",
-          title: "Erreur de connexion",
+          title: errorTitle,
           description: errorMessage,
         });
         setPassword("");
-        setIsLoading(false);
         return;
       }
 
-      if (!data.user) {
-        console.error("Aucune donnée utilisateur reçue");
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
+      if (user) {
+        const userType = user.user_metadata?.user_type;
 
-      const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur connecté:", userType);
+        if (requiredUserType && userType !== requiredUserType) {
+          toast({
+            variant: "destructive",
+            title: "Accès refusé",
+            description: `Cette section est réservée aux ${requiredUserType}s.`,
+          });
+          return;
+        }
 
-      if (requiredUserType && userType !== requiredUserType) {
         toast({
-          variant: "destructive",
-          title: "Accès refusé",
-          description: `Cette section est réservée aux ${requiredUserType}s.`,
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté",
         });
-        setIsLoading(false);
-        return;
+
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        }
+
+        onSuccess?.();
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté",
-      });
-
-      const returnPath = sessionStorage.getItem('returnPath');
-      if (returnPath) {
-        sessionStorage.removeItem('returnPath');
-        navigate(returnPath);
-      }
-
-      onSuccess?.();
     } catch (error: any) {
-      console.error("Erreur complète:", error);
-      setPassword("");
+      console.error("Erreur de connexion:", error);
       toast({
         variant: "destructive",
         title: "Erreur inattendue",
@@ -135,7 +120,6 @@ export function LoginForm({
           required
           placeholder="exemple@email.com"
           className="w-full"
-          disabled={isLoading}
         />
       </div>
 
@@ -149,7 +133,6 @@ export function LoginForm({
           required
           placeholder="••••••••"
           className="w-full"
-          disabled={isLoading}
         />
       </div>
 
@@ -168,7 +151,6 @@ export function LoginForm({
             variant="outline"
             onClick={onRegisterClick}
             className="w-full"
-            disabled={isLoading}
           >
             Créer un compte client
           </Button>
@@ -180,7 +162,6 @@ export function LoginForm({
             variant="outline"
             onClick={onCarrierRegisterClick}
             className="w-full"
-            disabled={isLoading}
           >
             Devenir transporteur
           </Button>
