@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCircle2 } from "lucide-react";
 import { useNavigation } from "./useNavigation";
 import { useToast } from "@/hooks/use-toast";
 
@@ -27,6 +27,14 @@ export const menuItems = [
     allowedUserTypes: ["client", "carrier", "admin"]
   },
   { 
+    name: "Devenir transporteur", 
+    href: "/planifier-tournee", 
+    icon: <Truck className="w-4 h-4" />,
+    highlight: true,
+    className: "bg-blue-50",
+    allowedUserTypes: []
+  },
+  { 
     name: "Actualités", 
     href: "/blog", 
     icon: <MessageSquare className="w-4 h-4" />,
@@ -42,6 +50,12 @@ export const menuItems = [
     name: "Contact", 
     href: "/contact", 
     icon: <Users className="w-4 h-4" />,
+    allowedUserTypes: ["client", "carrier", "admin"]
+  },
+  { 
+    name: "Profil", 
+    href: "/profil", 
+    icon: <UserCircle2 className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
 ];
@@ -78,9 +92,19 @@ export default function MenuItems() {
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
       {menuItems.map((item) => {
+        // Show "Devenir transporteur" only when not logged in or not a carrier
+        if (item.name === "Devenir transporteur" && (userType === "carrier" || userType === "admin")) {
+          return null;
+        }
+
+        // Hide "Profil" when not logged in
+        if (item.name === "Profil" && !userType) {
+          return null;
+        }
+
         const isAllowed = !userType || item.allowedUserTypes.includes(userType);
 
-        return isAllowed ? (
+        return (
           <Link
             key={item.name}
             to={item.href}
@@ -101,7 +125,7 @@ export default function MenuItems() {
             {item.icon}
             <span className="ml-2">{item.name}</span>
           </Link>
-        ) : null;
+        );
       })}
     </div>
   );
