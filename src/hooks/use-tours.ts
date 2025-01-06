@@ -7,6 +7,7 @@ import { useTourManagement } from "./use-tour-management";
 import { useTourData } from "./use-tour-data";
 
 export function useTours() {
+  const navigate = useNavigate();
   const {
     departureCountry,
     destinationCountry,
@@ -44,7 +45,7 @@ export function useTours() {
     };
 
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   return {
     loading,

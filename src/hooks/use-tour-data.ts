@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus } from "@/types/tour";
+import type { Tour, TourStatus, RouteStop } from "@/types/tour";
 
 interface UseTourDataProps {
   departureCountry: string;
@@ -64,7 +64,23 @@ export function useTourData({
       return;
     }
 
-    setTours(data || []);
+    const transformedTours = data?.map(tour => ({
+      ...tour,
+      route: Array.isArray(tour.route) 
+        ? tour.route 
+        : (typeof tour.route === 'string' 
+            ? JSON.parse(tour.route)
+            : tour.route
+          ),
+      carriers: tour.carriers ? {
+        ...tour.carriers,
+        carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+          ? tour.carriers.carrier_capacities
+          : [tour.carriers.carrier_capacities]
+      } : undefined
+    })) as Tour[];
+
+    setTours(transformedTours || []);
     setLoading(false);
   };
 
