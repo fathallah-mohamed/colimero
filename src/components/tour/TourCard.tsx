@@ -157,7 +157,7 @@ export function TourCard({
         <CollapsibleContent className="space-y-4 mt-4">
           {tour.bookings && tour.bookings.length > 0 ? (
             <div className="space-y-3">
-              {tour.bookings.map((booking: any) => (
+              {tour.bookings.map((booking) => (
                 <Card key={booking.id} className="p-3">
                   <div className="flex justify-between items-start">
                     <div>

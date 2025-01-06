@@ -25,6 +25,17 @@ interface Carrier {
   carrier_capacities: CarrierCapacity[];
 }
 
+export interface Booking {
+  id: string;
+  pickup_city: string;
+  delivery_city: string;
+  weight: number;
+  tracking_number: string;
+  status: string;
+  recipient_name: string;
+  recipient_phone: string;
+}
+
 export interface Tour {
   id: number;
   carrier_id: string;
@@ -42,4 +53,5 @@ export interface Tour {
   customs_declaration: boolean | null;
   status: TourStatus | null;
   carriers?: Carrier | null;
+  bookings?: Booking[];
 }
