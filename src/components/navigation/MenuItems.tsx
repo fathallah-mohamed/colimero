@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCircle2 } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCircle2, ClipboardList, UserCog } from "lucide-react";
 import { useNavigation } from "./useNavigation";
 import { useToast } from "@/hooks/use-toast";
 
@@ -58,6 +58,24 @@ export const menuItems = [
     icon: <UserCircle2 className="w-4 h-4" />,
     allowedUserTypes: ["client", "carrier", "admin"]
   },
+  { 
+    name: "Demandes d'inscription", 
+    href: "/admin/demandes-inscription", 
+    icon: <ClipboardList className="w-4 h-4" />,
+    allowedUserTypes: ["admin"]
+  },
+  { 
+    name: "Clients", 
+    href: "/admin/clients", 
+    icon: <Users className="w-4 h-4" />,
+    allowedUserTypes: ["admin"]
+  },
+  { 
+    name: "Administrateurs", 
+    href: "/admin/gestion", 
+    icon: <UserCog className="w-4 h-4" />,
+    allowedUserTypes: ["admin"]
+  }
 ];
 
 export default function MenuItems() {
@@ -99,6 +117,11 @@ export default function MenuItems() {
 
         // Hide "Profil" when not logged in
         if (item.name === "Profil" && !userType) {
+          return null;
+        }
+
+        // Show admin menu items only for admin users
+        if (item.allowedUserTypes.includes("admin") && userType !== "admin") {
           return null;
         }
 
