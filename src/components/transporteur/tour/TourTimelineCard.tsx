@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
-import { Tour } from "@/types/tour";
+import { Tour, TourStatus } from "@/types/tour";
 import { TourTimeline } from "@/components/transporteur/TourTimeline";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import AuthDialog from "@/components/auth/AuthDialog";
@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface TourTimelineCardProps {
   tour: Tour;
   onBookingClick: (tourId: number, pickupCity: string) => void;
+  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
   hideAvatar?: boolean;
   userType?: string | null;
   isUpcoming?: boolean;
@@ -25,6 +26,7 @@ interface TourTimelineCardProps {
 export function TourTimelineCard({ 
   tour, 
   onBookingClick, 
+  onStatusChange,
   hideAvatar, 
   userType,
   isUpcoming = false
@@ -127,7 +129,10 @@ export function TourTimelineCard({
               className="overflow-hidden"
             >
               <div className="pt-6 space-y-6">
-                <TourTimeline status={tour.status} />
+                <TourTimeline 
+                  status={tour.status} 
+                  onStatusChange={onStatusChange ? (newStatus) => onStatusChange(tour.id, newStatus) : undefined}
+                />
                 
                 <TourCapacityDisplay 
                   totalCapacity={tour.total_capacity} 
