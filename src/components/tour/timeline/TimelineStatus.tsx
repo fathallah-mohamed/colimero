@@ -37,19 +37,32 @@ export function TimelineStatus({
     }
   };
 
+  const getStatusLabel = (status: TourStatus) => {
+    switch (status) {
+      case 'planned':
+        return "Planifiée";
+      case 'collecting':
+        return "Collecte";
+      case 'in_transit':
+        return "Livraison";
+      case 'completed':
+        return "Terminée";
+      default:
+        return status;
+    }
+  };
+
   return (
     <div className="flex flex-col items-center relative">
-      <Button
-        variant="ghost"
-        size="lg"
+      <div 
         className={cn(
-          "rounded-full p-0 h-16 w-16 transition-all duration-200",
-          isClickable && "hover:bg-gray-100 cursor-pointer",
+          "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
+          isCompleted && "bg-primary shadow-lg",
           isCurrent && "ring-2 ring-primary ring-offset-2",
-          isCompleted && "bg-primary text-primary-foreground hover:bg-primary/90"
+          !isCompleted && !isCurrent && "bg-gray-100",
+          isClickable && "cursor-pointer hover:scale-105"
         )}
         onClick={handleClick}
-        disabled={!isClickable}
       >
         <TimelineIcon 
           status={status}
@@ -57,16 +70,21 @@ export function TimelineStatus({
           isCurrent={isCurrent}
           className="h-6 w-6"
         />
-      </Button>
-      <span className={cn(
-        "text-sm mt-3 font-medium",
-        isCurrent ? "text-primary" : isCompleted ? "text-primary" : "text-gray-500"
-      )}>
-        {status === 'planned' && "Planifiée"}
-        {status === 'collecting' && "Collecte"}
-        {status === 'in_transit' && "Livraison"}
-        {status === 'completed' && "Terminée"}
-      </span>
+      </div>
+      
+      <div className="mt-3 text-center">
+        <span className={cn(
+          "text-sm font-medium block",
+          isCurrent ? "text-primary" : isCompleted ? "text-primary" : "text-gray-500"
+        )}>
+          {getStatusLabel(status)}
+        </span>
+        {isCurrent && (
+          <span className="text-xs text-gray-500 mt-1 block">
+            Statut actuel
+          </span>
+        )}
+      </div>
     </div>
   );
 }
