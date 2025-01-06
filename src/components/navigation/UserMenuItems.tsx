@@ -1,44 +1,66 @@
 import { Link } from "react-router-dom";
-import { UserCircle2, Package, Truck, Users, ClipboardList, UserCog } from "lucide-react";
-
-interface UserMenuItem {
-  name: string;
-  href: string;
-  icon: JSX.Element;
-}
+import { UserCog, Package, CalendarDays, ClipboardCheck } from "lucide-react";
 
 interface UserMenuItemsProps {
   userType: string | null;
 }
 
 export function UserMenuItems({ userType }: UserMenuItemsProps) {
-  const userMenuItems: UserMenuItem[] = userType === 'carrier' ? [
-    { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
-    { name: "Mes tournées", href: "/mes-tournees", icon: <Truck className="w-4 h-4" /> },
-    { name: "Demandes d'approbation", href: "/demandes-approbation", icon: <Users className="w-4 h-4" /> }
-  ] : userType === 'admin' ? [
-    { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
-    { name: "Demandes d'inscription", href: "/admin", icon: <ClipboardList className="w-4 h-4" /> },
-    { name: "Clients", href: "/admin/clients", icon: <Users className="w-4 h-4" /> },
-    { name: "Administrateurs", href: "/admin/gestion", icon: <UserCog className="w-4 h-4" /> }
-  ] : [
-    { name: "Profil", href: "/profil", icon: <UserCircle2 className="w-4 h-4" /> },
-    { name: "Mes réservations", href: "/mes-reservations", icon: <Package className="w-4 h-4" /> },
-    { name: "Mes demandes d'approbation", href: "/mes-demandes-approbation", icon: <ClipboardList className="w-4 h-4" /> }
-  ];
-
-  return (
-    <>
-      {userMenuItems.map((item) => (
+  if (userType === "admin") {
+    return (
+      <div className="flex items-center space-x-4">
         <Link
-          key={item.name}
-          to={item.href}
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+          to="/admin/dashboard"
+          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
-          {item.icon}
-          <span className="ml-2">{item.name}</span>
+          <UserCog className="w-4 h-4 mr-2" />
+          Dashboard
         </Link>
-      ))}
-    </>
-  );
+      </div>
+    );
+  }
+
+  if (userType === "carrier") {
+    return (
+      <div className="flex items-center space-x-4">
+        <Link
+          to="/mes-tournees"
+          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          <CalendarDays className="w-4 h-4 mr-2" />
+          Mes tournées
+        </Link>
+        <Link
+          to="/demandes-approbation"
+          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          <ClipboardCheck className="w-4 h-4 mr-2" />
+          Demandes d'approbation
+        </Link>
+      </div>
+    );
+  }
+
+  if (userType === "client") {
+    return (
+      <div className="flex items-center space-x-4">
+        <Link
+          to="/mes-reservations"
+          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          <Package className="w-4 h-4 mr-2" />
+          Mes réservations
+        </Link>
+        <Link
+          to="/mes-demandes-approbation"
+          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          <ClipboardCheck className="w-4 h-4 mr-2" />
+          Mes demandes
+        </Link>
+      </div>
+    );
+  }
+
+  return null;
 }
