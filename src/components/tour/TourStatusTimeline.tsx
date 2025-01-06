@@ -14,10 +14,6 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     return <CancelledStatus />;
   }
 
-  if (status === "Livraison terminée") {
-    return null;
-  }
-
   // Les 4 étapes principales de la timeline
   const mainStatuses: TourStatus[] = [
     "Programmé",
@@ -29,20 +25,20 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
   // Trouver l'index du statut actuel
   const currentIndex = mainStatuses.indexOf(status);
 
-  // Calculer le pourcentage de progression
-  const progress = ((currentIndex) / (mainStatuses.length - 1)) * 100;
+  // Si la tournée est terminée, on met la progress à 100%
+  const progress = status === "Livraison terminée" ? 100 : ((currentIndex) / (mainStatuses.length - 1)) * 100;
 
   return (
     <div className="relative flex justify-between items-center w-full mt-8 px-4">
       <TimelineProgress progress={progress} />
       
       {mainStatuses.map((statusItem, index) => {
-        const isCompleted = index < currentIndex;
-        const isCurrent = index === currentIndex;
-        const isNext = index === currentIndex + 1;
+        const isCompleted = index < currentIndex || status === "Livraison terminée";
+        const isCurrent = index === currentIndex && status !== "Livraison terminée";
+        const isNext = index === currentIndex + 1 && status !== "Livraison terminée";
 
         let label = statusItem;
-        if (isCompleted) {
+        if (isCompleted || status === "Livraison terminée") {
           switch (statusItem) {
             case "Programmé":
               label = "Préparation terminée";

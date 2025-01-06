@@ -26,24 +26,24 @@ export function TimelineStatus({
         variant="ghost"
         className={cn(
           "h-12 w-12 rounded-full border-2 p-0",
-          isCompleted && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
+          (isCompleted || status === "Livraison terminée") && "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
           isCurrent && "border-primary",
-          !isCompleted && !isCurrent && "border-gray-200"
+          !isCompleted && !isCurrent && status !== "Livraison terminée" && "border-gray-200"
         )}
         onClick={onClick}
         disabled={!isNext}
       >
         <TimelineIcon 
           status={status} 
-          isCompleted={isCompleted}
+          isCompleted={isCompleted || status === "Livraison terminée"}
           isCurrent={isCurrent}
         />
       </Button>
       <span className={cn(
         "text-xs font-medium",
-        isCompleted && "text-primary",
+        (isCompleted || status === "Livraison terminée") && "text-primary",
         isCurrent && "text-primary",
-        !isCompleted && !isCurrent && "text-gray-500"
+        !isCompleted && !isCurrent && status !== "Livraison terminée" && "text-gray-500"
       )}>
         {label}
       </span>
