@@ -1,4 +1,17 @@
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from "@/integrations/supabase/client";
+
+// Create an admin client with the service role key
+const adminAuthClient = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+);
 
 export async function approveCarrierRequest(requestId: string) {
   try {
@@ -17,8 +30,8 @@ export async function approveCarrierRequest(requestId: string) {
     // Generate a random password for the new user
     const tempPassword = Math.random().toString(36).slice(-8);
 
-    // First create the auth user
-    const { error: authError } = await supabase.auth.admin.createUser({
+    // First create the auth user using the admin client
+    const { error: authError } = await adminAuthClient.auth.admin.createUser({
       email: request.email,
       password: tempPassword,
       email_confirm: true,
