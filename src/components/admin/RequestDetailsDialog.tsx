@@ -39,21 +39,35 @@ export default function RequestDetailsDialog({
 
     setIsSubmitting(true);
     try {
-      // First update the request status
+      // First update the request status without select()
       const { error: updateError } = await supabase
         .from("carrier_registration_requests")
         .update({ status: "approved" })
-        .eq("id", request.id)
-        .select()
-        .single();
+        .eq("id", request.id);
 
       if (updateError) {
         console.error("Error updating request:", updateError);
         throw updateError;
       }
 
-      // Wait a bit to ensure triggers have completed
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for triggers to complete
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Verify the carrier was created
+      const { data: carrier, error: verifyError } = await supabase
+        .from("carriers")
+        .select("*")
+        .eq("id", request.id)
+        .maybeSingle();
+
+      if (verifyError) {
+        console.error("Error verifying carrier creation:", verifyError);
+        throw verifyError;
+      }
+
+      if (!carrier) {
+        throw new Error("Carrier was not created successfully");
+      }
 
       toast({
         title: "Demande approuvée",
