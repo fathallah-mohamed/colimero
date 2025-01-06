@@ -5,8 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { Tour, TourStatus } from "@/types/tour";
 
 const getCompletedStatus = (currentStatus: TourStatus, newStatus: TourStatus): TourStatus | null => {
-  // Si on passe à "collecting" (ramassage en cours), "planned" devient "planned_completed"
-  if (newStatus === 'collecting' && currentStatus === 'planned') {
+  // Si le statut est "planned" (Programmé), il devient "planned_completed" (Préparation terminée)
+  if (currentStatus === 'planned') {
     return 'planned_completed';
   }
   
