@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import { supabase } from "@/integrations/supabase/client";
 
 export async function approveCarrierRequest(requestId: string) {
