@@ -1,34 +1,56 @@
-import { CalendarCheck, PackageSearch, Truck, MapPin, CheckCircle2 } from "lucide-react";
-import { TourStatus } from "@/types/tour";
+import { Check, Circle, Truck, Flag, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TourStatus } from "@/types/tour";
 
 interface TimelineIconProps {
   status: TourStatus;
-  isCompleted?: boolean;
-  isCurrent?: boolean;
+  isCompleted: boolean;
+  isCurrent: boolean;
   className?: string;
 }
 
 export function TimelineIcon({ status, isCompleted, isCurrent, className }: TimelineIconProps) {
-  if (isCompleted) {
-    return <CheckCircle2 className={cn("text-green-500", className)} />;
-  }
-
-  const iconClass = cn(
-    className,
-    isCurrent ? "text-primary" : "text-gray-500"
+  const baseIconClass = cn(
+    "transition-all duration-200",
+    isCompleted ? "text-primary" : "text-gray-400",
+    isCurrent ? "text-primary" : "",
+    className
   );
 
+  if (status === 'cancelled') {
+    return <XCircle className={cn(baseIconClass, "text-red-500")} />;
+  }
+
+  if (isCompleted) {
+    return <Check className={baseIconClass} />;
+  }
+
+  if (isCurrent) {
+    switch (status) {
+      case 'planned':
+        return <Circle className={baseIconClass} />;
+      case 'collecting':
+        return <Circle className={baseIconClass} />;
+      case 'in_transit':
+        return <Truck className={baseIconClass} />;
+      case 'completed':
+        return <Flag className={baseIconClass} />;
+      default:
+        return <Circle className={baseIconClass} />;
+    }
+  }
+
+  // État inactif
   switch (status) {
-    case "planned":
-      return <CalendarCheck className={iconClass} />;
-    case "collecting":
-      return <PackageSearch className={iconClass} />;
-    case "in_transit":
-      return <Truck className={iconClass} />;
-    case "completed":
-      return <MapPin className={iconClass} />;
+    case 'planned':
+      return <Circle className={baseIconClass} />;
+    case 'collecting':
+      return <Circle className={baseIconClass} />;
+    case 'in_transit':
+      return <Truck className={baseIconClass} />;
+    case 'completed':
+      return <Flag className={baseIconClass} />;
     default:
-      return <CalendarCheck className={iconClass} />;
+      return <Circle className={baseIconClass} />;
   }
 }
