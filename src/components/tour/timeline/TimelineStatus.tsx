@@ -27,9 +27,9 @@ export function TimelineStatus({
   const isCompleted = index < currentIndex || 
     (status === 'planned' && currentStatus !== 'planned') ||
     (status === 'collecting' && currentStatus !== 'collecting' && currentStatus !== 'planned') ||
-    (status === 'in_transit' && currentStatus === 'in_transit_completed');
+    (status === 'transport_completed' && currentStatus === 'delivery_in_progress');
   const isCurrent = status === currentStatus || 
-    (status === 'completed_completed' && currentStatus === 'in_transit_completed');
+    (status === 'completed_completed' && currentStatus === 'delivery_in_progress');
   const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed_completed'].includes(currentStatus);
 
   const { data: statusLabels } = useQuery({

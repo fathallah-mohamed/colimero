@@ -7,12 +7,18 @@ import type { Tour, TourStatus } from "@/types/tour";
 const getNextStatus = (currentStatus: TourStatus): TourStatus => {
   switch (currentStatus) {
     case 'planned':
+      return 'preparation_completed';
+    case 'preparation_completed':
       return 'collecting';
     case 'collecting':
+      return 'collecting_completed';
+    case 'collecting_completed':
       return 'in_transit';
     case 'in_transit':
-      return 'in_transit_completed';
-    case 'in_transit_completed':
+      return 'transport_completed';
+    case 'transport_completed':
+      return 'delivery_in_progress';
+    case 'delivery_in_progress':
       return 'completed_completed';
     default:
       return currentStatus;
