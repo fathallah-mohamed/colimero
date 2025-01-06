@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { PlanningContent } from "@/components/tour/planning/PlanningContent";
 import { PlanningDialogs } from "@/components/tour/planning/PlanningDialogs";
+import Navigation from "@/components/Navigation";
 
 export default function PlanifierTournee() {
   const navigate = useNavigate();
@@ -58,22 +59,25 @@ export default function PlanifierTournee() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <PlanningContent 
-        isAuthenticated={isAuthenticated}
-        onCreateTourClick={handleCreateTourClick}
-        onAuthClick={handleAuthClick}
-      />
-      <PlanningDialogs 
-        isAuthDialogOpen={isAuthDialogOpen}
-        isAccessDeniedOpen={isAccessDeniedOpen}
-        showCarrierSignupForm={showCarrierSignupForm}
-        onAuthClose={() => setIsAuthDialogOpen(false)}
-        onAccessDeniedClose={() => setIsAccessDeniedOpen(false)}
-        onCarrierSignupClose={() => setShowCarrierSignupForm(false)}
-        onAuthSuccess={handleAuthSuccess}
-        onCarrierRegisterClick={handleCarrierRegisterClick}
-      />
-    </div>
+    <>
+      <Navigation />
+      <div className="min-h-screen bg-gray-50">
+        <PlanningContent 
+          isAuthenticated={isAuthenticated}
+          onCreateTourClick={handleCreateTourClick}
+          onAuthClick={handleAuthClick}
+        />
+        <PlanningDialogs 
+          isAuthDialogOpen={isAuthDialogOpen}
+          isAccessDeniedOpen={isAccessDeniedOpen}
+          showCarrierSignupForm={showCarrierSignupForm}
+          onAuthClose={() => setIsAuthDialogOpen(false)}
+          onAccessDeniedClose={() => setIsAccessDeniedOpen(false)}
+          onCarrierSignupClose={() => setShowCarrierSignupForm(false)}
+          onAuthSuccess={handleAuthSuccess}
+          onCarrierRegisterClick={handleCarrierRegisterClick}
+        />
+      </div>
+    </>
   );
 }
