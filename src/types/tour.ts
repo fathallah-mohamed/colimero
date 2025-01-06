@@ -1,4 +1,13 @@
-export type TourStatus = 'planned' | 'collecting' | 'in_transit' | 'completed' | 'cancelled';
+export type TourStatus = 
+  | 'planned' 
+  | 'collecting' 
+  | 'in_transit' 
+  | 'completed'
+  | 'planned_completed'
+  | 'collecting_completed'
+  | 'in_transit_completed'
+  | 'completed_completed'
+  | 'cancelled';
 
 export interface TourStatusInfo {
   id: number;

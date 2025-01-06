@@ -2,7 +2,35 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourStatus } from "@/types/tour";
+
+const getCompletedStatus = (currentStatus: TourStatus): TourStatus => {
+  switch (currentStatus) {
+    case 'planned':
+      return 'planned_completed';
+    case 'collecting':
+      return 'collecting_completed';
+    case 'in_transit':
+      return 'in_transit_completed';
+    case 'completed':
+      return 'completed_completed';
+    default:
+      return currentStatus;
+  }
+};
+
+const getNextStatus = (currentStatus: TourStatus): TourStatus => {
+  switch (currentStatus) {
+    case 'planned':
+      return 'collecting';
+    case 'collecting':
+      return 'in_transit';
+    case 'in_transit':
+      return 'completed';
+    default:
+      return currentStatus;
+  }
+};
 
 export function useTourManagement() {
   const navigate = useNavigate();
@@ -12,7 +40,7 @@ export function useTourManagement() {
 
   const handleDelete = async (tourId: number) => {
     const tour = selectedTour;
-    if (tour?.status === 'completed') {
+    if (tour?.status === 'completed_completed') {
       toast({
         variant: "destructive",
         title: "Action impossible",
@@ -42,7 +70,7 @@ export function useTourManagement() {
   };
 
   const handleEdit = (tour: Tour) => {
-    if (tour.status === 'completed') {
+    if (tour.status === 'completed_completed') {
       toast({
         variant: "destructive",
         title: "Action impossible",
@@ -54,28 +82,36 @@ export function useTourManagement() {
     setIsEditDialogOpen(true);
   };
 
-  const handleStatusChange = async (tourId: number, newStatus: string) => {
-    if (selectedTour?.status === 'completed') {
+  const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
+    try {
+      // Si on passe à un nouveau statut, mettre à jour l'ancien statut comme terminé
+      if (selectedTour?.status) {
+        const completedStatus = getCompletedStatus(selectedTour.status);
+        await supabase
+          .from('tours')
+          .update({ status: completedStatus })
+          .eq('id', tourId);
+      }
+
+      // Mettre à jour avec le nouveau statut
+      const { error } = await supabase
+        .from('tours')
+        .update({ status: newStatus })
+        .eq('id', tourId);
+
+      if (error) throw error;
+
       toast({
-        variant: "destructive",
-        title: "Action impossible",
-        description: "Le statut des tournées terminées ne peut pas être modifié",
+        title: "Statut mis à jour",
+        description: "Le statut de la tournée a été mis à jour avec succès",
       });
-      return;
-    }
-
-    const { error } = await supabase
-      .from('tours')
-      .update({ status: newStatus })
-      .eq('id', tourId);
-
-    if (error) {
+    } catch (error) {
+      console.error('Error updating tour status:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de mettre à jour le statut",
       });
-      return;
     }
   };
 
