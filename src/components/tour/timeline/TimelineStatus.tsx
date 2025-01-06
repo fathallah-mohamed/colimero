@@ -27,7 +27,12 @@ export function TimelineStatus({
   const isClickable = Math.abs(index - currentIndex) === 1 && status !== 'cancelled';
 
   const handleClick = async () => {
+    console.log('Click detected on status:', status);
+    console.log('Current status:', currentStatus);
+    console.log('Is clickable:', isClickable);
+    
     if (isClickable) {
+      console.log('Attempting status change from', currentStatus, 'to', status);
       await handleStatusChange(currentStatus, status);
     }
   };

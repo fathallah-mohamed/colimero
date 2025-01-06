@@ -7,23 +7,31 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
 
   const handleStatusChange = async (currentStatus: TourStatus, newStatus: TourStatus) => {
     try {
+      console.log('Starting status change process:', { tourId, currentStatus, newStatus });
+
       // Cas 1: De "collecting" à "planned"
       if (currentStatus === 'collecting' && newStatus === 'planned') {
+        console.log('Case 1: collecting to planned');
         const { error: tourError } = await supabase
           .from('tours')
           .update({ status: newStatus })
           .eq('id', tourId);
 
-        if (tourError) throw tourError;
+        if (tourError) {
+          console.error('Tour update error:', tourError);
+          throw tourError;
+        }
 
-        // Les réservations avec statut "collected" restent "collected"
         const { error: bookingsError } = await supabase
           .from('bookings')
           .update({ status: 'pending' })
           .eq('tour_id', tourId)
           .eq('status', 'pending');
 
-        if (bookingsError) throw bookingsError;
+        if (bookingsError) {
+          console.error('Bookings update error:', bookingsError);
+          throw bookingsError;
+        }
 
         onStatusChange(newStatus);
         toast({
@@ -33,12 +41,16 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
       }
       // Cas 2: De "collecting" à "in_transit"
       else if (currentStatus === 'collecting' && newStatus === 'in_transit') {
+        console.log('Case 2: collecting to in_transit');
         const { error: tourError } = await supabase
           .from('tours')
           .update({ status: newStatus })
           .eq('id', tourId);
 
-        if (tourError) throw tourError;
+        if (tourError) {
+          console.error('Tour update error:', tourError);
+          throw tourError;
+        }
 
         const { error: bookingsError } = await supabase
           .from('bookings')
@@ -46,7 +58,10 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
           .eq('tour_id', tourId)
           .eq('status', 'collected');
 
-        if (bookingsError) throw bookingsError;
+        if (bookingsError) {
+          console.error('Bookings update error:', bookingsError);
+          throw bookingsError;
+        }
 
         onStatusChange(newStatus);
         toast({
@@ -56,12 +71,16 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
       }
       // Cas 3: De "in_transit" à "collecting"
       else if (currentStatus === 'in_transit' && newStatus === 'collecting') {
+        console.log('Case 3: in_transit to collecting');
         const { error: tourError } = await supabase
           .from('tours')
           .update({ status: newStatus })
           .eq('id', tourId);
 
-        if (tourError) throw tourError;
+        if (tourError) {
+          console.error('Tour update error:', tourError);
+          throw tourError;
+        }
 
         const { error: bookingsError } = await supabase
           .from('bookings')
@@ -69,7 +88,10 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
           .eq('tour_id', tourId)
           .eq('status', 'in_transit');
 
-        if (bookingsError) throw bookingsError;
+        if (bookingsError) {
+          console.error('Bookings update error:', bookingsError);
+          throw bookingsError;
+        }
 
         onStatusChange(newStatus);
         toast({
@@ -79,12 +101,16 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
       }
       // Comportement normal pour les autres changements de statut
       else {
+        console.log('Default case: simple status update');
         const { error } = await supabase
           .from('tours')
           .update({ status: newStatus })
           .eq('id', tourId);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Tour update error:', error);
+          throw error;
+        }
 
         onStatusChange(newStatus);
         toast({
