@@ -7,9 +7,11 @@ export const getStatusLabel = (status: TourStatus) => {
     case "collecting":
       return "Collecte";
     case "in_transit":
-      return "Livraison";
-    case "completed":
-      return "Terminée";
+      return "En transit";
+    case "in_transit_completed":
+      return "Livraison en cours";
+    case "completed_completed":
+      return "Livrée";
     default:
       return status;
   }

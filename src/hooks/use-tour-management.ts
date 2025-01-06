@@ -4,21 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tour, TourStatus } from "@/types/tour";
 
-const getCompletedStatus = (currentStatus: TourStatus, newStatus: TourStatus): TourStatus | null => {
-  switch (currentStatus) {
-    case 'planned':
-      return 'planned_completed';
-    case 'collecting':
-      return 'collecting_completed';
-    case 'in_transit':
-      return 'in_transit_completed';
-    case 'completed':
-      return 'completed_completed';
-    default:
-      return null;
-  }
-};
-
 const getNextStatus = (currentStatus: TourStatus): TourStatus => {
   switch (currentStatus) {
     case 'planned':
@@ -26,8 +11,8 @@ const getNextStatus = (currentStatus: TourStatus): TourStatus => {
     case 'collecting':
       return 'in_transit';
     case 'in_transit':
-      return 'completed';
-    case 'completed':
+      return 'in_transit_completed';
+    case 'in_transit_completed':
       return 'completed_completed';
     default:
       return currentStatus;
@@ -86,31 +71,6 @@ export function useTourManagement() {
 
   const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
-      // Récupérer le statut actuel de la tournée
-      const { data: tourData, error: tourError } = await supabase
-        .from('tours')
-        .select('status')
-        .eq('id', tourId)
-        .single();
-
-      if (tourError) throw tourError;
-
-      const currentStatus = tourData.status as TourStatus;
-      
-      // Vérifier si un statut précédent doit être marqué comme terminé
-      const completedStatus = getCompletedStatus(currentStatus, newStatus);
-      
-      if (completedStatus) {
-        // Mettre à jour l'ancien statut comme terminé
-        const { error: updateError } = await supabase
-          .from('tours')
-          .update({ status: completedStatus })
-          .eq('id', tourId);
-
-        if (updateError) throw updateError;
-      }
-
-      // Mettre à jour avec le nouveau statut
       const { error } = await supabase
         .from('tours')
         .update({ status: newStatus })

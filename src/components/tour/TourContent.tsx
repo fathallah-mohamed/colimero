@@ -34,8 +34,8 @@ export function TourContent() {
     );
   }
 
-  const upcomingTours = tours.filter(tour => tour.status !== 'completed');
-  const completedTours = tours.filter(tour => tour.status === 'completed');
+  const upcomingTours = tours.filter(tour => tour.status !== 'completed_completed');
+  const completedTours = tours.filter(tour => tour.status === 'completed_completed');
 
   return (
     <ScrollArea className="h-[calc(100vh-12rem)]">
