@@ -81,6 +81,7 @@ export default function MenuItems() {
       {menuItems.map((item) => {
         const isAllowed = !userType || item.allowedUserTypes.includes(userType);
         const shouldPreventDefault = !item.allowedUserTypes.includes(userType || '');
+        const Icon = item.icon;
 
         return (
           <Link
@@ -99,7 +100,7 @@ export default function MenuItems() {
               ${shouldPreventDefault ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
-            <item.icon className="h-4 w-4" />
+            <Icon className="h-4 w-4" />
             <span className="ml-2">{item.name}</span>
           </Link>
         );
