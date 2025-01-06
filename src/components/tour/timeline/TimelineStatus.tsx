@@ -32,6 +32,21 @@ export function TimelineStatus({
     }
   };
 
+  const getStatusLabel = (status: TourStatus): string => {
+    switch (status) {
+      case "Programmé":
+        return isCurrent ? "Programmé" : "Préparation terminée";
+      case "Ramassage en cours":
+        return isCurrent ? "Ramassage en cours" : "Ramassage terminé";
+      case "En transit":
+        return isCurrent ? "En transit" : "Transport terminé";
+      case "Livraison en cours":
+        return isCurrent ? "Livraison en cours" : "Livraison terminée";
+      default:
+        return status;
+    }
+  };
+
   const buttonClasses = cn(
     "flex flex-col items-center gap-2 relative",
     isCompleted && "text-primary",
@@ -46,7 +61,7 @@ export function TimelineStatus({
         variant="ghost"
         className={buttonClasses}
         onClick={handleClick}
-        disabled={!isNext}
+        disabled={!isNext || currentStatus === "Annulée"}
       >
         <div className={cn(
           "h-12 w-12 rounded-full border-2 flex items-center justify-center",
@@ -61,7 +76,9 @@ export function TimelineStatus({
             className="h-6 w-6"
           />
         </div>
-        <span className="text-xs font-medium whitespace-nowrap">{status}</span>
+        <span className="text-xs font-medium whitespace-nowrap">
+          {getStatusLabel(status)}
+        </span>
       </Button>
     </div>
   );

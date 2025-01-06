@@ -7,18 +7,27 @@ import type { Tour, TourStatus } from "@/types/tour";
 const getNextStatus = (currentStatus: TourStatus): TourStatus => {
   switch (currentStatus) {
     case "Programmé":
-      return "Préparation terminée";
-    case "Préparation terminée":
       return "Ramassage en cours";
     case "Ramassage en cours":
-      return "Ramassage terminé";
-    case "Ramassage terminé":
       return "En transit";
     case "En transit":
-      return "Transport terminé";
-    case "Transport terminé":
       return "Livraison en cours";
     case "Livraison en cours":
+      return "Livraison terminée";
+    default:
+      return currentStatus;
+  }
+};
+
+const getPreviousStatusCompleted = (currentStatus: TourStatus): TourStatus => {
+  switch (currentStatus) {
+    case "Ramassage en cours":
+      return "Préparation terminée";
+    case "En transit":
+      return "Ramassage terminé";
+    case "Livraison en cours":
+      return "Transport terminé";
+    case "Livraison terminée":
       return "Livraison terminée";
     default:
       return currentStatus;
@@ -77,12 +86,28 @@ export function useTourManagement() {
 
   const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
-      const { error } = await supabase
-        .from('tours')
-        .update({ status: newStatus })
-        .eq('id', tourId);
+      if (newStatus === "Annulée") {
+        const { error } = await supabase
+          .from('tours')
+          .update({ status: newStatus })
+          .eq('id', tourId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Mettre à jour avec le nouveau statut et le statut précédent complété
+        const previousStatus = getPreviousStatusCompleted(newStatus);
+        console.log("Updating tour status:", { newStatus, previousStatus });
+
+        const { error } = await supabase
+          .from('tours')
+          .update({ 
+            status: newStatus,
+            previous_status: previousStatus 
+          })
+          .eq('id', tourId);
+
+        if (error) throw error;
+      }
 
       toast({
         title: "Statut mis à jour",
