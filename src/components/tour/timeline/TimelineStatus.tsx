@@ -26,9 +26,8 @@ export function TimelineStatus({
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex || (status === 'planned' && currentStatus !== 'planned');
   const isCurrent = status === currentStatus;
-  const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed_completed'].includes(currentStatus);
+  const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'closed'].includes(currentStatus);
 
-  // Fetch status labels from database
   const { data: statusLabels } = useQuery({
     queryKey: ['tourStatuses'],
     queryFn: async () => {
@@ -45,12 +44,7 @@ export function TimelineStatus({
   });
 
   const handleClick = async () => {
-    console.log('Click detected on status:', status);
-    console.log('Current status:', currentStatus);
-    console.log('Is clickable:', isClickable);
-    
     if (isClickable) {
-      console.log('Attempting status change from', currentStatus, 'to', status);
       await handleStatusChange(currentStatus, status);
     }
   };
@@ -66,9 +60,11 @@ export function TimelineStatus({
           return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
         case 'completed':
           if (currentStatus === 'completed_completed') {
-            return 'Livrée';
+            return 'Livraison terminée';
           }
-          return currentStatus === 'completed' ? 'Livraison en cours' : 'Livrée';
+          return currentStatus === 'completed' ? 'Livraison en cours' : 'Livraison terminée';
+        case 'closed':
+          return 'Clôturée';
         default:
           return status;
       }
@@ -86,9 +82,12 @@ export function TimelineStatus({
     }
     if (status === 'completed') {
       if (currentStatus === 'completed_completed') {
-        return 'Livrée';
+        return 'Livraison terminée';
       }
-      return currentStatus === 'completed' ? 'Livraison en cours' : 'Livrée';
+      return currentStatus === 'completed' ? 'Livraison en cours' : 'Livraison terminée';
+    }
+    if (status === 'closed') {
+      return 'Clôturée';
     }
     return statusInfo ? statusInfo.label : status;
   };

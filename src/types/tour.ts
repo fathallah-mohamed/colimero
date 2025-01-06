@@ -7,6 +7,7 @@ export type TourStatus =
   | 'in_transit_completed'
   | 'completed'
   | 'completed_completed'
+  | 'closed'
   | 'cancelled';
 
 export interface TourStatusInfo {
