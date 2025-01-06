@@ -65,7 +65,10 @@ export function TimelineStatus({
         case 'in_transit':
           return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
         case 'completed':
-          return currentStatus === 'completed' ? 'Livraison en cours' : 'Livraison terminée';
+          if (currentStatus === 'completed_completed') {
+            return 'Livrée';
+          }
+          return currentStatus === 'completed' ? 'Livraison en cours' : 'Livrée';
         default:
           return status;
       }
@@ -81,8 +84,11 @@ export function TimelineStatus({
     if (status === 'in_transit' && currentStatus !== 'in_transit' && !['planned', 'collecting'].includes(currentStatus)) {
       return 'Transport terminé';
     }
-    if (status === 'completed' && currentStatus === 'completed_completed') {
-      return 'Livraison terminée';
+    if (status === 'completed') {
+      if (currentStatus === 'completed_completed') {
+        return 'Livrée';
+      }
+      return currentStatus === 'completed' ? 'Livraison en cours' : 'Livrée';
     }
     return statusInfo ? statusInfo.label : status;
   };
