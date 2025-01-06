@@ -1,5 +1,5 @@
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
 import { useNavigation } from "./navigation/useNavigation";
 import { AuthSection } from "./navigation/AuthSection";
 import { MobileMenuButton } from "./navigation/MobileMenuButton";
