@@ -14,7 +14,6 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     'planned',
     'preparation_completed',
     'collecting_completed',
-    'transport_completed',
     'completed_completed'
   ];
   const currentIndex = statusOrder.indexOf(status);
