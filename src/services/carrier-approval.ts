@@ -14,19 +14,41 @@ export async function approveCarrierRequest(requestId: string) {
 
     console.log("Found carrier request:", request);
 
-    // Update request status to trigger auth user creation
+    // Generate a random password for the new user
+    const tempPassword = Math.random().toString(36).slice(-8);
+
+    // First create the auth user
+    const { error: authError } = await supabase.auth.admin.createUser({
+      email: request.email,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: {
+        first_name: request.first_name,
+        last_name: request.last_name,
+        company_name: request.company_name,
+        user_type: 'carrier'
+      }
+    });
+
+    if (authError) throw authError;
+
+    // Wait a moment for the auth user to be created
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Update request status to trigger carrier creation
     const { error: updateError } = await supabase
       .from("carrier_registration_requests")
       .update({ 
         status: "approved",
-        email_verified: true 
+        email_verified: true,
+        password: tempPassword
       })
       .eq("id", requestId);
 
     if (updateError) throw updateError;
     console.log("Updated request status to approved");
 
-    // Wait for database triggers to complete (increased to 8 seconds)
+    // Wait for database triggers to complete
     console.log("Waiting for triggers to complete...");
     await new Promise(resolve => setTimeout(resolve, 8000));
 
