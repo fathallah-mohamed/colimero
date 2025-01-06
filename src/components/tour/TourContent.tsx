@@ -37,10 +37,10 @@ export function TourContent() {
   }
 
   const upcomingTours = tours.filter(tour => 
-    tour.status !== 'completed_completed' && tour.status !== 'cancelled'
+    !['completed_completed', 'cancelled'].includes(tour.status)
   );
   const completedTours = tours.filter(tour => 
-    tour.status === 'completed_completed' || tour.status === 'cancelled'
+    ['completed_completed', 'cancelled'].includes(tour.status)
   );
 
   return (
