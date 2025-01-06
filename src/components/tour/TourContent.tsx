@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { TourFilters } from "./TourFilters";
-import { TourTabs } from "./TourTabs";
+import { ToursList } from "./ToursList";
 import { TourEditDialog } from "./TourEditDialog";
 import { useTours } from "@/hooks/use-tours";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,13 +36,6 @@ export function TourContent() {
     );
   }
 
-  const upcomingTours = tours.filter(tour => 
-    tour.status !== "Livraison terminée" && tour.status !== "Annulée"
-  );
-  const completedTours = tours.filter(tour => 
-    tour.status === "Livraison terminée" || tour.status === "Annulée"
-  );
-
   return (
     <ScrollArea className="h-[calc(100vh-12rem)]">
       <div className="space-y-6">
@@ -59,9 +52,8 @@ export function TourContent() {
           />
         </div>
 
-        <TourTabs
-          upcomingTours={upcomingTours}
-          completedTours={completedTours}
+        <ToursList
+          tours={tours}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onStatusChange={handleStatusChange}

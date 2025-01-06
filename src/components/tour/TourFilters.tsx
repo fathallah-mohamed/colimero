@@ -1,8 +1,6 @@
 import { ArrowLeftRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { TourStatus } from "@/types/tour";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 interface TourFiltersProps {
   departureCountry: string;
@@ -24,6 +22,14 @@ const countryNames: { [key: string]: string } = {
   'MA': 'Maroc'
 };
 
+const tourStatuses: TourStatus[] = [
+  "Programmé",
+  "Ramassage en cours",
+  "En transit",
+  "Livraison en cours",
+  "Livraison terminée"
+];
+
 export function TourFilters({
   departureCountry,
   destinationCountry,
@@ -34,19 +40,6 @@ export function TourFilters({
   onSortChange,
   onStatusChange,
 }: TourFiltersProps) {
-  const { data: tourStatuses } = useQuery({
-    queryKey: ['tourStatuses'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tour_statuses')
-        .select('*')
-        .order('display_order', { ascending: true });
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
   const handleSwitch = () => {
     const isValidSwitch = 
       departureCountry === 'FR' || 
@@ -124,10 +117,9 @@ export function TourFilters({
               <SelectValue placeholder="Filtrer par statut" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tous les statuts</SelectItem>
-              {tourStatuses?.map((status) => (
-                <SelectItem key={status.id} value={status.name}>
-                  {status.name}
+              {tourStatuses.map((statusOption) => (
+                <SelectItem key={statusOption} value={statusOption}>
+                  {statusOption}
                 </SelectItem>
               ))}
             </SelectContent>
