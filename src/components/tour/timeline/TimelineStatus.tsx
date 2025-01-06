@@ -3,6 +3,8 @@ import { TimelineIcon } from "./TimelineIcon";
 import { TourStatus } from "@/types/tour";
 import { useTimelineTransition } from "./useTimelineTransition";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TimelineStatusProps {
   tourId: number;
@@ -26,6 +28,35 @@ export function TimelineStatus({
   const isCurrent = status === currentStatus;
   const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed'].includes(currentStatus);
 
+  // Fetch status labels from database
+  const { data: statusLabels } = useQuery({
+    queryKey: ['tourStatuses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tour_statuses')
+        .select('code, label, description');
+      
+      if (error) throw error;
+      return data.reduce((acc: Record<string, { label: string, completedLabel?: string }>, curr) => {
+        if (curr.code.endsWith('_completed')) {
+          const baseStatus = curr.code.replace('_completed', '');
+          if (acc[baseStatus]) {
+            acc[baseStatus].completedLabel = curr.label;
+          } else {
+            acc[baseStatus] = { label: '', completedLabel: curr.label };
+          }
+        } else {
+          if (acc[curr.code]) {
+            acc[curr.code].label = curr.label;
+          } else {
+            acc[curr.code] = { label: curr.label };
+          }
+        }
+        return acc;
+      }, {});
+    }
+  });
+
   const handleClick = async () => {
     console.log('Click detected on status:', status);
     console.log('Current status:', currentStatus);
@@ -38,18 +69,12 @@ export function TimelineStatus({
   };
 
   const getStatusLabel = (status: TourStatus, isCompleted: boolean) => {
-    switch (status) {
-      case 'planned':
-        return isCompleted ? "Préparation terminée" : "Planifiée";
-      case 'collecting':
-        return isCompleted ? "Ramassage terminé" : "En cours de collecte";
-      case 'in_transit':
-        return isCompleted ? "Transport effectué" : "En transit";
-      case 'completed':
-        return "Tournée terminée";
-      default:
-        return status;
-    }
+    if (!statusLabels) return '';
+
+    const statusInfo = statusLabels[status];
+    if (!statusInfo) return status;
+
+    return isCompleted ? (statusInfo.completedLabel || statusInfo.label) : statusInfo.label;
   };
 
   return (
