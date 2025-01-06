@@ -11,7 +11,6 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
     try {
       console.log('Starting status change process:', { tourId, currentStatus, newStatus });
 
-      // Mise à jour du statut de la tournée
       const { error: tourError } = await supabase
         .from('tours')
         .update({ status: newStatus })
@@ -22,14 +21,25 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         throw tourError;
       }
 
-      // Mise à jour des réservations en fonction de la transition
       let bookingStatus;
       switch (newStatus) {
-        case 'collecting':
+        case 'preparation_completed':
           bookingStatus = 'pending';
           break;
-        case 'in_transit':
+        case 'collecting':
+          bookingStatus = 'collecting';
+          break;
+        case 'collecting_completed':
           bookingStatus = 'collected';
+          break;
+        case 'in_transit':
+          bookingStatus = 'in_transit';
+          break;
+        case 'transport_completed':
+          bookingStatus = 'transport_completed';
+          break;
+        case 'delivery_in_progress':
+          bookingStatus = 'delivering';
           break;
         case 'completed_completed':
           bookingStatus = 'delivered';
@@ -52,9 +62,13 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
       
       const statusMessages = {
-        'collecting': 'La programmation est terminée',
-        'in_transit': 'Le ramassage est terminé',
-        'completed_completed': 'La livraison est terminée'
+        'preparation_completed': 'La préparation est terminée',
+        'collecting': 'Le ramassage est en cours',
+        'collecting_completed': 'Le ramassage est terminé',
+        'in_transit': 'La tournée est en transit',
+        'transport_completed': 'Le transport est terminé',
+        'delivery_in_progress': 'La livraison est en cours',
+        'completed_completed': 'La tournée est terminée'
       };
 
       toast({

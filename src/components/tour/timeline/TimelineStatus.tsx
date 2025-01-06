@@ -63,17 +63,19 @@ export function TimelineStatus({
       switch (status) {
         case 'planned':
           return currentStatus !== 'planned' ? 'Préparation terminée' : 'Programmée';
+        case 'collecting_completed':
+          return 'Ramassage terminé';
+        case 'transport_completed':
+          return 'Transport terminé';
+        case 'preparation_completed':
+          return 'Préparation terminée';
         case 'collecting':
-          return currentStatus === 'collecting' ? 'Ramassage en cours' : 'Ramassage terminé';
+          return 'Ramassage en cours';
         case 'in_transit':
-          if (currentStatus === 'in_transit_completed') {
-            return 'Transport terminé';
-          }
-          return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
+          return 'En transit';
+        case 'delivery_in_progress':
+          return 'Livraison en cours';
         case 'completed_completed':
-          if (currentStatus === 'in_transit_completed') {
-            return 'Livraison en cours';
-          }
           return 'Livrée';
         default:
           return status;
@@ -81,24 +83,6 @@ export function TimelineStatus({
     }
 
     const statusInfo = statusLabels[status];
-    if (status === 'planned' && currentStatus !== 'planned') {
-      return 'Préparation terminée';
-    }
-    if (status === 'collecting' && currentStatus !== 'collecting' && currentStatus !== 'planned') {
-      return 'Ramassage terminé';
-    }
-    if (status === 'in_transit') {
-      if (currentStatus === 'in_transit_completed') {
-        return 'Transport terminé';
-      }
-      return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
-    }
-    if (status === 'completed_completed') {
-      if (currentStatus === 'in_transit_completed') {
-        return 'Livraison en cours';
-      }
-      return 'Livrée';
-    }
     return statusInfo ? statusInfo.label : status;
   };
 
