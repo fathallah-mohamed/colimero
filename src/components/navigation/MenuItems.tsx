@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCog } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
 import { useNavigation } from "./useNavigation";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 export const menuItems = [
