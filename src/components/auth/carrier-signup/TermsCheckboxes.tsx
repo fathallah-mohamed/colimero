@@ -26,6 +26,8 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
     );
   }
 
+  if (!consents?.length) return null;
+
   const getDocumentLink = (code: string) => {
     switch (code) {
       case 'carrier_terms':
@@ -36,8 +38,6 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
         return null;
     }
   };
-
-  if (!consents?.length) return null;
 
   return (
     <div className="space-y-6">
@@ -51,29 +51,43 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
             name={`consents.${consent.code}`}
             render={({ field }) => (
               <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-                <div className="space-y-1 flex-1">
-                  <div className="text-sm font-medium flex items-center gap-2">
-                    {consent.label}
-                    {getDocumentLink(consent.code) && (
-                      <Link 
-                        to={getDocumentLink(consent.code)!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm"
-                      >
-                        (Voir le document)
-                      </Link>
-                    )}
+                <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      id={`consent-${consent.code}`}
+                    />
+                    <div 
+                      className="space-y-1 flex-1 cursor-pointer" 
+                      onClick={() => field.onChange(!field.value)}
+                    >
+                      <div className="text-sm font-medium flex items-center gap-2">
+                        <label 
+                          htmlFor={`consent-${consent.code}`}
+                          className="cursor-pointer"
+                        >
+                          {consent.label}
+                        </label>
+                        {getDocumentLink(consent.code) && (
+                          <Link 
+                            to={getDocumentLink(consent.code)!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline text-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            (Voir le document)
+                          </Link>
+                        )}
+                      </div>
+                      <Alert>
+                        <AlertDescription className="text-sm text-muted-foreground">
+                          {consent.description}
+                        </AlertDescription>
+                      </Alert>
+                    </div>
                   </div>
-                  <Alert>
-                    <AlertDescription className="text-sm text-muted-foreground">
-                      {consent.description}
-                    </AlertDescription>
-                  </Alert>
                 </div>
               </FormItem>
             )}
