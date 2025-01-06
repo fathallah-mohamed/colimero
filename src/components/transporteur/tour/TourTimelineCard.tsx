@@ -46,6 +46,7 @@ export function TourTimelineCard({
   };
 
   const getBookingButtonText = () => {
+    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
     if (tour.status === 'collecting_completed') return "Cette tournée est en cours de collecte";
     if (tour.status === 'transport_completed') return "Cette tournée est en cours de livraison";

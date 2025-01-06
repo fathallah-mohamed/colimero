@@ -31,7 +31,8 @@ const statusLabels: { [key: string]: string } = {
   'in_transit': 'En transit',
   'transport_completed': 'Transport terminé',
   'delivery_in_progress': 'Livraison en cours',
-  'completed_completed': 'Livrée'
+  'completed_completed': 'Livrée',
+  'cancelled': 'Annulée'
 };
 
 export function TourFilters({
