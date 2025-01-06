@@ -24,7 +24,7 @@ export function TimelineStatus({
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex;
   const isCurrent = status === currentStatus;
-  const isClickable = index === currentIndex + 1 && status !== 'completed' && status !== 'cancelled';
+  const isClickable = Math.abs(index - currentIndex) === 1;
 
   const handleClick = async () => {
     if (isClickable) {
