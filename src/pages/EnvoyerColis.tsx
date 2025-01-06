@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TourFilters } from "@/components/tour/TourFilters";
-import { TourList } from "@/components/tour/TourList";
+import { ToursList } from "@/components/tour/ToursList";
 import { useTourFilters } from "@/hooks/use-tour-filters";
 
 export default function EnvoyerColis() {
@@ -43,16 +43,16 @@ export default function EnvoyerColis() {
           destinationCountry={destinationCountry}
           sortBy={sortBy}
           status={status}
-          setDepartureCountry={setDepartureCountry}
-          setDestinationCountry={setDestinationCountry}
-          setSortBy={setSortBy}
-          setStatus={setStatus}
+          onDepartureChange={setDepartureCountry}
+          onDestinationChange={setDestinationCountry}
+          onSortChange={setSortBy}
+          onStatusChange={setStatus}
         />
-        <TourList
-          departureCountry={departureCountry}
-          destinationCountry={destinationCountry}
-          sortBy={sortBy}
-          status={status}
+        <ToursList
+          tours={[]}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onStatusChange={() => {}}
         />
       </div>
     </div>
