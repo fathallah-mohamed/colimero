@@ -1,5 +1,5 @@
 import React from "react";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { RouteStop } from "@/types/tour";
 
@@ -18,6 +18,20 @@ export function SelectableCollectionPointsList({
   isSelectionEnabled,
   tourDepartureDate
 }: SelectableCollectionPointsListProps) {
+  const formatDate = (dateString: string) => {
+    try {
+      const date = parseISO(dateString);
+      if (!isValid(date)) {
+        console.error("Invalid date:", dateString);
+        return "Date invalide";
+      }
+      return format(date, "EEEE d MMMM", { locale: fr });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Date invalide";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-4 text-sm text-gray-500 px-4">
@@ -44,7 +58,7 @@ export function SelectableCollectionPointsList({
             <span className="font-medium">{point.name}</span>
             <span className="text-gray-600">{point.location}</span>
             <span className="text-gray-600">
-              {format(new Date(point.collection_date), "EEEE d MMMM", { locale: fr })}
+              {formatDate(point.collection_date)}
             </span>
             <span className="text-gray-600">{point.time}</span>
           </div>
