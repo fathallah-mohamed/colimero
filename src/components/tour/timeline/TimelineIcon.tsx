@@ -1,4 +1,4 @@
-import { CalendarCheck, PackageSearch, Truck, MapPin, CheckCircle2 } from "lucide-react";
+import { CalendarCheck, PackageSearch, Truck, MapPin } from "lucide-react";
 import { TourStatus } from "@/types/tour";
 import { cn } from "@/lib/utils";
 
@@ -10,13 +10,9 @@ interface TimelineIconProps {
 }
 
 export function TimelineIcon({ status, isCompleted, isCurrent, className }: TimelineIconProps) {
-  if (isCompleted) {
-    return <CheckCircle2 className={cn("text-primary", className)} />;
-  }
-
   const iconClass = cn(
     className,
-    isCurrent ? "text-primary" : "text-gray-500"
+    isCurrent ? "text-primary" : isCompleted ? "text-white" : "text-gray-500"
   );
 
   switch (status) {
