@@ -6,7 +6,7 @@ import { TourTimeline } from "@/components/transporteur/TourTimeline";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
-import { CollectionPointsList } from "@/components/tour/CollectionPointsList";
+import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -136,7 +136,7 @@ export function TourTimelineCard({
 
                 <div>
                   <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
-                  <CollectionPointsList
+                  <SelectableCollectionPointsList
                     points={tour.route}
                     selectedPoint={selectedPickupCity}
                     onPointSelect={setSelectedPickupCity}

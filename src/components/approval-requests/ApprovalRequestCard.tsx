@@ -61,11 +61,9 @@ export function ApprovalRequestCard({
             user={request.user}
           />
 
-          <CollectionPoint 
-            pickupCity={request.pickup_city}
-            selectedStop={selectedStop}
-            collectionDate={selectedStop?.collection_date || request.tour?.collection_date}
-          />
+          {selectedStop && (
+            <CollectionPoint selectedStop={selectedStop} />
+          )}
 
           <RequestStatus 
             status={request.status}
