@@ -26,31 +26,31 @@ export function TimelineStatus({
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
 
   // Don't show timeline if tour is cancelled
-  if (currentStatus === 'cancelled') {
+  if (currentStatus === "Annulé") {
     return null;
   }
 
   const isCompleted = index < currentIndex || 
-    (status === 'planned' && currentStatus !== 'planned') ||
-    (status === 'collecting' && currentStatus !== 'collecting' && currentStatus !== 'planned') ||
-    (status === 'transport_completed' && currentStatus === 'delivery_in_progress');
+    (status === "Programmé" && currentStatus !== "Programmé") ||
+    (status === "Ramassage en cours" && currentStatus !== "Ramassage en cours" && currentStatus !== "Programmé") ||
+    (status === "Transport terminé" && currentStatus === "Livraison en cours");
   
   const isCurrent = status === currentStatus || 
-    (status === 'completed_completed' && currentStatus === 'delivery_in_progress');
+    (status === "Livraison terminée" && currentStatus === "Livraison en cours");
   
   const isClickable = Math.abs(index - currentIndex) === 1 && 
-    !['cancelled', 'completed_completed'].includes(currentStatus);
+    !["Annulé", "Livraison terminée"].includes(currentStatus);
 
   const { data: statusLabels } = useQuery({
     queryKey: ['tourStatuses'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tour_statuses')
-        .select('code, label, description');
+        .select('name, label');
       
       if (error) throw error;
       return data.reduce((acc: Record<string, { label: string }>, curr) => {
-        acc[curr.code] = { label: curr.label };
+        acc[curr.name] = { label: curr.label };
         return acc;
       }, {});
     }
@@ -60,36 +60,6 @@ export function TimelineStatus({
     if (isClickable) {
       await handleStatusChange(currentStatus, status);
     }
-  };
-
-  const getStatusLabel = (status: TourStatus) => {
-    if (!statusLabels) {
-      switch (status) {
-        case 'planned':
-          return currentStatus !== 'planned' ? 'Préparation terminée' : 'Programmée';
-        case 'collecting_completed':
-          return 'Ramassage terminé';
-        case 'transport_completed':
-          return 'Transport terminé';
-        case 'preparation_completed':
-          return 'Préparation terminée';
-        case 'collecting':
-          return 'Ramassage en cours';
-        case 'in_transit':
-          return 'En transit';
-        case 'delivery_in_progress':
-          return 'Livraison en cours';
-        case 'completed_completed':
-          return 'Livrée';
-        case 'cancelled':
-          return 'Annulée';
-        default:
-          return status;
-      }
-    }
-
-    const statusInfo = statusLabels[status];
-    return statusInfo ? statusInfo.label : status;
   };
 
   return (
@@ -128,7 +98,7 @@ export function TimelineStatus({
           )}
           animate={isCurrent ? { scale: 1.05 } : { scale: 1 }}
         >
-          {getStatusLabel(status)}
+          {status}
         </motion.span>
       </div>
     </div>

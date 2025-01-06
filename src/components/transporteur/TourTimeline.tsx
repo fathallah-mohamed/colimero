@@ -26,26 +26,26 @@ interface TourTimelineProps {
 export function TourTimeline({ status, onStatusChange, tourId }: TourTimelineProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  if (status === 'cancelled') {
+  if (status === "Annulé") {
     return <CancelledStatus />;
   }
 
   const statusOrder: TourStatus[] = [
-    'planned',
-    'preparation_completed',
-    'collecting',
-    'collecting_completed',
-    'in_transit',
-    'transport_completed',
-    'delivery_in_progress',
-    'completed_completed'
+    "Programmé",
+    "Préparation terminée",
+    "Ramassage en cours",
+    "Ramassage terminé",
+    "En transit",
+    "Transport terminé",
+    "Livraison en cours",
+    "Livraison terminée"
   ];
 
   const currentIndex = statusOrder.indexOf(status);
 
   const handleCancel = async () => {
     if (onStatusChange) {
-      await onStatusChange('cancelled');
+      await onStatusChange("Annulé");
     }
     setShowCancelDialog(false);
   };
@@ -63,12 +63,12 @@ export function TourTimeline({ status, onStatusChange, tourId }: TourTimelinePro
             currentStatus={status}
             currentIndex={currentIndex}
             index={index}
-            onStatusChange={onStatusChange || (() => {})}
+            onStatusChange={onStatusChange || (() => Promise.resolve())}
           />
         ))}
       </div>
 
-      {status !== 'completed_completed' && onStatusChange && (
+      {status !== "Livraison terminée" && onStatusChange && (
         <div className="flex justify-end mt-4">
           <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
             <AlertDialogTrigger asChild>

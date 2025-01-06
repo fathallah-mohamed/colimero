@@ -23,25 +23,25 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
 
       let bookingStatus;
       switch (newStatus) {
-        case 'preparation_completed':
+        case "Préparation terminée":
           bookingStatus = 'pending';
           break;
-        case 'collecting':
+        case "Ramassage en cours":
           bookingStatus = 'collecting';
           break;
-        case 'collecting_completed':
+        case "Ramassage terminé":
           bookingStatus = 'collected';
           break;
-        case 'in_transit':
+        case "En transit":
           bookingStatus = 'in_transit';
           break;
-        case 'transport_completed':
+        case "Transport terminé":
           bookingStatus = 'transport_completed';
           break;
-        case 'delivery_in_progress':
+        case "Livraison en cours":
           bookingStatus = 'delivering';
           break;
-        case 'completed_completed':
+        case "Livraison terminée":
           bookingStatus = 'delivered';
           break;
         default:
@@ -60,20 +60,10 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
 
       onStatusChange(newStatus);
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
-      
-      const statusMessages = {
-        'preparation_completed': 'La préparation est terminée',
-        'collecting': 'Le ramassage est en cours',
-        'collecting_completed': 'Le ramassage est terminé',
-        'in_transit': 'La tournée est en transit',
-        'transport_completed': 'Le transport est terminé',
-        'delivery_in_progress': 'La livraison est en cours',
-        'completed_completed': 'La tournée est terminée'
-      };
 
       toast({
         title: "Statut mis à jour",
-        description: statusMessages[newStatus as keyof typeof statusMessages] || "Le statut de la tournée a été mis à jour avec succès.",
+        description: `La tournée est maintenant en statut "${newStatus}"`,
       });
 
     } catch (error) {

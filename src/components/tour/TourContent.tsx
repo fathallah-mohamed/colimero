@@ -37,10 +37,10 @@ export function TourContent() {
   }
 
   const upcomingTours = tours.filter(tour => 
-    tour.status !== 'completed_completed' && tour.status !== 'cancelled'
+    tour.status !== "Livraison terminée" && tour.status !== "Annulé"
   );
   const completedTours = tours.filter(tour => 
-    tour.status === 'completed_completed' || tour.status === 'cancelled'
+    tour.status === "Livraison terminée" || tour.status === "Annulé"
   );
 
   return (
