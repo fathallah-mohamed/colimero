@@ -908,6 +908,12 @@ export type Database = {
         }
         Returns: undefined
       }
+      create_tours_for_specific_carrier: {
+        Args: {
+          carrier_email: string
+        }
+        Returns: undefined
+      }
       generate_company_name: {
         Args: {
           id: string

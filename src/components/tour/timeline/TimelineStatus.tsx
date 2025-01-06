@@ -22,24 +22,12 @@ export function TimelineStatus({
   index,
   onStatusChange 
 }: TimelineStatusProps) {
-  const { data: tourStatuses } = useQuery({
-    queryKey: ['tourStatuses'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tour_statuses')
-        .select('name')
-        .order('display_order', { ascending: true });
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
   const isCompleted = index < currentIndex;
   const isCurrent = index === currentIndex;
+  const isNext = index === currentIndex + 1;
 
   const handleClick = () => {
-    if (index === currentIndex + 1) {
+    if (isNext) {
       onStatusChange(status);
     }
   };
@@ -49,10 +37,8 @@ export function TimelineStatus({
     isCompleted && "text-primary",
     isCurrent && "text-primary",
     !isCompleted && !isCurrent && "text-gray-500",
-    index === currentIndex + 1 && "cursor-pointer hover:text-primary"
+    isNext && "cursor-pointer hover:text-primary"
   );
-
-  if (!tourStatuses) return null;
 
   return (
     <div className="relative z-10">
@@ -60,15 +46,22 @@ export function TimelineStatus({
         variant="ghost"
         className={buttonClasses}
         onClick={handleClick}
-        disabled={index !== currentIndex + 1}
+        disabled={!isNext}
       >
-        <TimelineIcon
-          status={status}
-          isCompleted={isCompleted}
-          isCurrent={isCurrent}
-          className="h-6 w-6"
-        />
-        <span className="text-xs font-medium">{status}</span>
+        <div className={cn(
+          "h-12 w-12 rounded-full border-2 flex items-center justify-center",
+          isCompleted && "bg-primary border-primary",
+          isCurrent && "border-primary",
+          !isCompleted && !isCurrent && "border-gray-200"
+        )}>
+          <TimelineIcon
+            status={status}
+            isCompleted={isCompleted}
+            isCurrent={isCurrent}
+            className="h-6 w-6"
+          />
+        </div>
+        <span className="text-xs font-medium whitespace-nowrap">{status}</span>
       </Button>
     </div>
   );

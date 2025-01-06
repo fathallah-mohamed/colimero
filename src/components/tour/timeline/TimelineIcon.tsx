@@ -22,6 +22,7 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
       return <PackageSearch className={iconClass} />;
     case "En transit":
       return <Truck className={iconClass} />;
+    case "Livraison en cours":
     case "Livraison terminée":
       return <MapPin className={iconClass} />;
     default:

@@ -1,6 +1,7 @@
 import { TourStatus } from "@/types/tour";
 import { TimelineStatus } from "./timeline/TimelineStatus";
 import { TimelineProgress } from "./timeline/TimelineProgress";
+import { CancelledStatus } from "./timeline/CancelledStatus";
 
 interface TourStatusTimelineProps {
   tourId: number;
@@ -10,16 +11,19 @@ interface TourStatusTimelineProps {
 
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
   console.log('TourStatusTimeline rendered with status:', status);
+  
+  // Si la tournée est annulée, afficher uniquement le statut d'annulation
+  if (status === "Annulée") {
+    return <CancelledStatus />;
+  }
+
   const statusOrder: TourStatus[] = [
     "Programmé",
-    "Préparation terminée",
     "Ramassage en cours",
-    "Ramassage terminé",
     "En transit",
-    "Transport terminé",
-    "Livraison en cours",
-    "Livraison terminée"
+    "Livraison en cours"
   ];
+  
   const currentIndex = statusOrder.indexOf(status);
 
   return (
