@@ -1,5 +1,6 @@
 export type TourStatus = 
   | 'planned'
+  | 'preparation_completed'
   | 'collecting'
   | 'collecting_completed'
   | 'in_transit'
@@ -10,10 +11,18 @@ export type TourStatus =
 
 export type TourType = 'public' | 'private';
 
+export interface RouteStop {
+  name: string;
+  location: string;
+  time: string;
+  type: 'pickup' | 'dropoff';
+  collection_date: string;
+}
+
 export interface Tour {
   id: number;
   carrier_id: string;
-  route: any[];
+  route: RouteStop[];
   total_capacity: number;
   remaining_capacity: number;
   type: TourType;
@@ -34,4 +43,25 @@ export interface Tour {
     }[];
   };
   bookings?: any[];
+}
+
+export interface Carrier {
+  company_name: string;
+  first_name?: string;
+  last_name?: string;
+  avatar_url?: string;
+  carrier_capacities?: {
+    price_per_kg: number;
+  }[];
+}
+
+export interface Booking {
+  id: string;
+  pickup_city: string;
+  delivery_city: string;
+  weight: number;
+  tracking_number: string;
+  status: string;
+  recipient_name: string;
+  recipient_phone: string;
 }
