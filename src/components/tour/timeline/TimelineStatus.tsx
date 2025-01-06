@@ -25,7 +25,7 @@ export function TimelineStatus({
 }: TimelineStatusProps) {
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
 
-  // Don't show timeline if tour is cancelled
+  // Ne pas afficher la timeline si la tournée est annulée
   if (currentStatus === "Annulé") {
     return null;
   }
@@ -46,7 +46,8 @@ export function TimelineStatus({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tour_statuses')
-        .select('name, label');
+        .select('name, label')
+        .order('display_order', { ascending: true });
       
       if (error) throw error;
       return data.reduce((acc: Record<string, { label: string }>, curr) => {

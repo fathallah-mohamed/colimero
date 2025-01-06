@@ -38,19 +38,19 @@ export function TourTimelineCard({
   const navigate = useNavigate();
 
   const isBookingEnabled = () => {
-    return selectedPickupCity && tour.status === 'planned' && userType !== 'admin';
+    return selectedPickupCity && tour.status === "Programmé" && userType !== 'admin';
   };
 
   const isPickupSelectionEnabled = () => {
-    return tour.status === 'planned' && userType !== 'admin';
+    return tour.status === "Programmé" && userType !== 'admin';
   };
 
   const getBookingButtonText = () => {
-    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+    if (tour.status === "Annulé") return "Cette tournée a été annulée";
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
-    if (tour.status === 'collecting_completed') return "Cette tournée est en cours de collecte";
-    if (tour.status === 'transport_completed') return "Cette tournée est en cours de livraison";
-    if (tour.status === 'completed_completed') return "Cette tournée est terminée";
+    if (tour.status === "Ramassage terminé") return "Cette tournée est en cours de collecte";
+    if (tour.status === "Transport terminé") return "Cette tournée est en cours de livraison";
+    if (tour.status === "Livraison terminée") return "Cette tournée est terminée";
     if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
     return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
   };
@@ -132,6 +132,7 @@ export function TourTimelineCard({
                 <TourTimeline 
                   status={tour.status} 
                   onStatusChange={onStatusChange ? (newStatus) => onStatusChange(tour.id, newStatus) : undefined}
+                  tourId={tour.id}
                 />
                 
                 <TourCapacityDisplay 
