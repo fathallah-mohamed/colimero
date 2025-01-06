@@ -10,8 +10,10 @@ export default function PlanifierTournee() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
+  const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -19,11 +21,12 @@ export default function PlanifierTournee() {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          setShowAuthDialog(true);
+          setIsAuthenticated(false);
           setIsLoading(false);
           return;
         }
 
+        setIsAuthenticated(true);
         const userType = session.user?.user_metadata?.user_type;
 
         if (userType === "admin") {
@@ -36,7 +39,7 @@ export default function PlanifierTournee() {
         }
 
         if (userType !== "carrier") {
-          setShowAccessDeniedDialog(true);
+          setIsAccessDeniedOpen(true);
           setIsLoading(false);
           return;
         }
@@ -51,18 +54,49 @@ export default function PlanifierTournee() {
     checkSession();
   }, [navigate, toast]);
 
+  const handleCreateTourClick = () => {
+    if (!isAuthenticated) {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+    // Implement tour creation logic here
+    console.log("Creating tour...");
+  };
+
+  const handleAuthClick = () => {
+    setIsAuthDialogOpen(true);
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthDialogOpen(false);
+    setIsAuthenticated(true);
+  };
+
+  const handleCarrierRegisterClick = () => {
+    setIsAuthDialogOpen(false);
+    setShowCarrierSignupForm(true);
+  };
+
   if (isLoading) {
     return <TransporteurLoading />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PlanningContent />
+      <PlanningContent 
+        isAuthenticated={isAuthenticated}
+        onCreateTourClick={handleCreateTourClick}
+        onAuthClick={handleAuthClick}
+      />
       <PlanningDialogs 
-        showAuthDialog={showAuthDialog}
-        setShowAuthDialog={setShowAuthDialog}
-        showAccessDeniedDialog={showAccessDeniedDialog}
-        setShowAccessDeniedDialog={setShowAccessDeniedDialog}
+        isAuthDialogOpen={isAuthDialogOpen}
+        isAccessDeniedOpen={isAccessDeniedOpen}
+        showCarrierSignupForm={showCarrierSignupForm}
+        onAuthClose={() => setIsAuthDialogOpen(false)}
+        onAccessDeniedClose={() => setIsAccessDeniedOpen(false)}
+        onCarrierSignupClose={setShowCarrierSignupForm}
+        onAuthSuccess={handleAuthSuccess}
+        onCarrierRegisterClick={handleCarrierRegisterClick}
       />
     </div>
   );
