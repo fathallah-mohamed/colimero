@@ -24,7 +24,7 @@ export function TimelineStatus({
   onStatusChange 
 }: TimelineStatusProps) {
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
-  const isCompleted = index < currentIndex;
+  const isCompleted = index < currentIndex || (status === 'planned' && currentStatus !== 'planned');
   const isCurrent = status === currentStatus;
   const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed'].includes(currentStatus);
 
@@ -57,6 +57,10 @@ export function TimelineStatus({
 
   const getStatusLabel = (status: TourStatus) => {
     if (!statusLabels) {
+      if (status === 'planned' && isCompleted) {
+        return 'Préparation terminée';
+      }
+      
       switch (status) {
         case 'planned':
           return 'Programmée';
@@ -72,6 +76,9 @@ export function TimelineStatus({
     }
 
     const statusInfo = statusLabels[status];
+    if (status === 'planned' && isCompleted) {
+      return 'Préparation terminée';
+    }
     return statusInfo ? statusInfo.label : status;
   };
 
