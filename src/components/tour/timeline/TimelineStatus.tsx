@@ -37,7 +37,7 @@ export function TimelineStatus({
     }
   };
 
-  const getStatusLabel = (status: TourStatus) => {
+  const getStatusLabel = (status: TourStatus): string => {
     switch (status) {
       case 'planned':
         return "Planifiée";
