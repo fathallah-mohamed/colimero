@@ -9,10 +9,12 @@ import { NewRequestsTable } from "./new-requests/NewRequestsTable";
 import Navigation from "@/components/Navigation";
 import RequestDetailsDialog from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
+import { approveCarrierRequest } from "@/services/carrier-approval";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
 
   const { data: requests, isLoading, refetch } = useQuery({
@@ -30,13 +32,11 @@ export default function RejectedRequests() {
   });
 
   const handleApprove = async (request: any) => {
+    if (isApproving) return;
+    
+    setIsApproving(true);
     try {
-      const { error: updateError } = await supabase
-        .from("carrier_registration_requests")
-        .update({ status: "approved" })
-        .eq("id", request.id);
-
-      if (updateError) throw updateError;
+      await approveCarrierRequest(request.id);
 
       toast({
         title: "Demande approuvée",
@@ -45,13 +45,15 @@ export default function RejectedRequests() {
 
       refetch();
       setSelectedRequest(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error approving request:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'approbation de la demande.",
+        description: error.message || "Une erreur est survenue lors de l'approbation de la demande.",
       });
+    } finally {
+      setIsApproving(false);
     }
   };
 
