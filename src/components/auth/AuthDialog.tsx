@@ -21,7 +21,7 @@ export default function AuthDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogTitle className="text-center">Connexion</DialogTitle>
+        <DialogTitle className="text-center">Connexion requise</DialogTitle>
         <LoginForm
           onSuccess={() => {
             onSuccess?.();
