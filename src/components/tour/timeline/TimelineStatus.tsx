@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { TimelineIcon } from "./TimelineIcon";
 import { TourStatus } from "@/types/tour";
 import { useTimelineTransition } from "./useTimelineTransition";
+import { motion } from "framer-motion";
 
 interface TimelineStatusProps {
   tourId: number;
@@ -42,9 +42,9 @@ export function TimelineStatus({
       case 'planned':
         return "Planifiée";
       case 'collecting':
-        return "Collecte";
+        return "En cours de collecte";
       case 'in_transit':
-        return "Livraison";
+        return "En transit";
       case 'completed':
         return "Terminée";
       default:
@@ -54,13 +54,14 @@ export function TimelineStatus({
 
   return (
     <div className="flex flex-col items-center relative">
-      <div 
+      <motion.div 
+        whileHover={isClickable ? { scale: 1.05 } : {}}
         className={cn(
           "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
           isCompleted && "bg-primary shadow-lg",
-          isCurrent && "ring-2 ring-primary ring-offset-2",
+          isCurrent && "ring-4 ring-primary/30 bg-white",
           !isCompleted && !isCurrent && "bg-gray-100",
-          isClickable && "cursor-pointer hover:scale-105"
+          isClickable && "cursor-pointer hover:shadow-md"
         )}
         onClick={handleClick}
       >
@@ -68,22 +69,27 @@ export function TimelineStatus({
           status={status}
           isCompleted={isCompleted}
           isCurrent={isCurrent}
-          className="h-6 w-6"
+          className={cn(
+            "h-6 w-6",
+            isCompleted && "text-white",
+            isCurrent && "text-primary",
+            !isCompleted && !isCurrent && "text-gray-400"
+          )}
         />
-      </div>
+      </motion.div>
       
       <div className="mt-3 text-center">
-        <span className={cn(
-          "text-sm font-medium block",
-          isCurrent ? "text-primary" : isCompleted ? "text-primary" : "text-gray-500"
-        )}>
+        <motion.span 
+          className={cn(
+            "text-sm font-medium block",
+            isCurrent && "text-primary font-semibold",
+            isCompleted && "text-primary",
+            !isCompleted && !isCurrent && "text-gray-500"
+          )}
+          animate={isCurrent ? { scale: 1.05 } : { scale: 1 }}
+        >
           {getStatusLabel(status)}
-        </span>
-        {isCurrent && (
-          <span className="text-xs text-gray-500 mt-1 block">
-            Statut actuel
-          </span>
-        )}
+        </motion.span>
       </div>
     </div>
   );

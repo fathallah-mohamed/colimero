@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { TourStatus } from "@/types/tour";
+import { motion } from "framer-motion";
 
 interface TimelineProgressProps {
   currentIndex: number;
@@ -11,10 +12,12 @@ export function TimelineProgress({ currentIndex, statusOrder }: TimelineProgress
 
   return (
     <>
-      <div className="absolute top-8 left-0 w-full h-0.5 bg-gray-200 -z-10" />
-      <div 
-        className="absolute top-8 left-0 h-0.5 bg-primary transition-all duration-500 -z-10"
-        style={{ width: `${progress}%` }}
+      <div className="absolute top-8 left-0 w-full h-1 bg-gray-200 rounded-full -z-10" />
+      <motion.div 
+        className="absolute top-8 left-0 h-1 bg-primary rounded-full -z-10"
+        initial={{ width: 0 }}
+        animate={{ width: `${progress}%` }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
       />
     </>
   );
