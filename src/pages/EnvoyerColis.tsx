@@ -3,8 +3,8 @@ import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
-import { Tour } from "@/types/tour";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { Tour } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const {
@@ -39,22 +39,14 @@ export default function EnvoyerColis() {
       const transformedTours = data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) 
-          ? tour.route.map(stop => ({
-              name: stop.name,
-              location: stop.location,
-              time: stop.time,
-              type: stop.type,
-              collection_date: stop.collection_date
+          ? tour.route.map((stop: any) => ({
+              name: stop.name || '',
+              location: stop.location || '',
+              time: stop.time || '',
+              type: stop.type || 'pickup',
+              collection_date: stop.collection_date || ''
             }))
-          : typeof tour.route === 'string'
-            ? JSON.parse(tour.route).map((stop: any) => ({
-                name: stop.name,
-                location: stop.location,
-                time: stop.time,
-                type: stop.type,
-                collection_date: stop.collection_date
-              }))
-            : tour.route,
+          : [],
         carriers: tour.carriers ? {
           ...tour.carriers,
           carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
