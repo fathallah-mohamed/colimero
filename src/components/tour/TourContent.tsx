@@ -26,6 +26,8 @@ export function TourContent() {
     onEditComplete
   } = useTours();
 
+  console.log('TourContent rendered with tours:', tours);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -34,8 +36,12 @@ export function TourContent() {
     );
   }
 
-  const upcomingTours = tours.filter(tour => tour.status !== 'completed_completed');
-  const completedTours = tours.filter(tour => tour.status === 'completed_completed');
+  const upcomingTours = tours.filter(tour => 
+    tour.status !== 'completed_completed' && tour.status !== 'cancelled'
+  );
+  const completedTours = tours.filter(tour => 
+    tour.status === 'completed_completed' || tour.status === 'cancelled'
+  );
 
   return (
     <ScrollArea className="h-[calc(100vh-12rem)]">

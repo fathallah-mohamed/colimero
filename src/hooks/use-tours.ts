@@ -47,6 +47,14 @@ export function useTours() {
     checkAuth();
   }, [navigate]);
 
+  console.log('useTours hook state:', {
+    departureCountry,
+    destinationCountry,
+    sortBy,
+    status,
+    toursCount: tours.length
+  });
+
   return {
     loading,
     tours,

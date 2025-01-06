@@ -19,6 +19,8 @@ export function useTourData({
   const [tours, setTours] = useState<Tour[]>([]);
 
   const fetchTours = async () => {
+    console.log('Fetching tours with filters:', { departureCountry, destinationCountry, sortBy, status });
+    
     let query = supabase
       .from('tours')
       .select(`
@@ -64,6 +66,8 @@ export function useTourData({
       return;
     }
 
+    console.log('Fetched tours:', data);
+
     const transformedTours = data?.map(tour => ({
       ...tour,
       route: Array.isArray(tour.route) 
@@ -85,6 +89,7 @@ export function useTourData({
   };
 
   useEffect(() => {
+    console.log('Filters changed, fetching tours...');
     fetchTours();
   }, [departureCountry, destinationCountry, sortBy, status]);
 
