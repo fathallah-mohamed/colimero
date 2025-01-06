@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Tour } from "@/types/tour";
+import { Tour, TourStatus } from "@/types/tour";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { format } from "date-fns";
@@ -15,7 +15,7 @@ interface TourCardProps {
   tour: Tour;
   onEdit: (tour: Tour) => void;
   onDelete: (tourId: number) => void;
-  onStatusChange: (tourId: number, newStatus: string) => void;
+  onStatusChange: (tourId: number, newStatus: TourStatus) => void;
   selectedPickupCity?: string;
   onPickupCitySelect?: (city: string) => void;
   isBookingEnabled?: boolean;
@@ -40,7 +40,7 @@ export function TourCard({
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (newStatus: TourStatus) => {
     try {
       onStatusChange(tour.id, newStatus);
       toast({
@@ -78,37 +78,20 @@ export function TourCard({
     return type === 'public' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: TourStatus) => {
     switch (status) {
-      case 'planned':
+      case "Programmé":
         return 'bg-blue-100 text-blue-800';
-      case 'collecting':
+      case "Ramassage en cours":
         return 'bg-yellow-100 text-yellow-800';
-      case 'in_transit':
+      case "En transit":
         return 'bg-purple-100 text-purple-800';
-      case 'completed':
+      case "Livraison terminée":
         return 'bg-green-100 text-green-800';
-      case 'cancelled':
+      case "Annulé":
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'planned':
-        return 'Planifiée';
-      case 'collecting':
-        return 'En collecte';
-      case 'in_transit':
-        return 'En transit';
-      case 'completed':
-        return 'Terminée';
-      case 'cancelled':
-        return 'Annulée';
-      default:
-        return status;
     }
   };
 
@@ -155,7 +138,7 @@ export function TourCard({
 
       <TourStatusTimeline
         tourId={tour.id}
-        status={tour.status || 'planned'}
+        status={tour.status || 'Programmé'}
         onStatusChange={handleStatusChange}
       />
 
@@ -179,7 +162,7 @@ export function TourCard({
                       <p className="text-sm text-gray-600">{booking.weight} kg</p>
                     </div>
                     <Badge className={getStatusColor(booking.status)}>
-                      {getStatusLabel(booking.status)}
+                      {booking.status}
                     </Badge>
                   </div>
                 </Card>

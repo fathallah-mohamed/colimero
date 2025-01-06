@@ -25,19 +25,12 @@ export function TimelineStatus({
 }: TimelineStatusProps) {
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
 
-  // Ne pas afficher la timeline si la tournée est annulée
   if (currentStatus === "Annulé") {
     return null;
   }
 
-  const isCompleted = index < currentIndex || 
-    (status === "Programmé" && currentStatus !== "Programmé") ||
-    (status === "Ramassage en cours" && currentStatus !== "Ramassage en cours" && currentStatus !== "Programmé") ||
-    (status === "Transport terminé" && currentStatus === "Livraison en cours");
-  
-  const isCurrent = status === currentStatus || 
-    (status === "Livraison terminée" && currentStatus === "Livraison en cours");
-  
+  const isCompleted = index < currentIndex;
+  const isCurrent = status === currentStatus;
   const isClickable = Math.abs(index - currentIndex) === 1 && 
     !["Annulé", "Livraison terminée"].includes(currentStatus);
 
@@ -50,10 +43,10 @@ export function TimelineStatus({
         .order('display_order', { ascending: true });
       
       if (error) throw error;
-      return data.reduce((acc: Record<string, { label: string }>, curr) => {
+      return data?.reduce((acc: Record<string, { label: string }>, curr) => {
         acc[curr.name] = { label: curr.label };
         return acc;
-      }, {});
+      }, {}) || {};
     }
   });
 
