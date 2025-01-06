@@ -18,7 +18,7 @@ export const menuItems = [
     icon: <Package className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
-    allowedUserTypes: ["client"]
+    allowedUserTypes: ["client", "admin"]
   },
   { 
     name: "Transporteurs", 
