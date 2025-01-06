@@ -84,7 +84,7 @@ export function TimelineStatus({
       <motion.div 
         whileHover={isClickable ? { scale: 1.05 } : {}}
         className={cn(
-          "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
+          "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer",
           isCompleted && "bg-primary shadow-lg",
           isCurrent && "ring-4 ring-primary/30 bg-white",
           !isCompleted && !isCurrent && "bg-gray-100",

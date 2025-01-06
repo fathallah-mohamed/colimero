@@ -1,9 +1,11 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { TourStatus } from "@/types/tour";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function useTimelineTransition(tourId: number, onStatusChange: (newStatus: TourStatus) => void) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleStatusChange = async (currentStatus: TourStatus, newStatus: TourStatus) => {
     try {
@@ -34,6 +36,8 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         }
 
         onStatusChange(newStatus);
+        await queryClient.invalidateQueries({ queryKey: ['tours'] });
+        
         toast({
           title: "Statut mis à jour",
           description: "Le statut de la tournée a été mis à jour. Les réservations collectées restent inchangées.",
@@ -64,6 +68,8 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         }
 
         onStatusChange(newStatus);
+        await queryClient.invalidateQueries({ queryKey: ['tours'] });
+        
         toast({
           title: "Statut mis à jour",
           description: "Le statut de la tournée et des réservations collectées ont été mis à jour avec succès.",
@@ -94,6 +100,8 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         }
 
         onStatusChange(newStatus);
+        await queryClient.invalidateQueries({ queryKey: ['tours'] });
+        
         toast({
           title: "Statut mis à jour",
           description: "Le statut de la tournée a été mis à jour. Les réservations en transit sont maintenant marquées comme collectées.",
@@ -113,6 +121,8 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         }
 
         onStatusChange(newStatus);
+        await queryClient.invalidateQueries({ queryKey: ['tours'] });
+        
         toast({
           title: "Statut mis à jour",
           description: "Le statut de la tournée a été mis à jour avec succès.",
