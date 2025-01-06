@@ -1,4 +1,4 @@
-import { CalendarCheck, PackageSearch, Truck, MapPin, CheckCircle } from "lucide-react";
+import { CalendarCheck, PackageSearch, Truck, MapPin, Check } from "lucide-react";
 import { TourStatus } from "@/types/tour";
 import { cn } from "@/lib/utils";
 
@@ -15,9 +15,9 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
     isCompleted ? "text-primary-foreground" : isCurrent ? "text-primary" : "text-gray-500"
   );
 
-  // For completed statuses, always show the check icon
-  if (status.includes("terminée") || status.includes("terminé")) {
-    return <CheckCircle className={iconClass} />;
+  // For completed statuses, show the check icon
+  if (isCompleted) {
+    return <Check className={iconClass} />;
   }
 
   switch (status) {

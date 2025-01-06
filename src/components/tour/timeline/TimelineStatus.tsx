@@ -35,7 +35,7 @@ export function TimelineStatus({
   const getStatusLabel = (status: TourStatus): string => {
     switch (status) {
       case "Programmé":
-        return isCurrent ? "Programmé" : "Préparation terminée";
+        return "Programmé";
       case "Ramassage en cours":
         return isCurrent ? "Ramassage en cours" : "Ramassage terminé";
       case "En transit":
