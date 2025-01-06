@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
@@ -138,7 +138,7 @@ export function TourTimelineCard({
                   <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
                   <SelectableCollectionPointsList
                     points={tour.route}
-                    selectedPoint={selectedPickupCity}
+                    selectedPoint={selectedPickupCity || ''}
                     onPointSelect={setSelectedPickupCity}
                     isSelectionEnabled={isPickupSelectionEnabled()}
                     tourDepartureDate={tour.departure_date}
