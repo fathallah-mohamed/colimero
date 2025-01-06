@@ -39,7 +39,15 @@ export default function RequestDetailsDialog({
 
     setIsSubmitting(true);
     try {
-      // First update the request status without select()
+      // First verify if auth user exists
+      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(request.id);
+      
+      if (authError) {
+        console.error("Error checking auth user:", authError);
+        // If user doesn't exist, we proceed with the approval which will trigger user creation
+      }
+
+      // Update request status
       const { error: updateError } = await supabase
         .from("carrier_registration_requests")
         .update({ status: "approved" })
@@ -51,9 +59,16 @@ export default function RequestDetailsDialog({
       }
 
       // Wait for triggers to complete
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // Verify the carrier was created
+      // First verify auth user was created
+      const { data: verifyAuthUser, error: verifyAuthError } = await supabase.auth.admin.getUserById(request.id);
+      
+      if (verifyAuthError || !verifyAuthUser) {
+        throw new Error("Auth user was not created successfully");
+      }
+
+      // Then verify carrier was created
       const { data: carrier, error: verifyError } = await supabase
         .from("carriers")
         .select("*")
