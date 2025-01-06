@@ -5,19 +5,19 @@ export const getStatusLabel = (status: TourStatus) => {
     case "planned":
       return "Programmée";
     case "collecting":
-      return "Collecte";
+      return "Ramassage en cours";
+    case "collecting_completed":
+      return "Ramassage terminé";
     case "in_transit":
       return "En transit";
     case "transport_completed":
       return "Transport terminé";
-    case "collecting_completed":
-      return "Ramassage terminé";
-    case "preparation_completed":
-      return "Préparation terminée";
     case "delivery_in_progress":
       return "Livraison en cours";
     case "completed_completed":
       return "Livrée";
+    case "cancelled":
+      return "Annulée";
     default:
       return status;
   }

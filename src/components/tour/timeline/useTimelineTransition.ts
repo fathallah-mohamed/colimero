@@ -23,9 +23,6 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
 
       let bookingStatus;
       switch (newStatus) {
-        case 'preparation_completed':
-          bookingStatus = 'pending';
-          break;
         case 'collecting':
           bookingStatus = 'collecting';
           break;
@@ -62,7 +59,6 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
       
       const statusMessages = {
-        'preparation_completed': 'La préparation est terminée',
         'collecting': 'Le ramassage est en cours',
         'collecting_completed': 'Le ramassage est terminé',
         'in_transit': 'La tournée est en transit',

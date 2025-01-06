@@ -7,8 +7,6 @@ import type { Tour, TourStatus } from "@/types/tour";
 const getNextStatus = (currentStatus: TourStatus): TourStatus => {
   switch (currentStatus) {
     case 'planned':
-      return 'preparation_completed';
-    case 'preparation_completed':
       return 'collecting';
     case 'collecting':
       return 'collecting_completed';
