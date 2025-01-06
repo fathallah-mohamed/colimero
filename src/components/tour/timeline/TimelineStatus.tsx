@@ -24,7 +24,7 @@ export function TimelineStatus({
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex;
   const isCurrent = status === currentStatus;
-  const isClickable = Math.abs(index - currentIndex) === 1;
+  const isClickable = Math.abs(index - currentIndex) === 1 && status !== 'cancelled';
 
   const handleClick = async () => {
     if (isClickable) {
@@ -40,7 +40,7 @@ export function TimelineStatus({
         className={cn(
           "rounded-full p-0 h-16 w-16 transition-all duration-200",
           isClickable && "hover:bg-gray-100 cursor-pointer",
-          status === currentStatus && "ring-2 ring-primary ring-offset-2"
+          isCurrent && "ring-2 ring-primary ring-offset-2"
         )}
         onClick={handleClick}
         disabled={!isClickable}
@@ -54,7 +54,7 @@ export function TimelineStatus({
       </Button>
       <span className={cn(
         "text-sm mt-3 font-medium",
-        status === currentStatus ? "text-primary" : "text-gray-500"
+        isCurrent ? "text-primary" : "text-gray-500"
       )}>
         {status === 'planned' && "Planifiée"}
         {status === 'collecting' && "Collecte"}

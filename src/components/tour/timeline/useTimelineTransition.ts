@@ -93,6 +93,7 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         });
       }
     } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
