@@ -7,10 +7,12 @@ export async function approveCarrierRequest(requestId: string) {
       .from("carrier_registration_requests")
       .select("*")
       .eq("id", requestId)
-      .single();
+      .maybeSingle();
 
     if (requestError) throw requestError;
     if (!request) throw new Error("Request not found");
+
+    console.log("Found carrier request:", request);
 
     // Update request status to trigger auth user creation
     const { error: updateError } = await supabase
@@ -22,19 +24,22 @@ export async function approveCarrierRequest(requestId: string) {
       .eq("id", requestId);
 
     if (updateError) throw updateError;
+    console.log("Updated request status to approved");
 
-    // Wait for database triggers to complete
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Wait for database triggers to complete (increased to 8 seconds)
+    console.log("Waiting for triggers to complete...");
+    await new Promise(resolve => setTimeout(resolve, 8000));
 
     // Verify carrier was created
     const { data: carrier, error: verifyError } = await supabase
       .from("carriers")
       .select("*")
       .eq("id", requestId)
-      .single();
+      .maybeSingle();
 
     if (verifyError) throw verifyError;
     if (!carrier) {
+      console.error("Carrier not found after waiting for triggers");
       throw new Error("Carrier creation failed - please try again");
     }
 
