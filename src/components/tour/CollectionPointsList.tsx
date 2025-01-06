@@ -5,7 +5,7 @@ interface CollectionPoint {
   name: string;
   location: string;
   time: string;
-  collection_date?: string;
+  collection_date: string;
 }
 
 interface CollectionPointsListProps {
@@ -49,15 +49,7 @@ export function CollectionPointsList({
             <span className="font-medium">{point.name}</span>
             <span className="text-gray-600">{point.location}</span>
             <span className="text-gray-600">
-              {point.collection_date ? (
-                format(
-                  new Date(point.collection_date), 
-                  "EEEE d MMMM", 
-                  { locale: fr }
-                )
-              ) : (
-                <span className="text-yellow-600 italic">Date à confirmer</span>
-              )}
+              {format(new Date(point.collection_date), "EEEE d MMMM", { locale: fr })}
             </span>
             <span className="text-gray-600">{point.time}</span>
           </div>

@@ -20,7 +20,7 @@ export function CollectionPoint({ pickupCity, selectedStop, collectionDate }: Co
             Emplacement : {selectedStop.location}
           </p>
           <p className="text-sm text-gray-600">
-            Date de collecte : {format(new Date(collectionDate), "EEEE d MMMM yyyy", { locale: fr })}
+            Date de collecte : {format(new Date(selectedStop.collection_date), "EEEE d MMMM yyyy", { locale: fr })}
           </p>
           <p className="text-sm text-gray-600">
             Heure : {selectedStop.time}
