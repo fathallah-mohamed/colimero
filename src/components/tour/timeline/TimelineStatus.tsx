@@ -35,7 +35,7 @@ export function TimelineStatus({
             (isCompleted || status === "Livraison terminée") && "bg-[#34D399] shadow-lg shadow-[#34D399]/20 text-white hover:bg-[#34D399]/90",
             isCurrent && "bg-[#34D399] shadow-lg shadow-[#34D399]/20 text-white hover:bg-[#34D399]/90",
             !isCompleted && !isCurrent && status !== "Livraison terminée" && "bg-white border-2 border-gray-100 hover:border-gray-200 shadow-lg shadow-gray-100/50",
-            isNext && "animate-pulse"
+            isNext && "hover:scale-105 transition-transform"
           )}
           onClick={onClick}
           disabled={!isNext}

@@ -1,4 +1,4 @@
-import { Check, Truck } from "lucide-react";
+import { Check, PackageCheck, Truck, PackageOpen, Package } from "lucide-react";
 import { TourStatus } from "@/types/tour";
 import { cn } from "@/lib/utils";
 
@@ -22,16 +22,16 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
 
   switch (status) {
     case "Programmé":
-      return <Check className={iconClass} />;
+      return <Package className={iconClass} />;
     case "Ramassage en cours":
-      return <Check className={iconClass} />;
+      return <PackageOpen className={iconClass} />;
     case "En transit":
       return <Truck className={iconClass} />;
     case "Livraison en cours":
-      return <Truck className={iconClass} />;
+      return <PackageCheck className={iconClass} />;
     case "Livraison terminée":
       return <Check className={iconClass} />;
     default:
-      return <Check className={iconClass} />;
+      return <Package className={iconClass} />;
   }
 }
