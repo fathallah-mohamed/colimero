@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import { Tour } from "@/types/tour";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 export default function EnvoyerColis() {
   const {
@@ -35,7 +36,25 @@ export default function EnvoyerColis() {
         .order('departure_date', { ascending: true });
 
       if (error) throw error;
-      return data as Tour[];
+
+      // Transform the data to match the Tour type
+      const transformedTours = data?.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) 
+          ? tour.route 
+          : (typeof tour.route === 'string' 
+              ? JSON.parse(tour.route)
+              : tour.route
+            ),
+        carriers: tour.carriers ? {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+            ? tour.carriers.carrier_capacities
+            : [tour.carriers.carrier_capacities]
+        } : undefined
+      })) as Tour[];
+
+      return transformedTours || [];
     },
   });
 
@@ -48,6 +67,7 @@ export default function EnvoyerColis() {
           tours={tours || []}
           type="public"
           isLoading={isLoading}
+          userType={null}
           onBookingClick={handleBookingClick}
         />
       </div>
