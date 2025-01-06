@@ -11,7 +11,7 @@ interface TimelineIconProps {
 
 export function TimelineIcon({ status, isCompleted, isCurrent, className }: TimelineIconProps) {
   if (isCompleted) {
-    return <CheckCircle2 className={cn("text-green-500", className)} />;
+    return <CheckCircle2 className={cn("text-primary", className)} />;
   }
 
   const iconClass = cn(
