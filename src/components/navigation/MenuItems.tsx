@@ -1,9 +1,16 @@
 import { Link } from "react-router-dom";
-import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCog } from "lucide-react";
 import { useNavigation } from "./useNavigation";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 export const menuItems = [
+  { 
+    name: "Administrateurs", 
+    href: "/admin/gestion", 
+    icon: <UserCog className="w-4 h-4" />, 
+    allowedUserTypes: ["admin"]
+  },
   { 
     name: "Planifier une tournée", 
     href: "/planifier-tournee", 
