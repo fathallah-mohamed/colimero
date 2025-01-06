@@ -26,7 +26,7 @@ interface TourTimelineProps {
 export function TourTimeline({ status, onStatusChange, tourId }: TourTimelineProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
-  if (status === "Annulé") {
+  if (status === "Annulée") {
     return <CancelledStatus />;
   }
 
@@ -45,7 +45,7 @@ export function TourTimeline({ status, onStatusChange, tourId }: TourTimelinePro
 
   const handleCancel = async () => {
     if (onStatusChange) {
-      await onStatusChange("Annulé");
+      await onStatusChange("Annulée");
     }
     setShowCancelDialog(false);
   };
