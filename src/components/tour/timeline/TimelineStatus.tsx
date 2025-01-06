@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TimelineIcon } from "./TimelineIcon";
 import { TourStatus } from "@/types/tour";
 import { useTimelineTransition } from "./useTimelineTransition";
+import { Check } from "lucide-react";
 
 interface TimelineStatusProps {
   tourId: number;
@@ -39,6 +40,11 @@ export function TimelineStatus({
 
   return (
     <div className="flex flex-col items-center relative">
+      {isCompleted && (
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-green-500 rounded-full p-1">
+          <Check className="w-4 h-4 text-white" />
+        </div>
+      )}
       <Button
         variant="ghost"
         size="lg"
