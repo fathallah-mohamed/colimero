@@ -142,6 +142,7 @@ export function TourCard({
       </div>
 
       <TourStatusTimeline
+        tourId={tour.id}
         status={tour.status || 'planned'}
         onStatusChange={handleStatusChange}
       />
