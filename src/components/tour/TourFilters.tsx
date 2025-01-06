@@ -27,7 +27,7 @@ const statusLabels: { [key: string]: string } = {
   'planned': 'Programmée',
   'collecting': 'Ramassage en cours',
   'in_transit': 'En transit',
-  'completed': 'Livraison en cours',
+  'in_transit_completed': 'Livraison en cours',
   'completed_completed': 'Livrée'
 };
 
