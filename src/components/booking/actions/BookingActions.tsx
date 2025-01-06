@@ -18,9 +18,10 @@ interface BookingActionsProps {
   isCollecting: boolean;
   onStatusChange: (status: BookingStatus) => void;
   onEdit: () => void;
+  tourStatus?: string;
 }
 
-export function BookingActions({ status, isCollecting, onStatusChange, onEdit }: BookingActionsProps) {
+export function BookingActions({ status, isCollecting, onStatusChange, onEdit, tourStatus }: BookingActionsProps) {
   if (!isCollecting) return null;
 
   const handleStatusChange = (newStatus: BookingStatus) => {
