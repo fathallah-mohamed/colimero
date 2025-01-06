@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { TourCard } from "@/components/tour/TourCard";
-import { Tour } from "@/types/tour";
+import type { Tour, RouteStop } from "@/types/tour";
 
 export default function Tours() {
   const [departureCountry, setDepartureCountry] = useState("FR");
@@ -39,7 +39,36 @@ export default function Tours() {
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
-      return data as Tour[];
+
+      // Transform the data to match the Tour type
+      return data.map(tour => ({
+        ...tour,
+        route: Array.isArray(tour.route) 
+          ? tour.route.map((stop: any) => ({
+              name: String(stop.name || ''),
+              location: String(stop.location || ''),
+              time: String(stop.time || ''),
+              type: stop.type === 'pickup' || stop.type === 'dropoff' ? stop.type : 'pickup',
+              collection_date: String(stop.collection_date || '')
+            }))
+          : (typeof tour.route === 'string' 
+              ? JSON.parse(tour.route).map((stop: any) => ({
+                  name: String(stop.name || ''),
+                  location: String(stop.location || ''),
+                  time: String(stop.time || ''),
+                  type: stop.type === 'pickup' || stop.type === 'dropoff' ? stop.type : 'pickup',
+                  collection_date: String(stop.collection_date || '')
+                }))
+              : []
+            ),
+        carriers: tour.carriers ? {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+            ? tour.carriers.carrier_capacities
+            : [tour.carriers.carrier_capacities]
+        } : null,
+        status: tour.status || 'planned'
+      })) as Tour[];
     },
   });
 
@@ -131,15 +160,11 @@ export default function Tours() {
                 <TourCard
                   key={tour.id}
                   tour={tour}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onStatusChange={handleStatusChange}
-                  selectedPickupCity={selectedPickupCity || ""}
-                  onPickupCitySelect={setSelectedPickupCity}
-                  isBookingEnabled={tour.status === "collecting"}
-                  isPickupSelectionEnabled={tour.status === "collecting"}
-                  bookingButtonText={getBookingButtonText(tour)}
+                  onEdit={() => handleEdit(tour)}
+                  onDelete={() => handleDelete(tour.id)}
+                  onStatusChange={(newStatus) => handleStatusChange(tour.id, newStatus)}
                   onBookingClick={() => handleBookingClick(tour)}
+                  isBookingEnabled={tour.status === "collecting"}
                 />
               ))
             )}
