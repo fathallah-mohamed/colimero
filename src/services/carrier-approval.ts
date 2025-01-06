@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Create an admin client with the service role key
 const adminAuthClient = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
+  "https://dsmahpgrhjoikcxuiqrw.supabase.co",
   import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY!,
   {
     auth: {
