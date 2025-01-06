@@ -24,7 +24,7 @@ export function TimelineStatus({
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex;
   const isCurrent = status === currentStatus;
-  const isClickable = Math.abs(index - currentIndex) === 1 && currentStatus !== 'cancelled' && currentStatus !== 'completed';
+  const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed'].includes(currentStatus);
 
   const handleClick = async () => {
     console.log('Click detected on status:', status);
@@ -66,7 +66,7 @@ export function TimelineStatus({
           currentStatus === 'cancelled' && "opacity-50"
         )}
         onClick={handleClick}
-        disabled={!isClickable || currentStatus === 'cancelled'}
+        disabled={!isClickable}
       >
         <TimelineIcon 
           status={status}
