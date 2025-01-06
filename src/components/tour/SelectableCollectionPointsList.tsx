@@ -1,5 +1,5 @@
 import React from "react";
-import { format, isValid, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { RouteStop } from "@/types/tour";
 
@@ -20,11 +20,19 @@ export function SelectableCollectionPointsList({
 }: SelectableCollectionPointsListProps) {
   const formatDate = (dateString: string) => {
     try {
+      // Si la date est null ou undefined, retourner un message par défaut
+      if (!dateString) {
+        console.log("Date string is empty:", dateString);
+        return "Date non définie";
+      }
+
+      // S'assurer que la date est au bon format avant de la parser
       const date = parseISO(dateString);
-      if (!isValid(date)) {
-        console.error("Invalid date:", dateString);
+      if (isNaN(date.getTime())) {
+        console.log("Invalid date:", dateString);
         return "Date invalide";
       }
+
       return format(date, "EEEE d MMMM", { locale: fr });
     } catch (error) {
       console.error("Error formatting date:", error);
