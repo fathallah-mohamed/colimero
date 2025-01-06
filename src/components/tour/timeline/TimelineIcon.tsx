@@ -1,4 +1,4 @@
-import { Check, CalendarCheck, PackageSearch, Truck, MapPin } from "lucide-react";
+import { Check, Truck } from "lucide-react";
 import { TourStatus } from "@/types/tour";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
   const iconClass = cn(
     "h-6 w-6",
     className,
-    isCompleted ? "text-white" : isCurrent ? "text-white" : "text-gray-500"
+    isCompleted ? "text-white" : isCurrent ? "text-white" : "text-gray-400"
   );
 
   if (isCompleted) {

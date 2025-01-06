@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface TimelineProgressProps {
@@ -7,14 +6,22 @@ interface TimelineProgressProps {
 
 export function TimelineProgress({ progress }: TimelineProgressProps) {
   return (
-    <>
-      <div className="absolute top-7 left-0 w-full h-1 bg-gray-100 rounded-full -z-10" />
-      <motion.div 
-        className="absolute top-7 left-0 h-1 bg-[#34D399] rounded-full -z-10"
-        initial={{ width: 0 }}
-        animate={{ width: `${progress}%` }}
-        transition={{ duration: 0.8, ease: "easeInOut" }}
-      />
-    </>
+    <motion.div 
+      className="absolute top-1/2 left-0 w-full flex items-center justify-between px-4 -z-10"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="flex-1 flex justify-between">
+        {[0, 1, 2, 3].map((step) => (
+          <div
+            key={step}
+            className={`h-2 w-2 rounded-full ${
+              (progress / 100) * 4 > step ? "bg-[#34D399]" : "bg-gray-200"
+            }`}
+          />
+        ))}
+      </div>
+    </motion.div>
   );
 }

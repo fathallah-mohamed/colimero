@@ -22,7 +22,7 @@ export function TimelineStatus({
   label
 }: TimelineStatusProps) {
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-3 relative">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -32,9 +32,9 @@ export function TimelineStatus({
           variant="ghost"
           className={cn(
             "relative h-14 w-14 rounded-full p-0 transition-all duration-300",
-            (isCompleted || status === "Livraison terminée") && "bg-[#34D399] border-none text-white hover:bg-[#34D399]/90",
-            isCurrent && "bg-[#34D399] border-none text-white hover:bg-[#34D399]/90",
-            !isCompleted && !isCurrent && status !== "Livraison terminée" && "border-2 border-gray-200 hover:border-gray-300",
+            (isCompleted || status === "Livraison terminée") && "bg-[#34D399] shadow-lg shadow-[#34D399]/20 text-white hover:bg-[#34D399]/90",
+            isCurrent && "bg-[#34D399] shadow-lg shadow-[#34D399]/20 text-white hover:bg-[#34D399]/90",
+            !isCompleted && !isCurrent && status !== "Livraison terminée" && "bg-white border-2 border-gray-100 hover:border-gray-200 shadow-lg shadow-gray-100/50",
             isNext && "animate-pulse"
           )}
           onClick={onClick}
