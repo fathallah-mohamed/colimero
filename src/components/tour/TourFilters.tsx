@@ -40,7 +40,7 @@ export function TourFilters({
       const { data, error } = await supabase
         .from('tour_statuses')
         .select('*')
-        .order('display_order', { ascending: true, nullsLast: true });
+        .order('display_order', { ascending: true });
       
       if (error) throw error;
       return data;

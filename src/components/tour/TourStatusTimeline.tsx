@@ -11,11 +11,14 @@ interface TourStatusTimelineProps {
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
   console.log('TourStatusTimeline rendered with status:', status);
   const statusOrder: TourStatus[] = [
-    'planned',
-    'preparation_completed',
-    'collecting_completed',
-    'transport_completed',
-    'completed_completed'
+    "Programmé",
+    "Préparation terminée",
+    "Ramassage en cours",
+    "Ramassage terminé",
+    "En transit",
+    "Transport terminé",
+    "Livraison en cours",
+    "Livraison terminée"
   ];
   const currentIndex = statusOrder.indexOf(status);
 
