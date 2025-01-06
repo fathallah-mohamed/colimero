@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { motion } from "framer-motion";
 
 interface TourTimelineProps {
   status: TourStatus;
@@ -38,8 +39,6 @@ export function TourTimeline({ status, onStatusChange, tourId }: TourTimelinePro
   ];
 
   const currentIndex = statusOrder.indexOf(status);
-
-  // Calculer le pourcentage de progression
   const progress = ((currentIndex) / (statusOrder.length - 1)) * 100;
 
   const handleCancel = async () => {
@@ -50,8 +49,13 @@ export function TourTimeline({ status, onStatusChange, tourId }: TourTimelinePro
   };
 
   return (
-    <div className="space-y-6">
-      <div className="relative flex justify-between items-center w-full mt-4">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div className="relative flex justify-between items-center w-full mt-8 px-4">
         <TimelineProgress progress={progress} />
         
         {statusOrder.map((statusItem, index) => {
@@ -92,10 +96,10 @@ export function TourTimeline({ status, onStatusChange, tourId }: TourTimelinePro
       </div>
 
       {status !== "Livraison terminée" && onStatusChange && (
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-8">
           <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2">
+              <Button variant="destructive" className="gap-2 hover:bg-destructive/90 transition-colors">
                 <XCircle className="h-4 w-4" />
                 Annuler la tournée
               </Button>
@@ -117,6 +121,6 @@ export function TourTimeline({ status, onStatusChange, tourId }: TourTimelinePro
           </AlertDialog>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
