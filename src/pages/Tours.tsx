@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { TourCard } from "@/components/tour/TourCard";
-import type { Tour, RouteStop } from "@/types/tour";
+import type { Tour, RouteStop, TourStatus } from "@/types/tour";
 
 export default function Tours() {
   const [departureCountry, setDepartureCountry] = useState("FR");
@@ -88,7 +88,7 @@ export default function Tours() {
     console.log("Delete tour:", tourId);
   };
 
-  const handleStatusChange = (tourId: number, newStatus: string) => {
+  const handleStatusChange = (tourId: number, newStatus: TourStatus) => {
     // Implement status change functionality
     console.log("Change status:", tourId, newStatus);
   };
@@ -187,12 +187,4 @@ export default function Tours() {
       </Dialog>
     </div>
   );
-}
-
-function getBookingButtonText(tour: Tour): string {
-  if (tour.status === 'cancelled') return "Cette tournée a été annulée";
-  if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
-  if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
-  if (tour.status === 'completed') return "Cette tournée est terminée";
-  return "Réserver sur cette tournée";
 }
