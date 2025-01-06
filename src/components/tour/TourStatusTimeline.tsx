@@ -17,13 +17,51 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     return <CancelledStatus />;
   }
 
-  const statusOrder: TourStatus[] = [
-    "Programmé",
-    "Ramassage en cours",
-    "En transit",
-    "Livraison en cours"
-  ];
-  
+  const getStatusOrder = (currentStatus: TourStatus): TourStatus[] => {
+    switch (currentStatus) {
+      case "Programmé":
+        return [
+          "Programmé",
+          "Ramassage en cours",
+          "En transit",
+          "Livraison en cours"
+        ];
+      case "Ramassage en cours":
+        return [
+          "Préparation terminée",
+          "Ramassage en cours",
+          "En transit",
+          "Livraison en cours",
+          "Livraison terminée"
+        ];
+      case "En transit":
+        return [
+          "Ramassage terminé",
+          "En transit",
+          "Livraison en cours",
+          "Livraison terminée"
+        ];
+      case "Livraison en cours":
+        return [
+          "Transport terminé",
+          "Livraison en cours",
+          "Livraison terminée"
+        ];
+      case "Livraison terminée":
+        return [
+          "Livraison terminée"
+        ];
+      default:
+        return [
+          "Programmé",
+          "Ramassage en cours",
+          "En transit",
+          "Livraison en cours"
+        ];
+    }
+  };
+
+  const statusOrder = getStatusOrder(status);
   const currentIndex = statusOrder.indexOf(status);
 
   return (

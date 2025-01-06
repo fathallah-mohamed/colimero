@@ -36,12 +36,20 @@ export function TimelineStatus({
     switch (status) {
       case "Programmé":
         return "Programmé";
+      case "Préparation terminée":
+        return "Préparation terminée";
       case "Ramassage en cours":
-        return isCurrent ? "Ramassage en cours" : "Ramassage terminé";
+        return "Ramassage en cours";
+      case "Ramassage terminé":
+        return "Ramassage terminé";
       case "En transit":
-        return isCurrent ? "En transit" : "Transport terminé";
+        return "En transit";
+      case "Transport terminé":
+        return "Transport terminé";
       case "Livraison en cours":
-        return isCurrent ? "Livraison en cours" : "Livraison terminée";
+        return "Livraison en cours";
+      case "Livraison terminée":
+        return "Livraison terminée";
       default:
         return status;
     }

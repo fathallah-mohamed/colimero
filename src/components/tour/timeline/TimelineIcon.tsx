@@ -22,12 +22,16 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
 
   switch (status) {
     case "Programmé":
+    case "Préparation terminée":
       return <CalendarCheck className={iconClass} />;
     case "Ramassage en cours":
+    case "Ramassage terminé":
       return <PackageSearch className={iconClass} />;
     case "En transit":
+    case "Transport terminé":
       return <Truck className={iconClass} />;
     case "Livraison en cours":
+    case "Livraison terminée":
       return <MapPin className={iconClass} />;
     default:
       return <CalendarCheck className={iconClass} />;
