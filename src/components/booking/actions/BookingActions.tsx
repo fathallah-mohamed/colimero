@@ -1,8 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { BookingStatus } from "@/types/booking";
-import { XSquare, Edit, RotateCcw, Package } from "lucide-react";
-import { BookingActionButton } from "./BookingActionButton";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { Edit2, XCircle, RotateCcw, CheckSquare } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,76 +12,56 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 
 interface BookingActionsProps {
   status: BookingStatus;
   isCollecting: boolean;
   onStatusChange: (status: BookingStatus) => void;
   onEdit: () => void;
-  tourStatus?: string;
 }
 
-export function BookingActions({ 
-  status, 
-  isCollecting, 
-  onStatusChange, 
-  onEdit,
-  tourStatus
-}: BookingActionsProps) {
-  const [userType, setUserType] = useState<string | null>(null);
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-
-  useEffect(() => {
-    const checkUserType = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserType(user.user_metadata?.user_type);
-      }
-    };
-    checkUserType();
-  }, []);
+export function BookingActions({ status, isCollecting, onStatusChange, onEdit }: BookingActionsProps) {
+  if (!isCollecting) return null;
 
   const handleStatusChange = (newStatus: BookingStatus) => {
     console.log("BookingActions - Changing status to:", newStatus);
     onStatusChange(newStatus);
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    console.log("Edit button clicked");
-    onEdit();
-  };
+  return (
+    <div className="flex items-center gap-3">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onEdit}
+        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED] transition-colors"
+      >
+        <Edit2 className="h-4 w-4" />
+        Modifier
+      </Button>
 
-  const handleCancel = () => {
-    handleStatusChange("cancelled");
-    setShowCancelDialog(false);
-  };
+      {status === "cancelled" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+          onClick={() => handleStatusChange("pending")}
+        >
+          <RotateCcw className="h-4 w-4" />
+          Remettre en attente
+        </Button>
+      )}
 
-  // Si c'est un client
-  if (userType === 'client') {
-    // Ne montrer les actions que si la réservation est en attente
-    if (status === 'pending') {
-      return (
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleEdit}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2 bg-white hover:bg-gray-100"
-          >
-            <Edit className="h-4 w-4" />
-            Modifier
-          </Button>
-
-          <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+      {status === "pending" && (
+        <>
+          <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50 transition-colors"
               >
-                <XSquare className="h-4 w-4" />
+                <XCircle className="h-4 w-4" />
                 Annuler
               </Button>
             </AlertDialogTrigger>
@@ -95,9 +73,9 @@ export function BookingActions({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Retour</AlertDialogCancel>
+                <AlertDialogCancel className="border-gray-200">Retour</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleCancel}
+                  onClick={() => handleStatusChange("cancelled")}
                   className="bg-red-600 text-white hover:bg-red-700"
                 >
                   Confirmer l'annulation
@@ -105,85 +83,30 @@ export function BookingActions({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-      );
-    }
-    // Si la réservation est annulée ou dans un autre état, ne pas montrer d'actions
-    return null;
-  }
 
-  // Pour les transporteurs, afficher toutes les actions possibles
-  if (isCollecting || tourStatus === 'planned') {
-    return (
-      <div className="flex items-center gap-2">
-        <Button
-          onClick={handleEdit}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2 bg-white hover:bg-gray-100"
-        >
-          <Edit className="h-4 w-4" />
-          Modifier
-        </Button>
-
-        {status === "cancelled" && (
           <Button
-            onClick={() => handleStatusChange("pending")}
             variant="outline"
             size="sm"
-            className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+            className="flex items-center gap-2 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300 hover:bg-green-50 transition-colors"
+            onClick={() => handleStatusChange("collected")}
           >
-            <RotateCcw className="h-4 w-4" />
-            Remettre en attente
+            <CheckSquare className="h-4 w-4" />
+            Marquer comme collecté
           </Button>
-        )}
+        </>
+      )}
 
-        {status === "pending" && (
-          <>
-            <Button
-              onClick={() => handleStatusChange("collected")}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2 border-green-200 text-green-600 hover:bg-green-50 hover:text-green-700"
-            >
-              <Package className="h-4 w-4" />
-              Marquer comme collecté
-            </Button>
-
-            <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                >
-                  <XSquare className="h-4 w-4" />
-                  Annuler
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmer l'annulation</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Retour</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleCancel}
-                    className="bg-red-600 text-white hover:bg-red-700"
-                  >
-                    Confirmer l'annulation
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  return null;
+      {status === "collected" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+          onClick={() => handleStatusChange("pending")}
+        >
+          <RotateCcw className="h-4 w-4" />
+          Remettre en attente
+        </Button>
+      )}
+    </div>
+  );
 }
