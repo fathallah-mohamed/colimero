@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { TourCard } from "@/components/tour/TourCard";
-import { Tour, RouteStop } from "@/types/tour";
+import { Tour } from "@/types/tour";
 
 export default function Tours() {
   const [departureCountry, setDepartureCountry] = useState("FR");
@@ -17,7 +17,6 @@ export default function Tours() {
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
-  const [userType, setUserType] = useState<string | null>(null);
 
   const { data: tours, isLoading } = useQuery({
     queryKey: ["tours", departureCountry, destinationCountry, tourType],
@@ -40,79 +39,29 @@ export default function Tours() {
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
-      
-      // Transform the data to match the Tour interface
-      return data.map(tour => {
-        // Ensure route is properly parsed as RouteStop[]
-        let parsedRoute: RouteStop[];
-        if (typeof tour.route === 'string') {
-          const parsed = JSON.parse(tour.route);
-          parsedRoute = parsed.map((stop: any) => ({
-            name: String(stop.name || ''),
-            location: String(stop.location || ''),
-            time: String(stop.time || ''),
-            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup',
-            collection_date: tour.collection_date // Use the tour's collection date for each stop
-          }));
-        } else if (Array.isArray(tour.route)) {
-          parsedRoute = tour.route.map((stop: any) => ({
-            name: String(stop.name || ''),
-            location: String(stop.location || ''),
-            time: String(stop.time || ''),
-            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup',
-            collection_date: tour.collection_date // Use the tour's collection date for each stop
-          }));
-        } else if (typeof tour.route === 'object' && tour.route !== null) {
-          // If it's a JSONB object from Supabase, convert it to array
-          parsedRoute = Object.values(tour.route).map((stop: any) => ({
-            name: String(stop.name || ''),
-            location: String(stop.location || ''),
-            time: String(stop.time || ''),
-            type: (stop.type === 'pickup' || stop.type === 'dropoff') ? stop.type : 'pickup',
-            collection_date: tour.collection_date // Use the tour's collection date for each stop
-          }));
-        } else {
-          parsedRoute = [];
-        }
-
-        return {
-          ...tour,
-          route: parsedRoute,
-          carriers: tour.carriers ? {
-            ...tour.carriers,
-            carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
-              ? tour.carriers.carrier_capacities
-              : [tour.carriers.carrier_capacities]
-          } : null
-        } as Tour;
-      });
+      return data as Tour[];
     },
   });
 
   const handleBookingClick = (tour: Tour) => {
-    if (!selectedPickupCity || !isBookingEnabled(tour)) {
-      return;
-    }
+    if (!selectedPickupCity) return;
     setSelectedTour(tour);
     setIsBookingFormOpen(true);
   };
 
-  const isBookingEnabled = (tour: Tour) => {
-    return tour.status === 'collecting' && userType !== 'admin';
+  const handleEdit = (tour: Tour) => {
+    // Implement edit functionality
+    console.log("Edit tour:", tour);
   };
 
-  const isPickupSelectionEnabled = (tour: Tour) => {
-    return tour.status === 'collecting' && userType !== 'admin';
+  const handleDelete = (tourId: number) => {
+    // Implement delete functionality
+    console.log("Delete tour:", tourId);
   };
 
-  const getBookingButtonText = (tour: Tour) => {
-    if (tour.status === 'cancelled') return "Cette tournée a été annulée";
-    if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
-    if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
-    if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
-    if (tour.status === 'completed') return "Cette tournée est terminée";
-    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
-    return "Réserver sur cette tournée";
+  const handleStatusChange = (tourId: number, newStatus: string) => {
+    // Implement status change functionality
+    console.log("Change status:", tourId, newStatus);
   };
 
   return (
@@ -182,12 +131,15 @@ export default function Tours() {
                 <TourCard
                   key={tour.id}
                   tour={tour}
-                  selectedPickupCity={selectedPickupCity}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onStatusChange={handleStatusChange}
+                  selectedPickupCity={selectedPickupCity || ""}
                   onPickupCitySelect={setSelectedPickupCity}
-                  onBookingClick={() => handleBookingClick(tour)}
-                  isBookingEnabled={isBookingEnabled(tour)}
-                  isPickupSelectionEnabled={isPickupSelectionEnabled(tour)}
+                  isBookingEnabled={tour.status === "collecting"}
+                  isPickupSelectionEnabled={tour.status === "collecting"}
                   bookingButtonText={getBookingButtonText(tour)}
+                  onBookingClick={() => handleBookingClick(tour)}
                 />
               ))
             )}
@@ -210,4 +162,12 @@ export default function Tours() {
       </Dialog>
     </div>
   );
+}
+
+function getBookingButtonText(tour: Tour): string {
+  if (tour.status === 'cancelled') return "Cette tournée a été annulée";
+  if (tour.status === 'planned') return "Cette tournée n'est pas encore ouverte aux réservations";
+  if (tour.status === 'in_transit') return "Cette tournée est en cours de livraison";
+  if (tour.status === 'completed') return "Cette tournée est terminée";
+  return "Réserver sur cette tournée";
 }

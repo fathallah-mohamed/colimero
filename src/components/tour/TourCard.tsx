@@ -21,6 +21,7 @@ interface TourCardProps {
   isBookingEnabled?: boolean;
   isPickupSelectionEnabled?: boolean;
   bookingButtonText?: string;
+  onBookingClick?: () => void;
 }
 
 export function TourCard({
@@ -33,6 +34,7 @@ export function TourCard({
   isBookingEnabled,
   isPickupSelectionEnabled,
   bookingButtonText,
+  onBookingClick
 }: TourCardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
