@@ -4,50 +4,67 @@ import { useNavigate } from "react-router-dom";
 import { Tour } from "@/types/tour";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import AuthDialog from "../auth/AuthDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Truck, CreditCard, Users, Package, Clock } from "lucide-react";
-import { CollectionPointsList } from "./CollectionPointsList";
+import { MapPin, Calendar, Truck, Package, Clock, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { TourStatusTimeline } from "./TourStatusTimeline";
+import { CollapsibleTrigger, CollapsibleContent, Collapsible } from "@/components/ui/collapsible";
 
 interface TourCardProps {
   tour: Tour;
-  selectedPickupCity: string | null;
-  onPickupCitySelect: (city: string) => void;
-  isBookingEnabled: boolean;
-  isPickupSelectionEnabled: boolean;
-  bookingButtonText: string;
-  onBookingClick: () => void;
+  onEdit: (tour: Tour) => void;
+  onDelete: (tourId: number) => void;
+  onStatusChange: (tourId: number, newStatus: string) => void;
 }
 
 export function TourCard({
   tour,
-  selectedPickupCity,
-  onPickupCitySelect,
-  isBookingEnabled,
-  isPickupSelectionEnabled,
-  bookingButtonText,
-  onBookingClick,
+  onEdit,
+  onDelete,
+  onStatusChange,
 }: TourCardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleBookingClick = () => {
-    sessionStorage.setItem('returnPath', `/reserver/${tour.id}`);
-    setShowAuthDialog(true);
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      onStatusChange(tour.id, newStatus);
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut de la tournée a été mis à jour avec succès.",
+      });
+    } catch (error) {
+      console.error('Error updating tour status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la tournée",
+      });
+    }
   };
 
-  const handleAuthSuccess = () => {
-    setShowAuthDialog(false);
-    navigate(`/reserver/${tour.id}`);
+  const handleDelete = async () => {
+    try {
+      onDelete(tour.id);
+      toast({
+        title: "Tournée supprimée",
+        description: "La tournée a été supprimée avec succès.",
+      });
+    } catch (error) {
+      console.error('Error deleting tour:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer la tournée",
+      });
+    }
   };
 
-  const price = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
-  const usedCapacity = tour.total_capacity - tour.remaining_capacity;
-  const capacityPercentage = (usedCapacity / tour.total_capacity) * 100;
+  const getTypeColor = (type: string) => {
+    return type === 'public' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,95 +101,84 @@ export function TourCard({
   };
 
   return (
-    <Card className="p-6 space-y-6">
+    <Card className="p-4 space-y-4">
       <div className="flex justify-between items-start">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <h3 className="text-xl font-semibold">Tournée #{tour.id}</h3>
-            <Badge className={getStatusColor(tour.status || '')}>
-              {getStatusLabel(tour.status || '')}
+            <h3 className="text-lg font-medium">
+              {tour.departure_country} → {tour.destination_country}
+            </h3>
+            <Badge className={getTypeColor(tour.type)}>
+              {tour.type === 'public' ? 'Public' : 'Privé'}
             </Badge>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
-            <MapPin className="h-4 w-4" />
-            <span>{tour.departure_country} → {tour.destination_country}</span>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-primary">{price} € <span className="text-sm text-gray-600">/ kg</span></p>
-          <p className="text-sm text-gray-600">Type: {tour.type === 'public' ? 'Publique' : 'Privée'}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-gray-600">
             <Calendar className="h-4 w-4" />
-            <span>Départ: {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Clock className="h-4 w-4" />
-            <span>Collecte: {format(new Date(tour.collection_date), "d MMMM yyyy", { locale: fr })}</span>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Package className="h-4 w-4" />
-            <span>Capacité totale: {tour.total_capacity} kg</span>
+            <span>Départ : {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Truck className="h-4 w-4" />
-            <span>Capacité restante: {tour.remaining_capacity} kg</span>
+            <span>
+              Capacité restante : {tour.remaining_capacity} kg   Total : {tour.total_capacity} kg
+            </span>
           </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(tour)}
+          >
+            <MapPin className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDelete}
+          >
+            <Package className="h-4 w-4 text-red-500" />
+          </Button>
         </div>
       </div>
 
-      <div className="relative pt-1">
-        <div className="flex mb-2 items-center justify-between">
-          <div className="text-xs font-semibold text-primary uppercase">
-            Capacité utilisée: {Math.round(capacityPercentage)}%
-          </div>
-        </div>
-        <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-          <div
-            style={{ width: `${capacityPercentage}%` }}
-            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary"
-          />
-        </div>
-      </div>
-
-      {tour.route && (
-        <div className="space-y-2">
-          <h4 className="font-medium text-gray-900">Points de collecte</h4>
-          <CollectionPointsList points={tour.route} />
-        </div>
-      )}
-
-      {tour.carriers && (
-        <div className="pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Users className="h-4 w-4" />
-            <span>Transporteur: {tour.carriers.company_name}</span>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex justify-end pt-4">
-        <Button
-          onClick={handleBookingClick}
-          disabled={!isBookingEnabled}
-          className="bg-primary text-white hover:bg-primary/90"
-        >
-          {bookingButtonText}
-        </Button>
-      </div>
-
-      <AuthDialog
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
-        onSuccess={handleAuthSuccess}
-        requiredUserType="client"
+      <TourStatusTimeline
+        status={tour.status || 'planned'}
+        onStatusChange={handleStatusChange}
       />
+
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="w-full flex items-center gap-2 justify-center">
+            <Eye className="h-4 w-4" />
+            {isExpanded ? "Masquer les détails" : "Voir les détails"}
+          </Button>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent className="space-y-4 mt-4">
+          {tour.bookings && tour.bookings.length > 0 ? (
+            <div className="space-y-3">
+              {tour.bookings.map((booking: any) => (
+                <Card key={booking.id} className="p-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium">{booking.recipient_name}</p>
+                      <p className="text-sm text-gray-600">{booking.pickup_city} → {booking.delivery_city}</p>
+                      <p className="text-sm text-gray-600">{booking.weight} kg</p>
+                    </div>
+                    <Badge className={getStatusColor(booking.status)}>
+                      {getStatusLabel(booking.status)}
+                    </Badge>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">
+              Aucune réservation pour cette tournée.
+            </p>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }

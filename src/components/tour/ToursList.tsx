@@ -1,5 +1,4 @@
 import { TourCard } from "./TourCard";
-import { TourEditDialog } from "./TourEditDialog";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -44,17 +43,14 @@ export function ToursList({
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="space-y-4">
       {tours.map((tour) => (
         <TourCard
           key={tour.id}
           tour={tour}
-          selectedPickupCity={null}
-          onPickupCitySelect={() => {}}
-          onBookingClick={() => {}}
-          isBookingEnabled={false}
-          isPickupSelectionEnabled={false}
-          bookingButtonText="Réserver"
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onStatusChange={onStatusChange}
         />
       ))}
     </div>

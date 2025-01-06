@@ -1,62 +1,52 @@
-import { TourStatus } from "../../types/tour";
-import { TimelineButton } from "./timeline/TimelineButton";
-import { TimelineProgress } from "./timeline/TimelineProgress";
-import { CancelledTimeline } from "./timeline/CancelledTimeline";
-import { useTimelineTransition } from "./timeline/useTimelineTransition";
-import { cn } from "@/lib/utils";
-import { getStatusLabel } from "./timeline/timelineUtils";
+import { Calendar, Package, Truck, MapPin } from "lucide-react";
 
 interface TourStatusTimelineProps {
-  tourId: number;
-  currentStatus: TourStatus;
-  onStatusChange: (newStatus: TourStatus) => void;
-  isCompleted?: boolean;
+  status: string;
+  onStatusChange: (newStatus: string) => void;
 }
 
-export function TourStatusTimeline({ 
-  tourId, 
-  currentStatus, 
-  onStatusChange,
-  isCompleted = false 
-}: TourStatusTimelineProps) {
-  const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
+export function TourStatusTimeline({ status, onStatusChange }: TourStatusTimelineProps) {
+  const statuses = [
+    { code: 'planned', label: 'Planifiée', icon: Calendar },
+    { code: 'collecting', label: 'Collecte', icon: Package },
+    { code: 'in_transit', label: 'Livraison', icon: Truck },
+    { code: 'completed', label: 'Terminée', icon: MapPin },
+  ];
 
-  if (currentStatus === 'cancelled') {
-    return <CancelledTimeline />;
-  }
-
-  const statusOrder: TourStatus[] = ['planned', 'collecting', 'in_transit', 'completed'];
-  const currentIndex = statusOrder.indexOf(currentStatus);
+  const currentIndex = statuses.findIndex(s => s.code === status);
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-8 px-4">
-      <div className="relative flex justify-between items-center">
-        {statusOrder.map((status, index) => {
-          const isStatusCompleted = index <= currentIndex;
-          const isCurrent = index === currentIndex;
-          
-          return (
-            <div key={status} className="flex flex-col items-center relative z-10">
-              <TimelineButton
-                status={status}
-                isCompleted={isStatusCompleted}
-                isCurrent={isCurrent}
-                onClick={() => handleStatusChange(currentStatus, status)}
-                disabled={isCompleted || index > currentIndex + 1}
-              />
-              <span className={cn(
-                "mt-4 text-sm font-medium whitespace-nowrap",
-                isCurrent && "text-primary font-semibold",
-                !isCurrent && "text-gray-500"
-              )}>
-                {getStatusLabel(status)}
-              </span>
+    <div className="flex justify-between items-center w-full mt-4">
+      {statuses.map((s, index) => {
+        const Icon = s.icon;
+        const isActive = index <= currentIndex && status !== 'cancelled';
+        const isClickable = index === currentIndex + 1 && status !== 'cancelled' && status !== 'completed';
+
+        return (
+          <div
+            key={s.code}
+            className={`flex-1 flex flex-col items-center ${
+              isClickable ? 'cursor-pointer' : ''
+            }`}
+            onClick={() => isClickable && onStatusChange(s.code)}
+          >
+            <div
+              className={`rounded-full p-4 ${
+                isActive
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 text-gray-400'
+              }`}
+            >
+              <Icon className="h-6 w-6" />
             </div>
-          );
-        })}
-        
-        <TimelineProgress currentIndex={currentIndex} statusOrder={statusOrder} />
-      </div>
+            <span className={`mt-2 text-sm ${
+              isActive ? 'text-primary' : 'text-gray-400'
+            }`}>
+              {s.label}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
