@@ -10,7 +10,8 @@ export const menuItems = [
     icon: <Calendar className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
-    allowedUserTypes: ["carrier"]
+    allowedUserTypes: ["carrier"],
+    requiresAuth: true
   },
   { 
     name: "Envoyer un colis", 
@@ -18,31 +19,36 @@ export const menuItems = [
     icon: <Package className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
-    allowedUserTypes: ["client", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "Transporteurs", 
     href: "/transporteurs", 
     icon: <Truck className="w-4 h-4" />,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "Actualités", 
     href: "/blog", 
     icon: <MessageSquare className="w-4 h-4" />,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "À propos", 
     href: "/a-propos", 
     icon: <Info className="w-4 h-4" />,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "Contact", 
     href: "/contact", 
     icon: <Users className="w-4 h-4" />,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
 ];
 
@@ -79,13 +85,13 @@ export default function MenuItems() {
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
       {menuItems.map((item) => {
-        const isAllowed = !userType || item.allowedUserTypes.includes(userType);
-        const shouldPreventDefault = !item.allowedUserTypes.includes(userType || '');
+        const isAllowed = !item.requiresAuth || (userType && item.allowedUserTypes.includes(userType));
+        const shouldPreventDefault = item.requiresAuth && (!userType || !item.allowedUserTypes.includes(userType));
 
         return (
           <Link
             key={item.name}
-            to={item.href}
+            to={shouldPreventDefault ? "/connexion" : item.href}
             onClick={(e) => {
               if (shouldPreventDefault) {
                 handleRestrictedClick(e, item.name, item.allowedUserTypes);
