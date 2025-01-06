@@ -74,11 +74,11 @@ export function TimelineStatus({
         case 'planned':
           return isCompleted ? 'Préparation terminée' : 'En préparation';
         case 'collecting':
-          return isCompleted ? 'Ramassage terminé' : 'En ramassage';
+          return isCompleted ? 'Programmé terminé' : 'En programmation';
         case 'in_transit':
-          return isCompleted ? 'Transport terminé' : 'En transport';
+          return isCompleted ? 'Ramassage terminé' : 'En ramassage';
         case 'completed':
-          return 'Terminée';
+          return 'Livraison terminée';
         default:
           return status;
       }
