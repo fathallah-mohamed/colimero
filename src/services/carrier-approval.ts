@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Create an admin client with the service role key
 const adminAuthClient = createClient(
   "https://dsmahpgrhjoikcxuiqrw.supabase.co",
-  import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY!,
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzbWFocGdyaGpvaWtjeHVpcXJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNDkwMjcxMCwiZXhwIjoyMDUwNDc4NzEwfQ.9YDEN41__xBHL8NY7kR5eJqP9vHdZUEqZQUUoVaK4HU",
   {
     auth: {
       autoRefreshToken: false,
