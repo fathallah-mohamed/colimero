@@ -19,7 +19,8 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     "Programmé",
     "Ramassage en cours",
     "En transit",
-    "Livraison en cours"
+    "Livraison en cours",
+    "Livraison terminée"  // Ajout de "Livraison terminée" dans les statuts principaux
   ];
 
   // Trouver l'index du statut actuel
@@ -32,7 +33,7 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     <div className="relative flex justify-between items-center w-full mt-8 px-4">
       <TimelineProgress progress={progress} />
       
-      {mainStatuses.map((statusItem, index) => {
+      {mainStatuses.slice(0, -1).map((statusItem, index) => {
         const isCompleted = index < currentIndex || status === "Livraison terminée";
         const isCurrent = index === currentIndex && status !== "Livraison terminée";
         const isNext = index === currentIndex + 1 && status !== "Livraison terminée";
