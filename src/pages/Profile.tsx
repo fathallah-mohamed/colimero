@@ -8,6 +8,7 @@ import { CarrierProfileView } from "@/components/profile/CarrierProfileView";
 import { ClientProfileView } from "@/components/profile/ClientProfileView";
 import { useProfile } from "@/hooks/use-profile";
 import { ProfileLoading } from "@/components/profile/ProfileLoading";
+import { ProfileNotFound } from "@/components/profile/ProfileNotFound";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -15,32 +16,36 @@ export default function Profile() {
   const { profile, loading, userType } = useProfile();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour accéder à cette page.",
+        });
+        navigate("/login");
+      }
+    };
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast({
-        variant: "destructive",
-        title: "Accès refusé",
-        description: "Vous devez être connecté pour accéder à cette page.",
-      });
-      navigate("/connexion");
-    }
-  };
+    checkAuth();
+  }, [navigate, toast]);
 
   if (loading) {
     return <ProfileLoading />;
   }
 
+  if (!profile) {
+    return <ProfileNotFound />;
+  }
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {profile?.user_type === 'admin' && <AdminProfileView profile={profile} />}
-        {profile?.user_type === 'carrier' && <CarrierProfileView profile={profile} />}
-        {profile?.user_type === 'client' && <ClientProfileView profile={profile} />}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {userType === 'admin' && <AdminProfileView profile={profile} />}
+        {userType === 'carrier' && <CarrierProfileView profile={profile} />}
+        {userType === 'client' && <ClientProfileView profile={profile} />}
       </div>
     </div>
   );

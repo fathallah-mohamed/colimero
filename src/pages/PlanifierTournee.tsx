@@ -40,12 +40,12 @@ export default function PlanifierTournee() {
         setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
         
         if (userMetadata.user_type === 'admin') {
-          navigate('/');
           toast({
             variant: "destructive",
             title: "Accès refusé",
             description: "Les administrateurs ne peuvent pas créer de tournées.",
           });
+          navigate('/');
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -62,15 +62,6 @@ export default function PlanifierTournee() {
         if (session?.user) {
           const userMetadata = session.user.user_metadata;
           setUserType(userMetadata.user_type as 'client' | 'carrier' | 'admin');
-          
-          if (userMetadata.user_type === 'admin') {
-            navigate('/');
-            toast({
-              variant: "destructive",
-              title: "Accès refusé",
-              description: "Les administrateurs ne peuvent pas créer de tournées.",
-            });
-          }
         }
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
