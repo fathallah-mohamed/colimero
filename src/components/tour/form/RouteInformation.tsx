@@ -1,68 +1,46 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { FormSection } from "./FormSection";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface RouteInformationProps {
   form: UseFormReturn<any>;
 }
 
 export function RouteInformation({ form }: RouteInformationProps) {
-  const [authorizedRoutes, setAuthorizedRoutes] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchCarrierProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: carrierData } = await supabase
-          .from('carriers')
-          .select('coverage_area')
-          .eq('id', session.user.id)
-          .single();
-
-        if (carrierData?.coverage_area) {
-          setAuthorizedRoutes(carrierData.coverage_area);
-        }
-      }
-    };
-
-    fetchCarrierProfile();
-  }, []);
+  const departureDate = form.watch('departure_date');
 
   return (
-    <FormSection title="Informations de trajet">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <FormSection title="Informations de route">
+      <div className="grid gap-6 md:grid-cols-2">
         <FormField
           control={form.control}
           name="departure_country"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Pays de départ</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value}
-                onOpenChange={(open) => {
-                  if (open && authorizedRoutes.length === 2) {
-                    field.onChange(authorizedRoutes[0]);
-                  }
-                }}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un pays" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {authorizedRoutes.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country === 'FR' ? 'France' : 
-                       country === 'TN' ? 'Tunisie' :
-                       country === 'MA' ? 'Maroc' :
-                       country === 'DZ' ? 'Algérie' : country}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="FR">France</SelectItem>
+                  <SelectItem value="TN">Tunisie</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -76,34 +54,56 @@ export function RouteInformation({ form }: RouteInformationProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Pays de destination</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                value={field.value}
-                onOpenChange={(open) => {
-                  if (open && authorizedRoutes.length === 2) {
-                    const departure = form.getValues('departure_country');
-                    field.onChange(authorizedRoutes.find(c => c !== departure) || authorizedRoutes[1]);
-                  }
-                }}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un pays" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {authorizedRoutes
-                    .filter(country => country !== form.getValues('departure_country'))
-                    .map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country === 'FR' ? 'France' : 
-                         country === 'TN' ? 'Tunisie' :
-                         country === 'MA' ? 'Maroc' :
-                         country === 'DZ' ? 'Algérie' : country}
-                      </SelectItem>
-                  ))}
+                  <SelectItem value="FR">France</SelectItem>
+                  <SelectItem value="TN">Tunisie</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="departure_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date de départ</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  {...field}
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="collection_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date de début des collectes</FormLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  {...field}
+                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                  min={new Date().toISOString().split('T')[0]}
+                  max={departureDate ? new Date(departureDate).toISOString().split('T')[0] : undefined}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

@@ -1,12 +1,25 @@
 import * as z from "zod";
 
 export const tourFormSchema = z.object({
-  departure_country: z.string(),
-  destination_country: z.string(),
-  total_capacity: z.number().min(1),
-  remaining_capacity: z.number().min(0),
+  departure_country: z.string().min(1, "Le pays de départ est requis"),
+  destination_country: z.string().min(1, "Le pays de destination est requis"),
+  total_capacity: z.number().min(1, "La capacité totale doit être supérieure à 0"),
+  remaining_capacity: z.number().min(0, "La capacité restante ne peut pas être négative"),
   type: z.enum(["public", "private"]),
-  departure_date: z.date(),
+  departure_date: z.date({
+    required_error: "La date de départ est requise",
+  }),
+  collection_date: z.date({
+    required_error: "La date de début des collectes est requise",
+  }).refine(
+    (date, ctx) => {
+      const departureDate = ctx.parent.departure_date;
+      return date <= departureDate;
+    },
+    {
+      message: "La date de collecte doit être antérieure ou égale à la date de départ",
+    }
+  ),
   route: z.array(
     z.object({
       name: z.string().min(1, "La ville est requise"),
@@ -23,3 +36,5 @@ export const tourFormSchema = z.object({
     message: "Vous devez accepter la déclaration douanière",
   }),
 });
+
+export type TourFormValues = z.infer<typeof tourFormSchema>;
