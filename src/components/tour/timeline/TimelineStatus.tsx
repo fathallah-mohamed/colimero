@@ -63,6 +63,9 @@ export function TimelineStatus({
         case 'collecting':
           return currentStatus === 'collecting' ? 'Ramassage en cours' : 'Ramassage terminé';
         case 'in_transit':
+          if (currentStatus === 'in_transit_completed') {
+            return 'Transport terminé';
+          }
           return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
         case 'completed':
           if (currentStatus === 'in_transit_completed') {
@@ -81,8 +84,11 @@ export function TimelineStatus({
     if (status === 'collecting' && currentStatus !== 'collecting' && currentStatus !== 'planned') {
       return 'Ramassage terminé';
     }
-    if (status === 'in_transit' && currentStatus !== 'in_transit' && !['planned', 'collecting'].includes(currentStatus)) {
-      return 'Transport terminé';
+    if (status === 'in_transit') {
+      if (currentStatus === 'in_transit_completed') {
+        return 'Transport terminé';
+      }
+      return currentStatus === 'in_transit' ? 'En transit' : 'Transport terminé';
     }
     if (status === 'completed') {
       if (currentStatus === 'in_transit_completed') {
@@ -98,7 +104,7 @@ export function TimelineStatus({
       <motion.div 
         whileHover={isClickable ? { scale: 1.05 } : {}}
         className={cn(
-          "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer",
+          "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
           isCompleted && "bg-primary shadow-lg",
           isCurrent && "ring-4 ring-primary/30 bg-white",
           !isCompleted && !isCurrent && "bg-gray-100",
@@ -123,8 +129,8 @@ export function TimelineStatus({
         <motion.span 
           className={cn(
             "text-sm font-medium block",
-            isCurrent && "text-primary font-semibold",
             isCompleted && "text-primary",
+            isCurrent && "text-primary font-semibold",
             !isCompleted && !isCurrent && "text-gray-500"
           )}
           animate={isCurrent ? { scale: 1.05 } : { scale: 1 }}
