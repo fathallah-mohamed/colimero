@@ -52,7 +52,7 @@ export default function MobileMenu({
                 : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
             )}
           >
-            {item.icon}
+            <item.icon className="h-4 w-4" />
             <span className="ml-2">{item.name}</span>
           </Link>
         ))}
