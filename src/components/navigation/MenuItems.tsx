@@ -85,15 +85,22 @@ export default function MenuItems() {
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
       {menuItems.map((item) => {
+        // Un élément est accessible si :
+        // - soit il ne requiert pas d'authentification (requiresAuth: false)
+        // - soit l'utilisateur est connecté ET son type est autorisé
         const isAllowed = !item.requiresAuth || (userType && item.allowedUserTypes.includes(userType));
-        const shouldPreventDefault = item.requiresAuth && (!userType || !item.allowedUserTypes.includes(userType));
+        
+        // On doit rediriger vers la page de login uniquement si :
+        // - l'élément requiert une authentification ET
+        // - soit l'utilisateur n'est pas connecté, soit son type n'est pas autorisé
+        const shouldRedirectToLogin = item.requiresAuth && (!userType || !item.allowedUserTypes.includes(userType));
 
         return (
           <Link
             key={item.name}
-            to={shouldPreventDefault ? "/connexion" : item.href}
+            to={shouldRedirectToLogin ? "/login" : item.href}
             onClick={(e) => {
-              if (shouldPreventDefault) {
+              if (shouldRedirectToLogin) {
                 handleRestrictedClick(e, item.name, item.allowedUserTypes);
               }
             }}
@@ -102,7 +109,7 @@ export default function MenuItems() {
                 ? "text-[#00B0F0] hover:text-[#0082b3] " + (item.className || "")
                 : "text-gray-700 hover:text-gray-900"
               }
-              ${shouldPreventDefault ? "opacity-50 cursor-not-allowed" : ""}
+              ${!isAllowed ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
             {item.icon}
