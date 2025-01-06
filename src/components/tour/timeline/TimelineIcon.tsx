@@ -12,7 +12,7 @@ interface TimelineIconProps {
 export function TimelineIcon({ status, isCompleted, isCurrent, className }: TimelineIconProps) {
   const iconClass = cn(
     className,
-    isCurrent ? "text-primary" : isCompleted ? "text-white" : "text-gray-500"
+    isCompleted ? "text-primary-foreground" : isCurrent ? "text-primary" : "text-gray-500"
   );
 
   switch (status) {
