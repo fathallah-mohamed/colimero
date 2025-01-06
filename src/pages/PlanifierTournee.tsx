@@ -30,19 +30,7 @@ export default function PlanifierTournee() {
         const userType = session.user?.user_metadata?.user_type;
 
         if (userType === "admin") {
-          toast({
-            title: "Accès refusé",
-            description: "Les administrateurs ne peuvent pas créer de tournées.",
-            variant: "destructive",
-          });
-          navigate('/');
-          return;
-        }
-
-        if (userType !== "carrier") {
           setIsAccessDeniedOpen(true);
-          setIsLoading(false);
-          return;
         }
 
         setIsLoading(false);
