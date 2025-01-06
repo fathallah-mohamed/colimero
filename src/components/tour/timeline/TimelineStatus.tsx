@@ -2,24 +2,35 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TimelineIcon } from "./TimelineIcon";
 import { TourStatus } from "@/types/tour";
+import { useTimelineTransition } from "./useTimelineTransition";
 
 interface TimelineStatusProps {
+  tourId: number;
   status: TourStatus;
   currentStatus: TourStatus;
   currentIndex: number;
   index: number;
-  onClick: () => void;
+  onStatusChange: (newStatus: TourStatus) => void;
 }
 
 export function TimelineStatus({ 
+  tourId,
   status, 
   currentStatus, 
   currentIndex, 
   index, 
-  onClick 
+  onStatusChange 
 }: TimelineStatusProps) {
+  const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
   const isCompleted = index < currentIndex;
   const isCurrent = status === currentStatus;
+  const isClickable = index === currentIndex + 1 && status !== 'completed' && status !== 'cancelled';
+
+  const handleClick = async () => {
+    if (isClickable) {
+      await handleStatusChange(currentStatus, status);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center relative">
@@ -28,11 +39,11 @@ export function TimelineStatus({
         size="lg"
         className={cn(
           "rounded-full p-0 h-16 w-16 transition-all duration-200",
-          index <= currentIndex && "hover:bg-gray-100",
+          isClickable && "hover:bg-gray-100 cursor-pointer",
           status === currentStatus && "ring-2 ring-primary ring-offset-2"
         )}
-        onClick={onClick}
-        disabled={index > currentIndex + 1}
+        onClick={handleClick}
+        disabled={!isClickable}
       >
         <TimelineIcon 
           status={status}
