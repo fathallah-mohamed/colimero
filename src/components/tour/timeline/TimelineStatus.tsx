@@ -70,7 +70,18 @@ export function TimelineStatus({
 
   const getStatusLabel = (status: TourStatus, isCompleted: boolean) => {
     if (!statusLabels) {
-      return status;
+      switch (status) {
+        case 'planned':
+          return isCompleted ? 'Préparation terminée' : 'En préparation';
+        case 'collecting':
+          return isCompleted ? 'Ramassage terminé' : 'En ramassage';
+        case 'in_transit':
+          return isCompleted ? 'Transport terminé' : 'En transport';
+        case 'completed':
+          return 'Terminée';
+        default:
+          return status;
+      }
     }
 
     const statusInfo = statusLabels[status];
