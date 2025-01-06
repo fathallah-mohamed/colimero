@@ -2,9 +2,10 @@ import { TourStatus } from "@/types/tour";
 
 interface TourTimelineProps {
   status: TourStatus;
+  onStatusChange?: (newStatus: TourStatus) => Promise<void>;
 }
 
-export function TourTimeline({ status }: TourTimelineProps) {
+export function TourTimeline({ status, onStatusChange }: TourTimelineProps) {
   // Si la tournée est annulée, afficher uniquement le statut annulé
   if (status === 'cancelled') {
     return (
@@ -34,16 +35,26 @@ export function TourTimeline({ status }: TourTimelineProps) {
         {steps.map((step, index) => {
           const isCompleted = index <= currentStep;
           const isCurrent = index === currentStep;
+          const isClickable = Math.abs(index - currentStep) === 1 && onStatusChange;
           
           return (
-            <div key={step.key} className="flex flex-col items-center relative z-10">
+            <div 
+              key={step.key} 
+              className="flex flex-col items-center relative z-10"
+              onClick={() => {
+                if (isClickable && onStatusChange) {
+                  onStatusChange(step.key as TourStatus);
+                }
+              }}
+            >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center
+                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer
                   ${isCompleted 
                     ? 'bg-green-500 border-2 border-green-500' 
                     : 'bg-white border-2 border-gray-300'
                   }
                   ${isCurrent ? 'ring-4 ring-green-100' : ''}
+                  ${isClickable ? 'hover:scale-110 transition-transform' : ''}
                 `}
               >
                 {isCompleted && (
