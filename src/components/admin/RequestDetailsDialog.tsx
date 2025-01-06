@@ -13,6 +13,7 @@ import { PersonalInfo } from "./request-details/PersonalInfo";
 import { CompanyInfo } from "./request-details/CompanyInfo";
 import { CapacityInfo } from "./request-details/CapacityInfo";
 import { RequestActions } from "./request-details/RequestActions";
+import { approveCarrierRequest } from "@/services/carrier-approval";
 
 interface RequestDetailsDialogProps {
   request: any;
@@ -39,50 +40,7 @@ export default function RequestDetailsDialog({
 
     setIsSubmitting(true);
     try {
-      // First verify if auth user exists
-      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(request.id);
-      
-      if (authError) {
-        console.error("Error checking auth user:", authError);
-        // If user doesn't exist, we proceed with the approval which will trigger user creation
-      }
-
-      // Update request status
-      const { error: updateError } = await supabase
-        .from("carrier_registration_requests")
-        .update({ status: "approved" })
-        .eq("id", request.id);
-
-      if (updateError) {
-        console.error("Error updating request:", updateError);
-        throw updateError;
-      }
-
-      // Wait for triggers to complete
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // First verify auth user was created
-      const { data: verifyAuthUser, error: verifyAuthError } = await supabase.auth.admin.getUserById(request.id);
-      
-      if (verifyAuthError || !verifyAuthUser) {
-        throw new Error("Auth user was not created successfully");
-      }
-
-      // Then verify carrier was created
-      const { data: carrier, error: verifyError } = await supabase
-        .from("carriers")
-        .select("*")
-        .eq("id", request.id)
-        .maybeSingle();
-
-      if (verifyError) {
-        console.error("Error verifying carrier creation:", verifyError);
-        throw verifyError;
-      }
-
-      if (!carrier) {
-        throw new Error("Carrier was not created successfully");
-      }
+      await approveCarrierRequest(request.id);
 
       toast({
         title: "Demande approuvée",
