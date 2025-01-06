@@ -37,16 +37,16 @@ export function TimelineStatus({
     }
   };
 
-  const getStatusLabel = (status: TourStatus) => {
+  const getStatusLabel = (status: TourStatus, isCompleted: boolean) => {
     switch (status) {
       case 'planned':
-        return "Planifiée";
+        return isCompleted ? "Préparation terminée" : "Planifiée";
       case 'collecting':
-        return "En cours de collecte";
+        return isCompleted ? "Ramassage terminé" : "En cours de collecte";
       case 'in_transit':
-        return "En transit";
+        return isCompleted ? "Transport effectué" : "En transit";
       case 'completed':
-        return "Terminée";
+        return "Tournée terminée";
       default:
         return status;
     }
@@ -88,7 +88,7 @@ export function TimelineStatus({
           )}
           animate={isCurrent ? { scale: 1.05 } : { scale: 1 }}
         >
-          {getStatusLabel(status)}
+          {getStatusLabel(status, isCompleted)}
         </motion.span>
       </div>
     </div>
