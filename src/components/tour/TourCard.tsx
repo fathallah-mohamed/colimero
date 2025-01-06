@@ -16,6 +16,11 @@ interface TourCardProps {
   onEdit: (tour: Tour) => void;
   onDelete: (tourId: number) => void;
   onStatusChange: (tourId: number, newStatus: string) => void;
+  selectedPickupCity?: string;
+  onPickupCitySelect?: (city: string) => void;
+  isBookingEnabled?: boolean;
+  isPickupSelectionEnabled?: boolean;
+  bookingButtonText?: string;
 }
 
 export function TourCard({
@@ -23,6 +28,11 @@ export function TourCard({
   onEdit,
   onDelete,
   onStatusChange,
+  selectedPickupCity,
+  onPickupCitySelect,
+  isBookingEnabled,
+  isPickupSelectionEnabled,
+  bookingButtonText,
 }: TourCardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
