@@ -13,9 +13,22 @@ interface ApprovalRequestCardProps {
     pickup_city: string;
   };
   onStatusChange: (status: string) => void;
+  userType?: string;
+  onApprove?: () => void;
+  onReject?: () => void;
+  onCancel?: (requestId: string) => void;
+  onDelete?: (requestId: string) => void;
 }
 
-export function ApprovalRequestCard({ request, onStatusChange }: ApprovalRequestCardProps) {
+export function ApprovalRequestCard({ 
+  request, 
+  onStatusChange,
+  userType,
+  onApprove,
+  onReject,
+  onCancel,
+  onDelete 
+}: ApprovalRequestCardProps) {
   const selectedStop = request.tour?.route?.find(
     (stop: any) => stop.name === request.pickup_city
   );
@@ -34,12 +47,15 @@ export function ApprovalRequestCard({ request, onStatusChange }: ApprovalRequest
 
         <RequestStatus 
           status={request.status}
-          reason={request.reason}
+          message={request.reason}
         />
 
         <RequestActions 
-          request={request}
-          onStatusChange={onStatusChange}
+          status={request.status}
+          userType={userType}
+          onApprove={onApprove}
+          onReject={onReject}
+          onCancel={onCancel}
         />
       </div>
     </div>

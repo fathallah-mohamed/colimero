@@ -2,13 +2,19 @@ import { Button } from "@/components/ui/button";
 
 interface RequestActionsProps {
   status: string;
-  userType: string | null;
+  userType: string | null | undefined;
   onApprove?: () => void;
   onReject?: () => void;
   onCancel?: () => void;
 }
 
-export function RequestActions({ status, userType, onApprove, onReject, onCancel }: RequestActionsProps) {
+export function RequestActions({ 
+  status, 
+  userType, 
+  onApprove, 
+  onReject, 
+  onCancel 
+}: RequestActionsProps) {
   if (status !== 'pending') return null;
 
   return (
