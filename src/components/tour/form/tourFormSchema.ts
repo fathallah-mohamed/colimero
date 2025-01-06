@@ -9,15 +9,6 @@ export const tourFormSchema = z.object({
   departure_date: z.date({
     required_error: "La date de départ est requise",
   }),
-  collection_date: z.date({
-    required_error: "La date de début des collectes est requise",
-  }).refine((date) => {
-    // We can't access parent context in the type-safe way here
-    // Instead, we'll validate this at the form level
-    return true;
-  }, {
-    message: "La date de collecte doit être antérieure ou égale à la date de départ",
-  }),
   route: z.array(
     z.object({
       name: z.string().min(1, "La ville est requise"),
