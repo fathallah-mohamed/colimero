@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { User, FileText, Users, UserCircle2, LogOut } from "lucide-react";
+import { User, FileText, Users, UserCircle2 } from "lucide-react";
 
 interface UserMenuItemsProps {
   userType: string | null;
@@ -55,7 +55,7 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
           to="/demandes-approbation"
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
-          <Mail className="w-4 h-4 mr-2" />
+          <FileText className="w-4 h-4 mr-2" />
           Demandes d'approbation
         </Link>
       </div>
@@ -76,7 +76,7 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
           to="/mes-demandes-approbation"
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
-          <Mail className="w-4 h-4 mr-2" />
+          <FileText className="w-4 h-4 mr-2" />
           Mes demandes
         </Link>
       </div>
