@@ -67,7 +67,7 @@ export default function Tours() {
             ? tour.carriers.carrier_capacities
             : [tour.carriers.carrier_capacities]
         } : null,
-        status: tour.status || 'planned'
+        status: tour.status as TourStatus || 'planned'
       })) as Tour[];
     },
   });
@@ -162,7 +162,7 @@ export default function Tours() {
                   tour={tour}
                   onEdit={() => handleEdit(tour)}
                   onDelete={() => handleDelete(tour.id)}
-                  onStatusChange={(newStatus) => handleStatusChange(tour.id, newStatus)}
+                  onStatusChange={handleStatusChange}
                   onBookingClick={() => handleBookingClick(tour)}
                   isBookingEnabled={tour.status === "collecting"}
                 />
