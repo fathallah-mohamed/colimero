@@ -38,7 +38,7 @@ export function TourTimelineCard({
   const navigate = useNavigate();
 
   const isBookingEnabled = () => {
-    return selectedPickupCity && ['planned', 'collecting'].includes(tour.status);
+    return selectedPickupCity && tour.status === 'planned' && userType !== 'admin';
   };
 
   const isPickupSelectionEnabled = () => {

@@ -10,34 +10,12 @@ interface TourStatusTimelineProps {
 
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
   console.log('TourStatusTimeline rendered with status:', status);
-  
-  // Initial status order shown at creation
-  const initialStatusOrder: TourStatus[] = [
+  const statusOrder: TourStatus[] = [
     'planned',
+    'preparation_completed',
     'collecting_completed',
-    'transport_completed',
     'completed_completed'
   ];
-
-  // Status transitions based on current status
-  const getStatusOrder = (currentStatus: TourStatus): TourStatus[] => {
-    switch (currentStatus) {
-      case 'collecting':
-        return ['planned', 'collecting', 'collecting_completed', 'completed_completed'];
-      case 'collecting_completed':
-        return ['planned', 'collecting_completed', 'in_transit', 'completed_completed'];
-      case 'in_transit':
-        return ['planned', 'collecting_completed', 'transport_completed', 'completed_completed'];
-      case 'transport_completed':
-        return ['planned', 'collecting_completed', 'transport_completed', 'delivery_in_progress'];
-      case 'delivery_in_progress':
-        return ['planned', 'collecting_completed', 'transport_completed', 'completed_completed'];
-      default:
-        return initialStatusOrder;
-    }
-  };
-
-  const statusOrder = getStatusOrder(status);
   const currentIndex = statusOrder.indexOf(status);
 
   return (
