@@ -83,6 +83,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         route: values.route,
         terms_accepted: values.terms_accepted,
         customs_declaration: values.customs_declaration,
+        status: "Programmé", // Définir explicitement le statut initial
       });
 
       if (error) throw error;

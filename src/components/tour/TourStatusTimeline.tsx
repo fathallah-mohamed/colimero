@@ -10,11 +10,15 @@ interface TourStatusTimelineProps {
 }
 
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
+  // Si le statut est annulé, afficher uniquement le statut d'annulation
   if (status === "Annulée") {
     return <CancelledStatus />;
   }
 
-  // Les 4 étapes principales de la timeline
+  // Définir le statut par défaut si aucun n'est fourni
+  const currentStatus = status || "Programmé";
+
+  // Les étapes principales de la timeline
   const mainStatuses: TourStatus[] = [
     "Programmé",
     "Ramassage en cours",
@@ -24,10 +28,10 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
   ];
 
   // Trouver l'index du statut actuel
-  const currentIndex = mainStatuses.indexOf(status);
+  const currentIndex = mainStatuses.indexOf(currentStatus);
 
   // Si la tournée est terminée, on met la progress à 100%
-  const isCompleted = status === "Livraison terminée";
+  const isCompleted = currentStatus === "Livraison terminée";
   const progress = isCompleted ? 100 : ((currentIndex) / (mainStatuses.length - 1)) * 100;
 
   return (
