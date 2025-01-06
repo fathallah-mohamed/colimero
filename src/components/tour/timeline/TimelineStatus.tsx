@@ -24,7 +24,10 @@ export function TimelineStatus({
   onStatusChange 
 }: TimelineStatusProps) {
   const { handleStatusChange } = useTimelineTransition(tourId, onStatusChange);
-  const isCompleted = index < currentIndex || (status === 'planned' && currentStatus !== 'planned');
+  const isCompleted = index < currentIndex || 
+    (status === 'planned' && currentStatus !== 'planned') ||
+    (status === 'collecting' && currentStatus !== 'collecting' && currentStatus !== 'planned') ||
+    (status === 'in_transit' && currentStatus === 'in_transit_completed');
   const isCurrent = status === currentStatus || 
     (status === 'completed' && currentStatus === 'in_transit_completed');
   const isClickable = Math.abs(index - currentIndex) === 1 && !['cancelled', 'completed_completed'].includes(currentStatus);
