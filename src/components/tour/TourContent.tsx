@@ -36,12 +36,13 @@ export function TourContent() {
     );
   }
 
-  const upcomingTours = tours.filter(tour => 
+  const upcomingTours = tours?.filter(tour => 
     !['completed_completed', 'cancelled'].includes(tour.status)
-  );
-  const completedTours = tours.filter(tour => 
+  ) || [];
+  
+  const completedTours = tours?.filter(tour => 
     ['completed_completed', 'cancelled'].includes(tour.status)
-  );
+  ) || [];
 
   return (
     <ScrollArea className="h-[calc(100vh-12rem)]">
@@ -67,12 +68,14 @@ export function TourContent() {
           onStatusChange={handleStatusChange}
         />
 
-        <TourEditDialog
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          tour={selectedTour}
-          onComplete={onEditComplete}
-        />
+        {selectedTour && (
+          <TourEditDialog
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            tour={selectedTour}
+            onComplete={onEditComplete}
+          />
+        )}
       </div>
     </ScrollArea>
   );
