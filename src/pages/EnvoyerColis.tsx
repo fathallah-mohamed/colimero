@@ -8,7 +8,7 @@ import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
-import { TourTimelineCard } from "@/components/transporteur/TourTimelineCard";
+import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { useTourData } from "@/hooks/use-tour-data";
 
 export default function EnvoyerColis() {
@@ -34,10 +34,6 @@ export default function EnvoyerColis() {
   const handleTourClick = (tourId: number, pickupCity: string) => {
     navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
-
-  // Séparer les tournées programmées des autres
-  const plannedTours = tours?.filter(tour => tour.status === "Programmée") || [];
-  const otherTours = tours?.filter(tour => tour.status !== "Programmée") || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,49 +61,19 @@ export default function EnvoyerColis() {
           />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {isLoading ? (
             <div className="text-center py-8">Chargement des tournées...</div>
           ) : tours?.length === 0 ? (
             <div className="text-center py-8">Aucune tournée disponible</div>
           ) : (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold mb-4">Tournées programmées</h2>
-                <div className="space-y-4">
-                  {plannedTours.map((tour) => (
-                    <TourTimelineCard
-                      key={tour.id}
-                      tour={tour}
-                      onBookingClick={handleTourClick}
-                    />
-                  ))}
-                  {plannedTours.length === 0 && (
-                    <p className="text-gray-500 text-center py-4">
-                      Aucune tournée programmée disponible
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-lg font-semibold mb-4">Autres tournées</h2>
-                <div className="space-y-4">
-                  {otherTours.map((tour) => (
-                    <TourTimelineCard
-                      key={tour.id}
-                      tour={tour}
-                      onBookingClick={handleTourClick}
-                    />
-                  ))}
-                  {otherTours.length === 0 && (
-                    <p className="text-gray-500 text-center py-4">
-                      Aucune autre tournée disponible
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
+            tours?.map((tour) => (
+              <ClientTourCard
+                key={tour.id}
+                tour={tour}
+                onBookingClick={handleTourClick}
+              />
+            ))
           )}
         </div>
       </div>
