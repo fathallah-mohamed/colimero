@@ -8,7 +8,6 @@ interface TransporteurToursProps {
   tours: Tour[];
   type: "public" | "private";
   isLoading?: boolean;
-  hideAvatar?: boolean;
   userType?: string | null;
   handleBookingClick?: (tourId: number, pickupCity: string) => void;
 }
@@ -63,7 +62,6 @@ export function TransporteurTours({
             <TourCard
               tour={tour}
               onBookingClick={onBookingClick}
-              hideAvatar={false}
             />
           </div>
         );
