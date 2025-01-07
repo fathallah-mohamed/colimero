@@ -74,7 +74,7 @@ export function TimelineStatus({
         >
           <TimelineIcon 
             status={status} 
-            isCompleted={isCompleted || status === "Terminée"}
+            isCompleted={isCompleted}
             isCurrent={isCurrent}
             variant={variant}
           />

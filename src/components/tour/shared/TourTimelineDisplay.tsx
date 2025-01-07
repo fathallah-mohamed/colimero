@@ -40,10 +40,10 @@ export function TourTimelineDisplay({
   }
 
   const statusOrder: TourStatus[] = [
-    "Programmé",
+    "Programmée",
     "Ramassage en cours",
     "En transit",
-    "Livraison en cours"
+    "Terminée"
   ];
 
   const currentIndex = statusOrder.indexOf(status);
@@ -51,7 +51,7 @@ export function TourTimelineDisplay({
 
   const handleCancel = async () => {
     if (onStatusChange) {
-      await onStatusChange("Annulée");
+      await onStatusChange("Annulée" as TourStatus);
     }
     setShowCancelDialog(false);
   };
@@ -71,24 +71,6 @@ export function TourTimelineDisplay({
           const isCurrent = index === currentIndex;
           const isNext = index === currentIndex + 1;
 
-          let label = statusItem;
-          if (isCompleted) {
-            switch (statusItem) {
-              case "Programmé":
-                label = "Préparation terminée";
-                break;
-              case "Ramassage en cours":
-                label = "Ramassage terminé";
-                break;
-              case "En transit":
-                label = "Transport terminé";
-                break;
-              case "Livraison en cours":
-                label = "Livraison terminée";
-                break;
-            }
-          }
-
           return (
             <TimelineStatus
               key={statusItem}
@@ -97,13 +79,13 @@ export function TourTimelineDisplay({
               isCurrent={isCurrent}
               isNext={isNext && canEdit}
               onClick={() => isNext && canEdit && onStatusChange && onStatusChange(statusItem)}
-              label={label}
+              label={statusItem}
             />
           );
         })}
       </div>
 
-      {status !== "Livraison terminée" && canEdit && onStatusChange && (
+      {status !== "Terminée" && canEdit && onStatusChange && (
         <div className="flex justify-end mt-8">
           <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
             <AlertDialogTrigger asChild>
