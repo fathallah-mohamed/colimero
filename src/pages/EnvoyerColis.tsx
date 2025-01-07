@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
+import { Package2, Truck, Clock, Shield } from "lucide-react";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -39,14 +40,12 @@ export default function EnvoyerColis() {
         `)
         .eq('type', 'public');
 
-      // Appliquer le filtre de trajet
       if (selectedRoute === "FR_TO_TN") {
         query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
       } else if (selectedRoute === "TN_TO_FR") {
         query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
       }
 
-      // Appliquer le filtre de statut
       if (selectedStatus !== "all") {
         query = query.eq('status', selectedStatus);
       }
@@ -55,16 +54,10 @@ export default function EnvoyerColis() {
 
       if (error) throw error;
 
-      const transformedTours = data?.map(tour => ({
+      return data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) 
-          ? tour.route.map((stop: any) => ({
-              name: stop.name || '',
-              location: stop.location || '',
-              time: stop.time || '',
-              type: stop.type || 'pickup',
-              collection_date: stop.collection_date || ''
-            }))
+          ? tour.route 
           : [],
         carriers: tour.carriers ? {
           ...tour.carriers,
@@ -73,8 +66,6 @@ export default function EnvoyerColis() {
             : [tour.carriers.carrier_capacities]
         } : undefined
       })) as Tour[];
-
-      return transformedTours || [];
     },
   });
 
@@ -85,12 +76,62 @@ export default function EnvoyerColis() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold mb-6">Tournées disponibles</h1>
+      
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-[#0FA0CE] to-[#0C82A7] text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">
+              Envoyez vos colis en toute simplicité
+            </h1>
+            <p className="text-xl text-gray-100 max-w-2xl mx-auto">
+              Trouvez le transporteur idéal pour acheminer vos colis entre la France et la Tunisie
+            </p>
+          </div>
+        </div>
+      </div>
 
-        {/* Filtres */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-2 gap-4">
+      {/* Features Section */}
+      <div className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg hover:shadow-md transition-shadow">
+              <div className="bg-blue-50 p-3 rounded-full mb-4">
+                <Package2 className="h-6 w-6 text-[#0FA0CE]" />
+              </div>
+              <h3 className="font-semibold mb-2">Expédition Facile</h3>
+              <p className="text-gray-600 text-sm">Réservez en quelques clics</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 rounded-lg hover:shadow-md transition-shadow">
+              <div className="bg-blue-50 p-3 rounded-full mb-4">
+                <Truck className="h-6 w-6 text-[#0FA0CE]" />
+              </div>
+              <h3 className="font-semibold mb-2">Transporteurs Vérifiés</h3>
+              <p className="text-gray-600 text-sm">Des professionnels de confiance</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 rounded-lg hover:shadow-md transition-shadow">
+              <div className="bg-blue-50 p-3 rounded-full mb-4">
+                <Clock className="h-6 w-6 text-[#0FA0CE]" />
+              </div>
+              <h3 className="font-semibold mb-2">Suivi en Temps Réel</h3>
+              <p className="text-gray-600 text-sm">Suivez votre colis à chaque étape</p>
+            </div>
+            <div className="flex flex-col items-center text-center p-6 rounded-lg hover:shadow-md transition-shadow">
+              <div className="bg-blue-50 p-3 rounded-full mb-4">
+                <Shield className="h-6 w-6 text-[#0FA0CE]" />
+              </div>
+              <h3 className="font-semibold mb-2">Sécurité Garantie</h3>
+              <p className="text-gray-600 text-sm">Vos colis sont entre de bonnes mains</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search Filters */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <h2 className="text-2xl font-semibold mb-6">Tournées disponibles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1.5 block">
                 Trajet
