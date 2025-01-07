@@ -39,8 +39,6 @@ export interface Tour {
   updated_at: string;
   departure_country: string;
   destination_country: string;
-  terms_accepted: boolean;
-  customs_declaration: boolean;
   status: TourStatus;
   type: TourType;
   previous_status?: TourStatus | null;

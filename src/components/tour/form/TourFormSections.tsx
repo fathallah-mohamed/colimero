@@ -2,8 +2,6 @@ import { UseFormReturn } from "react-hook-form";
 import { RouteInformation } from "./RouteInformation";
 import { CapacityInformation } from "./CapacityInformation";
 import { CollectionPointsSection } from "./CollectionPointsSection";
-import { DeclarationsSection } from "./DeclarationsSection";
-import { CommitmentsSection } from "./CommitmentsSection";
 
 interface TourFormSectionsProps {
   form: UseFormReturn<any>;
@@ -26,8 +24,6 @@ export function TourFormSections({ form }: TourFormSectionsProps) {
         form={form}
         departureDate={departureDate}
       />
-      <DeclarationsSection form={form} />
-      <CommitmentsSection form={form} />
     </div>
   );
 }
