@@ -6,19 +6,16 @@ interface TourTimelineDisplayProps {
   status: TourStatus;
   onStatusChange?: (newStatus: TourStatus) => Promise<void>;
   tourId: number;
-  userType?: string;
   canEdit?: boolean;
 }
 
-export function TourTimelineDisplay({ 
-  status, 
-  onStatusChange, 
+export function TourTimelineDisplay({
+  status,
+  onStatusChange,
   tourId,
-  userType,
-  canEdit = false
+  canEdit = false,
 }: TourTimelineDisplayProps) {
-  // Si c'est un transporteur et qu'il peut éditer
-  if (userType === 'carrier' && canEdit && onStatusChange) {
+  if (canEdit) {
     return (
       <CarrierTimeline
         status={status}
@@ -28,11 +25,5 @@ export function TourTimelineDisplay({
     );
   }
 
-  // Pour tous les autres cas (clients ou vue en lecture seule)
-  return (
-    <ClientTimeline
-      status={status}
-      tourId={tourId}
-    />
-  );
+  return <ClientTimeline status={status} />;
 }

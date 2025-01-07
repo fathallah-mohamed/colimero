@@ -1,69 +1,43 @@
 import { TourStatus } from "@/types/tour";
 import { TimelineBase } from "../shared/TimelineBase";
-import { Button } from "@/components/ui/button";
-import { XCircle } from "lucide-react";
+import { TimelineButton } from "../TimelineButton";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 interface CarrierTimelineProps {
   status: TourStatus;
-  onStatusChange: (newStatus: TourStatus) => Promise<void>;
+  onStatusChange?: (newStatus: TourStatus) => Promise<void>;
   tourId: number;
 }
 
 export function CarrierTimeline({ status, onStatusChange, tourId }: CarrierTimelineProps) {
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleCancel = async () => {
-    await onStatusChange("Annulée");
-    setShowCancelDialog(false);
+  const handleStatusChange = async (newStatus: TourStatus) => {
+    if (!onStatusChange) return;
+    
+    setIsUpdating(true);
+    try {
+      await onStatusChange(newStatus);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <TimelineBase 
-        status={status} 
-        onStatusChange={onStatusChange} 
-        tourId={tourId}
+        status={status}
         isInteractive={true}
-        showCancelButton={true}
+        onStatusChange={handleStatusChange}
+        tourId={tourId}
       />
-
-      {status !== "Livraison terminée" && status !== "Annulée" && (
-        <div className="flex justify-end mt-8">
-          <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2">
-                <XCircle className="h-4 w-4" />
-                Annuler la tournée
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Annuler la tournée ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action est irréversible. La tournée sera définitivement annulée.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Confirmer l'annulation
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+      
+      {status !== 'cancelled' && (
+        <TimelineButton
+          status={status}
+          isUpdating={isUpdating}
+          onStatusChange={handleStatusChange}
+        />
       )}
     </div>
   );
