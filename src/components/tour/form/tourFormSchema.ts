@@ -18,24 +18,6 @@ export const tourFormSchema = z.object({
       type: z.literal("pickup")
     })
   ).min(1, "Au moins un point de collecte est requis"),
-  terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions",
-  }),
-  customs_declaration: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter la déclaration douanière",
-  }),
-  info_accuracy: z.boolean().refine((val) => val === true, {
-    message: "Vous devez certifier l'exactitude des informations",
-  }),
-  transport_responsibility: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter la responsabilité du transport",
-  }),
-  platform_rules: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les CGU",
-  }),
-  safety_confirmation: z.boolean().refine((val) => val === true, {
-    message: "Vous devez confirmer la sécurité des colis",
-  }),
 });
 
 export type TourFormValues = z.infer<typeof tourFormSchema>;

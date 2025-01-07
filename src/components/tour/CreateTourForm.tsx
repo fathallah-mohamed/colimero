@@ -35,8 +35,6 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       remaining_capacity: 1000,
       type: "public",
       departure_date: new Date(),
-      terms_accepted: false,
-      customs_declaration: false,
       route: [
         {
           name: "",
@@ -87,8 +85,6 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         remaining_capacity: values.remaining_capacity,
         type: values.type,
         route: values.route,
-        terms_accepted: values.terms_accepted,
-        customs_declaration: values.customs_declaration,
         status: "Programmé",
       });
 
