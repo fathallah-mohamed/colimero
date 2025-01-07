@@ -44,7 +44,18 @@ export default function TransporteurDetails() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tours")
-        .select("*")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            first_name,
+            last_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          )
+        `)
         .eq("carrier_id", id)
         .eq("type", "public")
         .gte("departure_date", new Date().toISOString());
@@ -63,7 +74,18 @@ export default function TransporteurDetails() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tours")
-        .select("*")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            first_name,
+            last_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          )
+        `)
         .eq("carrier_id", id)
         .eq("type", "private")
         .gte("departure_date", new Date().toISOString());
@@ -106,12 +128,12 @@ export default function TransporteurDetails() {
         <div className="grid md:grid-cols-2 gap-6">
           <TransporteurTours 
             tours={publicTours} 
-            type="public" 
+            type="public"
             isLoading={isLoadingPublic}
           />
           <TransporteurTours 
             tours={privateTours} 
-            type="private" 
+            type="private"
             isLoading={isLoadingPrivate}
           />
         </div>
