@@ -95,7 +95,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
           />
 
           <Button 
-            className="w-full bg-[#E5DEFF] hover:bg-[#D1C6FF] text-[#8B5CF6]"
+            className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
             onClick={handleBookingClick}
             disabled={!selectedPoint}
           >
