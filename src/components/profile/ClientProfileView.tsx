@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Upload, Mail, Phone, MapPin, Calendar, User } from "lucide-react";
+import { Upload, Mail, Phone, MapPin, Calendar, User, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ClientProfileForm } from "./ClientProfileForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 interface ClientProfileViewProps {
   profile: any;
@@ -14,6 +15,7 @@ interface ClientProfileViewProps {
 
 export function ClientProfileView({ profile }: ClientProfileViewProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const { toast } = useToast();
 
   const handleIdDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,12 +65,18 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
   );
 
   return (
-    <div className="space-y-6 pt-8"> {/* Added pt-8 here for top padding */}
+    <div className="space-y-6 pt-8">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Mon profil</h1>
-        <Button onClick={() => setIsEditing(true)}>
-          Modifier mon profil
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsChangingPassword(true)} variant="outline">
+            <Lock className="h-4 w-4 mr-2" />
+            Changer le mot de passe
+          </Button>
+          <Button onClick={() => setIsEditing(true)}>
+            Modifier mon profil
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg p-6 space-y-6">
@@ -146,6 +154,18 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
             <DialogTitle>Modifier mon profil</DialogTitle>
           </DialogHeader>
           <ClientProfileForm initialData={profile} onClose={() => setIsEditing(false)} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isChangingPassword} onOpenChange={setIsChangingPassword}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Changer le mot de passe</DialogTitle>
+          </DialogHeader>
+          <ForgotPasswordForm 
+            onSuccess={() => setIsChangingPassword(false)}
+            onCancel={() => setIsChangingPassword(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>
