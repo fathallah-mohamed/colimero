@@ -25,5 +25,5 @@ export function TourTimelineDisplay({
     );
   }
 
-  return <ClientTimeline status={status} />;
+  return <ClientTimeline status={status} tourId={tourId} />;
 }

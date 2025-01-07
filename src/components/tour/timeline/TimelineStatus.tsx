@@ -22,7 +22,7 @@ export function TimelineStatus({
   label
 }: TimelineStatusProps) {
   return (
-    <div className="flex flex-col items-center gap-3 relative">
+    <div className="flex flex-col items-center gap-3">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
