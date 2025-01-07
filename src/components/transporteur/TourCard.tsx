@@ -34,13 +34,13 @@ export function TourCard({
   };
 
   // Vérifier si l'utilisateur peut réserver (client uniquement et tournée programmée)
-  const canBook = tour.status === "Programmé" && userType !== "carrier";
+  const canBook = tour.status === "Programmée" && userType !== "carrier";
 
   const getBookingStatusMessage = () => {
     if (userType === "carrier") {
       return "Les transporteurs ne peuvent pas effectuer de réservations. Seuls les clients peuvent réserver des tournées.";
     }
-    if (tour.status !== "Programmé") {
+    if (tour.status !== "Programmée") {
       return `Cette tournée est en statut "${tour.status}" et ne peut pas être réservée`;
     }
     return "";
@@ -62,11 +62,11 @@ export function TourCard({
         <div className="space-y-4">
           <Button
             variant="outline"
-            className="w-full flex items-center gap-2 text-[#0FA0CE] hover:text-[#0FA0CE]/90 border-[#0FA0CE] hover:border-[#0FA0CE]/90 hover:bg-[#0FA0CE]/10"
+            className="w-full gap-2"
             onClick={() => setShowDetails(!showDetails)}
           >
             <Eye className="h-4 w-4" />
-            {showDetails ? "Masquer les détails" : "Afficher les détails"}
+            {showDetails ? "Masquer les détails" : "Voir les détails"}
           </Button>
 
           {showDetails && (

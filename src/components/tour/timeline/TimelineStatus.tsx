@@ -33,9 +33,9 @@ export function TimelineStatus({
     
     return cn(
       "relative h-14 w-14 rounded-full p-0 transition-all duration-300",
-      (isCompleted || status === "Livraison terminée") && "bg-primary shadow-lg shadow-primary/20 text-white hover:bg-primary/90",
+      (isCompleted || status === "Terminée") && "bg-primary shadow-lg shadow-primary/20 text-white hover:bg-primary/90",
       isCurrent && "bg-primary shadow-lg shadow-primary/20 text-white hover:bg-primary/90",
-      !isCompleted && !isCurrent && status !== "Livraison terminée" && "bg-white border-2 border-gray-100 hover:border-gray-200 shadow-lg shadow-gray-100/50"
+      !isCompleted && !isCurrent && status !== "Terminée" && "bg-white border-2 border-gray-100 hover:border-gray-200 shadow-lg shadow-gray-100/50"
     );
   };
 
@@ -49,9 +49,9 @@ export function TimelineStatus({
     
     return cn(
       "text-sm font-medium transition-colors duration-300",
-      (isCompleted || status === "Livraison terminée") && "text-primary",
+      (isCompleted || status === "Terminée") && "text-primary",
       isCurrent && "text-primary",
-      !isCompleted && !isCurrent && status !== "Livraison terminée" && "text-gray-500"
+      !isCompleted && !isCurrent && status !== "Terminée" && "text-gray-500"
     );
   };
 
@@ -74,7 +74,7 @@ export function TimelineStatus({
         >
           <TimelineIcon 
             status={status} 
-            isCompleted={isCompleted || status === "Livraison terminée"}
+            isCompleted={isCompleted || status === "Terminée"}
             isCurrent={isCurrent}
             variant={variant}
           />

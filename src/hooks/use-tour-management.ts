@@ -6,14 +6,14 @@ import type { Tour, TourStatus } from "@/types/tour";
 
 const getNextStatus = (currentStatus: TourStatus): TourStatus => {
   switch (currentStatus) {
-    case "Programmé":
+    case "Programmée":
       return "Ramassage en cours";
     case "Ramassage en cours":
       return "En transit";
     case "En transit":
       return "Livraison en cours";
     case "Livraison en cours":
-      return "Livraison terminée";
+      return "Terminée";
     default:
       return currentStatus;
   }
@@ -22,13 +22,13 @@ const getNextStatus = (currentStatus: TourStatus): TourStatus => {
 const getPreviousStatusCompleted = (currentStatus: TourStatus): TourStatus => {
   switch (currentStatus) {
     case "Ramassage en cours":
-      return "Préparation terminée";
+      return "Programmée";
     case "En transit":
-      return "Ramassage terminé";
+      return "Ramassage en cours";
     case "Livraison en cours":
-      return "Transport terminé";
-    case "Livraison terminée":
-      return "Livraison terminée";
+      return "En transit";
+    case "Terminée":
+      return "Livraison en cours";
     default:
       return currentStatus;
   }
@@ -42,7 +42,7 @@ export function useTourManagement() {
 
   const handleDelete = async (tourId: number) => {
     const tour = selectedTour;
-    if (tour?.status === "Livraison terminée") {
+    if (tour?.status === "Terminée") {
       toast({
         variant: "destructive",
         title: "Action impossible",
@@ -72,7 +72,7 @@ export function useTourManagement() {
   };
 
   const handleEdit = (tour: Tour) => {
-    if (tour.status === "Livraison terminée") {
+    if (tour.status === "Terminée") {
       toast({
         variant: "destructive",
         title: "Action impossible",
@@ -94,7 +94,6 @@ export function useTourManagement() {
 
         if (error) throw error;
       } else {
-        // Mettre à jour avec le nouveau statut et le statut précédent complété
         const previousStatus = getPreviousStatusCompleted(newStatus);
         console.log("Updating tour status:", { newStatus, previousStatus });
 

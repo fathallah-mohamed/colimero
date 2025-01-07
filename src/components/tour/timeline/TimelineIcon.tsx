@@ -30,16 +30,15 @@ export function TimelineIcon({
   }
 
   switch (status) {
-    case "Programmé":
+    case "Programmée":
       return <Package className={iconClass} />;
     case "Ramassage en cours":
       return <PackageOpen className={iconClass} />;
     case "En transit":
       return <Truck className={iconClass} />;
     case "Livraison en cours":
+    case "Terminée":
       return <PackageCheck className={iconClass} />;
-    case "Livraison terminée":
-      return <Check className={iconClass} />;
     default:
       return <Package className={iconClass} />;
   }

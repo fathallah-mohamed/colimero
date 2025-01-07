@@ -36,19 +36,19 @@ export function TourTimelineCard({
   const navigate = useNavigate();
 
   const isBookingEnabled = () => {
-    return selectedPickupCity && tour.status === "Programmé" && userType !== 'admin';
+    return selectedPickupCity && tour.status === "Programmée" && userType !== 'admin';
   };
 
   const isPickupSelectionEnabled = () => {
-    return tour.status === "Programmé" && userType !== 'admin';
+    return tour.status === "Programmée" && userType !== 'admin';
   };
 
   const getBookingButtonText = () => {
     if (tour.status === "Annulée") return "Cette tournée a été annulée";
     if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
-    if (tour.status === "Ramassage terminé") return "Cette tournée est en cours de collecte";
-    if (tour.status === "Transport terminé") return "Cette tournée est en cours de livraison";
-    if (tour.status === "Livraison terminée") return "Cette tournée est terminée";
+    if (tour.status === "Ramassage en cours") return "Cette tournée est en cours de collecte";
+    if (tour.status === "En transit") return "Cette tournée est en cours de livraison";
+    if (tour.status === "Terminée") return "Cette tournée est terminée";
     if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
     return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
   };
