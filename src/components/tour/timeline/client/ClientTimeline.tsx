@@ -3,13 +3,15 @@ import { TimelineBase } from "../shared/TimelineBase";
 
 interface ClientTimelineProps {
   status: TourStatus;
+  tourId?: number;
 }
 
-export function ClientTimeline({ status }: ClientTimelineProps) {
+export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
   return (
     <TimelineBase 
       status={status}
       isInteractive={false}
+      tourId={tourId}
     />
   );
 }

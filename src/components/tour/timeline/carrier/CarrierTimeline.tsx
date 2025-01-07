@@ -36,8 +36,9 @@ export function CarrierTimeline({ status, onStatusChange, tourId }: CarrierTimel
         <TimelineButton
           status={status}
           isCompleted={status === "Livraison terminée"}
-          isCurrent={status !== "Livraison terminée" && status !== "Annulée"}
+          isCurrent={status !== "Livraison terminée"}
           onClick={() => handleStatusChange("Annulée")}
+          disabled={isUpdating}
           isUpdating={isUpdating}
         />
       )}
