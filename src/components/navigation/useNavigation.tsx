@@ -13,15 +13,21 @@ export function useNavigation() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        setUserType(session?.user?.user_metadata?.user_type ?? null);
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setUserType(session?.user?.user_metadata?.user_type ?? null);
+        }
       } catch (error) {
         console.error("Session check error:", error);
-        setUser(null);
-        setUserType(null);
+        if (mounted) {
+          setUser(null);
+          setUserType(null);
+        }
       }
     };
 
@@ -29,16 +35,21 @@ export function useNavigation() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setUser(session?.user ?? null);
-        setUserType(session?.user?.user_metadata?.user_type ?? null);
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setUserType(session?.user?.user_metadata?.user_type ?? null);
+        }
       } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setUserType(null);
-        navigate('/');
+        if (mounted) {
+          setUser(null);
+          setUserType(null);
+          navigate('/');
+        }
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
@@ -56,19 +67,27 @@ export function useNavigation() {
         });
         navigate('/');
       } else {
+        // Even if there's an error, we'll clear the local state
+        setUser(null);
+        setUserType(null);
         toast({
           variant: "destructive",
-          title: "Erreur",
-          description: result.error || "Une erreur est survenue lors de la déconnexion",
+          title: "Note",
+          description: "Session terminée. Vous avez été déconnecté.",
         });
+        navigate('/');
       }
     } catch (error) {
       console.error("Logout error:", error);
+      // Clear local state anyway
+      setUser(null);
+      setUserType(null);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
+        title: "Note",
+        description: "Session terminée. Vous avez été déconnecté.",
       });
+      navigate('/');
     }
   };
 
