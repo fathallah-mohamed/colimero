@@ -37,6 +37,8 @@ export function useTourData({
         ),
         carriers (
           company_name,
+          first_name,
+          last_name,
           avatar_url,
           carrier_capacities (
             price_per_kg
@@ -47,7 +49,9 @@ export function useTourData({
       .eq('destination_country', destinationCountry);
 
     if (status !== 'all') {
-      query = query.eq('status', status);
+      // Ensure we're using the correct status value
+      const normalizedStatus = status === "Programmée" ? "Programmée" : status;
+      query = query.eq('status', normalizedStatus);
     }
 
     switch (sortBy) {
