@@ -2,28 +2,22 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const handleLogoutFlow = async () => {
   try {
-    // First try to get the session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // First check if we have a session
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (sessionError) {
-      console.error("Session error:", sessionError);
-      return { success: true }; // Return success since user is effectively logged out
-    }
-
     if (!session) {
-      return { success: true }; // No session means user is already logged out
+      // No session means user is already logged out
+      return { success: true };
     }
 
-    // If we have a session, attempt to sign out without specifying scope
-    const { error: signOutError } = await supabase.auth.signOut();
+    // Sign out with specific scope
+    const { error } = await supabase.auth.signOut({
+      scope: 'local'  // Changed from 'global' to 'local' to avoid session issues
+    });
 
-    if (signOutError) {
-      console.error("SignOut error:", signOutError);
-      // If it's a session error, consider it a success since user is effectively logged out
-      if (signOutError.message.includes('session')) {
-        return { success: true };
-      }
-      throw signOutError;
+    if (error) {
+      console.error("SignOut error:", error);
+      throw error;
     }
 
     return { success: true };
