@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
-import { TourTimelineDisplay } from "@/components/tour/shared/TourTimelineDisplay";
+import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
-import AuthDialog from "@/components/auth/AuthDialog";
-import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { Plus, Minus } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+import AuthDialog from "@/components/auth/AuthDialog";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -78,19 +77,8 @@ export function TourTimelineCard({
     }
   };
 
-  const handleStatusUpdate = async (newStatus: TourStatus) => {
-    if (onStatusChange) {
-      await onStatusChange(tour.id, newStatus);
-    }
-  };
-
   return (
-    <div className={cn(
-      "bg-white rounded-xl overflow-hidden transition-all duration-200",
-      "border border-gray-100",
-      "hover:shadow-lg shadow-md",
-      "transform hover:-translate-y-1"
-    )}>
+    <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md transform hover:-translate-y-1">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
@@ -135,12 +123,9 @@ export function TourTimelineCard({
               className="overflow-hidden"
             >
               <div className="pt-6 space-y-6">
-                <TourTimelineDisplay 
+                <ClientTimeline 
                   status={tour.status} 
-                  onStatusChange={handleStatusUpdate}
                   tourId={tour.id}
-                  userType={userType}
-                  canEdit={userType === 'carrier'}
                 />
                 
                 <TourCapacityDisplay 
