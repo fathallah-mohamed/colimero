@@ -41,11 +41,11 @@ export function SendPackageFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="Programmé">Programmé</SelectItem>
+            <SelectItem value="Programmée">Programmée</SelectItem>
             <SelectItem value="Ramassage en cours">Ramassage en cours</SelectItem>
             <SelectItem value="En transit">En transit</SelectItem>
             <SelectItem value="Livraison en cours">Livraison en cours</SelectItem>
-            <SelectItem value="Livraison terminée">Livraison terminée</SelectItem>
+            <SelectItem value="Terminée">Terminée</SelectItem>
           </SelectContent>
         </Select>
       </div>

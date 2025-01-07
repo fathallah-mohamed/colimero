@@ -735,6 +735,8 @@ export type Database = {
           id: number
           is_final: boolean
           name: string
+          parent_status_id: number | null
+          status_type: string | null
           type: Database["public"]["Enums"]["status_type"]
           updated_at: string
         }
@@ -744,6 +746,8 @@ export type Database = {
           id?: number
           is_final?: boolean
           name: string
+          parent_status_id?: number | null
+          status_type?: string | null
           type: Database["public"]["Enums"]["status_type"]
           updated_at?: string
         }
@@ -753,10 +757,20 @@ export type Database = {
           id?: number
           is_final?: boolean
           name?: string
+          parent_status_id?: number | null
+          status_type?: string | null
           type?: Database["public"]["Enums"]["status_type"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tour_statuses_parent_status_id_fkey"
+            columns: ["parent_status_id"]
+            isOneToOne: false
+            referencedRelation: "tour_statuses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tours: {
         Row: {

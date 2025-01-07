@@ -1,5 +1,5 @@
 export type TourStatus = 
-  | "Programmé"
+  | "Programmée"
   | "Préparation terminée"
   | "Ramassage en cours"
   | "Ramassage terminé"
@@ -7,6 +7,7 @@ export type TourStatus =
   | "Transport terminé"
   | "Livraison en cours"
   | "Livraison terminée"
+  | "Terminée"
   | "Annulée";
 
 export type TourType = "public" | "private";

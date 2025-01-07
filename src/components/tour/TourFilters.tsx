@@ -23,11 +23,16 @@ const countryNames: { [key: string]: string } = {
 };
 
 const tourStatuses: TourStatus[] = [
-  "Programmé",
+  "Programmée",
+  "Préparation terminée",
   "Ramassage en cours",
+  "Ramassage terminé",
   "En transit",
+  "Transport terminé",
   "Livraison en cours",
-  "Livraison terminée"
+  "Livraison terminée",
+  "Terminée",
+  "Annulée"
 ];
 
 export function TourFilters({
