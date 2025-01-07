@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus } from "@/types/tour";
+import type { Tour, TourStatus, RouteStop } from "@/types/tour";
 
 interface UseTourDataProps {
   departureCountry: string;
@@ -68,21 +68,33 @@ export function useTourData({
 
     console.log('Fetched tours:', data);
 
-    const transformedTours = data?.map(tour => ({
-      ...tour,
-      route: Array.isArray(tour.route) 
-        ? tour.route 
-        : (typeof tour.route === 'string' 
-            ? JSON.parse(tour.route)
-            : tour.route
-          ),
-      carriers: tour.carriers ? {
-        ...tour.carriers,
-        carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
-          ? tour.carriers.carrier_capacities
-          : [tour.carriers.carrier_capacities]
-      } : undefined
-    })) as Tour[];
+    const transformedTours = data?.map(tour => {
+      // Parse route JSON into RouteStop array
+      const routeData = typeof tour.route === 'string' 
+        ? JSON.parse(tour.route) 
+        : tour.route;
+
+      const parsedRoute: RouteStop[] = Array.isArray(routeData) 
+        ? routeData.map(stop => ({
+            name: stop.name,
+            location: stop.location,
+            time: stop.time,
+            type: stop.type,
+            collection_date: stop.collection_date || tour.collection_date
+          }))
+        : [];
+
+      return {
+        ...tour,
+        route: parsedRoute,
+        carriers: tour.carriers ? {
+          ...tour.carriers,
+          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+            ? tour.carriers.carrier_capacities[0]
+            : tour.carriers.carrier_capacities
+        } : undefined
+      };
+    }) as Tour[];
 
     setTours(transformedTours || []);
     setLoading(false);
