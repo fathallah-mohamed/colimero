@@ -7,8 +7,10 @@ import AuthDialog from "@/components/auth/AuthDialog";
 import { Tour } from "@/types/tour";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
 
 export default function EnvoyerColis() {
+  const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<string>("Programmé");
 
@@ -75,6 +77,10 @@ export default function EnvoyerColis() {
     },
   });
 
+  const handleTourClick = (tourId: number, pickupCity: string) => {
+    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -125,7 +131,7 @@ export default function EnvoyerColis() {
           type="public"
           isLoading={isLoading}
           userType={null}
-          handleBookingClick={handleBookingClick}
+          handleBookingClick={handleTourClick}
         />
       </div>
 

@@ -5,17 +5,22 @@ import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Euro, Plus } from "lucide-react";
+import { Calendar, MapPin, Euro, Plus, Minus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
+import { TourTimeline } from "./TourTimeline";
+import { TourCapacityDisplay } from "./TourCapacityDisplay";
+import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 
 interface TourCardProps {
   tour: any;
-  hideAvatar?: boolean;
   onBookingClick?: (tourId: number, pickupCity: string) => void;
 }
 
 export function TourCard({ tour, onBookingClick }: TourCardProps) {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string>('');
   const { toast } = useToast();
   const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
 
@@ -32,12 +37,23 @@ export function TourCard({ tour, onBookingClick }: TourCardProps) {
     setShowApprovalDialog(true);
   };
 
-  const handleBookingClick = (pickupCity: string) => {
-    if (onBookingClick) {
-      onBookingClick(tour.id, pickupCity);
-    } else {
-      window.location.href = `/reserver/${tour.id}`;
+  const handleBookingClick = () => {
+    if (onBookingClick && selectedPickupCity) {
+      onBookingClick(tour.id, selectedPickupCity);
     }
+  };
+
+  const isBookingEnabled = () => {
+    return selectedPickupCity && tour.status === "Programmé";
+  };
+
+  const getBookingButtonText = () => {
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
+    if (tour.status === "Annulée") return "Cette tournée a été annulée";
+    if (tour.status === "Ramassage terminé") return "Cette tournée est en cours de collecte";
+    if (tour.status === "Transport terminé") return "Cette tournée est en cours de livraison";
+    if (tour.status === "Livraison terminée") return "Cette tournée est terminée";
+    return "Réserver sur cette tournée";
   };
 
   return (
@@ -93,24 +109,75 @@ export function TourCard({ tour, onBookingClick }: TourCardProps) {
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex justify-end">
-        <Button 
-          variant="ghost" 
+      {/* Expand/Collapse button */}
+      <div className="flex justify-center">
+        <Button
+          variant="ghost"
           size="sm"
-          className="text-primary hover:text-primary/90 hover:bg-primary/10"
-          onClick={() => handleBookingClick(tour.route?.[0]?.name || '')}
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-center gap-2"
         >
-          Plus de détails
-          <Plus className="ml-2 h-4 w-4" />
+          {isExpanded ? (
+            <>
+              Moins de détails
+              <Minus className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Plus de détails
+              <Plus className="h-4 w-4" />
+            </>
+          )}
         </Button>
       </div>
+
+      {/* Expanded content */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-6 pt-4"
+          >
+            <TourTimeline
+              status={tour.status}
+              tourId={tour.id}
+            />
+
+            <TourCapacityDisplay
+              totalCapacity={tour.total_capacity}
+              remainingCapacity={tour.remaining_capacity}
+            />
+
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Points de collecte</h4>
+              <SelectableCollectionPointsList
+                points={tour.route}
+                selectedPoint={selectedPickupCity}
+                onPointSelect={setSelectedPickupCity}
+                isSelectionEnabled={true}
+                tourDepartureDate={tour.departure_date}
+              />
+            </div>
+
+            <Button
+              onClick={handleBookingClick}
+              className="w-full"
+              disabled={!isBookingEnabled()}
+            >
+              {getBookingButtonText()}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ApprovalRequestDialog
         isOpen={showApprovalDialog}
         onClose={() => setShowApprovalDialog(false)}
         tourId={tour.id}
-        pickupCity={tour.route?.[0]?.name || ''}
+        pickupCity={selectedPickupCity}
       />
     </div>
   );
