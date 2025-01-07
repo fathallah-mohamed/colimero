@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNavigate } from "react-router-dom";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { Package2, Truck, Clock, Shield } from "lucide-react";
+import { Tour, RouteStop } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
