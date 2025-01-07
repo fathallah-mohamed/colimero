@@ -7,6 +7,7 @@ import { Tour } from "@/types/tour";
 import { Avatar } from "@/components/ui/avatar";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
+import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -75,6 +76,11 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
 
       {isExpanded && (
         <div className="space-y-6">
+          <ClientTimeline 
+            status={tour.status} 
+            tourId={tour.id}
+          />
+
           <TourCapacityDisplay 
             totalCapacity={tour.total_capacity} 
             remainingCapacity={tour.remaining_capacity} 
