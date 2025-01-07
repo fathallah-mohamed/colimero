@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/booking/BookingForm";
-import { Tour, RouteStop } from "@/types/tour";
+import { Tour, RouteStop, TourStatus } from "@/types/tour";
 
 export default function Reserver() {
   const { tourId } = useParams();
@@ -42,7 +42,8 @@ export default function Reserver() {
           type: stop.type,
           collection_date: stop.collection_date
         })),
-        status: data.status as Tour['status']
+        status: data.status as TourStatus,
+        previous_status: data.previous_status as TourStatus | null
       };
 
       return transformedTour;

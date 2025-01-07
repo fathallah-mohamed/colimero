@@ -2,7 +2,9 @@ export type TourStatus =
   | "Programmée"
   | "Ramassage en cours"
   | "En transit"
-  | "Terminée";
+  | "Livraison en cours"
+  | "Terminée"
+  | "Annulée";
 
 export type TourType = "public" | "private";
 
@@ -11,28 +13,7 @@ export interface RouteStop {
   location: string;
   time: string;
   type: "pickup" | "dropoff";
-  collection_date: string;
-}
-
-export interface Carrier {
-  company_name: string;
-  first_name?: string;
-  last_name?: string;
-  avatar_url?: string;
-  carrier_capacities?: {
-    price_per_kg: number;
-  }[];
-}
-
-export interface Booking {
-  id: string;
-  pickup_city: string;
-  delivery_city: string;
-  weight: number;
-  tracking_number: string;
-  status: string;
-  recipient_name: string;
-  recipient_phone: string;
+  collection_date?: string;
 }
 
 export interface Tour {
@@ -50,8 +31,13 @@ export interface Tour {
   terms_accepted: boolean;
   customs_declaration: boolean;
   status: TourStatus;
-  previous_status?: TourStatus;
   type: TourType;
-  carriers?: Carrier;
-  bookings?: Booking[];
+  previous_status?: TourStatus | null;
+  carriers?: {
+    company_name: string;
+    avatar_url: string;
+    carrier_capacities: {
+      price_per_kg: number;
+    };
+  };
 }

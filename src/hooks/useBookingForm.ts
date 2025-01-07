@@ -21,18 +21,23 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
         return { success: false };
       }
 
-      const bookingData: BookingFormData = {
-        ...formData,
-        user_id: user.id,
-        tour_id: tourId,
-        tracking_number: `TRK-${Math.random().toString(36).substr(2, 9)}`,
-        status: 'pending',
-        content_types: formData.content_types || [],
-        photos: formData.photos || []
-      } as BookingFormData;
-
       // Start a transaction by using RPC
-      const { data: result, error } = await supabase.rpc('create_booking_with_capacity_update', bookingData);
+      const { data: result, error } = await supabase.rpc('create_booking_with_capacity_update', {
+        p_tour_id: tourId,
+        p_user_id: user.id,
+        p_weight: formData.weight,
+        p_pickup_city: formData.pickup_city,
+        p_delivery_city: formData.delivery_city,
+        p_recipient_name: formData.recipient_name,
+        p_recipient_address: formData.recipient_address,
+        p_recipient_phone: formData.recipient_phone,
+        p_sender_name: formData.sender_name,
+        p_sender_phone: formData.sender_phone,
+        p_item_type: formData.item_type,
+        p_special_items: formData.special_items,
+        p_content_types: formData.content_types || [],
+        p_photos: formData.photos?.map(file => URL.createObjectURL(file)) || []
+      });
 
       if (error) throw error;
 
