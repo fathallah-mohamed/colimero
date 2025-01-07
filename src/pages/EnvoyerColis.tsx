@@ -29,53 +29,65 @@ export default function EnvoyerColis() {
   const { data: tours, isLoading } = useQuery({
     queryKey: ['public-tours', selectedRoute, selectedStatus, tourType],
     queryFn: async () => {
-      let query = supabase
-        .from('tours')
-        .select(`
-          *,
-          carriers (
-            company_name,
-            avatar_url,
-            carrier_capacities (
-              price_per_kg
+      try {
+        let query = supabase
+          .from('tours')
+          .select(`
+            *,
+            carriers (
+              company_name,
+              avatar_url,
+              carrier_capacities (
+                price_per_kg
+              )
             )
-          )
-        `)
-        .eq('type', tourType);
+          `)
+          .eq('type', tourType);
 
-      if (selectedRoute === "FR_TO_TN") {
-        query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
-      } else if (selectedRoute === "TN_TO_FR") {
-        query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
+        // Set departure and destination countries based on selected route
+        if (selectedRoute === "FR_TO_TN") {
+          query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
+        } else if (selectedRoute === "TN_TO_FR") {
+          query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
+        }
+
+        // Only apply status filter if not "all"
+        if (selectedStatus !== "all") {
+          query = query.eq('status', selectedStatus);
+        }
+
+        const { data, error } = await query.order('departure_date', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching tours:', error);
+          throw error;
+        }
+
+        return data?.map(tour => ({
+          ...tour,
+          route: Array.isArray(tour.route) 
+            ? tour.route.map((stop: any): RouteStop => ({
+                name: stop.name,
+                location: stop.location,
+                time: stop.time,
+                type: stop.type || "pickup",
+                collection_date: stop.collection_date || tour.collection_date
+              }))
+            : [],
+          carriers: tour.carriers ? {
+            ...tour.carriers,
+            carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+              ? tour.carriers.carrier_capacities
+              : [tour.carriers.carrier_capacities]
+          } : undefined
+        })) as Tour[];
+      } catch (error) {
+        console.error('Error in queryFn:', error);
+        throw error;
       }
-
-      if (selectedStatus !== "all") {
-        query = query.eq('status', selectedStatus);
-      }
-
-      const { data, error } = await query.order('departure_date', { ascending: true });
-
-      if (error) throw error;
-
-      return data?.map(tour => ({
-        ...tour,
-        route: Array.isArray(tour.route) 
-          ? tour.route.map((stop: any): RouteStop => ({
-              name: stop.name,
-              location: stop.location,
-              time: stop.time,
-              type: stop.type || "pickup",
-              collection_date: stop.collection_date || tour.collection_date
-            }))
-          : [],
-        carriers: tour.carriers ? {
-          ...tour.carriers,
-          carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
-            ? tour.carriers.carrier_capacities
-            : [tour.carriers.carrier_capacities]
-        } : undefined
-      })) as Tour[];
     },
+    retry: 1,
+    staleTime: 30000,
   });
 
   const handleTourClick = (tourId: number, pickupCity: string) => {
