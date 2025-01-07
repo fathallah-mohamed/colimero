@@ -9,7 +9,6 @@ interface TimelineButtonProps {
   isCurrent: boolean;
   onClick: () => void;
   disabled?: boolean;
-  isUpdating?: boolean;
 }
 
 export function TimelineButton({
@@ -17,8 +16,7 @@ export function TimelineButton({
   isCompleted,
   isCurrent,
   onClick,
-  disabled,
-  isUpdating
+  disabled
 }: TimelineButtonProps) {
   return (
     <Button
@@ -31,7 +29,7 @@ export function TimelineButton({
         !isCompleted && !isCurrent && "border-gray-200"
       )}
       onClick={onClick}
-      disabled={disabled || isUpdating}
+      disabled={disabled}
     >
       <TimelineIcon 
         status={status} 

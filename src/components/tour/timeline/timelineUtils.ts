@@ -1,65 +1,30 @@
 import { TourStatus } from "@/types/tour";
 
-export const getTimelineLabel = (status: TourStatus): string => {
+export const getStatusLabel = (status: TourStatus) => {
+  return status; // Les statuts sont déjà en français dans la base de données
+};
+
+export const getStatusColor = (status: TourStatus) => {
   switch (status) {
     case "Programmé":
-      return "Tournée planifiée";
+      return "bg-blue-100 text-blue-800";
     case "Ramassage en cours":
-      return "Collecte en cours";
-    case "Ramassage terminé":
-      return "Collecte terminée";
+      return "bg-yellow-100 text-yellow-800";
     case "En transit":
-      return "En transit";
+      return "bg-purple-100 text-purple-800";
+    case "Transport terminé":
+      return "bg-cyan-100 text-cyan-800";
+    case "Ramassage terminé":
+      return "bg-teal-100 text-teal-800";
+    case "Préparation terminée":
+      return "bg-emerald-100 text-emerald-800";
     case "Livraison en cours":
-      return "Livraison en cours";
+      return "bg-indigo-100 text-indigo-800";
     case "Livraison terminée":
-      return "Tournée terminée";
+      return "bg-green-100 text-green-800";
     case "Annulée":
-      return "Tournée annulée";
+      return "bg-red-100 text-red-800";
     default:
-      return "Statut inconnu";
+      return "bg-gray-100 text-gray-800";
   }
-};
-
-export const getTimelineProgress = (status: TourStatus): number => {
-  switch (status) {
-    case "Programmé":
-      return 0;
-    case "Ramassage en cours":
-      return 20;
-    case "Ramassage terminé":
-      return 40;
-    case "En transit":
-      return 60;
-    case "Livraison en cours":
-      return 80;
-    case "Livraison terminée":
-      return 100;
-    case "Annulée":
-      return 100;
-    default:
-      return 0;
-  }
-};
-
-export const getNextStatus = (currentStatus: TourStatus): TourStatus | null => {
-  switch (currentStatus) {
-    case "Programmé":
-      return "Ramassage en cours";
-    case "Ramassage en cours":
-      return "Ramassage terminé";
-    case "Ramassage terminé":
-      return "En transit";
-    case "En transit":
-      return "Livraison en cours";
-    case "Livraison en cours":
-      return "Livraison terminée";
-    default:
-      return null;
-  }
-};
-
-export const canTransitionTo = (currentStatus: TourStatus, newStatus: TourStatus): boolean => {
-  if (newStatus === "Annulée") return true;
-  return getNextStatus(currentStatus) === newStatus;
 };

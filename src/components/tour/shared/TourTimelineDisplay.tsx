@@ -1,29 +1,134 @@
 import { TourStatus } from "@/types/tour";
-import { CarrierTimeline } from "../timeline/carrier/CarrierTimeline";
-import { ClientTimeline } from "../timeline/client/ClientTimeline";
+import { TimelineStatus } from "../timeline/TimelineStatus";
+import { TimelineProgress } from "../timeline/TimelineProgress";
+import { CancelledStatus } from "../timeline/CancelledStatus";
+import { Button } from "@/components/ui/button";
+import { XCircle } from "lucide-react";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { motion } from "framer-motion";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
   onStatusChange?: (newStatus: TourStatus) => Promise<void>;
   tourId: number;
+  userType?: string;
   canEdit?: boolean;
 }
 
-export function TourTimelineDisplay({
-  status,
-  onStatusChange,
+export function TourTimelineDisplay({ 
+  status, 
+  onStatusChange, 
   tourId,
-  canEdit = false,
+  userType,
+  canEdit = false
 }: TourTimelineDisplayProps) {
-  if (canEdit) {
-    return (
-      <CarrierTimeline
-        status={status}
-        onStatusChange={onStatusChange}
-        tourId={tourId}
-      />
-    );
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  if (status === "Annulée") {
+    return <CancelledStatus />;
   }
 
-  return <ClientTimeline status={status} tourId={tourId} />;
+  const statusOrder: TourStatus[] = [
+    "Programmé",
+    "Ramassage en cours",
+    "En transit",
+    "Livraison en cours"
+  ];
+
+  const currentIndex = statusOrder.indexOf(status);
+  const progress = ((currentIndex) / (statusOrder.length - 1)) * 100;
+
+  const handleCancel = async () => {
+    if (onStatusChange) {
+      await onStatusChange("Annulée");
+    }
+    setShowCancelDialog(false);
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div className="relative flex justify-between items-center w-full mt-8 px-4">
+        <TimelineProgress progress={progress} />
+        
+        {statusOrder.map((statusItem, index) => {
+          const isCompleted = index < currentIndex;
+          const isCurrent = index === currentIndex;
+          const isNext = index === currentIndex + 1;
+
+          let label = statusItem;
+          if (isCompleted) {
+            switch (statusItem) {
+              case "Programmé":
+                label = "Préparation terminée";
+                break;
+              case "Ramassage en cours":
+                label = "Ramassage terminé";
+                break;
+              case "En transit":
+                label = "Transport terminé";
+                break;
+              case "Livraison en cours":
+                label = "Livraison terminée";
+                break;
+            }
+          }
+
+          return (
+            <TimelineStatus
+              key={statusItem}
+              status={statusItem}
+              isCompleted={isCompleted}
+              isCurrent={isCurrent}
+              isNext={isNext && canEdit}
+              onClick={() => isNext && canEdit && onStatusChange && onStatusChange(statusItem)}
+              label={label}
+            />
+          );
+        })}
+      </div>
+
+      {status !== "Livraison terminée" && canEdit && onStatusChange && (
+        <div className="flex justify-end mt-8">
+          <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="gap-2 hover:bg-destructive/90 transition-colors">
+                <XCircle className="h-4 w-4" />
+                Annuler la tournée
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Annuler la tournée ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Cette action est irréversible. La tournée sera définitivement annulée.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Confirmer l'annulation
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
+    </motion.div>
+  );
 }
