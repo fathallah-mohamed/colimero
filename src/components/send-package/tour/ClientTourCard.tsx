@@ -71,7 +71,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <Eye className="h-4 w-4 mr-2" />
-        {isExpanded ? "Masquer les détails" : "Afficher les détails"}
+        {isExpanded ? "Masquer la tournée" : "Voir la tournée"}
       </Button>
 
       {isExpanded && (
