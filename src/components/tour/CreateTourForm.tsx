@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { tourFormSchema } from "./form/tourFormSchema";
 import { Truck, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type FormValues = z.infer<typeof tourFormSchema>;
 
@@ -24,7 +24,6 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(tourFormSchema),
@@ -37,6 +36,10 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       departure_date: new Date(),
       terms_accepted: false,
       customs_declaration: false,
+      info_accuracy: false,
+      transport_responsibility: false,
+      platform_rules: false,
+      safety_confirmation: false,
       route: [
         {
           name: "",
@@ -47,44 +50,6 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         },
       ],
     },
-  });
-
-  // Calculate form completion progress
-  const calculateProgress = () => {
-    const fields = form.getValues();
-    let completedFields = 0;
-    let totalFields = 0;
-
-    // Count basic fields
-    const basicFields = ['departure_country', 'destination_country', 'total_capacity', 'remaining_capacity', 'type', 'departure_date'];
-    basicFields.forEach(field => {
-      totalFields++;
-      if (fields[field as keyof FormValues]) completedFields++;
-    });
-
-    // Count route points
-    if (fields.route) {
-      fields.route.forEach(point => {
-        const routeFields = ['name', 'location', 'time', 'collection_date'];
-        routeFields.forEach(field => {
-          totalFields++;
-          if (point[field as keyof typeof point]) completedFields++;
-        });
-      });
-    }
-
-    // Count declarations
-    ['terms_accepted', 'customs_declaration'].forEach(field => {
-      totalFields++;
-      if (fields[field as keyof FormValues]) completedFields++;
-    });
-
-    return (completedFields / totalFields) * 100;
-  };
-
-  // Update progress when form changes
-  form.watch(() => {
-    setProgress(calculateProgress());
   });
 
   async function onSubmit(values: FormValues) {
@@ -154,24 +119,29 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
 
   return (
     <ScrollArea className="h-[calc(100vh-4rem)]">
-      <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-8">
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Progression du formulaire</span>
-            <span className="text-sm font-medium">{Math.round(progress)}%</span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
-
+      <div className="max-w-4xl mx-auto p-4 md:p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 animate-fade-in">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <TourFormHeader />
             <TourFormSections form={form} />
+            
+            <Alert className="bg-amber-50 border-amber-200 mb-4">
+              <AlertDescription>
+                En validant cette tournée, vous reconnaissez être entièrement responsable des colis transportés et de leur conformité.
+              </AlertDescription>
+            </Alert>
+
             <div className="sticky bottom-0 bg-white p-4 border-t shadow-lg">
               <Button 
                 type="submit" 
                 className="w-full md:w-auto"
-                disabled={isSubmitting || !form.getValues("terms_accepted") || !form.getValues("customs_declaration")}
+                disabled={isSubmitting || 
+                  !form.getValues("terms_accepted") || 
+                  !form.getValues("customs_declaration") ||
+                  !form.getValues("info_accuracy") ||
+                  !form.getValues("transport_responsibility") ||
+                  !form.getValues("platform_rules") ||
+                  !form.getValues("safety_confirmation")}
               >
                 {isSubmitting ? (
                   <>

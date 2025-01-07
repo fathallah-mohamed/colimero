@@ -1,42 +1,33 @@
-import { UseFormReturn, useFieldArray } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 import { RouteInformation } from "./RouteInformation";
 import { CapacityInformation } from "./CapacityInformation";
 import { CollectionPointsSection } from "./CollectionPointsSection";
 import { DeclarationsSection } from "./DeclarationsSection";
+import { CommitmentsSection } from "./CommitmentsSection";
 
 interface TourFormSectionsProps {
   form: UseFormReturn<any>;
 }
 
 export function TourFormSections({ form }: TourFormSectionsProps) {
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "route",
-  });
-
   const departureDate = form.watch('departure_date');
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <div className="space-y-6 md:col-span-2">
-        <RouteInformation form={form} />
-      </div>
-      
+    <div className="space-y-6">
+      <RouteInformation form={form} />
       <CapacityInformation form={form} />
-      
-      <div className="space-y-6 md:col-span-2">
-        <CollectionPointsSection
-          fields={fields}
-          append={append}
-          remove={remove}
-          form={form}
-          departureDate={departureDate}
-        />
-      </div>
-      
-      <div className="md:col-span-2">
-        <DeclarationsSection form={form} />
-      </div>
+      <CollectionPointsSection
+        fields={form.getValues("route")}
+        append={(value) => form.setValue("route", [...form.getValues("route"), value])}
+        remove={(index) => {
+          const currentRoute = form.getValues("route");
+          form.setValue("route", currentRoute.filter((_, i) => i !== index));
+        }}
+        form={form}
+        departureDate={departureDate}
+      />
+      <DeclarationsSection form={form} />
+      <CommitmentsSection form={form} />
     </div>
   );
 }
