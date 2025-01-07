@@ -5,6 +5,7 @@ import { Package2, Weight } from "lucide-react";
 import { FormSection } from "./FormSection";
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface CapacityInformationProps {
   form: UseFormReturn<any>;
@@ -22,6 +23,20 @@ export function CapacityInformation({ form }: CapacityInformationProps) {
     }
   }, [totalCapacity, remainingCapacity]);
 
+  const handleStepChange = (field: "total_capacity" | "remaining_capacity", step: number) => {
+    const currentValue = form.getValues(field);
+    const newValue = Math.max(0, currentValue + step);
+    
+    if (field === "total_capacity") {
+      form.setValue("total_capacity", newValue);
+      form.setValue("remaining_capacity", newValue); // Reset remaining capacity when total changes
+    } else {
+      const total = form.getValues("total_capacity");
+      const clampedValue = Math.min(total, Math.max(0, newValue));
+      form.setValue("remaining_capacity", clampedValue);
+    }
+  };
+
   return (
     <FormSection title="Capacité de transport">
       <div className="space-y-6">
@@ -35,20 +50,39 @@ export function CapacityInformation({ form }: CapacityInformationProps) {
                   <Package2 className="w-4 h-4" />
                   Capacité totale (kg)
                 </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Exemple : 1000 kg"
-                    {...field}
-                    className="w-full"
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      field.onChange(value);
-                      // Mettre à jour automatiquement la capacité restante
-                      form.setValue("remaining_capacity", value);
-                    }}
-                  />
-                </FormControl>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleStepChange("total_capacity", -100)}
+                  >
+                    -
+                  </Button>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Exemple : 1000 kg"
+                      {...field}
+                      className="text-center"
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        field.onChange(value);
+                        form.setValue("remaining_capacity", value);
+                      }}
+                    />
+                  </FormControl>
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleStepChange("total_capacity", 100)}
+                  >
+                    +
+                  </Button>
+                </div>
                 <FormDescription>
                   Capacité maximale de transport en kilogrammes
                 </FormDescription>
@@ -66,23 +100,43 @@ export function CapacityInformation({ form }: CapacityInformationProps) {
                   <Weight className="w-4 h-4" />
                   Capacité disponible (kg)
                 </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Capacité restante"
-                    {...field}
-                    className="w-full"
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      const total = form.getValues("total_capacity");
-                      if (value <= total) {
-                        field.onChange(value);
-                      } else {
-                        field.onChange(total);
-                      }
-                    }}
-                  />
-                </FormControl>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleStepChange("remaining_capacity", -100)}
+                  >
+                    -
+                  </Button>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Capacité restante"
+                      {...field}
+                      className="text-center"
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        const total = form.getValues("total_capacity");
+                        if (value <= total) {
+                          field.onChange(value);
+                        } else {
+                          field.onChange(total);
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleStepChange("remaining_capacity", 100)}
+                  >
+                    +
+                  </Button>
+                </div>
                 <FormDescription>
                   Ne peut pas dépasser la capacité totale
                 </FormDescription>
