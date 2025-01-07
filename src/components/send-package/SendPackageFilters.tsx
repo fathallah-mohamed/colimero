@@ -6,13 +6,17 @@ interface SendPackageFiltersProps {
   setSelectedRoute: (value: string) => void;
   selectedStatus: string;
   setSelectedStatus: (value: string) => void;
+  tourType: "public" | "private";
+  setTourType: (value: "public" | "private") => void;
 }
 
 export function SendPackageFilters({
   selectedRoute,
   setSelectedRoute,
   selectedStatus,
-  setSelectedStatus
+  setSelectedStatus,
+  tourType,
+  setTourType
 }: SendPackageFiltersProps) {
   return (
     <div className="grid grid-cols-2 gap-4">

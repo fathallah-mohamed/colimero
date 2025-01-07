@@ -7,11 +7,11 @@ import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { useTours } from "@/hooks/use-tours";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@supabase/auth-helpers-react";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
-  const auth = useAuth();
+  const user = useUser();
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
@@ -19,16 +19,11 @@ export default function EnvoyerColis() {
 
   const {
     tours,
-    isLoading,
-    error,
-  } = useTours({
-    route: selectedRoute,
-    status: selectedStatus,
-    type: tourType,
-  });
+    loading,
+  } = useTours();
 
   const handleBooking = (tourId: number) => {
-    if (!auth?.user?.id) {
+    if (!user?.id) {
       toast({
         title: "Connexion requise",
         description: "Vous devez être connecté pour réserver une tournée",
@@ -39,10 +34,6 @@ export default function EnvoyerColis() {
     navigate(`/reserver/${tourId}`);
   };
 
-  if (error) {
-    return <div>Une erreur est survenue lors du chargement des tournées.</div>;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <SendPackageHero />
@@ -51,14 +42,14 @@ export default function EnvoyerColis() {
       <div className="mt-12">
         <SendPackageFilters
           selectedRoute={selectedRoute}
-          onRouteChange={setSelectedRoute}
+          setSelectedRoute={setSelectedRoute}
           selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
+          setSelectedStatus={setSelectedStatus}
           tourType={tourType}
-          onTourTypeChange={setTourType}
+          setTourType={setTourType}
         />
 
-        {isLoading ? (
+        {loading ? (
           <div className="text-center py-8">Chargement des tournées...</div>
         ) : tours && tours.length > 0 ? (
           <div className="grid gap-6 mt-6">
@@ -66,11 +57,7 @@ export default function EnvoyerColis() {
               <ClientTourCard
                 key={tour.id}
                 tour={tour}
-                action={
-                  <Button onClick={() => handleBooking(tour.id)}>
-                    Réserver
-                  </Button>
-                }
+                onBookingClick={() => handleBooking(tour.id)}
               />
             ))}
           </div>
