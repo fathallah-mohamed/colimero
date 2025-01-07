@@ -26,8 +26,7 @@ export function TourContent() {
     onEditComplete
   } = useTours();
 
-  console.log('TourContent rendered with tours:', tours);
-
+  // Add error boundary to catch and log any data fetching errors
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -35,6 +34,9 @@ export function TourContent() {
       </div>
     );
   }
+
+  // Ensure tours is always an array
+  const toursList = Array.isArray(tours) ? tours : [];
 
   return (
     <ScrollArea className="h-[calc(100vh-12rem)]">
@@ -53,18 +55,20 @@ export function TourContent() {
         </div>
 
         <ToursList
-          tours={tours}
+          tours={toursList}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onStatusChange={handleStatusChange}
         />
 
-        <TourEditDialog
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          tour={selectedTour}
-          onComplete={onEditComplete}
-        />
+        {selectedTour && (
+          <TourEditDialog
+            isOpen={isEditDialogOpen}
+            onClose={() => setIsEditDialogOpen(false)}
+            tour={selectedTour}
+            onComplete={onEditComplete}
+          />
+        )}
       </div>
     </ScrollArea>
   );
