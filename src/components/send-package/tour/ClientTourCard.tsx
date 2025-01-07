@@ -2,13 +2,11 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Calendar, Eye, Package, Truck, ArrowRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ClientTourTimeline } from "./ClientTourTimeline";
 import { ClientTourDetails } from "./ClientTourDetails";
 import { Tour } from "@/types/tour";
 import { Avatar } from "@/components/ui/avatar";
-import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -17,7 +15,6 @@ interface ClientTourCardProps {
 
 export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedPoint, setSelectedPoint] = useState<string>("");
   const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
 
   const statusIcons = [
@@ -28,8 +25,8 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   ];
 
   const handleBookingClick = () => {
-    if (selectedPoint) {
-      onBookingClick(tour.id, selectedPoint);
+    if (tour.route && tour.route.length > 0) {
+      onBookingClick(tour.id, tour.route[0].name);
     }
   };
 
@@ -114,23 +111,11 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
           <ClientTourTimeline tour={tour} />
           <ClientTourDetails tour={tour} />
           
-          <div className="mt-6">
-            <h4 className="font-medium mb-4">Points de collecte disponibles</h4>
-            <SelectableCollectionPointsList
-              points={tour.route || []}
-              selectedPoint={selectedPoint}
-              onPointSelect={setSelectedPoint}
-              isSelectionEnabled={true}
-              tourDepartureDate={tour.departure_date}
-            />
-          </div>
-
           <Button 
             className="w-full bg-[#00B0F0] hover:bg-[#0090D0] text-white"
             onClick={handleBookingClick}
-            disabled={!selectedPoint}
           >
-            {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte"}
+            Réserver sur cette tournée
           </Button>
         </div>
       )}
