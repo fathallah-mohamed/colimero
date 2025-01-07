@@ -14,7 +14,7 @@ import { useTourData } from "@/hooks/use-tour-data";
 export default function EnvoyerColis() {
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
-  const [selectedStatus, setSelectedStatus] = useState<string>("Programmé");
+  const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
   const [tourType, setTourType] = useState<"public" | "private">("public");
 
   const {
