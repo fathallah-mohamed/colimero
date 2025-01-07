@@ -11,7 +11,7 @@ import { Tour, RouteStop } from "@/types/tour";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -103,38 +103,14 @@ export default function EnvoyerColis() {
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <SendPackageFeatures />
           
-          <div className="mb-6 text-center">
-            <p className="text-sm text-muted-foreground mb-4">
-              Choisissez entre deux types de tournées pour votre envoi :
-            </p>
-            <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-muted-foreground">
-              <div className="p-3 bg-muted rounded-lg">
-                <strong className="text-primary">Tournées Publiques :</strong>
-                <p>Partagez l'espace avec d'autres colis pour un prix plus avantageux.</p>
-              </div>
-              <div className="p-3 bg-muted rounded-lg">
-                <strong className="text-primary">Tournées Privées :</strong>
-                <p>Réservez tout l'espace pour vos colis, idéal pour les envois volumineux.</p>
-              </div>
-            </div>
+          <div className="mb-6">
+            <TourTypeTabs
+              tourType={tourType}
+              publicToursCount={tours?.filter(t => t.type === "public").length || 0}
+              privateToursCount={tours?.filter(t => t.type === "private").length || 0}
+              onTypeChange={setTourType}
+            />
           </div>
-
-          <Tabs defaultValue="public" className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger 
-                value="public"
-                onClick={() => setTourType("public")}
-              >
-                Tournées Publiques
-              </TabsTrigger>
-              <TabsTrigger 
-                value="private"
-                onClick={() => setTourType("private")}
-              >
-                Tournées Privées
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
 
           <SendPackageFilters
             selectedRoute={selectedRoute}
