@@ -8,8 +8,9 @@ import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
-import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
+import { TourTimelineCard } from "@/components/transporteur/TourTimelineCard";
 import { useTourData } from "@/hooks/use-tour-data";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -34,6 +35,9 @@ export default function EnvoyerColis() {
   const handleTourClick = (tourId: number, pickupCity: string) => {
     navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
+
+  const plannedTours = tours?.filter(tour => tour.status === "Programmée" && tour.type === tourType);
+  const otherTours = tours?.filter(tour => tour.status !== "Programmée" && tour.type === tourType);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -61,21 +65,60 @@ export default function EnvoyerColis() {
           />
         </div>
 
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="text-center py-8">Chargement des tournées...</div>
-          ) : tours?.length === 0 ? (
-            <div className="text-center py-8">Aucune tournée disponible</div>
-          ) : (
-            tours?.map((tour) => (
-              <ClientTourCard
-                key={tour.id}
-                tour={tour}
-                onBookingClick={handleTourClick}
-              />
-            ))
-          )}
-        </div>
+        <Tabs defaultValue="planned" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="planned">Tournées programmées</TabsTrigger>
+            <TabsTrigger value="others">Autres tournées</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="planned" className="space-y-6">
+            {isLoading ? (
+              <div className="animate-pulse space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-48 bg-gray-200 rounded-lg" />
+                ))}
+              </div>
+            ) : plannedTours?.length > 0 ? (
+              <div className="space-y-4">
+                {plannedTours.map((tour) => (
+                  <TourTimelineCard
+                    key={tour.id}
+                    tour={tour}
+                    onBookingClick={handleTourClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center py-8 text-gray-500">
+                Aucune tournée programmée disponible
+              </p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="others" className="space-y-6">
+            {isLoading ? (
+              <div className="animate-pulse space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-48 bg-gray-200 rounded-lg" />
+                ))}
+              </div>
+            ) : otherTours?.length > 0 ? (
+              <div className="space-y-4">
+                {otherTours.map((tour) => (
+                  <TourTimelineCard
+                    key={tour.id}
+                    tour={tour}
+                    onBookingClick={handleTourClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center py-8 text-gray-500">
+                Aucune autre tournée disponible
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <AuthDialog
