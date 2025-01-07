@@ -115,6 +115,6 @@ export function TourCard({
           )}
         </div>
       </div>
-    </card>
+    </Card>
   );
 }
