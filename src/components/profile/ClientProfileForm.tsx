@@ -1,21 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonalInfoFields } from "./form/PersonalInfoFields";
 import { ContactInfoFields } from "./form/ContactInfoFields";
-import { IdDocumentUpload } from "./form/IdDocumentUpload";
-
-const formSchema = z.object({
-  first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
-  birth_date: z.string().optional(),
-  address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères").optional(),
-});
+import { formSchema, type FormValues } from "./form/formSchema";
 
 interface ClientProfileFormProps {
   initialData: any;
@@ -25,7 +16,7 @@ interface ClientProfileFormProps {
 export function ClientProfileForm({ initialData, onClose }: ClientProfileFormProps) {
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       first_name: initialData.first_name || "",
@@ -36,7 +27,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -68,6 +59,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       });
       
       onClose();
+      window.location.reload();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -82,7 +74,6 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <PersonalInfoFields form={form} />
         <ContactInfoFields form={form} />
-        <IdDocumentUpload />
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>

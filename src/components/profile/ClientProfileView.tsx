@@ -1,16 +1,21 @@
-import React from 'react';
-import { Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { CommitmentsSection } from "./CommitmentsSection";
-import { supabase } from "@/integrations/supabase/client";
+import React, { useState } from 'react';
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Upload, Mail, Phone, MapPin, Calendar, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ClientProfileForm } from "./ClientProfileForm";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ClientProfileViewProps {
   profile: any;
 }
 
 export function ClientProfileView({ profile }: ClientProfileViewProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
+
   const handleIdDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = event.target.files?.[0];
@@ -32,82 +37,117 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
 
       if (updateError) throw updateError;
 
+      toast({
+        title: "Succès",
+        description: "Document d'identité mis à jour avec succès",
+      });
+
       window.location.reload();
     } catch (error: any) {
-      console.error('Error uploading document:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
     }
   };
 
-  return (
-    <div className="space-y-8">
+  const InfoItem = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null }) => (
+    <div className="flex items-start gap-2">
+      <Icon className="h-4 w-4 text-primary/70 mt-1" />
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
-        <div className="bg-gray-50/50 rounded-lg p-6 space-y-4 border border-gray-100">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Prénom</p>
-              <p className="text-gray-900 font-medium">{profile.first_name || "-"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1">Nom</p>
-              <p className="text-gray-900 font-medium">{profile.last_name || "-"}</p>
-            </div>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Email</p>
-            <p className="text-gray-900 font-medium">{profile.email || "-"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Téléphone</p>
-            <p className="text-gray-900 font-medium">{profile.phone || "-"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Date de naissance</p>
-            <p className="text-gray-900 font-medium">
-              {profile.birth_date ? format(new Date(profile.birth_date), 'dd MMMM yyyy', { locale: fr }) : "-"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Adresse</p>
-            <p className="text-gray-900 font-medium">{profile.address || "-"}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 mb-1">Pièce d'identité</p>
-            <div className="flex items-center gap-4">
-              {profile.id_document ? (
-                <a 
-                  href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/id-documents/${profile.id_document}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  Voir le document
-                </a>
-              ) : (
-                <span className="text-gray-500">Aucun document</span>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-                onClick={() => document.getElementById('id-document-upload')?.click()}
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-sm font-medium">{value || "-"}</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Mon profil</h1>
+        <Button onClick={() => setIsEditing(true)}>
+          Modifier mon profil
+        </Button>
+      </div>
+
+      <div className="bg-white shadow rounded-lg p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InfoItem 
+            icon={User} 
+            label="Nom complet" 
+            value={`${profile.first_name || ''} ${profile.last_name || ''}`} 
+          />
+          <InfoItem 
+            icon={Mail} 
+            label="Email" 
+            value={profile.email} 
+          />
+          <InfoItem 
+            icon={Phone} 
+            label="Téléphone" 
+            value={profile.phone} 
+          />
+          <InfoItem 
+            icon={MapPin} 
+            label="Adresse" 
+            value={profile.address} 
+          />
+          <InfoItem 
+            icon={Calendar} 
+            label="Date de naissance" 
+            value={profile.birth_date ? format(new Date(profile.birth_date), 'dd MMMM yyyy', { locale: fr }) : null} 
+          />
+          <InfoItem 
+            icon={Calendar} 
+            label="Membre depuis" 
+            value={profile.created_at ? format(new Date(profile.created_at), 'PPP', { locale: fr }) : null} 
+          />
+        </div>
+
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-medium mb-4">Pièce d'identité</h3>
+          <div className="flex items-center gap-4">
+            {profile.id_document ? (
+              <a 
+                href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/id-documents/${profile.id_document}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
               >
-                <Upload className="h-4 w-4" />
-                {profile.id_document ? "Modifier" : "Ajouter"}
-              </Button>
-              <input
-                id="id-document-upload"
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleIdDocumentUpload}
-                className="hidden"
-              />
-            </div>
+                Voir le document
+              </a>
+            ) : (
+              <span className="text-gray-500">Aucun document</span>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => document.getElementById('id-document-upload')?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              {profile.id_document ? "Modifier" : "Ajouter"}
+            </Button>
+            <input
+              id="id-document-upload"
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleIdDocumentUpload}
+              className="hidden"
+            />
           </div>
         </div>
       </div>
 
-      <CommitmentsSection profile={profile} />
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Modifier mon profil</DialogTitle>
+          </DialogHeader>
+          <ClientProfileForm initialData={profile} onClose={() => setIsEditing(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
