@@ -21,8 +21,6 @@ interface RouteInformationProps {
 }
 
 export function RouteInformation({ form }: RouteInformationProps) {
-  const departureDate = form.watch('departure_date');
-
   return (
     <FormSection title="Informations de route">
       <div className="grid gap-6 md:grid-cols-2">
@@ -82,26 +80,6 @@ export function RouteInformation({ form }: RouteInformationProps) {
                   {...field}
                   value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
                   min={new Date().toISOString().split('T')[0]}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="collection_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date de début des collectes</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  {...field}
-                  value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                  min={new Date().toISOString().split('T')[0]}
-                  max={departureDate ? new Date(departureDate).toISOString().split('T')[0] : undefined}
                 />
               </FormControl>
               <FormMessage />
