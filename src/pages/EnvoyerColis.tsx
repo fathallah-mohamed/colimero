@@ -8,6 +8,7 @@ import { Tour } from "@/types/tour";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -132,6 +133,7 @@ export default function EnvoyerColis() {
           isLoading={isLoading}
           userType={null}
           handleBookingClick={handleTourClick}
+          TimelineComponent={ClientTimeline}
         />
       </div>
 

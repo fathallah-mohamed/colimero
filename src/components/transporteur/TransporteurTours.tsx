@@ -1,71 +1,56 @@
-import { TourCard } from "./TourCard";
 import { Tour } from "@/types/tour";
-import { useNavigate } from "react-router-dom";
-import { differenceInDays } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { TourCard } from "./TourCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TourTimelineDisplay } from "../tour/shared/TourTimelineDisplay";
+import { ClientTimeline } from "../tour/timeline/client/ClientTimeline";
 
 interface TransporteurToursProps {
   tours: Tour[];
-  type: "public" | "private";
+  type?: "public" | "private";
   isLoading?: boolean;
   userType?: string | null;
   handleBookingClick?: (tourId: number, pickupCity: string) => void;
+  TimelineComponent?: typeof TourTimelineDisplay | typeof ClientTimeline;
 }
 
 export function TransporteurTours({ 
   tours, 
-  isLoading, 
-  handleBookingClick 
+  type = "public",
+  isLoading,
+  userType,
+  handleBookingClick,
+  TimelineComponent = TourTimelineDisplay
 }: TransporteurToursProps) {
-  const navigate = useNavigate();
-
-  const onBookingClick = (tourId: number, pickupCity: string) => {
-    if (handleBookingClick) {
-      handleBookingClick(tourId, pickupCity);
-    } else {
-      navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-[200px] w-full" />
+        ))}
       </div>
     );
   }
 
-  if (!tours.length) {
+  if (!tours?.length) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">
-          Aucune tournée disponible pour le moment
-        </p>
+      <div className="text-center py-12">
+        <p className="text-lg text-gray-500">Aucune tournée disponible pour le moment.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
-      {tours.map((tour) => {
-        const daysUntilDeparture = differenceInDays(
-          new Date(tour.departure_date),
-          new Date()
-        );
-        const isUpcoming = daysUntilDeparture <= 7 && daysUntilDeparture >= 0;
-
-        return (
-          <div
-            key={tour.id}
-            className="transform transition-all duration-200 hover:translate-y-[-2px]"
-          >
-            <TourCard
-              tour={tour}
-              onBookingClick={onBookingClick}
-            />
-          </div>
-        );
-      })}
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {tours.map((tour) => (
+        <TourCard
+          key={tour.id}
+          tour={tour}
+          type={type}
+          userType={userType}
+          onBookingClick={handleBookingClick}
+          TimelineComponent={TimelineComponent}
+        />
+      ))}
     </div>
   );
 }
