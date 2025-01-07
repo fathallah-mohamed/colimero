@@ -1,8 +1,8 @@
 interface TourTypeTabsProps {
-  tourType: string;
+  tourType: "public" | "private";
   publicToursCount: number;
   privateToursCount: number;
-  onTypeChange: (type: string) => void;
+  onTypeChange: (type: "public" | "private") => void;
 }
 
 export function TourTypeTabs({
