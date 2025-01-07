@@ -6,8 +6,10 @@ import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, MapPin, Phone, User, Scale } from "lucide-react";
+import { Package, MapPin, Phone, User, Scale, Calendar, Clock, Truck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface BookingCardContentProps {
   booking: any;
@@ -77,6 +79,32 @@ export function BookingCardContent({
       </div>
       
       <div className="mt-4 space-y-3">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-2 text-gray-600">
+            <Calendar className="h-4 w-4" />
+            <div>
+              <p className="text-sm text-gray-500">Date de collecte</p>
+              <p className="font-medium">
+                {booking.tours?.collection_date 
+                  ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
+                  : "Non définie"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-gray-600">
+            <Clock className="h-4 w-4" />
+            <div>
+              <p className="text-sm text-gray-500">Date de départ</p>
+              <p className="font-medium">
+                {booking.tours?.departure_date 
+                  ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
+                  : "Non définie"}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center gap-2 text-gray-600">
           <MapPin className="h-4 w-4" />
           <div>
@@ -88,24 +116,28 @@ export function BookingCardContent({
         <div className="flex items-center gap-2 text-gray-600">
           <User className="h-4 w-4" />
           <div>
-            <p className="text-sm text-gray-500">Destinataire</p>
-            <p className="font-medium">{booking.recipient_name}</p>
+            <p className="text-sm text-gray-500">Client</p>
+            <p className="font-medium">{booking.sender_name}</p>
+            <p className="text-sm text-gray-600">{booking.sender_phone}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 text-gray-600">
-          <Phone className="h-4 w-4" />
+          <Truck className="h-4 w-4" />
           <div>
-            <p className="text-sm text-gray-500">Contact</p>
-            <p className="font-medium">{booking.recipient_phone}</p>
+            <p className="text-sm text-gray-500">Destinataire</p>
+            <p className="font-medium">{booking.recipient_name}</p>
+            <p className="text-sm text-gray-600">{booking.recipient_phone}</p>
+            <p className="text-sm text-gray-600">{booking.recipient_address}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 text-gray-600">
           <Scale className="h-4 w-4" />
           <div>
-            <p className="text-sm text-gray-500">Poids</p>
+            <p className="text-sm text-gray-500">Poids et suivi</p>
             <p className="font-medium">{booking.weight} kg</p>
+            <p className="text-sm text-gray-600">N° {booking.tracking_number}</p>
           </div>
         </div>
 
@@ -122,6 +154,13 @@ export function BookingCardContent({
                 ))}
               </div>
             </div>
+          </div>
+        )}
+
+        {booking.package_description && (
+          <div className="mt-2 text-gray-600">
+            <p className="text-sm text-gray-500">Description du colis</p>
+            <p className="text-sm mt-1">{booking.package_description}</p>
           </div>
         )}
       </div>
