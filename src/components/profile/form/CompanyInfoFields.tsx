@@ -2,30 +2,30 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 
-interface PersonalInfoFieldsProps {
+interface CompanyInfoFieldsProps {
   form: UseFormReturn<any>;
 }
 
-export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
+export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Informations personnelles</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <h3 className="text-lg font-medium">Informations de l'entreprise</h3>
+      <div className="grid grid-cols-1 gap-4">
         <FormField
           control={form.control}
-          name="first_name"
+          name="company_name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Prénom <span className="text-red-500">*</span>
+                Nom de l'entreprise <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="Votre prénom" 
+                  placeholder="Nom de votre entreprise" 
                   {...field}
                   onBlur={(e) => {
                     field.onBlur();
-                    form.trigger("first_name");
+                    form.trigger("company_name");
                   }}
                 />
               </FormControl>
@@ -35,19 +35,19 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
         />
         <FormField
           control={form.control}
-          name="last_name"
+          name="siret"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Nom <span className="text-red-500">*</span>
+                SIRET <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="Votre nom" 
+                  placeholder="Numéro SIRET" 
                   {...field}
                   onBlur={(e) => {
                     field.onBlur();
-                    form.trigger("last_name");
+                    form.trigger("siret");
                   }}
                 />
               </FormControl>
@@ -57,36 +57,20 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
         />
         <FormField
           control={form.control}
-          name="phone"
+          name="address"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Téléphone principal <span className="text-red-500">*</span>
+                Adresse <span className="text-red-500">*</span>
               </FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="+33 6 XX XX XX XX" 
+                  placeholder="Adresse complète" 
                   {...field}
                   onBlur={(e) => {
                     field.onBlur();
-                    form.trigger("phone");
+                    form.trigger("address");
                   }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phone_secondary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="+33 6 XX XX XX XX" 
-                  {...field}
                 />
               </FormControl>
               <FormMessage />
