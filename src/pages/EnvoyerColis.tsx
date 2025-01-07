@@ -8,6 +8,7 @@ import { useTours } from "@/hooks/use-tours";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@supabase/auth-helpers-react";
+import Navigation from "@/components/Navigation";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
@@ -35,37 +36,42 @@ export default function EnvoyerColis() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <SendPackageHero />
-      <SendPackageFeatures />
-      
-      <div className="mt-12">
-        <SendPackageFilters
-          selectedRoute={selectedRoute}
-          setSelectedRoute={setSelectedRoute}
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
-          tourType={tourType}
-          setTourType={setTourType}
-        />
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+      <div className="flex-1">
+        <div className="container mx-auto px-4 py-8">
+          <SendPackageHero />
+          <SendPackageFeatures />
+          
+          <div className="mt-12">
+            <SendPackageFilters
+              selectedRoute={selectedRoute}
+              setSelectedRoute={setSelectedRoute}
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
+              tourType={tourType}
+              setTourType={setTourType}
+            />
 
-        {loading ? (
-          <div className="text-center py-8">Chargement des tournées...</div>
-        ) : tours && tours.length > 0 ? (
-          <div className="grid gap-6 mt-6">
-            {tours.map((tour) => (
-              <ClientTourCard
-                key={tour.id}
-                tour={tour}
-                onBookingClick={() => handleBooking(tour.id)}
-              />
-            ))}
+            {loading ? (
+              <div className="text-center py-8">Chargement des tournées...</div>
+            ) : tours && tours.length > 0 ? (
+              <div className="grid gap-6 mt-6">
+                {tours.map((tour) => (
+                  <ClientTourCard
+                    key={tour.id}
+                    tour={tour}
+                    onBookingClick={() => handleBooking(tour.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                Aucune tournée disponible pour les critères sélectionnés.
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-8">
-            Aucune tournée disponible pour les critères sélectionnés.
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
