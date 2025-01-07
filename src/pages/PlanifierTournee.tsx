@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { PlanningContent } from "@/components/tour/planning/PlanningContent";
 import { PlanningDialogs } from "@/components/tour/planning/PlanningDialogs";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import Navigation from "@/components/Navigation";
 
 export default function PlanifierTournee() {
@@ -12,6 +13,7 @@ export default function PlanifierTournee() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState<string | null>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
@@ -21,6 +23,10 @@ export default function PlanifierTournee() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
+        if (session) {
+          const currentUserType = session.user.user_metadata?.user_type;
+          setUserType(currentUserType);
+        }
         setIsLoading(false);
       } catch (error) {
         console.error("Error checking session:", error);
@@ -31,23 +37,36 @@ export default function PlanifierTournee() {
     checkSession();
   }, [navigate, toast]);
 
-  const handleCreateTourClick = () => {
+  const handleCreateTourClick = async () => {
     if (!isAuthenticated) {
       setIsAuthDialogOpen(true);
       return;
     }
 
-    // Rediriger vers la page de création de tournée
-    navigate("/transporteur/tournees/creer");
+    if (userType === 'client') {
+      setIsAccessDeniedOpen(true);
+      return;
+    }
+
+    if (userType === 'carrier') {
+      navigate("/transporteur/tournees/creer");
+    }
   };
 
-  const handleAuthClick = () => {
-    setIsAuthDialogOpen(true);
-  };
+  const handleAuthSuccess = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const userType = session.user.user_metadata?.user_type;
+      setUserType(userType);
+      setIsAuthenticated(true);
+      setIsAuthDialogOpen(false);
 
-  const handleAuthSuccess = () => {
-    setIsAuthDialogOpen(false);
-    setIsAuthenticated(true);
+      if (userType === 'carrier') {
+        navigate("/transporteur/tournees/creer");
+      } else if (userType === 'client') {
+        setIsAccessDeniedOpen(true);
+      }
+    }
   };
 
   const handleCarrierRegisterClick = () => {
@@ -66,7 +85,7 @@ export default function PlanifierTournee() {
         <PlanningContent 
           isAuthenticated={isAuthenticated}
           onCreateTourClick={handleCreateTourClick}
-          onAuthClick={handleAuthClick}
+          onAuthClick={() => setIsAuthDialogOpen(true)}
         />
         <PlanningDialogs 
           isAuthDialogOpen={isAuthDialogOpen}
@@ -74,7 +93,7 @@ export default function PlanifierTournee() {
           showCarrierSignupForm={showCarrierSignupForm}
           onAuthClose={() => setIsAuthDialogOpen(false)}
           onAccessDeniedClose={() => setIsAccessDeniedOpen(false)}
-          onCarrierSignupClose={() => setShowCarrierSignupForm(false)}
+          onCarrierSignupClose={setShowCarrierSignupForm}
           onAuthSuccess={handleAuthSuccess}
           onCarrierRegisterClick={handleCarrierRegisterClick}
         />
