@@ -15,7 +15,7 @@ interface ClientTourCardProps {
 
 export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const pricePerKg = tour.carriers?.carrier_capacities?.price_per_kg || 0;
+  const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
