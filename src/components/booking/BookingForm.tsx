@@ -1,281 +1,241 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { BookingWeightSelector } from "./BookingWeightSelector";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { BookingContentTypes } from "./BookingContentTypes";
-import { BookingSpecialItems } from "./BookingSpecialItems";
+import { BookingWeightSelector } from "./BookingWeightSelector";
 import { BookingPhotoUpload } from "./BookingPhotoUpload";
-import { SenderInfo } from "./form/SenderInfo";
-import { RecipientInfo } from "./form/RecipientInfo";
-import { BookingCommitments } from "./form/BookingCommitments";
-import { BookingTotalPrice } from "./form/BookingTotalPrice";
-import { useConsents } from "@/hooks/useConsents";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useBookingForm } from "@/hooks/useBookingForm";
 import { useState } from "react";
-import { BookingFormProvider } from "./context/BookingFormProvider";
-import { useBookingFormContext } from "./context/BookingFormContext";
-import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
-import { SpecialItemDisplay } from "./form/SpecialItemDisplay";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
-import { BookingFormData } from "@/types/booking";
 
 const contentTypes = [
-  "Vêtements", "Chaussures", "Produits alimentaires", "Electronique",
-  "Livres", "Jouets", "Cosmétiques", "Médicaments", "Documents", "Accessoires"
+  "Vêtements",
+  "Électronique",
+  "Documents",
+  "Alimentaire",
+  "Cosmétiques",
+  "Autres",
 ];
 
-const specialItems = [
-  { name: "Vélo", price: 50, icon: "bike" },
-  { name: "Trottinette", price: 30, icon: "scooter" },
-  { name: "Ordinateur portable", price: 20, icon: "laptop" },
-  { name: "Smartphone", price: 15, icon: "smartphone" },
-  { name: "Télévision", price: 40, icon: "tv" },
-  { name: "Colis volumineux", price: 25, icon: "package" }
-];
+const formSchema = z.object({
+  weight: z.number().min(5).max(30),
+  recipient_name: z.string().min(2, "Le nom du destinataire est requis"),
+  recipient_address: z.string().min(5, "L'adresse de livraison est requise"),
+  recipient_phone: z.string().min(8, "Le numéro de téléphone est requis"),
+  sender_name: z.string().min(2, "Votre nom est requis"),
+  sender_phone: z.string().min(8, "Votre numéro de téléphone est requis"),
+  item_type: z.string().min(2, "Le type de colis est requis"),
+  special_items: z.string().optional(),
+});
 
-interface BookingFormProps {
+export interface BookingFormProps {
   tourId: number;
   pickupCity: string;
-  destinationCountry: string;
   onSuccess: () => void;
-  onCancel: () => void;
 }
 
-function BookingFormContent({ 
-  pickupCity, 
-  destinationCountry,
-  onCancel,
-  tourId 
-}: Omit<BookingFormProps, 'onSuccess'>) {
-  const { consentTypes, userConsents } = useConsents();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
-  const {
-    isLoading,
-    weight,
-    selectedContentTypes,
-    selectedSpecialItems,
-    itemQuantities,
-    photos,
-    pricePerKg,
-    formData,
-    setState,
-    handleSubmit,
-  } = useBookingFormContext();
+export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
+  const [weight, setWeight] = useState(5);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      weight: 5,
+      recipient_name: "",
+      recipient_address: "",
+      recipient_phone: "",
+      sender_name: "",
+      sender_phone: "",
+      item_type: "",
+      special_items: "",
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const formData = {
+      ...values,
+      weight,
+      pickup_city: pickupCity,
+      delivery_city: "À définir",
+      content_types: selectedTypes,
+      photos: photos,
+    };
+
+    const { success } = await createBooking(formData);
+    if (success) {
+      form.reset();
+      setWeight(5);
+      setSelectedTypes([]);
+      setPhotos([]);
+    }
+  };
 
   const handleWeightChange = (increment: boolean) => {
-    setState(prev => ({
-      ...prev,
-      weight: Math.min(Math.max(prev.weight + (increment ? 1 : -1), 5), 30)
-    }));
-  };
-
-  const handleContentTypeToggle = (type: string) => {
-    setState(prev => ({
-      ...prev,
-      selectedContentTypes: prev.selectedContentTypes.includes(type)
-        ? prev.selectedContentTypes.filter(t => t !== type)
-        : [...prev.selectedContentTypes, type]
-    }));
-  };
-
-  const handleSpecialItemToggle = (item: string) => {
-    setState(prev => {
-      const newSelectedItems = prev.selectedSpecialItems.includes(item)
-        ? prev.selectedSpecialItems.filter(i => i !== item)
-        : [...prev.selectedSpecialItems, item];
-      
-      const newItemQuantities = { ...prev.itemQuantities };
-      if (!prev.selectedSpecialItems.includes(item)) {
-        newItemQuantities[item] = 1;
-      }
-      
-      return {
-        ...prev,
-        selectedSpecialItems: newSelectedItems,
-        itemQuantities: newItemQuantities
-      };
+    setWeight((prev) => {
+      if (increment && prev < 30) return prev + 1;
+      if (!increment && prev > 5) return prev - 1;
+      return prev;
     });
   };
 
-  const handleQuantityChange = (itemName: string, increment: boolean) => {
-    setState(prev => ({
-      ...prev,
-      itemQuantities: {
-        ...prev.itemQuantities,
-        [itemName]: Math.max(1, (prev.itemQuantities[itemName] || 1) + (increment ? 1 : -1))
-      }
-    }));
+  const handleTypeToggle = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type)
+        ? prev.filter((t) => t !== type)
+        : [...prev, type]
+    );
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setState(prev => ({
-        ...prev,
-        photos: [...prev.photos, ...Array.from(e.target.files!)]
-      }));
-    }
-  };
-
-  const handleFormDataChange = (newData: Partial<typeof formData>) => {
-    setState(prev => ({
-      ...prev,
-      formData: { ...prev.formData, ...newData }
-    }));
-  };
-
-  const areConsentsValid = () => {
-    if (!consentTypes || !userConsents) return false;
-    return consentTypes
-      .filter(type => type.required)
-      .every(type => 
-        userConsents.some(
-          consent => 
-            consent.consent_type_id === type.id && 
-            consent.accepted
-        )
-      );
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowConfirmDialog(true);
-  };
-
-  const handleConfirmBooking = async () => {
-    if (responsibilityAccepted) {
-      setShowConfirmDialog(false);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Vous devez être connecté pour effectuer une réservation",
-        });
-        return;
-      }
-
-      const bookingData: BookingFormData = {
-        tour_id: tourId,
-        user_id: user.id,
-        pickup_city: pickupCity,
-        delivery_city: formData.delivery_city,
-        weight,
-        item_type: selectedContentTypes.join(', '),
-        recipient_name: formData.recipient_name,
-        recipient_address: formData.recipient_address,
-        recipient_phone: formData.recipient_phone,
-        sender_name: formData.sender_name,
-        sender_phone: formData.sender_phone,
-        special_items: selectedSpecialItems,
-        content_types: selectedContentTypes,
-        photos: photos.map(file => URL.createObjectURL(file)),
-        terms_accepted: true,
-        customs_declaration: true,
-        tracking_number: '',  // Will be generated by the hook
-        status: 'pending' as const
-      };
-
-      await handleSubmit(bookingData);
+    if (e.target.files) {
+      const newPhotos = Array.from(e.target.files);
+      setPhotos((prev) => [...prev, ...newPhotos]);
     }
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-6 border-b">
-        <h2 className="text-xl font-semibold">Détails du colis</h2>
-        <p className="text-sm text-gray-500">
-          Remplissez les informations de votre colis
-        </p>
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <BookingWeightSelector
+          weight={weight}
+          onWeightChange={handleWeightChange}
+        />
 
-      <form onSubmit={handleFormSubmit} className="flex flex-col h-full">
-        <ScrollArea className="flex-1 p-6">
-          <div className="space-y-6">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-blue-600">Prix au kilo: {pricePerKg}€</p>
-            </div>
+        <BookingContentTypes
+          selectedTypes={selectedTypes}
+          onTypeToggle={handleTypeToggle}
+          contentTypes={contentTypes}
+        />
 
-            <BookingWeightSelector 
-              weight={weight}
-              onWeightChange={handleWeightChange}
-            />
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="recipient_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom du destinataire</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <BookingContentTypes
-              selectedTypes={selectedContentTypes}
-              onTypeToggle={handleContentTypeToggle}
-              contentTypes={contentTypes}
-            />
+          <FormField
+            control={form.control}
+            name="recipient_address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adresse de livraison</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <BookingSpecialItems
-              selectedItems={selectedSpecialItems}
-              onItemToggle={handleSpecialItemToggle}
-              specialItems={specialItems}
-              itemQuantities={itemQuantities}
-              onQuantityChange={handleQuantityChange}
-            />
-
-            <div className="flex flex-wrap gap-2">
-              {selectedSpecialItems.map(itemName => (
-                <SpecialItemDisplay
-                  key={itemName}
-                  item={{ 
-                    name: itemName, 
-                    quantity: itemQuantities[itemName] || 1 
-                  }}
-                />
-              ))}
-            </div>
-
-            <BookingPhotoUpload
-              photos={photos}
-              onPhotoUpload={handlePhotoUpload}
-            />
-
-            <SenderInfo 
-              formData={formData}
-              setFormData={handleFormDataChange}
-            />
-
-            <RecipientInfo 
-              formData={formData}
-              setFormData={handleFormDataChange}
-              destinationCountry={destinationCountry}
-            />
-
-            <BookingCommitments />
-          </div>
-        </ScrollArea>
-
-        <div className="p-6 border-t mt-auto">
-          <BookingTotalPrice
-            weight={weight}
-            pricePerKg={pricePerKg}
-            selectedSpecialItems={selectedSpecialItems}
-            itemQuantities={itemQuantities}
-            specialItems={specialItems}
-            isLoading={isLoading}
-            disabled={!areConsentsValid()}
+          <FormField
+            control={form.control}
+            name="recipient_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone du destinataire</FormLabel>
+                <FormControl>
+                  <Input {...field} type="tel" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
+
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="sender_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Votre nom</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="sender_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Votre téléphone</FormLabel>
+                <FormControl>
+                  <Input {...field} type="tel" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="item_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description du colis</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Ex: Vêtements, documents..." />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="special_items"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Instructions spéciales (optionnel)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    placeholder="Ex: Fragile, manipuler avec précaution..."
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <BookingPhotoUpload
+          photos={photos}
+          onPhotoUpload={handlePhotoUpload}
+        />
+
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Création en cours..." : "Réserver"}
+        </Button>
       </form>
-
-      <BookingConfirmDialog
-        open={showConfirmDialog}
-        onOpenChange={setShowConfirmDialog}
-        responsibilityAccepted={responsibilityAccepted}
-        onResponsibilityChange={setResponsibilityAccepted}
-        onConfirm={handleConfirmBooking}
-      />
-    </div>
-  );
-}
-
-export function BookingForm(props: BookingFormProps) {
-  const { tourId, onSuccess } = props;
-  return (
-    <BookingFormProvider tourId={tourId} onSuccess={onSuccess}>
-      <BookingFormContent {...props} />
-    </BookingFormProvider>
+    </Form>
   );
 }
