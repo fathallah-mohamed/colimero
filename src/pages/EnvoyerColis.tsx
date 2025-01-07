@@ -1,16 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tour } from "@/types/tour";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
+import { useTourData } from "@/hooks/use-tour-data";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -25,46 +24,11 @@ export default function EnvoyerColis() {
     handleAuthSuccess
   } = useBookingFlow();
 
-  const { data: tours, isLoading } = useQuery({
-    queryKey: ['public-tours', selectedRoute, selectedStatus, tourType],
-    queryFn: async () => {
-      try {
-        let query = supabase
-          .from('tours')
-          .select(`
-            *,
-            carriers (
-              company_name,
-              avatar_url,
-              carrier_capacities (
-                price_per_kg
-              )
-            )
-          `)
-          .eq('type', tourType);
-
-        if (selectedRoute === "FR_TO_TN") {
-          query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
-        } else if (selectedRoute === "TN_TO_FR") {
-          query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
-        }
-
-        if (selectedStatus !== "all") {
-          query = query.eq('status', selectedStatus);
-        }
-
-        const { data, error } = await query.order('departure_date', { ascending: true });
-
-        if (error) throw error;
-
-        return data as Tour[];
-      } catch (error) {
-        console.error('Error in queryFn:', error);
-        throw error;
-      }
-    },
-    retry: 1,
-    staleTime: 30000,
+  const { tours, loading: isLoading } = useTourData({
+    departureCountry: selectedRoute === "FR_TO_TN" ? "FR" : "TN",
+    destinationCountry: selectedRoute === "FR_TO_TN" ? "TN" : "FR",
+    sortBy: "departure_asc",
+    status: selectedStatus as any
   });
 
   const handleTourClick = (tourId: number, pickupCity: string) => {
