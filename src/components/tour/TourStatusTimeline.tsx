@@ -20,6 +20,7 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     "Programmée",
     "Ramassage en cours",
     "En transit",
+    "Livraison en cours",
     "Terminée"
   ];
 
@@ -36,6 +37,13 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
         const isCurrent = index === currentIndex && !isCompleted;
         const isNext = index === currentIndex + 1 && !isCompleted;
 
+        // Combiner les étapes "Livraison en cours" et "Terminée"
+        if (statusItem === "Terminée") {
+          return null;
+        }
+
+        const label = statusItem === "Livraison en cours" ? "Livraison" : statusItem;
+
         return (
           <TimelineStatus
             key={statusItem}
@@ -44,7 +52,7 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
             isCurrent={isCurrent}
             isNext={isNext}
             onClick={() => isNext && onStatusChange(statusItem)}
-            label={statusItem}
+            label={label}
           />
         );
       })}

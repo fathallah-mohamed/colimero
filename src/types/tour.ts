@@ -2,6 +2,7 @@ export type TourStatus =
   | "Programmée"
   | "Ramassage en cours"
   | "En transit"
+  | "Livraison en cours"
   | "Terminée"
   | "Annulée";
 
