@@ -10,7 +10,6 @@ import { SendPackageFilters } from "@/components/send-package/SendPackageFilters
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
 import { TourTimelineCard } from "@/components/transporteur/TourTimelineCard";
 import { useTourData } from "@/hooks/use-tour-data";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -36,8 +35,9 @@ export default function EnvoyerColis() {
     navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
-  const plannedTours = tours?.filter(tour => tour.status === "Programmée" && tour.type === tourType);
-  const otherTours = tours?.filter(tour => tour.status !== "Programmée" && tour.type === tourType);
+  // Séparer les tournées programmées des autres
+  const plannedTours = tours?.filter(tour => tour.status === "Programmée") || [];
+  const otherTours = tours?.filter(tour => tour.status !== "Programmée") || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,60 +65,51 @@ export default function EnvoyerColis() {
           />
         </div>
 
-        <Tabs defaultValue="planned" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="planned">Tournées programmées</TabsTrigger>
-            <TabsTrigger value="others">Autres tournées</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          {isLoading ? (
+            <div className="text-center py-8">Chargement des tournées...</div>
+          ) : tours?.length === 0 ? (
+            <div className="text-center py-8">Aucune tournée disponible</div>
+          ) : (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Tournées programmées</h2>
+                <div className="space-y-4">
+                  {plannedTours.map((tour) => (
+                    <TourTimelineCard
+                      key={tour.id}
+                      tour={tour}
+                      onBookingClick={handleTourClick}
+                    />
+                  ))}
+                  {plannedTours.length === 0 && (
+                    <p className="text-gray-500 text-center py-4">
+                      Aucune tournée programmée disponible
+                    </p>
+                  )}
+                </div>
+              </div>
 
-          <TabsContent value="planned" className="space-y-6">
-            {isLoading ? (
-              <div className="animate-pulse space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-48 bg-gray-200 rounded-lg" />
-                ))}
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Autres tournées</h2>
+                <div className="space-y-4">
+                  {otherTours.map((tour) => (
+                    <TourTimelineCard
+                      key={tour.id}
+                      tour={tour}
+                      onBookingClick={handleTourClick}
+                    />
+                  ))}
+                  {otherTours.length === 0 && (
+                    <p className="text-gray-500 text-center py-4">
+                      Aucune autre tournée disponible
+                    </p>
+                  )}
+                </div>
               </div>
-            ) : plannedTours?.length > 0 ? (
-              <div className="space-y-4">
-                {plannedTours.map((tour) => (
-                  <TourTimelineCard
-                    key={tour.id}
-                    tour={tour}
-                    onBookingClick={handleTourClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center py-8 text-gray-500">
-                Aucune tournée programmée disponible
-              </p>
-            )}
-          </TabsContent>
-
-          <TabsContent value="others" className="space-y-6">
-            {isLoading ? (
-              <div className="animate-pulse space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-48 bg-gray-200 rounded-lg" />
-                ))}
-              </div>
-            ) : otherTours?.length > 0 ? (
-              <div className="space-y-4">
-                {otherTours.map((tour) => (
-                  <TourTimelineCard
-                    key={tour.id}
-                    tour={tour}
-                    onBookingClick={handleTourClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center py-8 text-gray-500">
-                Aucune autre tournée disponible
-              </p>
-            )}
-          </TabsContent>
-        </Tabs>
+            </div>
+          )}
+        </div>
       </div>
 
       <AuthDialog
