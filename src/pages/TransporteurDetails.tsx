@@ -34,9 +34,14 @@ export default function TransporteurDetails() {
         .eq("id", id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching carrier:", error);
+        throw error;
+      }
       return data;
     },
+    retry: 1,
+    enabled: !!id,
   });
 
   const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
@@ -44,12 +49,27 @@ export default function TransporteurDetails() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tours")
-        .select("*")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            first_name,
+            last_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          )
+        `)
         .eq("carrier_id", id)
         .eq("type", "public")
         .gte("departure_date", new Date().toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching public tours:", error);
+        throw error;
+      }
+      
       return data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
@@ -63,12 +83,27 @@ export default function TransporteurDetails() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tours")
-        .select("*")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            first_name,
+            last_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          )
+        `)
         .eq("carrier_id", id)
         .eq("type", "private")
         .gte("departure_date", new Date().toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching private tours:", error);
+        throw error;
+      }
+      
       return data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
