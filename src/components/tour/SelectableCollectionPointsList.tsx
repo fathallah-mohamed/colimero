@@ -20,58 +20,53 @@ export function SelectableCollectionPointsList({
 }: SelectableCollectionPointsListProps) {
   const formatDate = (dateString: string) => {
     try {
-      // Si la date est null ou undefined, retourner un message par défaut
       if (!dateString) {
-        console.log("Date string is empty:", dateString);
         return "Date non définie";
       }
 
-      // S'assurer que la date est au bon format avant de la parser
       const date = parseISO(dateString);
       if (isNaN(date.getTime())) {
-        console.log("Invalid date:", dateString);
-        return "Date invalide";
+        return "Date non définie";
       }
 
       return format(date, "EEEE d MMMM", { locale: fr });
     } catch (error) {
       console.error("Error formatting date:", error);
-      return "Date invalide";
+      return "Date non définie";
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-4 text-sm text-gray-500 px-4">
-        <span className="font-medium">Ville</span>
-        <span className="font-medium">Adresse</span>
-        <span className="font-medium">Date</span>
-        <span className="font-medium">Heure</span>
+    <div className="space-y-2">
+      <div className="grid grid-cols-4 text-sm text-gray-500 px-4 py-2">
+        <span>Ville</span>
+        <span>Adresse</span>
+        <span>Date</span>
+        <span>Heure</span>
       </div>
       {points.map((point, index) => (
         <div
           key={index}
           onClick={() => isSelectionEnabled && onPointSelect(point.name)}
-          className={`p-4 rounded-lg ${
-            isSelectionEnabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'
-          } border transition-colors ${
+          className={`grid grid-cols-4 items-center p-4 text-sm cursor-pointer ${
             selectedPoint === point.name
-              ? "border-primary bg-primary/5"
-              : isSelectionEnabled
-                ? "border-gray-200 hover:border-primary/20"
-                : "border-gray-200"
+              ? "bg-[#F3F0FF] border-[#8B5CF6]"
+              : "hover:bg-gray-50"
           }`}
         >
-          <div className="grid grid-cols-4 items-center text-sm gap-4">
-            <span className="font-medium">{point.name}</span>
-            <span className="text-gray-600">{point.location}</span>
-            <span className="text-gray-600">
-              {formatDate(point.collection_date)}
-            </span>
-            <span className="text-gray-600">{point.time}</span>
-          </div>
+          <span className="font-medium">{point.name}</span>
+          <span className="text-gray-600">{point.location}</span>
+          <span className="text-gray-600">
+            {formatDate(point.collection_date)}
+          </span>
+          <span className="text-gray-600">{point.time}</span>
         </div>
       ))}
+      {!selectedPoint && (
+        <div className="mt-4 p-4 text-center text-sm text-gray-500 bg-[#F3F0FF] rounded-lg">
+          Sélectionnez un point de collecte pour réserver
+        </div>
+      )}
     </div>
   );
 }
