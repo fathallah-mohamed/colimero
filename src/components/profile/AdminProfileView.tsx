@@ -27,7 +27,7 @@ export function AdminProfileView({ profile }: AdminProfileViewProps) {
     : '-';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pt-8">
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <User className="h-5 w-5 text-primary/70" />
