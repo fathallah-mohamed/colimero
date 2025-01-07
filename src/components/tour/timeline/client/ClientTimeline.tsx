@@ -2,12 +2,12 @@ import { TourStatus } from "@/types/tour";
 import { CancelledStatus } from "../CancelledStatus";
 import { TimelineProgress } from "../TimelineProgress";
 import { TimelineStatus } from "../TimelineStatus";
-import { getTimelineProgress } from "../timelineUtils";
+import { getTimelineProgress, getTimelineLabel } from "../timelineUtils";
 import { motion } from "framer-motion";
 
 interface ClientTimelineProps {
   status: TourStatus;
-  tourId?: number;
+  tourId: number;
 }
 
 export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
@@ -35,24 +35,6 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
           const isCurrent = index === currentIndex && status !== "Livraison terminée";
           const isNext = index === currentIndex + 1 && !isCompleted;
 
-          let label = statusItem;
-          if (isCompleted) {
-            switch (statusItem) {
-              case "Programmé":
-                label = "Préparation terminée";
-                break;
-              case "Ramassage en cours":
-                label = "Ramassage terminé";
-                break;
-              case "En transit":
-                label = "Transport terminé";
-                break;
-              case "Livraison terminée":
-                label = "Livraison terminée";
-                break;
-            }
-          }
-
           return (
             <motion.div
               key={statusItem}
@@ -67,7 +49,7 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
                 isCurrent={isCurrent}
                 isNext={isNext}
                 onClick={() => {}}
-                label={label}
+                label={getTimelineLabel(statusItem)}
               />
             </motion.div>
           );
