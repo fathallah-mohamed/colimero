@@ -9,7 +9,7 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between text-sm">
+      <div className="flex justify-between text-sm text-gray-600">
         <span>Capacité disponible : {remainingCapacity} kg</span>
         <span>Capacité occupée : {occupiedCapacity} kg</span>
       </div>
@@ -21,7 +21,7 @@ export function TourCapacityDisplay({ totalCapacity, remainingCapacity }: TourCa
         />
       </div>
       
-      <div className="text-sm text-center text-gray-600">
+      <div className="text-sm text-center text-gray-500">
         Capacité totale du camion : {totalCapacity} kg
       </div>
     </div>

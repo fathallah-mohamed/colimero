@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Eye, Package, Truck, ArrowRight } from "lucide-react";
+import { MapPin, Calendar, Eye, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ClientTourDetails } from "./ClientTourDetails";
 import { Tour } from "@/types/tour";
 import { Avatar } from "@/components/ui/avatar";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
+import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -18,13 +18,6 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
   const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
-
-  const statusIcons = [
-    { status: "Programmé", icon: Package, label: "Programmé", current: tour.status === "Programmé" },
-    { status: "Ramassage en cours", icon: Truck, label: "Ramassage en cours", current: tour.status === "Ramassage en cours" },
-    { status: "En transit", icon: ArrowRight, label: "En transit", current: tour.status === "En transit" },
-    { status: "Livraison en cours", icon: Truck, label: "Livraison en cours", current: tour.status === "Livraison en cours" }
-  ];
 
   const handleBookingClick = () => {
     if (selectedPoint) {
@@ -69,33 +62,6 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               <span>{pricePerKg}€/kg</span>
             </div>
           </div>
-
-          <div className="mt-6 flex justify-between items-center">
-            {statusIcons.map((item, index) => (
-              <div 
-                key={item.status} 
-                className="flex flex-col items-center gap-2"
-              >
-                <div className={`rounded-full p-4 ${
-                  item.current 
-                    ? "bg-[#00B0F0] text-white" 
-                    : "bg-gray-100 text-gray-400"
-                }`}>
-                  <item.icon className="h-5 w-5" />
-                </div>
-                <span className={`text-xs ${
-                  item.current 
-                    ? "text-[#00B0F0] font-medium" 
-                    : "text-gray-500"
-                }`}>
-                  {item.label}
-                </span>
-                <span className="text-xs text-gray-400">
-                  {item.current ? "En cours" : ""}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -109,11 +75,14 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
       </Button>
 
       {isExpanded && (
-        <div className="space-y-4">
-          <ClientTourDetails tour={tour} />
+        <div className="space-y-6">
+          <TourCapacityDisplay 
+            totalCapacity={tour.total_capacity} 
+            remainingCapacity={tour.remaining_capacity} 
+          />
           
-          <div className="mt-6">
-            <h4 className="font-medium mb-4">Points de collecte disponibles</h4>
+          <div>
+            <h4 className="font-medium mb-4">Points de collecte</h4>
             <SelectableCollectionPointsList
               points={tour.route || []}
               selectedPoint={selectedPoint}
@@ -124,11 +93,11 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
           </div>
 
           <Button 
-            className="w-full bg-[#00B0F0] hover:bg-[#0090D0] text-white"
+            className="w-full bg-[#E5DEFF] hover:bg-[#D1C6FF] text-[#8B5CF6]"
             onClick={handleBookingClick}
             disabled={!selectedPoint}
           >
-            {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte"}
+            {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte pour réserver"}
           </Button>
         </div>
       )}
