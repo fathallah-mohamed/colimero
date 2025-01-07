@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
-import { Tour } from "@/types/tour";
+import { Tour, RouteStop } from "@/types/tour";
 
 export default function Reserver() {
   const navigate = useNavigate();
@@ -38,10 +38,30 @@ export default function Reserver() {
         if (error) throw error;
 
         if (data) {
+          // Parse and transform the route data
+          const parsedRoute = Array.isArray(data.route) 
+            ? data.route 
+            : JSON.parse(data.route as string);
+
+          const transformedRoute = parsedRoute.map((stop: any): RouteStop => ({
+            name: stop.name,
+            location: stop.location,
+            time: stop.time,
+            type: stop.type,
+            collection_date: stop.collection_date
+          }));
+
           setNextTour({
             ...data,
+            route: transformedRoute,
             terms_accepted: data.terms_accepted || false,
             customs_declaration: data.customs_declaration || false,
+            carriers: {
+              ...data.carriers,
+              carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
+                ? data.carriers.carrier_capacities[0] 
+                : data.carriers?.carrier_capacities
+            }
           } as Tour);
         }
       } catch (error) {
