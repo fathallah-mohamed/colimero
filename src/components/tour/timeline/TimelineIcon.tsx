@@ -12,8 +12,7 @@ interface TimelineIconProps {
 export function TimelineIcon({ status, isCompleted, isCurrent, className }: TimelineIconProps) {
   const iconClass = cn(
     "h-6 w-6 transition-transform duration-300",
-    className,
-    isCompleted ? "text-white" : isCurrent ? "text-white" : "text-gray-400"
+    className
   );
 
   if (isCompleted) {
@@ -22,13 +21,11 @@ export function TimelineIcon({ status, isCompleted, isCurrent, className }: Time
 
   switch (status) {
     case "Programmé":
-      return <Package className={iconClass} />;
+      return <Check className={iconClass} />;
     case "Ramassage en cours":
-      return <PackageOpen className={iconClass} />;
+      return <Check className={iconClass} />;
     case "En transit":
       return <Truck className={iconClass} />;
-    case "Livraison en cours":
-      return <PackageCheck className={iconClass} />;
     case "Livraison terminée":
       return <Check className={iconClass} />;
     default:
