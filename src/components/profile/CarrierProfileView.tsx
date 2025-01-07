@@ -1,14 +1,33 @@
+import { useState } from "react";
 import { ProfileData } from "@/types/profile";
 import { ServicesSection } from "./ServicesSection";
 import { CommitmentsSection } from "./CommitmentsSection";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ProfileForm } from "./ProfileForm";
 
 interface CarrierProfileViewProps {
   profile: ProfileData;
 }
 
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
+  const [isEditing, setIsEditing] = useState(false);
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pt-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-primary">Mon profil</h1>
+        <Button 
+          variant="outline" 
+          className="flex items-center gap-2" 
+          onClick={() => setIsEditing(true)}
+        >
+          <Pencil className="h-4 w-4" />
+          Modifier
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Informations personnelles</h3>
@@ -53,6 +72,21 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
 
       <ServicesSection profile={profile} onUpdate={() => window.location.reload()} />
       <CommitmentsSection profile={profile} />
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Modifier mon profil</DialogTitle>
+          </DialogHeader>
+          <ProfileForm 
+            initialData={profile} 
+            onClose={() => {
+              setIsEditing(false);
+              window.location.reload();
+            }} 
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
