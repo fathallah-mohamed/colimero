@@ -2,7 +2,6 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Calendar, Eye, Package } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
 import { Avatar } from "@/components/ui/avatar";
@@ -81,23 +80,20 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
             remainingCapacity={tour.remaining_capacity} 
           />
           
-          <div>
-            <h4 className="font-medium mb-4">Points de collecte</h4>
-            <SelectableCollectionPointsList
-              points={tour.route || []}
-              selectedPoint={selectedPoint}
-              onPointSelect={setSelectedPoint}
-              isSelectionEnabled={true}
-              tourDepartureDate={tour.departure_date}
-            />
-          </div>
+          <SelectableCollectionPointsList
+            points={tour.route || []}
+            selectedPoint={selectedPoint}
+            onPointSelect={setSelectedPoint}
+            isSelectionEnabled={true}
+            tourDepartureDate={tour.departure_date}
+          />
 
           <Button 
             className="w-full bg-[#E5DEFF] hover:bg-[#D1C6FF] text-[#8B5CF6]"
             onClick={handleBookingClick}
             disabled={!selectedPoint}
           >
-            {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte pour réserver"}
+            Sélectionnez un point de collecte pour réserver
           </Button>
         </div>
       )}
