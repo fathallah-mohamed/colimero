@@ -12,6 +12,7 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
       status={status}
       isInteractive={false}
       tourId={tourId}
+      onStatusChange={() => Promise.resolve()} // Fonction vide car non interactive
     />
   );
 }
