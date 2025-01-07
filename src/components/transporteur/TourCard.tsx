@@ -18,8 +18,6 @@ export function TourCard({ tour, onBookingClick }: TourCardProps) {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const { toast } = useToast();
   const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
-  const avatarUrl = tour.carriers?.avatar_url;
-  const defaultAvatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${tour.carriers?.company_name}`;
 
   const handleRequestApproval = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -46,11 +44,11 @@ export function TourCard({ tour, onBookingClick }: TourCardProps) {
     <div className="bg-white rounded-lg p-6 space-y-4 hover:shadow-md transition-shadow">
       {/* Header with carrier info */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
           <img 
-            src={avatarUrl || defaultAvatarUrl} 
+            src={tour.carriers?.avatar_url || "/placeholder.svg"} 
             alt={tour.carriers?.company_name}
-            className="w-full h-full object-cover"
+            className="w-8 h-8 rounded-full"
           />
         </div>
         <div>
