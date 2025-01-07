@@ -26,7 +26,7 @@ export function TimelineStatus({
   const getStatusColor = () => {
     if (variant === 'client') {
       if (isCompleted || isCurrent) {
-        return "bg-[#9b87f5] shadow-lg shadow-[#9b87f5]/20 text-white hover:bg-[#9b87f5]/90";
+        return "bg-[#0FA0CE] shadow-lg shadow-[#0FA0CE]/20 text-white hover:bg-[#0FA0CE]/90";
       }
       return "bg-white border-2 border-gray-100 hover:border-gray-200 shadow-lg shadow-gray-100/50";
     }
@@ -42,7 +42,7 @@ export function TimelineStatus({
   const getTextColor = () => {
     if (variant === 'client') {
       if (isCompleted || isCurrent) {
-        return "text-[#9b87f5]";
+        return "text-[#0FA0CE]";
       }
       return "text-gray-500";
     }

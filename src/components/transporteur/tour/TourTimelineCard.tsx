@@ -96,7 +96,7 @@ export function TourTimelineCard({
           <Button
             variant="ghost"
             size="sm"
-            className="ml-auto transition-colors duration-200 hover:bg-[#9b87f5]/10"
+            className="ml-auto transition-colors duration-200 hover:bg-[#0FA0CE]/10"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
@@ -106,9 +106,9 @@ export function TourTimelineCard({
               {isExpanded ? "Moins de détails" : "Plus de détails"}
             </span>
             {isExpanded ? (
-              <Minus className="h-4 w-4 text-[#9b87f5]" />
+              <Minus className="h-4 w-4 text-[#0FA0CE]" />
             ) : (
-              <Plus className="h-4 w-4 text-[#9b87f5]" />
+              <Plus className="h-4 w-4 text-[#0FA0CE]" />
             )}
           </Button>
         </div>
@@ -147,7 +147,7 @@ export function TourTimelineCard({
                 <div>
                   <Button 
                     onClick={handleBookingClick}
-                    className="w-full bg-[#9b87f5] hover:bg-[#8670f4] text-white"
+                    className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
                     disabled={!isBookingEnabled()}
                   >
                     {getBookingButtonText()}
