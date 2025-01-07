@@ -11,24 +11,7 @@ const getNextStatus = (currentStatus: TourStatus): TourStatus => {
     case "Ramassage en cours":
       return "En transit";
     case "En transit":
-      return "Livraison en cours";
-    case "Livraison en cours":
       return "Terminée";
-    default:
-      return currentStatus;
-  }
-};
-
-const getPreviousStatusCompleted = (currentStatus: TourStatus): TourStatus => {
-  switch (currentStatus) {
-    case "Ramassage en cours":
-      return "Programmée";
-    case "En transit":
-      return "Ramassage en cours";
-    case "Livraison en cours":
-      return "En transit";
-    case "Terminée":
-      return "Livraison en cours";
     default:
       return currentStatus;
   }
@@ -86,27 +69,12 @@ export function useTourManagement() {
 
   const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
-      if (newStatus === "Annulée") {
-        const { error } = await supabase
-          .from('tours')
-          .update({ status: newStatus })
-          .eq('id', tourId);
+      const { error } = await supabase
+        .from('tours')
+        .update({ status: newStatus })
+        .eq('id', tourId);
 
-        if (error) throw error;
-      } else {
-        const previousStatus = getPreviousStatusCompleted(newStatus);
-        console.log("Updating tour status:", { newStatus, previousStatus });
-
-        const { error } = await supabase
-          .from('tours')
-          .update({ 
-            status: newStatus,
-            previous_status: previousStatus 
-          })
-          .eq('id', tourId);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Statut mis à jour",

@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TourStatus } from "@/types/tour";
 import { TimelineIcon } from "./TimelineIcon";
-import { motion } from "framer-motion";
 
 interface TimelineStatusProps {
   status: TourStatus;
@@ -57,29 +56,23 @@ export function TimelineStatus({
 
   return (
     <div className="flex flex-col items-center gap-3 relative">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.3 }}
+      <Button
+        variant="ghost"
+        className={cn(
+          "relative h-14 w-14 rounded-full p-0 transition-all duration-300",
+          getStatusColor(),
+          isNext && "hover:scale-105 transition-transform"
+        )}
+        onClick={onClick}
+        disabled={!isNext}
       >
-        <Button
-          variant="ghost"
-          className={cn(
-            "relative h-14 w-14 rounded-full p-0 transition-all duration-300",
-            getStatusColor(),
-            isNext && "hover:scale-105 transition-transform"
-          )}
-          onClick={onClick}
-          disabled={!isNext}
-        >
-          <TimelineIcon 
-            status={status} 
-            isCompleted={isCompleted}
-            isCurrent={isCurrent}
-            variant={variant}
-          />
-        </Button>
-      </motion.div>
+        <TimelineIcon 
+          status={status} 
+          isCompleted={isCompleted}
+          isCurrent={isCurrent}
+          variant={variant}
+        />
+      </Button>
       <div className="flex flex-col items-center gap-1">
         <span className={getTextColor()}>
           {label}
