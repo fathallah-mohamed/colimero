@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
@@ -11,6 +11,7 @@ export function useNavigation() {
   const [userType, setUserType] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const mounted = useRef(true);
 
   useEffect(() => {
     let mounted = true;
