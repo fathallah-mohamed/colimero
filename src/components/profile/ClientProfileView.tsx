@@ -63,7 +63,7 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-8"> {/* Added pt-8 here for top padding */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Mon profil</h1>
         <Button onClick={() => setIsEditing(true)}>
