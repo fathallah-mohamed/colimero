@@ -87,6 +87,7 @@ export default function TransporteurDetails() {
     return <TransporteurNotFound />;
   }
 
+  // Séparer les tournées programmées des autres
   const plannedTours = tours.filter(tour => tour.status === "Programmée");
   const otherTours = tours.filter(tour => tour.status !== "Programmée");
 
