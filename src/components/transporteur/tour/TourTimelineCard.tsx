@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
-import { Plus, Minus } from "lucide-react";
+import { Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import AuthDialog from "@/components/auth/AuthDialog";
@@ -77,7 +77,7 @@ export function TourTimelineCard({
   };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md transform hover:-translate-y-1">
+    <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
@@ -88,29 +88,15 @@ export function TourTimelineCard({
           )}
         </div>
 
-        <div 
-          className="flex items-center justify-between cursor-pointer group"
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full mt-4 text-[#0FA0CE] hover:text-[#0FA0CE] hover:bg-[#0FA0CE]/10"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-auto transition-colors duration-200 hover:bg-[#0FA0CE]/10"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(!isExpanded);
-            }}
-          >
-            <span className="mr-2 text-sm font-medium text-muted-foreground">
-              {isExpanded ? "Moins de détails" : "Plus de détails"}
-            </span>
-            {isExpanded ? (
-              <Minus className="h-4 w-4 text-[#0FA0CE]" />
-            ) : (
-              <Plus className="h-4 w-4 text-[#0FA0CE]" />
-            )}
-          </Button>
-        </div>
+          <Eye className="w-4 h-4 mr-2" />
+          {isExpanded ? "Masquer les détails" : "Afficher les détails"}
+        </Button>
 
         <AnimatePresence>
           {isExpanded && (
