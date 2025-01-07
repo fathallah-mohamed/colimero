@@ -26,7 +26,6 @@ export function TourContent() {
     onEditComplete
   } = useTours();
 
-  // Add error boundary to catch and log any data fetching errors
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -35,7 +34,6 @@ export function TourContent() {
     );
   }
 
-  // Ensure tours is always an array
   const toursList = Array.isArray(tours) ? tours : [];
 
   return (
@@ -47,9 +45,9 @@ export function TourContent() {
             destinationCountry={destinationCountry}
             sortBy={sortBy}
             status={status}
-            onDepartureChange={setDepartureCountry}
-            onDestinationChange={setDestinationCountry}
-            onSortChange={setSortBy}
+            onDepartureCountryChange={setDepartureCountry}
+            onDestinationCountryChange={setDestinationCountry}
+            onSortByChange={setSortBy}
             onStatusChange={setStatus}
           />
         </div>

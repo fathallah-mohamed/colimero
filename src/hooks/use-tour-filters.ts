@@ -5,7 +5,7 @@ export function useTourFilters() {
   const [departureCountry, setDepartureCountry] = useState("FR");
   const [destinationCountry, setDestinationCountry] = useState("TN");
   const [sortBy, setSortBy] = useState("departure_asc");
-  const [status, setStatus] = useState<TourStatus | "all">("Programmé");
+  const [status, setStatus] = useState<TourStatus | "all">("Programmée");
 
   return {
     departureCountry,
