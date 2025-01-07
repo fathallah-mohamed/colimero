@@ -19,6 +19,7 @@ import MesDemandesApprobation from "./pages/MesDemandesApprobation";
 import MesTournees from "./pages/MesTournees";
 import MesReservations from "./pages/MesReservations";
 import Reserver from "./pages/Reserver";
+import CreateTourForm from "./components/tour/CreateTourForm";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ function App() {
           <Route path="/transporteurs" element={<Transporteurs />} />
           <Route path="/transporteurs/:id" element={<TransporteurDetails />} />
           <Route path="/planifier-tournee" element={<PlanifierTournee />} />
+          <Route path="/transporteur/tournees/creer" element={<CreateTourForm onSuccess={() => {}} />} />
           <Route path="/envoyer-colis" element={<EnvoyerColis />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/gestion" element={<AdminManagement />} />
