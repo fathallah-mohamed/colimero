@@ -20,7 +20,6 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
     "Programmée",
     "Ramassage en cours",
     "En transit",
-    "Livraison en cours",
     "Terminée"
   ];
 

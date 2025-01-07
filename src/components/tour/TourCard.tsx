@@ -150,7 +150,7 @@ export function TourCard({
                       <p className="text-sm text-gray-600">{booking.pickup_city} → {booking.delivery_city}</p>
                       <p className="text-sm text-gray-600">{booking.weight} kg</p>
                     </div>
-                    <Badge className={getStatusColor(booking.status)}>
+                    <Badge className={getStatusColor(tour.status)}>
                       {booking.status}
                     </Badge>
                   </div>
