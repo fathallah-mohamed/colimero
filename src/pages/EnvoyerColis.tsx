@@ -1,17 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
-import { Tour, RouteStop } from "@/types/tour";
+import { Tour } from "@/types/tour";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { TourTypeTabs } from "@/components/tour/TourTypeTabs";
+import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -44,43 +43,21 @@ export default function EnvoyerColis() {
           `)
           .eq('type', tourType);
 
-        // Set departure and destination countries based on selected route
         if (selectedRoute === "FR_TO_TN") {
           query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
         } else if (selectedRoute === "TN_TO_FR") {
           query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
         }
 
-        // Only apply status filter if not "all"
         if (selectedStatus !== "all") {
           query = query.eq('status', selectedStatus);
         }
 
         const { data, error } = await query.order('departure_date', { ascending: true });
 
-        if (error) {
-          console.error('Error fetching tours:', error);
-          throw error;
-        }
+        if (error) throw error;
 
-        return data?.map(tour => ({
-          ...tour,
-          route: Array.isArray(tour.route) 
-            ? tour.route.map((stop: any): RouteStop => ({
-                name: stop.name,
-                location: stop.location,
-                time: stop.time,
-                type: stop.type || "pickup",
-                collection_date: stop.collection_date || tour.collection_date
-              }))
-            : [],
-          carriers: tour.carriers ? {
-            ...tour.carriers,
-            carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
-              ? tour.carriers.carrier_capacities
-              : [tour.carriers.carrier_capacities]
-          } : undefined
-        })) as Tour[];
+        return data as Tour[];
       } catch (error) {
         console.error('Error in queryFn:', error);
         throw error;
@@ -120,14 +97,21 @@ export default function EnvoyerColis() {
           />
         </div>
 
-        <TransporteurTours
-          tours={tours || []}
-          type={tourType}
-          isLoading={isLoading}
-          userType={null}
-          handleBookingClick={handleTourClick}
-          TimelineComponent={ClientTimeline}
-        />
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="text-center py-8">Chargement des tournées...</div>
+          ) : tours?.length === 0 ? (
+            <div className="text-center py-8">Aucune tournée disponible</div>
+          ) : (
+            tours?.map((tour) => (
+              <ClientTourCard
+                key={tour.id}
+                tour={tour}
+                onBookingClick={handleTourClick}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       <AuthDialog
