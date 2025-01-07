@@ -80,13 +80,13 @@ export function TourCard({
 
   const getStatusColor = (status: TourStatus) => {
     switch (status) {
-      case "Programmé":
+      case "Programmée":
         return 'bg-blue-100 text-blue-800';
       case "Ramassage en cours":
         return 'bg-yellow-100 text-yellow-800';
       case "En transit":
         return 'bg-purple-100 text-purple-800';
-      case "Livraison terminée":
+      case "Terminée":
         return 'bg-green-100 text-green-800';
       case "Annulée":
         return 'bg-red-100 text-red-800';
@@ -136,7 +136,7 @@ export function TourCard({
         <CollapsibleContent className="space-y-4 mt-4">
           <TourStatusTimeline
             tourId={tour.id}
-            status={tour.status as TourStatus || "Programmé"}
+            status={tour.status}
             onStatusChange={handleStatusChange}
           />
 
@@ -150,7 +150,7 @@ export function TourCard({
                       <p className="text-sm text-gray-600">{booking.pickup_city} → {booking.delivery_city}</p>
                       <p className="text-sm text-gray-600">{booking.weight} kg</p>
                     </div>
-                    <Badge className={getStatusColor(booking.status as TourStatus)}>
+                    <Badge className={getStatusColor(booking.status)}>
                       {booking.status}
                     </Badge>
                   </div>

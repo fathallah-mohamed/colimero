@@ -21,28 +21,22 @@ export function useTimelineTransition(tourId: number, onStatusChange: (newStatus
         throw tourError;
       }
 
-      let bookingStatus;
+      let bookingStatus: string;
       switch (newStatus) {
-        case "Préparation terminée":
+        case "Programmée":
           bookingStatus = 'pending';
           break;
         case "Ramassage en cours":
           bookingStatus = 'collecting';
           break;
-        case "Ramassage terminé":
-          bookingStatus = 'collected';
-          break;
         case "En transit":
           bookingStatus = 'in_transit';
           break;
-        case "Transport terminé":
-          bookingStatus = 'transport_completed';
-          break;
-        case "Livraison en cours":
-          bookingStatus = 'delivering';
-          break;
-        case "Livraison terminée":
+        case "Terminée":
           bookingStatus = 'delivered';
+          break;
+        case "Annulée":
+          bookingStatus = 'cancelled';
           break;
         default:
           bookingStatus = 'pending';
