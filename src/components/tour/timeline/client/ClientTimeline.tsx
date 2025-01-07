@@ -6,9 +6,10 @@ import { motion } from "framer-motion";
 
 interface ClientTimelineProps {
   status: TourStatus;
+  tourId?: number; // Ajout de tourId comme prop optionnelle
 }
 
-export function ClientTimeline({ status }: ClientTimelineProps) {
+export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
   // Si le statut est annulé, afficher uniquement le statut d'annulation
   if (status === "Annulée") {
     return <CancelledStatus />;
