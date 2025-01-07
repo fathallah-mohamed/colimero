@@ -36,8 +36,9 @@ export default function PlanifierTournee() {
       setIsAuthDialogOpen(true);
       return;
     }
-    // Implement tour creation logic here
-    console.log("Creating tour...");
+
+    // Rediriger vers la page de création de tournée
+    navigate("/transporteur/tournees/creer");
   };
 
   const handleAuthClick = () => {
