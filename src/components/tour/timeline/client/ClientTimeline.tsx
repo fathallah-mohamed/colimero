@@ -14,64 +14,85 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
     return <CancelledStatus />;
   }
 
-  // Les étapes principales de la timeline
-  const mainStatuses: TourStatus[] = [
-    "Programmé",
-    "Ramassage en cours",
-    "En transit",
-    "Livraison terminée"
+  // Map the current status to our simplified timeline steps
+  const getTimelineStep = (currentStatus: TourStatus): number => {
+    switch (currentStatus) {
+      case "Programmé":
+        return 0;
+      case "Ramassage en cours":
+      case "Ramassage terminé":
+        return 1;
+      case "En transit":
+      case "Transport terminé":
+      case "Livraison en cours":
+        return 2;
+      case "Livraison terminée":
+        return 3;
+      default:
+        return 0;
+    }
+  };
+
+  const currentStep = getTimelineStep(status);
+  const progress = (currentStep / 3) * 100;
+
+  // Define our timeline steps
+  const steps = [
+    { status: "Programmé" as TourStatus, label: "Planifiée" },
+    { status: "Ramassage en cours" as TourStatus, label: "Collecte" },
+    { status: "En transit" as TourStatus, label: "Livraison" },
+    { status: "Livraison terminée" as TourStatus, label: "Terminée" }
   ];
-
-  // Trouver l'index du statut actuel
-  const currentIndex = mainStatuses.indexOf(status);
-
-  // Si la tournée est terminée, on met la progress à 100%
-  const isCompleted = status === "Livraison terminée";
-  const progress = isCompleted ? 100 : ((currentIndex) / (mainStatuses.length - 1)) * 100;
 
   return (
     <div className="relative flex flex-col space-y-8 w-full mt-4">
-      <TimelineProgress progress={progress} />
+      {/* Progress bar connecting the steps */}
+      <div className="absolute top-6 left-0 w-full h-[2px] bg-gray-100">
+        <div 
+          className="h-full bg-primary transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
       
-      <div className="flex justify-between items-center px-4">
-        {mainStatuses.map((statusItem, index) => {
-          const isCompletedStep = index < currentIndex || isCompleted;
-          const isCurrent = index === currentIndex && !isCompleted;
-
-          let label = statusItem;
-          if (statusItem === "Programmé") label = "Planifiée";
-          if (statusItem === "Ramassage en cours") label = "Collecte";
-          if (statusItem === "En transit") label = "Livraison";
-          if (statusItem === "Livraison terminée") label = "Terminée";
+      <div className="flex justify-between items-center relative">
+        {steps.map((step, index) => {
+          const isCompleted = index < currentStep;
+          const isCurrent = index === currentStep;
 
           return (
             <motion.div
-              key={statusItem}
+              key={step.label}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-2"
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              className="flex flex-col items-center gap-2 z-10"
             >
               <div className={`
-                h-12 w-12 rounded-full flex items-center justify-center
-                ${isCompletedStep ? 'bg-success text-white' : 
-                  isCurrent ? 'bg-primary text-white' : 
-                  'bg-gray-100 text-gray-400'}
+                h-12 w-12 rounded-full flex items-center justify-center transition-colors
+                ${isCompleted ? 'bg-primary text-white' : 
+                  isCurrent ? 'bg-primary text-white border-2 border-primary' : 
+                  'bg-white border-2 border-gray-200'}
               `}>
                 <TimelineIcon 
-                  status={statusItem} 
-                  isCompleted={isCompletedStep}
+                  status={step.status}
+                  isCompleted={isCompleted}
                   isCurrent={isCurrent}
+                  className={isCompleted || isCurrent ? 'text-white' : 'text-gray-400'}
                 />
               </div>
               <span className={`
-                text-sm font-medium
-                ${isCompletedStep ? 'text-success' : 
+                text-sm font-medium transition-colors
+                ${isCompleted ? 'text-primary' : 
                   isCurrent ? 'text-primary' : 
                   'text-gray-400'}
               `}>
-                {label}
+                {step.label}
               </span>
+              {isCurrent && (
+                <span className="text-xs text-muted-foreground">
+                  En cours
+                </span>
+              )}
             </motion.div>
           );
         })}
