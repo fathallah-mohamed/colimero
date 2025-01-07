@@ -1,10 +1,9 @@
-import Navigation from "@/components/Navigation";
-import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useBookingFlow } from "@/hooks/useBookingFlow";
+import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { Tour, RouteStop } from "@/types/tour";
+import { useBookingFlow } from "@/hooks/useBookingFlow";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
@@ -100,30 +99,53 @@ export default function EnvoyerColis() {
         <div className="bg-white rounded-xl shadow-sm p-4 mb-4">
           <div className="grid grid-cols-2 gap-4">
             {/* Features Row */}
-            <div className="col-span-2 grid grid-cols-4 gap-4 mb-4 border-b pb-4">
-              <div className="flex items-center gap-2">
-                <div className="bg-blue-50 p-2 rounded-full">
-                  <Package2 className="h-4 w-4 text-[#0FA0CE]" />
+            <div className="col-span-2 grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 border-b pb-4">
+              <div className="bg-blue-50 rounded-lg p-4 hover:bg-blue-100 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-3 rounded-full">
+                    <Package2 className="h-6 w-6 text-[#0FA0CE]" />
+                  </div>
+                  <div>
+                    <span className="font-medium">Expédition Facile</span>
+                    <p className="text-sm text-gray-600 mt-1">Processus simplifié de bout en bout</p>
+                  </div>
                 </div>
-                <span className="text-sm">Expédition Facile</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-blue-50 p-2 rounded-full">
-                  <Truck className="h-4 w-4 text-[#0FA0CE]" />
+              
+              <div className="bg-blue-50 rounded-lg p-4 hover:bg-blue-100 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-3 rounded-full">
+                    <Truck className="h-6 w-6 text-[#0FA0CE]" />
+                  </div>
+                  <div>
+                    <span className="font-medium">Transporteurs Vérifiés</span>
+                    <p className="text-sm text-gray-600 mt-1">Partenaires de confiance</p>
+                  </div>
                 </div>
-                <span className="text-sm">Transporteurs Vérifiés</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-blue-50 p-2 rounded-full">
-                  <Clock className="h-4 w-4 text-[#0FA0CE]" />
+              
+              <div className="bg-blue-50 rounded-lg p-4 hover:bg-blue-100 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-3 rounded-full">
+                    <Clock className="h-6 w-6 text-[#0FA0CE]" />
+                  </div>
+                  <div>
+                    <span className="font-medium">Suivi en Temps Réel</span>
+                    <p className="text-sm text-gray-600 mt-1">Localisez vos colis</p>
+                  </div>
                 </div>
-                <span className="text-sm">Suivi en Temps Réel</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-blue-50 p-2 rounded-full">
-                  <Shield className="h-4 w-4 text-[#0FA0CE]" />
+              
+              <div className="bg-blue-50 rounded-lg p-4 hover:bg-blue-100 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-3 rounded-full">
+                    <Shield className="h-6 w-6 text-[#0FA0CE]" />
+                  </div>
+                  <div>
+                    <span className="font-medium">Sécurité Garantie</span>
+                    <p className="text-sm text-gray-600 mt-1">Protection maximale</p>
+                  </div>
                 </div>
-                <span className="text-sm">Sécurité Garantie</span>
               </div>
             </div>
 
