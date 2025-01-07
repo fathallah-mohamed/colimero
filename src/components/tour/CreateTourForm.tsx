@@ -12,7 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { tourFormSchema } from "./form/tourFormSchema";
 import { Truck, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 type FormValues = z.infer<typeof tourFormSchema>;
 
@@ -24,6 +26,13 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmChecks, setConfirmChecks] = useState({
+    info_accuracy: false,
+    transport_responsibility: false,
+    platform_rules: false,
+    safety_confirmation: false,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(tourFormSchema),
@@ -36,10 +45,6 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       departure_date: new Date(),
       terms_accepted: false,
       customs_declaration: false,
-      info_accuracy: false,
-      transport_responsibility: false,
-      platform_rules: false,
-      safety_confirmation: false,
       route: [
         {
           name: "",
@@ -51,6 +56,19 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       ],
     },
   });
+
+  const handleConfirmSubmit = async () => {
+    if (Object.values(confirmChecks).every(check => check)) {
+      await onSubmit(form.getValues());
+      setShowConfirmDialog(false);
+    }
+  };
+
+  const handleInitialSubmit = () => {
+    if (form.formState.isValid) {
+      setShowConfirmDialog(true);
+    }
+  };
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
@@ -118,47 +136,117 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-4rem)]">
-      <div className="max-w-4xl mx-auto p-4 md:p-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <TourFormHeader />
-            <TourFormSections form={form} />
-            
-            <Alert className="bg-amber-50 border-amber-200 mb-4">
-              <AlertDescription>
-                En validant cette tournée, vous reconnaissez être entièrement responsable des colis transportés et de leur conformité.
-              </AlertDescription>
-            </Alert>
+    <>
+      <ScrollArea className="h-[calc(100vh-4rem)]">
+        <div className="max-w-4xl mx-auto p-4 md:p-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleInitialSubmit)} className="space-y-6">
+              <TourFormHeader />
+              <TourFormSections form={form} />
+              
+              <div className="sticky bottom-0 bg-white p-4 border-t shadow-lg">
+                <Button 
+                  type="submit" 
+                  className="w-full md:w-auto"
+                  disabled={isSubmitting || !form.formState.isValid}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Création en cours...
+                    </>
+                  ) : (
+                    <>
+                      <Truck className="mr-2 h-4 w-4" />
+                      Créer la tournée
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+      </ScrollArea>
 
-            <div className="sticky bottom-0 bg-white p-4 border-t shadow-lg">
-              <Button 
-                type="submit" 
-                className="w-full md:w-auto"
-                disabled={isSubmitting || 
-                  !form.getValues("terms_accepted") || 
-                  !form.getValues("customs_declaration") ||
-                  !form.getValues("info_accuracy") ||
-                  !form.getValues("transport_responsibility") ||
-                  !form.getValues("platform_rules") ||
-                  !form.getValues("safety_confirmation")}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Création en cours...
-                  </>
-                ) : (
-                  <>
-                    <Truck className="mr-2 h-4 w-4" />
-                    Créer la tournée
-                  </>
-                )}
-              </Button>
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmation de création de la tournée</DialogTitle>
+            <DialogDescription>
+              Veuillez confirmer les points suivants avant de créer la tournée
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="info_accuracy"
+                checked={confirmChecks.info_accuracy}
+                onCheckedChange={(checked) => 
+                  setConfirmChecks(prev => ({ ...prev, info_accuracy: checked as boolean }))
+                }
+              />
+              <Label htmlFor="info_accuracy" className="text-sm leading-none">
+                Je certifie que toutes les informations saisies pour cette tournée sont exactes et conformes à la réalité.
+              </Label>
             </div>
-          </form>
-        </Form>
-      </div>
-    </ScrollArea>
+
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="transport_responsibility"
+                checked={confirmChecks.transport_responsibility}
+                onCheckedChange={(checked) => 
+                  setConfirmChecks(prev => ({ ...prev, transport_responsibility: checked as boolean }))
+                }
+              />
+              <Label htmlFor="transport_responsibility" className="text-sm leading-none">
+                Je reconnais être seul(e) responsable des objets transportés dans cette tournée, et je m'engage à respecter toutes les lois et réglementations applicables au transport de marchandises.
+              </Label>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="platform_rules"
+                checked={confirmChecks.platform_rules}
+                onCheckedChange={(checked) => 
+                  setConfirmChecks(prev => ({ ...prev, platform_rules: checked as boolean }))
+                }
+              />
+              <Label htmlFor="platform_rules" className="text-sm leading-none">
+                J'ai lu et j'accepte les <a href="/cgu" className="text-primary hover:underline" target="_blank">Conditions Générales d'Utilisation (CGU)</a> ainsi que les règles de fonctionnement de la plateforme Colimero.
+              </Label>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="safety_confirmation"
+                checked={confirmChecks.safety_confirmation}
+                onCheckedChange={(checked) => 
+                  setConfirmChecks(prev => ({ ...prev, safety_confirmation: checked as boolean }))
+                }
+              />
+              <Label htmlFor="safety_confirmation" className="text-sm leading-none">
+                Je comprends que je suis seul(e) responsable de la sécurité, du bon état et de la conformité des colis que je transporte dans cette tournée.
+              </Label>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleConfirmSubmit}
+              disabled={!Object.values(confirmChecks).every(check => check)}
+            >
+              Confirmer la création
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
