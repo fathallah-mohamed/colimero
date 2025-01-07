@@ -6,24 +6,30 @@ import { motion } from "framer-motion";
 
 interface TimelineBaseProps {
   status: TourStatus;
-  statusOrder: TourStatus[];
   onStatusChange?: (newStatus: TourStatus) => Promise<void>;
-  canEdit?: boolean;
-  renderCancelButton?: () => React.ReactNode;
-  getStatusLabel: (status: TourStatus, isCompleted: boolean) => string;
+  tourId: number;
+  isInteractive?: boolean;
+  showCancelButton?: boolean;
 }
 
 export function TimelineBase({ 
-  status,
-  statusOrder,
-  onStatusChange,
-  canEdit = false,
-  renderCancelButton,
-  getStatusLabel
+  status, 
+  onStatusChange, 
+  tourId,
+  isInteractive = false,
+  showCancelButton = false
 }: TimelineBaseProps) {
   if (status === "Annulée") {
     return <CancelledStatus />;
   }
+
+  const statusOrder: TourStatus[] = [
+    "Programmé",
+    "Ramassage en cours",
+    "En transit",
+    "Livraison en cours",
+    "Livraison terminée"
+  ];
 
   const currentIndex = statusOrder.indexOf(status);
   const progress = ((currentIndex) / (statusOrder.length - 1)) * 100;
@@ -43,7 +49,23 @@ export function TimelineBase({
           const isCurrent = index === currentIndex;
           const isNext = index === currentIndex + 1;
 
-          const label = getStatusLabel(statusItem, isCompleted);
+          let label = statusItem;
+          if (isCompleted) {
+            switch (statusItem) {
+              case "Programmé":
+                label = "Préparation terminée";
+                break;
+              case "Ramassage en cours":
+                label = "Ramassage terminé";
+                break;
+              case "En transit":
+                label = "Transport terminé";
+                break;
+              case "Livraison en cours":
+                label = "Livraison terminée";
+                break;
+            }
+          }
 
           return (
             <TimelineStatus
@@ -51,15 +73,13 @@ export function TimelineBase({
               status={statusItem}
               isCompleted={isCompleted}
               isCurrent={isCurrent}
-              isNext={isNext && canEdit}
-              onClick={() => isNext && canEdit && onStatusChange && onStatusChange(statusItem)}
+              isNext={isNext && isInteractive}
+              onClick={() => isNext && isInteractive && onStatusChange && onStatusChange(statusItem)}
               label={label}
             />
           );
         })}
       </div>
-
-      {renderCancelButton && renderCancelButton()}
     </motion.div>
   );
 }
