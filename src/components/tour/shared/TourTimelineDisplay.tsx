@@ -24,6 +24,7 @@ interface TourTimelineDisplayProps {
   tourId: number;
   userType?: string;
   canEdit?: boolean;
+  variant?: 'client' | 'carrier';
 }
 
 export function TourTimelineDisplay({ 
@@ -31,7 +32,8 @@ export function TourTimelineDisplay({
   onStatusChange, 
   tourId,
   userType,
-  canEdit = false
+  canEdit = false,
+  variant = 'carrier'
 }: TourTimelineDisplayProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
@@ -64,7 +66,7 @@ export function TourTimelineDisplay({
       className="space-y-6"
     >
       <div className="relative flex justify-between items-center w-full mt-8 px-4">
-        <TimelineProgress progress={progress} />
+        <TimelineProgress progress={progress} variant={variant} />
         
         {statusOrder.map((statusItem, index) => {
           const isCompleted = index < currentIndex;
@@ -80,6 +82,7 @@ export function TourTimelineDisplay({
               isNext={isNext && canEdit}
               onClick={() => isNext && canEdit && onStatusChange && onStatusChange(statusItem)}
               label={statusItem}
+              variant={variant}
             />
           );
         })}
