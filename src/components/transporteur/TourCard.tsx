@@ -4,9 +4,10 @@ import { TourTimelineDisplay } from "../tour/shared/TourTimelineDisplay";
 import { ClientTimeline } from "../tour/timeline/client/ClientTimeline";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, CreditCard } from "lucide-react";
+import { Eye, CreditCard, AlertOctagon } from "lucide-react";
 import { useState } from "react";
 import { SelectableCollectionPointsList } from "../tour/SelectableCollectionPointsList";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface TourCardProps {
   tour: Tour;
@@ -32,20 +33,32 @@ export function TourCard({
     }
   };
 
+  const canBook = tour.status === "Programmé" && userType !== "carrier";
+
+  const getBookingStatusMessage = () => {
+    if (userType === "carrier") {
+      return "Les transporteurs ne peuvent pas effectuer de réservations";
+    }
+    if (tour.status !== "Programmé") {
+      return `Cette tournée est en statut "${tour.status}" et ne peut pas être réservée`;
+    }
+    return "";
+  };
+
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
       <TourCardHeader
         tour={tour}
         type={type}
         userType={userType}
       />
-      <div className="p-4">
+      <div className="p-6 space-y-6">
         <TimelineComponent 
           status={tour.status} 
           tourId={tour.id}
         />
 
-        <div className="mt-4 space-y-4">
+        <div className="space-y-4">
           <Button
             variant="outline"
             className="w-full flex items-center gap-2 text-[#0FA0CE] hover:text-[#0FA0CE]/90 border-[#0FA0CE] hover:border-[#0FA0CE]/90 hover:bg-[#0FA0CE]/10"
@@ -56,7 +69,7 @@ export function TourCard({
           </Button>
 
           {showDetails && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in slide-in-from-top-4 duration-200">
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">Capacité restante</p>
@@ -74,23 +87,34 @@ export function TourCard({
                   points={tour.route}
                   selectedPoint={selectedPoint}
                   onPointSelect={setSelectedPoint}
-                  isSelectionEnabled={true}
+                  isSelectionEnabled={canBook}
                   tourDepartureDate={tour.departure_date}
                 />
               </div>
 
-              <Button
-                className="w-full flex items-center gap-2 bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-                onClick={handleBookingClick}
-                disabled={!selectedPoint}
-              >
-                <CreditCard className="h-4 w-4" />
-                Réserver sur cette tournée
-              </Button>
+              {!canBook && (
+                <Alert variant="destructive" className="bg-red-50 border-red-200">
+                  <AlertOctagon className="h-4 w-4" />
+                  <AlertDescription>
+                    {getBookingStatusMessage()}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {canBook && (
+                <Button
+                  className="w-full flex items-center gap-2 bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
+                  onClick={handleBookingClick}
+                  disabled={!selectedPoint}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte"}
+                </Button>
+              )}
             </div>
           )}
         </div>
       </div>
-    </Card>
+    </card>
   );
 }
