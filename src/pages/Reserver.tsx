@@ -144,8 +144,8 @@ export default function Reserver() {
     );
   }
 
-  // Convert tourId from string to number before passing it to BookingForm
-  const numericTourId = tourId ? parseInt(tourId) : 0;
+  // Convert tourId from string to number
+  const numericTourId = tourId ? parseInt(tourId, 10) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
