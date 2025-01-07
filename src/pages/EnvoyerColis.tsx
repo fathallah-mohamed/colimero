@@ -7,11 +7,9 @@ import AuthDialog from "@/components/auth/AuthDialog";
 import { Tour } from "@/types/tour";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeftRight } from "lucide-react";
 
 export default function EnvoyerColis() {
-  const [selectedDeparture, setSelectedDeparture] = useState<string>("FR");
-  const [selectedDestination, setSelectedDestination] = useState<string>("TN");
+  const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<string>("Programmé");
 
   const {
@@ -22,7 +20,7 @@ export default function EnvoyerColis() {
   } = useBookingFlow();
 
   const { data: tours, isLoading } = useQuery({
-    queryKey: ['public-tours', selectedDeparture, selectedDestination, selectedStatus],
+    queryKey: ['public-tours', selectedRoute, selectedStatus],
     queryFn: async () => {
       let query = supabase
         .from('tours')
@@ -36,9 +34,14 @@ export default function EnvoyerColis() {
             )
           )
         `)
-        .eq('type', 'public')
-        .eq('departure_country', selectedDeparture)
-        .eq('destination_country', selectedDestination);
+        .eq('type', 'public');
+
+      // Appliquer le filtre de trajet
+      if (selectedRoute === "FR_TO_TN") {
+        query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
+      } else if (selectedRoute === "TN_TO_FR") {
+        query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
+      }
 
       // Appliquer le filtre de statut
       if (selectedStatus !== "all") {
@@ -81,40 +84,19 @@ export default function EnvoyerColis() {
         {/* Filtres */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-end gap-2">
-              <div className="flex-1">
-                <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                  Pays de départ
-                </label>
-                <Select value={selectedDeparture} onValueChange={setSelectedDeparture}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pays de départ" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="FR">France</SelectItem>
-                    <SelectItem value="TN">Tunisie</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="pb-2">
-                <ArrowLeftRight className="h-6 w-6 text-gray-400" />
-              </div>
-
-              <div className="flex-1">
-                <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-                  Pays d'arrivée
-                </label>
-                <Select value={selectedDestination} onValueChange={setSelectedDestination}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pays d'arrivée" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TN">Tunisie</SelectItem>
-                    <SelectItem value="FR">France</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                Trajet
+              </label>
+              <Select value={selectedRoute} onValueChange={setSelectedRoute}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sélectionner un trajet" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FR_TO_TN">France → Tunisie</SelectItem>
+                  <SelectItem value="TN_TO_FR">Tunisie → France</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
