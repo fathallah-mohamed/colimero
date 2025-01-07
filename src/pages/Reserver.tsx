@@ -10,6 +10,8 @@ export default function Reserver() {
   const { data: tour, isLoading } = useQuery({
     queryKey: ["tour", tourId],
     queryFn: async () => {
+      if (!tourId) throw new Error("Tour ID is required");
+      
       const { data, error } = await supabase
         .from("tours")
         .select(`
@@ -24,7 +26,7 @@ export default function Reserver() {
             )
           )
         `)
-        .eq("id", tourId)
+        .eq("id", parseInt(tourId, 10))
         .single();
 
       if (error) throw error;
@@ -32,13 +34,15 @@ export default function Reserver() {
       // Transform the JSON route data into RouteStop array
       const transformedTour: Tour = {
         ...data,
+        id: parseInt(data.id.toString(), 10),
         route: (data.route as any[]).map((stop): RouteStop => ({
           name: stop.name,
           location: stop.location,
           time: stop.time,
           type: stop.type,
           collection_date: stop.collection_date
-        }))
+        })),
+        status: data.status as Tour['status']
       };
 
       return transformedTour;
