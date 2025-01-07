@@ -39,7 +39,7 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
           .from('clients')
           .select('first_name, last_name, phone')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (clientData) {
           setState(prev => ({
