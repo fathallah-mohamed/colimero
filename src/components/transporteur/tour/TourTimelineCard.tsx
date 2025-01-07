@@ -3,7 +3,6 @@ import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
-import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -126,11 +125,6 @@ export function TourTimelineCard({
                 <ClientTimeline 
                   status={tour.status} 
                   tourId={tour.id}
-                />
-                
-                <TourCapacityDisplay 
-                  totalCapacity={tour.total_capacity} 
-                  remainingCapacity={tour.remaining_capacity} 
                 />
 
                 <div>
