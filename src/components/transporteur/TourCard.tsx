@@ -33,11 +33,12 @@ export function TourCard({
     }
   };
 
+  // Vérifier si l'utilisateur peut réserver (client uniquement et tournée programmée)
   const canBook = tour.status === "Programmé" && userType !== "carrier";
 
   const getBookingStatusMessage = () => {
     if (userType === "carrier") {
-      return "Les transporteurs ne peuvent pas effectuer de réservations";
+      return "Les transporteurs ne peuvent pas effectuer de réservations. Seuls les clients peuvent réserver des tournées.";
     }
     if (tour.status !== "Programmé") {
       return `Cette tournée est en statut "${tour.status}" et ne peut pas être réservée`;
