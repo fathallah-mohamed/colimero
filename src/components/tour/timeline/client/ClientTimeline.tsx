@@ -31,7 +31,7 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
       transition={{ duration: 0.5 }}
       className="relative flex justify-between items-center w-full mt-8 px-4"
     >
-      <TimelineProgress progress={progress} />
+      <TimelineProgress progress={progress} variant="client" />
       
       {statusOrder.map((statusItem, index) => {
         const isCompleted = index < currentIndex;
