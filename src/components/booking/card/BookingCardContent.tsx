@@ -6,6 +6,8 @@ import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Package, MapPin, Phone, User, Scale } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface BookingCardContentProps {
   booking: any;
@@ -74,10 +76,54 @@ export function BookingCardContent({
         <BookingStatusBadge status={currentStatus} />
       </div>
       
-      <div className="mt-4">
-        <p className="text-gray-600">{booking.delivery_city}</p>
-        <p className="font-medium">{booking.recipient_name}</p>
-        <p className="text-gray-600">{booking.recipient_phone}</p>
+      <div className="mt-4 space-y-3">
+        <div className="flex items-center gap-2 text-gray-600">
+          <MapPin className="h-4 w-4" />
+          <div>
+            <p className="text-sm text-gray-500">Trajet</p>
+            <p className="font-medium">{booking.pickup_city} → {booking.delivery_city}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-gray-600">
+          <User className="h-4 w-4" />
+          <div>
+            <p className="text-sm text-gray-500">Destinataire</p>
+            <p className="font-medium">{booking.recipient_name}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-gray-600">
+          <Phone className="h-4 w-4" />
+          <div>
+            <p className="text-sm text-gray-500">Contact</p>
+            <p className="font-medium">{booking.recipient_phone}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-gray-600">
+          <Scale className="h-4 w-4" />
+          <div>
+            <p className="text-sm text-gray-500">Poids</p>
+            <p className="font-medium">{booking.weight} kg</p>
+          </div>
+        </div>
+
+        {booking.special_items?.length > 0 && (
+          <div className="flex items-center gap-2 text-gray-600">
+            <Package className="h-4 w-4" />
+            <div>
+              <p className="text-sm text-gray-500">Objets spéciaux</p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {booking.special_items.map((item: any, index: number) => (
+                  <Badge key={index} variant="secondary">
+                    {item.name} {item.quantity && `(${item.quantity})`}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {showActions && (
