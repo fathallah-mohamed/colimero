@@ -2,11 +2,13 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Calendar, Eye, Package, Truck, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
+import { ClientTourTimeline } from "./ClientTourTimeline";
 import { ClientTourDetails } from "./ClientTourDetails";
 import { Tour } from "@/types/tour";
 import { Avatar } from "@/components/ui/avatar";
+import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -109,6 +111,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
 
       {isExpanded && (
         <div className="space-y-4">
+          <ClientTourTimeline tour={tour} />
           <ClientTourDetails tour={tour} />
           
           <div className="mt-6">
