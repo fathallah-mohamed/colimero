@@ -5,7 +5,6 @@ import { Package2, Weight } from "lucide-react";
 import { FormSection } from "./FormSection";
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
-import { Slider } from "@/components/ui/slider";
 
 interface CapacityInformationProps {
   form: UseFormReturn<any>;
@@ -23,17 +22,6 @@ export function CapacityInformation({ form }: CapacityInformationProps) {
     }
   }, [totalCapacity, remainingCapacity]);
 
-  const handleTotalCapacityChange = (value: number[]) => {
-    const newTotal = value[0];
-    form.setValue("total_capacity", newTotal);
-    form.setValue("remaining_capacity", newTotal);
-  };
-
-  const handleRemainingCapacityChange = (value: number[]) => {
-    const newRemaining = Math.min(value[0], totalCapacity);
-    form.setValue("remaining_capacity", newRemaining);
-  };
-
   return (
     <FormSection title="Capacité de transport">
       <div className="space-y-6">
@@ -47,23 +35,20 @@ export function CapacityInformation({ form }: CapacityInformationProps) {
                   <Package2 className="w-4 h-4" />
                   Capacité totale (kg)
                 </FormLabel>
-                <div className="space-y-4">
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Exemple : 1000 kg"
-                      {...field}
-                      className="text-center"
-                      readOnly
-                    />
-                  </FormControl>
-                  <Slider
-                    defaultValue={[field.value]}
-                    max={5000}
-                    step={100}
-                    onValueChange={handleTotalCapacityChange}
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Exemple : 1000 kg"
+                    {...field}
+                    className="w-full"
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      field.onChange(value);
+                      // Mettre à jour automatiquement la capacité restante
+                      form.setValue("remaining_capacity", value);
+                    }}
                   />
-                </div>
+                </FormControl>
                 <FormDescription>
                   Capacité maximale de transport en kilogrammes
                 </FormDescription>
@@ -81,23 +66,23 @@ export function CapacityInformation({ form }: CapacityInformationProps) {
                   <Weight className="w-4 h-4" />
                   Capacité disponible (kg)
                 </FormLabel>
-                <div className="space-y-4">
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Capacité restante"
-                      {...field}
-                      className="text-center"
-                      readOnly
-                    />
-                  </FormControl>
-                  <Slider
-                    defaultValue={[field.value]}
-                    max={totalCapacity}
-                    step={100}
-                    onValueChange={handleRemainingCapacityChange}
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Capacité restante"
+                    {...field}
+                    className="w-full"
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      const total = form.getValues("total_capacity");
+                      if (value <= total) {
+                        field.onChange(value);
+                      } else {
+                        field.onChange(total);
+                      }
+                    }}
                   />
-                </div>
+                </FormControl>
                 <FormDescription>
                   Ne peut pas dépasser la capacité totale
                 </FormDescription>
