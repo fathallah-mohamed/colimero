@@ -34,13 +34,11 @@ export function useNavigation() {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        if (mounted) {
+      if (mounted) {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           setUser(session?.user ?? null);
           setUserType(session?.user?.user_metadata?.user_type ?? null);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        if (mounted) {
+        } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setUserType(null);
           navigate('/');
@@ -56,27 +54,26 @@ export function useNavigation() {
 
   const handleLogout = async () => {
     try {
+      // Clear local state first
+      setUser(null);
+      setUserType(null);
+      
       const result = await handleLogoutFlow();
       
       if (result.success) {
-        setUser(null);
-        setUserType(null);
         toast({
           title: "Déconnexion réussie",
           description: "Vous avez été déconnecté avec succès",
         });
-        navigate('/');
       } else {
-        // Even if there's an error, we'll clear the local state
-        setUser(null);
-        setUserType(null);
         toast({
           variant: "destructive",
           title: "Note",
           description: "Session terminée. Vous avez été déconnecté.",
         });
-        navigate('/');
       }
+      
+      navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
       // Clear local state anyway

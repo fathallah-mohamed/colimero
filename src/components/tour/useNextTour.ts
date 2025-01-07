@@ -6,30 +6,35 @@ export function useNextTour() {
   return useQuery({
     queryKey: ['next-planned-tour'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tours')
-        .select(`
-          *,
-          carriers (
-            company_name,
-            first_name,
-            last_name,
-            avatar_url,
-            carrier_capacities (
-              price_per_kg
+      try {
+        const { data, error } = await supabase
+          .from('tours')
+          .select(`
+            *,
+            carriers (
+              company_name,
+              first_name,
+              last_name,
+              avatar_url,
+              carrier_capacities (
+                price_per_kg
+              )
             )
-          )
-        `)
-        .eq('status', 'planned')
-        .eq('type', 'public')
-        .gte('departure_date', new Date().toISOString())
-        .order('departure_date', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+          `)
+          .eq('status', 'Programmé')
+          .eq('type', 'public')
+          .gte('departure_date', new Date().toISOString())
+          .order('departure_date', { ascending: true })
+          .limit(1)
+          .maybeSingle();
 
-      if (error) throw error;
-      
-      if (data) {
+        if (error) {
+          console.error('Error fetching next tour:', error);
+          throw error;
+        }
+        
+        if (!data) return null;
+        
         const parsedRoute = Array.isArray(data.route) 
           ? data.route 
           : JSON.parse(data.route as string);
@@ -53,8 +58,12 @@ export function useNextTour() {
               : [data.carriers?.carrier_capacities]
           }
         } as Tour;
+      } catch (error) {
+        console.error('Error in useNextTour:', error);
+        throw error;
       }
-      return null;
     },
+    retry: 1,
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 }

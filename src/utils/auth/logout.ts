@@ -7,10 +7,11 @@ export const handleLogoutFlow = async () => {
     
     if (!session) {
       // No session means user is already logged out
+      console.log('No active session found, user is already logged out');
       return { success: true };
     }
 
-    // Try to sign out without scope first (simpler approach)
+    // Try to sign out
     const { error } = await supabase.auth.signOut();
 
     if (error) {
@@ -28,9 +29,7 @@ export const handleLogoutFlow = async () => {
     return { success: true };
   } catch (error) {
     console.error("Logout error:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Une erreur est survenue lors de la déconnexion" 
-    };
+    // Even if there's an error, we'll consider the user logged out locally
+    return { success: true };
   }
 };
