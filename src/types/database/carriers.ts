@@ -40,6 +40,12 @@ export interface CarrierTables {
     updated_at: string;
     reason: string | null;
     avatar_url: string | null;
+    email_verified: boolean | null;
+    company_details: Json | null;
+    authorized_routes: Json | null;
+    total_deliveries: number | null;
+    cities_covered: number | null;
+    password: string | null;
   };
 
   carrier_services: {
@@ -71,5 +77,6 @@ export interface CarrierTables {
     total_deliveries: number | null;
     cities_covered: number | null;
     status: string | null;
+    id_document: string | null;
   };
 }

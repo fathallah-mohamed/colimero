@@ -445,6 +445,7 @@ export type Database = {
           email_verified: boolean
           first_name: string
           id: string
+          id_document: string | null
           last_name: string
           phone: string
           phone_secondary: string
@@ -465,6 +466,7 @@ export type Database = {
           email_verified?: boolean
           first_name: string
           id: string
+          id_document?: string | null
           last_name: string
           phone: string
           phone_secondary?: string
@@ -485,6 +487,7 @@ export type Database = {
           email_verified?: boolean
           first_name?: string
           id?: string
+          id_document?: string | null
           last_name?: string
           phone?: string
           phone_secondary?: string
