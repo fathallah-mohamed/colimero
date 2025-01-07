@@ -97,7 +97,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
             onClick={handleBookingClick}
             disabled={!selectedPoint}
           >
-            Réserver sur cette tournée
+            {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte pour réserver"}
           </Button>
         </div>
       )}
