@@ -67,13 +67,14 @@ export function ClientTimeline({ status }: ClientTimelineProps) {
     <div className="relative flex flex-col space-y-8 w-full mt-4">
       {/* Progress bar connecting the steps */}
       <div className="absolute top-6 left-0 w-full h-[2px] bg-gray-100">
-        <div 
+        <motion.div 
           className="h-full bg-primary transition-all duration-500 ease-out"
-          style={{ width: `${progress}%` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
         />
       </div>
       
-      <div className="flex justify-between items-center relative">
+      <div className="relative flex justify-between items-start">
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
@@ -87,13 +88,15 @@ export function ClientTimeline({ status }: ClientTimelineProps) {
               transition={{ duration: 0.3, delay: index * 0.1 }}
               className="flex flex-col items-center gap-2 z-10"
             >
-              <div 
+              <motion.div 
                 className={cn(
-                  "h-12 w-12 rounded-full flex items-center justify-center transition-colors",
-                  isCompleted ? "bg-primary text-white" : 
-                  isCurrent ? "bg-primary text-white border-2 border-primary" : 
+                  "h-12 w-12 rounded-full flex items-center justify-center transition-colors duration-300",
+                  isCompleted ? "bg-primary text-white shadow-lg shadow-primary/20" : 
+                  isCurrent ? "bg-primary text-white shadow-lg shadow-primary/20" : 
                   "bg-white border-2 border-gray-200"
                 )}
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
               >
                 <Icon 
                   className={cn(
@@ -101,22 +104,28 @@ export function ClientTimeline({ status }: ClientTimelineProps) {
                     isCompleted || isCurrent ? "text-white" : "text-gray-400"
                   )} 
                 />
-              </div>
-              <span 
-                className={cn(
-                  "text-sm font-medium transition-colors",
-                  isCompleted ? "text-primary" : 
-                  isCurrent ? "text-primary" : 
-                  "text-gray-400"
-                )}
-              >
-                {step.label}
-              </span>
-              {isCurrent && (
-                <span className="text-xs text-muted-foreground">
-                  En cours
+              </motion.div>
+              <div className="flex flex-col items-center gap-1">
+                <span 
+                  className={cn(
+                    "text-sm font-medium transition-colors",
+                    isCompleted ? "text-primary" : 
+                    isCurrent ? "text-primary" : 
+                    "text-gray-400"
+                  )}
+                >
+                  {step.label}
                 </span>
-              )}
+                {isCurrent && (
+                  <motion.span 
+                    className="text-xs text-muted-foreground"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    En cours
+                  </motion.span>
+                )}
+              </div>
             </motion.div>
           );
         })}
