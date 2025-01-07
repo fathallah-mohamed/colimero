@@ -62,11 +62,6 @@ export function SelectableCollectionPointsList({
           <span className="text-gray-600">{point.time}</span>
         </div>
       ))}
-      {!selectedPoint && (
-        <div className="mt-4 p-4 text-center text-sm text-gray-500 bg-[#F3F0FF] rounded-lg">
-          Sélectionnez un point de collecte pour réserver
-        </div>
-      )}
     </div>
   );
 }
