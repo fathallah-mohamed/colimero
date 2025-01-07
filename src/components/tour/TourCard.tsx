@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Truck, Package, Clock, Eye } from "lucide-react";
+import { MapPin, Calendar, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TourStatusTimeline } from "./TourStatusTimeline";
 import { CollapsibleTrigger, CollapsibleContent, Collapsible } from "@/components/ui/collapsible";
@@ -111,12 +111,6 @@ export function TourCard({
             <Calendar className="h-4 w-4" />
             <span>Départ : {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}</span>
           </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <Truck className="h-4 w-4" />
-            <span>
-              Capacité restante : {tour.remaining_capacity} kg   Total : {tour.total_capacity} kg
-            </span>
-          </div>
         </div>
         <div className="flex gap-2">
           <Button
@@ -126,31 +120,26 @@ export function TourCard({
           >
             <MapPin className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDelete}
-          >
-            <Package className="h-4 w-4 text-red-500" />
-          </Button>
         </div>
       </div>
 
-      <TourStatusTimeline
-        tourId={tour.id}
-        status={tour.status as TourStatus || "Programmé"}
-        onStatusChange={handleStatusChange}
-      />
+      <Button
+        variant="outline"
+        className="w-full gap-2"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <Eye className="h-4 w-4" />
+        {isExpanded ? "Masquer les détails" : "Voir les détails"}
+      </Button>
 
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" className="w-full flex items-center gap-2 justify-center">
-            <Eye className="h-4 w-4" />
-            {isExpanded ? "Masquer les détails" : "Voir les détails"}
-          </Button>
-        </CollapsibleTrigger>
-
         <CollapsibleContent className="space-y-4 mt-4">
+          <TourStatusTimeline
+            tourId={tour.id}
+            status={tour.status as TourStatus || "Programmé"}
+            onStatusChange={handleStatusChange}
+          />
+
           {tour.bookings && tour.bookings.length > 0 ? (
             <div className="space-y-3">
               {tour.bookings.map((booking) => (
