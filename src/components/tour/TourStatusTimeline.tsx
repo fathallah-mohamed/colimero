@@ -10,56 +10,32 @@ interface TourStatusTimelineProps {
 }
 
 export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatusTimelineProps) {
-  // Si le statut est annulé, afficher uniquement le statut d'annulation
   if (status === "Annulée") {
     return <CancelledStatus />;
   }
 
-  // Définir le statut par défaut si aucun n'est fourni
-  const currentStatus = status || "Programmé";
+  const currentStatus = status || "Programmée";
 
-  // Les étapes principales de la timeline
   const mainStatuses: TourStatus[] = [
-    "Programmé",
+    "Programmée",
     "Ramassage en cours",
     "En transit",
     "Livraison en cours",
-    "Livraison terminée"
+    "Terminée"
   ];
 
-  // Trouver l'index du statut actuel
   const currentIndex = mainStatuses.indexOf(currentStatus);
-
-  // Si la tournée est terminée, on met la progress à 100%
-  const isCompleted = currentStatus === "Livraison terminée";
+  const isCompleted = currentStatus === "Terminée";
   const progress = isCompleted ? 100 : ((currentIndex) / (mainStatuses.length - 1)) * 100;
 
   return (
     <div className="relative flex justify-between items-center w-full mt-8 px-4">
       <TimelineProgress progress={progress} />
       
-      {mainStatuses.slice(0, -1).map((statusItem, index) => {
+      {mainStatuses.map((statusItem, index) => {
         const isCompletedStep = index < currentIndex || isCompleted;
         const isCurrent = index === currentIndex && !isCompleted;
         const isNext = index === currentIndex + 1 && !isCompleted;
-
-        let label = statusItem;
-        if (isCompletedStep || isCompleted) {
-          switch (statusItem) {
-            case "Programmé":
-              label = "Préparation terminée";
-              break;
-            case "Ramassage en cours":
-              label = "Ramassage terminé";
-              break;
-            case "En transit":
-              label = "Transport terminé";
-              break;
-            case "Livraison en cours":
-              label = "Livraison terminée";
-              break;
-          }
-        }
 
         return (
           <TimelineStatus
@@ -69,7 +45,7 @@ export function TourStatusTimeline({ tourId, status, onStatusChange }: TourStatu
             isCurrent={isCurrent}
             isNext={isNext}
             onClick={() => isNext && onStatusChange(statusItem)}
-            label={label}
+            label={statusItem}
           />
         );
       })}
