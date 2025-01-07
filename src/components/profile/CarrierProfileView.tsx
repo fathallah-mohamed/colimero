@@ -14,6 +14,11 @@ interface CarrierProfileViewProps {
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
   const [isEditing, setIsEditing] = useState(false);
 
+  const handleProfileUpdate = () => {
+    setIsEditing(false);
+    window.location.reload();
+  };
+
   return (
     <div className="space-y-8 pt-8">
       <div className="flex justify-between items-center mb-6">
@@ -80,10 +85,7 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
           </DialogHeader>
           <ProfileForm 
             initialData={profile} 
-            onClose={() => {
-              setIsEditing(false);
-              window.location.reload();
-            }} 
+            onClose={handleProfileUpdate}
           />
         </DialogContent>
       </Dialog>
