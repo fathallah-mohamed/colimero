@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
+import { Package2, Truck, Clock, Shield } from "lucide-react";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -82,22 +83,51 @@ export default function EnvoyerColis() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="bg-gradient-to-br from-[#0FA0CE] to-[#0C82A7] py-8">
+      <div className="bg-gradient-to-br from-[#0FA0CE] to-[#0C82A7] py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-white mb-2">
               Envoyez vos colis
             </h1>
-            <p className="text-lg text-gray-100">
+            <p className="text-gray-100">
               Trouvez le transporteur idéal pour votre envoi
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-4">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Features Row */}
+            <div className="col-span-2 grid grid-cols-4 gap-4 mb-4 border-b pb-4">
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-50 p-2 rounded-full">
+                  <Package2 className="h-4 w-4 text-[#0FA0CE]" />
+                </div>
+                <span className="text-sm">Expédition Facile</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-50 p-2 rounded-full">
+                  <Truck className="h-4 w-4 text-[#0FA0CE]" />
+                </div>
+                <span className="text-sm">Transporteurs Vérifiés</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-50 p-2 rounded-full">
+                  <Clock className="h-4 w-4 text-[#0FA0CE]" />
+                </div>
+                <span className="text-sm">Suivi en Temps Réel</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-50 p-2 rounded-full">
+                  <Shield className="h-4 w-4 text-[#0FA0CE]" />
+                </div>
+                <span className="text-sm">Sécurité Garantie</span>
+              </div>
+            </div>
+
+            {/* Filters */}
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1.5 block">
                 Trajet
