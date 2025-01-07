@@ -12,15 +12,11 @@ export function TimelineProgress({ progress }: TimelineProgressProps) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex-1 flex justify-between">
-        {[0, 1, 2, 3].map((step) => (
-          <div
-            key={step}
-            className={`h-2 w-2 rounded-full ${
-              (progress / 100) * 4 > step ? "bg-[#34D399]" : "bg-gray-200"
-            }`}
-          />
-        ))}
+      <div className="timeline-progress w-full">
+        <div 
+          className="timeline-progress-bar"
+          style={{ width: `${progress}%` }}
+        />
       </div>
     </motion.div>
   );

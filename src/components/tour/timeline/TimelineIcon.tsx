@@ -11,7 +11,7 @@ interface TimelineIconProps {
 
 export function TimelineIcon({ status, isCompleted, isCurrent, className }: TimelineIconProps) {
   const iconClass = cn(
-    "h-6 w-6",
+    "h-6 w-6 transition-transform duration-300",
     className,
     isCompleted ? "text-white" : isCurrent ? "text-white" : "text-gray-400"
   );
