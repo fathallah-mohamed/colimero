@@ -25,7 +25,6 @@ export function TourCard({
         tour={tour}
         type={type}
         userType={userType}
-        onBookingClick={onBookingClick}
       />
       <div className="p-4">
         <TimelineComponent 

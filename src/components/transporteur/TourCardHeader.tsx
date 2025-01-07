@@ -7,9 +7,11 @@ import { MapPin, Calendar, Truck, CreditCard } from "lucide-react";
 interface TourCardHeaderProps {
   tour: Tour;
   hideAvatar?: boolean;
+  type?: "public" | "private";
+  userType?: string;
 }
 
-export function TourCardHeader({ tour, hideAvatar }: TourCardHeaderProps) {
+export function TourCardHeader({ tour, hideAvatar, type, userType }: TourCardHeaderProps) {
   const firstCity = tour.route[0]?.name;
   const lastCity = tour.route[tour.route.length - 1]?.name;
   const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
