@@ -83,7 +83,7 @@ export function TourTimelineCard({
         <div className="flex items-center justify-between mb-4">
           <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
           {isUpcoming && (
-            <Badge className="bg-success/10 text-success hover:bg-success/20 transition-colors">
+            <Badge className="bg-[#9b87f5]/10 text-[#9b87f5] hover:bg-[#9b87f5]/20 transition-colors">
               Prochaine tournée
             </Badge>
           )}
@@ -96,7 +96,7 @@ export function TourTimelineCard({
           <Button
             variant="ghost"
             size="sm"
-            className="ml-auto transition-colors duration-200 hover:bg-primary/10"
+            className="ml-auto transition-colors duration-200 hover:bg-[#9b87f5]/10"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
@@ -106,9 +106,9 @@ export function TourTimelineCard({
               {isExpanded ? "Moins de détails" : "Plus de détails"}
             </span>
             {isExpanded ? (
-              <Minus className="h-4 w-4 text-primary" />
+              <Minus className="h-4 w-4 text-[#9b87f5]" />
             ) : (
-              <Plus className="h-4 w-4 text-primary" />
+              <Plus className="h-4 w-4 text-[#9b87f5]" />
             )}
           </Button>
         </div>
@@ -147,7 +147,7 @@ export function TourTimelineCard({
                 <div>
                   <Button 
                     onClick={handleBookingClick}
-                    className="w-full"
+                    className="w-full bg-[#9b87f5] hover:bg-[#8670f4] text-white"
                     disabled={!isBookingEnabled()}
                   >
                     {getBookingButtonText()}

@@ -1,5 +1,8 @@
 import { TourStatus } from "@/types/tour";
-import { TimelineBase } from "../shared/TimelineBase";
+import { TimelineStatus } from "../TimelineStatus";
+import { TimelineProgress } from "../TimelineProgress";
+import { CancelledStatus } from "../CancelledStatus";
+import { motion } from "framer-motion";
 
 interface ClientTimelineProps {
   status: TourStatus;
@@ -7,6 +10,10 @@ interface ClientTimelineProps {
 }
 
 export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
+  if (status === "Annulée") {
+    return <CancelledStatus />;
+  }
+
   const statusOrder: TourStatus[] = [
     "Programmé",
     "Ramassage en cours",
@@ -14,29 +21,54 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
     "Livraison en cours"
   ];
 
-  const getStatusLabel = (status: TourStatus, isCompleted: boolean): string => {
-    if (!isCompleted) return status;
-
-    switch (status) {
-      case "Programmé":
-        return "Préparation terminée";
-      case "Ramassage en cours":
-        return "Ramassage terminé";
-      case "En transit":
-        return "Transport terminé";
-      case "Livraison en cours":
-        return "Livraison terminée";
-      default:
-        return status;
-    }
-  };
+  const currentIndex = statusOrder.indexOf(status);
+  const progress = ((currentIndex) / (statusOrder.length - 1)) * 100;
 
   return (
-    <TimelineBase
-      status={status}
-      statusOrder={statusOrder}
-      getStatusLabel={getStatusLabel}
-      canEdit={false}
-    />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="relative flex justify-between items-center w-full mt-8 px-4"
+    >
+      <TimelineProgress progress={progress} />
+      
+      {statusOrder.map((statusItem, index) => {
+        const isCompleted = index < currentIndex;
+        const isCurrent = index === currentIndex;
+        const isNext = index === currentIndex + 1;
+
+        let label = statusItem;
+        if (isCompleted) {
+          switch (statusItem) {
+            case "Programmé":
+              label = "Préparation terminée";
+              break;
+            case "Ramassage en cours":
+              label = "Ramassage terminé";
+              break;
+            case "En transit":
+              label = "Transport terminé";
+              break;
+            case "Livraison en cours":
+              label = "Livraison terminée";
+              break;
+          }
+        }
+
+        return (
+          <TimelineStatus
+            key={statusItem}
+            status={statusItem}
+            isCompleted={isCompleted}
+            isCurrent={isCurrent}
+            isNext={isNext}
+            onClick={() => {}}
+            label={label}
+            variant="client"
+          />
+        );
+      })}
+    </motion.div>
   );
 }

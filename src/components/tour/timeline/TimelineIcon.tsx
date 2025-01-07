@@ -7,13 +7,22 @@ interface TimelineIconProps {
   isCompleted?: boolean;
   isCurrent?: boolean;
   className?: string;
+  variant?: 'client' | 'carrier';
 }
 
-export function TimelineIcon({ status, isCompleted, isCurrent, className }: TimelineIconProps) {
+export function TimelineIcon({ 
+  status, 
+  isCompleted, 
+  isCurrent, 
+  className,
+  variant = 'carrier'
+}: TimelineIconProps) {
   const iconClass = cn(
     "h-6 w-6 transition-transform duration-300",
     className,
-    isCompleted ? "text-white" : isCurrent ? "text-white" : "text-gray-400"
+    variant === 'client' 
+      ? isCompleted || isCurrent ? "text-white" : "text-gray-400"
+      : isCompleted ? "text-white" : isCurrent ? "text-white" : "text-gray-400"
   );
 
   if (isCompleted) {
