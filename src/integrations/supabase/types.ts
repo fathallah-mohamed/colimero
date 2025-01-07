@@ -962,6 +962,10 @@ export type Database = {
             }
             Returns: Json
           }
+      generate_tours_with_all_statuses: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       random_last_city: {
         Args: Record<PropertyKey, never>
         Returns: Json
