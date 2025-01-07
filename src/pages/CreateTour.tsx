@@ -11,6 +11,7 @@ export default function CreateTour() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [userType, setUserType] = useState<string | null>(null);
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -26,12 +27,12 @@ export default function CreateTour() {
         setIsLoading(false);
 
         if (currentUserType !== 'carrier') {
+          setShowAccessDenied(true);
           toast({
             variant: "destructive",
             title: "Accès refusé",
             description: "Seuls les transporteurs peuvent créer des tournées",
           });
-          navigate('/');
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -47,7 +48,16 @@ export default function CreateTour() {
   }
 
   if (userType !== 'carrier') {
-    return <AccessDeniedMessage />;
+    return (
+      <AccessDeniedMessage 
+        userType="client"
+        isOpen={showAccessDenied}
+        onClose={() => {
+          setShowAccessDenied(false);
+          navigate('/');
+        }}
+      />
+    );
   }
 
   return (
