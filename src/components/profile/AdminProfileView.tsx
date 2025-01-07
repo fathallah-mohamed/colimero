@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { ProfileData } from '@/types/profile';
-import { User, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import NewRegistrationRequests from '@/components/admin/NewRegistrationRequests';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AdminProfileForm } from './form/AdminProfileForm';
+import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
 
 interface AdminProfileViewProps {
   profile: ProfileData;
@@ -14,6 +15,7 @@ interface AdminProfileViewProps {
 
 export function AdminProfileView({ profile }: AdminProfileViewProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const InfoItem = ({ icon: Icon, label, value }: { icon: any, label: string, value: string }) => (
     <div className="flex items-start gap-3 p-4 rounded-lg bg-white border border-gray-100">
@@ -39,9 +41,15 @@ export function AdminProfileView({ profile }: AdminProfileViewProps) {
             <User className="h-5 w-5 text-primary/70" />
             Informations administrateur
           </h2>
-          <Button onClick={() => setIsEditing(true)}>
-            Modifier le profil
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setIsChangingPassword(true)} variant="outline">
+              <Lock className="h-4 w-4 mr-2" />
+              Changer le mot de passe
+            </Button>
+            <Button onClick={() => setIsEditing(true)}>
+              Modifier le profil
+            </Button>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoItem 
@@ -92,6 +100,18 @@ export function AdminProfileView({ profile }: AdminProfileViewProps) {
           <AdminProfileForm 
             initialData={profile} 
             onClose={() => setIsEditing(false)} 
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isChangingPassword} onOpenChange={setIsChangingPassword}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Changer le mot de passe</DialogTitle>
+          </DialogHeader>
+          <ForgotPasswordForm 
+            onSuccess={() => setIsChangingPassword(false)}
+            onCancel={() => setIsChangingPassword(false)}
           />
         </DialogContent>
       </Dialog>

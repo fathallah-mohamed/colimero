@@ -45,7 +45,18 @@ export function AdminProfileForm({ initialData, onClose }: AdminProfileFormProps
         return;
       }
 
-      const { error } = await supabase
+      // Update auth metadata
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: {
+          first_name: values.first_name,
+          last_name: values.last_name,
+        }
+      });
+
+      if (metadataError) throw metadataError;
+
+      // Update administrator profile
+      const { error: profileError } = await supabase
         .from('administrators')
         .update({
           first_name: values.first_name,
@@ -55,7 +66,7 @@ export function AdminProfileForm({ initialData, onClose }: AdminProfileFormProps
         })
         .eq('id', session.user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       toast({
         title: "Succès",
