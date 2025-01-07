@@ -52,7 +52,6 @@ export default function EnvoyerColis() {
 
       if (error) throw error;
 
-      // Transform the data to match the Tour type
       const transformedTours = data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) 

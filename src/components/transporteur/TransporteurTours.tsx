@@ -47,7 +47,7 @@ export function TransporteurTours({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-3xl mx-auto space-y-4">
       {tours.map((tour) => {
         const daysUntilDeparture = differenceInDays(
           new Date(tour.departure_date),

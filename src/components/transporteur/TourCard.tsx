@@ -41,7 +41,7 @@ export function TourCard({ tour, onBookingClick }: TourCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 space-y-6 hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-lg p-6 space-y-4 hover:shadow-md transition-shadow">
       {/* Header with carrier info */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -62,7 +62,7 @@ export function TourCard({ tour, onBookingClick }: TourCardProps) {
       </div>
 
       {/* Route info */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center gap-2 text-gray-600">
           <MapPin className="h-5 w-5 text-primary/60" />
           <div>
