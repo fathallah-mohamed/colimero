@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
-import { TourTimeline } from "@/components/transporteur/TourTimeline";
+import { TourTimelineDisplay } from "@/components/tour/shared/TourTimelineDisplay";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
@@ -19,7 +19,7 @@ interface TourTimelineCardProps {
   onBookingClick: (tourId: number, pickupCity: string) => void;
   onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
   hideAvatar?: boolean;
-  userType?: string | null;
+  userType?: string;
   isUpcoming?: boolean;
 }
 
@@ -78,6 +78,12 @@ export function TourTimelineCard({
     }
   };
 
+  const handleStatusUpdate = async (newStatus: TourStatus) => {
+    if (onStatusChange) {
+      await onStatusChange(tour.id, newStatus);
+    }
+  };
+
   return (
     <div className={cn(
       "bg-white rounded-xl overflow-hidden transition-all duration-200",
@@ -129,10 +135,12 @@ export function TourTimelineCard({
               className="overflow-hidden"
             >
               <div className="pt-6 space-y-6">
-                <TourTimeline 
+                <TourTimelineDisplay 
                   status={tour.status} 
-                  onStatusChange={onStatusChange ? (newStatus) => onStatusChange(tour.id, newStatus) : undefined}
+                  onStatusChange={handleStatusUpdate}
                   tourId={tour.id}
+                  userType={userType}
+                  canEdit={userType === 'carrier'}
                 />
                 
                 <TourCapacityDisplay 
