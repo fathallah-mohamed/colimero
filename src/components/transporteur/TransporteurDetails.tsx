@@ -108,13 +108,11 @@ export default function TransporteurDetails() {
             tours={publicTours} 
             type="public" 
             isLoading={isLoadingPublic}
-            hideAvatar
           />
           <TransporteurTours 
             tours={privateTours} 
             type="private" 
             isLoading={isLoadingPrivate}
-            hideAvatar
           />
         </div>
       </div>
