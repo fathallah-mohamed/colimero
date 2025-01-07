@@ -1,7 +1,8 @@
-import { TourTimelineCard } from "./tour/TourTimelineCard";
+import { TourCard } from "./TourCard";
 import { Tour } from "@/types/tour";
 import { useNavigate } from "react-router-dom";
 import { differenceInDays } from "date-fns";
+import { Loader2 } from "lucide-react";
 
 interface TransporteurToursProps {
   tours: Tour[];
@@ -14,10 +15,7 @@ interface TransporteurToursProps {
 
 export function TransporteurTours({ 
   tours, 
-  type, 
   isLoading, 
-  hideAvatar, 
-  userType,
   handleBookingClick 
 }: TransporteurToursProps) {
   const navigate = useNavigate();
@@ -31,21 +29,25 @@ export function TransporteurTours({
   };
 
   if (isLoading) {
-    return <div>Chargement des tournées...</div>;
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (!tours.length) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">
-          Aucune tournée {type === "public" ? "publique" : "privée"} disponible
+          Aucune tournée disponible pour le moment
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {tours.map((tour) => {
         const daysUntilDeparture = differenceInDays(
           new Date(tour.departure_date),
@@ -56,14 +58,12 @@ export function TransporteurTours({
         return (
           <div
             key={tour.id}
-            className="transform transition-all duration-200 hover:translate-y-[-4px]"
+            className="transform transition-all duration-200 hover:translate-y-[-2px]"
           >
-            <TourTimelineCard
+            <TourCard
               tour={tour}
               onBookingClick={onBookingClick}
-              hideAvatar={hideAvatar}
-              userType={userType}
-              isUpcoming={isUpcoming}
+              hideAvatar={false}
             />
           </div>
         );
