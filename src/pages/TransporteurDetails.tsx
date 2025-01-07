@@ -6,7 +6,7 @@ import { TransporteurLayout } from "@/components/transporteur/TransporteurLayout
 import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLeftColumn";
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
-import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
+import { TourTimelineCard } from "@/components/transporteur/TourTimelineCard";
 import type { Tour } from "@/types/tour";
 
 export default function TransporteurDetails() {
@@ -129,26 +129,67 @@ export default function TransporteurDetails() {
         firstName={transporteur.first_name}
       />
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <TransporteurLeftColumn
-          email={transporteur.email || ""}
-          phone={transporteur.phone || ""}
-          phoneSecondary={transporteur.phone_secondary}
-          address={transporteur.address || ""}
-          capacities={transporteur.carrier_capacities}
-          services={transporteur.carrier_services}
-          transporteurName={transporteur.company_name || transporteur.first_name}
-        />
-        <div className="grid md:grid-cols-2 gap-6">
-          <TransporteurTours 
-            tours={publicTours} 
-            type="public"
-            isLoading={isLoadingPublic}
-          />
-          <TransporteurTours 
-            tours={privateTours} 
-            type="private"
-            isLoading={isLoadingPrivate}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <TransporteurLeftColumn
+              email={transporteur.email || ""}
+              phone={transporteur.phone || ""}
+              phoneSecondary={transporteur.phone_secondary}
+              address={transporteur.address || ""}
+              capacities={transporteur.carrier_capacities}
+              services={transporteur.carrier_services}
+              transporteurName={transporteur.company_name || transporteur.first_name}
+            />
+          </div>
+          <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Tournées publiques</h2>
+              {isLoadingPublic ? (
+                <div className="animate-pulse space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-48 bg-gray-200 rounded-lg" />
+                  ))}
+                </div>
+              ) : publicTours.length > 0 ? (
+                <div className="space-y-4">
+                  {publicTours.map((tour) => (
+                    <TourTimelineCard
+                      key={tour.id}
+                      tour={tour}
+                      hideAvatar
+                      onBookingClick={() => {}}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">Aucune tournée publique disponible</p>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Tournées privées</h2>
+              {isLoadingPrivate ? (
+                <div className="animate-pulse space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-48 bg-gray-200 rounded-lg" />
+                  ))}
+                </div>
+              ) : privateTours.length > 0 ? (
+                <div className="space-y-4">
+                  {privateTours.map((tour) => (
+                    <TourTimelineCard
+                      key={tour.id}
+                      tour={tour}
+                      hideAvatar
+                      onBookingClick={() => {}}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">Aucune tournée privée disponible</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </TransporteurLayout>
