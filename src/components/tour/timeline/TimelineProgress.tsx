@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
+import { TourStatus } from "@/types/tour";
+import { getTimelineProgress } from "./timelineUtils";
 
 interface TimelineProgressProps {
   progress: number;
+  status?: TourStatus;
 }
 
 export function TimelineProgress({ progress }: TimelineProgressProps) {

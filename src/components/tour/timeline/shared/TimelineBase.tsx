@@ -2,6 +2,7 @@ import { TourStatus } from "@/types/tour";
 import { TimelineProgress } from "../TimelineProgress";
 import { TimelineIcon } from "../TimelineIcon";
 import { TimelineStatus } from "../TimelineStatus";
+import { getTimelineProgress } from "../timelineUtils";
 
 interface TimelineBaseProps {
   status: TourStatus;
@@ -16,16 +17,20 @@ export function TimelineBase({
   onStatusChange,
   tourId,
 }: TimelineBaseProps) {
+  const progress = getTimelineProgress(status);
+
   return (
     <div className="space-y-4">
-      <TimelineProgress status={status} />
+      <TimelineProgress progress={progress} />
       <div className="flex items-center gap-2">
         <TimelineIcon status={status} />
         <TimelineStatus 
           status={status}
-          isInteractive={isInteractive}
-          onStatusChange={onStatusChange}
-          tourId={tourId}
+          isCompleted={status === "Livraison terminée"}
+          isCurrent={status !== "Livraison terminée" && status !== "Annulée"}
+          isNext={false}
+          onClick={() => {}}
+          label={status}
         />
       </div>
     </div>
