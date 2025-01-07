@@ -80,21 +80,24 @@ export function useTourData({
             location: stop.location,
             time: stop.time,
             type: stop.type,
-            collection_date: stop.collection_date || tour.collection_date
+            collection_date: stop.collection_date
           }))
         : [];
 
       return {
         ...tour,
         route: parsedRoute,
+        status: tour.status as TourStatus,
+        previous_status: tour.previous_status as TourStatus | null,
+        bookings: tour.bookings || [],
         carriers: tour.carriers ? {
           ...tour.carriers,
           carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
             ? tour.carriers.carrier_capacities[0]
             : tour.carriers.carrier_capacities
         } : undefined
-      };
-    }) as Tour[];
+      } as Tour;
+    });
 
     setTours(transformedTours || []);
     setLoading(false);

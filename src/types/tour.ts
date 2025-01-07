@@ -2,7 +2,6 @@ export type TourStatus =
   | "Programmée"
   | "Ramassage en cours"
   | "En transit"
-  | "Livraison en cours"
   | "Terminée"
   | "Annulée";
 
@@ -17,12 +16,14 @@ export interface RouteStop {
 }
 
 export interface Booking {
-  id: number;
+  id: string;
   recipient_name: string;
   pickup_city: string;
   delivery_city: string;
   weight: number;
-  status: TourStatus;
+  tracking_number: string;
+  status: string;
+  recipient_phone: string;
 }
 
 export interface Tour {

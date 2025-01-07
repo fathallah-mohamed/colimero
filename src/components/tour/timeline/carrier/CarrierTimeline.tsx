@@ -29,23 +29,23 @@ export function CarrierTimeline({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   const statusOrder: TourStatus[] = [
-    "Programmé",
+    "Programmée",
     "Ramassage en cours",
     "En transit",
-    "Livraison en cours"
+    "Terminée"
   ];
 
   const getStatusLabel = (status: TourStatus, isCompleted: boolean): string => {
     if (!isCompleted) return status;
 
     switch (status) {
-      case "Programmé":
+      case "Programmée":
         return "Préparation terminée";
       case "Ramassage en cours":
         return "Ramassage terminé";
       case "En transit":
         return "Transport terminé";
-      case "Livraison en cours":
+      case "Terminée":
         return "Livraison terminée";
       default:
         return status;
@@ -60,7 +60,7 @@ export function CarrierTimeline({
   };
 
   const renderCancelButton = () => {
-    if (status === "Livraison terminée") return null;
+    if (status === "Terminée") return null;
 
     return (
       <div className="flex justify-end mt-8">
