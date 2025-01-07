@@ -12,6 +12,7 @@ import { tourFormSchema } from "./form/tourFormSchema";
 import { Truck, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { TourConfirmDialog } from "./form/TourConfirmDialog";
+import * as z from "zod";
 
 type FormValues = z.infer<typeof tourFormSchema>;
 
