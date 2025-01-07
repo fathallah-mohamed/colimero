@@ -80,6 +80,14 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
             remainingCapacity={tour.remaining_capacity} 
           />
           
+          <SelectableCollectionPointsList
+            points={tour.route || []}
+            selectedPoint={selectedPoint}
+            onPointSelect={setSelectedPoint}
+            isSelectionEnabled={true}
+            tourDepartureDate={tour.departure_date}
+          />
+
           <Button 
             className="w-full bg-[#E5DEFF] hover:bg-[#D1C6FF] text-[#8B5CF6]"
             onClick={handleBookingClick}
