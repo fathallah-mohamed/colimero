@@ -1,17 +1,20 @@
 import { TourStatus } from "@/types/tour";
-import { TimelineProgress } from "../TimelineProgress";
-import { TimelineIcon } from "../TimelineIcon";
-import { CancelledStatus } from "../CancelledStatus";
 import { motion } from "framer-motion";
+import { Package, Truck, CheckCircle2, CalendarDays } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ClientTimelineProps {
   status: TourStatus;
   tourId?: number;
 }
 
-export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
+export function ClientTimeline({ status }: ClientTimelineProps) {
   if (status === "Annulée") {
-    return <CancelledStatus />;
+    return (
+      <div className="flex items-center justify-center p-4 bg-red-50 rounded-lg">
+        <span className="text-red-600 font-medium">Tournée annulée</span>
+      </div>
+    );
   }
 
   // Map the current status to our simplified timeline steps
@@ -38,10 +41,26 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
 
   // Define our timeline steps
   const steps = [
-    { status: "Programmé" as TourStatus, label: "Planifiée" },
-    { status: "Ramassage en cours" as TourStatus, label: "Collecte" },
-    { status: "En transit" as TourStatus, label: "Livraison" },
-    { status: "Livraison terminée" as TourStatus, label: "Terminée" }
+    { 
+      icon: CalendarDays,
+      label: "Planifiée",
+      status: "Programmé" as TourStatus 
+    },
+    { 
+      icon: Package,
+      label: "Collecte",
+      status: "Ramassage en cours" as TourStatus 
+    },
+    { 
+      icon: Truck,
+      label: "Livraison",
+      status: "En transit" as TourStatus 
+    },
+    { 
+      icon: CheckCircle2,
+      label: "Terminée",
+      status: "Livraison terminée" as TourStatus 
+    }
   ];
 
   return (
@@ -58,6 +77,7 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
         {steps.map((step, index) => {
           const isCompleted = index < currentStep;
           const isCurrent = index === currentStep;
+          const Icon = step.icon;
 
           return (
             <motion.div
@@ -67,25 +87,29 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
               transition={{ duration: 0.3, delay: index * 0.1 }}
               className="flex flex-col items-center gap-2 z-10"
             >
-              <div className={`
-                h-12 w-12 rounded-full flex items-center justify-center transition-colors
-                ${isCompleted ? 'bg-primary text-white' : 
-                  isCurrent ? 'bg-primary text-white border-2 border-primary' : 
-                  'bg-white border-2 border-gray-200'}
-              `}>
-                <TimelineIcon 
-                  status={step.status}
-                  isCompleted={isCompleted}
-                  isCurrent={isCurrent}
-                  className={isCompleted || isCurrent ? 'text-white' : 'text-gray-400'}
+              <div 
+                className={cn(
+                  "h-12 w-12 rounded-full flex items-center justify-center transition-colors",
+                  isCompleted ? "bg-primary text-white" : 
+                  isCurrent ? "bg-primary text-white border-2 border-primary" : 
+                  "bg-white border-2 border-gray-200"
+                )}
+              >
+                <Icon 
+                  className={cn(
+                    "h-5 w-5",
+                    isCompleted || isCurrent ? "text-white" : "text-gray-400"
+                  )} 
                 />
               </div>
-              <span className={`
-                text-sm font-medium transition-colors
-                ${isCompleted ? 'text-primary' : 
-                  isCurrent ? 'text-primary' : 
-                  'text-gray-400'}
-              `}>
+              <span 
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  isCompleted ? "text-primary" : 
+                  isCurrent ? "text-primary" : 
+                  "text-gray-400"
+                )}
+              >
                 {step.label}
               </span>
               {isCurrent && (
