@@ -19,3 +19,22 @@ export interface Profile {
     price_per_kg: number;
   };
 }
+
+// Alias ProfileData to Profile for backward compatibility
+export type ProfileData = Profile;
+
+export interface EditServicesDialogProps {
+  carrier_id: string;
+  onClose: () => void;
+}
+
+export interface ServicesSectionProps {
+  profile: Profile;
+  onUpdate?: () => void;
+}
+
+export interface ProfileHeaderProps {
+  title: string;
+  description: string;
+  onEdit: () => void;
+}

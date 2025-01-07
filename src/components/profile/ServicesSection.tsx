@@ -1,13 +1,8 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Profile } from "@/types/profile";
-import { ServicesList } from "./services/ServicesList";
 import { EditServicesDialog } from "./services/EditServicesDialog";
-
-export interface ServicesSectionProps {
-  profile: Profile;
-  onUpdate?: () => void;
-}
+import { ServicesList } from "./services/ServicesList";
+import { ServicesSectionProps } from "@/types/profile";
 
 export function ServicesSection({ profile, onUpdate }: ServicesSectionProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -19,17 +14,19 @@ export function ServicesSection({ profile, onUpdate }: ServicesSectionProps) {
       </div>
       <ServicesList services={profile.carrier_services || []} />
 
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <EditServicesDialog
-            profile={profile}
-            onClose={() => {
-              setShowEditDialog(false);
-              onUpdate?.();
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      {showEditDialog && (
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <EditServicesDialog
+              carrier_id={profile.id}
+              onClose={() => {
+                setShowEditDialog(false);
+                onUpdate?.();
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

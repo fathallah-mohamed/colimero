@@ -1,38 +1,55 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { ServiceOptions } from "@/components/auth/ServiceOptions";
-import { UseFormReturn } from "react-hook-form";
+import { EditServicesDialogProps } from "@/types/profile";
 
-interface EditServicesDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  form: UseFormReturn<any>;
-  onSubmit: (values: { services: string[] }) => Promise<void>;
-}
+export function EditServicesDialog({ carrier_id, onClose }: EditServicesDialogProps) {
+  const [isOpen, setIsOpen] = useState(true);
 
-export function EditServicesDialog({ isOpen, onClose, form, onSubmit }: EditServicesDialogProps) {
+  const handleClose = () => {
+    setIsOpen(false);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-primary">
-            Modifier mes services
-          </DialogTitle>
+          <DialogTitle>Modifier les services</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <ServiceOptions form={form} />
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button type="submit">
-                Enregistrer
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-500">
+            Sélectionnez les services que vous souhaitez proposer à vos clients.
+          </p>
+          {/* Service selection form would go here */}
+          <div className="flex flex-col gap-4">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="form-checkbox" />
+              <span>Transport standard</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="form-checkbox" />
+              <span>Transport express</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" className="form-checkbox" />
+              <span>Transport frigorifique</span>
+            </label>
+          </div>
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary/90"
+            >
+              Enregistrer
+            </button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
