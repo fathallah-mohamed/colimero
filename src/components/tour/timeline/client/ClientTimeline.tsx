@@ -18,6 +18,7 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
     "Programmée",
     "Ramassage en cours",
     "En transit",
+    "Livraison en cours",
     "Terminée"
   ];
 
@@ -38,6 +39,13 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
         const isCurrent = index === currentIndex;
         const isNext = index === currentIndex + 1;
 
+        // Combiner les étapes "Livraison en cours" et "Terminée"
+        if (statusItem === "Terminée") {
+          return null;
+        }
+
+        const label = statusItem === "Livraison en cours" ? "Livraison" : statusItem;
+
         return (
           <TimelineStatus
             key={statusItem}
@@ -46,7 +54,7 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
             isCurrent={isCurrent}
             isNext={isNext}
             onClick={() => {}}
-            label={statusItem}
+            label={label}
             variant="client"
           />
         );
