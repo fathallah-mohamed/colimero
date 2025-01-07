@@ -83,7 +83,7 @@ export default function EnvoyerColis() {
 
         {/* Filtres */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700 mb-1.5 block">
                 Trajet
