@@ -8,6 +8,7 @@ import { ClientTourTimeline } from "./ClientTourTimeline";
 import { ClientTourDetails } from "./ClientTourDetails";
 import { Tour } from "@/types/tour";
 import { Avatar } from "@/components/ui/avatar";
+import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -16,6 +17,7 @@ interface ClientTourCardProps {
 
 export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedPoint, setSelectedPoint] = useState<string>("");
   const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
 
   const statusIcons = [
@@ -24,6 +26,12 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
     { status: "En transit", icon: ArrowRight, label: "En transit", current: tour.status === "En transit" },
     { status: "Livraison en cours", icon: Truck, label: "Livraison en cours", current: tour.status === "Livraison en cours" }
   ];
+
+  const handleBookingClick = () => {
+    if (selectedPoint) {
+      onBookingClick(tour.id, selectedPoint);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
@@ -97,7 +105,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
         className="w-full text-[#00B0F0] hover:text-[#00B0F0] hover:bg-blue-50"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <Eye className="h-4 w-4" />
+        <Eye className="h-4 w-4 mr-2" />
         {isExpanded ? "Masquer les détails" : "Afficher les détails"}
       </Button>
 
@@ -105,11 +113,24 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
         <div className="space-y-4">
           <ClientTourTimeline tour={tour} />
           <ClientTourDetails tour={tour} />
+          
+          <div className="mt-6">
+            <h4 className="font-medium mb-4">Points de collecte disponibles</h4>
+            <SelectableCollectionPointsList
+              points={tour.route || []}
+              selectedPoint={selectedPoint}
+              onPointSelect={setSelectedPoint}
+              isSelectionEnabled={true}
+              tourDepartureDate={tour.departure_date}
+            />
+          </div>
+
           <Button 
             className="w-full bg-[#00B0F0] hover:bg-[#0090D0] text-white"
-            onClick={() => onBookingClick(tour.id, tour.route?.[0]?.name || "")}
+            onClick={handleBookingClick}
+            disabled={!selectedPoint}
           >
-            Réserver sur cette tournée
+            {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte"}
           </Button>
         </div>
       )}
