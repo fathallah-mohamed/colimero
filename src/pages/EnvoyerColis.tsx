@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { Tour } from "@/types/tour";
+import { Tour, RouteStop } from "@/types/tour";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
@@ -57,7 +57,13 @@ export default function EnvoyerColis() {
       return data?.map(tour => ({
         ...tour,
         route: Array.isArray(tour.route) 
-          ? tour.route 
+          ? tour.route.map((stop: any): RouteStop => ({
+              name: stop.name,
+              location: stop.location,
+              time: stop.time,
+              type: stop.type || "pickup",
+              collection_date: stop.collection_date || tour.collection_date
+            }))
           : [],
         carriers: tour.carriers ? {
           ...tour.carriers,
