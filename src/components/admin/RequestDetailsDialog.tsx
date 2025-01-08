@@ -103,7 +103,7 @@ export default function RequestDetailsDialog({
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors du rejet de la demande.",
       });
     } finally {
       setIsSubmitting(false);

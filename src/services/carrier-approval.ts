@@ -14,12 +14,16 @@ export async function approveCarrierRequest(requestId: string) {
 
     console.log("Found carrier request:", request);
 
+    // Generate a random password for the new user
+    const tempPassword = Math.random().toString(36).slice(-8);
+
     // Update request status to trigger carrier creation
     const { error: updateError } = await supabase
       .from("carrier_registration_requests")
       .update({ 
         status: "approved",
-        email_verified: true
+        email_verified: true,
+        password: tempPassword
       })
       .eq("id", requestId);
 
@@ -28,7 +32,7 @@ export async function approveCarrierRequest(requestId: string) {
 
     // Wait for database triggers to complete
     console.log("Waiting for triggers to complete...");
-    await new Promise(resolve => setTimeout(resolve, 8000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Verify carrier was created
     const { data: carrier, error: verifyError } = await supabase
@@ -41,6 +45,20 @@ export async function approveCarrierRequest(requestId: string) {
     if (!carrier) {
       console.error("Carrier not found after waiting for triggers");
       throw new Error("Carrier creation failed - please try again");
+    }
+
+    // Send approval email
+    const { error: emailError } = await supabase.functions.invoke("send-approval-email", {
+      body: JSON.stringify({
+        email: request.email,
+        company_name: request.company_name,
+        password: tempPassword
+      }),
+    });
+
+    if (emailError) {
+      console.error("Error sending approval email:", emailError);
+      // Don't throw here, as the carrier was still created successfully
     }
 
     console.log("Carrier created successfully:", carrier);
