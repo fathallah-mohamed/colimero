@@ -1,5 +1,5 @@
 import { MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Heading } from "@/components/ui/heading";
 import { TransporteurAvatar } from "./TransporteurAvatar";
@@ -19,6 +19,7 @@ const countryNames: { [key: string]: string } = {
 };
 
 export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }: TransporteurHeaderProps) {
+  const navigate = useNavigate();
   const countries = coverageArea.split(", ");
   
   const formatCoverageArea = (countries: string[]) => {
@@ -29,10 +30,13 @@ export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }:
   return (
     <div className="bg-gradient-to-r from-[#2563EB] to-[#00B0F0] py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <Link to="/nos-transporteurs" className="inline-flex items-center text-white mb-8 hover:opacity-80">
+        <button 
+          onClick={() => navigate('/nos-transporteurs')}
+          className="inline-flex items-center text-white mb-8 hover:opacity-80"
+        >
           <ArrowLeft className="h-5 w-5 mr-2" />
           Retour aux transporteurs
-        </Link>
+        </button>
         <div className="flex items-center gap-6">
           <TransporteurAvatar
             avatarUrl={avatarUrl}
