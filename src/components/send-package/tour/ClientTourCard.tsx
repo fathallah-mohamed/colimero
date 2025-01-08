@@ -32,7 +32,9 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   };
 
   // Filter only pickup points from the route
-  const pickupPoints = tour.route?.filter(stop => stop.type === 'pickup' || stop.type === 'ramassage') || [];
+  const pickupPoints = tour.route?.filter(stop => 
+    stop.type === 'pickup' || stop.type === 'ramassage'
+  ) || [];
 
   const cities = tour.route?.map(stop => ({
     name: stop.name,
