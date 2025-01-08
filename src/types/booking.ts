@@ -20,6 +20,21 @@ export interface BookingFormState {
   formData: FormData;
 }
 
+export interface BookingFormData {
+  weight: number;
+  pickup_city: string;
+  delivery_city: string;
+  recipient_name: string;
+  recipient_address: string;
+  recipient_phone: string;
+  sender_name: string;
+  sender_phone: string;
+  item_type?: string;
+  special_items?: any[];
+  content_types?: string[];
+  photos?: File[];
+}
+
 export interface Booking {
   id: string;
   user_id: string;
