@@ -1,5 +1,3 @@
-import { Route } from "@/types/navigation";
-
 export const PUBLIC_ROUTES = [
   '/',
   '/connexion',
