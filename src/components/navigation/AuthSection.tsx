@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { UserCircle2 } from "lucide-react";
-import { UserMenuItems } from "./UserMenuItems";
+import { AccountMenu } from "./AccountMenu";
 
 interface AuthSectionProps {
   user: any;
@@ -15,22 +15,11 @@ export function AuthSection({
   handleLogout, 
   setShowAuthDialog 
 }: AuthSectionProps) {
-  if (!user) {
-    return (
-      <Button 
-        variant="outline" 
-        onClick={() => setShowAuthDialog(true)}
-        className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-      >
-        <UserCircle2 className="w-4 h-4 mr-2" />
-        Se connecter
-      </Button>
-    );
-  }
-
   return (
-    <div className="hidden md:flex md:items-center md:space-x-4">
-      <UserMenuItems userType={userType} />
-    </div>
+    <AccountMenu 
+      user={user}
+      userType={userType}
+      onLogout={handleLogout}
+    />
   );
 }

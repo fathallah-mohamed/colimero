@@ -28,7 +28,7 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         <Button 
           variant="outline" 
           size="sm"
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
+          className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
           onClick={() => setShowAuthDialog(true)}
         >
           <UserCircle2 className="w-4 h-4 mr-1.5" />
@@ -50,16 +50,22 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
   };
 
   const getMenuItems = () => {
+    const commonItems = (
+      <>
+        <DropdownMenuItem asChild>
+          <Link to="/profil" className="flex items-center gap-2">
+            <UserCircle2 className="w-4 h-4" />
+            Profil
+          </Link>
+        </DropdownMenuItem>
+      </>
+    );
+
     switch (userType) {
       case 'carrier':
         return (
           <>
-            <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center gap-2">
-                <UserCircle2 className="w-4 h-4" />
-                Profil
-              </Link>
-            </DropdownMenuItem>
+            {commonItems}
             <DropdownMenuItem asChild>
               <Link to="/mes-tournees" className="flex items-center gap-2">
                 <Truck className="w-4 h-4" />
@@ -77,12 +83,7 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
       case 'admin':
         return (
           <>
-            <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center gap-2">
-                <UserCircle2 className="w-4 h-4" />
-                Profil
-              </Link>
-            </DropdownMenuItem>
+            {commonItems}
             <DropdownMenuItem asChild>
               <Link to="/admin" className="flex items-center gap-2">
                 <ClipboardList className="w-4 h-4" />
@@ -94,12 +95,7 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
       default:
         return (
           <>
-            <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center gap-2">
-                <UserCircle2 className="w-4 h-4" />
-                Profil
-              </Link>
-            </DropdownMenuItem>
+            {commonItems}
             <DropdownMenuItem asChild>
               <Link to="/mes-reservations" className="flex items-center gap-2">
                 <ClipboardList className="w-4 h-4" />
@@ -117,7 +113,7 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         <Button 
           variant="outline" 
           size="sm"
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
+          className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
         >
           <UserCircle2 className="w-4 h-4 mr-1.5" />
           {getUserDisplayName()}
