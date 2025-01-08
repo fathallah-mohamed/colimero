@@ -25,6 +25,10 @@ export function BookingListItem({ booking }: BookingListItemProps) {
     }
   };
 
+  // Ensure special_items is always an array
+  const specialItems = Array.isArray(booking.special_items) ? booking.special_items : [];
+  const contentTypes = Array.isArray(booking.content_types) ? booking.content_types : [];
+
   return (
     <Card key={booking.id} className="p-3">
       <div className="space-y-4">
@@ -95,13 +99,13 @@ export function BookingListItem({ booking }: BookingListItemProps) {
               </div>
             </div>
 
-            {booking.content_types && booking.content_types.length > 0 && (
+            {contentTypes.length > 0 && (
               <div className="flex items-start gap-2">
                 <Package className="h-4 w-4 mt-1 text-gray-500" />
                 <div>
                   <p className="text-sm text-gray-500">Types de contenu</p>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {booking.content_types.map((type: string, index: number) => (
+                    {contentTypes.map((type: string, index: number) => (
                       <Badge key={index} variant="secondary">
                         {type}
                       </Badge>
@@ -111,13 +115,13 @@ export function BookingListItem({ booking }: BookingListItemProps) {
               </div>
             )}
 
-            {booking.special_items && booking.special_items.length > 0 && (
+            {specialItems.length > 0 && (
               <div className="flex items-start gap-2">
                 <Package className="h-4 w-4 mt-1 text-gray-500" />
                 <div>
                   <p className="text-sm text-gray-500">Objets spéciaux</p>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {booking.special_items.map((item: any, index: number) => (
+                    {specialItems.map((item: any, index: number) => (
                       <Badge key={index} variant="secondary">
                         {item.name} {item.quantity && `(${item.quantity})`}
                       </Badge>
