@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { UserCircle2, LogOut } from "lucide-react";
 import { UserMenuItems } from "./UserMenuItems";
+import { cn } from "@/lib/utils";
 
 interface AuthSectionProps {
   user: any;
@@ -17,7 +18,13 @@ export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }:
           variant="outline" 
           size="sm"
           onClick={() => setShowAuthDialog(true)}
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
+          className={cn(
+            "border-2 border-primary text-primary",
+            "hover:bg-primary hover:text-white",
+            "transition-all duration-200",
+            "shadow-sm hover:shadow-md",
+            "bg-white/80 backdrop-blur-sm"
+          )}
         >
           <UserCircle2 className="w-4 h-4 mr-2" />
           Se connecter
@@ -34,7 +41,12 @@ export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }:
         variant="outline" 
         size="sm" 
         onClick={handleLogout}
-        className="text-red-600 hover:text-red-700"
+        className={cn(
+          "text-red-600 hover:text-red-700",
+          "border-red-200 hover:border-red-300",
+          "hover:bg-red-50",
+          "transition-all duration-200"
+        )}
       >
         <LogOut className="w-4 h-4 mr-2" />
         Déconnexion
