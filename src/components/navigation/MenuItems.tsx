@@ -37,7 +37,7 @@ export default function MenuItems() {
         />
         <span className={cn(
           "whitespace-nowrap",
-          isMobile ? "block" : item.hideTextOnMobile ? "hidden lg:block" : "block"
+          isMobile ? "block" : item.hideTextOnMobile ? "hidden xl:block" : "block"
         )}>
           {item.name}
         </span>
@@ -84,7 +84,7 @@ export default function MenuItems() {
 
   return (
     <div className={cn(
-      "hidden lg:flex items-center space-x-1",
+      "hidden lg:flex items-center space-x-1", // Changed from lg:flex
       "lg:flex-nowrap lg:overflow-x-auto lg:pb-2",
       "scrollbar-hide"
     )}>
