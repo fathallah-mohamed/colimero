@@ -17,7 +17,9 @@ import {
   ClipboardList, 
   UserCog,
   Users,
-  Building2
+  Building2,
+  Truck,
+  User
 } from "lucide-react";
 
 interface AccountMenuProps {
@@ -27,6 +29,32 @@ interface AccountMenuProps {
 
 export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
   const { toast } = useToast();
+  const [userData, setUserData] = useState<{ first_name: string; last_name: string } | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      let profileData;
+      if (userType === 'admin') {
+        const { data } = await supabase.from('administrators').select('first_name, last_name').eq('id', user.id).single();
+        profileData = data;
+      } else if (userType === 'carrier') {
+        const { data } = await supabase.from('carriers').select('first_name, last_name').eq('id', user.id).single();
+        profileData = data;
+      } else {
+        const { data } = await supabase.from('clients').select('first_name, last_name').eq('id', user.id).single();
+        profileData = data;
+      }
+
+      if (profileData) {
+        setUserData(profileData);
+      }
+    };
+
+    fetchUserData();
+  }, [userType]);
 
   const handleSignOut = async () => {
     try {
@@ -47,6 +75,19 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
         title: "Erreur",
         description: error.message,
       });
+    }
+  };
+
+  const getUserIcon = () => {
+    switch (userType) {
+      case 'admin':
+        return <Building2 className="w-4 h-4" />;
+      case 'carrier':
+        return <Truck className="w-4 h-4" />;
+      case 'client':
+        return <User className="w-4 h-4" />;
+      default:
+        return <UserCircle2 className="w-4 h-4" />;
     }
   };
 
@@ -141,9 +182,12 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="relative hover:bg-primary/10 transition-colors"
+          className="relative hover:bg-primary/10 transition-colors flex items-center gap-2"
         >
-          <UserCircle2 className="w-5 h-5 text-primary" />
+          {getUserIcon()}
+          <span className="font-medium">
+            {userData ? `${userData.first_name} ${userData.last_name}` : 'Mon compte'}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
