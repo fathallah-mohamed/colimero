@@ -14,7 +14,7 @@ export interface RouteStop {
   name: string;
   location: string;
   time: string;
-  type: "pickup" | "dropoff";
+  type: "pickup" | "dropoff" | "ramassage" | "livraison";
   collection_date?: string;
 }
 
