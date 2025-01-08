@@ -14,7 +14,7 @@ export const MobileMenuButton = React.forwardRef<HTMLButtonElement, MobileMenuBu
         ref={ref}
         variant="ghost"
         size="icon"
-        className={cn("md:hidden", className)}
+        className={cn("block lg:hidden", className)} // Changed to always show on mobile/tablet
         {...props}
       >
         {isOpen ? (

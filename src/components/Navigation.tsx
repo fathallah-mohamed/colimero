@@ -76,7 +76,7 @@ export default function Navigation() {
             </Link>
           </motion.div>
 
-          {/* Desktop Menu - Changed from md: to lg: */}
+          {/* Desktop Menu */}
           <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
             <MenuItems />
           </div>
@@ -94,17 +94,17 @@ export default function Navigation() {
               ref={mobileButtonRef}
               isOpen={isOpen}
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden" // Changed from md:hidden
+              className="block lg:hidden" // Changed to always show on mobile/tablet
             />
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu - Changed from md:hidden */}
+      {/* Mobile Menu */}
       <div 
         ref={mobileMenuRef}
         className={cn(
-          "lg:hidden transition-all duration-300 ease-in-out",
+          "block lg:hidden transition-all duration-300 ease-in-out", // Changed to always show on mobile/tablet
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
