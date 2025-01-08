@@ -19,6 +19,7 @@ export interface Profile {
     total_capacity: number;
     price_per_kg: number;
   };
+  id_document?: string | null;
 }
 
 // Alias ProfileData to Profile for backward compatibility
