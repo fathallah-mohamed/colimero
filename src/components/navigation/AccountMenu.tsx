@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import {
+import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -11,16 +10,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
   UserCircle2, 
-  LogOut, 
-  Settings, 
-  Package, 
-  ClipboardList, 
-  UserCog,
-  Users,
+  LogOut,
   Building2,
   Truck,
   User
 } from "lucide-react";
+import { getMenuItems } from "./menu/MenuItems";
+import { useUserData } from "./menu/useUserData";
 
 interface AccountMenuProps {
   userType: string | null;
@@ -29,32 +25,7 @@ interface AccountMenuProps {
 
 export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
   const { toast } = useToast();
-  const [userData, setUserData] = useState<{ first_name: string; last_name: string } | null>(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      let profileData;
-      if (userType === 'admin') {
-        const { data } = await supabase.from('administrators').select('first_name, last_name').eq('id', user.id).single();
-        profileData = data;
-      } else if (userType === 'carrier') {
-        const { data } = await supabase.from('carriers').select('first_name, last_name').eq('id', user.id).single();
-        profileData = data;
-      } else {
-        const { data } = await supabase.from('clients').select('first_name, last_name').eq('id', user.id).single();
-        profileData = data;
-      }
-
-      if (profileData) {
-        setUserData(profileData);
-      }
-    };
-
-    fetchUserData();
-  }, [userType]);
+  const userData = useUserData(userType);
 
   const handleSignOut = async () => {
     try {
@@ -91,91 +62,6 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
     }
   };
 
-  const getMenuItems = () => {
-    if (userType === 'admin') {
-      return (
-        <>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/profile">
-              <UserCircle2 className="w-4 h-4" />
-              <span>Profil</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/admin/dashboard">
-              <ClipboardList className="w-4 h-4" />
-              <span>Demandes d'inscription</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/admin/clients">
-              <Users className="w-4 h-4" />
-              <span>Clients</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/admin/gestion">
-              <UserCog className="w-4 h-4" />
-              <span>Administrateurs</span>
-            </Link>
-          </DropdownMenuItem>
-        </>
-      );
-    }
-
-    if (userType === 'carrier') {
-      return (
-        <>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/profile">
-              <UserCircle2 className="w-4 h-4" />
-              <span>Profil</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/mes-tournees">
-              <Package className="w-4 h-4" />
-              <span>Mes tournées</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/demandes-approbation">
-              <ClipboardList className="w-4 h-4" />
-              <span>Demandes d'approbation</span>
-            </Link>
-          </DropdownMenuItem>
-        </>
-      );
-    }
-
-    if (userType === 'client') {
-      return (
-        <>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/profile">
-              <UserCircle2 className="w-4 h-4" />
-              <span>Profil</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/mes-reservations">
-              <Package className="w-4 h-4" />
-              <span>Mes réservations</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
-            <Link to="/mes-demandes-approbation">
-              <ClipboardList className="w-4 h-4" />
-              <span>Mes demandes</span>
-            </Link>
-          </DropdownMenuItem>
-        </>
-      );
-    }
-
-    return null;
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -191,7 +77,7 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        {getMenuItems()}
+        {getMenuItems(userType)}
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           onClick={handleSignOut}
