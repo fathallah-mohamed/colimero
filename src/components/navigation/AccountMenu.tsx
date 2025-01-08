@@ -39,6 +39,12 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
             <DropdownMenuItem asChild>
               <Link to="/admin" className="w-full">Demandes d'inscription</Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/admin/clients" className="w-full">Clients</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/admin/gestion" className="w-full">Administrateurs</Link>
+            </DropdownMenuItem>
           </>
         );
       case 'carrier':
