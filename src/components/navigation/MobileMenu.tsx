@@ -82,21 +82,45 @@ export default function MobileMenu({
       </div>
 
       <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-1">
-        {menuItems.map((item) => (
-          <motion.div
-            key={item.name}
-            variants={itemVariants}
-          >
-            <Link
-              to={item.href}
-              onClick={() => setIsOpen(false)}
-              className="flex items-center w-full px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
+        {/* Actions principales en haut */}
+        <div className="space-y-2 mb-4 border-b border-gray-200 pb-4">
+          {menuItems
+            .filter(item => item.highlight)
+            .map((item) => (
+              <motion.div
+                key={item.name}
+                variants={itemVariants}
+              >
+                <Link
+                  to={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center w-full px-3 py-2 text-base font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition-colors duration-200"
+                >
+                  {item.icon && <item.icon className="w-5 h-5 mr-3" />}
+                  {item.name}
+                </Link>
+              </motion.div>
+            ))}
+        </div>
+
+        {/* Menu items secondaires */}
+        {menuItems
+          .filter(item => !item.highlight)
+          .map((item) => (
+            <motion.div
+              key={item.name}
+              variants={itemVariants}
             >
-              {item.icon && <item.icon className="w-4 h-4 mr-3" />}
-              {item.name}
-            </Link>
-          </motion.div>
-        ))}
+              <Link
+                to={item.href}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
+              >
+                {item.icon && <item.icon className="w-4 h-4 mr-3" />}
+                {item.name}
+              </Link>
+            </motion.div>
+          ))}
 
         {user ? (
           <div className="border-t border-gray-200 pt-4 mt-4">

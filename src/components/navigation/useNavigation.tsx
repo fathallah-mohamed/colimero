@@ -55,6 +55,7 @@ export function useNavigation() {
 
   const handleLogout = async () => {
     try {
+      // Clear local state first
       setUser(null);
       setUserType(null);
       
@@ -76,6 +77,7 @@ export function useNavigation() {
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
+      // Clear local state anyway
       setUser(null);
       setUserType(null);
       toast({

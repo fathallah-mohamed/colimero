@@ -1,78 +1,59 @@
-import { Calendar, Package, Home, Users, FileText, Info, Mail, User } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
-export interface MenuItem {
+interface MenuItem {
   name: string;
   href: string;
-  icon: any;
-  allowedUserTypes: string[];
-  requiresAuth: boolean;
+  icon: LucideIcon;
   highlight?: boolean;
   className?: string;
+  allowedUserTypes: string[];
+  requiresAuth?: boolean;
 }
 
 export const menuItems: MenuItem[] = [
-  {
-    name: "Accueil",
-    href: "/",
-    icon: Home,
-    allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false,
-    highlight: false
-  },
-  {
-    name: "Planifier une tournée",
+  { 
+    name: "Planifier une tournée", 
     href: "/planifier-tournee", 
     icon: Calendar,
+    highlight: true,
     allowedUserTypes: ["carrier"],
-    requiresAuth: true,
-    highlight: false
+    requiresAuth: true
   },
-  {
-    name: "Envoyer un colis",
+  { 
+    name: "Envoyer un colis", 
     href: "/envoyer-colis", 
     icon: Package,
+    highlight: true,
     allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false,
-    highlight: false
+    requiresAuth: false
   },
-  {
-    name: "Transporteurs",
-    href: "/transporteurs",
-    icon: Users,
+  { 
+    name: "Transporteurs", 
+    href: "/transporteurs", 
+    icon: Truck,
     allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false,
-    highlight: false
+    requiresAuth: false
   },
-  {
-    name: "Blog",
-    href: "/blog",
-    icon: FileText,
+  { 
+    name: "Actualités", 
+    href: "/blog", 
+    icon: MessageSquare,
     allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false,
-    highlight: false
+    requiresAuth: false
   },
-  {
-    name: "À propos",
-    href: "/a-propos",
+  { 
+    name: "À propos", 
+    href: "/a-propos", 
     icon: Info,
     allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false,
-    highlight: false
+    requiresAuth: false
   },
-  {
-    name: "Contact",
-    href: "/contact",
-    icon: Mail,
+  { 
+    name: "Contact", 
+    href: "/contact", 
+    icon: Users,
     allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false,
-    highlight: false
+    requiresAuth: false
   },
-  {
-    name: "Se connecter",
-    href: "/auth",
-    icon: User,
-    allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false,
-    highlight: false
-  }
 ];
