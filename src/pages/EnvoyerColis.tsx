@@ -5,14 +5,11 @@ import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatur
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { useTours } from "@/hooks/use-tours";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
-  const user = useUser();
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
@@ -24,14 +21,6 @@ export default function EnvoyerColis() {
   } = useTours();
 
   const handleBooking = (tourId: number) => {
-    if (!user?.id) {
-      toast({
-        title: "Connexion requise",
-        description: "Vous devez être connecté pour réserver une tournée",
-        variant: "destructive",
-      });
-      return;
-    }
     navigate(`/reserver/${tourId}`);
   };
 
