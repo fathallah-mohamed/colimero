@@ -68,11 +68,16 @@ export function TransporteurDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <TransporteurServices services={carrier.carrier_services} />
-            <TransporteurTours carrierId={carrier.id} />
+            <TransporteurTours tours={carrier.tours} />
           </div>
           <div className="space-y-8">
             <TransporteurCapacities capacities={carrier.carrier_capacities?.[0]} />
-            <TransporteurContact carrier={carrier} />
+            <TransporteurContact
+              email={carrier.email}
+              phone={carrier.phone}
+              phoneSecondary={carrier.phone_secondary}
+              address={carrier.address}
+            />
           </div>
         </div>
       </div>
