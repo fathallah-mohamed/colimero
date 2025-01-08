@@ -4,12 +4,11 @@ import { useNavigation } from "./navigation/useNavigation";
 import { AuthSection } from "./navigation/AuthSection";
 import { MobileMenuButton } from "./navigation/MobileMenuButton";
 import MenuItems from "./navigation/MenuItems";
+import MobileMenu from "./navigation/MobileMenu";
 import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { MobileMenuOverlay } from "./navigation/MobileMenuOverlay";
-import { MobileMenuPanel } from "./navigation/MobileMenuPanel";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,12 +20,6 @@ export default function Navigation() {
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
 
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location]);
-
-  // Handle click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -44,43 +37,26 @@ export default function Navigation() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // Save return path for authentication
   useEffect(() => {
     if (location.pathname.includes('/reserver/')) {
       sessionStorage.setItem('returnPath', location.pathname);
     }
   }, [location.pathname]);
 
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100">
+    <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex items-center gap-10">
-            <Link 
-              to="/" 
-              className="text-2xl font-bold text-primary hover:text-primary-hover transition-all duration-300 ease-in-out transform hover:scale-105"
-              onClick={() => setIsOpen(false)}
-            >
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <Link to="/" className="text-2xl font-bold text-primary hover:text-primary-hover transition-colors">
               Colimero
             </Link>
-            <div className="hidden md:flex md:items-center">
+            <div className="hidden md:flex md:ml-10">
               <MenuItems />
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center space-x-4">
             <AuthSection 
               user={user}
               userType={userType}
@@ -97,17 +73,16 @@ export default function Navigation() {
         </div>
       </div>
 
-      <MobileMenuOverlay isOpen={isOpen} onClose={() => setIsOpen(false)} />
-      
-      <MobileMenuPanel
-        ref={mobileMenuRef}
-        isOpen={isOpen}
-        user={user}
-        userType={userType}
-        handleLogout={handleLogout}
-        setIsOpen={setIsOpen}
-        setShowAuthDialog={setShowAuthDialog}
-      />
+      <div ref={mobileMenuRef}>
+        <MobileMenu
+          isOpen={isOpen}
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setIsOpen={setIsOpen}
+          setShowAuthDialog={setShowAuthDialog}
+        />
+      </div>
 
       <AuthDialog 
         isOpen={showAuthDialog}
