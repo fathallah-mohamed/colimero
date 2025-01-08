@@ -1,45 +1,55 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { menuItems } from "./config/menuItems";
-import { useNavigation } from "./useNavigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 export default function MenuItems() {
-  const { user } = useNavigation();
+  const location = useLocation();
 
   return (
-    <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
-      {menuItems.map((item) => (
-        <Link
-          key={item.name}
-          to={item.href}
-          className={cn(
-            "group relative flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out",
-            item.highlight
-              ? "text-primary bg-primary/10 hover:bg-primary/20"
-              : "text-gray-700 hover:text-gray-900 hover:bg-gray-50/80",
-            "lg:text-base",
-            item.className
-          )}
-        >
-          <motion.div
-            className="flex items-center"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+    <div className="hidden md:flex items-center space-x-1">
+      {menuItems.map((item) => {
+        const isActive = location.pathname === item.href;
+        
+        return (
+          <Link
+            key={item.name}
+            to={item.href}
+            className="relative"
           >
-            {item.icon && (
+            <motion.div
+              className={cn(
+                "flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                "hover:bg-primary/10 hover:scale-105",
+                "active:scale-95",
+                isActive ? "text-primary" : "text-gray-700",
+                item.highlight && !isActive && "bg-primary text-white hover:bg-primary/90",
+                item.className
+              )}
+              whileHover={{ y: -2 }}
+              whileTap={{ y: 0 }}
+            >
               <item.icon 
                 className={cn(
-                  "w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-200",
-                  !item.highlight && "text-primary",
-                  "mr-2"
+                  "w-4 h-4 mr-2",
+                  isActive ? "text-primary" : item.highlight ? "text-white" : "text-gray-500"
                 )}
               />
-            )}
-            <span>{item.name}</span>
-          </motion.div>
-        </Link>
-      ))}
+              <span>{item.name}</span>
+              
+              {/* Animated underline for active state */}
+              {isActive && !item.highlight && (
+                <motion.div
+                  className="absolute bottom-0 left-0 h-0.5 bg-primary"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 0.2 }}
+                />
+              )}
+            </motion.div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
