@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Eye, Package, ChevronDown } from "lucide-react";
+import { MapPin, Calendar, Eye, Package, ChevronDown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
 import { Avatar } from "@/components/ui/avatar";
@@ -28,6 +28,10 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
     }
   };
 
+  // Extraire les villes de la route
+  const cities = tour.route?.map(stop => stop.name) || [];
+  const routeDisplay = cities.join(" → ");
+
   return (
     <div className="bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
       <div className="p-6 space-y-6">
@@ -45,29 +49,47 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
               {tour.carriers?.company_name}
             </h3>
+
+            {/* Route Display */}
+            <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 overflow-x-auto pb-2">
+              <MapPin className="h-4 w-4 flex-shrink-0 text-primary/70" />
+              <div className="flex items-center gap-2 flex-nowrap">
+                {cities.map((city, index) => (
+                  <div key={city} className="flex items-center">
+                    <span className="whitespace-nowrap">{city}</span>
+                    {index < cities.length - 1 && (
+                      <ArrowRight className="h-4 w-4 mx-1 text-primary/70" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Departure Date */}
+            <div className="mt-4 bg-primary/5 rounded-lg p-3 border border-primary/10">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Date de départ
+                  </span>
+                  <span className="text-base font-semibold text-primary">
+                    {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
+                  </span>
+                </div>
+              </div>
+            </div>
             
             <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <MapPin className="h-4 w-4 text-primary/70" />
-                <span className="truncate">
-                  {tour.route?.[0]?.name} → {tour.route?.[tour.route.length - 1]?.name}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <Calendar className="h-4 w-4 text-primary/70" />
-                <span>
-                  Date de départ: {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
-                </span>
-              </div>
-              
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <Package className="h-4 w-4 text-primary/70" />
                 <span>{tour.remaining_capacity} kg disponibles</span>
               </div>
               
-              <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                <span>{pricePerKg}€/kg</span>
+              <div className="flex items-center gap-2 text-sm font-medium text-primary justify-end">
+                <span className="bg-primary/10 px-3 py-1 rounded-full">
+                  {pricePerKg}€/kg
+                </span>
               </div>
             </div>
           </div>
