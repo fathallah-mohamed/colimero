@@ -11,11 +11,17 @@ const PUBLIC_ROUTES = [
   '/connexion',
   '/login',
   '/envoyer-colis',
+  '/planifier-tournee',
   '/transporteurs',
   '/blog',
   '/a-propos',
   '/contact'
 ];
+
+// Helper function to check if a route is public
+const isPublicRoute = (pathname: string) => {
+  return PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+};
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +39,8 @@ export function useNavigation() {
         setUserType(session?.user?.user_metadata?.user_type ?? null);
 
         // Only redirect to login if the current route requires authentication
-        if (!session?.user && !PUBLIC_ROUTES.includes(location.pathname)) {
+        if (!session?.user && !isPublicRoute(location.pathname)) {
+          console.log('Redirecting to login, current path:', location.pathname);
           navigate('/connexion');
         }
       } catch (error) {
@@ -42,7 +49,8 @@ export function useNavigation() {
         setUserType(null);
         
         // Only redirect to login if the current route requires authentication
-        if (!PUBLIC_ROUTES.includes(location.pathname)) {
+        if (!isPublicRoute(location.pathname)) {
+          console.log('Error redirecting to login, current path:', location.pathname);
           navigate('/connexion');
         }
       }
@@ -58,7 +66,7 @@ export function useNavigation() {
         setUser(null);
         setUserType(null);
         // Only redirect to home if not already on a public route
-        if (!PUBLIC_ROUTES.includes(location.pathname)) {
+        if (!isPublicRoute(location.pathname)) {
           navigate('/');
         }
       }
