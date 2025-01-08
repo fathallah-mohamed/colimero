@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { UserCircle2, LogOut } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 import { UserMenuItems } from "./UserMenuItems";
 
 interface AuthSectionProps {
@@ -9,35 +9,28 @@ interface AuthSectionProps {
   setShowAuthDialog: (show: boolean) => void;
 }
 
-export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }: AuthSectionProps) {
+export function AuthSection({ 
+  user, 
+  userType, 
+  handleLogout, 
+  setShowAuthDialog 
+}: AuthSectionProps) {
   if (!user) {
     return (
-      <div className="hidden md:block">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => setShowAuthDialog(true)}
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Se connecter
-        </Button>
-      </div>
+      <Button 
+        variant="outline" 
+        onClick={() => setShowAuthDialog(true)}
+        className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+      >
+        <UserCircle2 className="w-4 h-4 mr-2" />
+        Se connecter
+      </Button>
     );
   }
 
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
       <UserMenuItems userType={userType} />
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={handleLogout}
-        className="text-red-600 hover:text-red-700"
-      >
-        <LogOut className="w-4 h-4 mr-2" />
-        Déconnexion
-      </Button>
     </div>
   );
 }

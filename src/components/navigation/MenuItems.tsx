@@ -12,32 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, UserCircle2, ClipboardList, Truck, Bell } from "lucide-react";
+import { ChevronDown, UserCircle2, ClipboardList, MessageSquare, LogOut } from "lucide-react";
 
 export default function MenuItems() {
   const location = useLocation();
   const { user, userType, handleLogout } = useNavigation();
-
-  const getMenuItems = () => {
-    switch (userType) {
-      case 'admin':
-        return [
-          { href: "/profil", icon: UserCircle2, label: "Profil" },
-          { href: "/admin", icon: Bell, label: "Demandes d'inscription" }
-        ];
-      case 'carrier':
-        return [
-          { href: "/profil", icon: UserCircle2, label: "Profil" },
-          { href: "/mes-tournees", icon: Truck, label: "Mes tournées" },
-          { href: "/demandes-approbation", icon: Bell, label: "Demandes d'approbation" }
-        ];
-      default: // client
-        return [
-          { href: "/profil", icon: UserCircle2, label: "Profil" },
-          { href: "/mes-reservations", icon: ClipboardList, label: "Mes réservations" }
-        ];
-    }
-  };
 
   const getUserDisplayName = () => {
     const firstName = user?.user_metadata?.first_name || '';
@@ -106,19 +85,30 @@ export default function MenuItems() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {getMenuItems().map((item) => (
-              <DropdownMenuItem key={item.href} asChild>
-                <Link to={item.href} className="flex items-center gap-2 cursor-pointer">
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuItem asChild>
+              <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                <UserCircle2 className="w-4 h-4" />
+                Profil
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/mes-reservations" className="flex items-center gap-2 cursor-pointer">
+                <ClipboardList className="w-4 h-4" />
+                Mes réservations
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/mes-demandes-approbation" className="flex items-center gap-2 cursor-pointer">
+                <MessageSquare className="w-4 h-4" />
+                Mes demandes
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={handleLogout}
               className="text-red-600 cursor-pointer"
             >
+              <LogOut className="w-4 h-4 mr-2" />
               Déconnexion
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -10,13 +10,6 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
     return (
       <div className="flex flex-col space-y-1">
         <Link
-          to="/profile"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil
-        </Link>
-        <Link
           to="/admin/dashboard"
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
@@ -45,13 +38,6 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
     return (
       <div className="flex flex-col space-y-1">
         <Link
-          to="/profile"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil
-        </Link>
-        <Link
           to="/mes-tournees"
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
@@ -64,34 +50,6 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
         >
           <FileText className="w-4 h-4 mr-2" />
           Demandes d'approbation
-        </Link>
-      </div>
-    );
-  }
-
-  if (userType === "client") {
-    return (
-      <div className="flex flex-col space-y-1">
-        <Link
-          to="/profile"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil
-        </Link>
-        <Link
-          to="/mes-reservations"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <FileText className="w-4 h-4 mr-2" />
-          Mes réservations
-        </Link>
-        <Link
-          to="/mes-demandes-approbation"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <FileText className="w-4 h-4 mr-2" />
-          Mes demandes
         </Link>
       </div>
     );
