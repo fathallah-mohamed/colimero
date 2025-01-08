@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,10 +8,10 @@ import { TourFormHeader } from "./form/TourFormHeader";
 import { TourFormSections } from "./form/TourFormSections";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { tourFormSchema } from "./form/tourFormSchema";
-import { Truck, Loader2, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { TourConfirmDialog } from "./form/TourConfirmDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { TourSuccessDialog } from "./form/TourSuccessDialog";
+import { TourSubmitButton } from "./form/TourSubmitButton";
 import * as z from "zod";
 
 type FormValues = z.infer<typeof tourFormSchema>;
@@ -125,26 +124,10 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
             <form onSubmit={form.handleSubmit(() => setShowConfirmDialog(true))} className="space-y-6">
               <TourFormHeader />
               <TourFormSections form={form} />
-              
-              <div className="sticky bottom-0 bg-white p-4 border-t shadow-lg">
-                <Button 
-                  type="submit" 
-                  className="w-full md:w-auto"
-                  disabled={isSubmitting || !form.formState.isValid}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Création en cours...
-                    </>
-                  ) : (
-                    <>
-                      <Truck className="mr-2 h-4 w-4" />
-                      Créer la tournée
-                    </>
-                  )}
-                </Button>
-              </div>
+              <TourSubmitButton 
+                isSubmitting={isSubmitting}
+                isValid={form.formState.isValid}
+              />
             </form>
           </Form>
         </div>
@@ -156,27 +139,11 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         onConfirm={() => onSubmit(form.getValues())}
       />
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-6 w-6 text-green-500" />
-              Tournée créée avec succès
-            </DialogTitle>
-            <DialogDescription>
-              Votre tournée a été créée avec succès. Vous pouvez maintenant la consulter dans votre liste de tournées.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button 
-              onClick={handleSuccessConfirm}
-              className="w-full"
-            >
-              J'ai compris
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <TourSuccessDialog 
+        open={showSuccessDialog}
+        onOpenChange={setShowSuccessDialog}
+        onConfirm={handleSuccessConfirm}
+      />
     </>
   );
 }
