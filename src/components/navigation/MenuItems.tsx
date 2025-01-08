@@ -16,8 +16,7 @@ export default function MenuItems() {
           className={cn(
             "group relative flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out",
             "text-gray-700 hover:text-gray-900 hover:bg-gray-50/80",
-            "lg:text-base",
-            item.className
+            "lg:text-base"
           )}
         >
           <motion.div
