@@ -16,9 +16,9 @@ export default function MenuItems() {
           className={cn(
             "group relative flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out",
             item.highlight
-              ? "text-white bg-gradient-to-r from-primary to-primary-light hover:shadow-lg hover:shadow-primary/20 transform hover:-translate-y-0.5"
+              ? "text-primary bg-primary/10 hover:bg-primary/20"
               : "text-gray-700 hover:text-gray-900 hover:bg-gray-50/80",
-            "lg:text-base", // Larger text on larger screens
+            "lg:text-base",
             item.className
           )}
         >
@@ -38,14 +38,6 @@ export default function MenuItems() {
             )}
             <span>{item.name}</span>
           </motion.div>
-          
-          {/* Highlight effect for primary actions */}
-          {item.highlight && (
-            <motion.div
-              className="absolute inset-0 bg-white rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"
-              layoutId={`highlight-${item.name}`}
-            />
-          )}
         </Link>
       ))}
     </div>

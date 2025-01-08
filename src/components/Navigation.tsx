@@ -70,7 +70,7 @@ export default function Navigation() {
           >
             <Link 
               to="/" 
-              className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#8B5CF6] to-[#D946EF] bg-clip-text text-transparent hover:opacity-90 transition-opacity"
+              className="text-2xl lg:text-3xl font-bold text-primary hover:opacity-90 transition-opacity"
             >
               Colimero
             </Link>
