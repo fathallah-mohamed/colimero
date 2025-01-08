@@ -76,13 +76,13 @@ export default function Navigation() {
             </Link>
           </motion.div>
 
-          {/* Desktop Menu - Now hidden on xl breakpoint instead of md */}
-          <div className="hidden xl:flex xl:items-center xl:space-x-6">
+          {/* Desktop Menu */}
+          <div className="hidden md:flex md:items-center md:space-x-6 lg:space-x-8">
             <MenuItems />
           </div>
 
           {/* Auth Section */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-6 lg:space-x-8">
             <AuthSection
               user={user}
               userType={userType}
@@ -94,17 +94,16 @@ export default function Navigation() {
               ref={mobileButtonRef}
               isOpen={isOpen}
               onClick={() => setIsOpen(!isOpen)}
-              className="xl:hidden" // Changed from md:hidden to xl:hidden
             />
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu - Now visible up to xl breakpoint */}
+      {/* Mobile Menu */}
       <div 
         ref={mobileMenuRef}
         className={cn(
-          "xl:hidden transition-all duration-300 ease-in-out", // Changed from md:hidden to xl:hidden
+          "md:hidden transition-all duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >

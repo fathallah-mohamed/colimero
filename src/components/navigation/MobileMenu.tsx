@@ -62,7 +62,7 @@ export default function MobileMenu({
       animate={isOpen ? "open" : "closed"}
       variants={menuVariants}
       className={cn(
-        "fixed inset-y-0 right-0 w-full sm:w-80 bg-white border-l border-gray-200 shadow-lg transform xl:hidden", // Changed from lg:hidden to xl:hidden
+        "fixed inset-y-0 right-0 w-full sm:w-80 bg-white border-l border-gray-200 shadow-lg transform lg:hidden",
         "flex flex-col"
       )}
     >
