@@ -12,10 +12,11 @@ export default function EnvoyerColis() {
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
+  const [tourType, setTourType] = useState<"public" | "private">("public");
+  
   const {
-    data: tours,
-    isLoading,
-    error,
+    loading,
+    tours,
   } = useTours();
 
   const handleBooking = (tourId: number) => {
@@ -32,6 +33,8 @@ export default function EnvoyerColis() {
           setSelectedRoute={setSelectedRoute}
           selectedStatus={selectedStatus}
           setSelectedStatus={setSelectedStatus}
+          tourType={tourType}
+          setTourType={setTourType}
         />
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {tours?.map((tour) => (
