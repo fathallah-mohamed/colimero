@@ -9,7 +9,7 @@ import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotF
 import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
 import type { Tour } from "@/types/tour";
 
-export default function TransporteurDetails() {
+export function TransporteurDetails() {
   const { id } = useParams();
 
   const { data: transporteur, isLoading: isLoadingTransporteur } = useQuery({
@@ -141,3 +141,6 @@ export default function TransporteurDetails() {
     </TransporteurLayout>
   );
 }
+
+// Export the component as default
+export default TransporteurDetails;
