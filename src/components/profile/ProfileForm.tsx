@@ -73,14 +73,20 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (carrierError) throw carrierError;
 
-      // Update carrier capacities
+      // Upsert carrier capacities using ON CONFLICT
       const { error: capacitiesError } = await supabase
         .from('carrier_capacities')
-        .upsert({
-          carrier_id: session.user.id,
-          total_capacity: values.total_capacity,
-          price_per_kg: values.price_per_kg,
-        });
+        .upsert(
+          {
+            carrier_id: session.user.id,
+            total_capacity: values.total_capacity,
+            price_per_kg: values.price_per_kg,
+          },
+          {
+            onConflict: 'carrier_id',
+            ignoreDuplicates: false
+          }
+        );
 
       if (capacitiesError) throw capacitiesError;
 
@@ -91,10 +97,11 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
       
       onClose();
     } catch (error: any) {
+      console.error("Error updating profile:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la mise à jour du profil",
       });
     }
   }
