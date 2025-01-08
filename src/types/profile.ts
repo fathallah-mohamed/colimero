@@ -9,6 +9,7 @@ export interface Profile {
   siret?: string;
   phone_secondary?: string;
   avatar_url?: string;
+  coverage_area?: string[];
   created_at?: string;
   carrier_services?: Array<{
     service_type: string;
