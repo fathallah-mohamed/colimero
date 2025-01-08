@@ -92,7 +92,7 @@ export default function MenuItems() {
             key={item.name}
             to={item.href}
             onClick={(e) => {
-              if (item.requiresAuth && !isAllowed) {
+              if (!isAllowed && item.requiresAuth) {
                 handleRestrictedClick(e, item.name, item.allowedUserTypes);
               }
             }}
