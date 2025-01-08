@@ -1,14 +1,19 @@
 import { Link } from "react-router-dom";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { UserCircle2 } from "lucide-react";
 
 interface AccountMenuProps {
   userType: string | null;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
@@ -24,7 +29,9 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
         description: "À bientôt !",
       });
       
-      onClose();
+      if (onClose) {
+        onClose();
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -90,12 +97,19 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
   };
 
   return (
-    <>
-      {getMenuItems()}
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={handleSignOut}>
-        Se déconnecter
-      </DropdownMenuItem>
-    </>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="relative">
+          <UserCircle2 className="w-5 h-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {getMenuItems()}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleSignOut}>
+          Se déconnecter
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

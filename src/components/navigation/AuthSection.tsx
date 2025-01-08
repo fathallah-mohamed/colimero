@@ -29,9 +29,8 @@ export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }:
   return (
     <div className="hidden md:block">
       <AccountMenu 
-        user={user}
         userType={userType}
-        onLogout={handleLogout}
+        onClose={handleLogout}
       />
     </div>
   );
