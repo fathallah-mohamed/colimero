@@ -1,15 +1,28 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { supabase } from "@/integrations/supabase/client";
+
+// Routes that don't require authentication
+const PUBLIC_ROUTES = [
+  '/',
+  '/connexion',
+  '/login',
+  '/envoyer-colis',
+  '/transporteurs',
+  '/blog',
+  '/a-propos',
+  '/contact'
+];
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -18,10 +31,20 @@ export function useNavigation() {
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
         setUserType(session?.user?.user_metadata?.user_type ?? null);
+
+        // Only redirect to login if the current route requires authentication
+        if (!session?.user && !PUBLIC_ROUTES.includes(location.pathname)) {
+          navigate('/connexion');
+        }
       } catch (error) {
         console.error("Session check error:", error);
         setUser(null);
         setUserType(null);
+        
+        // Only redirect to login if the current route requires authentication
+        if (!PUBLIC_ROUTES.includes(location.pathname)) {
+          navigate('/connexion');
+        }
       }
     };
 
@@ -34,14 +57,17 @@ export function useNavigation() {
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setUserType(null);
-        navigate('/');
+        // Only redirect to home if not already on a public route
+        if (!PUBLIC_ROUTES.includes(location.pathname)) {
+          navigate('/');
+        }
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const handleLogout = async () => {
     try {
