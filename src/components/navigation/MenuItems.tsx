@@ -94,7 +94,7 @@ export default function MenuItems() {
               ? "text-primary hover:text-primary-hover " + (item.className || "")
               : "text-gray-700 hover:text-gray-900"
             }
-            ${item.name === "Planifier une tournée" && userType !== "carrier" ? "opacity-50" : ""}
+            ${item.name === "Planifier une tournée" && userType !== "carrier" ? "opacity-50 cursor-not-allowed" : ""}
             transition-all duration-200 ease-in-out
           `}
         >
