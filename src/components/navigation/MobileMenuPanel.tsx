@@ -17,11 +17,11 @@ export const MobileMenuPanel = forwardRef<HTMLDivElement, MobileMenuPanelProps>(
       <div 
         ref={ref}
         className={cn(
-          "fixed inset-y-0 right-0 w-full max-w-sm transform transition-transform duration-300 ease-in-out md:hidden z-[100]",
+          "fixed inset-y-0 right-0 w-full max-w-sm transform transition-transform duration-300 ease-in-out md:hidden z-[999]",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="relative w-full h-full bg-white shadow-xl overflow-hidden">
+        <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl">
           <MobileMenu
             isOpen={isOpen}
             user={user}
