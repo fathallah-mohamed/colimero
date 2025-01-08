@@ -5,16 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { TourFormHeader } from "./form/TourFormHeader";
-import { TourFormSections } from "./form/TourFormSections";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { tourFormSchema } from "./form/tourFormSchema";
 import { useState } from "react";
 import { TourConfirmDialog } from "./form/TourConfirmDialog";
 import { TourSuccessDialog } from "./form/TourSuccessDialog";
 import { TourSubmitButton } from "./form/TourSubmitButton";
+import { RouteSection } from "./form/sections/RouteSection";
+import { CapacitySection } from "./form/sections/CapacitySection";
+import { TermsSection } from "./form/sections/TermsSection";
+import { CollectionPointsSection } from "./form/sections/CollectionPointsSection";
+import type { TourFormValues } from "./form/types";
 import * as z from "zod";
-
-type FormValues = z.infer<typeof tourFormSchema>;
 
 interface CreateTourFormProps {
   onSuccess: () => void;
@@ -27,7 +29,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
-  const form = useForm<FormValues>({
+  const form = useForm<TourFormValues>({
     resolver: zodResolver(tourFormSchema),
     defaultValues: {
       departure_country: "FR",
@@ -50,7 +52,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
     },
   });
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: z.infer<typeof tourFormSchema>) {
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -88,7 +90,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         remaining_capacity: values.remaining_capacity,
         type: values.type,
         route: values.route,
-        status: "Programmé",
+        status: "Programmée",
         terms_accepted: values.terms_accepted,
         customs_declaration: values.customs_declaration,
       });
@@ -123,7 +125,10 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(() => setShowConfirmDialog(true))} className="space-y-6">
               <TourFormHeader />
-              <TourFormSections form={form} />
+              <RouteSection form={form} />
+              <CapacitySection form={form} />
+              <CollectionPointsSection form={form} />
+              <TermsSection form={form} />
               <TourSubmitButton 
                 isSubmitting={isSubmitting}
                 isValid={form.formState.isValid}
