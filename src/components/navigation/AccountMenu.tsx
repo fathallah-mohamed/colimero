@@ -11,7 +11,7 @@ import {
 import { User } from "@supabase/supabase-js";
 import { useState } from "react";
 import AuthDialog from "../auth/AuthDialog";
-import { UserCircle2, ClipboardList, Users2, Truck, Bell } from "lucide-react";
+import { UserCircle2, ClipboardList, Truck, Bell, LogOut } from "lucide-react";
 
 interface AccountMenuProps {
   user: User | null;
@@ -43,71 +43,66 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
     );
   }
 
-  const getMenuLabel = () => {
-    switch (userType) {
-      case 'admin':
-        return "Administration";
-      case 'carrier':
-        return "Mon compte transporteur";
-      default:
-        return "Mon compte client";
-    }
+  const getUserDisplayName = () => {
+    const firstName = user?.user_metadata?.first_name || '';
+    const lastName = user?.user_metadata?.last_name || '';
+    return `${firstName} ${lastName}`.trim() || 'Mon compte';
   };
 
   const getMenuItems = () => {
     switch (userType) {
-      case 'admin':
-        return (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center">
-                <UserCircle2 className="w-4 h-4 mr-2" />
-                Profil
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/admin" className="flex items-center">
-                <Users2 className="w-4 h-4 mr-2" />
-                Demandes d'inscription
-              </Link>
-            </DropdownMenuItem>
-          </>
-        );
       case 'carrier':
         return (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center">
-                <UserCircle2 className="w-4 h-4 mr-2" />
+              <Link to="/profil" className="flex items-center gap-2">
+                <UserCircle2 className="w-4 h-4" />
                 Profil
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/mes-tournees" className="flex items-center">
-                <Truck className="w-4 h-4 mr-2" />
+              <Link to="/mes-tournees" className="flex items-center gap-2">
+                <Truck className="w-4 h-4" />
                 Mes tournées
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/demandes-approbation" className="flex items-center">
-                <Bell className="w-4 h-4 mr-2" />
+              <Link to="/demandes-approbation" className="flex items-center gap-2">
+                <Bell className="w-4 h-4" />
                 Demandes d'approbation
               </Link>
             </DropdownMenuItem>
           </>
         );
-      default:
+      case 'admin':
         return (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center">
-                <UserCircle2 className="w-4 h-4 mr-2" />
+              <Link to="/profil" className="flex items-center gap-2">
+                <UserCircle2 className="w-4 h-4" />
                 Profil
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/mes-reservations" className="flex items-center">
-                <ClipboardList className="w-4 h-4 mr-2" />
+              <Link to="/admin" className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" />
+                Tableau de bord
+              </Link>
+            </DropdownMenuItem>
+          </>
+        );
+      default:
+        return (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/profil" className="flex items-center gap-2">
+                <UserCircle2 className="w-4 h-4" />
+                Profil
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/mes-reservations" className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" />
                 Mes réservations
               </Link>
             </DropdownMenuItem>
@@ -125,15 +120,16 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
           className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
         >
           <UserCircle2 className="w-4 h-4 mr-1.5" />
-          {getMenuLabel()}
+          {getUserDisplayName()}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>{getMenuLabel()}</DropdownMenuLabel>
+        <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {getMenuItems()}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onLogout} className="text-red-600">
+          <LogOut className="w-4 h-4 mr-2" />
           Déconnexion
         </DropdownMenuItem>
       </DropdownMenuContent>
