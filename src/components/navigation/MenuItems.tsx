@@ -20,7 +20,7 @@ export default function MenuItems() {
             <motion.div
               className={cn(
                 "flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                "w-[140px] justify-center", // Fixed width and centered content
+                "w-[180px] justify-center", // Increased width from 140px to 180px
                 "hover:bg-primary/10 hover:scale-105",
                 "active:scale-95",
                 isActive ? "text-primary" : "text-gray-700",
@@ -32,11 +32,11 @@ export default function MenuItems() {
             >
               <item.icon 
                 className={cn(
-                  "w-4 h-4 mr-2 shrink-0", // Added shrink-0 to prevent icon from shrinking
+                  "w-4 h-4 mr-2 shrink-0",
                   isActive ? "text-primary" : item.highlight ? "text-white" : "text-gray-500"
                 )}
               />
-              <span className="truncate">{item.name}</span>
+              <span>{item.name}</span>
               
               {/* Animated underline for active state */}
               {isActive && !item.highlight && (
