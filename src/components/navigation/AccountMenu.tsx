@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,41 +8,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User } from "@supabase/supabase-js";
-import { useState } from "react";
-import AuthDialog from "../auth/AuthDialog";
-import { UserCircle2, ClipboardList, Users2, Truck, Bell } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 
 interface AccountMenuProps {
-  user: User | null;
+  user: any;
   userType: string | null;
   onLogout: () => void;
 }
 
 export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-
-  if (!user) {
-    return (
-      <>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
-          onClick={() => setShowAuthDialog(true)}
-        >
-          <UserCircle2 className="w-4 h-4 mr-1.5" />
-          Se connecter
-        </Button>
-
-        <AuthDialog 
-          isOpen={showAuthDialog} 
-          onClose={() => setShowAuthDialog(false)} 
-        />
-      </>
-    );
-  }
-
   const getMenuLabel = () => {
     switch (userType) {
       case 'admin':
@@ -60,16 +34,10 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         return (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center">
-                <UserCircle2 className="w-4 h-4 mr-2" />
-                Profil
-              </Link>
+              <Link to="/profil" className="w-full">Profil</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/admin" className="flex items-center">
-                <Users2 className="w-4 h-4 mr-2" />
-                Demandes d'inscription
-              </Link>
+              <Link to="/admin" className="w-full">Demandes d'inscription</Link>
             </DropdownMenuItem>
           </>
         );
@@ -77,22 +45,13 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         return (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center">
-                <UserCircle2 className="w-4 h-4 mr-2" />
-                Profil
-              </Link>
+              <Link to="/profil" className="w-full">Profil</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/mes-tournees" className="flex items-center">
-                <Truck className="w-4 h-4 mr-2" />
-                Mes tournées
-              </Link>
+              <Link to="/mes-tournees" className="w-full">Mes tournées</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/demandes-approbation" className="flex items-center">
-                <Bell className="w-4 h-4 mr-2" />
-                Demandes d'approbation
-              </Link>
+              <Link to="/demandes-approbation" className="w-full">Demandes d'approbation</Link>
             </DropdownMenuItem>
           </>
         );
@@ -100,16 +59,10 @@ export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
         return (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/profil" className="flex items-center">
-                <UserCircle2 className="w-4 h-4 mr-2" />
-                Profil
-              </Link>
+              <Link to="/profil" className="w-full">Profil</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/mes-reservations" className="flex items-center">
-                <ClipboardList className="w-4 h-4 mr-2" />
-                Mes réservations
-              </Link>
+              <Link to="/mes-reservations" className="w-full">Mes réservations</Link>
             </DropdownMenuItem>
           </>
         );

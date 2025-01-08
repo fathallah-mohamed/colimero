@@ -10,16 +10,7 @@ import CarrierSignupForm from "@/components/auth/carrier-signup/CarrierSignupFor
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { UserCircle2 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { AuthSection } from "@/components/navigation/AuthSection";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,70 +54,6 @@ export default function Navigation() {
     }
   }, [location.pathname]);
 
-  const renderAuthSection = () => {
-    if (!user) {
-      return (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => setShowAuthDialog(true)}
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Se connecter
-        </Button>
-      );
-    }
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
-          >
-            <UserCircle2 className="w-4 h-4 mr-2" />
-            {userType === 'admin' ? 'Administration' : userType === 'carrier' ? 'Mon compte transporteur' : 'Mon compte client'}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link to="/profil" className="w-full">Profil</Link>
-          </DropdownMenuItem>
-          {userType === 'admin' && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link to="/admin" className="w-full">Demandes d'inscription</Link>
-              </DropdownMenuItem>
-            </>
-          )}
-          {userType === 'carrier' && (
-            <>
-              <DropdownMenuItem asChild>
-                <Link to="/mes-tournees" className="w-full">Mes tournées</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/demandes-approbation" className="w-full">Demandes d'approbation</Link>
-              </DropdownMenuItem>
-            </>
-          )}
-          {userType === 'client' && (
-            <DropdownMenuItem asChild>
-              <Link to="/mes-reservations" className="w-full">Mes réservations</Link>
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-            Déconnexion
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
-
   return (
     <nav className={cn(
       "fixed top-0 left-0 right-0 bg-white z-50 transition-all duration-300",
@@ -156,9 +83,12 @@ export default function Navigation() {
 
           {/* Auth Section */}
           <div className="flex items-center space-x-6 lg:space-x-8">
-            <div className="hidden md:block">
-              {renderAuthSection()}
-            </div>
+            <AuthSection
+              user={user}
+              userType={userType}
+              handleLogout={handleLogout}
+              setShowAuthDialog={setShowAuthDialog}
+            />
             
             <MobileMenuButton 
               ref={mobileButtonRef}

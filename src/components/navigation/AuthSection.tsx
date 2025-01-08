@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { UserCircle2, LogOut } from "lucide-react";
-import { UserMenuItems } from "./UserMenuItems";
+import { UserCircle2 } from "lucide-react";
+import { AccountMenu } from "./AccountMenu";
 
 interface AuthSectionProps {
   user: any;
@@ -27,18 +27,12 @@ export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }:
   }
 
   return (
-    <div className="hidden md:flex md:items-center md:space-x-4">
-      <span className="text-sm text-gray-600">{user.email}</span>
-      <UserMenuItems userType={userType} />
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={handleLogout}
-        className="text-red-600 hover:text-red-700"
-      >
-        <LogOut className="w-4 h-4 mr-2" />
-        Déconnexion
-      </Button>
+    <div className="hidden md:block">
+      <AccountMenu 
+        user={user}
+        userType={userType}
+        onLogout={handleLogout}
+      />
     </div>
   );
 }
