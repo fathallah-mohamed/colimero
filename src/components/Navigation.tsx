@@ -44,19 +44,22 @@ export default function Navigation() {
   }, [location.pathname]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-primary hover:text-primary-hover transition-colors">
+        <div className="flex justify-between items-center h-20">
+          <div className="flex items-center gap-10">
+            <Link 
+              to="/" 
+              className="text-2xl font-bold text-primary hover:text-primary-hover transition-all duration-300 ease-in-out transform hover:scale-105"
+            >
               Colimero
             </Link>
-            <div className="hidden md:flex md:ml-10">
+            <div className="hidden md:flex md:items-center">
               <MenuItems />
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-6">
             <AuthSection 
               user={user}
               userType={userType}

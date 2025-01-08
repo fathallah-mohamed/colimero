@@ -15,13 +15,19 @@ export default function MenuItem({ name, href, icon: Icon, highlight, className,
     <Link
       to={href}
       onClick={onClick}
-      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
+      className={`flex items-center px-4 py-2.5 rounded-md text-sm font-medium 
+        group relative overflow-hidden
         ${highlight
-          ? "text-[#00B0F0] hover:text-[#0082b3] " + (className || "")
-          : "text-gray-700 hover:text-gray-900"
-        }`}
+          ? "text-primary hover:text-primary-hover " + (className || "")
+          : "text-gray-600 hover:text-gray-900"
+        }
+        transition-all duration-300 ease-in-out hover:-translate-y-0.5
+        after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 
+        after:bg-primary after:scale-x-0 after:origin-left
+        hover:after:scale-x-100 after:transition-transform after:duration-300
+      `}
     >
-      <Icon className="w-4 h-4" />
+      <Icon className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
       <span className="ml-2">{name}</span>
     </Link>
   );
