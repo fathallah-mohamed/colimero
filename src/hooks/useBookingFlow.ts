@@ -18,7 +18,6 @@ export function useBookingFlow() {
       return;
     }
 
-    // Check user type
     const userType = user.user_metadata?.user_type;
     
     if (userType === 'carrier') {
@@ -26,7 +25,6 @@ export function useBookingFlow() {
       return;
     }
 
-    // Vérifier si l'utilisateur a déjà une réservation en cours
     const { data: existingBookings, error } = await supabase
       .from('bookings')
       .select('*')

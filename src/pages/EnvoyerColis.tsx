@@ -7,6 +7,7 @@ import { useTours } from "@/hooks/use-tours";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
@@ -52,6 +53,13 @@ export default function EnvoyerColis() {
           ))}
         </div>
       </div>
+
+      <AuthDialog 
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={handleAuthSuccess}
+        requiredUserType="client"
+      />
     </div>
   );
 }
