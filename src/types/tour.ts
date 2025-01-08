@@ -36,6 +36,8 @@ export interface Booking {
   package_description?: string;
   created_at: string;
   updated_at?: string;
+  terms_accepted: boolean;
+  customs_declaration: boolean;
 }
 
 export interface Tour {

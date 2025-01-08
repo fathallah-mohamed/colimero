@@ -27,13 +27,26 @@ export function useTourData({
         *,
         bookings (
           id,
+          user_id,
+          tour_id,
           pickup_city,
           delivery_city,
           weight,
           tracking_number,
           status,
           recipient_name,
-          recipient_phone
+          recipient_phone,
+          recipient_address,
+          item_type,
+          sender_name,
+          sender_phone,
+          special_items,
+          content_types,
+          package_description,
+          created_at,
+          updated_at,
+          terms_accepted,
+          customs_declaration
         ),
         carriers (
           company_name,
@@ -49,7 +62,6 @@ export function useTourData({
       .eq('destination_country', destinationCountry);
 
     if (status !== 'all') {
-      // Ensure we're using the correct status value
       const normalizedStatus = status === "Programmée" ? "Programmée" : status;
       query = query.eq('status', normalizedStatus);
     }
@@ -73,7 +85,6 @@ export function useTourData({
     console.log('Fetched tours:', data);
 
     const transformedTours = data?.map(tour => {
-      // Parse route JSON into RouteStop array
       const routeData = typeof tour.route === 'string' 
         ? JSON.parse(tour.route) 
         : tour.route;
@@ -93,7 +104,13 @@ export function useTourData({
         route: parsedRoute,
         status: tour.status as TourStatus,
         previous_status: tour.previous_status as TourStatus | null,
-        bookings: tour.bookings || [],
+        bookings: tour.bookings?.map(booking => ({
+          ...booking,
+          special_items: booking.special_items || [],
+          content_types: booking.content_types || [],
+          terms_accepted: booking.terms_accepted || false,
+          customs_declaration: booking.customs_declaration || false
+        })) || [],
         carriers: tour.carriers ? {
           ...tour.carriers,
           carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
