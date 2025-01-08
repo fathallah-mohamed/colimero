@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
 import { useNavigation } from "./useNavigation";
 import { useToast } from "@/hooks/use-toast";
@@ -55,62 +55,53 @@ export const menuItems = [
 export default function MenuItems() {
   const { userType } = useNavigation();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleRestrictedClick = (e: React.MouseEvent, itemName: string) => {
-    e.preventDefault();
-    
-    if (!userType) {
-      toast({
-        title: "Accès restreint",
-        description: "Vous devez être connecté pour accéder à cette fonctionnalité.",
-        variant: "destructive",
-      });
-      return;
+  const handleClick = (e: React.MouseEvent, item: typeof menuItems[0]) => {
+    if (item.name === "Planifier une tournée") {
+      e.preventDefault();
+      
+      if (!userType) {
+        toast({
+          title: "Accès restreint",
+          description: "Vous devez être connecté pour accéder à cette fonctionnalité.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (userType === "carrier") {
+        navigate("/planifier-tournee");
+      } else {
+        toast({
+          title: "Accès restreint",
+          description: "Seuls les transporteurs peuvent créer des tournées.",
+          variant: "destructive",
+        });
+      }
     }
-
-    // Si l'utilisateur est connecté mais n'a pas le bon type
-    const messages = {
-      admin: "Les administrateurs n'ont pas accès à cette fonctionnalité.",
-      carrier: "Les transporteurs ne peuvent pas envoyer de colis.",
-      client: "Les clients ne peuvent pas créer de tournées."
-    };
-    
-    toast({
-      title: "Accès restreint",
-      description: messages[userType as keyof typeof messages],
-      variant: "destructive",
-    });
   };
 
   return (
     <div className="flex items-center space-x-1">
-      {menuItems.map((item) => {
-        const isAllowed = !item.requiresAuth || 
-          (userType && item.allowedUserTypes.includes(userType));
-
-        return (
-          <Link
-            key={item.name}
-            to={isAllowed ? item.href : "#"}
-            onClick={(e) => {
-              if (!isAllowed) {
-                handleRestrictedClick(e, item.name);
-              }
-            }}
-            className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
-              ${item.highlight
-                ? "text-primary hover:text-primary-hover " + (item.className || "")
-                : "text-gray-700 hover:text-gray-900"
-              }
-              ${!isAllowed ? "opacity-50" : ""}
-              transition-all duration-200 ease-in-out
-            `}
-          >
-            {item.icon}
-            <span className="ml-2">{item.name}</span>
-          </Link>
-        );
-      })}
+      {menuItems.map((item) => (
+        <Link
+          key={item.name}
+          to={item.href}
+          onClick={(e) => handleClick(e, item)}
+          className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
+            ${item.highlight
+              ? "text-primary hover:text-primary-hover " + (item.className || "")
+              : "text-gray-700 hover:text-gray-900"
+            }
+            ${item.name === "Planifier une tournée" && userType !== "carrier" ? "opacity-50" : ""}
+            transition-all duration-200 ease-in-out
+          `}
+        >
+          {item.icon}
+          <span className="ml-2">{item.name}</span>
+        </Link>
+      ))}
     </div>
   );
 }
