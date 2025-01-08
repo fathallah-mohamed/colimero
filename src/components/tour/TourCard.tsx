@@ -6,10 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Eye } from "lucide-react";
+import { MapPin, Calendar, Eye, Package, Phone, User, Scale, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TourStatusTimeline } from "./TourStatusTimeline";
 import { CollapsibleTrigger, CollapsibleContent, Collapsible } from "@/components/ui/collapsible";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface TourCardProps {
   tour: Tour;
@@ -39,6 +40,7 @@ export function TourCard({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showBookingDetails, setShowBookingDetails] = useState<Record<string, boolean>>({});
 
   const handleStatusChange = async (newStatus: TourStatus) => {
     try {
@@ -72,6 +74,13 @@ export function TourCard({
         description: "Impossible de supprimer la tournée",
       });
     }
+  };
+
+  const toggleBookingDetails = (bookingId: string) => {
+    setShowBookingDetails(prev => ({
+      ...prev,
+      [bookingId]: !prev[bookingId]
+    }));
   };
 
   const getTypeColor = (type: string) => {
@@ -144,23 +153,146 @@ export function TourCard({
             <div className="space-y-3">
               {tour.bookings.map((booking) => (
                 <Card key={booking.id} className="p-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{booking.recipient_name}</p>
-                      <p className="text-sm text-gray-600">{booking.pickup_city} → {booking.delivery_city}</p>
-                      <p className="text-sm text-gray-600">{booking.weight} kg</p>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <Badge className={getStatusColor(tour.status)}>
+                          {booking.status}
+                        </Badge>
+                        <p className="font-medium mt-2">{booking.tracking_number}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleBookingDetails(booking.id)}
+                      >
+                        {showBookingDetails[booking.id] ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
-                    <Badge className={getStatusColor(tour.status)}>
-                      {booking.status}
-                    </Badge>
+
+                    {showBookingDetails[booking.id] && (
+                      <div className="space-y-4 border-t pt-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-start gap-2">
+                            <User className="h-4 w-4 mt-1 text-gray-500" />
+                            <div>
+                              <p className="text-sm text-gray-500">Expéditeur</p>
+                              <p className="font-medium">{booking.sender_name}</p>
+                              <p className="text-sm text-gray-600">{booking.sender_phone}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <User className="h-4 w-4 mt-1 text-gray-500" />
+                            <div>
+                              <p className="text-sm text-gray-500">Destinataire</p>
+                              <p className="font-medium">{booking.recipient_name}</p>
+                              <p className="text-sm text-gray-600">{booking.recipient_phone}</p>
+                              <p className="text-sm text-gray-600">{booking.recipient_address}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-start gap-2">
+                            <MapPin className="h-4 w-4 mt-1 text-gray-500" />
+                            <div>
+                              <p className="text-sm text-gray-500">Ville de collecte</p>
+                              <p className="font-medium">{booking.pickup_city}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <MapPin className="h-4 w-4 mt-1 text-gray-500" />
+                            <div>
+                              <p className="text-sm text-gray-500">Ville de livraison</p>
+                              <p className="font-medium">{booking.delivery_city}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-2">
+                          <Scale className="h-4 w-4 mt-1 text-gray-500" />
+                          <div>
+                            <p className="text-sm text-gray-500">Poids</p>
+                            <p className="font-medium">{booking.weight} kg</p>
+                          </div>
+                        </div>
+
+                        {booking.content_types?.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <Package className="h-4 w-4 mt-1 text-gray-500" />
+                            <div>
+                              <p className="text-sm text-gray-500">Types de contenu</p>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {booking.content_types.map((type: string, index: number) => (
+                                  <Badge key={index} variant="secondary">
+                                    {type}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {booking.special_items?.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <Package className="h-4 w-4 mt-1 text-gray-500" />
+                            <div>
+                              <p className="text-sm text-gray-500">Objets spéciaux</p>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {booking.special_items.map((item: any, index: number) => (
+                                  <Badge key={index} variant="secondary">
+                                    {item.name} {item.quantity && `(${item.quantity})`}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {booking.package_description && (
+                          <div className="flex items-start gap-2">
+                            <Info className="h-4 w-4 mt-1 text-gray-500" />
+                            <div>
+                              <p className="text-sm text-gray-500">Description du colis</p>
+                              <p className="text-sm">{booking.package_description}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-start gap-2">
+                          <Calendar className="h-4 w-4 mt-1 text-gray-500" />
+                          <div>
+                            <p className="text-sm text-gray-500">Dates</p>
+                            <div className="space-y-1">
+                              <p className="text-sm">
+                                <span className="font-medium">Créée le:</span>{" "}
+                                {format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr })}
+                              </p>
+                              {booking.updated_at && (
+                                <p className="text-sm">
+                                  <span className="font-medium">Dernière mise à jour:</span>{" "}
+                                  {format(new Date(booking.updated_at), "d MMMM yyyy", { locale: fr })}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500">
-              Aucune réservation pour cette tournée.
-            </p>
+            <Alert>
+              <AlertDescription>
+                Aucune réservation pour cette tournée.
+              </AlertDescription>
+            </Alert>
           )}
         </CollapsibleContent>
       </Collapsible>
