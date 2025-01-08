@@ -23,7 +23,7 @@ export default function MenuItems() {
           "hover:bg-primary/10 hover:scale-105 active:scale-95",
           isActive ? "text-primary" : "text-gray-700",
           item.highlight && !isActive && "bg-primary text-white hover:bg-primary/90",
-          "w-full xl:w-auto justify-start xl:justify-center"
+          "w-full lg:w-auto justify-start lg:justify-center"
         )}
         whileHover={{ y: -2 }}
         whileTap={{ y: 0 }}
@@ -37,7 +37,7 @@ export default function MenuItems() {
         />
         <span className={cn(
           "whitespace-nowrap",
-          isMobile ? "block" : item.hideTextOnMobile ? "hidden xl:block" : "block"
+          isMobile ? "block" : item.hideTextOnMobile ? "hidden lg:block" : "block"
         )}>
           {item.name}
         </span>
@@ -84,8 +84,8 @@ export default function MenuItems() {
 
   return (
     <div className={cn(
-      "hidden xl:flex xl:items-center xl:space-x-1",
-      "xl:flex-nowrap xl:overflow-x-auto xl:pb-2",
+      "hidden lg:flex items-center space-x-1",
+      "lg:flex-nowrap lg:overflow-x-auto lg:pb-2",
       "scrollbar-hide"
     )}>
       {menuItems.map(renderMenuItem)}
