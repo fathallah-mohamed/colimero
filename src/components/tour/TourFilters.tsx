@@ -23,10 +23,13 @@ export function TourFilters({
   onStatusChange,
 }: TourFiltersProps) {
   return (
-    <div className="flex gap-3 items-center">
-      <div className="w-40">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div>
+        <label className="text-sm font-medium mb-1.5 block">
+          Pays de départ
+        </label>
         <Select value={departureCountry} onValueChange={onDepartureCountryChange}>
-          <SelectTrigger className="h-9">
+          <SelectTrigger>
             <SelectValue placeholder="Pays de départ" />
           </SelectTrigger>
           <SelectContent>
@@ -36,9 +39,12 @@ export function TourFilters({
         </Select>
       </div>
 
-      <div className="w-40">
+      <div>
+        <label className="text-sm font-medium mb-1.5 block">
+          Pays de destination
+        </label>
         <Select value={destinationCountry} onValueChange={onDestinationCountryChange}>
-          <SelectTrigger className="h-9">
+          <SelectTrigger>
             <SelectValue placeholder="Pays de destination" />
           </SelectTrigger>
           <SelectContent>
@@ -48,9 +54,12 @@ export function TourFilters({
         </Select>
       </div>
 
-      <div className="w-48">
+      <div>
+        <label className="text-sm font-medium mb-1.5 block">
+          Statut
+        </label>
         <Select value={status} onValueChange={onStatusChange}>
-          <SelectTrigger className="h-9">
+          <SelectTrigger>
             <SelectValue placeholder="Filtrer par statut" />
           </SelectTrigger>
           <SelectContent>
@@ -65,9 +74,12 @@ export function TourFilters({
         </Select>
       </div>
 
-      <div className="w-52">
+      <div>
+        <label className="text-sm font-medium mb-1.5 block">
+          Trier par
+        </label>
         <Select value={sortBy} onValueChange={onSortByChange}>
-          <SelectTrigger className="h-9">
+          <SelectTrigger>
             <SelectValue placeholder="Trier par" />
           </SelectTrigger>
           <SelectContent>
