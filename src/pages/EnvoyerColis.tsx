@@ -137,7 +137,6 @@ export default function EnvoyerColis() {
               <ClientTourCard
                 key={tour.id}
                 tour={tour}
-                onBookingClick={handleBookingClick}
               />
             ))}
           </div>
