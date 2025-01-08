@@ -84,7 +84,7 @@ export default function MenuItems() {
 
   return (
     <div className={cn(
-      "hidden lg:flex items-center space-x-1",
+      "hidden lg:flex lg:items-center lg:space-x-1",
       "lg:flex-nowrap lg:overflow-x-auto lg:pb-2",
       "scrollbar-hide"
     )}>
