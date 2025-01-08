@@ -14,16 +14,12 @@ export async function approveCarrierRequest(requestId: string) {
 
     console.log("Found carrier request:", request);
 
-    // Generate a random password for the new user
-    const tempPassword = Math.random().toString(36).slice(-8);
-
     // Update request status to trigger carrier creation
     const { error: updateError } = await supabase
       .from("carrier_registration_requests")
       .update({ 
         status: "approved",
-        email_verified: true,
-        password: tempPassword
+        email_verified: true
       })
       .eq("id", requestId);
 

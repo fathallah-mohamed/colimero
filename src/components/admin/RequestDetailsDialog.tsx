@@ -38,6 +38,8 @@ export default function RequestDetailsDialog({
       return;
     }
 
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
     try {
       await approveCarrierRequest(request.id);
@@ -52,7 +54,7 @@ export default function RequestDetailsDialog({
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de l'approbation de la demande.",
       });
     } finally {
       setIsSubmitting(false);
