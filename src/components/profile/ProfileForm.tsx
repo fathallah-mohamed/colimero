@@ -73,27 +73,16 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (carrierError) throw carrierError;
 
-      // First try to update existing capacity
-      const { error: updateError } = await supabase
+      // Use upsert for carrier capacities
+      const { error: capacitiesError } = await supabase
         .from('carrier_capacities')
-        .update({
+        .upsert({
+          carrier_id: session.user.id,
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg,
-        })
-        .eq('carrier_id', session.user.id);
+        });
 
-      // If update fails because record doesn't exist, insert new record
-      if (updateError) {
-        const { error: insertError } = await supabase
-          .from('carrier_capacities')
-          .insert({
-            carrier_id: session.user.id,
-            total_capacity: values.total_capacity,
-            price_per_kg: values.price_per_kg,
-          });
-
-        if (insertError) throw insertError;
-      }
+      if (capacitiesError) throw capacitiesError;
 
       toast({
         title: "Succès",
