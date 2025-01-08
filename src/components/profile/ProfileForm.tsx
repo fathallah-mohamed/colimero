@@ -73,22 +73,27 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (carrierError) throw carrierError;
 
-      // Upsert carrier capacities using ON CONFLICT
-      const { error: capacitiesError } = await supabase
+      // First try to update existing capacity
+      const { error: updateError } = await supabase
         .from('carrier_capacities')
-        .upsert(
-          {
+        .update({
+          total_capacity: values.total_capacity,
+          price_per_kg: values.price_per_kg,
+        })
+        .eq('carrier_id', session.user.id);
+
+      // If update fails because record doesn't exist, insert new record
+      if (updateError) {
+        const { error: insertError } = await supabase
+          .from('carrier_capacities')
+          .insert({
             carrier_id: session.user.id,
             total_capacity: values.total_capacity,
             price_per_kg: values.price_per_kg,
-          },
-          {
-            onConflict: 'carrier_id',
-            ignoreDuplicates: false
-          }
-        );
+          });
 
-      if (capacitiesError) throw capacitiesError;
+        if (insertError) throw insertError;
+      }
 
       toast({
         title: "Succès",
