@@ -9,20 +9,13 @@ import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { isPublicRoute } from "@/config/routes";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
-  const { 
-    user, 
-    userType, 
-    handleLogout, 
-    handleAuthDialogOpen 
-  } = useNavigation();
-  
+  const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
@@ -44,19 +37,11 @@ export default function Navigation() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const onAuthDialogOpen = () => {
-    // Ne pas ouvrir le dialogue si nous sommes sur une route publique
-    if (isPublicRoute(location.pathname)) {
-      console.log("Route publique, pas d'ouverture du dialogue d'authentification");
-      return;
+  useEffect(() => {
+    if (location.pathname.includes('/reserver/')) {
+      sessionStorage.setItem('returnPath', location.pathname);
     }
-
-    const shouldOpen = handleAuthDialogOpen();
-    if (shouldOpen) {
-      console.log("Ouverture du dialogue d'authentification");
-      setShowAuthDialog(true);
-    }
-  };
+  }, [location.pathname]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -73,7 +58,7 @@ export default function Navigation() {
               user={user}
               userType={userType}
               handleLogout={handleLogout}
-              setShowAuthDialog={onAuthDialogOpen}
+              setShowAuthDialog={setShowAuthDialog}
             />
             
             <MobileMenuButton 
@@ -92,7 +77,7 @@ export default function Navigation() {
           userType={userType}
           handleLogout={handleLogout}
           setIsOpen={setIsOpen}
-          setShowAuthDialog={onAuthDialogOpen}
+          setShowAuthDialog={setShowAuthDialog}
         />
       </div>
 

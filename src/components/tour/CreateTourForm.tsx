@@ -87,7 +87,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         remaining_capacity: values.remaining_capacity,
         type: values.type,
         route: values.route,
-        status: "planned",
+        status: "Programmé",
         terms_accepted: values.terms_accepted,
         customs_declaration: values.customs_declaration,
       });
