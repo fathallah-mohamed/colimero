@@ -1,4 +1,5 @@
 import { Calendar, Package, Home, Users, FileText } from "lucide-react";
+import { MenuItem } from "../MenuItem";
 
 export const menuItems = [
   {
