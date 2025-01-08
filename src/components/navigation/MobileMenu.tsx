@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { UserCircle2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { menuItems } from "./MenuItems";
 import { UserMenuItems } from "./UserMenuItems";
 
@@ -10,8 +9,8 @@ interface MobileMenuProps {
   user: any;
   userType: string | null;
   handleLogout: () => void;
-  setIsOpen: (value: boolean) => void;
-  setShowAuthDialog: (value: boolean) => void;
+  setIsOpen: (isOpen: boolean) => void;
+  setShowAuthDialog: (show: boolean) => void;
 }
 
 export default function MobileMenu({
@@ -20,17 +19,24 @@ export default function MobileMenu({
   userType,
   handleLogout,
   setIsOpen,
-  setShowAuthDialog
+  setShowAuthDialog,
 }: MobileMenuProps) {
   return (
     <div className="h-full flex flex-col bg-white">
-      <div className="flex justify-end p-4">
+      <div className="flex items-center justify-between p-4 border-b">
+        <Link 
+          to="/" 
+          className="text-xl font-bold text-primary"
+          onClick={() => setIsOpen(false)}
+        >
+          Colimero
+        </Link>
         <button
           onClick={() => setIsOpen(false)}
           className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
         >
-          <X className="h-6 w-6" />
           <span className="sr-only">Fermer le menu</span>
+          <X className="h-6 w-6" aria-hidden="true" />
         </button>
       </div>
 
