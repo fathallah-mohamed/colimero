@@ -43,6 +43,8 @@ export interface Tour {
   type: TourType;
   previous_status?: TourStatus | null;
   bookings?: Booking[];
+  terms_accepted: boolean;
+  customs_declaration: boolean;
   carriers?: {
     company_name: string;
     avatar_url: string;

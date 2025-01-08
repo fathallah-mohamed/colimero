@@ -777,6 +777,7 @@ export type Database = {
           carrier_id: string
           collection_date: string
           created_at: string
+          customs_declaration: boolean | null
           departure_country: string
           departure_date: string
           destination_country: string
@@ -785,6 +786,7 @@ export type Database = {
           remaining_capacity: number
           route: Json
           status: string | null
+          terms_accepted: boolean | null
           total_capacity: number
           type: Database["public"]["Enums"]["tour_type"]
           updated_at: string
@@ -793,6 +795,7 @@ export type Database = {
           carrier_id: string
           collection_date: string
           created_at?: string
+          customs_declaration?: boolean | null
           departure_country?: string
           departure_date: string
           destination_country?: string
@@ -801,6 +804,7 @@ export type Database = {
           remaining_capacity: number
           route: Json
           status?: string | null
+          terms_accepted?: boolean | null
           total_capacity: number
           type?: Database["public"]["Enums"]["tour_type"]
           updated_at?: string
@@ -809,6 +813,7 @@ export type Database = {
           carrier_id?: string
           collection_date?: string
           created_at?: string
+          customs_declaration?: boolean | null
           departure_country?: string
           departure_date?: string
           destination_country?: string
@@ -817,6 +822,7 @@ export type Database = {
           remaining_capacity?: number
           route?: Json
           status?: string | null
+          terms_accepted?: boolean | null
           total_capacity?: number
           type?: Database["public"]["Enums"]["tour_type"]
           updated_at?: string

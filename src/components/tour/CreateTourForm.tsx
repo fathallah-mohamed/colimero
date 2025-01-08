@@ -44,6 +44,8 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
           collection_date: new Date().toISOString().split('T')[0],
         },
       ],
+      terms_accepted: false,
+      customs_declaration: false,
     },
   });
 
@@ -86,6 +88,8 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         type: values.type,
         route: values.route,
         status: "Programmé",
+        terms_accepted: values.terms_accepted,
+        customs_declaration: values.customs_declaration,
       });
 
       if (error) throw error;
