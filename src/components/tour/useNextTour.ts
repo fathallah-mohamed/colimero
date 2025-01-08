@@ -7,6 +7,8 @@ export function useNextTour() {
     queryKey: ['next-planned-tour'],
     queryFn: async () => {
       try {
+        console.log('Fetching next tour...');
+        
         const { data, error } = await supabase
           .from('tours')
           .select(`
@@ -21,7 +23,7 @@ export function useNextTour() {
               )
             )
           `)
-          .eq('status', 'Programmé')
+          .eq('status', 'Programmée')
           .eq('type', 'public')
           .gte('departure_date', new Date().toISOString())
           .order('departure_date', { ascending: true })
@@ -33,12 +35,16 @@ export function useNextTour() {
           throw error;
         }
         
+        console.log('Next tour data:', data);
+        
         if (!data) return null;
         
+        // Parse route data
         const parsedRoute = Array.isArray(data.route) 
           ? data.route 
           : JSON.parse(data.route as string);
 
+        // Transform route data
         const transformedRoute = parsedRoute.map((stop: any): RouteStop => ({
           name: stop.name,
           location: stop.location,
@@ -47,17 +53,21 @@ export function useNextTour() {
           collection_date: stop.collection_date
         }));
 
-        return {
+        // Transform carrier data
+        const transformedTour = {
           ...data,
           route: transformedRoute,
           status: data.status as Tour['status'],
           carriers: {
             ...data.carriers,
             carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
-              ? data.carriers.carrier_capacities 
-              : [data.carriers?.carrier_capacities]
+              ? data.carriers.carrier_capacities[0]
+              : data.carriers?.carrier_capacities
           }
         } as Tour;
+
+        console.log('Transformed tour:', transformedTour);
+        return transformedTour;
       } catch (error) {
         console.error('Error in useNextTour:', error);
         throw error;
