@@ -39,6 +39,12 @@ export default function MenuItems() {
     }
   };
 
+  const getUserDisplayName = () => {
+    const firstName = user?.user_metadata?.first_name || '';
+    const lastName = user?.user_metadata?.last_name || '';
+    return `${firstName} ${lastName}`.trim() || 'Mon compte';
+  };
+
   return (
     <div className="hidden md:flex items-center space-x-1">
       {/* Menu items communs */}
@@ -93,7 +99,7 @@ export default function MenuItems() {
               className="flex items-center gap-2 px-4 py-2 hover:bg-primary/10"
             >
               <UserCircle2 className="w-4 h-4" />
-              <span className="text-sm font-medium">{user.email}</span>
+              <span className="text-sm font-medium">{getUserDisplayName()}</span>
               <ChevronDown className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
