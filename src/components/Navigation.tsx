@@ -77,7 +77,7 @@ export default function Navigation() {
           </motion.div>
 
           {/* Desktop Menu - Only show on large screens */}
-          <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
+          <div className="hidden xl:flex xl:items-center xl:space-x-6">
             <MenuItems />
           </div>
 
@@ -94,7 +94,7 @@ export default function Navigation() {
               ref={mobileButtonRef}
               isOpen={isOpen}
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden" // Only show on screens smaller than lg
+              className="xl:hidden" // Only show on screens smaller than xl
             />
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function Navigation() {
       <div 
         ref={mobileMenuRef}
         className={cn(
-          "lg:hidden transition-all duration-300 ease-in-out",
+          "xl:hidden transition-all duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
