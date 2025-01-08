@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tour } from "@/types/tour";
 import Navigation from "@/components/Navigation";
-import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader";
-import { TransporteurLayout } from "@/components/transporteur/TransporteurLayout";
+import TransporteurHeader from "@/components/transporteur/TransporteurHeader";
+import TransporteurLayout from "@/components/transporteur/TransporteurLayout";
 import { useToast } from "@/hooks/use-toast";
 
 export default function TransporteurDetails() {
@@ -38,7 +38,6 @@ export default function TransporteurDetails() {
 
         const transformedTours = toursData.map(tour => ({
           ...tour,
-          route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
           terms_accepted: tour.terms_accepted || false,
           customs_declaration: tour.customs_declaration || false,
         })) as Tour[];
@@ -70,10 +69,7 @@ export default function TransporteurDetails() {
   return (
     <TransporteurLayout>
       <Navigation />
-      <TransporteurHeader 
-        name="Nom du transporteur"
-        coverageArea="FR, TN"
-      />
+      <TransporteurHeader />
       <div className="p-4">
         {loading ? (
           <div>Chargement...</div>
@@ -96,7 +92,7 @@ export default function TransporteurDetails() {
                 ))}
               </ul>
             )}
-            <h2 className="text-2xl font-semibold mt-8">Tournées à venir</h2>
+            <h2 className="text-2xl font-semibold">Tournées à venir</h2>
             {upcomingTours.length === 0 ? (
               <p>Aucune tournée à venir.</p>
             ) : (
