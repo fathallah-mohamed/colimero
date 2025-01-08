@@ -9,6 +9,7 @@ import Tours from "./pages/Tours";
 import Transporteurs from "./pages/Transporteurs";
 import TransporteurDetails from "./pages/TransporteurDetails";
 import PlanifierTournee from "./pages/PlanifierTournee";
+import CreateTourForm from "./components/tour/CreateTourForm";
 import EnvoyerColis from "./pages/EnvoyerColis";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminManagement from "./pages/AdminManagement";
@@ -18,7 +19,6 @@ import MesDemandesApprobation from "./pages/MesDemandesApprobation";
 import MesTournees from "./pages/MesTournees";
 import MesReservations from "./pages/MesReservations";
 import Reserver from "./pages/Reserver";
-import CreateTourForm from "./components/tour/CreateTourForm";
 
 const queryClient = new QueryClient();
 

@@ -28,7 +28,7 @@ export const menuItems: MenuItem[] = [
     highlight: true,
     className: "bg-blue-50",
     allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false
+    requiresAuth: false // Explicitly set to false to ensure public access
   },
   { 
     name: "Transporteurs", 
