@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { UserCircle2 } from "lucide-react";
-import { AccountMenu } from "./AccountMenu";
+import AccountMenu from "./AccountMenu";
 
 interface AuthSectionProps {
   user: any;
