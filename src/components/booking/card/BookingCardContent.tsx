@@ -6,10 +6,11 @@ import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, MapPin, Phone, User, Scale, Calendar, Clock, Truck } from "lucide-react";
+import { Package, MapPin, Phone, User, Scale, Calendar, Clock, Truck, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface BookingCardContentProps {
   booking: any;
@@ -69,7 +70,7 @@ export function BookingCardContent({
     setShowEditDialog(false);
   };
 
-  const showActions = isCollecting || tourStatus === 'planned';
+  const canModifyBooking = booking.tours?.status === "Programmée";
 
   return (
     <>
@@ -78,6 +79,15 @@ export function BookingCardContent({
         <BookingStatusBadge status={currentStatus} />
       </div>
       
+      {!canModifyBooking && booking.status !== "cancelled" && (
+        <Alert className="mt-4 bg-yellow-50 text-yellow-800 border-yellow-200">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Cette réservation ne peut plus être modifiée ou annulée car la tournée n'est plus au statut "Programmée"
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="mt-4 space-y-3">
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2 text-gray-600">
@@ -165,7 +175,7 @@ export function BookingCardContent({
         )}
       </div>
 
-      {showActions && (
+      {canModifyBooking && (
         <div className="mt-4">
           <BookingActions
             status={currentStatus}
