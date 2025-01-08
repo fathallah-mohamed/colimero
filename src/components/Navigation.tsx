@@ -77,7 +77,7 @@ export default function Navigation() {
           </motion.div>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex lg:items-center lg:space-x-6">
+          <div className="hidden md:flex md:items-center md:space-x-6 lg:space-x-8">
             <MenuItems />
           </div>
 
@@ -103,7 +103,7 @@ export default function Navigation() {
       <div 
         ref={mobileMenuRef}
         className={cn(
-          "lg:hidden transition-all duration-300 ease-in-out",
+          "md:hidden transition-all duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
