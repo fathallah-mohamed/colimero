@@ -1,22 +1,20 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { SendPackageHero } from "@/components/send-package/SendPackageHero";
-import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
-import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
-import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { useTours } from "@/hooks/use-tours";
-import { Button } from "@/components/ui/button";
+import ClientTourCard from "@/components/send-package/tour/ClientTourCard";
+import SendPackageHero from "@/components/send-package/SendPackageHero";
+import SendPackageFeatures from "@/components/send-package/SendPackageFeatures";
+import SendPackageFilters from "@/components/send-package/SendPackageFilters";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 import { Tour, RouteStop } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
-  const user = useUser();
   const navigate = useNavigate();
-  const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
-  const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
+  const [departureCountry, setDepartureCountry] = useState<string>("FR");
+  const [destinationCountry, setDestinationCountry] = useState<string>("TN");
+  const [sortBy, setSortBy] = useState<string>("departure_date");
   const [tourType, setTourType] = useState<"public" | "private">("public");
 
   const {
@@ -39,39 +37,38 @@ export default function EnvoyerColis() {
   })) as Tour[];
 
   const handleBooking = (tourId: number, pickupCity: string) => {
-    if (!user?.id) {
-      toast({
-        title: "Connexion requise",
-        description: "Vous devez être connecté pour réserver une tournée",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Store the current path in sessionStorage before redirecting to login
+    sessionStorage.setItem('returnPath', `/reserver/${tourId}`);
+    
     navigate(`/reserver/${tourId}`);
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <SendPackageHero />
-          <SendPackageFeatures />
-          
-          <div className="mt-12">
-            <SendPackageFilters
-              selectedRoute={selectedRoute}
-              setSelectedRoute={setSelectedRoute}
-              selectedStatus={selectedStatus}
-              setSelectedStatus={setSelectedStatus}
-              tourType={tourType}
-              setTourType={setTourType}
-            />
+      
+      <SendPackageHero />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <SendPackageFeatures />
+        
+        <div className="mt-12">
+          <SendPackageFilters
+            departureCountry={departureCountry}
+            destinationCountry={destinationCountry}
+            sortBy={sortBy}
+            tourType={tourType}
+            onDepartureCountryChange={setDepartureCountry}
+            onDestinationCountryChange={setDestinationCountry}
+            onSortByChange={setSortBy}
+            onTourTypeChange={setTourType}
+          />
 
+          <div className="mt-8">
             {loading ? (
-              <div className="text-center py-8">Chargement des tournées...</div>
+              <div className="text-center">Chargement des tournées...</div>
             ) : tours && tours.length > 0 ? (
-              <div className="grid gap-6 mt-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {tours.map((tour) => (
                   <ClientTourCard
                     key={tour.id}
@@ -81,8 +78,8 @@ export default function EnvoyerColis() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
-                Aucune tournée disponible pour les critères sélectionnés.
+              <div className="text-center text-gray-500">
+                Aucune tournée disponible pour le moment.
               </div>
             )}
           </div>
