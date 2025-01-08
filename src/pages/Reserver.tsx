@@ -1,83 +1,72 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import Navigation from "@/components/Navigation";
-import { Tour } from "@/types/tour";
+import { BookingForm } from "@/components/booking/BookingForm";
+import { Tour, RouteStop, TourStatus } from "@/types/tour";
 
 export default function Reserver() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [nextTour, setNextTour] = useState<Tour | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { tourId } = useParams();
 
-  useEffect(() => {
-    const fetchNextTour = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('tours')
-          .select(`
-            *,
-            carriers (
-              company_name,
-              first_name,
-              last_name,
-              avatar_url,
-              carrier_capacities (
-                price_per_kg
-              )
+  const { data: tour, isLoading } = useQuery({
+    queryKey: ["tour", tourId],
+    queryFn: async () => {
+      if (!tourId) throw new Error("Tour ID is required");
+      
+      const { data, error } = await supabase
+        .from("tours")
+        .select(`
+          *,
+          carriers (
+            company_name,
+            first_name,
+            last_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
             )
-          `)
-          .eq('status', 'Programmé')
-          .eq('type', 'public')
-          .gte('departure_date', new Date().toISOString())
-          .order('departure_date', { ascending: true })
-          .limit(1)
-          .maybeSingle();
+          )
+        `)
+        .eq("id", parseInt(tourId, 10))
+        .single();
 
-        if (error) throw error;
+      if (error) throw error;
 
-        if (data) {
-          setNextTour({
-            ...data,
-            terms_accepted: data.terms_accepted || false,
-            customs_declaration: data.customs_declaration || false,
-          } as Tour);
-        }
-      } catch (error) {
-        console.error('Error fetching next tour:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger la prochaine tournée",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+      // Transform the JSON route data into RouteStop array
+      const transformedTour: Tour = {
+        ...data,
+        id: parseInt(data.id.toString(), 10),
+        route: (data.route as any[]).map((stop): RouteStop => ({
+          name: stop.name,
+          location: stop.location,
+          time: stop.time,
+          type: stop.type,
+          collection_date: stop.collection_date
+        })),
+        status: data.status as TourStatus,
+        previous_status: data.previous_status as TourStatus | null
+      };
 
-    fetchNextTour();
-  }, [toast]);
+      return transformedTour;
+    }
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!tour) {
+    return <div>Tour not found</div>;
+  }
 
   return (
-    <div>
-      <Navigation />
-      {loading ? (
-        <div>Chargement...</div>
-      ) : nextTour ? (
-        <div>
-          <h1>Détails de la prochaine tournée</h1>
-          <p>Pays de départ: {nextTour.departure_country}</p>
-          <p>Pays de destination: {nextTour.destination_country}</p>
-          <p>Date de départ: {nextTour.departure_date}</p>
-          <p>Capacité totale: {nextTour.total_capacity}</p>
-          <p>Capacité restante: {nextTour.remaining_capacity}</p>
-          <p>Termes acceptés: {nextTour.terms_accepted ? "Oui" : "Non"}</p>
-          <p>Déclaration douanière: {nextTour.customs_declaration ? "Oui" : "Non"}</p>
-        </div>
-      ) : (
-        <div>Aucune tournée à venir.</div>
-      )}
+    <div className="container mx-auto py-8">
+      <BookingForm 
+        tourId={tour.id}
+        pickupCity={tour.route[0].name}
+        onSuccess={() => {
+          // Handle success
+        }}
+      />
     </div>
   );
 }
