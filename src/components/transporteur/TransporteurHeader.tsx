@@ -11,14 +11,14 @@ interface TransporteurHeaderProps {
   firstName?: string;
 }
 
-const countryNames: { [key: string]: string } = {
-  'FR': 'France',
-  'TN': 'Tunisie',
-  'MA': 'Maroc',
-  'DZ': 'Algérie'
-};
-
 export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }: TransporteurHeaderProps) {
+  const countryNames: { [key: string]: string } = {
+    'FR': 'France',
+    'TN': 'Tunisie',
+    'MA': 'Maroc',
+    'DZ': 'Algérie'
+  };
+  
   const countries = coverageArea.split(", ");
   
   const formatCoverageArea = (countries: string[]) => {
@@ -55,3 +55,5 @@ export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }:
     </div>
   );
 }
+
+export default TransporteurHeader;

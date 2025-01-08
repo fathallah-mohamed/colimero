@@ -51,6 +51,8 @@ export function useNextTour() {
           ...data,
           route: transformedRoute,
           status: data.status as Tour['status'],
+          terms_accepted: data.terms_accepted || false,
+          customs_declaration: data.customs_declaration || false,
           carriers: {
             ...data.carriers,
             carrier_capacities: Array.isArray(data.carriers?.carrier_capacities) 
@@ -64,6 +66,6 @@ export function useNextTour() {
       }
     },
     retry: 1,
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    staleTime: 30000,
   });
 }
