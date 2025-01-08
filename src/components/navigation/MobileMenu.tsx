@@ -30,7 +30,8 @@ export default function MobileMenu({
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 30
+        damping: 30,
+        staggerChildren: 0.1
       }
     },
     closed: {
@@ -46,18 +47,12 @@ export default function MobileMenu({
 
   const itemVariants = {
     open: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        y: { stiffness: 1000, velocity: -100 }
-      }
+      x: 0,
+      opacity: 1
     },
     closed: {
-      y: 50,
-      opacity: 0,
-      transition: {
-        y: { stiffness: 1000 }
-      }
+      x: 50,
+      opacity: 0
     }
   };
 
@@ -67,7 +62,7 @@ export default function MobileMenu({
       animate={isOpen ? "open" : "closed"}
       variants={menuVariants}
       className={cn(
-        "fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 shadow-lg transform md:hidden",
+        "fixed inset-y-0 right-0 w-full sm:w-80 bg-white border-l border-gray-200 shadow-lg transform lg:hidden",
         "flex flex-col"
       )}
     >
@@ -81,11 +76,33 @@ export default function MobileMenu({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 pb-3 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
         {/* Actions principales en haut */}
-        <div className="space-y-2 mb-4 border-b border-gray-200 pb-4">
+        <div className="space-y-2 mb-4">
           {menuItems
             .filter(item => item.highlight)
+            .map((item) => (
+              <motion.div
+                key={item.name}
+                variants={itemVariants}
+                className="w-full"
+              >
+                <Link
+                  to={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center w-full px-4 py-3 text-base font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors duration-200"
+                >
+                  <item.icon className="w-5 h-5 mr-3" />
+                  {item.name}
+                </Link>
+              </motion.div>
+            ))}
+        </div>
+
+        {/* Menu items secondaires */}
+        <div className="space-y-1 border-t border-gray-200 pt-4">
+          {menuItems
+            .filter(item => !item.highlight)
             .map((item) => (
               <motion.div
                 key={item.name}
@@ -94,54 +111,36 @@ export default function MobileMenu({
                 <Link
                   to={item.href}
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center w-full px-3 py-2 text-base font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition-colors duration-200"
+                  className="flex items-center w-full px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  {item.icon && <item.icon className="w-5 h-5 mr-3" />}
+                  <item.icon className="w-5 h-5 mr-3" />
                   {item.name}
                 </Link>
               </motion.div>
             ))}
         </div>
 
-        {/* Menu items secondaires */}
-        {menuItems
-          .filter(item => !item.highlight)
-          .map((item) => (
-            <motion.div
-              key={item.name}
-              variants={itemVariants}
-            >
-              <Link
-                to={item.href}
-                onClick={() => setIsOpen(false)}
-                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
+        {/* Section utilisateur */}
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          {user ? (
+            <>
+              <div className="px-4 py-2 text-sm text-gray-600">
+                {user.email}
+              </div>
+              <UserMenuItems userType={userType} />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                className="w-full mt-2 text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
               >
-                {item.icon && <item.icon className="w-4 h-4 mr-3" />}
-                {item.name}
-              </Link>
-            </motion.div>
-          ))}
-
-        {user ? (
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="px-3 py-2 text-sm text-gray-600">
-              {user.email}
-            </div>
-            <UserMenuItems userType={userType} />
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => {
-                handleLogout();
-                setIsOpen(false);
-              }}
-              className="w-full mt-2 text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
-            >
-              Déconnexion
-            </Button>
-          </div>
-        ) : (
-          <div className="border-t border-gray-200 pt-4 mt-4">
+                Déconnexion
+              </Button>
+            </>
+          ) : (
             <Button 
               variant="outline" 
               size="sm"
@@ -154,8 +153,8 @@ export default function MobileMenu({
               <UserCircle2 className="w-4 h-4 mr-2" />
               Se connecter
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </motion.div>
   );

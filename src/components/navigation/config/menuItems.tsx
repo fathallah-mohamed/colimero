@@ -6,6 +6,7 @@ interface MenuItem {
   href: string;
   icon: LucideIcon;
   highlight?: boolean;
+  hideTextOnMobile?: boolean;
   className?: string;
 }
 
@@ -26,15 +27,18 @@ export const menuItems: MenuItem[] = [
     name: "Transporteurs", 
     href: "/transporteurs", 
     icon: Truck,
+    hideTextOnMobile: true,
   },
   { 
     name: "À propos", 
     href: "/a-propos", 
     icon: Info,
+    hideTextOnMobile: true,
   },
   { 
     name: "Contact", 
     href: "/contact", 
     icon: Mail,
+    hideTextOnMobile: true,
   },
 ];

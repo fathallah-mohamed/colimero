@@ -64,6 +64,16 @@
     --input: 240 3.7% 15.9%;
     --ring: 252 84% 74%;
   }
+
+  /* Masquer la scrollbar tout en gardant la fonctionnalité */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }
 
 @layer base {
