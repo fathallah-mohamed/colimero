@@ -18,6 +18,8 @@ export interface RouteStop {
 
 export interface Booking {
   id: string;
+  user_id: string;
+  tour_id: number;
   recipient_name: string;
   pickup_city: string;
   delivery_city: string;
@@ -25,6 +27,15 @@ export interface Booking {
   tracking_number: string;
   status: string;
   recipient_phone: string;
+  recipient_address: string;
+  item_type: string;
+  sender_name?: string;
+  sender_phone?: string;
+  special_items?: any[];
+  content_types?: string[];
+  package_description?: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface Tour {

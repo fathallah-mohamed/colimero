@@ -72,6 +72,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       delivery_city: "À définir",
       content_types: selectedTypes,
       photos: photos,
+      special_items: values.special_items ? [{ name: values.special_items }] : [], // Convert string to array of objects
     };
 
     const { success } = await createBooking(formData);
