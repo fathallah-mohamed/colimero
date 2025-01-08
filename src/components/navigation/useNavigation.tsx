@@ -19,7 +19,7 @@ const PUBLIC_ROUTES = [
 ];
 
 // Helper function to check if a route is public
-export const isPublicRoute = (pathname: string) => {
+export const isPublicRoute = (pathname: string): boolean => {
   // Check exact matches first
   if (PUBLIC_ROUTES.includes(pathname)) {
     return true;
@@ -125,6 +125,6 @@ export function useNavigation() {
     user,
     userType,
     handleLogout,
-    isPublicRoute, // Export the isPublicRoute function
+    isPublicRoute,
   };
 }

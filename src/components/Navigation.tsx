@@ -44,9 +44,12 @@ export default function Navigation() {
   }, [location.pathname]);
 
   const handleAuthDialogOpen = () => {
+    // Vérifier explicitement si la route actuelle est publique
     if (isPublicRoute(location.pathname)) {
-      return; // Ne pas ouvrir la fenêtre de connexion pour les routes publiques
+      console.log("Route publique détectée, pas d'ouverture de la fenêtre de connexion");
+      return;
     }
+    console.log("Route privée détectée, ouverture de la fenêtre de connexion");
     setShowAuthDialog(true);
   };
 
