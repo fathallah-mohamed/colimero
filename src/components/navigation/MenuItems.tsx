@@ -7,7 +7,7 @@ export default function MenuItems() {
   const location = useLocation();
 
   return (
-    <div className="hidden md:flex items-center space-x-0">
+    <div className="hidden md:flex items-center space-x-1">
       {menuItems.map((item) => {
         const isActive = location.pathname === item.href;
         
@@ -19,8 +19,8 @@ export default function MenuItems() {
           >
             <motion.div
               className={cn(
-                "flex items-center px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                "w-[140px] justify-center",
+                "flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                "w-[180px] justify-center", // Increased width from 140px to 180px
                 "hover:bg-primary/10 hover:scale-105",
                 "active:scale-95",
                 isActive ? "text-primary" : "text-gray-700",
@@ -36,7 +36,7 @@ export default function MenuItems() {
                   isActive ? "text-primary" : item.highlight ? "text-white" : "text-gray-500"
                 )}
               />
-              <span className="text-nowrap">{item.name}</span>
+              <span>{item.name}</span>
               
               {/* Animated underline for active state */}
               {isActive && !item.highlight && (
