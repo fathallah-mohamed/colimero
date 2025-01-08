@@ -47,19 +47,17 @@ export function SelectableCollectionPointsList({
       {points.map((point, index) => (
         <div
           key={index}
-          onClick={() => isSelectionEnabled && point.type === 'pickup' && onPointSelect(point.name)}
-          className={`grid grid-cols-4 items-center p-4 text-sm ${
-            point.type === 'pickup' ? 'cursor-pointer' : 'cursor-default'
-          } ${
+          onClick={() => isSelectionEnabled && onPointSelect(point.name)}
+          className={`grid grid-cols-4 items-center p-4 text-sm cursor-pointer hover:bg-gray-50 ${
             selectedPoint === point.name
-              ? "bg-[#F3F0FF] border-[#8B5CF6]"
-              : "hover:bg-gray-50"
-          }`}
+              ? "bg-[#F3F0FF] border border-[#8B5CF6]"
+              : "border border-transparent"
+          } rounded-lg transition-all duration-200`}
         >
           <span className="font-medium">{point.name}</span>
           <span className="text-gray-600">{point.location}</span>
           <span className="text-gray-600">
-            {formatDate(point.collection_date)}
+            {formatDate(point.collection_date || tourDepartureDate)}
           </span>
           <span className="text-gray-600">{point.time}</span>
         </div>
