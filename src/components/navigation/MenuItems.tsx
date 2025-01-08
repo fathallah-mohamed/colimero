@@ -9,7 +9,7 @@ export const menuItems = [
     href: "/planifier-tournee", 
     icon: <Calendar className="w-4 h-4" />, 
     highlight: true,
-    className: "bg-blue-50",
+    className: "bg-primary/10",
     allowedUserTypes: ["carrier"],
     requiresAuth: true
   },
@@ -18,7 +18,7 @@ export const menuItems = [
     href: "/envoyer-colis", 
     icon: <Package className="w-4 h-4" />, 
     highlight: true,
-    className: "bg-blue-50",
+    className: "bg-primary/10",
     allowedUserTypes: ["client", "carrier", "admin"],
     requiresAuth: false
   },
@@ -83,7 +83,7 @@ export default function MenuItems() {
   };
 
   return (
-    <div className="hidden md:flex md:items-center md:space-x-4">
+    <div className="flex items-center space-x-1">
       {menuItems.map((item) => {
         const isAllowed = !item.requiresAuth || (userType && item.allowedUserTypes.includes(userType));
         
@@ -98,10 +98,11 @@ export default function MenuItems() {
             }}
             className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
               ${item.highlight
-                ? "text-[#00B0F0] hover:text-[#0082b3] " + (item.className || "")
+                ? "text-primary hover:text-primary-hover " + (item.className || "")
                 : "text-gray-700 hover:text-gray-900"
               }
               ${!isAllowed && item.requiresAuth ? "opacity-50 cursor-not-allowed" : ""}
+              transition-all duration-200 ease-in-out
             `}
           >
             {item.icon}
