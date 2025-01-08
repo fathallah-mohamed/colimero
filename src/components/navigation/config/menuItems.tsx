@@ -1,59 +1,39 @@
-import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import { Calendar, Package, Home, Users, FileText } from "lucide-react";
 
-interface MenuItem {
-  name: string;
-  href: string;
-  icon: LucideIcon;
-  highlight?: boolean;
-  className?: string;
-  allowedUserTypes: string[];
-  requiresAuth?: boolean;
-}
-
-export const menuItems: MenuItem[] = [
-  { 
-    name: "Planifier une tournée", 
+export const menuItems = [
+  {
+    name: "Accueil",
+    href: "/",
+    icon: Home,
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
+  },
+  {
+    name: "Planifier une tournée",
     href: "/planifier-tournee", 
     icon: Calendar,
-    highlight: true,
     allowedUserTypes: ["carrier"],
     requiresAuth: true
   },
-  { 
-    name: "Envoyer un colis", 
+  {
+    name: "Envoyer un colis",
     href: "/envoyer-colis", 
     icon: Package,
-    highlight: true,
     allowedUserTypes: ["client", "carrier", "admin"],
     requiresAuth: false
   },
-  { 
-    name: "Transporteurs", 
-    href: "/transporteurs", 
-    icon: Truck,
-    allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false
-  },
-  { 
-    name: "Actualités", 
-    href: "/blog", 
-    icon: MessageSquare,
-    allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false
-  },
-  { 
-    name: "À propos", 
-    href: "/a-propos", 
-    icon: Info,
-    allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false
-  },
-  { 
-    name: "Contact", 
-    href: "/contact", 
+  {
+    name: "Transporteurs",
+    href: "/transporteurs",
     icon: Users,
     allowedUserTypes: ["client", "carrier", "admin"],
     requiresAuth: false
   },
+  {
+    name: "Blog",
+    href: "/blog",
+    icon: FileText,
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
+  }
 ];

@@ -15,9 +15,7 @@ export default function MenuItems() {
           to={item.href}
           className={cn(
             "group relative flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out",
-            item.highlight
-              ? "text-primary bg-primary/10 hover:bg-primary/20"
-              : "text-gray-700 hover:text-gray-900 hover:bg-gray-50/80",
+            "text-gray-700 hover:text-gray-900 hover:bg-gray-50/80",
             "lg:text-base",
             item.className
           )}
@@ -31,7 +29,7 @@ export default function MenuItems() {
               <item.icon 
                 className={cn(
                   "w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-200",
-                  !item.highlight && "text-primary",
+                  "text-primary",
                   "mr-2"
                 )}
               />
