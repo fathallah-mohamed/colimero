@@ -4,12 +4,12 @@ import { useNavigation } from "./navigation/useNavigation";
 import { AuthSection } from "./navigation/AuthSection";
 import { MobileMenuButton } from "./navigation/MobileMenuButton";
 import MenuItems from "./navigation/MenuItems";
-import MobileMenu from "./navigation/MobileMenu";
 import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { cn } from "@/lib/utils";
+import { MobileMenuOverlay } from "./navigation/MobileMenuOverlay";
+import { MobileMenuPanel } from "./navigation/MobileMenuPanel";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -97,32 +97,17 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Mobile menu overlay */}
-      <div 
-        className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden z-40",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
-        onClick={() => setIsOpen(false)}
-      />
-
-      {/* Mobile menu panel */}
-      <div 
+      <MobileMenuOverlay isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      
+      <MobileMenuPanel
         ref={mobileMenuRef}
-        className={cn(
-          "fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden z-50",
-          isOpen ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        <MobileMenu
-          isOpen={isOpen}
-          user={user}
-          userType={userType}
-          handleLogout={handleLogout}
-          setIsOpen={setIsOpen}
-          setShowAuthDialog={setShowAuthDialog}
-        />
-      </div>
+        isOpen={isOpen}
+        user={user}
+        userType={userType}
+        handleLogout={handleLogout}
+        setIsOpen={setIsOpen}
+        setShowAuthDialog={setShowAuthDialog}
+      />
 
       <AuthDialog 
         isOpen={showAuthDialog}
