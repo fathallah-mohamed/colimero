@@ -50,7 +50,7 @@ export default function MobileMenu({
             className={cn(
               "flex items-center px-3 py-2 rounded-md text-base font-medium transition-all duration-300",
               item.highlight 
-                ? "text-white bg-gradient-primary hover:opacity-90 shadow-md" + (item.className || "")
+                ? "text-white bg-gradient-primary hover:opacity-90 shadow-md"
                 : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
             )}
           >
