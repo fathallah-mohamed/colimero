@@ -76,13 +76,13 @@ export default function Navigation() {
             </Link>
           </motion.div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex md:items-center md:space-x-6 lg:space-x-8">
+          {/* Desktop Menu - Now only visible on lg screens and up */}
+          <div className="hidden lg:flex lg:items-center lg:space-x-6">
             <MenuItems />
           </div>
 
           {/* Auth Section */}
-          <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-6">
             <AuthSection
               user={user}
               userType={userType}
@@ -94,16 +94,17 @@ export default function Navigation() {
               ref={mobileButtonRef}
               isOpen={isOpen}
               onClick={() => setIsOpen(!isOpen)}
+              className="lg:hidden" // Only show on screens smaller than lg
             />
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Now visible on all screens below lg */}
       <div 
         ref={mobileMenuRef}
         className={cn(
-          "md:hidden transition-all duration-300 ease-in-out",
+          "lg:hidden transition-all duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
