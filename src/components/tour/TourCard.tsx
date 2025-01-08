@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Tour, TourStatus } from "@/types/tour";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Calendar, Eye, Package, Phone, User, Scale, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -104,6 +104,17 @@ export function TourCard({
     }
   };
 
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '';
+    try {
+      const date = parseISO(dateString);
+      return format(date, "d MMMM yyyy", { locale: fr });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
+
   return (
     <Card className="p-4 space-y-4">
       <div className="flex justify-between items-start">
@@ -118,7 +129,7 @@ export function TourCard({
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Calendar className="h-4 w-4" />
-            <span>Départ : {format(new Date(tour.departure_date), "d MMMM yyyy", { locale: fr })}</span>
+            <span>Départ : {formatDate(tour.departure_date)}</span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -181,8 +192,8 @@ export function TourCard({
                             <User className="h-4 w-4 mt-1 text-gray-500" />
                             <div>
                               <p className="text-sm text-gray-500">Expéditeur</p>
-                              <p className="font-medium">{booking.sender_name}</p>
-                              <p className="text-sm text-gray-600">{booking.sender_phone}</p>
+                              <p className="font-medium">{booking.sender_name || 'Non spécifié'}</p>
+                              <p className="text-sm text-gray-600">{booking.sender_phone || 'Non spécifié'}</p>
                             </div>
                           </div>
                           <div className="flex items-start gap-2">
@@ -221,7 +232,7 @@ export function TourCard({
                           </div>
                         </div>
 
-                        {booking.content_types?.length > 0 && (
+                        {booking.content_types && booking.content_types.length > 0 && (
                           <div className="flex items-start gap-2">
                             <Package className="h-4 w-4 mt-1 text-gray-500" />
                             <div>
@@ -237,7 +248,7 @@ export function TourCard({
                           </div>
                         )}
 
-                        {booking.special_items?.length > 0 && (
+                        {booking.special_items && booking.special_items.length > 0 && (
                           <div className="flex items-start gap-2">
                             <Package className="h-4 w-4 mt-1 text-gray-500" />
                             <div>
@@ -270,12 +281,12 @@ export function TourCard({
                             <div className="space-y-1">
                               <p className="text-sm">
                                 <span className="font-medium">Créée le:</span>{" "}
-                                {format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr })}
+                                {formatDate(booking.created_at)}
                               </p>
                               {booking.updated_at && (
                                 <p className="text-sm">
                                   <span className="font-medium">Dernière mise à jour:</span>{" "}
-                                  {format(new Date(booking.updated_at), "d MMMM yyyy", { locale: fr })}
+                                  {formatDate(booking.updated_at)}
                                 </p>
                               )}
                             </div>
