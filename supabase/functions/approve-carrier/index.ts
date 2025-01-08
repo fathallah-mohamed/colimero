@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from '@supabase/supabase-js'
 import { corsHeaders } from '../_shared/cors.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -7,6 +7,7 @@ const supabaseServiceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const supabase = createClient(supabaseUrl, supabaseServiceRole)
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -23,6 +24,8 @@ Deno.serve(async (req) => {
 
     if (requestError) throw requestError;
     if (!request) throw new Error("Request not found");
+
+    console.log("Found carrier request:", request);
 
     // Generate a random password
     const tempPassword = Math.random().toString(36).slice(-8);
@@ -45,6 +48,7 @@ Deno.serve(async (req) => {
     });
 
     if (createUserError) throw createUserError;
+    console.log("Created auth user:", userData);
 
     // Update request status
     const { error: updateError } = await supabase
@@ -91,12 +95,14 @@ Deno.serve(async (req) => {
       JSON.stringify({ success: true, carrier }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
+
   } catch (error) {
+    console.error("Error in approve-carrier function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400 
+        status: 400
       },
     )
   }
