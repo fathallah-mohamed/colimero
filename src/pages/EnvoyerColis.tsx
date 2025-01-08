@@ -1,51 +1,103 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SendPackageHero } from "@/components/send-package/SendPackageHero";
-import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
-import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
-import { useTours } from "@/hooks/use-tours";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
+import { SendPackageHero } from "@/components/send-package/SendPackageHero";
+import { PlanningDialogs } from "@/components/tour/planning/PlanningDialogs";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import Navigation from "@/components/Navigation";
 
 export default function EnvoyerColis() {
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
-  const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
-  const [tourType, setTourType] = useState<"public" | "private">("public");
-  
-  const {
-    loading,
-    tours,
-  } = useTours();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState<string | null>(null);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
+  const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
 
-  const handleBooking = (tourId: number) => {
-    navigate(`/reserver/${tourId}`);
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+        if (session) {
+          const currentUserType = session.user.user_metadata?.user_type;
+          setUserType(currentUserType);
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error checking session:", error);
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
+  }, [navigate, toast]);
+
+  const handleSendPackageClick = async () => {
+    if (!isAuthenticated) {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+
+    if (userType === 'carrier') {
+      setIsAccessDeniedOpen(true);
+      return;
+    }
+
+    if (userType === 'client') {
+      navigate("/envoyer-colis");
+    }
   };
 
+  const handleAuthSuccess = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const userType = session.user.user_metadata?.user_type;
+      setUserType(userType);
+      setIsAuthenticated(true);
+      setIsAuthDialogOpen(false);
+
+      if (userType === 'client') {
+        navigate("/envoyer-colis");
+      } else if (userType === 'carrier') {
+        setIsAccessDeniedOpen(true);
+      }
+    }
+  };
+
+  const handleCarrierRegisterClick = () => {
+    setIsAuthDialogOpen(false);
+    setShowCarrierSignupForm(true);
+  };
+
+  if (isLoading) {
+    return <TransporteurLoading />;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Navigation />
-      <SendPackageHero />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <SendPackageFilters
-          selectedRoute={selectedRoute}
-          setSelectedRoute={setSelectedRoute}
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
-          tourType={tourType}
-          setTourType={setTourType}
+      <div className="min-h-screen bg-gray-50">
+        <SendPackageHero 
+          isAuthenticated={isAuthenticated}
+          onSendPackageClick={handleSendPackageClick}
+          onAuthClick={() => setIsAuthDialogOpen(true)}
         />
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {tours?.map((tour) => (
-            <ClientTourCard
-              key={tour.id}
-              tour={tour}
-              onBookingClick={() => handleBooking(tour.id)}
-            />
-          ))}
-        </div>
+        <PlanningDialogs 
+          isAuthDialogOpen={isAuthDialogOpen}
+          isAccessDeniedOpen={isAccessDeniedOpen}
+          showCarrierSignupForm={showCarrierSignupForm}
+          onAuthClose={() => setIsAuthDialogOpen(false)}
+          onAccessDeniedClose={() => setIsAccessDeniedOpen(false)}
+          onCarrierSignupClose={setShowCarrierSignupForm}
+          onAuthSuccess={handleAuthSuccess}
+          onCarrierRegisterClick={handleCarrierRegisterClick}
+        />
       </div>
-    </div>
+    </>
   );
 }
