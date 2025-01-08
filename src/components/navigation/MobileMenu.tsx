@@ -23,13 +23,8 @@ export default function MobileMenu({
   setShowAuthDialog
 }: MobileMenuProps) {
   return (
-    <div 
-      className={cn(
-        "fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 shadow-lg transform transition-transform duration-300 ease-in-out md:hidden",
-        isOpen ? "translate-x-0" : "translate-x-full"
-      )}
-    >
-      <div className="flex justify-end p-4">
+    <div className="h-full flex flex-col">
+      <div className="flex justify-end p-4 border-b">
         <button
           onClick={() => setIsOpen(false)}
           className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
@@ -39,7 +34,7 @@ export default function MobileMenu({
         </button>
       </div>
 
-      <div className="h-full overflow-y-auto px-2 pb-3 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
         {menuItems.map((item) => (
           <Link
             key={item.name}
@@ -53,33 +48,35 @@ export default function MobileMenu({
             )}
           >
             {item.icon}
-            <span className="ml-2">{item.name}</span>
+            <span className="ml-3">{item.name}</span>
           </Link>
         ))}
 
         {user ? (
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="px-3 py-2 text-sm text-gray-600">
+          <div className="border-t border-gray-200 pt-6">
+            <div className="px-3 py-2 text-sm text-gray-500">
               {user.email}
             </div>
-            <UserMenuItems userType={userType} />
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => {
-                handleLogout();
-                setIsOpen(false);
-              }}
-              className="w-full mt-2 text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
-            >
-              Déconnexion
-            </Button>
+            <div className="mt-3 space-y-3">
+              <UserMenuItems userType={userType} />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                className="w-full text-destructive hover:text-destructive-foreground hover:bg-destructive/10"
+              >
+                Déconnexion
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="border-t border-gray-200 pt-4 mt-4">
+          <div className="border-t border-gray-200 pt-6">
             <Button 
               variant="outline" 
-              size="sm"
+              size="lg"
               onClick={() => {
                 setShowAuthDialog(true);
                 setIsOpen(false);
@@ -88,7 +85,7 @@ export default function MobileMenu({
                 transition-all duration-300 ease-in-out
                 hover:shadow-[0_0_15px_rgba(155,135,245,0.5)]"
             >
-              <UserCircle2 className="w-4 h-4 mr-2" />
+              <UserCircle2 className="w-5 h-5 mr-2" />
               Se connecter
             </Button>
           </div>

@@ -9,6 +9,7 @@ import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";
+import { cn } from "@/lib/utils";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -94,11 +95,22 @@ export default function Navigation() {
         </div>
       </div>
 
+      {/* Mobile menu overlay */}
+      <div 
+        className={cn(
+          "fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setIsOpen(false)}
+      />
+
+      {/* Mobile menu panel */}
       <div 
         ref={mobileMenuRef}
-        className={`fixed inset-0 bg-black/50 transition-opacity duration-300 md:hidden ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={cn(
+          "fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}
       >
         <MobileMenu
           isOpen={isOpen}
