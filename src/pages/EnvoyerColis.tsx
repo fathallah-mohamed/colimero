@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
-import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { useTours } from "@/hooks/use-tours";
@@ -13,11 +12,10 @@ export default function EnvoyerColis() {
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
-  const [tourType, setTourType] = useState<"public" | "private">("public");
-
   const {
-    tours,
-    loading,
+    data: tours,
+    isLoading,
+    error,
   } = useTours();
 
   const handleBooking = (tourId: number) => {
@@ -25,41 +23,24 @@ export default function EnvoyerColis() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <SendPackageHero />
-          <SendPackageFeatures />
-          
-          <div className="mt-12">
-            <SendPackageFilters
-              selectedRoute={selectedRoute}
-              setSelectedRoute={setSelectedRoute}
-              selectedStatus={selectedStatus}
-              setSelectedStatus={setSelectedStatus}
-              tourType={tourType}
-              setTourType={setTourType}
+      <SendPackageHero />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <SendPackageFilters
+          selectedRoute={selectedRoute}
+          setSelectedRoute={setSelectedRoute}
+          selectedStatus={selectedStatus}
+          setSelectedStatus={setSelectedStatus}
+        />
+        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {tours?.map((tour) => (
+            <ClientTourCard
+              key={tour.id}
+              tour={tour}
+              onBookingClick={() => handleBooking(tour.id)}
             />
-
-            {loading ? (
-              <div className="text-center py-8">Chargement des tournées...</div>
-            ) : tours && tours.length > 0 ? (
-              <div className="grid gap-6 mt-6">
-                {tours.map((tour) => (
-                  <ClientTourCard
-                    key={tour.id}
-                    tour={tour}
-                    onBookingClick={() => handleBooking(tour.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                Aucune tournée disponible pour les critères sélectionnés.
-              </div>
-            )}
-          </div>
+          ))}
         </div>
       </div>
     </div>
