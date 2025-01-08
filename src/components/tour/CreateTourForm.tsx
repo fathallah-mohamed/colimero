@@ -4,14 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { TourFormHeader } from "./form/TourFormHeader";
 import { TourFormSections } from "./form/TourFormSections";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { tourFormSchema } from "./form/tourFormSchema";
-import { Truck, Loader2 } from "lucide-react";
+import { Truck, Loader2, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { TourConfirmDialog } from "./form/TourConfirmDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import * as z from "zod";
 
 type FormValues = z.infer<typeof tourFormSchema>;
@@ -25,6 +26,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(tourFormSchema),
@@ -94,14 +96,8 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
 
       if (error) throw error;
 
-      toast({
-        title: "Succès",
-        description: "La tournée a été créée avec succès",
-        className: "bg-green-50 border-green-200",
-      });
+      setShowSuccessDialog(true);
       
-      onSuccess();
-      navigate("/transporteur/tournees");
     } catch (error) {
       console.error("Error creating tour:", error);
       toast({
@@ -114,6 +110,12 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       setShowConfirmDialog(false);
     }
   }
+
+  const handleSuccessConfirm = () => {
+    setShowSuccessDialog(false);
+    onSuccess();
+    navigate("/transporteur/tournees");
+  };
 
   return (
     <>
@@ -153,6 +155,28 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         onOpenChange={setShowConfirmDialog}
         onConfirm={() => onSubmit(form.getValues())}
       />
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-6 w-6 text-green-500" />
+              Tournée créée avec succès
+            </DialogTitle>
+            <DialogDescription>
+              Votre tournée a été créée avec succès. Vous pouvez maintenant la consulter dans votre liste de tournées.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              onClick={handleSuccessConfirm}
+              className="w-full"
+            >
+              J'ai compris
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
