@@ -4,32 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { supabase } from "@/integrations/supabase/client";
-
-// Routes that don't require authentication
-const PUBLIC_ROUTES = [
-  '/',
-  '/connexion',
-  '/login',
-  '/envoyer-colis',
-  '/planifier-tournee',
-  '/transporteurs',
-  '/blog',
-  '/a-propos',
-  '/contact'
-];
-
-// Helper function to check if a route is public
-export const isPublicRoute = (pathname: string): boolean => {
-  // Check exact matches first
-  if (PUBLIC_ROUTES.includes(pathname)) {
-    return true;
-  }
-  
-  // Then check if it starts with any of our public route prefixes
-  return pathname.startsWith('/envoyer-colis') || 
-         pathname.startsWith('/planifier-tournee') ||
-         pathname.startsWith('/transporteurs');
-};
+import { isPublicRoute } from "./config/routes";
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
