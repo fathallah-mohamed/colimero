@@ -40,8 +40,6 @@ export const menuItems = [
 ];
 
 export default function MenuItems() {
-  const { userType } = useNavigation();
-
   return (
     <div className="flex items-center space-x-1">
       {menuItems.map((item) => (
