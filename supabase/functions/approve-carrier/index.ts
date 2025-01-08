@@ -1,3 +1,4 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -10,7 +11,7 @@ const supabaseServiceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const supabase = createClient(supabaseUrl, supabaseServiceRole)
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -18,68 +19,66 @@ Deno.serve(async (req) => {
 
   try {
     const { requestId } = await req.json()
+    console.log("Processing request ID:", requestId)
 
     // Get the request details
     const { data: request, error: requestError } = await supabase
       .from("carrier_registration_requests")
       .select("*")
       .eq("id", requestId)
-      .maybeSingle();
+      .maybeSingle()
 
-    if (requestError) throw requestError;
-    if (!request) throw new Error("Request not found");
+    if (requestError) {
+      console.error("Error fetching request:", requestError)
+      throw new Error("Failed to fetch carrier request")
+    }
 
-    console.log("Found carrier request:", request);
+    if (!request) {
+      console.error("Request not found:", requestId)
+      throw new Error("Carrier request not found")
+    }
+
+    console.log("Found carrier request:", request)
 
     // Generate a random password
-    const tempPassword = Math.random().toString(36).slice(-8);
+    const tempPassword = Math.random().toString(36).slice(-8)
 
-    // Create the auth user using admin API
-    const { data: userData, error: createUserError } = await supabase.auth.admin.createUser({
-      email: request.email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
-        user_type: 'carrier',
-        first_name: request.first_name,
-        last_name: request.last_name,
-        company_name: request.company_name
-      },
-      app_metadata: {
-        provider: 'email',
-        providers: ['email']
-      }
-    });
-
-    if (createUserError) throw createUserError;
-    console.log("Created auth user:", userData);
-
-    // Update request status
+    // Update request status first
     const { error: updateError } = await supabase
       .from("carrier_registration_requests")
       .update({ 
         status: "approved",
-        email_verified: true,
-        password: tempPassword
+        password: tempPassword,
+        email_verified: true
       })
-      .eq("id", requestId);
+      .eq("id", requestId)
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      console.error("Error updating request:", updateError)
+      throw new Error("Failed to update carrier request status")
+    }
 
     // Wait briefly for triggers to complete
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
     // Verify carrier was created
     const { data: carrier, error: verifyError } = await supabase
       .from("carriers")
       .select("*")
       .eq("id", requestId)
-      .maybeSingle();
+      .maybeSingle()
 
-    if (verifyError) throw verifyError;
-    if (!carrier) {
-      throw new Error("Carrier creation failed - please try again");
+    if (verifyError) {
+      console.error("Error verifying carrier creation:", verifyError)
+      throw new Error("Failed to verify carrier creation")
     }
+
+    if (!carrier) {
+      console.error("Carrier not created:", requestId)
+      throw new Error("Carrier creation failed - please try again")
+    }
+
+    console.log("Carrier created successfully:", carrier)
 
     // Send approval email
     const { error: emailError } = await supabase.functions.invoke("send-approval-email", {
@@ -88,10 +87,10 @@ Deno.serve(async (req) => {
         company_name: request.company_name,
         password: tempPassword
       }),
-    });
+    })
 
     if (emailError) {
-      console.error("Error sending approval email:", emailError);
+      console.error("Error sending approval email:", emailError)
       // Don't throw here as the carrier was still created successfully
     }
 
@@ -101,7 +100,7 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    console.error("Error in approve-carrier function:", error);
+    console.error("Error in approve-carrier function:", error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
