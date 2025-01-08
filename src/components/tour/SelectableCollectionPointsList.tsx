@@ -47,8 +47,10 @@ export function SelectableCollectionPointsList({
       {points.map((point, index) => (
         <div
           key={index}
-          onClick={() => isSelectionEnabled && onPointSelect(point.name)}
-          className={`grid grid-cols-4 items-center p-4 text-sm cursor-pointer ${
+          onClick={() => isSelectionEnabled && point.type === 'pickup' && onPointSelect(point.name)}
+          className={`grid grid-cols-4 items-center p-4 text-sm ${
+            point.type === 'pickup' ? 'cursor-pointer' : 'cursor-default'
+          } ${
             selectedPoint === point.name
               ? "bg-[#F3F0FF] border-[#8B5CF6]"
               : "hover:bg-gray-50"

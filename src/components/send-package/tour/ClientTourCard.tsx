@@ -99,7 +99,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
                       {city.type === 'pickup' ? (
                         <>
                           <Package className="h-4 w-4" />
-                          Collecte
+                          Ramassage
                         </>
                       ) : (
                         <>
@@ -157,7 +157,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
                 onClick={handleBookingClick}
                 disabled={!selectedPoint}
               >
-                {selectedPoint ? "Réserver maintenant" : "Sélectionnez un point de collecte"}
+                {selectedPoint ? "Réserver maintenant" : "Sélectionnez un point de ramassage"}
               </Button>
             </div>
           )}
