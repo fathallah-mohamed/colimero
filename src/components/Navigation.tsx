@@ -10,6 +10,7 @@ import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,20 +60,29 @@ export default function Navigation() {
       isScrolled ? "shadow-md" : "shadow-sm"
     )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+        <div className="flex justify-between items-center h-16 lg:h-20">
+          {/* Logo Section */}
+          <motion.div 
+            className="flex items-center"
+            initial={false}
+            animate={{ scale: isScrolled ? 0.95 : 1 }}
+            transition={{ duration: 0.2 }}
+          >
             <Link 
               to="/" 
-              className="text-2xl font-bold text-primary hover:text-primary-hover transition-colors"
+              className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent hover:opacity-90 transition-opacity"
             >
               Colimero
             </Link>
-            <div className="hidden md:flex md:ml-10">
-              <MenuItems />
-            </div>
+          </motion.div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex md:items-center md:space-x-4 lg:space-x-8">
+            <MenuItems />
           </div>
 
-          <div className="flex items-center space-x-4">
+          {/* Auth Section */}
+          <div className="flex items-center space-x-4 lg:space-x-6">
             <div className="hidden md:block">
               <AuthSection 
                 user={user}
@@ -91,6 +101,7 @@ export default function Navigation() {
         </div>
       </div>
 
+      {/* Mobile Menu */}
       <div 
         ref={mobileMenuRef}
         className={cn(
@@ -108,6 +119,7 @@ export default function Navigation() {
         />
       </div>
 
+      {/* Dialogs */}
       <AuthDialog 
         isOpen={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}

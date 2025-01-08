@@ -17,7 +17,7 @@ export const menuItems: MenuItem[] = [
     href: "/planifier-tournee", 
     icon: Calendar,
     highlight: true,
-    className: "bg-blue-50",
+    className: "bg-gradient-primary",
     allowedUserTypes: ["carrier"],
     requiresAuth: true
   },
@@ -26,9 +26,9 @@ export const menuItems: MenuItem[] = [
     href: "/envoyer-colis", 
     icon: Package,
     highlight: true,
-    className: "bg-blue-50",
+    className: "bg-gradient-client",
     allowedUserTypes: ["client", "carrier", "admin"],
-    requiresAuth: false // Explicitly set to false to ensure public access
+    requiresAuth: false
   },
   { 
     name: "Transporteurs", 
