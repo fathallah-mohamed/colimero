@@ -9,7 +9,16 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { UserCircle2 } from "lucide-react";
+import { 
+  UserCircle2, 
+  LogOut, 
+  Settings, 
+  Package, 
+  ClipboardList, 
+  UserCog,
+  Users,
+  Building2
+} from "lucide-react";
 
 interface AccountMenuProps {
   userType: string | null;
@@ -45,17 +54,29 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
     if (userType === 'admin') {
       return (
         <>
-          <DropdownMenuItem asChild>
-            <Link to="/profile" className="w-full">Profil</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/profile">
+              <UserCircle2 className="w-4 h-4" />
+              <span>Profil</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/admin/dashboard" className="w-full">Demandes d'inscription</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/admin/dashboard">
+              <ClipboardList className="w-4 h-4" />
+              <span>Demandes d'inscription</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/admin/clients" className="w-full">Clients</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/admin/clients">
+              <Users className="w-4 h-4" />
+              <span>Clients</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/admin/gestion" className="w-full">Administrateurs</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/admin/gestion">
+              <UserCog className="w-4 h-4" />
+              <span>Administrateurs</span>
+            </Link>
           </DropdownMenuItem>
         </>
       );
@@ -64,14 +85,23 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
     if (userType === 'carrier') {
       return (
         <>
-          <DropdownMenuItem asChild>
-            <Link to="/profile" className="w-full">Profil</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/profile">
+              <UserCircle2 className="w-4 h-4" />
+              <span>Profil</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/mes-tournees" className="w-full">Mes tournées</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/mes-tournees">
+              <Package className="w-4 h-4" />
+              <span>Mes tournées</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/demandes-approbation" className="w-full">Demandes d'approbation</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/demandes-approbation">
+              <ClipboardList className="w-4 h-4" />
+              <span>Demandes d'approbation</span>
+            </Link>
           </DropdownMenuItem>
         </>
       );
@@ -80,14 +110,23 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
     if (userType === 'client') {
       return (
         <>
-          <DropdownMenuItem asChild>
-            <Link to="/profile" className="w-full">Profil</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/profile">
+              <UserCircle2 className="w-4 h-4" />
+              <span>Profil</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/mes-reservations" className="w-full">Mes réservations</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/mes-reservations">
+              <Package className="w-4 h-4" />
+              <span>Mes réservations</span>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/mes-demandes-approbation" className="w-full">Mes demandes</Link>
+          <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
+            <Link to="/mes-demandes-approbation">
+              <ClipboardList className="w-4 h-4" />
+              <span>Mes demandes</span>
+            </Link>
           </DropdownMenuItem>
         </>
       );
@@ -99,15 +138,23 @@ export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative">
-          <UserCircle2 className="w-5 h-5" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="relative hover:bg-primary/10 transition-colors"
+        >
+          <UserCircle2 className="w-5 h-5 text-primary" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         {getMenuItems()}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          Se déconnecter
+        <DropdownMenuItem 
+          onClick={handleSignOut}
+          className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-50"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Déconnexion</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
