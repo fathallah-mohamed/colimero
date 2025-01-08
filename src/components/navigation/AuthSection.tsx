@@ -28,7 +28,6 @@ export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }:
 
   return (
     <div className="hidden md:flex md:items-center md:space-x-4">
-      <span className="text-sm text-gray-600">{user.email}</span>
       <UserMenuItems userType={userType} />
       <Button 
         variant="outline" 
