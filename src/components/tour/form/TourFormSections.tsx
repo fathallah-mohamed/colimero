@@ -3,6 +3,7 @@ import { RouteInformation } from "./RouteInformation";
 import { CapacityInformation } from "./CapacityInformation";
 import { CollectionPointsSection } from "./CollectionPointsSection";
 import { DeclarationsSection } from "./DeclarationsSection";
+import { CommitmentsSection } from "./CommitmentsSection";
 
 interface TourFormSectionsProps {
   form: UseFormReturn<any>;
@@ -26,6 +27,7 @@ export function TourFormSections({ form }: TourFormSectionsProps) {
         departureDate={departureDate}
       />
       <DeclarationsSection form={form} />
+      <CommitmentsSection form={form} />
     </div>
   );
 }
