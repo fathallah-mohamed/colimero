@@ -36,6 +36,11 @@ export default {
           foreground: "#1A1F2C",
           hover: "#E5F5D5",
         },
+        client: {
+          DEFAULT: "#3B82F6",
+          light: "#EFF6FF",
+          hover: "#2563EB",
+        },
         success: {
           DEFAULT: "#10B981",
           foreground: "#FFFFFF",
@@ -85,6 +90,7 @@ export default {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-primary': 'linear-gradient(to right, #9b87f5, #D6BCFA)',
+        'gradient-client': 'linear-gradient(to right, #3B82F6, #60A5FA)',
       },
     },
   },

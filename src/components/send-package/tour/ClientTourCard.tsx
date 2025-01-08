@@ -94,14 +94,14 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
 
           {/* Bouton détails */}
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full"
+            className="w-full bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 hover:text-blue-800 transition-colors group"
           >
-            <Eye className="h-5 w-5 mr-2" />
-            {isExpanded ? "Masquer les détails" : "Voir les détails"}
+            <Eye className="h-5 w-5 mr-2 text-blue-500 group-hover:text-blue-600" />
+            {isExpanded ? "Masquer les informations" : "Voir les informations détaillées"}
             <ChevronDown className={cn(
-              "h-5 w-5 ml-2 transition-transform duration-200",
+              "h-5 w-5 ml-2 text-blue-500 transition-transform duration-200 group-hover:text-blue-600",
               isExpanded && "rotate-180"
             )} />
           </Button>
@@ -128,7 +128,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               />
 
               <Button 
-                className="w-full bg-gradient-primary hover:opacity-90 text-white transition-opacity"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                 onClick={handleBookingClick}
                 disabled={!selectedPoint}
               >
