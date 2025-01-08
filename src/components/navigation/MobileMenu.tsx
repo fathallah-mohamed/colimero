@@ -24,7 +24,7 @@ export default function MobileMenu({
 }: MobileMenuProps) {
   return (
     <div className="h-full flex flex-col bg-white">
-      <div className="flex justify-end p-4 border-b">
+      <div className="flex justify-end p-4">
         <button
           onClick={() => setIsOpen(false)}
           className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
