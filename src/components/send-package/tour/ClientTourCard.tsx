@@ -40,7 +40,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
         <div className="flex flex-col space-y-6">
           {/* Informations principales */}
           <div className="flex items-center justify-between flex-wrap gap-4">
-            {/* Transporteur - Déplacé à gauche */}
+            {/* Transporteur */}
             <div className="flex items-center gap-3">
               <TransporteurAvatar 
                 avatarUrl={tour.carriers?.avatar_url}
@@ -52,6 +52,17 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               </span>
             </div>
 
+            {/* Date de départ */}
+            <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <div className="flex flex-col">
+                <span className="text-sm text-blue-600 font-medium">Date de départ</span>
+                <span className="text-base font-semibold text-blue-700">
+                  {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
+                </span>
+              </div>
+            </div>
+
             {/* Prix et capacité */}
             <div className="flex items-center gap-6">
               <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary min-w-[100px] text-center">
@@ -59,14 +70,6 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               </span>
               <span className="text-green-600 dark:text-green-400 font-medium text-base min-w-[150px]">
                 {tour.remaining_capacity} kg disponibles
-              </span>
-            </div>
-
-            {/* Date de départ */}
-            <div className="flex items-center gap-2 min-w-[200px]">
-              <Calendar className="h-5 w-5 text-primary" />
-              <span className="text-base font-medium">
-                {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
               </span>
             </div>
           </div>
