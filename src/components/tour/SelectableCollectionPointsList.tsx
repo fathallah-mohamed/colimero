@@ -48,11 +48,14 @@ export function SelectableCollectionPointsList({
         <div
           key={index}
           onClick={() => isSelectionEnabled && onPointSelect(point.name)}
-          className={`grid grid-cols-4 items-center p-4 text-sm cursor-pointer hover:bg-gray-50 ${
-            selectedPoint === point.name
-              ? "bg-[#F3F0FF] border border-[#8B5CF6]"
-              : "border border-transparent"
-          } rounded-lg transition-all duration-200`}
+          className={`grid grid-cols-4 items-center p-4 text-sm cursor-pointer 
+            transform transition-all duration-200 ease-in-out
+            hover:scale-[1.02] hover:shadow-md hover:bg-primary/5
+            ${
+              selectedPoint === point.name
+                ? "bg-[#F3F0FF] border-2 border-primary shadow-sm scale-[1.01]"
+                : "border border-transparent"
+            } rounded-lg`}
         >
           <span className="font-medium">{point.name}</span>
           <span className="text-gray-600">{point.location}</span>
