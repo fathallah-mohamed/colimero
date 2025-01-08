@@ -124,9 +124,16 @@ export default function MobileMenu({
 
         {user ? (
           <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="px-3 py-2 text-sm text-gray-600">
-              {user.email}
-            </div>
+            <motion.div variants={itemVariants}>
+              <Link
+                to="/profile"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <UserCircle2 className="w-4 h-4 mr-3" />
+                Profil
+              </Link>
+            </motion.div>
             <UserMenuItems userType={userType} />
             <Button 
               variant="outline" 
