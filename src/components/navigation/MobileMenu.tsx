@@ -23,7 +23,7 @@ export default function MobileMenu({
   setShowAuthDialog
 }: MobileMenuProps) {
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white">
       <div className="flex justify-end p-4 border-b">
         <button
           onClick={() => setIsOpen(false)}

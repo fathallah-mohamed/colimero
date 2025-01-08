@@ -26,6 +26,7 @@ export default function Navigation() {
     setIsOpen(false);
   }, [location]);
 
+  // Handle click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -43,6 +44,7 @@ export default function Navigation() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
+  // Save return path for authentication
   useEffect(() => {
     if (location.pathname.includes('/reserver/')) {
       sessionStorage.setItem('returnPath', location.pathname);
@@ -98,7 +100,7 @@ export default function Navigation() {
       {/* Mobile menu overlay */}
       <div 
         className={cn(
-          "fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+          "fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden z-40",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setIsOpen(false)}
@@ -108,7 +110,7 @@ export default function Navigation() {
       <div 
         ref={mobileMenuRef}
         className={cn(
-          "fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden",
+          "fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:hidden z-50",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
