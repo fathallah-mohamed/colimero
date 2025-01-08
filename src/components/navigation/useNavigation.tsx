@@ -85,17 +85,12 @@ export function useNavigation() {
   };
 
   const handleAuthDialogOpen = () => {
-    if (isPublicRoute(location.pathname)) {
-      console.log("Route publique détectée, pas d'ouverture de la fenêtre de connexion");
-      return false;
-    }
-    
     // Store the current path for redirection after login
     if (location.pathname.includes('/reserver/')) {
       sessionStorage.setItem('returnPath', location.pathname);
     }
     
-    console.log("Route privée détectée, ouverture de la fenêtre de connexion");
+    console.log("Ouverture de la fenêtre de connexion");
     return true;
   };
 
