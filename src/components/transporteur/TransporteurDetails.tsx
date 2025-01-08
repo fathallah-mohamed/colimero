@@ -23,7 +23,8 @@ export function TransporteurDetails() {
           .select(`
             *,
             carrier_services(*),
-            carrier_capacities(*)
+            carrier_capacities(*),
+            tours(*)
           `)
           .eq("id", id)
           .single();
