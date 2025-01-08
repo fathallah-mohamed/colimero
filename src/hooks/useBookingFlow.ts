@@ -25,6 +25,7 @@ export function useBookingFlow() {
       return;
     }
 
+    // Vérifier si l'utilisateur a déjà une réservation en cours
     const { data: existingBookings, error } = await supabase
       .from('bookings')
       .select('*')
@@ -51,7 +52,10 @@ export function useBookingFlow() {
       return;
     }
 
-    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
+    // Naviguer vers la page de réservation
+    const bookingPath = `/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`;
+    console.log("Navigating to:", bookingPath);
+    navigate(bookingPath);
   };
 
   const handleAuthSuccess = () => {

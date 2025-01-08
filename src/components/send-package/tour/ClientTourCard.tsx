@@ -12,6 +12,8 @@ import { CardCustom } from "@/components/ui/card-custom";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -20,6 +22,7 @@ interface ClientTourCardProps {
 export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
+  const navigate = useNavigate();
   
   const {
     showAuthDialog,
@@ -35,9 +38,25 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const departureDate = new Date(tour.departure_date);
   const tourDuration = differenceInDays(departureDate, firstCollectionDate);
 
-  const handleBookingButtonClick = () => {
-    if (selectedPoint) {
-      handleBookingClick(tour.id, selectedPoint);
+  const handleBookingButtonClick = async () => {
+    if (!selectedPoint) {
+      toast({
+        variant: "destructive",
+        title: "Point de ramassage requis",
+        description: "Veuillez sélectionner un point de ramassage avant de réserver",
+      });
+      return;
+    }
+
+    try {
+      await handleBookingClick(tour.id, selectedPoint);
+    } catch (error) {
+      console.error("Erreur lors de la réservation:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la réservation",
+      });
     }
   };
 
