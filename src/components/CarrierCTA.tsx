@@ -42,13 +42,15 @@ export default function CarrierCTA() {
             </div>
           ))}
         </div>
-        <div className="text-center">
-          <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
+        <div className="text-center space-y-4">
+          <Button asChild size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
             <Link to="/planifier-tournee">Commencer maintenant</Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="mt-4 border-blue-600 text-blue-600 hover:bg-blue-50">
-            <Link to="/profil">Mon compte</Link>
-          </Button>
+          <div className="block sm:inline-block sm:ml-4">
+            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-blue-600 text-blue-600 hover:bg-blue-50">
+              <Link to="/profil">Mon compte</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
