@@ -1,77 +1,73 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { SendPackageHero } from "@/components/send-package/SendPackageHero";
-import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
-import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
-import { useTours } from "@/hooks/use-tours";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@supabase/auth-helpers-react";
-import Navigation from "@/components/Navigation";
+import { useNavigate } from "react-router-dom";
+import { Tour } from "@/types/tour";
 
 export default function EnvoyerColis() {
-  const { toast } = useToast();
-  const user = useUser();
   const navigate = useNavigate();
-  const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
-  const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
-  const [tourType, setTourType] = useState<"public" | "private">("public");
+  const [searchParams] = useState(new URLSearchParams(window.location.search));
+  const tourId = searchParams.get("tourId");
 
-  const {
-    tours,
-    loading,
-  } = useTours();
+  const { data: tours, isLoading } = useQuery({
+    queryKey: ["available-tours"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tours")
+        .select(`
+          *,
+          carriers (
+            id,
+            company_name,
+            avatar_url,
+            carrier_capacities (*)
+          )
+        `)
+        .eq("status", "planned")
+        .order("departure_date", { ascending: true });
 
-  const handleBooking = (tourId: number) => {
-    if (!user?.id) {
-      toast({
-        title: "Connexion requise",
-        description: "Vous devez être connecté pour réserver une tournée",
-        variant: "destructive",
-      });
-      return;
-    }
-    navigate(`/reserver/${tourId}`);
+      if (error) throw error;
+      return data as Tour[];
+    },
+  });
+
+  const handleBookingClick = (tourId: number, pickupCity: string) => {
+    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
-      <div className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <SendPackageHero />
-          <SendPackageFeatures />
-          
-          <div className="mt-12">
-            <SendPackageFilters
-              selectedRoute={selectedRoute}
-              setSelectedRoute={setSelectedRoute}
-              selectedStatus={selectedStatus}
-              setSelectedStatus={setSelectedStatus}
-              tourType={tourType}
-              setTourType={setTourType}
-            />
-
-            {loading ? (
-              <div className="text-center py-8">Chargement des tournées...</div>
-            ) : tours && tours.length > 0 ? (
-              <div className="grid gap-6 mt-6">
-                {tours.map((tour) => (
-                  <ClientTourCard
-                    key={tour.id}
-                    tour={tour}
-                    onBookingClick={() => handleBooking(tour.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                Aucune tournée disponible pour les critères sélectionnés.
-              </div>
-            )}
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 bg-gray-200 rounded"></div>
+            ))}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Tournées disponibles</h1>
+      <div className="space-y-4">
+        {tours?.map((tour) => (
+          <ClientTourCard
+            key={tour.id}
+            tour={tour}
+            onBookingClick={handleBookingClick}
+          />
+        ))}
+        {tours?.length === 0 && (
+          <p className="text-gray-500 text-center py-8">
+            Aucune tournée disponible pour le moment.
+          </p>
+        )}
       </div>
     </div>
   );
