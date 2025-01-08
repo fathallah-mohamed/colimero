@@ -1,4 +1,4 @@
-import { Calendar, Package, Truck, MessageSquare, Info, Users, UserCog } from "lucide-react";
+import { Calendar, Package, Truck, MessageSquare, Info, Users } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 interface MenuItem {
@@ -12,13 +12,6 @@ interface MenuItem {
 }
 
 export const menuItems: MenuItem[] = [
-  { 
-    name: "Administrateurs", 
-    href: "/admin", 
-    icon: UserCog,
-    allowedUserTypes: ["admin"],
-    requiresAuth: true
-  },
   { 
     name: "Planifier une tournée", 
     href: "/planifier-tournee", 
