@@ -10,24 +10,34 @@ import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline
 import { cn } from "@/lib/utils";
 import { CardCustom } from "@/components/ui/card-custom";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
+import { useBookingFlow } from "@/hooks/useBookingFlow";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 interface ClientTourCardProps {
   tour: Tour;
-  onBookingClick: (tourId: number, pickupCity: string) => void;
 }
 
-export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
+export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
+  
+  const {
+    showAuthDialog,
+    setShowAuthDialog,
+    showAccessDeniedDialog,
+    setShowAccessDeniedDialog,
+    handleBookingClick,
+    handleAuthSuccess
+  } = useBookingFlow();
   
   const pricePerKg = tour.carriers?.carrier_capacities?.price_per_kg || 0;
   const firstCollectionDate = new Date(tour.collection_date);
   const departureDate = new Date(tour.departure_date);
   const tourDuration = differenceInDays(departureDate, firstCollectionDate);
 
-  const handleBookingClick = () => {
+  const handleBookingButtonClick = () => {
     if (selectedPoint) {
-      onBookingClick(tour.id, selectedPoint);
+      handleBookingClick(tour.id, selectedPoint);
     }
   };
 
@@ -159,7 +169,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
 
               <Button 
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                onClick={handleBookingClick}
+                onClick={handleBookingButtonClick}
                 disabled={!selectedPoint}
               >
                 {selectedPoint ? "Réserver maintenant" : "Sélectionnez un point de ramassage"}
@@ -168,6 +178,13 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
           )}
         </div>
       </div>
+
+      <AuthDialog 
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={handleAuthSuccess}
+        requiredUserType="client"
+      />
     </CardCustom>
   );
 }
