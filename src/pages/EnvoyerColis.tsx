@@ -113,14 +113,13 @@ export default function EnvoyerColis() {
             </p>
           </div>
         ) : (
-          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {tours?.map((tour) => (
-              <div key={tour.id} className="transform hover:-translate-y-1 transition-all duration-200">
-                <ClientTourCard
-                  tour={tour}
-                  onBookingClick={handleBookingClick}
-                />
-              </div>
+              <ClientTourCard
+                key={tour.id}
+                tour={tour}
+                onBookingClick={handleBookingClick}
+              />
             ))}
           </div>
         )}
