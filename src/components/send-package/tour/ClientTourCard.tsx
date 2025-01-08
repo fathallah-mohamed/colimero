@@ -18,7 +18,9 @@ interface ClientTourCardProps {
 export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
-  const pricePerKg = tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0;
+  
+  // Récupérer le prix par kg depuis les capacités du transporteur
+  const pricePerKg = tour.carriers?.carrier_capacities?.price_per_kg || 0;
 
   const handleBookingClick = () => {
     if (selectedPoint) {
@@ -55,7 +57,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <Calendar className="h-4 w-4 text-primary/70" />
                 <span>
-                  {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
+                  Date de départ: {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
                 </span>
               </div>
               
