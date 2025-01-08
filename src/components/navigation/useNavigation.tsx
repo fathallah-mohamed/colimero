@@ -5,6 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { supabase } from "@/integrations/supabase/client";
 import { UserType } from "@/types/navigation";
+import { isPublicRoute } from "@/config/routes";
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,9 +82,9 @@ export function useNavigation() {
   };
 
   const handleAuthDialogOpen = () => {
-    // Store the current path for redirection after login only for booking pages
-    if (location.pathname.includes('/reserver/')) {
-      sessionStorage.setItem('returnPath', location.pathname);
+    if (isPublicRoute(location.pathname)) {
+      console.log("Route publique, pas d'ouverture du dialogue d'authentification");
+      return false;
     }
     
     console.log("Ouverture de la fenêtre de connexion");
