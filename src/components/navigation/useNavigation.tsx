@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { supabase } from "@/integrations/supabase/client";
-import { isPublicRoute } from "@/config/routes";
 import { UserType } from "@/types/navigation";
 
 export function useNavigation() {
@@ -39,16 +38,13 @@ export function useNavigation() {
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setUserType(null);
-        if (!isPublicRoute(location.pathname)) {
-          navigate('/');
-        }
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, location.pathname]);
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {
@@ -85,7 +81,7 @@ export function useNavigation() {
   };
 
   const handleAuthDialogOpen = () => {
-    // Store the current path for redirection after login
+    // Store the current path for redirection after login only for booking pages
     if (location.pathname.includes('/reserver/')) {
       sessionStorage.setItem('returnPath', location.pathname);
     }
