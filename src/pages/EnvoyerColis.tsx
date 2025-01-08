@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { Package2, ShieldCheck, Clock4 } from "lucide-react";
+import { Package2, ShieldCheck, Clock4, Loader2 } from "lucide-react";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
@@ -36,7 +36,7 @@ export default function EnvoyerColis() {
       <Navigation />
       <SendPackageHero />
       
-      {/* Nouveau bloc de présentation */}
+      {/* Bloc de présentation */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/20 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -50,7 +50,7 @@ export default function EnvoyerColis() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 mt-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
                 <Package2 className="w-6 h-6 text-primary" />
               </div>
@@ -62,7 +62,7 @@ export default function EnvoyerColis() {
               </p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
                 <ShieldCheck className="w-6 h-6 text-primary" />
               </div>
@@ -74,7 +74,7 @@ export default function EnvoyerColis() {
               </p>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 mx-auto">
                 <Clock4 className="w-6 h-6 text-primary" />
               </div>
@@ -98,15 +98,32 @@ export default function EnvoyerColis() {
           tourType={tourType}
           setTourType={setTourType}
         />
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {tours?.map((tour) => (
-            <ClientTourCard
-              key={tour.id}
-              tour={tour}
-              onBookingClick={handleBookingClick}
-            />
-          ))}
-        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : tours?.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Aucune tournée disponible
+            </h3>
+            <p className="text-gray-500">
+              Aucune tournée ne correspond à vos critères de recherche pour le moment.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-in slide-in-from-bottom-4 duration-500">
+            {tours?.map((tour) => (
+              <div key={tour.id} className="transform hover:-translate-y-1 transition-all duration-200">
+                <ClientTourCard
+                  tour={tour}
+                  onBookingClick={handleBookingClick}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <AuthDialog 
