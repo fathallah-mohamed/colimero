@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useNavigation } from "@/hooks/use-navigation";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { UserCircle2 } from "lucide-react";
+import { useNavigation } from "./navigation/useNavigation";
+import { AuthSection } from "./navigation/AuthSection";
+import { MobileMenuButton } from "./navigation/MobileMenuButton";
 import MenuItems from "./navigation/MenuItems";
 import MobileMenu from "./navigation/MobileMenu";
-import { MobileMenuButton } from "./navigation/MobileMenuButton";
 import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
+import { Dialog, DialogContent } from "./ui/dialog";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -84,35 +83,13 @@ export default function Navigation() {
 
           {/* Auth Section */}
           <div className="flex items-center space-x-6 lg:space-x-8">
-            <div className="hidden md:flex md:items-center md:space-x-4">
-              {user ? (
-                <>
-                  <Link to="/profile">
-                    <Button variant="outline" size="sm" className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                      <UserCircle2 className="w-4 h-4 mr-1.5" />
-                      Profil
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleLogout}
-                    className="border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                  >
-                    Déconnexion
-                  </Button>
-                </>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                  onClick={() => setShowAuthDialog(true)}
-                >
-                  <UserCircle2 className="w-4 h-4 mr-1.5" />
-                  Se connecter
-                </Button>
-              )}
+            <div className="hidden md:block">
+              <AuthSection 
+                user={user}
+                userType={userType}
+                handleLogout={handleLogout}
+                setShowAuthDialog={setShowAuthDialog}
+              />
             </div>
             
             <MobileMenuButton 
