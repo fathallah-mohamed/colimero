@@ -73,14 +73,20 @@ export function ProfileForm({ initialData, onClose }: ProfileFormProps) {
 
       if (carrierError) throw carrierError;
 
-      // Use upsert for carrier capacities
+      // Use upsert for carrier capacities with explicit conflict handling
       const { error: capacitiesError } = await supabase
         .from('carrier_capacities')
-        .upsert({
-          carrier_id: session.user.id,
-          total_capacity: values.total_capacity,
-          price_per_kg: values.price_per_kg,
-        });
+        .upsert(
+          {
+            carrier_id: session.user.id,
+            total_capacity: values.total_capacity,
+            price_per_kg: values.price_per_kg,
+          },
+          {
+            onConflict: 'carrier_id',
+            ignoreDuplicates: false,
+          }
+        );
 
       if (capacitiesError) throw capacitiesError;
 
