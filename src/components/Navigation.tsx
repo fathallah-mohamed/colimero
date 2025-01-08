@@ -20,6 +20,11 @@ export default function Navigation() {
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -43,6 +48,18 @@ export default function Navigation() {
     }
   }, [location.pathname]);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,6 +68,7 @@ export default function Navigation() {
             <Link 
               to="/" 
               className="text-2xl font-bold text-primary hover:text-primary-hover transition-all duration-300 ease-in-out transform hover:scale-105"
+              onClick={() => setIsOpen(false)}
             >
               Colimero
             </Link>
@@ -76,7 +94,12 @@ export default function Navigation() {
         </div>
       </div>
 
-      <div ref={mobileMenuRef}>
+      <div 
+        ref={mobileMenuRef}
+        className={`fixed inset-0 bg-black/50 transition-opacity duration-300 md:hidden ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
         <MobileMenu
           isOpen={isOpen}
           user={user}

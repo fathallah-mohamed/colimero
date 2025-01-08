@@ -32,7 +32,7 @@ export default function MobileMenu({
       <div className="flex justify-end p-4">
         <button
           onClick={() => setIsOpen(false)}
-          className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#00B0F0]"
+          className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
         >
           <X className="h-6 w-6" />
           <span className="sr-only">Fermer le menu</span>
@@ -46,9 +46,9 @@ export default function MobileMenu({
             to={item.href}
             onClick={() => setIsOpen(false)}
             className={cn(
-              "flex items-center px-3 py-2 rounded-md text-base font-medium",
+              "flex items-center px-3 py-2 rounded-md text-base font-medium transition-all duration-300",
               item.highlight 
-                ? "text-primary hover:text-primary-hover hover:bg-primary/10" + (item.className || "")
+                ? "text-white bg-gradient-primary hover:opacity-90 shadow-md" + (item.className || "")
                 : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
             )}
           >
@@ -84,7 +84,9 @@ export default function MobileMenu({
                 setShowAuthDialog(true);
                 setIsOpen(false);
               }}
-              className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground
+                transition-all duration-300 ease-in-out
+                hover:shadow-[0_0_15px_rgba(155,135,245,0.5)]"
             >
               <UserCircle2 className="w-4 h-4 mr-2" />
               Se connecter
