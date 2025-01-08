@@ -17,7 +17,7 @@ export const menuItems: MenuItem[] = [
     href: "/planifier-tournee", 
     icon: Calendar,
     highlight: true,
-    className: "bg-gradient-primary",
+    className: "bg-gradient-to-r from-[#8B5CF6] to-[#D946EF]",
     allowedUserTypes: ["carrier"],
     requiresAuth: true
   },
@@ -26,7 +26,7 @@ export const menuItems: MenuItem[] = [
     href: "/envoyer-colis", 
     icon: Package,
     highlight: true,
-    className: "bg-gradient-client",
+    className: "bg-gradient-to-r from-[#F97316] to-[#FB923C]",
     allowedUserTypes: ["client", "carrier", "admin"],
     requiresAuth: false
   },

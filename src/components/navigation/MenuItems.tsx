@@ -8,15 +8,15 @@ export default function MenuItems() {
   const { user } = useNavigation();
 
   return (
-    <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+    <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
       {menuItems.map((item) => (
         <Link
           key={item.name}
           to={item.href}
           className={cn(
-            "group relative flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ease-in-out",
+            "group relative flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out",
             item.highlight
-              ? "text-white bg-gradient-primary hover:shadow-lg hover:shadow-primary/20 transform hover:-translate-y-0.5"
+              ? "text-white bg-gradient-to-r from-primary to-primary-light hover:shadow-lg hover:shadow-primary/20 transform hover:-translate-y-0.5"
               : "text-gray-700 hover:text-gray-900 hover:bg-gray-50/80",
             "lg:text-base", // Larger text on larger screens
             item.className
@@ -42,7 +42,7 @@ export default function MenuItems() {
           {/* Highlight effect for primary actions */}
           {item.highlight && (
             <motion.div
-              className="absolute inset-0 bg-white rounded-md opacity-0 group-hover:opacity-10 transition-opacity duration-200"
+              className="absolute inset-0 bg-white rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"
               layoutId={`highlight-${item.name}`}
             />
           )}
