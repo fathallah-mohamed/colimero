@@ -1,5 +1,5 @@
 import { UseFormReturn } from "react-hook-form";
-import { FormField } from "@/components/ui/form";
+import { FormField, FormItem, FormControl } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormSection } from "./FormSection";
 
@@ -9,53 +9,53 @@ interface DeclarationsSectionProps {
 
 export function DeclarationsSection({ form }: DeclarationsSectionProps) {
   return (
-    <FormSection title="Déclarations">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <FormField
-            control={form.control}
-            name="customs_declaration"
-            render={({ field }) => (
-              <div className="flex items-start space-x-3">
+    <FormSection title="Déclarations et engagements">
+      <div className="space-y-4">
+        <FormField
+          control={form.control}
+          name="terms_accepted"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <div className="space-y-1 leading-none">
-                  <label className="text-sm font-medium">
-                    Je déclare que je respecterai toutes les lois douanières
-                  </label>
-                  <p className="text-sm text-gray-500">
-                    Je suis responsable des objets que je transporte
-                  </p>
-                </div>
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <label className="text-sm font-medium">
+                  J'accepte les conditions générales de transport
+                </label>
+                <p className="text-sm text-gray-500">
+                  Je m'engage à respecter les règles et conditions de transport
+                </p>
               </div>
-            )}
-          />
-        </div>
+            </FormItem>
+          )}
+        />
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <FormField
-            control={form.control}
-            name="terms_accepted"
-            render={({ field }) => (
-              <div className="flex items-start space-x-3">
+        <FormField
+          control={form.control}
+          name="customs_declaration"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormControl>
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <div className="space-y-1 leading-none">
-                  <label className="text-sm font-medium">
-                    J'accepte les conditions générales
-                  </label>
-                  <p className="text-sm text-gray-500">
-                    Je comprends que je suis responsable du respect des lois
-                  </p>
-                </div>
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <label className="text-sm font-medium">
+                  Je déclare respecter les règles douanières
+                </label>
+                <p className="text-sm text-gray-500">
+                  Je m'engage à respecter toutes les réglementations douanières en vigueur
+                </p>
               </div>
-            )}
-          />
-        </div>
+            </FormItem>
+          )}
+        />
       </div>
     </FormSection>
   );
