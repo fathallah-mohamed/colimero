@@ -87,21 +87,35 @@ export default function MenuItems() {
       {menuItems.map((item) => {
         const isAllowed = !item.requiresAuth || (userType && item.allowedUserTypes.includes(userType));
         
+        if (!isAllowed && item.requiresAuth) {
+          return (
+            <button
+              key={item.name}
+              onClick={(e) => handleRestrictedClick(e, item.name, item.allowedUserTypes)}
+              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
+                ${item.highlight
+                  ? "text-primary hover:text-primary-hover " + (item.className || "")
+                  : "text-gray-700 hover:text-gray-900"
+                }
+                opacity-50 cursor-not-allowed
+                transition-all duration-200 ease-in-out
+              `}
+            >
+              {item.icon}
+              <span className="ml-2">{item.name}</span>
+            </button>
+          );
+        }
+
         return (
           <Link
             key={item.name}
             to={item.href}
-            onClick={(e) => {
-              if (item.requiresAuth && !isAllowed) {
-                handleRestrictedClick(e, item.name, item.allowedUserTypes);
-              }
-            }}
             className={`flex items-center px-3 py-2 rounded-md text-sm font-medium 
               ${item.highlight
                 ? "text-primary hover:text-primary-hover " + (item.className || "")
                 : "text-gray-700 hover:text-gray-900"
               }
-              ${!isAllowed && item.requiresAuth ? "opacity-50 cursor-not-allowed" : ""}
               transition-all duration-200 ease-in-out
             `}
           >
