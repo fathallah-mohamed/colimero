@@ -1,101 +1,101 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserCircle2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AccountMenuProps {
-  user: any;
   userType: string | null;
-  onLogout: () => void;
+  onClose: () => void;
 }
 
-export function AccountMenu({ user, userType, onLogout }: AccountMenuProps) {
-  const getMenuLabel = () => {
-    switch (userType) {
-      case 'admin':
-        return "Administration";
-      case 'carrier':
-        return "Mon compte transporteur";
-      default:
-        return "Mon compte client";
+export default function AccountMenu({ userType, onClose }: AccountMenuProps) {
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt !",
+      });
+      
+      onClose();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
     }
   };
 
   const getMenuItems = () => {
-    switch (userType) {
-      case 'admin':
-        return (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/profil" className="w-full">Profil</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/admin" className="w-full">Demandes d'inscription</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/admin/clients" className="w-full">Clients</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/admin/gestion" className="w-full">Administrateurs</Link>
-            </DropdownMenuItem>
-          </>
-        );
-      case 'carrier':
-        return (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/profil" className="w-full">Profil</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/mes-tournees" className="w-full">Mes tournées</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/demandes-approbation" className="w-full">Demandes d'approbation</Link>
-            </DropdownMenuItem>
-          </>
-        );
-      default:
-        return (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/profil" className="w-full">Profil</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/mes-reservations" className="w-full">Mes réservations</Link>
-            </DropdownMenuItem>
-          </>
-        );
+    if (userType === 'admin') {
+      return (
+        <>
+          <DropdownMenuItem asChild>
+            <Link to="/profile" className="w-full">Profil</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/admin/dashboard" className="w-full">Demandes d'inscription</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/admin/clients" className="w-full">Clients</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/admin/gestion" className="w-full">Administrateurs</Link>
+          </DropdownMenuItem>
+        </>
+      );
     }
+
+    if (userType === 'carrier') {
+      return (
+        <>
+          <DropdownMenuItem asChild>
+            <Link to="/profile" className="w-full">Profil</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/mes-tournees" className="w-full">Mes tournées</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/demandes-approbation" className="w-full">Demandes d'approbation</Link>
+          </DropdownMenuItem>
+        </>
+      );
+    }
+
+    if (userType === 'client') {
+      return (
+        <>
+          <DropdownMenuItem asChild>
+            <Link to="/profile" className="w-full">Profil</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/mes-reservations" className="w-full">Mes réservations</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/mes-demandes-approbation" className="w-full">Mes demandes</Link>
+          </DropdownMenuItem>
+        </>
+      );
+    }
+
+    return null;
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
-        >
-          <UserCircle2 className="w-4 h-4 mr-1.5" />
-          {getMenuLabel()}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>{getMenuLabel()}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {getMenuItems()}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onLogout} className="text-red-600">
-          Déconnexion
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      {getMenuItems()}
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={handleSignOut}>
+        Se déconnecter
+      </DropdownMenuItem>
+    </>
   );
 }
