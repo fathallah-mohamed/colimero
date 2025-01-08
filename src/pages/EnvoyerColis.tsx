@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { useNavigate } from "react-router-dom";
-import { Tour } from "@/types/tour";
+import { Tour, RouteStop } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const navigate = useNavigate();
@@ -28,7 +28,17 @@ export default function EnvoyerColis() {
         .order("departure_date", { ascending: true });
 
       if (error) throw error;
-      return data as Tour[];
+      
+      // Transform the data to match the Tour type
+      return (data || []).map(tour => ({
+        ...tour,
+        route: tour.route as RouteStop[], // Cast the JSON route to RouteStop[]
+        carriers: tour.carriers ? {
+          company_name: tour.carriers.company_name,
+          avatar_url: tour.carriers.avatar_url,
+          carrier_capacities: tour.carriers.carrier_capacities
+        } : undefined
+      })) as Tour[];
     },
   });
 
