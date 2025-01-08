@@ -9,6 +9,7 @@ import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
 import { Dialog, DialogContent } from "./ui/dialog";
+import { isPublicRoute } from "@/config/routes";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,15 +44,16 @@ export default function Navigation() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  useEffect(() => {
-    if (location.pathname.includes('/reserver/')) {
-      sessionStorage.setItem('returnPath', location.pathname);
-    }
-  }, [location.pathname]);
-
   const onAuthDialogOpen = () => {
+    // Ne pas ouvrir le dialogue si nous sommes sur une route publique
+    if (isPublicRoute(location.pathname)) {
+      console.log("Route publique, pas d'ouverture du dialogue d'authentification");
+      return;
+    }
+
     const shouldOpen = handleAuthDialogOpen();
     if (shouldOpen) {
+      console.log("Ouverture du dialogue d'authentification");
       setShowAuthDialog(true);
     }
   };
