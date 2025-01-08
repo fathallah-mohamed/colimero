@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { PlanningDialogs } from "@/components/tour/planning/PlanningDialogs";
-import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import Navigation from "@/components/Navigation";
 
 export default function EnvoyerColis() {
