@@ -44,27 +44,18 @@ export interface Booking {
   sender_phone?: string;
   created_at: string;
   updated_at?: string;
+  tours?: {
+    collection_date: string;
+    departure_date: string;
+    destination_country: string;
+    carriers?: {
+      company_name: string | null;
+      avatar_url: string | null;
+      phone: string | null;
+    };
+  };
 }
 
 export interface BookingDetailsProps {
   booking: Booking;
-}
-
-export interface BookingFormData {
-  user_id: string;
-  tour_id: number;
-  weight: number;
-  pickup_city: string;
-  delivery_city: string;
-  tracking_number: string;
-  status: BookingStatus;
-  recipient_name: string;
-  recipient_address: string;
-  recipient_phone: string;
-  sender_name: string;
-  sender_phone: string;
-  item_type: string;
-  special_items?: string;
-  content_types: string[];
-  photos: File[];
 }
