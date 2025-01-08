@@ -15,7 +15,13 @@ export default function Navigation() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
-  const { user, userType, handleLogout, isPublicRoute } = useNavigation();
+  const { 
+    user, 
+    userType, 
+    handleLogout, 
+    handleAuthDialogOpen 
+  } = useNavigation();
+  
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
@@ -43,14 +49,11 @@ export default function Navigation() {
     }
   }, [location.pathname]);
 
-  const handleAuthDialogOpen = () => {
-    // Vérifier explicitement si la route actuelle est publique
-    if (isPublicRoute(location.pathname)) {
-      console.log("Route publique détectée, pas d'ouverture de la fenêtre de connexion");
-      return;
+  const onAuthDialogOpen = () => {
+    const shouldOpen = handleAuthDialogOpen();
+    if (shouldOpen) {
+      setShowAuthDialog(true);
     }
-    console.log("Route privée détectée, ouverture de la fenêtre de connexion");
-    setShowAuthDialog(true);
   };
 
   return (
@@ -68,7 +71,7 @@ export default function Navigation() {
               user={user}
               userType={userType}
               handleLogout={handleLogout}
-              setShowAuthDialog={handleAuthDialogOpen}
+              setShowAuthDialog={onAuthDialogOpen}
             />
             
             <MobileMenuButton 
@@ -87,7 +90,7 @@ export default function Navigation() {
           userType={userType}
           handleLogout={handleLogout}
           setIsOpen={setIsOpen}
-          setShowAuthDialog={handleAuthDialogOpen}
+          setShowAuthDialog={onAuthDialogOpen}
         />
       </div>
 

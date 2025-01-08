@@ -5,11 +5,12 @@ import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { supabase } from "@/integrations/supabase/client";
 import { isPublicRoute } from "./config/routes";
+import { UserType } from "@/types/navigation";
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [userType, setUserType] = useState<string | null>(null);
+  const [userType, setUserType] = useState<UserType>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -18,10 +19,10 @@ export function useNavigation() {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Session check:', session?.user ? 'User logged in' : 'No user');
         setUser(session?.user ?? null);
         setUserType(session?.user?.user_metadata?.user_type ?? null);
 
-        // Only redirect to login if the current route requires authentication
         if (!session?.user && !isPublicRoute(location.pathname)) {
           console.log('Redirecting to login, current path:', location.pathname);
           navigate('/connexion');
@@ -31,7 +32,6 @@ export function useNavigation() {
         setUser(null);
         setUserType(null);
         
-        // Only redirect to login if the current route requires authentication
         if (!isPublicRoute(location.pathname)) {
           console.log('Error redirecting to login, current path:', location.pathname);
           navigate('/connexion');
@@ -42,13 +42,13 @@ export function useNavigation() {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event);
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setUser(session?.user ?? null);
         setUserType(session?.user?.user_metadata?.user_type ?? null);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setUserType(null);
-        // Only redirect to home if not already on a public route
         if (!isPublicRoute(location.pathname)) {
           navigate('/');
         }
@@ -94,12 +94,21 @@ export function useNavigation() {
     }
   };
 
+  const handleAuthDialogOpen = () => {
+    if (isPublicRoute(location.pathname)) {
+      console.log("Route publique détectée, pas d'ouverture de la fenêtre de connexion");
+      return false;
+    }
+    console.log("Route privée détectée, ouverture de la fenêtre de connexion");
+    return true;
+  };
+
   return {
     isOpen,
     setIsOpen,
     user,
     userType,
     handleLogout,
-    isPublicRoute,
+    handleAuthDialogOpen,
   };
 }

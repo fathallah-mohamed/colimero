@@ -1,4 +1,3 @@
-// Routes that don't require authentication
 export const PUBLIC_ROUTES = [
   '/',
   '/connexion',
@@ -11,19 +10,24 @@ export const PUBLIC_ROUTES = [
   '/contact'
 ] as const;
 
-// Routes that start with these prefixes are also public
 export const PUBLIC_ROUTE_PREFIXES = [
   '/envoyer-colis/',
   '/planifier-tournee/',
-  '/transporteurs/'
+  '/transporteurs/',
+  '/reserver/'
 ] as const;
 
 export const isPublicRoute = (pathname: string): boolean => {
+  console.log('Checking if route is public:', pathname);
+  
   // Check exact matches first
   if (PUBLIC_ROUTES.includes(pathname as any)) {
+    console.log('Route is public (exact match)');
     return true;
   }
   
   // Then check prefixes
-  return PUBLIC_ROUTE_PREFIXES.some(prefix => pathname.startsWith(prefix));
+  const isPublicPrefix = PUBLIC_ROUTE_PREFIXES.some(prefix => pathname.startsWith(prefix));
+  console.log('Route is public (prefix match):', isPublicPrefix);
+  return isPublicPrefix;
 };
