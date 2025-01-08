@@ -1,146 +1,81 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader";
-import { TransporteurLayout } from "@/components/transporteur/TransporteurLayout";
-import { TransporteurLeftColumn } from "@/components/transporteur/TransporteurLeftColumn";
-import { TransporteurLoading } from "@/components/transporteur/TransporteurLoading";
-import { TransporteurNotFound } from "@/components/transporteur/TransporteurNotFound";
-import { TransporteurTours } from "@/components/transporteur/TransporteurTours";
-import type { Tour } from "@/types/tour";
+import { TransporteurHeader } from "./TransporteurHeader";
+import { TransporteurServices } from "./TransporteurServices";
+import { TransporteurCapacities } from "./TransporteurCapacities";
+import { TransporteurTours } from "./TransporteurTours";
+import { TransporteurContact } from "./TransporteurContact";
+import { TransporteurNotFound } from "./TransporteurNotFound";
+import { TransporteurLoading } from "./TransporteurLoading";
+import Navigation from "@/components/Navigation";
 
 export function TransporteurDetails() {
-  const { id } = useParams();
+  const [carrier, setCarrier] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const { id } = useParams<{ id: string }>();
 
-  const { data: transporteur, isLoading: isLoadingTransporteur } = useQuery({
-    queryKey: ["transporteur", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("carriers")
-        .select(`
-          *,
-          carrier_capacities!carrier_capacities_carrier_id_fkey (
-            total_capacity,
-            price_per_kg,
-            offers_home_delivery
-          ),
-          carrier_services (
-            id,
-            service_type,
-            description,
-            icon
-          )
-        `)
-        .eq("id", id)
-        .maybeSingle();
+  useEffect(() => {
+    const fetchCarrier = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("carriers")
+          .select(`
+            *,
+            carrier_services(*),
+            carrier_capacities(*)
+          `)
+          .eq("id", id)
+          .single();
 
-      if (error) throw error;
-      return data;
-    },
-  });
+        if (error) throw error;
+        setCarrier(data);
+      } catch (error) {
+        console.error("Error fetching carrier:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const { data: publicTours = [], isLoading: isLoadingPublic } = useQuery({
-    queryKey: ["transporteur-tours", id, "public"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tours")
-        .select(`
-          *,
-          carriers (
-            company_name,
-            first_name,
-            last_name,
-            avatar_url,
-            carrier_capacities (
-              price_per_kg
-            )
-          )
-        `)
-        .eq("carrier_id", id)
-        .eq("type", "public")
-        .gte("departure_date", new Date().toISOString());
+    if (id) {
+      fetchCarrier();
+    }
+  }, [id]);
 
-      if (error) throw error;
-      return data?.map(tour => ({
-        ...tour,
-        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
-      })) as Tour[];
-    },
-    enabled: !!id,
-  });
-
-  const { data: privateTours = [], isLoading: isLoadingPrivate } = useQuery({
-    queryKey: ["transporteur-tours", id, "private"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tours")
-        .select(`
-          *,
-          carriers (
-            company_name,
-            first_name,
-            last_name,
-            avatar_url,
-            carrier_capacities (
-              price_per_kg
-            )
-          )
-        `)
-        .eq("carrier_id", id)
-        .eq("type", "private")
-        .gte("departure_date", new Date().toISOString());
-
-      if (error) throw error;
-      return data?.map(tour => ({
-        ...tour,
-        route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string)
-      })) as Tour[];
-    },
-    enabled: !!id,
-  });
-
-  if (isLoadingTransporteur) {
+  if (loading) {
     return <TransporteurLoading />;
   }
 
-  if (!transporteur) {
+  if (!carrier) {
     return <TransporteurNotFound />;
   }
 
   return (
-    <TransporteurLayout>
-      <TransporteurHeader
-        name={transporteur.company_name || ""}
-        coverageArea={transporteur.coverage_area?.join(", ") || ""}
-        avatarUrl={transporteur.avatar_url}
-        firstName={transporteur.first_name}
-      />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <TransporteurLeftColumn
-          email={transporteur.email || ""}
-          phone={transporteur.phone || ""}
-          phoneSecondary={transporteur.phone_secondary}
-          address={transporteur.address || ""}
-          capacities={transporteur.carrier_capacities}
-          services={transporteur.carrier_services}
-          transporteurName={transporteur.company_name || transporteur.first_name}
-        />
-        <div className="grid md:grid-cols-2 gap-6">
-          <TransporteurTours 
-            tours={publicTours} 
-            type="public"
-            isLoading={isLoadingPublic}
-          />
-          <TransporteurTours 
-            tours={privateTours} 
-            type="private"
-            isLoading={isLoadingPrivate}
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      <div className="bg-gradient-primary">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <TransporteurHeader
+            name={carrier.company_name}
+            coverageArea={carrier.coverage_area?.join(" ↔ ")}
+            avatarUrl={carrier.avatar_url}
+            firstName={carrier.first_name}
           />
         </div>
       </div>
-    </TransporteurLayout>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <TransporteurServices services={carrier.carrier_services} />
+            <TransporteurTours carrierId={carrier.id} />
+          </div>
+          <div className="space-y-8">
+            <TransporteurCapacities capacities={carrier.carrier_capacities?.[0]} />
+            <TransporteurContact carrier={carrier} />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
-// Export the component as default
-export default TransporteurDetails;
