@@ -20,11 +20,15 @@ const PUBLIC_ROUTES = [
 
 // Helper function to check if a route is public
 const isPublicRoute = (pathname: string) => {
-  // Check if the pathname exactly matches any of the public routes
-  // or if it starts with /envoyer-colis/ or /planifier-tournee/
-  return PUBLIC_ROUTES.includes(pathname) ||
-         pathname.startsWith('/envoyer-colis/') ||
-         pathname.startsWith('/planifier-tournee/');
+  // Check exact matches first
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    return true;
+  }
+  
+  // Then check if it starts with any of our public route prefixes
+  return pathname.startsWith('/envoyer-colis') || 
+         pathname.startsWith('/planifier-tournee') ||
+         pathname.startsWith('/transporteurs/');
 };
 
 export function useNavigation() {
