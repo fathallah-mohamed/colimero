@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { UserCircle2 } from "lucide-react";
 import MenuItems from "./navigation/MenuItems";
 import MobileMenu from "./navigation/MobileMenu";
-import MobileMenuButton from "./navigation/MobileMenuButton";
+import { MobileMenuButton } from "./navigation/MobileMenuButton";
 import AuthDialog from "./auth/AuthDialog";
 import { RegisterForm } from "./auth/RegisterForm";
 import CarrierSignupForm from "./auth/carrier-signup/CarrierSignupForm";
