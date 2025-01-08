@@ -7,7 +7,7 @@ export default function MenuItems() {
   const location = useLocation();
 
   return (
-    <div className="hidden md:flex items-center space-x-0.5">
+    <div className="hidden md:flex items-center space-x-0">
       {menuItems.map((item) => {
         const isActive = location.pathname === item.href;
         
@@ -19,7 +19,7 @@ export default function MenuItems() {
           >
             <motion.div
               className={cn(
-                "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                "flex items-center px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                 "w-[140px] justify-center",
                 "hover:bg-primary/10 hover:scale-105",
                 "active:scale-95",
