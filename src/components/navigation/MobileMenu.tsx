@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { UserCircle2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { menuItems } from "./config/menuItems";
-import { UserMenuItems } from "./UserMenuItems";
 import { motion } from "framer-motion";
 
 interface MobileMenuProps {
@@ -127,7 +126,6 @@ export default function MobileMenu({
             <div className="px-3 py-2 text-sm text-gray-600">
               {user.email}
             </div>
-            <UserMenuItems userType={userType} />
             <Button 
               variant="outline" 
               size="sm" 
