@@ -1,3 +1,5 @@
+import { BookingStatus } from './booking';
+
 export type TourStatus = 
   | "Programmée"
   | "Ramassage en cours"
@@ -25,7 +27,7 @@ export interface Booking {
   delivery_city: string;
   weight: number;
   tracking_number: string;
-  status: string;
+  status: BookingStatus;
   recipient_phone: string;
   recipient_address: string;
   item_type: string;
