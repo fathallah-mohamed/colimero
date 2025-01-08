@@ -10,8 +10,8 @@ export const menuItems = [
     icon: <Calendar className="w-4 h-4" />, 
     highlight: true,
     className: "bg-blue-50",
-    allowedUserTypes: ["carrier"],
-    requiresAuth: true
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "Envoyer un colis", 
