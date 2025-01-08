@@ -16,6 +16,7 @@ export default function EnvoyerColis() {
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
   const [tourType, setTourType] = useState<"public" | "private">("public");
+  const [sortBy, setSortBy] = useState<string>("departure_asc");
   
   const {
     loading,
@@ -30,6 +31,22 @@ export default function EnvoyerColis() {
     handleBookingClick,
     handleAuthSuccess
   } = useBookingFlow();
+
+  // Tri des tournées
+  const sortedTours = [...(tours || [])].sort((a, b) => {
+    switch (sortBy) {
+      case "departure_asc":
+        return new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime();
+      case "departure_desc":
+        return new Date(b.departure_date).getTime() - new Date(a.departure_date).getTime();
+      case "price_asc":
+        return (a.carriers?.carrier_capacities?.price_per_kg || 0) - (b.carriers?.carrier_capacities?.price_per_kg || 0);
+      case "price_desc":
+        return (b.carriers?.carrier_capacities?.price_per_kg || 0) - (a.carriers?.carrier_capacities?.price_per_kg || 0);
+      default:
+        return 0;
+    }
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -97,13 +114,15 @@ export default function EnvoyerColis() {
           setSelectedStatus={setSelectedStatus}
           tourType={tourType}
           setTourType={setTourType}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
         />
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : tours?.length === 0 ? (
+        ) : sortedTours?.length === 0 ? (
           <div className="text-center py-12">
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               Aucune tournée disponible
@@ -114,7 +133,7 @@ export default function EnvoyerColis() {
           </div>
         ) : (
           <div className="mt-8 space-y-4">
-            {tours?.map((tour) => (
+            {sortedTours?.map((tour) => (
               <ClientTourCard
                 key={tour.id}
                 tour={tour}

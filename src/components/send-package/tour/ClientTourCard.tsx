@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Eye, Package, ChevronDown, ArrowRight } from "lucide-react";
+import { MapPin, Calendar, Eye, Package, ChevronDown, ArrowRight, Clock, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
-import { Avatar } from "@/components/ui/avatar";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
@@ -22,6 +21,9 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
   const [selectedPoint, setSelectedPoint] = useState<string>("");
   
   const pricePerKg = tour.carriers?.carrier_capacities?.price_per_kg || 0;
+  const firstCollectionDate = new Date(tour.collection_date);
+  const departureDate = new Date(tour.departure_date);
+  const tourDuration = differenceInDays(departureDate, firstCollectionDate);
 
   const handleBookingClick = () => {
     if (selectedPoint) {
@@ -39,7 +41,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
       <div className="p-6">
         <div className="flex flex-col space-y-6">
           {/* Informations principales */}
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Transporteur */}
             <div className="flex items-center gap-3">
               <TransporteurAvatar 
@@ -58,17 +60,28 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               <div className="flex flex-col">
                 <span className="text-sm text-blue-600 font-medium">Date de départ</span>
                 <span className="text-base font-semibold text-blue-700">
-                  {format(new Date(tour.departure_date), "d MMM yyyy", { locale: fr })}
+                  {format(departureDate, "d MMM yyyy", { locale: fr })}
+                </span>
+              </div>
+            </div>
+
+            {/* Durée de la tournée */}
+            <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg">
+              <Clock className="h-5 w-5 text-purple-600" />
+              <div className="flex flex-col">
+                <span className="text-sm text-purple-600 font-medium">Durée de la tournée</span>
+                <span className="text-base font-semibold text-purple-700">
+                  {tourDuration} jours
                 </span>
               </div>
             </div>
 
             {/* Prix et capacité */}
-            <div className="flex items-center gap-6">
-              <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary min-w-[100px] text-center">
+            <div className="flex flex-col gap-2">
+              <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary text-center">
                 {pricePerKg} €/kg
               </span>
-              <span className="text-green-600 dark:text-green-400 font-medium text-base min-w-[150px]">
+              <span className="text-green-600 dark:text-green-400 font-medium text-base text-center px-4 py-2 bg-green-50 rounded-lg">
                 {tour.remaining_capacity} kg disponibles
               </span>
             </div>
@@ -76,14 +89,24 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
 
           {/* Trajet */}
           <div className="flex items-center gap-3">
-            <MapPin className="h-5 w-5 flex-shrink-0 text-primary/70" />
+            <Truck className="h-5 w-5 flex-shrink-0 text-primary/70" />
             <div className="flex items-center gap-3 flex-wrap">
               {cities.map((city, index) => (
                 <div key={city.name} className="flex items-center">
                   <span className="flex items-center gap-2">
                     <span className="text-base">{city.name}</span>
-                    <span className="text-sm px-3 py-1 rounded-full bg-gray-100">
-                      {city.type === 'pickup' ? 'Collecte' : 'Livraison'}
+                    <span className="text-sm px-3 py-1 rounded-full bg-gray-100 flex items-center gap-1">
+                      {city.type === 'pickup' ? (
+                        <>
+                          <Package className="h-4 w-4" />
+                          Collecte
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="h-4 w-4" />
+                          Livraison
+                        </>
+                      )}
                     </span>
                   </span>
                   {index < cities.length - 1 && (

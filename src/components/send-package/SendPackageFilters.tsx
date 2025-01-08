@@ -8,6 +8,8 @@ interface SendPackageFiltersProps {
   setSelectedStatus: (value: string) => void;
   tourType: "public" | "private";
   setTourType: (value: "public" | "private") => void;
+  sortBy: string;
+  setSortBy: (value: string) => void;
 }
 
 export function SendPackageFilters({
@@ -16,10 +18,12 @@ export function SendPackageFilters({
   selectedStatus,
   setSelectedStatus,
   tourType,
-  setTourType
+  setTourType,
+  sortBy,
+  setSortBy
 }: SendPackageFiltersProps) {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div>
         <label className="text-sm font-medium text-gray-700 mb-1.5 block">
           Trajet
@@ -50,6 +54,38 @@ export function SendPackageFilters({
             <SelectItem value="En transit">En transit</SelectItem>
             <SelectItem value="Livraison en cours">Livraison en cours</SelectItem>
             <SelectItem value="Terminée">Terminée</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+          Type de tournée
+        </label>
+        <Select value={tourType} onValueChange={setTourType}>
+          <SelectTrigger>
+            <SelectValue placeholder="Type de tournée" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="public">Publique</SelectItem>
+            <SelectItem value="private">Privée</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+          Trier par
+        </label>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger>
+            <SelectValue placeholder="Trier par" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="departure_asc">Date de départ (croissant)</SelectItem>
+            <SelectItem value="departure_desc">Date de départ (décroissant)</SelectItem>
+            <SelectItem value="price_asc">Prix (croissant)</SelectItem>
+            <SelectItem value="price_desc">Prix (décroissant)</SelectItem>
           </SelectContent>
         </Select>
       </div>
