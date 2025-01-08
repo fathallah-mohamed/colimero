@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { UserCircle2, X } from "lucide-react";
 import { menuItems } from "./MenuItems";
 import { UserMenuItems } from "./UserMenuItems";
+import { cn } from "@/lib/utils";
 
 interface MobileMenuProps {
   isOpen: boolean;
