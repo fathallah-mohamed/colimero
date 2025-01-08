@@ -27,7 +27,7 @@ export const menuItems: MenuItem[] = [
     icon: Package,
     highlight: true,
     className: "bg-blue-50",
-    allowedUserTypes: ["client"],
+    allowedUserTypes: ["client", "carrier", "admin"],
     requiresAuth: false
   },
   { 

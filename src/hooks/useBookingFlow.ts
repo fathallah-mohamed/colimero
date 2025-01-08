@@ -12,7 +12,6 @@ export function useBookingFlow() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      // Save the complete path with parameters
       const bookingPath = `/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`;
       sessionStorage.setItem('returnPath', bookingPath);
       setShowAuthDialog(true);
@@ -27,7 +26,7 @@ export function useBookingFlow() {
       return;
     }
 
-    // Check if user already has an active booking
+    // Vérifier si l'utilisateur a déjà une réservation en cours
     const { data: existingBookings, error } = await supabase
       .from('bookings')
       .select('*')

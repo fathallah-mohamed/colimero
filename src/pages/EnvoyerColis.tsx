@@ -6,6 +6,7 @@ import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { useTours } from "@/hooks/use-tours";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
+import { useBookingFlow } from "@/hooks/useBookingFlow";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
@@ -19,9 +20,14 @@ export default function EnvoyerColis() {
     tours,
   } = useTours();
 
-  const handleBooking = (tourId: number) => {
-    navigate(`/reserver/${tourId}`);
-  };
+  const {
+    showAuthDialog,
+    setShowAuthDialog,
+    showAccessDeniedDialog,
+    setShowAccessDeniedDialog,
+    handleBookingClick,
+    handleAuthSuccess
+  } = useBookingFlow();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,7 +47,7 @@ export default function EnvoyerColis() {
             <ClientTourCard
               key={tour.id}
               tour={tour}
-              onBookingClick={() => handleBooking(tour.id)}
+              onBookingClick={handleBookingClick}
             />
           ))}
         </div>
