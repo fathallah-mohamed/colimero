@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useTours } from "@/hooks/use-tours";
-import ClientTourCard from "@/components/send-package/tour/ClientTourCard";
-import SendPackageHero from "@/components/send-package/SendPackageHero";
-import SendPackageFeatures from "@/components/send-package/SendPackageFeatures";
-import SendPackageFilters from "@/components/send-package/SendPackageFilters";
+import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
+import { SendPackageHero } from "@/components/send-package/SendPackageHero";
+import { SendPackageFeatures } from "@/components/send-package/SendPackageFeatures";
+import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
@@ -12,9 +12,8 @@ import { Tour, RouteStop } from "@/types/tour";
 export default function EnvoyerColis() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [departureCountry, setDepartureCountry] = useState<string>("FR");
-  const [destinationCountry, setDestinationCountry] = useState<string>("TN");
-  const [sortBy, setSortBy] = useState<string>("departure_date");
+  const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [tourType, setTourType] = useState<"public" | "private">("public");
 
   const {
@@ -54,14 +53,12 @@ export default function EnvoyerColis() {
         
         <div className="mt-12">
           <SendPackageFilters
-            departureCountry={departureCountry}
-            destinationCountry={destinationCountry}
-            sortBy={sortBy}
+            selectedRoute={selectedRoute}
+            setSelectedRoute={setSelectedRoute}
+            selectedStatus={selectedStatus}
+            setSelectedStatus={setSelectedStatus}
             tourType={tourType}
-            onDepartureCountryChange={setDepartureCountry}
-            onDestinationCountryChange={setDestinationCountry}
-            onSortByChange={setSortBy}
-            onTourTypeChange={setTourType}
+            setTourType={setTourType}
           />
 
           <div className="mt-8">
