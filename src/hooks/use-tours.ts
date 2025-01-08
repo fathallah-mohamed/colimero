@@ -36,17 +36,6 @@ export function useTours() {
     status,
   });
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/connexion');
-      }
-    };
-
-    checkAuth();
-  }, [navigate]);
-
   console.log('useTours hook state:', {
     departureCountry,
     destinationCountry,
