@@ -54,16 +54,12 @@ export function TransporteurDetails() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="bg-gradient-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TransporteurHeader
-            name={carrier.company_name}
-            coverageArea={carrier.coverage_area?.join(" ↔ ")}
-            avatarUrl={carrier.avatar_url}
-            firstName={carrier.first_name}
-          />
-        </div>
-      </div>
+      <TransporteurHeader
+        name={carrier.company_name}
+        coverageArea={carrier.coverage_area?.join(", ")}
+        avatarUrl={carrier.avatar_url}
+        firstName={carrier.first_name}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

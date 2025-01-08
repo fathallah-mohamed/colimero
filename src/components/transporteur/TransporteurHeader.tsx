@@ -12,10 +12,10 @@ interface TransporteurHeaderProps {
 }
 
 const countryNames: { [key: string]: string } = {
-  'FR': 'France',
-  'TN': 'Tunisie',
-  'MA': 'Maroc',
-  'DZ': 'Algérie'
+  'FR': 'FR',
+  'TN': 'TN',
+  'MA': 'MA',
+  'DZ': 'DZ'
 };
 
 export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }: TransporteurHeaderProps) {
@@ -28,7 +28,7 @@ export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }:
   };
 
   return (
-    <div className="bg-gradient-to-r from-[#2563EB] to-[#00B0F0] py-16">
+    <div className="bg-gradient-to-r from-blue-600 to-blue-400 py-8">
       <div className="max-w-7xl mx-auto px-4">
         <button 
           onClick={() => navigate('/transporteurs')}
