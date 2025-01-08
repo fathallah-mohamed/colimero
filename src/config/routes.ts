@@ -1,7 +1,5 @@
 export const PUBLIC_ROUTES = [
   '/',
-  '/connexion',
-  '/login',
   '/envoyer-colis',
   '/planifier-tournee',
   '/transporteurs',
