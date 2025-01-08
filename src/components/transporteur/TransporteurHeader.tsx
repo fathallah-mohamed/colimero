@@ -31,7 +31,7 @@ export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }:
     <div className="bg-gradient-to-r from-[#2563EB] to-[#00B0F0] py-16">
       <div className="max-w-7xl mx-auto px-4">
         <button 
-          onClick={() => navigate('/nos-transporteurs')}
+          onClick={() => navigate('/transporteurs')}
           className="inline-flex items-center text-white mb-8 hover:opacity-80"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
