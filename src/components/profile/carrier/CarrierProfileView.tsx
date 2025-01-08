@@ -1,116 +1,187 @@
 import { useState } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Upload, Mail, Phone, MapPin, Building2, FileText, Truck, Euro } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CarrierProfileForm } from "./CarrierProfileForm";
-import { ProfileHeader } from "../ProfileHeader";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 import { ServicesSection } from "../ServicesSection";
-import { CommitmentsSection } from "../CommitmentsSection";
 import { Profile } from "@/types/profile";
-import { TransporteurHeader } from "@/components/transporteur/TransporteurHeader";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, MapPin, Phone } from "lucide-react";
 
 interface CarrierProfileViewProps {
   profile: Profile;
 }
 
 export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
+
+  const handleIdDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${profile.id}/${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('id-documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { error: updateError } = await supabase
+        .from('carriers')
+        .update({ id_document: filePath })
+        .eq('id', profile.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Succès",
+        description: "Document d'identité mis à jour avec succès",
+      });
+
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
+    }
+  };
+
+  const InfoItem = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null }) => (
+    <div className="flex items-start gap-3">
+      <div className="flex-shrink-0">
+        <Icon className="h-5 w-5 text-gray-400" />
+      </div>
+      <div>
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-gray-900">{value || "-"}</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
-      <TransporteurHeader
-        name={profile.company_name || ""}
-        coverageArea={profile.coverage_area?.join(" ↔ ") || ""}
-        avatarUrl={profile.avatar_url}
-        firstName={profile.first_name}
-      />
-
-      <div className="max-w-7xl mx-auto px-4">
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="mb-8">
-            <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="capacities">Capacités</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="profile">
-            <div className="bg-white shadow rounded-lg p-6 space-y-6">
-              <h2 className="text-xl font-semibold">Contact</h2>
-              
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-gray-500 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-500">Email</p>
-                    <p>{profile.email}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-gray-500 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-500">Téléphone</p>
-                    <p>{profile.phone}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-gray-500 mt-1" />
-                  <div>
-                    <p className="text-sm text-gray-500">Adresse</p>
-                    <p>{profile.address}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="services">
-            <ServicesSection profile={profile} />
-          </TabsContent>
-
-          <TabsContent value="capacities">
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-6">Capacités et Tarifs</h2>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 3V21M3 12H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Capacité totale</p>
-                    <p className="font-medium">1000 kg</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <svg className="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3Z" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Prix par kilo</p>
-                    <p className="font-medium">5€/kg</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="max-w-2xl">
-            <CarrierProfileForm
-              initialData={profile}
-              onClose={() => setShowEditDialog(false)}
-            />
-          </DialogContent>
-        </Dialog>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Mon profil transporteur</h1>
+        <Button onClick={() => setIsEditing(true)}>
+          Modifier mon profil
+        </Button>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Informations personnelles */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Informations personnelles</h2>
+          <div className="space-y-4">
+            <InfoItem 
+              icon={Building2} 
+              label="Entreprise" 
+              value={profile.company_name} 
+            />
+            <InfoItem 
+              icon={FileText} 
+              label="SIRET" 
+              value={profile.siret} 
+            />
+            <InfoItem 
+              icon={Mail} 
+              label="Email" 
+              value={profile.email} 
+            />
+            <InfoItem 
+              icon={Phone} 
+              label="Téléphone" 
+              value={profile.phone} 
+            />
+            {profile.phone_secondary && (
+              <InfoItem 
+                icon={Phone} 
+                label="Téléphone secondaire" 
+                value={profile.phone_secondary} 
+              />
+            )}
+            <InfoItem 
+              icon={MapPin} 
+              label="Adresse" 
+              value={profile.address} 
+            />
+          </div>
+        </Card>
+
+        {/* Capacités */}
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Capacités</h2>
+          <div className="space-y-4">
+            <InfoItem 
+              icon={Truck} 
+              label="Capacité totale" 
+              value={`${profile.carrier_capacities?.total_capacity || 0} kg`} 
+            />
+            <InfoItem 
+              icon={Euro} 
+              label="Prix par kg" 
+              value={`${profile.carrier_capacities?.price_per_kg || 0} €`} 
+            />
+          </div>
+        </Card>
+
+        {/* Services */}
+        <Card className="p-6 lg:col-span-2">
+          <ServicesSection profile={profile} onUpdate={() => window.location.reload()} />
+        </Card>
+
+        {/* Documents */}
+        <Card className="p-6 lg:col-span-2">
+          <h2 className="text-lg font-semibold mb-4">Documents</h2>
+          <div className="flex items-center gap-4">
+            {profile.id_document ? (
+              <a 
+                href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/id-documents/${profile.id_document}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Voir le document d'identité
+              </a>
+            ) : (
+              <span className="text-gray-500">Aucun document d'identité</span>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => document.getElementById('id-document-upload')?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              {profile.id_document ? "Modifier" : "Ajouter"}
+            </Button>
+            <input
+              id="id-document-upload"
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleIdDocumentUpload}
+              className="hidden"
+            />
+          </div>
+        </Card>
+      </div>
+
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[600px]">
+          <CarrierProfileForm
+            initialData={profile}
+            onClose={() => setIsEditing(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
