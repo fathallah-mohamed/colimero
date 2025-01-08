@@ -31,6 +31,9 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
     }
   };
 
+  // Filter only pickup points from the route
+  const pickupPoints = tour.route?.filter(stop => stop.type === 'pickup' || stop.type === 'ramassage') || [];
+
   const cities = tour.route?.map(stop => ({
     name: stop.name,
     type: stop.type
@@ -96,7 +99,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
                   <span className="flex items-center gap-2">
                     <span className="text-base">{city.name}</span>
                     <span className="text-sm px-3 py-1 rounded-full bg-gray-100 flex items-center gap-1">
-                      {city.type === 'pickup' ? (
+                      {city.type === 'pickup' || city.type === 'ramassage' ? (
                         <>
                           <Package className="h-4 w-4" />
                           Ramassage
@@ -145,7 +148,7 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               />
               
               <SelectableCollectionPointsList
-                points={tour.route || []}
+                points={pickupPoints}
                 selectedPoint={selectedPoint}
                 onPointSelect={setSelectedPoint}
                 isSelectionEnabled={true}
