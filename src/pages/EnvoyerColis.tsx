@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
+import { Tour, RouteStop } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
@@ -19,11 +20,25 @@ export default function EnvoyerColis() {
   const [tourType, setTourType] = useState<"public" | "private">("public");
 
   const {
-    tours,
+    tours: rawTours,
     loading,
   } = useTours();
 
-  const handleBooking = (tourId: number) => {
+  // Transform the tours data to match the expected types
+  const tours = rawTours?.map(tour => ({
+    ...tour,
+    route: Array.isArray(tour.route) 
+      ? tour.route.map((stop: any): RouteStop => ({
+          name: stop.name,
+          location: stop.location,
+          time: stop.time,
+          type: stop.type,
+          collection_date: stop.collection_date
+        }))
+      : [],
+  })) as Tour[];
+
+  const handleBooking = (tourId: number, pickupCity: string) => {
     if (!user?.id) {
       toast({
         title: "Connexion requise",
@@ -61,7 +76,7 @@ export default function EnvoyerColis() {
                   <ClientTourCard
                     key={tour.id}
                     tour={tour}
-                    onBookingClick={() => handleBooking(tour.id)}
+                    onBookingClick={handleBooking}
                   />
                 ))}
               </div>

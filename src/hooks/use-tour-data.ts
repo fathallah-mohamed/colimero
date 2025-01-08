@@ -73,7 +73,21 @@ export function useTourData({
 
     const transformedTours = data?.map(tour => ({
       ...tour,
-      route: Array.isArray(tour.route) ? tour.route : JSON.parse(tour.route as string),
+      route: Array.isArray(tour.route) 
+        ? tour.route.map((stop: any): RouteStop => ({
+            name: stop.name,
+            location: stop.location,
+            time: stop.time,
+            type: stop.type,
+            collection_date: stop.collection_date
+          }))
+        : JSON.parse(tour.route as string).map((stop: any): RouteStop => ({
+            name: stop.name,
+            location: stop.location,
+            time: stop.time,
+            type: stop.type,
+            collection_date: stop.collection_date
+          })),
       status: tour.status as TourStatus,
       previous_status: tour.previous_status as TourStatus | null,
       terms_accepted: tour.terms_accepted || false,
