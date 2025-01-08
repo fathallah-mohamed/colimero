@@ -10,6 +10,7 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { cn } from "@/lib/utils";
 import { CardCustom } from "@/components/ui/card-custom";
+import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -39,6 +40,18 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
         <div className="flex flex-col space-y-6">
           {/* Informations principales */}
           <div className="flex items-center justify-between flex-wrap gap-4">
+            {/* Transporteur - Déplacé à gauche */}
+            <div className="flex items-center gap-3">
+              <TransporteurAvatar 
+                avatarUrl={tour.carriers?.avatar_url}
+                companyName={tour.carriers?.company_name || ""}
+                size="md"
+              />
+              <span className="text-base font-medium text-gray-900">
+                {tour.carriers?.company_name}
+              </span>
+            </div>
+
             {/* Prix et capacité */}
             <div className="flex items-center gap-6">
               <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary min-w-[100px] text-center">
@@ -46,20 +59,6 @@ export function ClientTourCard({ tour, onBookingClick }: ClientTourCardProps) {
               </span>
               <span className="text-green-600 dark:text-green-400 font-medium text-base min-w-[150px]">
                 {tour.remaining_capacity} kg disponibles
-              </span>
-            </div>
-
-            {/* Transporteur */}
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 ring-2 ring-primary/10">
-                <img 
-                  src={tour.carriers?.avatar_url || "/placeholder.svg"} 
-                  alt={tour.carriers?.company_name || "Carrier"} 
-                  className="object-cover"
-                />
-              </Avatar>
-              <span className="text-base font-medium text-gray-900">
-                {tour.carriers?.company_name}
               </span>
             </div>
 
