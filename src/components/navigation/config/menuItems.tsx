@@ -8,6 +8,7 @@ interface MenuItem {
   highlight?: boolean;
   className?: string;
   allowedUserTypes: string[];
+  requiresAuth?: boolean;
 }
 
 export const menuItems: MenuItem[] = [
@@ -15,7 +16,8 @@ export const menuItems: MenuItem[] = [
     name: "Administrateurs", 
     href: "/admin", 
     icon: UserCog,
-    allowedUserTypes: ["admin"]
+    allowedUserTypes: ["admin"],
+    requiresAuth: true
   },
   { 
     name: "Planifier une tournée", 
@@ -23,7 +25,8 @@ export const menuItems: MenuItem[] = [
     icon: Calendar,
     highlight: true,
     className: "bg-blue-50",
-    allowedUserTypes: ["carrier"]
+    allowedUserTypes: ["carrier"],
+    requiresAuth: true
   },
   { 
     name: "Envoyer un colis", 
@@ -31,30 +34,35 @@ export const menuItems: MenuItem[] = [
     icon: Package,
     highlight: true,
     className: "bg-blue-50",
-    allowedUserTypes: ["client"]
+    allowedUserTypes: ["client"],
+    requiresAuth: false
   },
   { 
     name: "Transporteurs", 
     href: "/transporteurs", 
     icon: Truck,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "Actualités", 
     href: "/blog", 
     icon: MessageSquare,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "À propos", 
     href: "/a-propos", 
     icon: Info,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
   { 
     name: "Contact", 
     href: "/contact", 
     icon: Users,
-    allowedUserTypes: ["client", "carrier", "admin"]
+    allowedUserTypes: ["client", "carrier", "admin"],
+    requiresAuth: false
   },
 ];
