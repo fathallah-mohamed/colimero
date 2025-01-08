@@ -28,7 +28,7 @@ const isPublicRoute = (pathname: string) => {
   // Then check if it starts with any of our public route prefixes
   return pathname.startsWith('/envoyer-colis') || 
          pathname.startsWith('/planifier-tournee') ||
-         pathname.startsWith('/transporteurs/');
+         pathname.startsWith('/transporteurs');
 };
 
 export function useNavigation() {
