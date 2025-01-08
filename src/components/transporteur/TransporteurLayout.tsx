@@ -1,11 +1,13 @@
 import { ReactNode } from "react";
 
-export function TransporteurLayout({ children }: { children: ReactNode }) {
+interface TransporteurLayoutProps {
+  children: ReactNode;
+}
+
+export function TransporteurLayout({ children }: TransporteurLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {children}
     </div>
   );
 }
-
-export default TransporteurLayout;
