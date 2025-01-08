@@ -1,53 +1,61 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { handleLogoutFlow } from "@/utils/auth/logout";
 import { supabase } from "@/integrations/supabase/client";
-import { UserType } from "@/types/navigation";
 
 export function useNavigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [userType, setUserType] = useState<UserType>(null);
+  const [userType, setUserType] = useState<string | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
+  const mounted = useRef(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('Session check:', session?.user ? 'User logged in' : 'No user');
-        setUser(session?.user ?? null);
-        setUserType(session?.user?.user_metadata?.user_type ?? null);
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setUserType(session?.user?.user_metadata?.user_type ?? null);
+        }
       } catch (error) {
         console.error("Session check error:", error);
-        setUser(null);
-        setUserType(null);
+        if (mounted) {
+          setUser(null);
+          setUserType(null);
+        }
       }
     };
 
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event);
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setUser(session?.user ?? null);
-        setUserType(session?.user?.user_metadata?.user_type ?? null);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setUserType(null);
+      if (mounted) {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setUser(session?.user ?? null);
+          setUserType(session?.user?.user_metadata?.user_type ?? null);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setUserType(null);
+          navigate('/');
+        }
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
 
   const handleLogout = async () => {
     try {
+      // Clear local state first
       setUser(null);
       setUserType(null);
       
@@ -69,6 +77,7 @@ export function useNavigation() {
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
+      // Clear local state anyway
       setUser(null);
       setUserType(null);
       toast({
@@ -80,22 +89,11 @@ export function useNavigation() {
     }
   };
 
-  const handleAuthDialogOpen = () => {
-    // Store the current path for redirection after login only for booking pages
-    if (location.pathname.includes('/reserver/')) {
-      sessionStorage.setItem('returnPath', location.pathname);
-    }
-    
-    console.log("Ouverture de la fenêtre de connexion");
-    return true;
-  };
-
   return {
     isOpen,
     setIsOpen,
     user,
     userType,
     handleLogout,
-    handleAuthDialogOpen,
   };
 }
