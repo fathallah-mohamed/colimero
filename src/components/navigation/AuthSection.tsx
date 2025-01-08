@@ -12,7 +12,7 @@ interface AuthSectionProps {
 export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }: AuthSectionProps) {
   if (!user) {
     return (
-      <div className="hidden lg:block">
+      <div className="hidden md:block">
         <Button 
           variant="outline" 
           size="sm"
@@ -27,7 +27,7 @@ export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }:
   }
 
   return (
-    <div className="hidden lg:block">
+    <div className="hidden md:block">
       <AccountMenu 
         userType={userType}
         onClose={handleLogout}
