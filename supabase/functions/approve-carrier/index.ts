@@ -40,10 +40,42 @@ serve(async (req) => {
       )
     }
 
-    // Update the carrier request status
+    // 1. Vérifier que la demande existe et récupérer ses données
+    const { data: request, error: requestError } = await supabaseClient
+      .from("carrier_registration_requests")
+      .select("*")
+      .eq("id", requestId)
+      .single()
+
+    if (requestError) {
+      console.error("Error fetching request:", requestError)
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch carrier request", details: requestError.message }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    if (!request) {
+      console.error("Request not found")
+      return new Response(
+        JSON.stringify({ error: "Carrier request not found" }),
+        { 
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // 2. Mettre à jour le statut de la demande
     const { error: updateError } = await supabaseClient
       .from('carrier_registration_requests')
-      .update({ status: 'approved' })
+      .update({ 
+        status: 'approved',
+        updated_at: new Date().toISOString()
+      })
       .eq('id', requestId)
 
     if (updateError) {
@@ -57,10 +89,10 @@ serve(async (req) => {
       )
     }
 
-    // Wait for triggers to complete
+    // 3. Attendre que les triggers s'exécutent
     await new Promise(resolve => setTimeout(resolve, 2000))
 
-    // Verify the carrier was created
+    // 4. Vérifier que le transporteur a bien été créé
     const { data: carrier, error: verifyError } = await supabaseClient
       .from('carriers')
       .select('*')
@@ -80,7 +112,11 @@ serve(async (req) => {
 
     console.log("Carrier approved successfully:", carrier)
     return new Response(
-      JSON.stringify({ success: true, carrier }),
+      JSON.stringify({ 
+        success: true, 
+        carrier,
+        message: "Carrier approved and account created successfully"
+      }),
       { 
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
