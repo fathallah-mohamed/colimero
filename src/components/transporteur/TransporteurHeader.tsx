@@ -6,8 +6,8 @@ import { TransporteurAvatar } from "./TransporteurAvatar";
 
 interface TransporteurHeaderProps {
   name: string;
-  coverageArea: string;
-  avatarUrl?: string;
+  coverageArea: string[];
+  avatarUrl?: string | null;
   firstName?: string;
 }
 
@@ -18,9 +18,8 @@ const countryNames: { [key: string]: string } = {
   'DZ': 'DZ'
 };
 
-export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }: TransporteurHeaderProps) {
+export function TransporteurHeader({ name, coverageArea, avatarUrl }: TransporteurHeaderProps) {
   const navigate = useNavigate();
-  const countries = coverageArea.split(", ");
   
   const formatCoverageArea = (countries: string[]) => {
     return countries.map(code => countryNames[code] || code)
@@ -50,7 +49,7 @@ export function TransporteurHeader({ name, coverageArea, avatarUrl, firstName }:
             <div className="flex items-center gap-4 text-white/80">
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                <span>Zone de couverture : {formatCoverageArea(countries)}</span>
+                <span>Zone de couverture : {formatCoverageArea(coverageArea)}</span>
               </div>
             </div>
           </div>

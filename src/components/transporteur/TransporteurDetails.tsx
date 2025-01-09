@@ -6,6 +6,7 @@ import { TransporteurServices } from "./TransporteurServices";
 import { TransporteurContact } from "./TransporteurContact";
 import { ClientTourCard } from "../send-package/tour/ClientTourCard";
 import { Loader2 } from "lucide-react";
+import { Tour } from "@/types/tour";
 
 export function TransporteurDetails() {
   const { id } = useParams<{ id: string }>();
@@ -45,7 +46,7 @@ export function TransporteurDetails() {
         .order('departure_date', { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as Tour[];
     }
   });
 
@@ -63,7 +64,11 @@ export function TransporteurDetails() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <TransporteurHeader carrier={carrier} />
+      <TransporteurHeader 
+        name={carrier.company_name}
+        coverageArea={carrier.coverage_area}
+        avatarUrl={carrier.avatar_url}
+      />
       
       <div className="mt-8 grid gap-8">
         <section>
@@ -79,8 +84,13 @@ export function TransporteurDetails() {
           </div>
         </section>
 
-        <TransporteurServices carrier={carrier} />
-        <TransporteurContact carrier={carrier} />
+        <TransporteurServices services={carrier.carrier_services} />
+        <TransporteurContact 
+          email={carrier.email}
+          phone={carrier.phone}
+          phoneSecondary={carrier.phone_secondary}
+          address={carrier.address}
+        />
       </div>
     </div>
   );
