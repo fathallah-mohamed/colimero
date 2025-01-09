@@ -6,7 +6,8 @@ import { TransporteurServices } from "./TransporteurServices";
 import { TransporteurContact } from "./TransporteurContact";
 import { ClientTourCard } from "../send-package/tour/ClientTourCard";
 import { Loader2 } from "lucide-react";
-import { Tour } from "@/types/tour";
+import { Tour, RouteStop } from "@/types/tour";
+import { Json } from "@/integrations/supabase/types";
 
 export function TransporteurDetails() {
   const { id } = useParams<{ id: string }>();
@@ -46,7 +47,36 @@ export function TransporteurDetails() {
         .order('departure_date', { ascending: true });
 
       if (error) throw error;
-      return data as Tour[];
+
+      // Transform the data to match the Tour type
+      return (data || []).map(tour => {
+        const routeData = typeof tour.route === 'string' 
+          ? JSON.parse(tour.route) 
+          : tour.route;
+
+        const parsedRoute: RouteStop[] = Array.isArray(routeData) 
+          ? routeData.map(stop => ({
+              name: stop.name,
+              location: stop.location,
+              time: stop.time,
+              type: stop.type,
+              collection_date: stop.collection_date
+            }))
+          : [];
+
+        return {
+          ...tour,
+          route: parsedRoute,
+          status: tour.status as Tour['status'],
+          type: tour.type as Tour['type'],
+          carriers: tour.carriers ? {
+            ...tour.carriers,
+            carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+              ? tour.carriers.carrier_capacities[0]
+              : tour.carriers.carrier_capacities
+          } : undefined
+        } as Tour;
+      });
     }
   });
 
