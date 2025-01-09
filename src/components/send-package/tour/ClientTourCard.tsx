@@ -14,6 +14,7 @@ import { useBookingFlow } from "@/hooks/useBookingFlow";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -48,16 +49,26 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       return;
     }
 
-    try {
-      await handleBookingClick(tour.id, selectedPoint);
-    } catch (error) {
-      console.error("Erreur lors de la réservation:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la réservation",
-      });
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      // Si l'utilisateur n'est pas connecté, on sauvegarde le chemin et on affiche le dialogue d'authentification
+      const bookingPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`;
+      sessionStorage.setItem('returnPath', bookingPath);
+      setShowAuthDialog(true);
+      return;
     }
+
+    // Si l'utilisateur est connecté, on vérifie son type
+    const userType = session.user.user_metadata?.user_type;
+    
+    if (userType === 'carrier') {
+      setShowAccessDeniedDialog(true);
+      return;
+    }
+
+    // Navigation directe vers la page de réservation si l'utilisateur est connecté
+    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
   };
 
   // Filter only pickup points from the route
