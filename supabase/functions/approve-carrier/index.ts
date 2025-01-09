@@ -14,7 +14,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get request body
     const { requestId } = await req.json();
     console.log("Processing approval for request:", requestId);
 
@@ -42,7 +41,7 @@ serve(async (req) => {
       }
     );
 
-    // 1. Vérifier que la demande existe et récupérer ses données
+    // 1. Fetch the carrier request
     const { data: request, error: requestError } = await supabaseClient
       .from("carrier_registration_requests")
       .select("*")
@@ -71,7 +70,9 @@ serve(async (req) => {
       );
     }
 
-    // 2. Mettre à jour le statut de la demande
+    console.log("Found carrier request:", request);
+
+    // 2. Update request status to approved
     const { error: updateError } = await supabaseClient
       .from('carrier_registration_requests')
       .update({ 
@@ -91,10 +92,10 @@ serve(async (req) => {
       );
     }
 
-    // 3. Attendre que les triggers s'exécutent
+    // 3. Wait for triggers to execute
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 4. Vérifier que le transporteur a bien été créé
+    // 4. Verify carrier was created
     const { data: carrier, error: verifyError } = await supabaseClient
       .from('carriers')
       .select('*')
