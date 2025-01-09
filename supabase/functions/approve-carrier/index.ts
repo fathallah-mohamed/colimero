@@ -72,59 +72,89 @@ serve(async (req) => {
 
     console.log("Found carrier request:", request);
 
-    // 2. Update request status to approved
-    const { error: updateError } = await supabaseClient
-      .from('carrier_registration_requests')
-      .update({ 
-        status: 'approved',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', requestId);
-
-    if (updateError) {
-      console.error("Error updating carrier request:", updateError);
-      return new Response(
-        JSON.stringify({ error: "Failed to update carrier request status", details: updateError.message }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // 2. Create auth user first
+    const password = crypto.randomUUID().substring(0, 12);
+    try {
+      const { data: authUser, error: createUserError } = await supabaseClient.auth.admin.createUser({
+        email: request.email,
+        password: password,
+        email_confirm: true,
+        user_metadata: {
+          user_type: 'carrier',
+          first_name: request.first_name,
+          last_name: request.last_name,
+          company_name: request.company_name
         }
-      );
-    }
+      });
 
-    // 3. Wait for triggers to execute
-    await new Promise(resolve => setTimeout(resolve, 2000));
+      if (createUserError) throw createUserError;
+      console.log("Auth user created:", authUser);
 
-    // 4. Verify carrier was created
-    const { data: carrier, error: verifyError } = await supabaseClient
-      .from('carriers')
-      .select('*')
-      .eq('id', requestId)
-      .single();
+      // 3. Update request status to approved
+      const { error: updateError } = await supabaseClient
+        .from('carrier_registration_requests')
+        .update({ 
+          status: 'approved',
+          password: password,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
 
-    if (verifyError || !carrier) {
-      console.error("Error verifying carrier creation:", verifyError);
-      return new Response(
-        JSON.stringify({ error: "Failed to verify carrier creation", details: verifyError?.message }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log("Carrier approved successfully:", carrier);
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        carrier,
-        message: "Carrier approved and account created successfully"
-      }),
-      { 
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      if (updateError) {
+        console.error("Error updating carrier request:", updateError);
+        return new Response(
+          JSON.stringify({ error: "Failed to update carrier request status", details: updateError.message }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
       }
-    );
+
+      // 4. Wait for triggers to execute
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // 5. Verify carrier was created
+      const { data: carrier, error: verifyError } = await supabaseClient
+        .from('carriers')
+        .select('*')
+        .eq('id', authUser.user.id)
+        .single();
+
+      if (verifyError || !carrier) {
+        console.error("Error verifying carrier creation:", verifyError);
+        return new Response(
+          JSON.stringify({ error: "Failed to verify carrier creation", details: verifyError?.message }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      console.log("Carrier approved successfully:", carrier);
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          carrier,
+          message: "Carrier approved and account created successfully"
+        }),
+        { 
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+
+    } catch (err) {
+      console.error("Error creating auth user:", err);
+      return new Response(
+        JSON.stringify({ error: "Failed to create auth user", details: err.message }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
   } catch (err) {
     console.error("Error in approve-carrier function:", err);
