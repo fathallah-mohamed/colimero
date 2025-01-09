@@ -1,14 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createAuthUser } from "../_shared/auth-service.ts";
+import { createCarrierProfile } from "../_shared/carrier-service.ts";
+import { CarrierRequest } from "../_shared/types.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -28,7 +29,6 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -48,10 +48,10 @@ serve(async (req) => {
       .eq("id", requestId)
       .single();
 
-    if (requestError) {
+    if (requestError || !request) {
       console.error("Error fetching request:", requestError);
       return new Response(
-        JSON.stringify({ error: "Failed to fetch carrier request", details: requestError.message }),
+        JSON.stringify({ error: "Failed to fetch carrier request", details: requestError?.message }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -59,41 +59,16 @@ serve(async (req) => {
       );
     }
 
-    if (!request) {
-      console.error("Request not found");
-      return new Response(
-        JSON.stringify({ error: "Carrier request not found" }),
-        { 
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log("Found carrier request:", request);
-
-    // 2. Create auth user first
-    const password = crypto.randomUUID().substring(0, 12);
     try {
-      const { data: authUser, error: createUserError } = await supabaseClient.auth.admin.createUser({
-        email: request.email,
-        password: password,
-        email_confirm: true,
-        user_metadata: {
-          user_type: 'carrier',
-          first_name: request.first_name,
-          last_name: request.last_name,
-          company_name: request.company_name
-        }
-      });
-
-      if (createUserError) throw createUserError;
+      // 2. Create auth user
+      const password = crypto.randomUUID().substring(0, 12);
+      const authUser = await createAuthUser(supabaseClient, request as CarrierRequest, password);
       console.log("Auth user created:", authUser);
 
       // 3. Wait for auth user to be fully created
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // 4. Update request status to approved and save password
+      // 4. Update request status
       const { error: updateError } = await supabaseClient
         .from('carrier_registration_requests')
         .update({ 
@@ -117,83 +92,8 @@ serve(async (req) => {
       // 5. Wait for triggers to execute
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // 6. Insert carrier record
-      const { error: carrierError } = await supabaseClient
-        .from('carriers')
-        .insert({
-          id: authUser.user.id,
-          email: request.email,
-          first_name: request.first_name,
-          last_name: request.last_name,
-          phone: request.phone,
-          phone_secondary: request.phone_secondary,
-          company_name: request.company_name,
-          siret: request.siret,
-          address: request.address,
-          coverage_area: request.coverage_area,
-          avatar_url: request.avatar_url,
-          email_verified: true,
-          company_details: request.company_details,
-          authorized_routes: request.authorized_routes,
-          total_deliveries: request.total_deliveries || 0,
-          cities_covered: request.cities_covered || 30,
-          status: 'active'
-        });
-
-      if (carrierError) {
-        console.error("Error creating carrier:", carrierError);
-        return new Response(
-          JSON.stringify({ error: "Failed to create carrier", details: carrierError.message }),
-          { 
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-
-      // 7. Insert carrier capacities
-      const { error: capacitiesError } = await supabaseClient
-        .from('carrier_capacities')
-        .insert({
-          carrier_id: authUser.user.id,
-          total_capacity: request.total_capacity || 1000,
-          price_per_kg: request.price_per_kg || 12
-        });
-
-      if (capacitiesError) {
-        console.error("Error creating carrier capacities:", capacitiesError);
-        return new Response(
-          JSON.stringify({ error: "Failed to create carrier capacities", details: capacitiesError.message }),
-          { 
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-
-      // 8. Insert carrier services
-      if (request.services && request.services.length > 0) {
-        const { error: servicesError } = await supabaseClient
-          .from('carrier_services')
-          .insert(
-            request.services.map(service => ({
-              carrier_id: authUser.user.id,
-              service_type: service,
-              icon: 'package'
-            }))
-          );
-
-        if (servicesError) {
-          console.error("Error creating carrier services:", servicesError);
-          return new Response(
-            JSON.stringify({ error: "Failed to create carrier services", details: servicesError.message }),
-            { 
-              status: 400,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-      }
+      // 6. Create carrier profile and related records
+      await createCarrierProfile(supabaseClient, request as CarrierRequest, authUser.user.id);
 
       console.log("Carrier approved successfully");
       return new Response(
