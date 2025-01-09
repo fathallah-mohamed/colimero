@@ -90,6 +90,9 @@ serve(async (req) => {
       if (createUserError) throw createUserError;
       console.log("Auth user created:", authUser);
 
+      // Wait for triggers to complete
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       // 3. Update request status to approved and save password
       const { error: updateError } = await supabaseClient
         .from('carrier_registration_requests')
