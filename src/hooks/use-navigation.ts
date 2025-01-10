@@ -57,6 +57,9 @@ export function useNavigation() {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
+      setUser(null);
+      setUserType(null);
+      
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès",
