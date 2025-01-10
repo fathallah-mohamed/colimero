@@ -56,7 +56,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   };
 
   const isBookingEnabled = () => {
-    return tour.status === "Programmée" && selectedPoint;
+    return tour.status === "Programmée" && Boolean(selectedPoint);
   };
 
   return (
