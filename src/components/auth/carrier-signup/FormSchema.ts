@@ -28,7 +28,10 @@ export const formSchema = z.object({
     (consents) => Object.values(consents).every(value => value === true),
     "Vous devez accepter tous les consentements pour continuer"
   ),
+  type: z.enum(["public", "private"], {
+    required_error: "Le type de tournée est requis",
+  }),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-export type CarrierSignupFormValues = FormValues; // Re-export for backward compatibility
+export type CarrierSignupFormValues = FormValues;

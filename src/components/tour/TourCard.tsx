@@ -45,7 +45,6 @@ export function TourCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCarrier, setIsCarrier] = useState(false);
 
-  // Vérifier si l'utilisateur connecté est le transporteur de cette tournée
   const checkCarrierStatus = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -89,6 +88,9 @@ export function TourCard({
     }
   };
 
+  const showStatusButtons = isCarrier && tour.status !== "Terminée" && tour.status !== "Annulée";
+  const nextStatus = getNextStatus(tour.status);
+
   return (
     <Card className="p-4 space-y-4">
       <div className="flex justify-between items-start">
@@ -117,20 +119,17 @@ export function TourCard({
         </div>
       </div>
 
-      {isCarrier && tour.status !== "Terminée" && tour.status !== "Annulée" && (
+      {showStatusButtons && (
         <div className="flex gap-2 mt-4">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              const nextStatus = getNextStatus(tour.status);
-              if (nextStatus) {
-                handleStatusChange(nextStatus);
-              }
-            }}
-          >
-            Passer à {getNextStatus(tour.status)}
-          </Button>
+          {nextStatus && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleStatusChange(nextStatus)}
+            >
+              Passer à {nextStatus}
+            </Button>
+          )}
           <Button
             variant="destructive"
             onClick={() => handleStatusChange("Annulée")}

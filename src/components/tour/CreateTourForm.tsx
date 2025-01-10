@@ -15,6 +15,7 @@ import { RouteSection } from "./form/sections/RouteSection";
 import { CapacitySection } from "./form/sections/CapacitySection";
 import { TermsSection } from "./form/sections/TermsSection";
 import { CollectionPointsSection } from "./form/sections/CollectionPointsSection";
+import { TourTypeSection } from "./form/sections/TourTypeSection";
 import type { TourFormValues } from "./form/types";
 import * as z from "zod";
 
@@ -126,6 +127,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
             <form onSubmit={form.handleSubmit(() => setShowConfirmDialog(true))} className="space-y-6">
               <TourFormHeader />
               <RouteSection form={form} />
+              <TourTypeSection form={form} />
               <CapacitySection form={form} />
               <CollectionPointsSection form={form} />
               <TermsSection form={form} />
