@@ -6,12 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Eye } from "lucide-react";
+import { MapPin, Calendar, Eye, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TourStatusTimeline } from "./TourStatusTimeline";
 import { CollapsibleTrigger, CollapsibleContent, Collapsible } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BookingListItem } from "./booking/BookingListItem";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TourCardProps {
   tour: Tour;
@@ -41,54 +42,50 @@ export function TourCard({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isCarrier, setIsCarrier] = useState(false);
+
+  // Vérifier si l'utilisateur connecté est le transporteur de cette tournée
+  const checkCarrierStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      setIsCarrier(session.user.id === tour.carrier_id);
+    }
+  };
+
+  React.useEffect(() => {
+    checkCarrierStatus();
+  }, [tour.carrier_id]);
+
+  const getNextStatus = (currentStatus: TourStatus): TourStatus | null => {
+    const statusOrder: TourStatus[] = [
+      "Programmée",
+      "Ramassage en cours",
+      "En transit",
+      "Livraison en cours",
+      "Terminée"
+    ];
+    
+    const currentIndex = statusOrder.indexOf(currentStatus);
+    if (currentIndex < statusOrder.length - 1) {
+      return statusOrder[currentIndex + 1];
+    }
+    return null;
+  };
 
   const handleStatusChange = async (newStatus: TourStatus) => {
     try {
       onStatusChange(tour.id, newStatus);
       toast({
         title: "Statut mis à jour",
-        description: "Le statut de la tournée a été mis à jour avec succès.",
+        description: `La tournée est maintenant ${newStatus}`,
       });
     } catch (error) {
-      console.error('Error updating tour status:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la tournée",
+        description: "Impossible de mettre à jour le statut",
       });
     }
-  };
-
-  const handleDelete = async () => {
-    try {
-      onDelete(tour.id);
-      toast({
-        title: "Tournée supprimée",
-        description: "La tournée a été supprimée avec succès.",
-      });
-    } catch (error) {
-      console.error('Error deleting tour:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de supprimer la tournée",
-      });
-    }
-  };
-
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return '';
-    try {
-      const date = parseISO(dateString);
-      return format(date, "d MMMM yyyy", { locale: fr });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return '';
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    return type === 'public' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
   };
 
   return (
@@ -99,13 +96,13 @@ export function TourCard({
             <h3 className="text-lg font-medium">
               {tour.departure_country} → {tour.destination_country}
             </h3>
-            <Badge className={getTypeColor(tour.type)}>
+            <Badge className={tour.type === 'public' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}>
               {tour.type === 'public' ? 'Public' : 'Privé'}
             </Badge>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Calendar className="h-4 w-4" />
-            <span>Départ : {formatDate(tour.departure_date)}</span>
+            <span>Départ : {format(parseISO(tour.departure_date), "d MMMM yyyy", { locale: fr })}</span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -118,6 +115,29 @@ export function TourCard({
           </Button>
         </div>
       </div>
+
+      {isCarrier && tour.status !== "Terminée" && tour.status !== "Annulée" && (
+        <div className="flex gap-2 mt-4">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              const nextStatus = getNextStatus(tour.status);
+              if (nextStatus) {
+                handleStatusChange(nextStatus);
+              }
+            }}
+          >
+            Passer à {getNextStatus(tour.status)}
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => handleStatusChange("Annulée")}
+          >
+            Annuler la tournée
+          </Button>
+        </div>
+      )}
 
       <Button
         variant="outline"

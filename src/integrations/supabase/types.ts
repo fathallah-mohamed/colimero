@@ -736,8 +736,7 @@ export type Database = {
           is_final: boolean
           name: string
           parent_status_id: number | null
-          status_type: string | null
-          type: Database["public"]["Enums"]["status_type"]
+          status_type: Database["public"]["Enums"]["status_type"]
           updated_at: string
         }
         Insert: {
@@ -747,8 +746,7 @@ export type Database = {
           is_final?: boolean
           name: string
           parent_status_id?: number | null
-          status_type?: string | null
-          type: Database["public"]["Enums"]["status_type"]
+          status_type?: Database["public"]["Enums"]["status_type"]
           updated_at?: string
         }
         Update: {
@@ -758,8 +756,7 @@ export type Database = {
           is_final?: boolean
           name?: string
           parent_status_id?: number | null
-          status_type?: string | null
-          type?: Database["public"]["Enums"]["status_type"]
+          status_type?: Database["public"]["Enums"]["status_type"]
           updated_at?: string
         }
         Relationships: [
