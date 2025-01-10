@@ -11,6 +11,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { AuthSection } from "@/components/navigation/AuthSection";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +25,23 @@ export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    // Check and refresh session on component mount
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Session check error:", error);
+      }
+      if (!session) {
+        // If no session, try to refresh it
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.error("Session refresh error:", refreshError);
+        }
+      }
+    };
+
+    checkSession();
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
@@ -94,7 +112,7 @@ export default function Navigation() {
               ref={mobileButtonRef}
               isOpen={isOpen}
               onClick={() => setIsOpen(!isOpen)}
-              className="block lg:hidden" // Changed to always show on mobile/tablet
+              className="block lg:hidden"
             />
           </div>
         </div>
@@ -104,7 +122,7 @@ export default function Navigation() {
       <div 
         ref={mobileMenuRef}
         className={cn(
-          "block lg:hidden transition-all duration-300 ease-in-out", // Changed to always show on mobile/tablet
+          "block lg:hidden transition-all duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
       >
