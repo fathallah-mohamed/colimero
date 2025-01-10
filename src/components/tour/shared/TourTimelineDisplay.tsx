@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { motion } from "framer-motion";
+import { TimelineMobileView } from "../timeline/TimelineMobileView";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
@@ -65,7 +66,11 @@ export function TourTimelineDisplay({
       transition={{ duration: 0.5 }}
       className="space-y-6"
     >
-      <div className="relative flex justify-between items-center w-full mt-8 px-4">
+      {/* Vue mobile */}
+      <TimelineMobileView status={status} variant={variant} />
+
+      {/* Vue desktop */}
+      <div className="relative hidden lg:flex justify-between items-center w-full mt-8 px-4">
         <TimelineProgress progress={progress} variant={variant} />
         
         {statusOrder.map((statusItem, index) => {

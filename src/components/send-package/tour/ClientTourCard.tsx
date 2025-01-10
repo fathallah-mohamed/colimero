@@ -20,7 +20,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const navigate = useNavigate();
 
   const handleBookingButtonClick = async () => {
@@ -45,11 +44,19 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     const userType = session.user.user_metadata?.user_type;
     
     if (userType === 'carrier') {
-      setShowAccessDeniedDialog(true);
+      toast({
+        variant: "destructive",
+        title: "Accès refusé",
+        description: "Les transporteurs ne peuvent pas effectuer de réservations",
+      });
       return;
     }
 
     navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+  };
+
+  const isBookingEnabled = () => {
+    return tour.status === "Programmée" && selectedPoint;
   };
 
   return (
@@ -78,6 +85,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               selectedPoint={selectedPoint}
               onPointSelect={setSelectedPoint}
               onBookingClick={handleBookingButtonClick}
+              isBookingEnabled={isBookingEnabled()}
             />
           )}
         </div>
