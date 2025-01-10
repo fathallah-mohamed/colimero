@@ -12,6 +12,7 @@ import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -36,56 +37,47 @@ export function TourTimelineCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const getNextStatus = (currentStatus: TourStatus): TourStatus | null => {
+    const statusOrder: TourStatus[] = [
+      "Programmée",
+      "Ramassage en cours",
+      "En transit",
+      "Livraison en cours",
+      "Terminée"
+    ];
+    
+    const currentIndex = statusOrder.indexOf(currentStatus);
+    if (currentIndex < statusOrder.length - 1) {
+      return statusOrder[currentIndex + 1];
+    }
+    return null;
+  };
 
   const handleStatusChange = async (newStatus: TourStatus) => {
     try {
-      if (onStatusChange) {
-        await onStatusChange(tour.id, newStatus);
-        toast({
-          title: "Statut mis à jour",
-          description: `La tournée est maintenant ${newStatus}`,
-        });
-      }
+      const { error } = await supabase
+        .from('tours')
+        .update({ status: newStatus })
+        .eq('id', tour.id);
+
+      if (error) throw error;
+
+      // Invalider le cache pour forcer le rechargement des données
+      await queryClient.invalidateQueries({ queryKey: ['tours'] });
+
+      toast({
+        title: "Statut mis à jour",
+        description: `La tournée est maintenant ${newStatus}`,
+      });
     } catch (error) {
+      console.error('Error updating tour status:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Impossible de mettre à jour le statut",
       });
-    }
-  };
-
-  const getStatusActions = () => {
-    switch (tour.status) {
-      case "Programmée":
-        return (
-          <Button 
-            onClick={() => handleStatusChange("Ramassage en cours")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Passer à Ramassage en cours
-          </Button>
-        );
-      case "Ramassage en cours":
-        return (
-          <Button 
-            onClick={() => handleStatusChange("En transit")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Passer à En transit
-          </Button>
-        );
-      case "En transit":
-        return (
-          <Button 
-            onClick={() => handleStatusChange("Terminée")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Terminer la tournée
-          </Button>
-        );
-      default:
-        return null;
     }
   };
 
@@ -112,7 +104,8 @@ export function TourTimelineCard({
     }
   };
 
-  const canShowActions = userType === 'carrier' && tour.status !== "Terminée" && tour.status !== "Annulée";
+  const showStatusButtons = userType === 'carrier' && tour.status !== "Terminée" && tour.status !== "Annulée";
+  const nextStatus = getNextStatus(tour.status);
 
   return (
     <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
@@ -151,17 +144,23 @@ export function TourTimelineCard({
                   tourId={tour.id}
                 />
 
-                {canShowActions && (
-                  <div className="flex justify-between items-center gap-4">
-                    {getStatusActions()}
-                    {tour.status !== "Terminée" && (
+                {showStatusButtons && (
+                  <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+                    {nextStatus && (
                       <Button
-                        variant="destructive"
-                        onClick={() => handleStatusChange("Annulée")}
+                        onClick={() => handleStatusChange(nextStatus)}
+                        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
                       >
-                        Annuler la tournée
+                        Passer à {nextStatus}
                       </Button>
                     )}
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleStatusChange("Annulée")}
+                      className="w-full sm:w-auto"
+                    >
+                      Annuler la tournée
+                    </Button>
                   </div>
                 )}
 
