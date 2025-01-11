@@ -3,12 +3,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Globe, Lock } from "lucide-react";
+import type { TourStatus } from "@/types/tour";
 
 interface SendPackageFiltersProps {
   selectedRoute: string;
   setSelectedRoute: (value: string) => void;
-  selectedStatus: string;
-  setSelectedStatus: (value: string) => void;
+  selectedStatus: TourStatus | "all";
+  setSelectedStatus: (value: TourStatus | "all") => void;
   tourType: "public" | "private";
   setTourType: (value: "public" | "private") => void;
   sortBy: string;
@@ -87,6 +88,7 @@ export function SendPackageFilters({
               <SelectItem value="En transit">En transit</SelectItem>
               <SelectItem value="Livraison en cours">Livraison en cours</SelectItem>
               <SelectItem value="Terminée">Terminée</SelectItem>
+              <SelectItem value="Annulée">Annulée</SelectItem>
             </SelectContent>
           </Select>
         </div>
