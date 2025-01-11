@@ -32,8 +32,11 @@ export default function EnvoyerColis() {
     handleAuthSuccess
   } = useBookingFlow();
 
+  // Filtrer les tournées selon le type (public/privé)
+  const filteredTours = tours?.filter(tour => tour.type === tourType);
+
   // Tri des tournées
-  const sortedTours = [...(tours || [])].sort((a, b) => {
+  const sortedTours = [...(filteredTours || [])].sort((a, b) => {
     switch (sortBy) {
       case "departure_asc":
         return new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime();
