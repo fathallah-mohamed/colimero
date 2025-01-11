@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { AuthSection } from "@/components/navigation/AuthSection";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,20 +24,39 @@ export default function Navigation() {
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Check and refresh session on component mount
     const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Session check error:", error);
-      }
-      if (!session) {
-        // If no session, try to refresh it
-        const { error: refreshError } = await supabase.auth.refreshSession();
-        if (refreshError) {
-          console.error("Session refresh error:", refreshError);
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session check error:", sessionError);
+          return;
         }
+
+        if (!session) {
+          const { error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError) {
+            // Only log refresh token errors, don't show them to users
+            console.error("Session refresh error:", refreshError);
+            
+            // If it's specifically a refresh token error, handle silently
+            if (refreshError.message.includes("refresh_token_not_found")) {
+              return;
+            }
+            
+            // For other errors, show a toast
+            toast({
+              variant: "destructive",
+              title: "Erreur de session",
+              description: "Une erreur est survenue lors de la vérification de votre session.",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
       }
     };
 
@@ -47,7 +67,7 @@ export default function Navigation() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
