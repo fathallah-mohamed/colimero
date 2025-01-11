@@ -29,14 +29,23 @@ export function TourExpandedContent({
       if (tour.type === 'private') {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          const { data: approvalRequest } = await supabase
-            .from('approval_requests')
-            .select('status')
-            .eq('tour_id', tour.id)
-            .eq('user_id', session.user.id)
-            .single();
+          try {
+            const { data: approvalRequest, error } = await supabase
+              .from('approval_requests')
+              .select('status')
+              .eq('tour_id', tour.id)
+              .eq('user_id', session.user.id)
+              .maybeSingle();
 
-          setApprovalStatus(approvalRequest?.status || null);
+            if (error) {
+              console.error('Error checking approval status:', error);
+              return;
+            }
+
+            setApprovalStatus(approvalRequest?.status || null);
+          } catch (error) {
+            console.error('Error checking approval status:', error);
+          }
         }
       }
       setIsLoading(false);
