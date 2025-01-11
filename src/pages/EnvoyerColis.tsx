@@ -15,7 +15,7 @@ export default function EnvoyerColis() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
-  const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("Programmée");
+  const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("all");
   const [tourType, setTourType] = useState<"public" | "private">("public");
   const [sortBy, setSortBy] = useState<string>("departure_asc");
   
@@ -33,8 +33,12 @@ export default function EnvoyerColis() {
     handleAuthSuccess
   } = useBookingFlow();
 
-  // Filtrer les tournées selon le type (public/privé)
-  const filteredTours = tours?.filter(tour => tour.type === tourType);
+  // Filtrer les tournées selon le type (public/privé) et le statut
+  const filteredTours = tours?.filter(tour => {
+    const typeMatch = tour.type === tourType;
+    const statusMatch = selectedStatus === "all" || tour.status === selectedStatus;
+    return typeMatch && statusMatch;
+  });
 
   // Tri des tournées
   const sortedTours = [...(filteredTours || [])].sort((a, b) => {

@@ -5,6 +5,8 @@ import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDispl
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 interface TourExpandedContentProps {
   tour: Tour;
@@ -23,6 +25,8 @@ export function TourExpandedContent({
 }: TourExpandedContentProps) {
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkApprovalStatus = async () => {
@@ -54,37 +58,91 @@ export function TourExpandedContent({
     checkApprovalStatus();
   }, [tour.id, tour.type]);
 
+  const handlePrivateTourAction = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    if (!selectedPoint) {
+      toast({
+        variant: "destructive",
+        title: "Point de ramassage requis",
+        description: "Veuillez sélectionner un point de ramassage",
+      });
+      return;
+    }
+
+    // Si pas de demande existante, créer une nouvelle demande
+    if (!approvalStatus) {
+      try {
+        const { error } = await supabase
+          .from('approval_requests')
+          .insert({
+            user_id: session.user.id,
+            tour_id: tour.id,
+            status: 'pending'
+          });
+
+        if (error) throw error;
+
+        setApprovalStatus('pending');
+        toast({
+          title: "Demande envoyée",
+          description: "Votre demande d'approbation a été envoyée au transporteur. Vous serez notifié par email de sa décision.",
+        });
+      } catch (error) {
+        console.error('Error creating approval request:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de l'envoi de la demande",
+        });
+      }
+      return;
+    }
+
+    // Si approuvé, permettre la réservation
+    if (approvalStatus === 'approved') {
+      onBookingClick();
+    }
+  };
+
   const pickupPoints = tour.route?.filter(stop => 
     stop.type === 'pickup' || stop.type === 'ramassage'
   ) || [];
 
-  const getBookingButtonText = () => {
-    if (tour.status === "Annulée") return "Cette tournée a été annulée";
-    if (tour.status !== "Programmée") return "Cette tournée n'est plus disponible pour les réservations";
-    
+  const getButtonText = () => {
+    if (tour.status !== "Programmée") {
+      return "Cette tournée n'est plus disponible pour les réservations";
+    }
+
     if (tour.type === "private") {
-      if (approvalStatus === "pending") return "Demande d'approbation en cours";
-      if (approvalStatus === "rejected") return "Demande d'approbation refusée";
-      if (approvalStatus === "approved") {
+      if (!approvalStatus) {
         return !selectedPoint 
-          ? "Sélectionnez un point de ramassage pour réserver" 
-          : "Réserver maintenant";
+          ? "Sélectionnez un point de ramassage pour demander une approbation" 
+          : "Demander une approbation";
       }
-      return !selectedPoint 
-        ? "Sélectionnez un point de ramassage pour demander une approbation" 
-        : "Demander une approbation";
+      
+      switch (approvalStatus) {
+        case "pending":
+          return "Demande d'approbation en cours";
+        case "rejected":
+          return "Demande d'approbation refusée";
+        case "approved":
+          return !selectedPoint 
+            ? "Sélectionnez un point de ramassage pour réserver" 
+            : "Réserver maintenant";
+        default:
+          return "Demander une approbation";
+      }
     }
 
     return !selectedPoint 
       ? "Sélectionnez un point de ramassage pour réserver" 
       : "Réserver maintenant";
-  };
-
-  const isActionDisabled = () => {
-    if (tour.status !== "Programmée") return true;
-    if (tour.type === "private" && approvalStatus === "pending") return true;
-    if (!selectedPoint) return true;
-    return false;
   };
 
   const getButtonStyle = () => {
@@ -95,6 +153,15 @@ export function TourExpandedContent({
       return "bg-purple-600 hover:bg-purple-700";
     }
     return "bg-blue-600 hover:bg-blue-700";
+  };
+
+  const isActionDisabled = () => {
+    if (tour.status !== "Programmée") return true;
+    if (tour.type === "private") {
+      if (approvalStatus === "pending" || approvalStatus === "rejected") return true;
+      if (approvalStatus === "approved" && !selectedPoint) return true;
+    }
+    return !selectedPoint;
   };
 
   return (
@@ -119,11 +186,21 @@ export function TourExpandedContent({
 
       <Button 
         className={`w-full transition-colors ${getButtonStyle()} text-white`}
-        onClick={onBookingClick}
+        onClick={tour.type === "private" ? handlePrivateTourAction : onBookingClick}
         disabled={isActionDisabled()}
       >
-        {getBookingButtonText()}
+        {getButtonText()}
       </Button>
+
+      <AuthDialog 
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          handlePrivateTourAction();
+        }}
+        requiredUserType="client"
+      />
     </div>
   );
 }
