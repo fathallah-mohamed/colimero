@@ -26,8 +26,12 @@ export function TourExpandedContent({
   const getBookingButtonText = () => {
     if (tour.status === "Annulée") return "Cette tournée a été annulée";
     if (tour.status !== "Programmée") return "Cette tournée n'est plus disponible pour les réservations";
-    if (!selectedPoint) return "Sélectionnez un point de ramassage pour réserver";
-    return "Réserver maintenant";
+    if (!selectedPoint) {
+      return tour.type === "private" 
+        ? "Sélectionnez un point de ramassage pour demander une approbation"
+        : "Sélectionnez un point de ramassage pour réserver";
+    }
+    return tour.type === "private" ? "Demander une approbation" : "Réserver maintenant";
   };
 
   return (
@@ -51,7 +55,11 @@ export function TourExpandedContent({
       />
 
       <Button 
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+        className={`w-full transition-colors ${
+          tour.type === "private" 
+            ? "bg-purple-600 hover:bg-purple-700" 
+            : "bg-blue-600 hover:bg-blue-700"
+        } text-white`}
         onClick={onBookingClick}
         disabled={!isBookingEnabled}
       >
