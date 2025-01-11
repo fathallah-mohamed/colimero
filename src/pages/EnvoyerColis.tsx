@@ -9,12 +9,13 @@ import Navigation from "@/components/Navigation";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { Package2, ShieldCheck, Clock4, Loader2 } from "lucide-react";
+import type { TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
-  const [selectedStatus, setSelectedStatus] = useState<string>("Programmée");
+  const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("Programmée");
   const [tourType, setTourType] = useState<"public" | "private">("public");
   const [sortBy, setSortBy] = useState<string>("departure_asc");
   
