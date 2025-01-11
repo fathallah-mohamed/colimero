@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
@@ -35,77 +35,95 @@ export function TourTimelineCard({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const getNextStatus = (currentStatus: TourStatus): TourStatus | null => {
-    const statusOrder: TourStatus[] = [
-      "Programmée",
-      "Ramassage en cours",
-      "En transit",
-      "Livraison en cours",
-      "Terminée"
-    ];
-    
-    const currentIndex = statusOrder.indexOf(currentStatus);
-    if (currentIndex < statusOrder.length - 1) {
-      return statusOrder[currentIndex + 1];
-    }
-    return null;
-  };
+  useEffect(() => {
+    checkExistingRequest();
+  }, [tour.id]);
 
-  const handleStatusChange = async (newStatus: TourStatus) => {
-    try {
-      const { error } = await supabase
-        .from('tours')
-        .update({ status: newStatus })
-        .eq('id', tour.id);
+  const checkExistingRequest = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-      if (error) throw error;
+    const { data: request, error } = await supabase
+      .from('approval_requests')
+      .select('*')
+      .eq('tour_id', tour.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-      // Invalider le cache pour forcer le rechargement des données
-      await queryClient.invalidateQueries({ queryKey: ['tours'] });
-
-      toast({
-        title: "Statut mis à jour",
-        description: `La tournée est maintenant ${newStatus}`,
-      });
-    } catch (error) {
-      console.error('Error updating tour status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut",
-      });
-    }
-  };
-
-  const handleBookingClick = async () => {
-    if (!selectedPickupCity) return;
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      setShowAuthDialog(true);
+    if (error) {
+      console.error('Error checking existing request:', error);
       return;
     }
 
-    const userType = session.user.user_metadata?.user_type;
-    if (userType !== 'client') {
+    setExistingRequest(request);
+  };
+
+  const handleActionClick = async () => {
+    if (!selectedPickupCity) {
+      toast({
+        variant: "destructive",
+        title: "Point de collecte requis",
+        description: "Veuillez sélectionner un point de collecte",
+      });
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
       setShowAuthDialog(true);
       return;
     }
 
     if (tour.type === 'private') {
+      if (existingRequest) {
+        toast({
+          title: "Demande existante",
+          description: `Votre demande est ${existingRequest.status === 'pending' ? 'en attente' : existingRequest.status}`,
+        });
+        return;
+      }
       setShowApprovalDialog(true);
     } else {
       navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
   };
 
-  const showStatusButtons = userType === 'carrier' && tour.status !== "Terminée" && tour.status !== "Annulée";
-  const nextStatus = getNextStatus(tour.status);
+  const getActionButtonText = () => {
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            return "Demande en attente d'approbation";
+          case 'approved':
+            return "Demande approuvée - Réserver";
+          case 'rejected':
+            return "Demande rejetée";
+          default:
+            return "Demander l'approbation";
+        }
+      }
+      return "Demander l'approbation";
+    }
+    return "Réserver maintenant";
+  };
+
+  const isActionEnabled = () => {
+    if (!selectedPickupCity) return false;
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        return existingRequest.status === 'approved';
+      }
+      return true;
+    }
+    return true;
+  };
 
   return (
     <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
@@ -144,33 +162,13 @@ export function TourTimelineCard({
                   tourId={tour.id}
                 />
 
-                {showStatusButtons && (
-                  <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
-                    {nextStatus && (
-                      <Button
-                        onClick={() => handleStatusChange(nextStatus)}
-                        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        Passer à {nextStatus}
-                      </Button>
-                    )}
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleStatusChange("Annulée")}
-                      className="w-full sm:w-auto"
-                    >
-                      Annuler la tournée
-                    </Button>
-                  </div>
-                )}
-
                 <div>
                   <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
                   <SelectableCollectionPointsList
                     points={tour.route}
                     selectedPoint={selectedPickupCity || ''}
                     onPointSelect={setSelectedPickupCity}
-                    isSelectionEnabled={tour.status === "Programmée" && userType !== 'carrier'}
+                    isSelectionEnabled={tour.status === "Programmée"}
                     tourDepartureDate={tour.departure_date}
                   />
                 </div>
@@ -178,16 +176,11 @@ export function TourTimelineCard({
                 {userType === 'client' && tour.status === "Programmée" && (
                   <div>
                     <Button 
-                      onClick={handleBookingClick}
+                      onClick={handleActionClick}
                       className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-                      disabled={!selectedPickupCity}
+                      disabled={!isActionEnabled()}
                     >
-                      {!selectedPickupCity 
-                        ? "Sélectionnez un point de collecte pour réserver" 
-                        : tour.type === 'private' 
-                          ? "Demander l'approbation" 
-                          : "Réserver sur cette tournée"
-                      }
+                      {getActionButtonText()}
                     </Button>
                   </div>
                 )}
@@ -202,13 +195,7 @@ export function TourTimelineCard({
         onClose={() => setShowAuthDialog(false)}
         onSuccess={() => {
           setShowAuthDialog(false);
-          if (selectedPickupCity) {
-            if (tour.type === 'private') {
-              setShowApprovalDialog(true);
-            } else {
-              navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-            }
-          }
+          checkExistingRequest();
         }}
         requiredUserType="client"
       />
