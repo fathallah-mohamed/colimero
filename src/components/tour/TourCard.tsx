@@ -88,6 +88,7 @@ export function TourCard({
     }
   };
 
+  // Afficher les boutons d'action si l'utilisateur est le transporteur et que la tournée n'est pas terminée ou annulée
   const showStatusButtons = isCarrier && tour.status !== "Terminée" && tour.status !== "Annulée";
   const nextStatus = getNextStatus(tour.status);
 
@@ -109,13 +110,15 @@ export function TourCard({
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(tour)}
-          >
-            <MapPin className="h-4 w-4" />
-          </Button>
+          {isCarrier && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(tour)}
+            >
+              <MapPin className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
