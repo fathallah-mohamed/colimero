@@ -1,4 +1,10 @@
-export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'collected' | 'in_transit' | 'delivered' | 'cancelled';
+export type BookingStatus = 
+  | 'pending'
+  | 'confirmed' 
+  | 'collected'
+  | 'ready_to_deliver'
+  | 'delivered'
+  | 'cancelled';
 
 export type BookingFilterStatus = BookingStatus | 'all';
 
