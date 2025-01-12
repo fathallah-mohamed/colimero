@@ -4,6 +4,8 @@ import { BookingStatusBadge } from "../BookingStatusBadge";
 import { BookingStatusActions } from "../actions/BookingStatusActions";
 import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { BookingCardDetails } from "./BookingCardDetails";
 
 interface BookingCardContentProps {
@@ -20,13 +22,19 @@ export function BookingCardContent({
   isCollecting, 
   onStatusChange,
   onUpdate,
-  tourStatus = "Programmée",
+  tourStatus,
   isCarrier = false
 }: BookingCardContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const { toast } = useToast();
 
   const handleEdit = () => {
     setShowEditDialog(true);
+  };
+
+  const handleEditSuccess = async () => {
+    await onUpdate();
+    setShowEditDialog(false);
   };
 
   return (
@@ -42,7 +50,7 @@ export function BookingCardContent({
         <BookingStatusActions
           bookingId={booking.id}
           bookingStatus={booking.status}
-          tourStatus={tourStatus}
+          tourStatus={tourStatus || ""}
           isCarrier={isCarrier}
           onStatusChange={onUpdate}
           onEdit={handleEdit}
@@ -53,7 +61,7 @@ export function BookingCardContent({
         booking={booking}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-        onSuccess={onUpdate}
+        onSuccess={handleEditSuccess}
       />
     </>
   );
