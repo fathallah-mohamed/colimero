@@ -20,12 +20,6 @@ export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
         return "bg-green-100 text-green-800 hover:bg-green-100";
       case "cancelled":
         return "bg-red-100 text-red-800 hover:bg-red-100";
-      case "in_transit":
-        return "bg-indigo-100 text-indigo-800 hover:bg-indigo-100";
-      case "accepted":
-        return "bg-emerald-100 text-emerald-800 hover:bg-emerald-100";
-      case "rejected":
-        return "bg-rose-100 text-rose-800 hover:bg-rose-100";
       default:
         return "bg-gray-100 text-gray-800 hover:bg-gray-100";
     }
@@ -45,12 +39,6 @@ export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
         return "Livrée";
       case "cancelled":
         return "Annulée";
-      case "in_transit":
-        return "En transit";
-      case "accepted":
-        return "Acceptée";
-      case "rejected":
-        return "Refusée";
       default:
         return status;
     }
