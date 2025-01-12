@@ -103,7 +103,7 @@ export function BookingStatusActions({
               {renderActionButton(<Edit2 className="h-4 w-4" />, "Modifier", onEdit)}
               {renderActionButton(<X className="h-4 w-4" />, "Annuler", 
                 () => handleStatusChange("cancelled"))}
-              {renderActionButton(<Package className="h-4 w-4" />, "Marquer comme Collecté", 
+              {renderActionButton(<Package className="h-4 w-4" />, "Marquer comme Ramassée", 
                 () => handleStatusChange("collected"), 
                 tourStatus !== "Ramassage en cours")}
             </>
@@ -112,13 +112,13 @@ export function BookingStatusActions({
           return (
             <>
               {renderActionButton(<Edit2 className="h-4 w-4" />, "Modifier", onEdit)}
-              {renderActionButton(<Truck className="h-4 w-4" />, "Marquer comme Prêt à Livrer", 
+              {renderActionButton(<Truck className="h-4 w-4" />, "Marquer comme Prête à Livrer", 
                 () => handleStatusChange("ready_to_deliver"), 
                 tourStatus !== "En transit")}
             </>
           );
         case "ready_to_deliver":
-          return renderActionButton(<MapPin className="h-4 w-4" />, "Marquer comme Livré", 
+          return renderActionButton(<MapPin className="h-4 w-4" />, "Marquer comme Livrée", 
             () => handleStatusChange("delivered"), 
             tourStatus !== "Livraison en cours");
         default:
