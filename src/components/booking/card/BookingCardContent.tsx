@@ -22,7 +22,7 @@ export function BookingCardContent({
   isCollecting, 
   onStatusChange,
   onUpdate,
-  tourStatus,
+  tourStatus = "Programmée",
   isCarrier = false
 }: BookingCardContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -50,7 +50,7 @@ export function BookingCardContent({
         <BookingStatusActions
           bookingId={booking.id}
           bookingStatus={booking.status}
-          tourStatus={tourStatus || ""}
+          tourStatus={tourStatus}
           isCarrier={isCarrier}
           onStatusChange={onUpdate}
           onEdit={handleEdit}

@@ -16,6 +16,7 @@ export function BookingList() {
             collection_date,
             departure_date,
             destination_country,
+            status,
             carriers (
               company_name,
               avatar_url,
@@ -88,6 +89,7 @@ export function BookingList() {
           onStatusChange={handleStatusChange}
           onUpdate={handleUpdate}
           isEven={index % 2 === 0}
+          tourStatus={booking.tours?.status}
         />
       ))}
     </div>
