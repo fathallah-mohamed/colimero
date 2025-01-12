@@ -4,8 +4,6 @@ import { BookingStatusBadge } from "../BookingStatusBadge";
 import { BookingStatusActions } from "../actions/BookingStatusActions";
 import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { BookingCardDetails } from "./BookingCardDetails";
 
 interface BookingCardContentProps {
@@ -26,15 +24,9 @@ export function BookingCardContent({
   isCarrier = false
 }: BookingCardContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const { toast } = useToast();
 
   const handleEdit = () => {
     setShowEditDialog(true);
-  };
-
-  const handleEditSuccess = async () => {
-    await onUpdate();
-    setShowEditDialog(false);
   };
 
   return (
@@ -61,7 +53,7 @@ export function BookingCardContent({
         booking={booking}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
-        onSuccess={handleEditSuccess}
+        onSuccess={onUpdate}
       />
     </>
   );
