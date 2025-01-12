@@ -10,6 +10,16 @@ export const getStatusBadgeVariant = (status: BookingStatus) => {
       return "secondary";
     case "pending":
       return "warning";
+    case "confirmed":
+      return "info";
+    case "ready_to_deliver":
+      return "purple";
+    case "delivered":
+      return "success";
+    case "accepted":
+      return "success";
+    case "rejected":
+      return "destructive";
     default:
       return "secondary";
   }
@@ -25,12 +35,16 @@ export const getStatusLabel = (status: BookingStatus) => {
       return "En transit";
     case "pending":
       return "En attente";
+    case "confirmed":
+      return "Confirmé";
+    case "ready_to_deliver":
+      return "Prêt à livrer";
+    case "delivered":
+      return "Livré";
     case "accepted":
       return "Accepté";
     case "rejected":
       return "Refusé";
-    case "delivered":
-      return "Livré";
     default:
       return status;
   }

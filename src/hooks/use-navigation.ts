@@ -11,15 +11,23 @@ export function useNavigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initial session check
     const initSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        
+        if (error) {
+          console.error("Session error:", error);
+          throw error;
+        }
         
         if (!session) {
           const { error: refreshError } = await supabase.auth.refreshSession();
-          if (refreshError) throw refreshError;
+          if (refreshError) {
+            console.error("Session refresh error:", refreshError);
+            // If refresh fails, redirect to login
+            navigate('/connexion');
+            return;
+          }
         } else {
           setUser(session.user);
           setUserType(session.user?.user_metadata?.user_type ?? null);
@@ -28,22 +36,22 @@ export function useNavigation() {
         console.error("Session initialization error:", error);
         setUser(null);
         setUserType(null);
+        navigate('/connexion');
       }
     };
 
     initSession();
 
-    // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setUser(session?.user ?? null);
         setUserType(session?.user?.user_metadata?.user_type ?? null);
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
         setUser(null);
         setUserType(null);
-        navigate('/');
+        navigate('/connexion');
       }
     });
 
@@ -65,7 +73,7 @@ export function useNavigation() {
         description: "Vous avez été déconnecté avec succès",
       });
       
-      navigate('/');
+      navigate('/connexion');
     } catch (error) {
       console.error("Logout error:", error);
       toast({
