@@ -48,7 +48,8 @@ export function useNavigation() {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setUser(session?.user ?? null);
         setUserType(session?.user?.user_metadata?.user_type ?? null);
-      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      } else if (event === 'SIGNED_OUT') {
+        // Removed USER_DELETED comparison since it's not a valid event type
         setUser(null);
         setUserType(null);
         navigate('/connexion');
