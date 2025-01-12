@@ -2,8 +2,6 @@ import type { BookingStatus } from "@/types/booking";
 import { BookingCardWrapper } from "./card/BookingCardWrapper";
 import { BookingCardContent } from "./card/BookingCardContent";
 import { BookingCardDetails } from "./card/BookingCardDetails";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface BookingCardProps {
   booking: any;
@@ -22,20 +20,6 @@ export function BookingCard({
   isEven = false,
   tourStatus
 }: BookingCardProps) {
-  const [isCarrier, setIsCarrier] = useState(false);
-
-  useEffect(() => {
-    const checkCarrierStatus = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session && booking.tours?.carriers) {
-        // Vérifie si l'utilisateur connecté est le transporteur de cette tournée
-        setIsCarrier(session.user.id === booking.tours.carrier_id);
-      }
-    };
-
-    checkCarrierStatus();
-  }, [booking]);
-
   return (
     <BookingCardWrapper isEven={isEven}>
       <BookingCardContent
@@ -44,8 +28,8 @@ export function BookingCard({
         onStatusChange={onStatusChange}
         onUpdate={onUpdate}
         tourStatus={tourStatus}
-        isCarrier={isCarrier}
       />
+      <BookingCardDetails booking={booking} />
     </BookingCardWrapper>
   );
 }

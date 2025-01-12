@@ -23,7 +23,7 @@ export function BookingCardContent({
   onStatusChange,
   onUpdate,
   tourStatus = "Programmée",
-  isCarrier = false
+  isCarrier = true
 }: BookingCardContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
