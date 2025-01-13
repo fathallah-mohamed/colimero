@@ -3,7 +3,7 @@ import type { TourStatus } from "@/types/tour";
 
 export function useTourFilters() {
   const [selectedRoute, setSelectedRoute] = useState("FR_TO_TN");
-  const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("Programmée");
+  const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("all");
   const [tourType, setTourType] = useState<"public" | "private">("public");
   const [sortBy, setSortBy] = useState("departure_asc");
 
