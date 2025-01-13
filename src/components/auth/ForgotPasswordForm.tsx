@@ -32,25 +32,16 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
         console.error("Erreur de réinitialisation Supabase:", error);
         
         // If Supabase fails, try our custom email function
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-reset-email`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({
-              email: trimmedEmail,
-              resetLink,
-            }),
+        const response = await supabase.functions.invoke('send-reset-email', {
+          body: {
+            email: trimmedEmail,
+            resetLink,
           }
-        );
+        });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Erreur de la fonction d'envoi d'email:", errorData);
-          throw new Error(errorData.error || "Erreur lors de l'envoi de l'email");
+        if ('error' in response) {
+          console.error("Erreur de la fonction d'envoi d'email:", response.error);
+          throw new Error(response.error || "Erreur lors de l'envoi de l'email");
         }
       }
 
