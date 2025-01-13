@@ -46,15 +46,12 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
-      // Apply filter based on user type
+      // Appliquer le filtre en fonction du type d'utilisateur
       if (userType === 'carrier') {
         query = query.eq('tours.carrier_id', userId);
       } else if (userType === 'client') {
         query = query.eq('user_id', userId);
       }
-
-      // Add ordering to show most recent first
-      query = query.order('created_at', { ascending: false });
 
       const { data: approvalData, error } = await query;
 
