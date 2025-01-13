@@ -15,8 +15,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { BookingContentTypes } from "./BookingContentTypes";
 import { BookingWeightSelector } from "./BookingWeightSelector";
 import { BookingPhotoUpload } from "./BookingPhotoUpload";
+import { BookingSpecialItems } from "./BookingSpecialItems";
 import { useBookingForm } from "@/hooks/useBookingForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+const specialItems = [
+  { name: "Vélo", price: 50, icon: "bicycle" },
+  { name: "Trottinette", price: 30, icon: "scooter" },
+  { name: "Télévision", price: 40, icon: "tv" },
+  { name: "Meuble", price: 60, icon: "cabinet" },
+  { name: "Instrument de musique", price: 45, icon: "music" },
+  { name: "Équipement sportif", price: 35, icon: "dumbbell" }
+];
 
 const contentTypes = [
   "Vêtements",
@@ -47,8 +58,32 @@ export interface BookingFormProps {
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const [weight, setWeight] = useState(5);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
+  const [userData, setUserData] = useState<any>(null);
   const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (clientData) {
+          setUserData(clientData);
+          form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
+          form.setValue('sender_phone', clientData.phone || '');
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,6 +100,11 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const formattedSpecialItems = selectedItems.map(itemName => ({
+      name: itemName,
+      quantity: itemQuantities[itemName] || 1
+    }));
+
     const formData = {
       ...values,
       weight,
@@ -72,7 +112,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       delivery_city: "À définir",
       content_types: selectedTypes,
       photos: photos,
-      special_items: values.special_items ? [{ name: values.special_items }] : [], // Convert string to array of objects
+      special_items: formattedSpecialItems,
     };
 
     const { success } = await createBooking(formData);
@@ -80,6 +120,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       form.reset();
       setWeight(5);
       setSelectedTypes([]);
+      setSelectedItems([]);
+      setItemQuantities({});
       setPhotos([]);
     }
   };
@@ -98,6 +140,21 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         ? prev.filter((t) => t !== type)
         : [...prev, type]
     );
+  };
+
+  const handleItemToggle = (item: string) => {
+    setSelectedItems(prev => 
+      prev.includes(item)
+        ? prev.filter(i => i !== item)
+        : [...prev, item]
+    );
+  };
+
+  const handleQuantityChange = (itemName: string, increment: boolean) => {
+    setItemQuantities(prev => ({
+      ...prev,
+      [itemName]: Math.max(1, (prev[itemName] || 1) + (increment ? 1 : -1))
+    }));
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,6 +177,44 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           onTypeToggle={handleTypeToggle}
           contentTypes={contentTypes}
         />
+
+        <BookingSpecialItems
+          selectedItems={selectedItems}
+          onItemToggle={handleItemToggle}
+          specialItems={specialItems}
+          itemQuantities={itemQuantities}
+          onQuantityChange={handleQuantityChange}
+        />
+
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="sender_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Votre nom</FormLabel>
+                <FormControl>
+                  <Input {...field} readOnly className="bg-gray-100" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="sender_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Votre téléphone</FormLabel>
+                <FormControl>
+                  <Input {...field} type="tel" readOnly className="bg-gray-100" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="space-y-4">
           <FormField
@@ -156,36 +251,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Téléphone du destinataire</FormLabel>
-                <FormControl>
-                  <Input {...field} type="tel" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="sender_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Votre nom</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sender_phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Votre téléphone</FormLabel>
                 <FormControl>
                   <Input {...field} type="tel" />
                 </FormControl>

@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookingCard } from "./BookingCard";
 import { AlertCircle, Loader2 } from "lucide-react";
 import type { BookingStatus } from "@/types/booking";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export function BookingList() {
   const { data: bookings, isLoading, refetch } = useQuery({
@@ -19,7 +21,10 @@ export function BookingList() {
             carriers (
               company_name,
               avatar_url,
-              phone
+              phone,
+              first_name,
+              last_name,
+              email
             )
           )
         `)
@@ -30,10 +35,8 @@ export function BookingList() {
         throw error;
       }
       
-      // Log pour debug
       console.log("Bookings data:", data);
       
-      // Normalisation des special_items pour chaque réservation
       const normalizedData = data?.map(booking => ({
         ...booking,
         special_items: Array.isArray(booking.special_items) 
@@ -41,7 +44,14 @@ export function BookingList() {
               if (typeof item === 'string') return { name: item, quantity: 1 };
               return item;
             })
-          : []
+          : [],
+        created_at_formatted: format(new Date(booking.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr }),
+        departure_date_formatted: booking.tours?.departure_date 
+          ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
+          : null,
+        collection_date_formatted: booking.tours?.collection_date
+          ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
+          : null
       }));
 
       return normalizedData;
