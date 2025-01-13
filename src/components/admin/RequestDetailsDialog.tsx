@@ -14,23 +14,27 @@ import { CompanyInfo } from "./request-details/CompanyInfo";
 import { CapacityInfo } from "./request-details/CapacityInfo";
 import { RequestActions } from "./request-details/RequestActions";
 import { approveCarrierRequest } from "@/services/carrier-approval";
+import { useNavigate } from "react-router-dom";
 
 interface RequestDetailsDialogProps {
   request: any;
   onClose: () => void;
   onApprove?: (request: any) => void;
   showApproveButton?: boolean;
+  onRequestProcessed?: () => void;
 }
 
 export default function RequestDetailsDialog({ 
   request, 
   onClose,
   onApprove,
-  showApproveButton = false
+  showApproveButton = false,
+  onRequestProcessed
 }: RequestDetailsDialogProps) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleApprove = async () => {
     if (onApprove) {
@@ -48,7 +52,16 @@ export default function RequestDetailsDialog({
         title: "Demande approuvée",
         description: "Un email a été envoyé au transporteur.",
       });
+      
+      if (onRequestProcessed) {
+        onRequestProcessed();
+      }
+      
       onClose();
+      
+      // Rediriger vers l'onglet des transporteurs validés
+      navigate('/admin/dashboard?tab=approved');
+      
     } catch (error: any) {
       console.error("Error approving request:", error);
       toast({
@@ -97,7 +110,16 @@ export default function RequestDetailsDialog({
         title: "Demande rejetée",
         description: "Un email a été envoyé au transporteur.",
       });
+      
+      if (onRequestProcessed) {
+        onRequestProcessed();
+      }
+      
       onClose();
+      
+      // Rediriger vers l'onglet des demandes rejetées
+      navigate('/admin/dashboard?tab=rejected');
+      
     } catch (error: any) {
       console.error("Error rejecting request:", error);
       toast({

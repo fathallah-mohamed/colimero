@@ -7,6 +7,7 @@ interface UseTourDataProps {
   destinationCountry: string;
   sortBy: string;
   status: TourStatus | "all";
+  carrierOnly?: boolean;
 }
 
 export function useTourData({
@@ -14,13 +15,14 @@ export function useTourData({
   destinationCountry,
   sortBy,
   status,
+  carrierOnly = false,
 }: UseTourDataProps) {
   const [loading, setLoading] = useState(true);
   const [tours, setTours] = useState<Tour[]>([]);
 
   const fetchTours = async () => {
     try {
-      console.log('Fetching tours with filters:', { departureCountry, destinationCountry, sortBy, status });
+      console.log('Fetching tours with filters:', { departureCountry, destinationCountry, sortBy, status, carrierOnly });
       
       let query = supabase
         .from('tours')
@@ -62,29 +64,27 @@ export function useTourData({
         .eq('departure_country', departureCountry)
         .eq('destination_country', destinationCountry);
 
+      if (carrierOnly) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          query = query.eq('carrier_id', user.id);
+        }
+      }
+
       if (status !== 'all') {
         query = query.eq('status', status);
       }
 
-      switch (sortBy) {
-        case 'departure_asc':
-          query = query.order('departure_date', { ascending: true });
-          break;
-        case 'departure_desc':
-          query = query.order('departure_date', { ascending: false });
-          break;
-      }
-
-      const { data, error } = await query;
+      const { data: toursData, error } = await query;
 
       if (error) {
         console.error('Error fetching tours:', error);
         return;
       }
 
-      console.log('Fetched tours:', data);
+      console.log('Fetched tours:', toursData);
 
-      const transformedTours = data?.map(tour => {
+      const transformedTours = toursData?.map(tour => {
         const routeData = typeof tour.route === 'string' 
           ? JSON.parse(tour.route) 
           : tour.route;
@@ -118,9 +118,25 @@ export function useTourData({
               : tour.carriers.carrier_capacities
           } : undefined
         } as Tour;
+      }) || [];
+
+      // Appliquer le tri après la transformation
+      const sortedTours = [...transformedTours].sort((a, b) => {
+        switch (sortBy) {
+          case 'departure_asc':
+            return new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime();
+          case 'departure_desc':
+            return new Date(b.departure_date).getTime() - new Date(a.departure_date).getTime();
+          case 'price_asc':
+            return (a.carriers?.carrier_capacities?.price_per_kg || 0) - (b.carriers?.carrier_capacities?.price_per_kg || 0);
+          case 'price_desc':
+            return (b.carriers?.carrier_capacities?.price_per_kg || 0) - (a.carriers?.carrier_capacities?.price_per_kg || 0);
+          default:
+            return 0;
+        }
       });
 
-      setTours(transformedTours || []);
+      setTours(sortedTours);
     } catch (error) {
       console.error('Error in fetchTours:', error);
       setTours([]);
@@ -132,7 +148,7 @@ export function useTourData({
   useEffect(() => {
     console.log('Filters changed, fetching tours...');
     fetchTours();
-  }, [departureCountry, destinationCountry, sortBy, status]);
+  }, [departureCountry, destinationCountry, sortBy, status, carrierOnly]);
 
   return {
     loading,

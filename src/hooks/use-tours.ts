@@ -1,13 +1,9 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus } from "@/types/tour";
+import { useState } from "react";
 import { useTourFilters } from "./use-tour-filters";
 import { useTourManagement } from "./use-tour-management";
 import { useTourData } from "./use-tour-data";
 
-export function useTours() {
-  const navigate = useNavigate();
+export function useTours(carrierOnly: boolean = false) {
   const {
     departureCountry,
     destinationCountry,
@@ -34,6 +30,7 @@ export function useTours() {
     destinationCountry,
     sortBy,
     status,
+    carrierOnly
   });
 
   console.log('useTours hook state:', {
@@ -41,7 +38,8 @@ export function useTours() {
     destinationCountry,
     sortBy,
     status,
-    toursCount: tours.length
+    toursCount: tours.length,
+    carrierOnly
   });
 
   return {

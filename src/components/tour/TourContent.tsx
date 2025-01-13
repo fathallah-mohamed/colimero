@@ -5,7 +5,11 @@ import { TourEditDialog } from "./TourEditDialog";
 import { useTours } from "@/hooks/use-tours";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export function TourContent() {
+interface TourContentProps {
+  carrierOnly?: boolean;
+}
+
+export function TourContent({ carrierOnly = false }: TourContentProps) {
   const {
     loading,
     tours,
@@ -24,7 +28,7 @@ export function TourContent() {
     handleEdit,
     handleStatusChange,
     onEditComplete
-  } = useTours();
+  } = useTours(carrierOnly);
 
   if (loading) {
     return (
