@@ -16,14 +16,12 @@ export function TourContent({ carrierOnly = false }: TourContentProps) {
     tours,
     selectedTour,
     isEditDialogOpen,
-    departureCountry,
-    destinationCountry,
+    selectedRoute,
+    selectedStatus,
     sortBy,
-    status,
-    setDepartureCountry,
-    setDestinationCountry,
+    setSelectedRoute,
+    setSelectedStatus,
     setSortBy,
-    setStatus,
     setIsEditDialogOpen,
     handleDelete,
     handleEdit,
@@ -47,6 +45,9 @@ export function TourContent({ carrierOnly = false }: TourContentProps) {
 
   const toursList = Array.isArray(tours) ? tours : [];
 
+  // Split the selectedRoute into departure and destination countries
+  const [departureCountry, destinationCountry] = selectedRoute.split('_TO_');
+
   return (
     <ScrollArea className="h-[calc(100vh-12rem)]">
       <div className="space-y-6">
@@ -55,11 +56,11 @@ export function TourContent({ carrierOnly = false }: TourContentProps) {
             departureCountry={departureCountry}
             destinationCountry={destinationCountry}
             sortBy={sortBy}
-            status={status}
-            onDepartureCountryChange={setDepartureCountry}
-            onDestinationCountryChange={setDestinationCountry}
+            status={selectedStatus}
+            onDepartureCountryChange={(country) => setSelectedRoute(`${country}_TO_${destinationCountry}`)}
+            onDestinationCountryChange={(country) => setSelectedRoute(`${departureCountry}_TO_${country}`)}
             onSortByChange={setSortBy}
-            onStatusChange={setStatus}
+            onStatusChange={setSelectedStatus}
           />
         </div>
 
