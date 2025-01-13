@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { BookingDetails } from "../details/BookingDetails";
-import { Info, ChevronDown, ChevronUp, Package, MapPin, Phone, User, Scale, Calendar, Clock, Truck } from "lucide-react";
+import { Info, Package, MapPin, Phone, User, Scale, Calendar, Clock, Truck } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -131,28 +130,6 @@ export function BookingCardDetails({ booking }: BookingCardDetailsProps) {
           </div>
         </div>
       )}
-      
-      <div className="flex justify-center border-t pt-4">
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex items-center justify-center gap-2 w-full max-w-md hover:bg-gray-50"
-          onClick={() => setShowDetails(!showDetails)}
-        >
-          <Info className="h-4 w-4" />
-          {showDetails ? (
-            <>
-              Masquer les détails de la réservation
-              <ChevronUp className="h-4 w-4" />
-            </>
-          ) : (
-            <>
-              Voir tous les détails de la réservation
-              <ChevronDown className="h-4 w-4" />
-            </>
-          )}
-        </Button>
-      </div>
     </>
   );
 }
