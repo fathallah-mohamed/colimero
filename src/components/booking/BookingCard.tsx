@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, Edit2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
-import { BookingHeader } from "./card/BookingHeader";
 import { BookingStatusBadge } from "./BookingStatusBadge";
 import {
   AlertDialog,
@@ -64,19 +63,22 @@ export function BookingCard({
   };
 
   return (
-    <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
+    <Card className="p-4 hover:shadow-lg transition-shadow duration-200">
       <div className="space-y-4">
+        {/* En-tête compact avec les informations essentielles */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <div className="font-medium text-lg mb-1">
-                {booking.tracking_number}
+          <div className="grid grid-cols-2 gap-6 flex-1">
+            <div className="flex items-center gap-3">
+              <div>
+                <div className="font-medium">#{booking.tracking_number}</div>
+                <div className="text-sm text-gray-500">{booking.weight} kg</div>
               </div>
-              <div className="text-sm text-gray-500">
-                Créée le {booking.created_at_formatted}
-              </div>
+              <BookingStatusBadge status={booking.status} />
             </div>
-            <BookingStatusBadge status={booking.status} />
+            <div>
+              <div className="text-sm font-medium">{booking.recipient_name}</div>
+              <div className="text-sm text-gray-600">{booking.delivery_city}</div>
+            </div>
           </div>
           
           {tourStatus === "Programmée" && (
@@ -124,56 +126,17 @@ export function BookingCard({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-6 mt-4">
-          <div>
-            <div className="text-sm font-medium text-gray-500 mb-1">Expéditeur</div>
-            <div className="space-y-1">
-              <div>{booking.sender_name}</div>
-              <div>{booking.sender_phone}</div>
-              <div>Ville de collecte: {booking.pickup_city}</div>
-            </div>
+        {/* Afficher le trajet si disponible */}
+        {booking.tours?.route && !showDetails && (
+          <div className="pt-2">
+            <TourRoute tour={booking.tours} />
           </div>
-          
-          <div>
-            <div className="text-sm font-medium text-gray-500 mb-1">Destinataire</div>
-            <div className="space-y-1">
-              <div>{booking.recipient_name}</div>
-              <div>{booking.recipient_phone}</div>
-              <div>{booking.recipient_address}</div>
-              <div>Ville de livraison: {booking.delivery_city}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t pt-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-sm font-medium text-gray-500 mb-1">Détails du colis</div>
-              <div className="space-y-1">
-                <div>Poids: {booking.weight} kg</div>
-                <div>Type: {booking.item_type}</div>
-              </div>
-            </div>
-            
-            {booking.special_items?.length > 0 && (
-              <div>
-                <div className="text-sm font-medium text-gray-500 mb-1">Articles spéciaux</div>
-                <div className="space-y-1">
-                  {booking.special_items.map((item: any) => (
-                    <div key={item.name}>
-                      {item.name} (x{item.quantity || 1})
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
 
         <Button
           variant="outline"
           size="sm"
-          className="w-full flex items-center justify-center gap-2 mt-4"
+          className="w-full flex items-center justify-center gap-2"
           onClick={() => setShowDetails(!showDetails)}
         >
           {showDetails ? (
