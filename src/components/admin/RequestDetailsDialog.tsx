@@ -48,9 +48,18 @@ export default function RequestDetailsDialog({
     try {
       await approveCarrierRequest(request.id);
 
+      // Supprimer la demande d'inscription après approbation
+      const { error: deleteError } = await supabase
+        .from('carrier_registration_requests')
+        .delete()
+        .eq('id', request.id);
+
+      if (deleteError) throw deleteError;
+
       toast({
         title: "Demande approuvée",
-        description: "Le transporteur a été approuvé avec succès.",
+        description: "Le transporteur a été approuvé avec succès et peut maintenant se connecter.",
+        duration: 5000,
       });
 
       // Invalider les requêtes pour forcer un rafraîchissement des données
