@@ -73,7 +73,7 @@ export function useTourData({
 
       // Appliquer le filtre de statut seulement si ce n'est pas "all"
       if (status !== 'all') {
-        console.log('Filtering by status:', status);
+        console.log('Applying status filter:', status);
         query = query.eq('status', status);
       }
 
@@ -148,7 +148,7 @@ export function useTourData({
   };
 
   useEffect(() => {
-    console.log('Filters changed, fetching tours...');
+    console.log('Filters changed, fetching tours with status:', status);
     fetchTours();
   }, [departureCountry, destinationCountry, sortBy, status, carrierOnly]);
 
