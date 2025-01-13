@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
+import { AvatarUpload } from "./AvatarUpload";
 
 export interface CarrierSignupFormProps {
   onSuccess: () => void;
@@ -27,6 +28,7 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       email: "",
       password: "",
@@ -66,6 +68,7 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
           services: values.services,
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg,
+          avatar_url: values.avatar_url,
         });
 
       if (registrationError) throw registrationError;
@@ -94,7 +97,6 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
 
       if (emailError) {
         console.error("Error sending admin notification:", emailError);
-        // On continue malgré l'erreur d'envoi d'email
       }
 
       toast({
@@ -114,9 +116,10 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
     }
   };
 
-  // Watch consents field and check if all consents are accepted
-  const formConsents = form.watch("consents");
-  const allConsentsAccepted = formConsents ? Object.values(formConsents).every(value => value === true) : false;
+  // Watch form values for validation
+  const formValues = form.watch();
+  const isValid = form.formState.isValid;
+  const allConsentsAccepted = formValues.consents ? Object.values(formValues.consents).every(value => value === true) : false;
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -134,6 +137,11 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <ScrollArea className="h-[calc(100vh-300px)] pr-4">
             <div className="grid gap-8">
+              <Card className="p-6">
+                <h2 className="text-xl font-semibold mb-6">Photo de profil</h2>
+                <AvatarUpload form={form} />
+              </Card>
+
               <Card className="p-6">
                 <h2 className="text-xl font-semibold mb-6">Informations de contact</h2>
                 <ContactInfoFields form={form} />
@@ -169,7 +177,7 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
               <Button 
                 type="submit" 
                 className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
-                disabled={!form.formState.isValid || !allConsentsAccepted}
+                disabled={!isValid || !allConsentsAccepted}
               >
                 Envoyer ma demande d'inscription
               </Button>
