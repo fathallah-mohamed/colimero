@@ -19,6 +19,8 @@ import { BookingSpecialItems } from "./BookingSpecialItems";
 import { useBookingForm } from "@/hooks/useBookingForm";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const specialItems = [
   { name: "Vélo", price: 50, icon: "bicycle" },
@@ -62,7 +64,11 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
   const [userData, setUserData] = useState<any>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [formValues, setFormValues] = useState<any>(null);
+  const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
   const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -99,7 +105,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     const formattedSpecialItems = selectedItems.map(itemName => ({
       name: itemName,
       quantity: itemQuantities[itemName] || 1
@@ -115,14 +121,27 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: formattedSpecialItems,
     };
 
-    const { success } = await createBooking(formData);
+    setFormValues(formData);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!formValues) return;
+
+    const { success } = await createBooking(formValues);
     if (success) {
+      toast({
+        title: "Réservation créée",
+        description: "Votre réservation a été créée avec succès",
+      });
       form.reset();
       setWeight(5);
       setSelectedTypes([]);
       setSelectedItems([]);
       setItemQuantities({});
       setPhotos([]);
+      setShowConfirmDialog(false);
+      setResponsibilityAccepted(false);
     }
   };
 
@@ -166,7 +185,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
         <BookingWeightSelector
           weight={weight}
           onWeightChange={handleWeightChange}
@@ -302,6 +321,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           {isLoading ? "Création en cours..." : "Réserver"}
         </Button>
       </form>
+
+      <BookingConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        responsibilityAccepted={responsibilityAccepted}
+        onResponsibilityChange={setResponsibilityAccepted}
+        onConfirm={handleConfirmBooking}
+      />
     </Form>
   );
 }
