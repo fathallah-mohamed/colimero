@@ -21,7 +21,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         .from('approval_requests')
         .select(`
           *,
-          tour:tours!inner (
+          tour:tours (
             id,
             departure_country,
             destination_country,
@@ -31,14 +31,14 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             total_capacity,
             remaining_capacity,
             type,
-            carriers!inner (
+            carriers (
               id,
               company_name,
               email,
               phone
             )
           ),
-          user:clients!inner (
+          user:clients (
             id,
             first_name,
             last_name,
@@ -49,7 +49,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
       // Filtrer selon le type d'utilisateur
       if (userType === 'carrier') {
-        query = query.eq('tours.carriers.id', userId);
+        query = query.eq('tour.carriers.id', userId);
       } else {
         query = query.eq('user_id', userId);
       }
@@ -146,11 +146,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   };
 
   useEffect(() => {
-    console.log('useEffect triggered with userId:', userId);
+    console.log('useEffect triggered with userId:', userId, 'userType:', userType);
     if (userId) {
       fetchRequests();
     }
-  }, [userId, userType]); // Ajout de userType comme dépendance
+  }, [userId, userType]);
 
   return { 
     requests, 
