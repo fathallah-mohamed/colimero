@@ -16,7 +16,6 @@ export default function DemandesApprobation() {
   const { 
     requests, 
     loading, 
-    handleApproval,
     handleCancelRequest,
     handleDeleteRequest
   } = useApprovalRequests(userType, userId);
@@ -60,8 +59,6 @@ export default function DemandesApprobation() {
               request={request}
               userType={userType}
               onStatusChange={() => {}}
-              onApprove={() => handleApproval(request.id, true)}
-              onReject={() => handleApproval(request.id, false)}
               onCancel={() => handleCancelRequest(request.id)}
               onDelete={() => handleDeleteRequest(request.id)}
             />
