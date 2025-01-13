@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { LoginForm } from "./login/LoginForm";
-import { ForgotPasswordForm } from "./forgot-password/ForgotPasswordForm";
+import { LoginForm } from "./LoginForm";
+import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { useState } from "react";
 import { Button } from "../ui/button";
 
