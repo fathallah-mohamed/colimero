@@ -15,13 +15,13 @@ import { CapacityInfo } from "./request-details/CapacityInfo";
 import { RequestActions } from "./request-details/RequestActions";
 import { approveCarrierRequest } from "@/services/carrier-approval";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface RequestDetailsDialogProps {
   request: any;
   onClose: () => void;
   onApprove?: (request: any) => void;
   showApproveButton?: boolean;
-  onRequestProcessed?: () => void;
 }
 
 export default function RequestDetailsDialog({ 
@@ -29,12 +29,12 @@ export default function RequestDetailsDialog({
   onClose,
   onApprove,
   showApproveButton = false,
-  onRequestProcessed
 }: RequestDetailsDialogProps) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleApprove = async () => {
     if (onApprove) {
@@ -50,12 +50,11 @@ export default function RequestDetailsDialog({
 
       toast({
         title: "Demande approuvée",
-        description: "Un email a été envoyé au transporteur.",
+        description: "Le transporteur a été approuvé avec succès.",
       });
-      
-      if (onRequestProcessed) {
-        onRequestProcessed();
-      }
+
+      // Invalider les requêtes pour forcer un rafraîchissement des données
+      await queryClient.invalidateQueries({ queryKey: ["carrier-requests"] });
       
       onClose();
       
@@ -111,9 +110,8 @@ export default function RequestDetailsDialog({
         description: "Un email a été envoyé au transporteur.",
       });
       
-      if (onRequestProcessed) {
-        onRequestProcessed();
-      }
+      // Invalider les requêtes pour forcer un rafraîchissement des données
+      await queryClient.invalidateQueries({ queryKey: ["carrier-requests"] });
       
       onClose();
       
