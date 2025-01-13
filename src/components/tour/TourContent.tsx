@@ -4,6 +4,7 @@ import { ToursList } from "./ToursList";
 import { TourEditDialog } from "./TourEditDialog";
 import { useTours } from "@/hooks/use-tours";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { BookingStatus } from "@/types/booking";
 
 interface TourContentProps {
   carrierOnly?: boolean;
@@ -29,6 +30,12 @@ export function TourContent({ carrierOnly = false }: TourContentProps) {
     handleStatusChange,
     onEditComplete
   } = useTours(carrierOnly);
+
+  // Create a wrapper function that adapts the signature
+  const handleBookingStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    // Since this is for bookings, we don't need to do anything with tour status here
+    return Promise.resolve();
+  };
 
   if (loading) {
     return (
@@ -60,7 +67,7 @@ export function TourContent({ carrierOnly = false }: TourContentProps) {
           tours={toursList}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onStatusChange={handleStatusChange}
+          onStatusChange={handleBookingStatusChange}
         />
 
         {selectedTour && (
