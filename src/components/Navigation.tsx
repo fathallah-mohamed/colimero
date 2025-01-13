@@ -29,7 +29,7 @@ export default function Navigation() {
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Get current session
+        // First try to get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -37,22 +37,18 @@ export default function Navigation() {
           return;
         }
 
-        // If no session, try to refresh
+        // If no session exists, try to refresh it
         if (!session) {
           const { data: { session: refreshedSession }, error: refreshError } = 
             await supabase.auth.refreshSession();
           
           if (refreshError) {
-            if (refreshError.message.includes('session_not_found')) {
-              // Silent handling for missing session
-              return;
-            }
             console.error("Session refresh error:", refreshError);
             return;
           }
 
           if (!refreshedSession) {
-            // No session after refresh attempt
+            console.log("No session after refresh attempt");
             return;
           }
         }
@@ -62,7 +58,6 @@ export default function Navigation() {
           data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (event === 'SIGNED_OUT') {
-            // Handle sign out
             if (location.pathname.includes('/reserver/')) {
               window.location.href = '/';
             }
