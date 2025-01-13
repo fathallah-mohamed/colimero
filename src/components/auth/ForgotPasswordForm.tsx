@@ -20,32 +20,43 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const trimmedEmail = email.trim();
+      const resetLink = `${window.location.origin}/reset-password`;
+
+      // First, try to send the reset email through Supabase
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+        redirectTo: resetLink,
       });
 
       if (error) {
-        console.error("Erreur de réinitialisation:", error);
-        let errorMessage = "Une erreur est survenue lors de l'envoi de l'email";
+        console.error("Erreur de réinitialisation Supabase:", error);
         
-        if (error.message.includes("Email not confirmed")) {
-          errorMessage = "Cet email n'a pas été confirmé. Veuillez d'abord confirmer votre email.";
-        } else if (error.message.includes("User not found")) {
-          errorMessage = "Aucun compte n'est associé à cet email.";
-        }
+        // If Supabase fails, try our custom email function
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-reset-email`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              email: trimmedEmail,
+              resetLink,
+            }),
+          }
+        );
 
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: errorMessage,
-        });
-        return;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Erreur lors de l'envoi de l'email");
+        }
       }
 
-      // Log the email attempt
+      // Log success
       await supabase.from('email_logs').insert([
         {
-          email: email.trim(),
+          email: trimmedEmail,
           status: 'success',
           email_type: 'password_reset'
         }
@@ -60,7 +71,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     } catch (error: any) {
       console.error("Erreur complète:", error);
       
-      // Log the failed attempt
+      // Log the error
       await supabase.from('email_logs').insert([
         {
           email: email.trim(),
