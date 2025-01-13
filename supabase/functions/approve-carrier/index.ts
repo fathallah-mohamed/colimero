@@ -59,47 +59,51 @@ serve(async (req) => {
     console.log("Found carrier request:", request);
 
     try {
-      // 2. Create auth user with the password from the request
-      const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
-        email: request.email,
-        password: request.password,
-        email_confirm: true,
-        user_metadata: {
-          user_type: 'carrier',
-          first_name: request.first_name,
-          last_name: request.last_name,
-          company_name: request.company_name
-        }
-      });
+      // Check if user already exists
+      const { data: existingUser, error: existingUserError } = await supabaseClient.auth.admin.listUsers();
+      const userExists = existingUser?.users.some(user => user.email === request.email);
 
-      if (authError) throw authError;
-      console.log("Auth user created:", authData);
-
-      // 3. Update request status
-      const { error: updateError } = await supabaseClient
-        .from('carrier_registration_requests')
-        .update({ 
-          status: 'approved',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', requestId);
-
-      if (updateError) {
-        console.error("Error updating carrier request:", updateError);
-        return new Response(
-          JSON.stringify({ error: "Failed to update carrier request status", details: updateError.message }),
-          { 
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      let authData;
+      if (userExists) {
+        console.log("User already exists, updating metadata");
+        const { data: updatedUser, error: updateError } = await supabaseClient.auth.admin.updateUserById(
+          request.id,
+          {
+            email: request.email,
+            user_metadata: {
+              user_type: 'carrier',
+              first_name: request.first_name,
+              last_name: request.last_name,
+              company_name: request.company_name
+            }
           }
         );
+        if (updateError) throw updateError;
+        authData = updatedUser;
+      } else {
+        console.log("Creating new auth user");
+        const { data: newUser, error: authError } = await supabaseClient.auth.admin.createUser({
+          email: request.email,
+          password: request.password || Math.random().toString(36).slice(-8),
+          email_confirm: true,
+          user_metadata: {
+            user_type: 'carrier',
+            first_name: request.first_name,
+            last_name: request.last_name,
+            company_name: request.company_name
+          }
+        });
+        if (authError) throw authError;
+        authData = newUser;
       }
 
-      // 4. Create carrier profile
+      console.log("Auth user processed successfully:", authData);
+
+      // Create or update carrier profile
       const { error: carrierError } = await supabaseClient
         .from('carriers')
-        .insert({
-          id: authData.user.id,
+        .upsert({
+          id: request.id,
           email: request.email,
           first_name: request.first_name,
           last_name: request.last_name,
@@ -120,31 +124,42 @@ serve(async (req) => {
 
       if (carrierError) throw carrierError;
 
-      // 5. Create carrier capacities
+      // Create carrier capacities
       const { error: capacityError } = await supabaseClient
         .from('carrier_capacities')
-        .insert({
-          carrier_id: authData.user.id,
-          total_capacity: request.total_capacity,
-          price_per_kg: request.price_per_kg
+        .upsert({
+          carrier_id: request.id,
+          total_capacity: request.total_capacity || 1000,
+          price_per_kg: request.price_per_kg || 12
         });
 
       if (capacityError) throw capacityError;
 
-      // 6. Create carrier services
+      // Create carrier services
       if (request.services && request.services.length > 0) {
         const services = request.services.map(service => ({
-          carrier_id: authData.user.id,
+          carrier_id: request.id,
           service_type: service,
           icon: 'package'
         }));
 
         const { error: servicesError } = await supabaseClient
           .from('carrier_services')
-          .insert(services);
+          .upsert(services);
 
         if (servicesError) throw servicesError;
       }
+
+      // Update request status
+      const { error: updateError } = await supabaseClient
+        .from('carrier_registration_requests')
+        .update({ 
+          status: 'approved',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+      if (updateError) throw updateError;
 
       console.log("Carrier approved successfully");
       return new Response(
