@@ -67,7 +67,7 @@ export default function Navigation() {
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+          if (event === 'SIGNED_OUT') {
             // Handle sign out
             if (location.pathname.includes('/reserver/')) {
               window.location.href = '/';
