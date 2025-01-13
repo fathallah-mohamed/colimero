@@ -82,6 +82,21 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
 
       await Promise.all(consentPromises);
 
+      // Envoyer l'email à l'administrateur
+      const { error: emailError } = await supabase.functions.invoke("send-registration-email", {
+        body: {
+          email: values.email,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          company_name: values.company_name,
+        },
+      });
+
+      if (emailError) {
+        console.error("Error sending admin notification:", emailError);
+        // On continue malgré l'erreur d'envoi d'email
+      }
+
       toast({
         title: "Demande envoyée avec succès",
         description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
