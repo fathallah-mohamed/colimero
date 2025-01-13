@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BookingStatus } from "@/types/booking";
-import { Edit2, XCircle, RotateCcw, CheckSquare } from "lucide-react";
+import { Edit2, XCircle, RotateCcw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,21 +12,54 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookingActionsProps {
   status: BookingStatus;
   isCollecting: boolean;
   onStatusChange: (status: BookingStatus) => void;
   onEdit: () => void;
+  bookingId: string;
   tourStatus?: string;
 }
 
-export function BookingActions({ status, isCollecting, onStatusChange, onEdit, tourStatus }: BookingActionsProps) {
+export function BookingActions({ 
+  status, 
+  isCollecting, 
+  onStatusChange, 
+  onEdit,
+  bookingId,
+  tourStatus 
+}: BookingActionsProps) {
+  const { toast } = useToast();
+  
   if (!isCollecting) return null;
 
-  const handleStatusChange = (newStatus: BookingStatus) => {
-    console.log("BookingActions - Changing status to:", newStatus);
-    onStatusChange(newStatus);
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    try {
+      if (newStatus === 'cancelled') {
+        const { error } = await supabase.rpc('cancel_booking_and_update_capacity', {
+          booking_id: bookingId
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Réservation annulée",
+          description: "La réservation a été annulée et la capacité du camion a été mise à jour.",
+        });
+      }
+      
+      onStatusChange(newStatus);
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'annuler la réservation",
+      });
+    }
   };
 
   return (
@@ -53,7 +86,7 @@ export function BookingActions({ status, isCollecting, onStatusChange, onEdit, t
         </Button>
       )}
 
-      {status === "pending" && (
+      {status === "pending" && tourStatus === "Programmée" && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button

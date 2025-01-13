@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BookingStatusBadge } from "../BookingStatusBadge";
-import { BookingStatusActions } from "../actions/BookingStatusActions";
+import { BookingActions } from "../actions/BookingActions";
 import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
@@ -8,7 +8,6 @@ import { BookingCardDetails } from "./BookingCardDetails";
 import { Card } from "@/components/ui/card";
 import { MapPin, User, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 interface BookingCardContentProps {
   booking: any;
@@ -44,28 +43,9 @@ export function BookingCardContent({
     });
   };
 
-  const handleStatusChange = async () => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', booking.id);
-
-      if (error) throw error;
-
-      await onUpdate();
-      toast({
-        title: "Réservation annulée",
-        description: "La réservation a été annulée avec succès.",
-      });
-    } catch (error) {
-      console.error('Error cancelling booking:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'annuler la réservation",
-      });
-    }
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    await onStatusChange(booking.id, newStatus);
+    await onUpdate();
   };
 
   return (
@@ -97,16 +77,14 @@ export function BookingCardContent({
 
           <div className="flex items-center space-x-4">
             <BookingStatusBadge status={booking.status} />
-            {tourStatus === "Programmée" && booking.status !== "cancelled" && (
-              <BookingStatusActions
-                bookingId={booking.id}
-                bookingStatus={booking.status}
-                tourStatus={tourStatus}
-                isCarrier={isCarrier}
-                onStatusChange={handleStatusChange}
-                onEdit={handleEdit}
-              />
-            )}
+            <BookingActions
+              status={booking.status}
+              isCollecting={isCollecting}
+              onStatusChange={handleStatusChange}
+              onEdit={handleEdit}
+              bookingId={booking.id}
+              tourStatus={tourStatus}
+            />
           </div>
         </div>
 

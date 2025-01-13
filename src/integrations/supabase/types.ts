@@ -921,6 +921,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_booking_and_update_capacity: {
+        Args: {
+          booking_id: string
+        }
+        Returns: undefined
+      }
       create_booking_with_capacity_update: {
         Args: {
           p_tour_id: number
