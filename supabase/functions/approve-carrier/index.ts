@@ -59,51 +59,28 @@ serve(async (req) => {
     console.log("Found carrier request:", request);
 
     try {
-      // Check if user already exists
-      const { data: existingUser, error: existingUserError } = await supabaseClient.auth.admin.listUsers();
-      const userExists = existingUser?.users.some(user => user.email === request.email);
+      // Create auth user
+      console.log("Creating new auth user");
+      const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
+        email: request.email,
+        password: request.password || Math.random().toString(36).slice(-8),
+        email_confirm: true,
+        user_metadata: {
+          user_type: 'carrier',
+          first_name: request.first_name,
+          last_name: request.last_name,
+          company_name: request.company_name
+        }
+      });
 
-      let authData;
-      if (userExists) {
-        console.log("User already exists, updating metadata");
-        const { data: updatedUser, error: updateError } = await supabaseClient.auth.admin.updateUserById(
-          request.id,
-          {
-            email: request.email,
-            user_metadata: {
-              user_type: 'carrier',
-              first_name: request.first_name,
-              last_name: request.last_name,
-              company_name: request.company_name
-            }
-          }
-        );
-        if (updateError) throw updateError;
-        authData = updatedUser;
-      } else {
-        console.log("Creating new auth user");
-        const { data: newUser, error: authError } = await supabaseClient.auth.admin.createUser({
-          email: request.email,
-          password: request.password || Math.random().toString(36).slice(-8),
-          email_confirm: true,
-          user_metadata: {
-            user_type: 'carrier',
-            first_name: request.first_name,
-            last_name: request.last_name,
-            company_name: request.company_name
-          }
-        });
-        if (authError) throw authError;
-        authData = newUser;
-      }
+      if (authError) throw authError;
+      console.log("Auth user created successfully:", authData);
 
-      console.log("Auth user processed successfully:", authData);
-
-      // Create or update carrier profile
+      // Create carrier profile using the new auth user ID
       const { error: carrierError } = await supabaseClient
         .from('carriers')
-        .upsert({
-          id: request.id,
+        .insert({
+          id: authData.user.id, // Use the auth user ID here
           email: request.email,
           first_name: request.first_name,
           last_name: request.last_name,
@@ -117,8 +94,8 @@ serve(async (req) => {
           email_verified: true,
           company_details: request.company_details,
           authorized_routes: request.authorized_routes,
-          total_deliveries: 0,
-          cities_covered: 30,
+          total_deliveries: request.total_deliveries || 0,
+          cities_covered: request.cities_covered || 30,
           status: 'active'
         });
 
@@ -127,8 +104,8 @@ serve(async (req) => {
       // Create carrier capacities
       const { error: capacityError } = await supabaseClient
         .from('carrier_capacities')
-        .upsert({
-          carrier_id: request.id,
+        .insert({
+          carrier_id: authData.user.id, // Use the auth user ID here
           total_capacity: request.total_capacity || 1000,
           price_per_kg: request.price_per_kg || 12
         });
@@ -138,28 +115,25 @@ serve(async (req) => {
       // Create carrier services
       if (request.services && request.services.length > 0) {
         const services = request.services.map(service => ({
-          carrier_id: request.id,
+          carrier_id: authData.user.id, // Use the auth user ID here
           service_type: service,
           icon: 'package'
         }));
 
         const { error: servicesError } = await supabaseClient
           .from('carrier_services')
-          .upsert(services);
+          .insert(services);
 
         if (servicesError) throw servicesError;
       }
 
-      // Update request status
-      const { error: updateError } = await supabaseClient
+      // Delete the request after successful approval
+      const { error: deleteError } = await supabaseClient
         .from('carrier_registration_requests')
-        .update({ 
-          status: 'approved',
-          updated_at: new Date().toISOString()
-        })
+        .delete()
         .eq('id', requestId);
 
-      if (updateError) throw updateError;
+      if (deleteError) throw deleteError;
 
       console.log("Carrier approved successfully");
       return new Response(
