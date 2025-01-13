@@ -49,7 +49,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
       // Filtrer selon le type d'utilisateur
       if (userType === 'carrier') {
-        query = query.eq('tour.carriers.id', userId);
+        query = query.eq('tour.carrier_id', userId);
       } else {
         query = query.eq('user_id', userId);
       }
