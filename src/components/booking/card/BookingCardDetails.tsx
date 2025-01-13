@@ -1,7 +1,5 @@
 import { Info, Package, MapPin, Phone, User, Scale, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 interface BookingCardDetailsProps {
   booking: any;
@@ -110,12 +108,12 @@ export function BookingCardDetails({ booking }: BookingCardDetailsProps) {
           <div className="space-y-1">
             <p className="text-sm">
               <span className="font-medium">Créée le:</span>{" "}
-              {format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr })}
+              {booking.created_at_formatted}
             </p>
             {booking.updated_at && (
               <p className="text-sm">
                 <span className="font-medium">Dernière mise à jour:</span>{" "}
-                {format(new Date(booking.updated_at), "d MMMM yyyy", { locale: fr })}
+                {booking.updated_at_formatted}
               </p>
             )}
           </div>

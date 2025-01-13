@@ -71,6 +71,7 @@ export function BookingCardContent({
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
       <div className="space-y-4">
+        {/* En-tête de la réservation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div>
@@ -109,6 +110,7 @@ export function BookingCardContent({
           </div>
         </div>
 
+        {/* Bouton pour afficher/masquer les détails */}
         <Button
           variant="outline"
           size="sm"
@@ -128,8 +130,10 @@ export function BookingCardContent({
           )}
         </Button>
 
+        {/* Détails de la réservation (affichés uniquement si showDetails est true) */}
         {showDetails && <BookingCardDetails booking={booking} />}
 
+        {/* Dialog de modification */}
         <EditBookingDialog
           booking={booking}
           open={showEditDialog}
