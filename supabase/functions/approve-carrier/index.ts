@@ -26,20 +26,20 @@ serve(async (req) => {
       );
     }
 
-    const supabaseClient = createClient(
+    // Initialize Supabase client with service role key
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       {
         auth: {
           autoRefreshToken: false,
-          persistSession: false,
-          detectSessionInUrl: false
+          persistSession: false
         }
       }
     );
 
     // 1. Fetch the carrier request
-    const { data: request, error: requestError } = await supabaseClient
+    const { data: request, error: requestError } = await supabaseAdmin
       .from("carrier_registration_requests")
       .select("*")
       .eq("id", requestId)
@@ -60,11 +60,15 @@ serve(async (req) => {
 
     try {
       // Check if user already exists
-      const { data: existingUsers, error: existingUserError } = await supabaseClient.auth.admin.listUsers();
+      console.log("Checking for existing user with email:", request.email);
+      const { data: { users: existingUsers }, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers();
       
-      if (existingUserError) throw existingUserError;
+      if (existingUserError) {
+        console.error("Error checking existing users:", existingUserError);
+        throw existingUserError;
+      }
       
-      const existingUser = existingUsers?.users.find(user => user.email === request.email);
+      const existingUser = existingUsers?.find(user => user.email === request.email);
       let userId;
 
       if (existingUser) {
@@ -72,7 +76,7 @@ serve(async (req) => {
         userId = existingUser.id;
         
         // Update existing user metadata
-        const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
           userId,
           {
             user_metadata: {
@@ -83,11 +87,14 @@ serve(async (req) => {
             }
           }
         );
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error("Error updating user metadata:", updateError);
+          throw updateError;
+        }
       } else {
         // Create new auth user
         console.log("Creating new auth user");
-        const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
           email: request.email,
           password: request.password || Math.random().toString(36).slice(-8),
           email_confirm: true,
@@ -99,13 +106,16 @@ serve(async (req) => {
           }
         });
 
-        if (authError) throw authError;
+        if (authError) {
+          console.error("Error creating auth user:", authError);
+          throw authError;
+        }
         userId = authData.user.id;
         console.log("Auth user created successfully:", authData);
       }
 
       // Create or update carrier profile
-      const { error: carrierError } = await supabaseClient
+      const { error: carrierError } = await supabaseAdmin
         .from('carriers')
         .upsert({
           id: userId,
@@ -127,10 +137,13 @@ serve(async (req) => {
           status: 'active'
         });
 
-      if (carrierError) throw carrierError;
+      if (carrierError) {
+        console.error("Error creating carrier profile:", carrierError);
+        throw carrierError;
+      }
 
       // Create or update carrier capacities
-      const { error: capacityError } = await supabaseClient
+      const { error: capacityError } = await supabaseAdmin
         .from('carrier_capacities')
         .upsert({
           carrier_id: userId,
@@ -138,38 +151,52 @@ serve(async (req) => {
           price_per_kg: request.price_per_kg || 12
         });
 
-      if (capacityError) throw capacityError;
+      if (capacityError) {
+        console.error("Error creating carrier capacities:", capacityError);
+        throw capacityError;
+      }
 
       // Create carrier services
       if (request.services && request.services.length > 0) {
+        // Delete existing services first
+        const { error: deleteError } = await supabaseAdmin
+          .from('carrier_services')
+          .delete()
+          .eq('carrier_id', userId);
+
+        if (deleteError) {
+          console.error("Error deleting existing services:", deleteError);
+          throw deleteError;
+        }
+
         const services = request.services.map(service => ({
           carrier_id: userId,
           service_type: service,
           icon: 'package'
         }));
 
-        // Delete existing services first
-        await supabaseClient
-          .from('carrier_services')
-          .delete()
-          .eq('carrier_id', userId);
-
-        const { error: servicesError } = await supabaseClient
+        const { error: servicesError } = await supabaseAdmin
           .from('carrier_services')
           .insert(services);
 
-        if (servicesError) throw servicesError;
+        if (servicesError) {
+          console.error("Error creating carrier services:", servicesError);
+          throw servicesError;
+        }
       }
 
       // Delete the request after successful approval
-      const { error: deleteError } = await supabaseClient
+      const { error: deleteError } = await supabaseAdmin
         .from('carrier_registration_requests')
         .delete()
         .eq('id', requestId);
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error("Error deleting registration request:", deleteError);
+        throw deleteError;
+      }
 
-      console.log("Carrier approved successfully");
+      console.log("Carrier approval process completed successfully");
       return new Response(
         JSON.stringify({ 
           success: true, 
