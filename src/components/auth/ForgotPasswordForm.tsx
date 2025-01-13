@@ -59,7 +59,10 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
         description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe",
       });
 
-      onSuccess?.();
+      // Important: Call onSuccess to close the dialog
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error: any) {
       console.error("Erreur complète:", error);
       

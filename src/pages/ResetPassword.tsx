@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,6 @@ export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -38,11 +37,14 @@ export default function ResetPassword() {
 
       toast({
         title: "Succès",
-        description: "Votre mot de passe a été mis à jour",
+        description: "Votre mot de passe a été mis à jour avec succès",
       });
 
-      // Rediriger vers la page de connexion
-      navigate("/login");
+      // Rediriger vers la page d'accueil après un court délai
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+
     } catch (error) {
       console.error("Error resetting password:", error);
       toast({
