@@ -47,13 +47,7 @@ export default function Navigation() {
               // Silent handling for missing session
               return;
             }
-            
             console.error("Session refresh error:", refreshError);
-            toast({
-              variant: "destructive",
-              title: "Erreur de session",
-              description: "Une erreur est survenue lors de la vérification de votre session.",
-            });
             return;
           }
 
@@ -72,9 +66,6 @@ export default function Navigation() {
             if (location.pathname.includes('/reserver/')) {
               window.location.href = '/';
             }
-          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            // Handle successful sign in or token refresh
-            console.log('Auth state updated:', event);
           }
         });
 
@@ -93,7 +84,7 @@ export default function Navigation() {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [location.pathname, toast]);
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
