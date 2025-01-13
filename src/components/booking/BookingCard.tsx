@@ -65,19 +65,28 @@ export function BookingCard({
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow duration-200">
       <div className="space-y-4">
-        {/* En-tête compact avec les informations essentielles */}
+        {/* En-tête avec les informations essentielles */}
         <div className="flex items-center justify-between">
-          <div className="grid grid-cols-2 gap-6 flex-1">
-            <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
               <div>
                 <div className="font-medium">#{booking.tracking_number}</div>
                 <div className="text-sm text-gray-500">{booking.weight} kg</div>
               </div>
               <BookingStatusBadge status={booking.status} />
             </div>
-            <div>
-              <div className="text-sm font-medium">{booking.recipient_name}</div>
-              <div className="text-sm text-gray-600">{booking.delivery_city}</div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-sm text-gray-500">Expéditeur</div>
+                <div className="text-sm font-medium">{booking.sender_name}</div>
+                <div className="text-sm text-gray-600">{booking.pickup_city}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Destinataire</div>
+                <div className="text-sm font-medium">{booking.recipient_name}</div>
+                <div className="text-sm text-gray-600">{booking.delivery_city}</div>
+              </div>
             </div>
           </div>
           
@@ -126,9 +135,9 @@ export function BookingCard({
           )}
         </div>
 
-        {/* Afficher le trajet si disponible */}
-        {booking.tours?.route && !showDetails && (
-          <div className="pt-2">
+        {/* Afficher le trajet */}
+        {booking.tours?.route && (
+          <div className="pt-2 border-t">
             <TourRoute tour={booking.tours} />
           </div>
         )}
