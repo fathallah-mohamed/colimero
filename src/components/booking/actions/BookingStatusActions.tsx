@@ -1,9 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Edit2, X } from "lucide-react";
 import { BookingStatus } from "@/types/booking";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { Edit2, XCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface BookingStatusActionsProps {
   bookingId: string;
@@ -22,40 +30,6 @@ export function BookingStatusActions({
   onStatusChange,
   onEdit,
 }: BookingStatusActionsProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleStatusChange = async (newStatus: BookingStatus) => {
-    try {
-      setIsLoading(true);
-      console.log("Updating booking status:", { bookingId, newStatus });
-      
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: newStatus })
-        .eq('id', bookingId);
-
-      if (error) throw error;
-
-      await onStatusChange();
-      toast({
-        title: "Statut mis à jour",
-        description: newStatus === 'cancelled' 
-          ? "La réservation a été annulée avec succès."
-          : "Le statut de la réservation a été mis à jour avec succès.",
-      });
-    } catch (error) {
-      console.error('Error updating booking status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la réservation",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (bookingStatus === "cancelled" || tourStatus !== "Programmée") {
     return null;
   }
@@ -66,23 +40,41 @@ export function BookingStatusActions({
         variant="outline"
         size="sm"
         onClick={onEdit}
-        disabled={isLoading}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
       >
         <Edit2 className="h-4 w-4" />
         Modifier
       </Button>
       
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleStatusChange("cancelled")}
-        disabled={isLoading}
-        className="flex items-center gap-2 text-red-500 hover:text-red-600"
-      >
-        <X className="h-4 w-4" />
-        Annuler
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
+          >
+            <XCircle className="h-4 w-4" />
+            Annuler
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer l'annulation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-gray-200">Retour</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onStatusChange}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              Confirmer l'annulation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
