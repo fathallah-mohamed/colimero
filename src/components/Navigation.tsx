@@ -27,37 +27,29 @@ export default function Navigation() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     const initSession = async () => {
       try {
-        // First try to get the current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Session check error:", sessionError);
+        // Clear any stale session data
+        const currentSession = await supabase.auth.getSession();
+        if (!currentSession.data.session) {
+          // If no session exists, clear local storage to prevent stale data
+          localStorage.removeItem('supabase.auth.token');
           return;
-        }
-
-        // If no session exists, try to refresh it
-        if (!session) {
-          const { data: { session: refreshedSession }, error: refreshError } = 
-            await supabase.auth.refreshSession();
-          
-          if (refreshError) {
-            console.error("Session refresh error:", refreshError);
-            return;
-          }
-
-          if (!refreshedSession) {
-            console.log("No session after refresh attempt");
-            return;
-          }
         }
 
         // Set up auth state change listener
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_OUT') {
+          if (!mounted) return;
+
+          if (event === 'TOKEN_REFRESHED') {
+            console.log('Session token refreshed successfully');
+          } else if (event === 'SIGNED_OUT') {
+            // Clear any stored session data
+            localStorage.removeItem('supabase.auth.token');
             if (location.pathname.includes('/reserver/')) {
               window.location.href = '/';
             }
@@ -69,16 +61,24 @@ export default function Navigation() {
         };
       } catch (error) {
         console.error("Session initialization error:", error);
+        // Clear potentially corrupted session data
+        localStorage.removeItem('supabase.auth.token');
       }
     };
 
     initSession();
 
     const handleScroll = () => {
+      if (!mounted) return;
       setIsScrolled(window.scrollY > 0);
     };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [location.pathname]);
 
   useEffect(() => {

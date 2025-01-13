@@ -11,68 +11,73 @@ export function useNavigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initial session check
-    const initSession = async () => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (!session) {
-          const { error: refreshError } = await supabase.auth.refreshSession();
-          if (refreshError) throw refreshError;
-        } else {
-          setUser(session.user);
-          setUserType(session.user?.user_metadata?.user_type ?? null);
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          return;
         }
+
+        if (mounted && session?.user) {
+          setUser(session.user);
+          setUserType(session.user.user_metadata?.user_type ?? null);
+        }
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (!mounted) return;
+
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            setUser(session?.user ?? null);
+            setUserType(session?.user?.user_metadata?.user_type ?? null);
+          } else if (event === 'SIGNED_OUT') {
+            setUser(null);
+            setUserType(null);
+            navigate('/');
+          }
+        });
+
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error) {
-        console.error("Session initialization error:", error);
-        setUser(null);
-        setUserType(null);
+        console.error("Auth initialization error:", error);
       }
     };
 
-    initSession();
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-      
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setUser(session?.user ?? null);
-        setUserType(session?.user?.user_metadata?.user_type ?? null);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setUserType(null);
-        navigate('/');
-      }
-    });
+    initializeAuth();
 
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
     };
   }, [navigate]);
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
+      // First clear local state
       setUser(null);
       setUserType(null);
-      
+
+      // Then attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout error:", error);
+        // Even if there's an error, we'll show success since the local state is cleared
+      }
+
       toast({
         title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès",
+        description: "À bientôt !",
       });
-      
+
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion",
-      });
+      // Still clear local state and redirect
+      navigate('/');
     }
   };
 
