@@ -8,6 +8,7 @@ import { BookingCardDetails } from "./BookingCardDetails";
 import { Card } from "@/components/ui/card";
 import { MapPin, User, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingCardContentProps {
   booking: any;
@@ -41,6 +42,30 @@ export function BookingCardContent({
       title: "Réservation mise à jour",
       description: "Les modifications ont été enregistrées avec succès.",
     });
+  };
+
+  const handleStatusChange = async () => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', booking.id);
+
+      if (error) throw error;
+
+      await onUpdate();
+      toast({
+        title: "Réservation annulée",
+        description: "La réservation a été annulée avec succès.",
+      });
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'annuler la réservation",
+      });
+    }
   };
 
   const canModifyBooking = tourStatus === "Programmée";
@@ -79,7 +104,7 @@ export function BookingCardContent({
                 bookingStatus={booking.status}
                 tourStatus={tourStatus}
                 isCarrier={isCarrier}
-                onStatusChange={onUpdate}
+                onStatusChange={handleStatusChange}
                 onEdit={handleEdit}
               />
             )}
