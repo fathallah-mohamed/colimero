@@ -30,6 +30,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             route,
             total_capacity,
             remaining_capacity,
+            type,
             carrier:carriers (
               id,
               company_name,
