@@ -2,19 +2,19 @@ import { useState } from "react";
 import type { TourStatus } from "@/types/tour";
 
 export function useTourFilters() {
-  const [departureCountry, setDepartureCountry] = useState("FR");
-  const [destinationCountry, setDestinationCountry] = useState("TN");
+  const [selectedRoute, setSelectedRoute] = useState("FR_TO_TN");
+  const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("all");
+  const [tourType, setTourType] = useState<"public" | "private">("public");
   const [sortBy, setSortBy] = useState("departure_asc");
-  const [status, setStatus] = useState<TourStatus | "all">("all");
 
   return {
-    departureCountry,
-    destinationCountry,
+    selectedRoute,
+    selectedStatus,
+    tourType,
     sortBy,
-    status,
-    setDepartureCountry,
-    setDestinationCountry,
+    setSelectedRoute,
+    setSelectedStatus,
+    setTourType,
     setSortBy,
-    setStatus,
   };
 }

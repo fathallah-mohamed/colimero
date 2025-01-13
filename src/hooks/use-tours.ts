@@ -1,18 +1,17 @@
-import { useState } from "react";
 import { useTourFilters } from "./use-tour-filters";
 import { useTourManagement } from "./use-tour-management";
 import { useTourData } from "./use-tour-data";
 
 export function useTours(carrierOnly: boolean = false) {
   const {
-    departureCountry,
-    destinationCountry,
+    selectedRoute,
+    selectedStatus,
+    tourType,
     sortBy,
-    status,
-    setDepartureCountry,
-    setDestinationCountry,
+    setSelectedRoute,
+    setSelectedStatus,
+    setTourType,
     setSortBy,
-    setStatus,
   } = useTourFilters();
 
   const {
@@ -25,11 +24,14 @@ export function useTours(carrierOnly: boolean = false) {
     onEditComplete,
   } = useTourManagement();
 
+  const departureCountry = selectedRoute.split('_TO_')[0];
+  const destinationCountry = selectedRoute.split('_TO_')[1];
+
   const { loading, tours, fetchTours } = useTourData({
     departureCountry,
     destinationCountry,
     sortBy,
-    status,
+    status: selectedStatus,
     carrierOnly
   });
 
@@ -37,7 +39,7 @@ export function useTours(carrierOnly: boolean = false) {
     departureCountry,
     destinationCountry,
     sortBy,
-    status,
+    status: selectedStatus,
     toursCount: tours.length,
     carrierOnly
   });
@@ -47,14 +49,14 @@ export function useTours(carrierOnly: boolean = false) {
     tours,
     selectedTour,
     isEditDialogOpen,
-    departureCountry,
-    destinationCountry,
+    selectedRoute,
+    selectedStatus,
+    tourType,
     sortBy,
-    status,
-    setDepartureCountry,
-    setDestinationCountry,
+    setSelectedRoute,
+    setSelectedStatus,
+    setTourType,
     setSortBy,
-    setStatus,
     setIsEditDialogOpen,
     handleDelete,
     handleEdit,
