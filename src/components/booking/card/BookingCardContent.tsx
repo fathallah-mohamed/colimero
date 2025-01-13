@@ -6,8 +6,9 @@ import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCardDetails } from "./BookingCardDetails";
 import { Card } from "@/components/ui/card";
-import { MapPin, User, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, User, ChevronDown, ChevronUp, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
 
 interface BookingCardContentProps {
   booking: any;
@@ -73,6 +74,16 @@ export function BookingCardContent({
                 <p className="text-sm">{booking.recipient_phone}</p>
               </div>
             </div>
+
+            {booking.tours?.departure_date && (
+              <div className="flex items-center space-x-2 text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <div>
+                  <p className="text-sm">Départ prévu</p>
+                  <p className="font-medium">{booking.departure_date_formatted}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
@@ -87,6 +98,13 @@ export function BookingCardContent({
             />
           </div>
         </div>
+
+        {/* Itinéraire de la tournée */}
+        {booking.tours?.route && (
+          <div className="mt-4 border-t pt-4">
+            <TourRoute tour={booking.tours} />
+          </div>
+        )}
 
         {/* Bouton pour afficher/masquer les détails */}
         <Button
