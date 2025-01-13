@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { BookingHeader } from "./BookingHeader";
 import { BookingStatusBadge } from "../BookingStatusBadge";
 import { BookingStatusActions } from "../actions/BookingStatusActions";
 import { EditBookingDialog } from "../EditBookingDialog";
@@ -7,7 +6,8 @@ import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCardDetails } from "./BookingCardDetails";
 import { Card } from "@/components/ui/card";
-import { MapPin, User } from "lucide-react";
+import { MapPin, User, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface BookingCardContentProps {
   booking: any;
@@ -27,6 +27,7 @@ export function BookingCardContent({
   isCarrier = false
 }: BookingCardContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
   const handleEdit = () => {
@@ -41,6 +42,8 @@ export function BookingCardContent({
       description: "Les modifications ont été enregistrées avec succès.",
     });
   };
+
+  const canModifyBooking = tourStatus === "Programmée";
 
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
@@ -70,18 +73,39 @@ export function BookingCardContent({
 
           <div className="flex items-center space-x-4">
             <BookingStatusBadge status={booking.status} />
-            <BookingStatusActions
-              bookingId={booking.id}
-              bookingStatus={booking.status}
-              tourStatus={tourStatus || ""}
-              isCarrier={isCarrier}
-              onStatusChange={onUpdate}
-              onEdit={handleEdit}
-            />
+            {canModifyBooking && (
+              <BookingStatusActions
+                bookingId={booking.id}
+                bookingStatus={booking.status}
+                tourStatus={tourStatus}
+                isCarrier={isCarrier}
+                onStatusChange={onUpdate}
+                onEdit={handleEdit}
+              />
+            )}
           </div>
         </div>
 
-        <BookingCardDetails booking={booking} />
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full flex items-center justify-center gap-2"
+          onClick={() => setShowDetails(!showDetails)}
+        >
+          {showDetails ? (
+            <>
+              Masquer les détails
+              <ChevronUp className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Voir tous les détails de la réservation
+              <ChevronDown className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+
+        {showDetails && <BookingCardDetails booking={booking} />}
 
         <EditBookingDialog
           booking={booking}
