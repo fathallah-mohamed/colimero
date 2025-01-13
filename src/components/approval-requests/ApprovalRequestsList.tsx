@@ -9,9 +9,11 @@ import { ProfileLoading } from "@/components/profile/ProfileLoading";
 export function ApprovalRequestsList() {
   const [page] = useState(1);
   const user = useUser();
-  const { requests, loading, handleCancelRequest, handleDeleteRequest } = useApprovalRequests('client', user?.id);
+  const userType = user?.user_metadata?.user_type;
+  const { requests, loading, handleCancelRequest, handleDeleteRequest } = useApprovalRequests(userType, user?.id);
 
   console.log('Current user:', user);
+  console.log('User type:', userType);
   console.log('Approval requests:', requests);
 
   if (loading) {
@@ -41,7 +43,7 @@ export function ApprovalRequestsList() {
         <ApprovalRequestCard 
           key={request.id} 
           request={request} 
-          userType="client"
+          userType={userType}
           onStatusChange={() => {}}
           onCancel={() => handleCancelRequest(request.id)}
           onDelete={() => handleDeleteRequest(request.id)}

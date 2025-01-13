@@ -12,6 +12,9 @@ export default function MesDemandesApprobation() {
   const user = useUser();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
+  console.log("Session:", session);
+  console.log("User:", user);
+
   useEffect(() => {
     if (!isSessionLoading && !session) {
       setShowAuthDialog(true);
