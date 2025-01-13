@@ -32,13 +32,16 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             remaining_capacity,
             carrier:carriers (
               id,
-              company_name
+              company_name,
+              email,
+              phone
             )
           ),
           user:clients (
             first_name,
             last_name,
-            phone
+            phone,
+            email
           )
         `);
 
@@ -70,34 +73,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleApproval = async (requestId: string, isApproved: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('approval_requests')
-        .update({
-          status: isApproved ? 'approved' : 'rejected',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', requestId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: `La demande a été ${isApproved ? 'approuvée' : 'rejetée'} avec succès`,
-      });
-
-      await fetchRequests();
-    } catch (error) {
-      console.error('Error handling approval:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors du traitement de la demande",
-      });
     }
   };
 
@@ -181,7 +156,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   return { 
     requests, 
     loading,
-    handleApproval,
     handleCancelRequest,
     handleDeleteRequest
   };
