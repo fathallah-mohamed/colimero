@@ -677,6 +677,36 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          email: string
+          email_type: string
+          error_message: string | null
+          id: string
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          sent_at?: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          sent_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       prohibited_items: {
         Row: {
           category: string

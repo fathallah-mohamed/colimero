@@ -10,6 +10,7 @@ interface LoginFormProps {
   onSuccess?: () => void;
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
+  onForgotPasswordClick?: () => void;
   requiredUserType?: 'client' | 'carrier' | 'admin';
 }
 
@@ -17,6 +18,7 @@ export function LoginForm({
   onSuccess,
   onRegisterClick,
   onCarrierRegisterClick,
+  onForgotPasswordClick,
   requiredUserType,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
@@ -160,6 +162,16 @@ export function LoginForm({
       >
         {isLoading ? "Connexion..." : "Se connecter"}
       </Button>
+
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onForgotPasswordClick}
+          className="text-sm text-[#00B0F0] hover:underline"
+        >
+          Mot de passe oublié ?
+        </button>
+      </div>
 
       <div className="space-y-4">
         {onRegisterClick && (
