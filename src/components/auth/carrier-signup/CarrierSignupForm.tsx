@@ -67,7 +67,7 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const { error: registrationError } = await supabase
+      const { error: registrationError, data: registrationData } = await supabase
         .from("carrier_registration_requests")
         .insert({
           email: values.email,
@@ -83,21 +83,25 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg,
           avatar_url: values.avatar_url,
-        });
+        })
+        .select()
+        .single();
 
       if (registrationError) throw registrationError;
 
-      // Insert consents
-      const consentPromises = Object.entries(values.consents).map(([code, accepted]) => 
-        supabase.from("user_consents").insert({
-          user_id: values.email, // Using email as temporary ID since we don't have user_id yet
-          consent_type_id: consentTypes?.find(c => c.code === code)?.id,
-          accepted,
-          accepted_at: accepted ? new Date().toISOString() : null,
-        })
-      );
+      // Insert consents using the registration request ID
+      if (registrationData) {
+        const consentPromises = Object.entries(values.consents).map(([code, accepted]) => 
+          supabase.from("user_consents").insert({
+            user_id: registrationData.id,
+            consent_type_id: consentTypes?.find(c => c.code === code)?.id,
+            accepted,
+            accepted_at: accepted ? new Date().toISOString() : null,
+          })
+        );
 
-      await Promise.all(consentPromises);
+        await Promise.all(consentPromises);
+      }
 
       // Envoyer l'email à l'administrateur
       const { error: emailError } = await supabase.functions.invoke("send-registration-email", {
