@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { AvatarUpload } from "./AvatarUpload";
+import { useEffect } from "react";
 
 export interface CarrierSignupFormProps {
   onSuccess: () => void;
@@ -39,7 +40,7 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
       siret: "",
       address: "",
       phone_secondary: "",
-      coverage_area: [],
+      coverage_area: ["FR"],
       services: [],
       total_capacity: 0,
       price_per_kg: 0,
@@ -50,6 +51,19 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
       }), {}) || {},
     },
   });
+
+  // Watch form values for validation
+  const formValues = form.watch();
+  const isValid = form.formState.isValid;
+  const allConsentsAccepted = formValues.consents ? Object.values(formValues.consents).every(value => value === true) : false;
+
+  // Debug logs
+  useEffect(() => {
+    console.log("Form values:", formValues);
+    console.log("Form is valid:", isValid);
+    console.log("All consents accepted:", allConsentsAccepted);
+    console.log("Form errors:", form.formState.errors);
+  }, [formValues, isValid, allConsentsAccepted, form.formState.errors]);
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -115,11 +129,6 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
       });
     }
   };
-
-  // Watch form values for validation
-  const formValues = form.watch();
-  const isValid = form.formState.isValid;
-  const allConsentsAccepted = formValues.consents ? Object.values(formValues.consents).every(value => value === true) : false;
 
   return (
     <div className="w-full max-w-4xl mx-auto">

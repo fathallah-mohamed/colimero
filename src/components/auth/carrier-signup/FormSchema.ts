@@ -8,30 +8,14 @@ export const formSchema = z.object({
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
-  siret: z.string().min(14, "Le numéro SIRET doit contenir 14 chiffres"),
+  siret: z.string().min(14, "Le numéro SIRET doit contenir 14 chiffres").max(14, "Le numéro SIRET doit contenir 14 chiffres"),
   address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
-  coverage_area: z.array(z.string())
-    .length(2, "Vous devez sélectionner la France et un pays du Maghreb")
-    .refine(
-      (arr) => arr.includes('FR'),
-      "La France doit être sélectionnée"
-    )
-    .refine(
-      (arr) => arr.some(country => ['TN', 'MA', 'DZ'].includes(country)),
-      "Vous devez sélectionner un pays du Maghreb"
-    ),
+  coverage_area: z.array(z.string()).min(1, "Sélectionnez au moins une zone de couverture"),
   services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
   total_capacity: z.number().min(0),
   price_per_kg: z.number().min(0),
   avatar_url: z.string().nullable(),
-  consents: z.record(z.string(), z.boolean()).refine(
-    (consents) => Object.values(consents).every(value => value === true),
-    "Vous devez accepter tous les consentements pour continuer"
-  ),
-  type: z.enum(["public", "private"], {
-    required_error: "Le type de tournée est requis",
-  }),
+  consents: z.record(z.string(), z.boolean()),
 });
 
 export type FormValues = z.infer<typeof formSchema>;
-export type CarrierSignupFormValues = FormValues;
