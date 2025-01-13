@@ -26,7 +26,12 @@ export function SendPackageFilters({
   sortBy,
   setSortBy
 }: SendPackageFiltersProps) {
-  console.log('Current status:', selectedStatus); // Debug log
+  // Définir "Programmée" comme statut par défaut lors du premier rendu
+  React.useEffect(() => {
+    if (selectedStatus === "all") {
+      setSelectedStatus("Programmée");
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
