@@ -71,7 +71,6 @@ export function useTourData({
         }
       }
 
-      // Appliquer le filtre de statut seulement si ce n'est pas "all"
       if (status !== 'all') {
         console.log('Applying status filter:', status);
         query = query.eq('status', status);
@@ -122,7 +121,6 @@ export function useTourData({
         } as Tour;
       }) || [];
 
-      // Appliquer le tri après la transformation
       const sortedTours = [...transformedTours].sort((a, b) => {
         switch (sortBy) {
           case 'departure_asc':
