@@ -43,7 +43,7 @@ export function BookingList() {
               return item;
             })
           : [],
-        created_at_formatted: format(new Date(booking.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr }),
+        created_at_formatted: format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr }),
         departure_date_formatted: booking.tours?.departure_date 
           ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
           : null,
@@ -95,7 +95,7 @@ export function BookingList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {bookings.map((booking) => (
         <BookingCard 
           key={booking.id} 
