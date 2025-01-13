@@ -20,11 +20,36 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur de réinitialisation:", error);
+        let errorMessage = "Une erreur est survenue lors de l'envoi de l'email";
+        
+        if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Cet email n'a pas été confirmé. Veuillez d'abord confirmer votre email.";
+        } else if (error.message.includes("User not found")) {
+          errorMessage = "Aucun compte n'est associé à cet email.";
+        }
+
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: errorMessage,
+        });
+        return;
+      }
+
+      // Log the email attempt
+      await supabase.from('email_logs').insert([
+        {
+          email: email.trim(),
+          status: 'success',
+          email_type: 'password_reset'
+        }
+      ]);
 
       toast({
         title: "Email envoyé",
@@ -33,10 +58,22 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
 
       onSuccess?.();
     } catch (error: any) {
+      console.error("Erreur complète:", error);
+      
+      // Log the failed attempt
+      await supabase.from('email_logs').insert([
+        {
+          email: email.trim(),
+          status: 'error',
+          error_message: error.message,
+          email_type: 'password_reset'
+        }
+      ]);
+
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: "Une erreur inattendue s'est produite. Veuillez réessayer.",
       });
     } finally {
       setIsLoading(false);
