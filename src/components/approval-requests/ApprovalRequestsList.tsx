@@ -25,7 +25,9 @@ export function ApprovalRequestsList() {
       <div className="bg-white shadow rounded-lg p-6">
         <div className="text-center space-y-4">
           <p className="text-gray-500">
-            Vous n'avez pas encore fait de demande d'approbation pour une tournée privée.
+            {userType === 'carrier' 
+              ? "Vous n'avez pas encore reçu de demandes d'approbation pour vos tournées privées."
+              : "Vous n'avez pas encore fait de demande d'approbation pour une tournée privée."}
           </p>
           <Button asChild>
             <Link to="/tours" className="inline-flex items-center">

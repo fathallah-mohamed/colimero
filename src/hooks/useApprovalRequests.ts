@@ -21,7 +21,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         .from('approval_requests')
         .select(`
           *,
-          tour:tours (
+          tour:tours!inner (
             id,
             departure_country,
             destination_country,
@@ -31,14 +31,14 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             total_capacity,
             remaining_capacity,
             type,
-            carriers (
+            carriers!inner (
               id,
               company_name,
               email,
               phone
             )
           ),
-          user:clients (
+          user:clients!inner (
             id,
             first_name,
             last_name,
@@ -47,13 +47,12 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
+      // Filtrer selon le type d'utilisateur
       if (userType === 'carrier') {
-        query = query.eq('tours.carrier_id', userId);
-      } else if (userType === 'client') {
+        query = query.eq('tours.carriers.id', userId);
+      } else {
         query = query.eq('user_id', userId);
       }
-
-      query = query.order('created_at', { ascending: false });
 
       const { data: approvalData, error } = await query;
 
@@ -65,7 +64,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       console.log('Fetched approval requests:', approvalData);
       setRequests(approvalData || []);
     } catch (error: any) {
-      console.error('Error fetching requests:', error);
+      console.error('Error in fetchRequests:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -151,7 +150,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     if (userId) {
       fetchRequests();
     }
-  }, [userId]);
+  }, [userId, userType]); // Ajout de userType comme dépendance
 
   return { 
     requests, 
