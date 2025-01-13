@@ -3,13 +3,14 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Tour } from "@/types/tour";
+import { BookingStatus } from "@/types/booking";
 
 interface ToursListProps {
   tours: Tour[];
   isCompleted?: boolean;
   onEdit: (tour: Tour) => void;
   onDelete: (tourId: number) => void;
-  onStatusChange: (tourId: number, newStatus: string) => void;
+  onStatusChange: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
 }
 
 export function ToursList({ 
@@ -48,9 +49,8 @@ export function ToursList({
         <TourCard
           key={tour.id}
           tour={tour}
-          onEdit={onEdit}
-          onDelete={onDelete}
           onStatusChange={onStatusChange}
+          onUpdate={() => Promise.resolve()}
         />
       ))}
     </div>
