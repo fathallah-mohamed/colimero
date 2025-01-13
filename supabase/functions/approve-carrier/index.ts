@@ -59,28 +59,56 @@ serve(async (req) => {
     console.log("Found carrier request:", request);
 
     try {
-      // Create auth user
-      console.log("Creating new auth user");
-      const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
-        email: request.email,
-        password: request.password || Math.random().toString(36).slice(-8),
-        email_confirm: true,
-        user_metadata: {
-          user_type: 'carrier',
-          first_name: request.first_name,
-          last_name: request.last_name,
-          company_name: request.company_name
-        }
-      });
+      // Check if user already exists
+      const { data: existingUsers, error: existingUserError } = await supabaseClient.auth.admin.listUsers();
+      
+      if (existingUserError) throw existingUserError;
+      
+      const existingUser = existingUsers?.users.find(user => user.email === request.email);
+      let userId;
 
-      if (authError) throw authError;
-      console.log("Auth user created successfully:", authData);
+      if (existingUser) {
+        console.log("User already exists, using existing user ID:", existingUser.id);
+        userId = existingUser.id;
+        
+        // Update existing user metadata
+        const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
+          userId,
+          {
+            user_metadata: {
+              user_type: 'carrier',
+              first_name: request.first_name,
+              last_name: request.last_name,
+              company_name: request.company_name
+            }
+          }
+        );
+        if (updateError) throw updateError;
+      } else {
+        // Create new auth user
+        console.log("Creating new auth user");
+        const { data: authData, error: authError } = await supabaseClient.auth.admin.createUser({
+          email: request.email,
+          password: request.password || Math.random().toString(36).slice(-8),
+          email_confirm: true,
+          user_metadata: {
+            user_type: 'carrier',
+            first_name: request.first_name,
+            last_name: request.last_name,
+            company_name: request.company_name
+          }
+        });
 
-      // Create carrier profile using the new auth user ID
+        if (authError) throw authError;
+        userId = authData.user.id;
+        console.log("Auth user created successfully:", authData);
+      }
+
+      // Create or update carrier profile
       const { error: carrierError } = await supabaseClient
         .from('carriers')
-        .insert({
-          id: authData.user.id, // Use the auth user ID here
+        .upsert({
+          id: userId,
           email: request.email,
           first_name: request.first_name,
           last_name: request.last_name,
@@ -101,11 +129,11 @@ serve(async (req) => {
 
       if (carrierError) throw carrierError;
 
-      // Create carrier capacities
+      // Create or update carrier capacities
       const { error: capacityError } = await supabaseClient
         .from('carrier_capacities')
-        .insert({
-          carrier_id: authData.user.id, // Use the auth user ID here
+        .upsert({
+          carrier_id: userId,
           total_capacity: request.total_capacity || 1000,
           price_per_kg: request.price_per_kg || 12
         });
@@ -115,10 +143,16 @@ serve(async (req) => {
       // Create carrier services
       if (request.services && request.services.length > 0) {
         const services = request.services.map(service => ({
-          carrier_id: authData.user.id, // Use the auth user ID here
+          carrier_id: userId,
           service_type: service,
           icon: 'package'
         }));
+
+        // Delete existing services first
+        await supabaseClient
+          .from('carrier_services')
+          .delete()
+          .eq('carrier_id', userId);
 
         const { error: servicesError } = await supabaseClient
           .from('carrier_services')
@@ -139,7 +173,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          carrier: authData.user,
+          carrier: { id: userId },
           message: "Carrier approved and account created successfully"
         }),
         { 
