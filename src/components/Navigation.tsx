@@ -27,8 +27,9 @@ export default function Navigation() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkSession = async () => {
+    const initSession = async () => {
       try {
+        // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -36,38 +37,63 @@ export default function Navigation() {
           return;
         }
 
+        // If no session, try to refresh
         if (!session) {
-          const { error: refreshError } = await supabase.auth.refreshSession();
+          const { data: { session: refreshedSession }, error: refreshError } = 
+            await supabase.auth.refreshSession();
+          
           if (refreshError) {
-            // Only log refresh token errors, don't show them to users
-            console.error("Session refresh error:", refreshError);
-            
-            // If it's specifically a refresh token error, handle silently
-            if (refreshError.message.includes("refresh_token_not_found")) {
+            if (refreshError.message.includes('session_not_found')) {
+              // Silent handling for missing session
               return;
             }
             
-            // For other errors, show a toast
+            console.error("Session refresh error:", refreshError);
             toast({
               variant: "destructive",
               title: "Erreur de session",
               description: "Une erreur est survenue lors de la vérification de votre session.",
             });
+            return;
+          }
+
+          if (!refreshedSession) {
+            // No session after refresh attempt
+            return;
           }
         }
+
+        // Set up auth state change listener
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+            // Handle sign out
+            if (location.pathname.includes('/reserver/')) {
+              window.location.href = '/';
+            }
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            // Handle successful sign in or token refresh
+            console.log('Auth state updated:', event);
+          }
+        });
+
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error) {
-        console.error("Session check error:", error);
+        console.error("Session initialization error:", error);
       }
     };
 
-    checkSession();
+    initSession();
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [toast]);
+  }, [location.pathname, toast]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
