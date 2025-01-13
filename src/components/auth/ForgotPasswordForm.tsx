@@ -49,6 +49,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
 
         if (!response.ok) {
           const errorData = await response.json();
+          console.error("Erreur de la fonction d'envoi d'email:", errorData);
           throw new Error(errorData.error || "Erreur lors de l'envoi de l'email");
         }
       }
