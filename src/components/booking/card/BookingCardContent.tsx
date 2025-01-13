@@ -5,8 +5,8 @@ import { BookingStatusActions } from "../actions/BookingStatusActions";
 import { EditBookingDialog } from "../EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { BookingCardDetails } from "./BookingCardDetails";
+import { Card } from "@/components/ui/card";
 
 interface BookingCardContentProps {
   booking: any;
@@ -35,34 +35,40 @@ export function BookingCardContent({
   const handleEditSuccess = async () => {
     await onUpdate();
     setShowEditDialog(false);
+    toast({
+      title: "Réservation mise à jour",
+      description: "Les modifications ont été enregistrées avec succès.",
+    });
   };
 
   return (
-    <>
-      <div className="flex justify-between items-start">
-        <BookingHeader booking={booking} />
-        <BookingStatusBadge status={booking.status} />
-      </div>
+    <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
+      <div className="space-y-6">
+        <div className="flex justify-between items-start">
+          <BookingHeader booking={booking} />
+          <BookingStatusBadge status={booking.status} />
+        </div>
 
-      <BookingCardDetails booking={booking} />
+        <BookingCardDetails booking={booking} />
 
-      <div className="mt-4">
-        <BookingStatusActions
-          bookingId={booking.id}
-          bookingStatus={booking.status}
-          tourStatus={tourStatus || ""}
-          isCarrier={isCarrier}
-          onStatusChange={onUpdate}
-          onEdit={handleEdit}
+        <div className="pt-4 border-t">
+          <BookingStatusActions
+            bookingId={booking.id}
+            bookingStatus={booking.status}
+            tourStatus={tourStatus || ""}
+            isCarrier={isCarrier}
+            onStatusChange={onUpdate}
+            onEdit={handleEdit}
+          />
+        </div>
+
+        <EditBookingDialog
+          booking={booking}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          onSuccess={handleEditSuccess}
         />
       </div>
-
-      <EditBookingDialog
-        booking={booking}
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        onSuccess={handleEditSuccess}
-      />
-    </>
+    </Card>
   );
 }

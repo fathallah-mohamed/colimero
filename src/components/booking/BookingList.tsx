@@ -35,9 +35,7 @@ export function BookingList() {
         throw error;
       }
       
-      console.log("Bookings data:", data);
-      
-      const normalizedData = data?.map(booking => ({
+      return data?.map(booking => ({
         ...booking,
         special_items: Array.isArray(booking.special_items) 
           ? booking.special_items.map(item => {
@@ -53,23 +51,27 @@ export function BookingList() {
           ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
           : null
       }));
-
-      return normalizedData;
     },
   });
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
-    console.log("Status change requested:", bookingId, newStatus);
-  };
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
 
-  const handleUpdate = async (): Promise<void> => {
-    await refetch();
+      if (error) throw error;
+      await refetch();
+    } catch (err) {
+      console.error("Error updating booking status:", err);
+    }
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -90,14 +92,14 @@ export function BookingList() {
 
   return (
     <div className="space-y-6">
-      {bookings.map((booking, index) => (
+      {bookings.map((booking) => (
         <BookingCard 
           key={booking.id} 
           booking={booking} 
           isCollecting={true}
           onStatusChange={handleStatusChange}
-          onUpdate={handleUpdate}
-          isEven={index % 2 === 0}
+          onUpdate={refetch}
+          isEven={false}
         />
       ))}
     </div>
