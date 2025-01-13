@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const MAILGUN_API_KEY = Deno.env.get('MAILGUN_API_KEY')
-const MAILGUN_DOMAIN = 'sandbox0123456789abcdef.mailgun.org' // Remplacez par votre domaine Mailgun
+const MAILGUN_DOMAIN = 'colimero.com' // Updated domain
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
