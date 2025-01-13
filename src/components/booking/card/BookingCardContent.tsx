@@ -24,7 +24,7 @@ export function BookingCardContent({
   isCollecting, 
   onStatusChange,
   onUpdate,
-  tourStatus,
+  tourStatus = "Programmée",
   isCarrier = false
 }: BookingCardContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -68,8 +68,6 @@ export function BookingCardContent({
     }
   };
 
-  const canModifyBooking = tourStatus === "Programmée";
-
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
       <div className="space-y-4">
@@ -98,7 +96,7 @@ export function BookingCardContent({
 
           <div className="flex items-center space-x-4">
             <BookingStatusBadge status={booking.status} />
-            {canModifyBooking && (
+            {tourStatus === "Programmée" && booking.status !== "cancelled" && (
               <BookingStatusActions
                 bookingId={booking.id}
                 bookingStatus={booking.status}
