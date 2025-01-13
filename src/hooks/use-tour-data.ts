@@ -71,7 +71,9 @@ export function useTourData({
         }
       }
 
+      // Appliquer le filtre de statut seulement si ce n'est pas "all"
       if (status !== 'all') {
+        console.log('Filtering by status:', status);
         query = query.eq('status', status);
       }
 

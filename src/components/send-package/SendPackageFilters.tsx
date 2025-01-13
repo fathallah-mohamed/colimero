@@ -26,6 +26,8 @@ export function SendPackageFilters({
   sortBy,
   setSortBy
 }: SendPackageFiltersProps) {
+  console.log('Current status:', selectedStatus); // Debug log
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue={tourType} onValueChange={(value) => setTourType(value as "public" | "private")}>
