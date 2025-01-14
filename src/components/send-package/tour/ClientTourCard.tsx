@@ -5,7 +5,7 @@ import { Tour } from "@/types/tour";
 import { cn } from "@/lib/utils";
 import { CardCustom } from "@/components/ui/card-custom";
 import { useNavigate } from "react-router-dom";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { TourMainInfo } from "./components/TourMainInfo";
@@ -21,6 +21,27 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [selectedPoint, setSelectedPoint] = useState<string>("");
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const checkExistingBooking = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+
+    const { data: existingBooking, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('tour_id', tour.id)
+      .eq('user_id', session.user.id)
+      .neq('status', 'cancelled')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing booking:', error);
+      return null;
+    }
+
+    return existingBooking;
+  };
 
   const handleBookingButtonClick = async () => {
     if (!selectedPoint) {
@@ -48,6 +69,18 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         variant: "destructive",
         title: "Accès refusé",
         description: "Les transporteurs ne peuvent pas effectuer de réservations",
+      });
+      return;
+    }
+
+    // Vérifier si l'utilisateur a déjà une réservation active sur cette tournée
+    const existingBooking = await checkExistingBooking();
+    
+    if (existingBooking) {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Vous avez déjà une réservation en cours sur cette tournée. Veuillez choisir une autre tournée ou annuler votre réservation existante.",
       });
       return;
     }
