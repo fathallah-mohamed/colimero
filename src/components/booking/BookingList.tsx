@@ -58,12 +58,21 @@ export function BookingList() {
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     try {
+      console.log("Updating booking status:", { bookingId, newStatus });
+      
       const { error } = await supabase
         .from('bookings')
-        .update({ status: newStatus })
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus 
+        })
         .eq('id', bookingId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating booking status:", error);
+        throw error;
+      }
+      
       await refetch();
     } catch (err) {
       console.error("Error updating booking status:", err);
