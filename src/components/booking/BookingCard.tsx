@@ -10,6 +10,7 @@ import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
 import { BookingCardHeader } from "./card/BookingCardHeader";
 import { BookingAddressInfo } from "./card/BookingAddressInfo";
 import { BookingActions } from "./card/BookingActions";
+import { useUserData } from "@/components/navigation/menu/useUserData";
 
 interface BookingCardProps {
   booking: any;
@@ -30,6 +31,7 @@ export function BookingCard({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
+  const userData = useUserData();
 
   const handleEditSuccess = async () => {
     await onUpdate();
@@ -56,6 +58,7 @@ export function BookingCard({
             onStatusChange={onStatusChange}
             onUpdate={onUpdate}
             onEdit={() => setShowEditDialog(true)}
+            userType={userData?.user_type}
           />
         </div>
 

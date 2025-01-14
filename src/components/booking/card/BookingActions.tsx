@@ -22,6 +22,7 @@ interface BookingActionsProps {
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
   onUpdate: () => Promise<void>;
   onEdit: () => void;
+  userType?: string | null;
 }
 
 export function BookingActions({ 
@@ -30,7 +31,8 @@ export function BookingActions({
   tourStatus,
   onStatusChange,
   onUpdate,
-  onEdit 
+  onEdit,
+  userType
 }: BookingActionsProps) {
   const { toast } = useToast();
 
@@ -70,7 +72,7 @@ export function BookingActions({
 
   return (
     <div className="flex items-center gap-2">
-      {status === "pending" && (
+      {status === "pending" && userType === "carrier" && (
         <Button
           variant="outline"
           size="sm"
