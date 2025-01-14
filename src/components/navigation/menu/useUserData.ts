@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface UserData {
   first_name: string;
   last_name: string;
+  email: string;
 }
 
 export function useUserData(userType: string | null) {
@@ -16,13 +17,13 @@ export function useUserData(userType: string | null) {
 
       let profileData;
       if (userType === 'admin') {
-        const { data } = await supabase.from('administrators').select('first_name, last_name').eq('id', user.id).single();
+        const { data } = await supabase.from('administrators').select('first_name, last_name, email').eq('id', user.id).single();
         profileData = data;
       } else if (userType === 'carrier') {
-        const { data } = await supabase.from('carriers').select('first_name, last_name').eq('id', user.id).single();
+        const { data } = await supabase.from('carriers').select('first_name, last_name, email').eq('id', user.id).single();
         profileData = data;
       } else {
-        const { data } = await supabase.from('clients').select('first_name, last_name').eq('id', user.id).single();
+        const { data } = await supabase.from('clients').select('first_name, last_name, email').eq('id', user.id).single();
         profileData = data;
       }
 
