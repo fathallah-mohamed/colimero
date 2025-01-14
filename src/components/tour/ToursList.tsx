@@ -45,10 +45,11 @@ export function ToursList({
 
   return (
     <div className="space-y-4">
-      {tours.map((tour) => (
+      {tours.map((tour, index) => (
         <TourCard
           key={tour.id}
           tour={tour}
+          isEven={index % 2 === 0}
           onStatusChange={onStatusChange}
           onUpdate={() => Promise.resolve()}
         />

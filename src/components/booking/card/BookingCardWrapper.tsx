@@ -10,7 +10,7 @@ export function BookingCardWrapper({ children, isEven = false }: BookingCardWrap
   return (
     <div className={cn(
       "rounded-lg shadow-sm p-6 space-y-4",
-      isEven ? "bg-[#F1F1F1]" : "bg-[#F3F3F3]"
+      isEven ? "bg-secondary" : "bg-muted"
     )}>
       {children}
     </div>

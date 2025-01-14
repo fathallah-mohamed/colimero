@@ -11,12 +11,14 @@ import type { BookingStatus } from "@/types/booking";
 
 interface TourCardProps {
   tour: Tour;
+  isEven?: boolean;
   onStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
   onUpdate?: () => Promise<void>;
 }
 
 export function TourCard({ 
   tour,
+  isEven = false,
   onStatusChange,
   onUpdate
 }: TourCardProps) {
@@ -47,7 +49,11 @@ export function TourCard({
   };
 
   return (
-    <Card className="p-6">
+    <Card className={cn(
+      "p-6",
+      isEven ? "bg-secondary hover:bg-secondary/90" : "bg-muted hover:bg-muted/90",
+      "transition-colors duration-200"
+    )}>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-lg font-semibold">
@@ -77,13 +83,14 @@ export function TourCard({
       />
 
       <div className="mt-6 space-y-4">
-        {tour.bookings?.map((booking: any) => (
+        {tour.bookings?.map((booking: any, index: number) => (
           <BookingCard
             key={booking.id}
             booking={booking}
             isCollecting={tour.status === "Ramassage en cours"}
             onStatusChange={onStatusChange || (() => Promise.resolve())}
             onUpdate={onUpdate || (() => Promise.resolve())}
+            isEven={index % 2 === 0}
             tourStatus={tour.status}
           />
         ))}
