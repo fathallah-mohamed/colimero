@@ -66,20 +66,24 @@ export function BookingActions({
     }
   };
 
-  // Si le statut de la tournée n'est pas "Programmée", ne pas afficher les actions
-  if (tourStatus !== "Programmée") {
+  // Pour les clients, n'autoriser les modifications que si le statut est "pending" et la tournée est "Programmée"
+  const canClientModify = userType === "client" && status === "pending" && tourStatus === "Programmée";
+  
+  // Pour les transporteurs:
+  // - Si la tournée est "Programmée": autoriser modification/annulation des réservations en attente
+  // - Si la tournée est "Ramassage en cours": autoriser le ramassage des réservations en attente
+  const canCarrierModify = userType === "carrier" && status === "pending";
+  const canCarrierCollect = userType === "carrier" && status === "pending" && tourStatus === "Ramassage en cours";
+  const canCarrierEditOrCancel = userType === "carrier" && status === "pending" && tourStatus === "Programmée";
+
+  if (!canClientModify && !canCarrierModify) {
     return null;
   }
 
-  // Pour les clients, n'autoriser les modifications que si le statut est "pending"
-  const canClientModify = userType === "client" && status === "pending";
-  // Pour les transporteurs, autoriser les actions sur les réservations en attente
-  const canCarrierModify = userType === "carrier" && status === "pending";
-
   return (
     <div className="flex items-center gap-2">
-      {/* Bouton "Marquer comme ramassée" - uniquement pour les transporteurs */}
-      {canCarrierModify && (
+      {/* Bouton "Marquer comme ramassée" - uniquement pour les transporteurs pendant la phase de ramassage */}
+      {canCarrierCollect && (
         <Button
           variant="outline"
           size="sm"
@@ -91,8 +95,8 @@ export function BookingActions({
         </Button>
       )}
       
-      {/* Bouton Modifier - uniquement si le client peut modifier */}
-      {canClientModify && (
+      {/* Bouton Modifier - si le client peut modifier ou si le transporteur peut modifier */}
+      {(canClientModify || canCarrierEditOrCancel) && (
         <Button
           variant="outline"
           size="sm"
@@ -104,8 +108,8 @@ export function BookingActions({
         </Button>
       )}
       
-      {/* Bouton Annuler - uniquement si le client peut modifier */}
-      {canClientModify && (
+      {/* Bouton Annuler - si le client peut modifier ou si le transporteur peut modifier */}
+      {(canClientModify || canCarrierEditOrCancel) && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
