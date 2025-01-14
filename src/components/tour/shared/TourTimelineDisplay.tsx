@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
-  onStatusChange?: (newStatus: string) => Promise<void>;
+  onStatusChange?: (newStatus: TourStatus) => Promise<void>;
   tourId: number;
   userType?: string;
   canEdit?: boolean;
@@ -44,7 +44,7 @@ export function TourTimelineDisplay({
     return <CancelledStatus />;
   }
 
-  const statusOrder = [
+  const statusOrder: TourStatus[] = [
     "Programmée",
     "Ramassage en cours",
     "En transit",
@@ -57,7 +57,7 @@ export function TourTimelineDisplay({
 
   const handleCancel = async () => {
     if (onStatusChange) {
-      await onStatusChange("Annulée");
+      await onStatusChange("Annulée" as TourStatus);
     }
     setShowCancelDialog(false);
   };

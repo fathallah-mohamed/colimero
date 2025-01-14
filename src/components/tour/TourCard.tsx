@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 import { TourStatusBadge } from "./TourStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { TourTimelineDisplay } from "./shared/TourTimelineDisplay";
-import type { Tour } from "@/types/tour";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tour, TourStatus } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
 
 interface TourCardProps {
@@ -53,7 +54,7 @@ export function TourCard({
     }
   };
 
-  const handleTourStatusChange = async (newStatus: string) => {
+  const handleTourStatusChange = async (newStatus: TourStatus) => {
     try {
       const { data, error } = await supabase
         .from('tours')
