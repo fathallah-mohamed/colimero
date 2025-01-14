@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
-import { TourTimelineDisplay } from "@/components/tour/shared/TourTimelineDisplay";
+import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -34,48 +35,94 @@ export function TourTimelineCard({
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const isBookingEnabled = () => {
-    return selectedPickupCity && tour.status === "Programmée" && userType !== 'admin';
-  };
+  useEffect(() => {
+    checkExistingRequest();
+  }, [tour.id]);
 
-  const isPickupSelectionEnabled = () => {
-    return tour.status === "Programmée" && userType !== 'admin';
-  };
+  const checkExistingRequest = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-  const getBookingButtonText = () => {
-    if (tour.status === "Annulée") return "Cette tournée a été annulée";
-    if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
-    if (tour.status === "Ramassage en cours") return "Cette tournée est en cours de collecte";
-    if (tour.status === "En transit") return "Cette tournée est en cours de livraison";
-    if (tour.status === "Terminée") return "Cette tournée est terminée";
-    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
-    return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
-  };
+    const { data: request, error } = await supabase
+      .from('approval_requests')
+      .select('*')
+      .eq('tour_id', tour.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-  const handleBookingClick = async () => {
-    if (!selectedPickupCity) return;
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      setShowAuthDialog(true);
+    if (error) {
+      console.error('Error checking existing request:', error);
       return;
     }
 
-    const userType = session.user.user_metadata?.user_type;
-    if (userType !== 'client') {
+    setExistingRequest(request);
+  };
+
+  const handleActionClick = async () => {
+    if (!selectedPickupCity) {
+      toast({
+        variant: "destructive",
+        title: "Point de collecte requis",
+        description: "Veuillez sélectionner un point de collecte",
+      });
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
       setShowAuthDialog(true);
       return;
     }
 
     if (tour.type === 'private') {
+      if (existingRequest) {
+        toast({
+          title: "Demande existante",
+          description: `Votre demande est ${existingRequest.status === 'pending' ? 'en attente' : existingRequest.status}`,
+        });
+        return;
+      }
       setShowApprovalDialog(true);
     } else {
       navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
+  };
+
+  const getActionButtonText = () => {
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            return "Demande en attente d'approbation";
+          case 'approved':
+            return "Demande approuvée - Réserver";
+          case 'rejected':
+            return "Demande rejetée";
+          default:
+            return "Demander l'approbation";
+        }
+      }
+      return "Demander l'approbation";
+    }
+    return "Réserver maintenant";
+  };
+
+  const isActionEnabled = () => {
+    if (!selectedPickupCity) return false;
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        return existingRequest.status === 'approved';
+      }
+      return true;
+    }
+    return true;
   };
 
   return (
@@ -110,10 +157,9 @@ export function TourTimelineCard({
               className="overflow-hidden"
             >
               <div className="pt-6 space-y-6">
-                <TourTimelineDisplay 
+                <ClientTimeline 
                   status={tour.status} 
                   tourId={tour.id}
-                  variant="client"
                 />
 
                 <div>
@@ -122,20 +168,22 @@ export function TourTimelineCard({
                     points={tour.route}
                     selectedPoint={selectedPickupCity || ''}
                     onPointSelect={setSelectedPickupCity}
-                    isSelectionEnabled={isPickupSelectionEnabled()}
+                    isSelectionEnabled={tour.status === "Programmée"}
                     tourDepartureDate={tour.departure_date}
                   />
                 </div>
 
-                <div>
-                  <Button 
-                    onClick={handleBookingClick}
-                    className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-                    disabled={!isBookingEnabled()}
-                  >
-                    {getBookingButtonText()}
-                  </Button>
-                </div>
+                {userType === 'client' && tour.status === "Programmée" && (
+                  <div>
+                    <Button 
+                      onClick={handleActionClick}
+                      className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
+                      disabled={!isActionEnabled()}
+                    >
+                      {getActionButtonText()}
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -143,17 +191,11 @@ export function TourTimelineCard({
       </div>
 
       <AuthDialog 
-        open={showAuthDialog} 
-        onOpenChange={setShowAuthDialog}
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
         onSuccess={() => {
           setShowAuthDialog(false);
-          if (selectedPickupCity) {
-            if (tour.type === 'private') {
-              setShowApprovalDialog(true);
-            } else {
-              navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-            }
-          }
+          checkExistingRequest();
         }}
         requiredUserType="client"
       />

@@ -10,14 +10,9 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface MenuItemsProps {
-  isMobile?: boolean;
-}
-
-export default function MenuItems({ isMobile }: MenuItemsProps) {
+export default function MenuItems() {
   const location = useLocation();
-  const isDefaultMobile = useIsMobile();
-  const isMobileView = isMobile || isDefaultMobile;
+  const isMobile = useIsMobile();
 
   const renderMenuItem = (item: typeof menuItems[0]) => {
     const isActive = location.pathname === item.href;
@@ -28,7 +23,7 @@ export default function MenuItems({ isMobile }: MenuItemsProps) {
           "hover:bg-primary/10 hover:scale-105 active:scale-95",
           isActive ? "text-primary" : "text-gray-700",
           item.highlight && !isActive && "bg-primary text-white hover:bg-primary/90",
-          isMobileView && "w-full"
+          "w-full lg:w-auto justify-start lg:justify-center"
         )}
         whileHover={{ y: -2 }}
         whileTap={{ y: 0 }}
@@ -37,12 +32,12 @@ export default function MenuItems({ isMobile }: MenuItemsProps) {
           className={cn(
             "w-5 h-5 shrink-0",
             isActive ? "text-primary" : item.highlight ? "text-white" : "text-gray-500",
-            isMobileView ? "mr-3" : "mr-2"
+            isMobile ? "mr-3" : "mr-2"
           )}
         />
         <span className={cn(
           "whitespace-nowrap",
-          isMobileView ? "block" : item.hideTextOnMobile ? "hidden xl:block" : "block"
+          isMobile ? "block" : item.hideTextOnMobile ? "hidden xl:block" : "block"
         )}>
           {item.name}
         </span>
@@ -58,7 +53,7 @@ export default function MenuItems({ isMobile }: MenuItemsProps) {
       </motion.div>
     );
 
-    return isMobileView ? (
+    return isMobile ? (
       <Link
         key={item.name}
         to={item.href}
@@ -89,9 +84,9 @@ export default function MenuItems({ isMobile }: MenuItemsProps) {
 
   return (
     <div className={cn(
-      isMobileView 
-        ? "flex flex-col space-y-1 w-full" 
-        : "flex items-center space-x-1 lg:flex-nowrap lg:overflow-x-auto lg:pb-2 scrollbar-hide"
+      "flex items-center space-x-1",
+      "lg:flex-nowrap lg:overflow-x-auto lg:pb-2",
+      "scrollbar-hide"
     )}>
       {menuItems.map(renderMenuItem)}
     </div>

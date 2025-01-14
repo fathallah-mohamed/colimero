@@ -6,7 +6,7 @@ import { SelectableCollectionPointsList } from "@/components/tour/SelectableColl
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 interface TourExpandedContentProps {
   tour: Tour;
@@ -193,8 +193,8 @@ export function TourExpandedContent({
       </Button>
 
       <AuthDialog 
-        open={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
         onSuccess={() => {
           setShowAuthDialog(false);
           handlePrivateTourAction();

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 import { ApprovalRequestsList } from "@/components/approval-requests/ApprovalRequestsList";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
+import { useState } from "react";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
@@ -40,8 +41,8 @@ export default function MesDemandesApprobation() {
           <ApprovalRequestsList />
         ) : (
           <AuthDialog 
-            open={showAuthDialog} 
-            onOpenChange={setShowAuthDialog}
+            isOpen={showAuthDialog} 
+            onClose={() => setShowAuthDialog(false)}
             requiredUserType="client"
           />
         )}

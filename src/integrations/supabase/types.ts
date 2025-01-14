@@ -574,8 +574,6 @@ export type Database = {
       }
       clients: {
         Row: {
-          activation_expires_at: string | null
-          activation_token: string | null
           address: string | null
           birth_date: string | null
           created_at: string
@@ -584,7 +582,6 @@ export type Database = {
           first_name: string | null
           id: string
           id_document: string | null
-          is_activated: boolean | null
           last_name: string | null
           phone: string | null
           status: string
@@ -592,8 +589,6 @@ export type Database = {
           terms_accepted_at: string | null
         }
         Insert: {
-          activation_expires_at?: string | null
-          activation_token?: string | null
           address?: string | null
           birth_date?: string | null
           created_at?: string
@@ -602,7 +597,6 @@ export type Database = {
           first_name?: string | null
           id: string
           id_document?: string | null
-          is_activated?: boolean | null
           last_name?: string | null
           phone?: string | null
           status?: string
@@ -610,8 +604,6 @@ export type Database = {
           terms_accepted_at?: string | null
         }
         Update: {
-          activation_expires_at?: string | null
-          activation_token?: string | null
           address?: string | null
           birth_date?: string | null
           created_at?: string
@@ -620,7 +612,6 @@ export type Database = {
           first_name?: string | null
           id?: string
           id_document?: string | null
-          is_activated?: boolean | null
           last_name?: string | null
           phone?: string | null
           status?: string

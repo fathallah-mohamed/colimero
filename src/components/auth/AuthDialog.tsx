@@ -4,34 +4,32 @@ import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { useState } from "react";
 import { Button } from "../ui/button";
 
-export type UserType = "client" | "carrier" | "admin";
-
-export interface AuthDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface AuthDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
   onSuccess?: () => void;
-  requiredUserType?: UserType;
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
+  requiredUserType?: "client" | "carrier";
 }
 
-export function AuthDialog({
-  open,
-  onOpenChange,
+export default function AuthDialog({
+  isOpen,
+  onClose,
   onSuccess,
-  requiredUserType,
   onRegisterClick,
-  onCarrierRegisterClick
+  onCarrierRegisterClick,
+  requiredUserType,
 }: AuthDialogProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleForgotPasswordSuccess = () => {
     setShowForgotPassword(false);
-    onOpenChange(false);
+    onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
@@ -55,15 +53,30 @@ export function AuthDialog({
         ) : (
           <div className="space-y-4">
             <LoginForm
-              onSuccess={() => {
-                onOpenChange(false);
-                onSuccess?.();
-              }}
+              onSuccess={onSuccess}
               onForgotPasswordClick={() => setShowForgotPassword(true)}
-              onRegisterClick={onRegisterClick}
-              onCarrierRegisterClick={onCarrierRegisterClick}
               requiredUserType={requiredUserType}
             />
+            <div className="flex flex-col gap-2">
+              {onRegisterClick && (
+                <Button
+                  variant="outline"
+                  onClick={onRegisterClick}
+                  className="w-full"
+                >
+                  Créer un compte client
+                </Button>
+              )}
+              {onCarrierRegisterClick && (
+                <Button
+                  variant="outline"
+                  onClick={onCarrierRegisterClick}
+                  className="w-full"
+                >
+                  Devenir transporteur
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </DialogContent>

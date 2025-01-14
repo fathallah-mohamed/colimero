@@ -1,13 +1,4 @@
 project_id = "dsmahpgrhjoikcxuiqrw"
 
-[api]
-enabled = true
-url = "https://dsmahpgrhjoikcxuiqrw.supabase.co/functions/v1"
-
-[[headers]]
-for = "/send-activation-email"
-values = { Authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
-
-[[headers]]
-for = "/verify-activation"
-values = { Authorization = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+[functions.send-registration-email]
+verify_jwt = false

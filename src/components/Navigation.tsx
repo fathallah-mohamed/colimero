@@ -3,34 +3,95 @@ import { Link, useLocation } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
 import MenuItems from "@/components/navigation/MenuItems";
+import MobileMenu from "@/components/navigation/MobileMenu";
+import AuthDialog from "@/components/auth/AuthDialog";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import CarrierSignupForm from "@/components/auth/carrier-signup/CarrierSignupForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { AuthSection } from "@/components/navigation/AuthSection";
-import { AuthDialog } from "@/components/auth/AuthDialog";
-import { useAuthState } from "@/hooks/useAuthState";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Navigation() {
-  const { user, userType, handleLogout } = useNavigation();
   const [isOpen, setIsOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
+  const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-
-  // Use the new auth state hook
-  useAuthState();
+  const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
+    const initSession = async () => {
+      try {
+        // Get current session first
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          // Clear potentially corrupted session data
+          localStorage.removeItem('supabase.auth.token');
+          return;
+        }
+
+        // Set up auth state change listener
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+          if (!mounted) return;
+
+          console.log('Auth event:', event);
+
+          if (event === 'SIGNED_IN') {
+            console.log('User signed in successfully');
+          } else if (event === 'SIGNED_OUT') {
+            console.log('User signed out');
+            localStorage.removeItem('supabase.auth.token');
+            if (location.pathname.includes('/reserver/')) {
+              window.location.href = '/';
+            }
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log('Session token refreshed');
+          } else if (event === 'USER_UPDATED') {
+            console.log('User data updated');
+          }
+        });
+
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error("Session initialization error:", error);
+        localStorage.removeItem('supabase.auth.token');
+      }
+    };
+
+    initSession();
+
     const handleScroll = () => {
+      if (!mounted) return;
       setIsScrolled(window.scrollY > 0);
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
+        isOpen &&
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target as Node) &&
         mobileButtonRef.current &&
@@ -42,63 +103,109 @@ export default function Navigation() {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
-    setIsOpen(false);
+    if (location.pathname.includes('/reserver/')) {
+      sessionStorage.setItem('returnPath', location.pathname);
+    }
   }, [location.pathname]);
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-        isScrolled ? "bg-white shadow-md" : "bg-transparent"
-      }`}
-    >
+    <nav className={cn(
+      "fixed top-0 left-0 right-0 bg-white z-50 transition-all duration-300",
+      isScrolled ? "shadow-lg py-2" : "shadow-sm py-4"
+    )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-2xl font-bold text-blue-600">
-                Colimero
-              </Link>
-            </div>
-            <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
-              <MenuItems />
-            </div>
+        <div className="flex justify-between items-center">
+          {/* Logo Section */}
+          <motion.div 
+            className="flex items-center"
+            initial={false}
+            animate={{ scale: isScrolled ? 0.95 : 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Link 
+              to="/" 
+              className="text-2xl lg:text-3xl font-bold text-primary hover:opacity-90 transition-opacity"
+            >
+              Colimero
+            </Link>
+          </motion.div>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
+            <MenuItems />
           </div>
 
-          <AuthSection
-            user={user}
-            userType={userType}
-            handleLogout={handleLogout}
-            setShowAuthDialog={setShowAuthDialog}
-          />
-
-          <div className="flex items-center lg:hidden">
-            <MobileMenuButton
+          {/* Auth Section */}
+          <div className="flex items-center space-x-6 lg:space-x-8">
+            <AuthSection
+              user={user}
+              userType={userType}
+              handleLogout={handleLogout}
+              setShowAuthDialog={setShowAuthDialog}
+            />
+            
+            <MobileMenuButton 
               ref={mobileButtonRef}
               isOpen={isOpen}
               onClick={() => setIsOpen(!isOpen)}
+              className="block lg:hidden"
             />
           </div>
         </div>
       </div>
 
-      <div
+      {/* Mobile Menu */}
+      <div 
         ref={mobileMenuRef}
-        className={`lg:hidden transition-all duration-200 ease-in-out ${
-          isOpen ? "max-h-screen" : "max-h-0 overflow-hidden"
-        }`}
+        className={cn(
+          "block lg:hidden transition-all duration-300 ease-in-out",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
       >
-        <div className="px-2 pt-2 pb-3 space-y-1 bg-white shadow-lg">
-          <MenuItems isMobile={true} />
-        </div>
+        <MobileMenu
+          isOpen={isOpen}
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setIsOpen={setIsOpen}
+          setShowAuthDialog={setShowAuthDialog}
+        />
       </div>
 
-      <AuthDialog
-        open={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
+      {/* Dialogs */}
+      <AuthDialog 
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={() => setShowAuthDialog(false)}
+        onRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowRegisterForm(true);
+        }}
+        onCarrierRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowCarrierSignupForm(true);
+        }}
       />
+
+      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
+        <DialogContent className="max-w-2xl">
+          <RegisterForm onLogin={() => {
+            setShowRegisterForm(false);
+            setShowAuthDialog(true);
+          }} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCarrierSignupForm} onOpenChange={setShowCarrierSignupForm}>
+        <DialogContent className="max-w-2xl">
+          <CarrierSignupForm onSuccess={() => {
+            setShowCarrierSignupForm(false);
+          }} />
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }
