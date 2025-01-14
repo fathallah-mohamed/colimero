@@ -76,7 +76,7 @@ export default function MobileMenu({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+      <div className="flex-1 overflow-y-auto px-4 pb-6">
         {/* Actions principales en haut */}
         <div className="space-y-2 mb-4">
           {menuItems
