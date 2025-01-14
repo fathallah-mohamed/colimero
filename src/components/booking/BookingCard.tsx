@@ -4,7 +4,7 @@ import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCardDetails } from "./card/BookingCardDetails";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
 import { BookingCardHeader } from "./card/BookingCardHeader";
@@ -49,6 +49,39 @@ export function BookingCard({
           <div className="flex-1">
             <BookingCardHeader booking={booking} />
             <BookingAddressInfo booking={booking} />
+            
+            {/* Dates importantes */}
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2 text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <div>
+                  <p className="text-sm text-gray-500">Date de départ</p>
+                  <p className="text-sm font-medium">
+                    {booking.tours?.departure_date_formatted || "Non définie"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <div>
+                  <p className="text-sm text-gray-500">Date de collecte</p>
+                  <p className="text-sm font-medium">
+                    {booking.tours?.collection_date_formatted || "Non définie"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Adresse de collecte */}
+            <div className="mt-2 flex items-center gap-2 text-gray-600">
+              <MapPin className="h-4 w-4" />
+              <div>
+                <p className="text-sm text-gray-500">Adresse de collecte</p>
+                <p className="text-sm font-medium">
+                  {booking.pickup_city}
+                </p>
+              </div>
+            </div>
           </div>
           
           <BookingActions
