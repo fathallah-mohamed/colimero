@@ -55,11 +55,12 @@ export function BookingCardContent({
         <div className="flex items-center justify-between">
           <BookingHeader booking={booking} />
           <BookingActions
-            booking={booking}
-            isCollecting={isCollecting}
-            onStatusChange={handleStatusChange}
-            onEdit={handleEdit}
+            bookingId={booking.id}
+            status={booking.status}
             tourStatus={tourStatus}
+            onStatusChange={handleStatusChange}
+            onUpdate={onUpdate}
+            onEdit={handleEdit}
           />
         </div>
 
