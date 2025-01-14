@@ -29,6 +29,10 @@ export async function generateTourPDF(tour: any) {
     doc.text(`Capacité totale: ${tour.total_capacity}kg`, 20, yPos);
     yPos += 7;
     doc.text(`Capacité restante: ${tour.remaining_capacity}kg`, 20, yPos);
+    yPos += 7;
+    doc.text(`Statut: ${tour.status}`, 20, yPos);
+    yPos += 7;
+    doc.text(`Type: ${tour.type === 'public' ? 'Publique' : 'Privée'}`, 20, yPos);
     yPos += 15;
 
     if (!bookings || bookings.length === 0) {
@@ -56,59 +60,71 @@ export async function generateTourPDF(tour: any) {
         doc.text(`Ville de livraison: ${city}`, 20, yPos);
         yPos += 10;
 
-        // Add table headers
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const headers = ['N° Suivi', 'Destinataire', 'Adresse', 'Téléphone', 'Poids', 'Statut'];
-        const colWidths = [30, 35, 45, 30, 20, 25];
-        let xPos = 15;
-
-        headers.forEach((header, i) => {
-          doc.text(header, xPos, yPos);
-          xPos += colWidths[i];
-        });
-        yPos += 7;
-
-        // Add a line under headers
-        doc.line(15, yPos - 3, 195, yPos - 3);
-        
-        // Add bookings for this city
+        // Process each booking
         cityBookings.forEach((booking) => {
-          if (yPos > 270) {
+          if (yPos > 250) {
             doc.addPage();
             yPos = 20;
-            
-            // Repeat headers on new page
-            xPos = 15;
-            headers.forEach((header, i) => {
-              doc.text(header, xPos, yPos);
-              xPos += colWidths[i];
-            });
-            yPos += 7;
-            doc.line(15, yPos - 3, 195, yPos - 3);
           }
 
-          xPos = 15;
-          doc.text(booking.tracking_number, xPos, yPos);
-          xPos += colWidths[0];
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'normal');
+
+          // Booking header
+          doc.text(`Réservation #${booking.tracking_number}`, 20, yPos);
+          yPos += 7;
+
+          // Sender info
+          doc.text("Expéditeur:", 25, yPos);
+          yPos += 5;
+          doc.setFontSize(10);
+          doc.text(`${booking.sender_name}`, 30, yPos);
+          yPos += 5;
+          doc.text(`Tél: ${booking.sender_phone}`, 30, yPos);
+          yPos += 5;
+          doc.text(`Ville: ${booking.pickup_city}`, 30, yPos);
+          yPos += 8;
+
+          // Recipient info
+          doc.setFontSize(12);
+          doc.text("Destinataire:", 25, yPos);
+          yPos += 5;
+          doc.setFontSize(10);
+          doc.text(`${booking.recipient_name}`, 30, yPos);
+          yPos += 5;
+          doc.text(`Tél: ${booking.recipient_phone}`, 30, yPos);
+          yPos += 5;
+          doc.text(`Adresse: ${booking.recipient_address}`, 30, yPos);
+          yPos += 8;
+
+          // Package details
+          doc.setFontSize(12);
+          doc.text("Détails du colis:", 25, yPos);
+          yPos += 5;
+          doc.setFontSize(10);
+          doc.text(`Poids: ${booking.weight}kg`, 30, yPos);
+          yPos += 5;
           
-          doc.text(booking.recipient_name, xPos, yPos);
-          xPos += colWidths[1];
-          
-          // Split long addresses into multiple lines if needed
-          const addressLines = doc.splitTextToSize(booking.recipient_address, 40);
-          doc.text(addressLines, xPos, yPos);
-          xPos += colWidths[2];
-          
-          doc.text(booking.recipient_phone, xPos, yPos);
-          xPos += colWidths[3];
-          
-          doc.text(`${booking.weight}kg`, xPos, yPos);
-          xPos += colWidths[4];
-          
-          doc.text(booking.status, xPos, yPos);
-          
-          yPos += addressLines.length > 1 ? 7 * addressLines.length : 7;
+          if (booking.content_types?.length > 0) {
+            doc.text(`Types de contenu: ${booking.content_types.join(", ")}`, 30, yPos);
+            yPos += 5;
+          }
+
+          if (booking.special_items?.length > 0) {
+            const specialItems = booking.special_items.map((item: any) => 
+              `${item.name}${item.quantity ? ` (${item.quantity})` : ''}`
+            ).join(", ");
+            doc.text(`Objets spéciaux: ${specialItems}`, 30, yPos);
+            yPos += 5;
+          }
+
+          if (booking.package_description) {
+            doc.text(`Description: ${booking.package_description}`, 30, yPos);
+            yPos += 5;
+          }
+
+          doc.text(`Statut: ${booking.status}`, 30, yPos);
+          yPos += 15;
         });
 
         yPos += 10; // Add space between cities

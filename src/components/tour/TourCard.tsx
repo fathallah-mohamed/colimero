@@ -76,16 +76,18 @@ export function TourCard({
           </div>
         </div>
         
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleDownloadPDF}
-          disabled={isGeneratingPDF}
-          className="flex items-center gap-2"
-        >
-          <FileDown className="h-4 w-4" />
-          {isGeneratingPDF ? "Génération..." : "Télécharger PDF"}
-        </Button>
+        {hasBookings && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+            className="flex items-center gap-2"
+          >
+            <FileDown className="h-4 w-4" />
+            {isGeneratingPDF ? "Génération..." : "Télécharger PDF"}
+          </Button>
+        )}
       </div>
 
       <TourCapacityInfo
