@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, ChevronDown, ChevronUp } from "lucide-react";
 import { TourCapacityInfo } from "./TourCapacityInfo";
 import { generateTourPDF } from "./tour-card/PDFGenerator";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +24,7 @@ export function TourCard({
   onUpdate
 }: TourCardProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showBookings, setShowBookings] = useState(false);
   const { toast } = useToast();
 
   const handleDownloadPDF = async () => {
@@ -48,6 +49,8 @@ export function TourCard({
       setIsGeneratingPDF(false);
     }
   };
+
+  const hasBookings = tour.bookings && tour.bookings.length > 0;
 
   return (
     <Card className={cn(
@@ -83,19 +86,43 @@ export function TourCard({
         bookingsCount={tour.bookings?.length || 0}
       />
 
-      <div className="mt-6 space-y-4">
-        {tour.bookings?.map((booking: any, index: number) => (
-          <BookingCard
-            key={booking.id}
-            booking={booking}
-            isCollecting={tour.status === "Ramassage en cours"}
-            onStatusChange={onStatusChange || (() => Promise.resolve())}
-            onUpdate={onUpdate || (() => Promise.resolve())}
-            isEven={index % 2 === 0}
-            tourStatus={tour.status}
-          />
-        ))}
-      </div>
+      {hasBookings && (
+        <div className="mt-4">
+          <Button
+            variant="ghost"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => setShowBookings(!showBookings)}
+          >
+            {showBookings ? (
+              <>
+                <ChevronUp className="h-4 w-4" />
+                Masquer les réservations
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4" />
+                Afficher les réservations ({tour.bookings.length})
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
+      {showBookings && hasBookings && (
+        <div className="mt-6 space-y-4">
+          {tour.bookings?.map((booking: any, index: number) => (
+            <BookingCard
+              key={booking.id}
+              booking={booking}
+              isCollecting={tour.status === "Ramassage en cours"}
+              onStatusChange={onStatusChange || (() => Promise.resolve())}
+              onUpdate={onUpdate || (() => Promise.resolve())}
+              isEven={index % 2 === 0}
+              tourStatus={tour.status}
+            />
+          ))}
+        </div>
+      )}
     </Card>
   );
 }
