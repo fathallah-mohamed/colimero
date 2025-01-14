@@ -58,15 +58,15 @@ export function BookingActions({
       // Invalider les caches pour forcer le rechargement
       await queryClient.invalidateQueries({ queryKey: ['bookings'] });
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
+      await queryClient.invalidateQueries({ queryKey: ['tours'] });
 
       // Appeler les callbacks pour mettre à jour l'UI
       await onStatusChange(bookingId, newStatus);
       await onUpdate();
 
-      const message = newStatus === "cancelled" ? "annulée" : "ramassée";
       toast({
-        title: `Réservation ${message}`,
-        description: `La réservation a été ${message} avec succès.`,
+        title: `Réservation ${newStatus === "collected" ? "ramassée" : "mise à jour"}`,
+        description: `La réservation a été ${newStatus === "collected" ? "ramassée" : "mise à jour"} avec succès.`,
       });
     } catch (error) {
       console.error('Error updating booking status:', error);
