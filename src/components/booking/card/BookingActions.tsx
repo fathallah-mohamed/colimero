@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Edit2, XCircle, Package } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import type { BookingStatus } from "@/types/booking";
+import { Edit2, XCircle, Package } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +12,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookingActionsProps {
   bookingId: string;
@@ -66,13 +66,20 @@ export function BookingActions({
     }
   };
 
+  // Si le statut de la tournée n'est pas "Programmée", ne pas afficher les actions
   if (tourStatus !== "Programmée") {
     return null;
   }
 
+  // Pour les clients, n'autoriser les modifications que si le statut est "pending"
+  const canClientModify = userType === "client" && status === "pending";
+  // Pour les transporteurs, autoriser les actions sur les réservations en attente
+  const canCarrierModify = userType === "carrier" && status === "pending";
+
   return (
     <div className="flex items-center gap-2">
-      {status === "pending" && userType === "carrier" && (
+      {/* Bouton "Marquer comme ramassée" - uniquement pour les transporteurs */}
+      {canCarrierModify && (
         <Button
           variant="outline"
           size="sm"
@@ -84,45 +91,51 @@ export function BookingActions({
         </Button>
       )}
       
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onEdit}
-        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
-      >
-        <Edit2 className="h-4 w-4" />
-        Modifier
-      </Button>
+      {/* Bouton Modifier - uniquement si le client peut modifier */}
+      {canClientModify && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onEdit}
+          className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
+        >
+          <Edit2 className="h-4 w-4" />
+          Modifier
+        </Button>
+      )}
       
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
-          >
-            <XCircle className="h-4 w-4" />
-            Annuler
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer l'annulation</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-gray-200">Retour</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => handleStatusChange("cancelled")}
-              className="bg-red-600 text-white hover:bg-red-700"
+      {/* Bouton Annuler - uniquement si le client peut modifier */}
+      {canClientModify && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
             >
-              Confirmer l'annulation
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              <XCircle className="h-4 w-4" />
+              Annuler
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer l'annulation</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-gray-200">Retour</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => handleStatusChange("cancelled")}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Confirmer l'annulation
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
