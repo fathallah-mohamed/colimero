@@ -28,7 +28,7 @@ export default function MenuItems({ isMobile }: MenuItemsProps) {
           "hover:bg-primary/10 hover:scale-105 active:scale-95",
           isActive ? "text-primary" : "text-gray-700",
           item.highlight && !isActive && "bg-primary text-white hover:bg-primary/90",
-          "w-full lg:w-auto justify-start lg:justify-center"
+          isMobileView && "w-full"
         )}
         whileHover={{ y: -2 }}
         whileTap={{ y: 0 }}
@@ -89,9 +89,9 @@ export default function MenuItems({ isMobile }: MenuItemsProps) {
 
   return (
     <div className={cn(
-      "flex items-center space-x-1",
-      "lg:flex-nowrap lg:overflow-x-auto lg:pb-2",
-      "scrollbar-hide"
+      isMobileView 
+        ? "flex flex-col space-y-1 w-full" 
+        : "flex items-center space-x-1 lg:flex-nowrap lg:overflow-x-auto lg:pb-2 scrollbar-hide"
     )}>
       {menuItems.map(renderMenuItem)}
     </div>
