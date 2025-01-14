@@ -15,7 +15,7 @@ export function getMenuItems(userType: string | null) {
         <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
           <Link to="/profile">
             <UserCircle2 className="w-4 h-4" />
-            <span>Profil</span>
+            <span>Profil Administrateur</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
@@ -46,7 +46,7 @@ export function getMenuItems(userType: string | null) {
         <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
           <Link to="/profile">
             <UserCircle2 className="w-4 h-4" />
-            <span>Profil</span>
+            <span>Profil Transporteur</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
@@ -71,7 +71,7 @@ export function getMenuItems(userType: string | null) {
         <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
           <Link to="/profile">
             <UserCircle2 className="w-4 h-4" />
-            <span>Profil</span>
+            <span>Profil Client</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">

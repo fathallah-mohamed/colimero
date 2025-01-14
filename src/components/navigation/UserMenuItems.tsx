@@ -14,7 +14,7 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
           <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil
+          Profil Administrateur
         </Link>
         <Link
           to="/admin/dashboard"
@@ -49,7 +49,7 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
           <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil
+          Profil Transporteur
         </Link>
         <Link
           to="/mes-tournees"
@@ -77,7 +77,7 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
           <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil
+          Profil Client
         </Link>
         <Link
           to="/mes-reservations"
