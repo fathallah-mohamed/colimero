@@ -47,7 +47,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
-      // Filtrer selon le type d'utilisateur
+      // Filter based on user type
       if (userType === 'carrier') {
         query = query.eq('tour.carrier_id', userId);
       } else {
@@ -109,11 +109,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         .from('approval_requests')
         .select('status')
         .eq('id', requestId)
-        .single();
+        .maybeSingle();
 
       if (checkError) throw checkError;
 
-      if (request.status !== 'cancelled') {
+      if (request?.status !== 'cancelled') {
         toast({
           variant: "destructive",
           title: "Erreur",
