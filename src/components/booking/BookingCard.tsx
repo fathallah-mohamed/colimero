@@ -4,7 +4,7 @@ import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCardDetails } from "./card/BookingCardDetails";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, Edit2, XCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit2, XCircle, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
 import { BookingStatusBadge } from "./BookingStatusBadge";
@@ -53,12 +53,13 @@ export function BookingCard({
     });
   };
 
-  const handleStatusChange = async () => {
-    await onStatusChange(booking.id, "cancelled");
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    await onStatusChange(booking.id, newStatus);
     await onUpdate();
+    const message = newStatus === "cancelled" ? "annulée" : "ramassée";
     toast({
-      title: "Réservation annulée",
-      description: "La réservation a été annulée avec succès.",
+      title: `Réservation ${message}`,
+      description: `La réservation a été ${message} avec succès.`,
     });
   };
 
@@ -92,6 +93,18 @@ export function BookingCard({
           
           {tourStatus === "Programmée" && (
             <div className="flex items-center gap-2">
+              {booking.status === "pending" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleStatusChange("collected")}
+                  className="flex items-center gap-2 bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
+                >
+                  <Package className="h-4 w-4" />
+                  Marquer comme ramassée
+                </Button>
+              )}
+              
               <Button
                 variant="outline"
                 size="sm"
@@ -123,7 +136,7 @@ export function BookingCard({
                   <AlertDialogFooter>
                     <AlertDialogCancel className="border-gray-200">Retour</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={handleStatusChange}
+                      onClick={() => handleStatusChange("cancelled")}
                       className="bg-red-600 text-white hover:bg-red-700"
                     >
                       Confirmer l'annulation
