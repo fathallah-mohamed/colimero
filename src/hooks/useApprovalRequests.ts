@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useApprovalActions } from "./useApprovalActions";
 import { useRequestManagement } from "./useRequestManagement";
+import { useToast } from "./use-toast";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<any[]>([]);
   const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
   const { handleCancelRequest, handleDeleteRequest } = useRequestManagement();
+  const { toast } = useToast();
 
   const fetchRequests = async () => {
     if (!userId) {
@@ -57,12 +59,25 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
       const { data: approvalData, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching approval requests:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger vos demandes d'approbation"
+        });
+        throw error;
+      }
 
       console.log('Fetched approval requests:', approvalData);
       setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors du chargement de vos demandes"
+      });
     } finally {
       setLoading(false);
     }
