@@ -5,6 +5,9 @@ import { RequestStatus } from "./RequestStatus";
 import { RequestActions } from "./RequestActions";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 interface ApprovalRequestCardProps {
   request: {
@@ -30,9 +33,22 @@ export function ApprovalRequestCard({
   onCancel,
   onDelete 
 }: ApprovalRequestCardProps) {
+  const navigate = useNavigate();
   const selectedStop = request.tour?.route?.find(
     (stop: any) => stop.name === request.pickup_city
   );
+
+  const handleBookNow = () => {
+    if (request.status === 'approved') {
+      navigate(`/reserver/${request.tour.id}?pickupCity=${encodeURIComponent(request.pickup_city)}`);
+    } else {
+      toast({
+        title: "Action non disponible",
+        description: "Vous ne pouvez réserver que lorsque votre demande est approuvée",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="space-y-4 p-6 bg-white rounded-xl shadow-sm">
@@ -84,14 +100,25 @@ export function ApprovalRequestCard({
           message={request.reason}
         />
 
-        <RequestActions 
-          status={request.status}
-          userType={userType}
-          onApprove={onApprove}
-          onReject={onReject}
-          onCancel={onCancel}
-          onDelete={onDelete}
-        />
+        <div className="flex flex-col gap-2">
+          <RequestActions 
+            status={request.status}
+            userType={userType}
+            onApprove={onApprove}
+            onReject={onReject}
+            onCancel={onCancel}
+            onDelete={onDelete}
+          />
+          
+          {request.status === 'approved' && (
+            <Button 
+              onClick={handleBookNow}
+              className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+            >
+              Réserver maintenant
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
