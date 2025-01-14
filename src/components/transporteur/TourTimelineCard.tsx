@@ -2,15 +2,17 @@ import React, { useState } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
-import { TourTimelineDisplay } from "@/components/tour/shared/TourTimelineDisplay";
+import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TourTimelineCardProps {
   tour: Tour;
@@ -34,6 +36,8 @@ export function TourTimelineCard({
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const isBookingEnabled = () => {
     return selectedPickupCity && tour.status === "Programmée" && userType !== 'admin';
@@ -108,10 +112,9 @@ export function TourTimelineCard({
               className="overflow-hidden"
             >
               <div className="pt-6 space-y-6">
-                <TourTimelineDisplay 
+                <ClientTimeline 
                   status={tour.status} 
                   tourId={tour.id}
-                  variant="client"
                 />
 
                 <div>

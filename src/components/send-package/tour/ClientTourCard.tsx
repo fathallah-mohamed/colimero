@@ -7,7 +7,7 @@ import { CardCustom } from "@/components/ui/card-custom";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";

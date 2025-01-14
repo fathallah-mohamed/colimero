@@ -1,10 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 import { ApprovalRequestsList } from "@/components/approval-requests/ApprovalRequestsList";
-import AuthDialog from "@/components/auth/AuthDialog";
-import { useState } from "react";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
