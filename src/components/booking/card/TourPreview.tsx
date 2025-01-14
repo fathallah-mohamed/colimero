@@ -1,6 +1,7 @@
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, MapPin, Badge } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Badge as UIBadge } from "@/components/ui/badge";
 
 interface TourPreviewProps {
   tour: any;
@@ -25,6 +26,9 @@ export function TourPreview({ tour }: TourPreviewProps) {
             : "Date non définie"}
         </span>
       </div>
+      <UIBadge variant="outline" className="w-fit">
+        Statut: {tour.status || "Non défini"}
+      </UIBadge>
     </div>
   );
 }

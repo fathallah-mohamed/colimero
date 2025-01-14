@@ -27,12 +27,15 @@ export function BookingCard({
   isCollecting, 
   onStatusChange,
   onUpdate,
-  tourStatus = "Programmée"
+  tourStatus
 }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
   const { userType } = useNavigation();
+
+  // Récupérer le statut de la tournée depuis l'objet booking
+  const currentTourStatus = booking.tours?.status || tourStatus || "Programmée";
 
   const handleEditSuccess = async () => {
     await onUpdate();
@@ -66,7 +69,7 @@ export function BookingCard({
           <BookingActions
             bookingId={booking.id}
             status={booking.status}
-            tourStatus={tourStatus}
+            tourStatus={currentTourStatus}
             onStatusChange={onStatusChange}
             onUpdate={onUpdate}
             onEdit={() => setShowEditDialog(true)}
