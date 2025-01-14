@@ -14,7 +14,6 @@ import { useNavigation } from "@/hooks/use-navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 
 interface BookingCardProps {
   booking: any;
@@ -49,16 +48,23 @@ export function BookingCard({
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow duration-200">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <BookingCardHeader booking={booking} />
+        {/* En-tête de la réservation */}
+        <BookingCardHeader booking={booking} />
+
+        {/* Informations principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Informations sur l'expéditeur et le destinataire */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-500 mb-2">Détails de la livraison</h4>
             <BookingAddressInfo booking={booking} />
-            
-            {/* Informations sur la tournée */}
-            <div className="mt-4 border-t pt-4">
+          </div>
+
+          {/* Informations sur la tournée */}
+          {booking.tours && (
+            <div>
               <h4 className="text-sm font-medium text-gray-500 mb-2">Informations sur la tournée</h4>
               <div className="space-y-3">
-                {booking.tours?.carriers && (
+                {booking.tours.carriers && (
                   <div className="flex items-center gap-2">
                     <Truck className="h-4 w-4 text-gray-500" />
                     <div>
@@ -70,28 +76,20 @@ export function BookingCard({
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <div>
-                      <p className="text-sm text-gray-500">Date de départ</p>
-                      <p className="text-sm font-medium">
-                        {booking.tours?.departure_date 
-                          ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
-                          : "Non définie"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <div>
-                      <p className="text-sm text-gray-500">Date de collecte</p>
-                      <p className="text-sm font-medium">
-                        {booking.tours?.collection_date 
-                          ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
-                          : "Non définie"}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-500">Dates</p>
+                    <p className="text-sm">
+                      Départ: {booking.tours?.departure_date 
+                        ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
+                        : "Non définie"}
+                    </p>
+                    <p className="text-sm">
+                      Collecte: {booking.tours?.collection_date 
+                        ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
+                        : "Non définie"}
+                    </p>
                   </div>
                 </div>
 
@@ -99,32 +97,22 @@ export function BookingCard({
                   <MapPin className="h-4 w-4 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-500">Trajet</p>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm">
                       {booking.tours?.departure_country} → {booking.tours?.destination_country}
                     </p>
                   </div>
                 </div>
 
-                <div>
-                  <Badge variant="outline" className="text-sm">
-                    Statut de la tournée: {booking.tours?.status || "Non défini"}
-                  </Badge>
-                </div>
+                <Badge variant="outline" className="text-sm">
+                  Statut de la tournée: {booking.tours?.status || "Non défini"}
+                </Badge>
               </div>
             </div>
+          )}
+        </div>
 
-            {/* Adresse de collecte */}
-            <div className="mt-2 flex items-center gap-2 text-gray-600">
-              <MapPin className="h-4 w-4" />
-              <div>
-                <p className="text-sm text-gray-500">Adresse de collecte</p>
-                <p className="text-sm font-medium">
-                  {booking.pickup_city}
-                </p>
-              </div>
-            </div>
-          </div>
-          
+        {/* Actions */}
+        <div className="flex justify-end">
           <BookingActions
             bookingId={booking.id}
             status={booking.status}
@@ -136,12 +124,14 @@ export function BookingCard({
           />
         </div>
 
+        {/* Route de la tournée */}
         {booking.tours?.route && (
           <div className="pt-2 border-t">
             <TourRoute tour={booking.tours} />
           </div>
         )}
 
+        {/* Bouton pour voir plus de détails */}
         <Button
           variant="outline"
           size="sm"
@@ -161,8 +151,10 @@ export function BookingCard({
           )}
         </Button>
 
+        {/* Détails supplémentaires */}
         {showDetails && <BookingCardDetails booking={booking} />}
 
+        {/* Dialog de modification */}
         <EditBookingDialog
           booking={booking}
           open={showEditDialog}
