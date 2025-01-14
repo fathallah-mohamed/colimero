@@ -51,9 +51,12 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
+      // Ajout de la condition en fonction du type d'utilisateur
       if (userType === 'carrier') {
+        console.log('Filtering for carrier:', userId);
         query = query.eq('tour.carrier_id', userId);
       } else {
+        console.log('Filtering for client:', userId);
         query = query.eq('user_id', userId);
       }
 
