@@ -27,7 +27,7 @@ export function TourTimelineDisplay({
 
   const handleCancel = async () => {
     if (onStatusChange) {
-      await onStatusChange("Annulée" as TourStatus);
+      await onStatusChange("Annulée");
     }
     setShowCancelDialog(false);
   };
@@ -38,25 +38,25 @@ export function TourTimelineDisplay({
 
   const handleStartCollection = async () => {
     if (onStatusChange) {
-      await onStatusChange("Ramassage en cours" as TourStatus);
+      await onStatusChange("Ramassage en cours");
     }
   };
 
   const handleStartTransit = async () => {
     if (onStatusChange) {
-      await onStatusChange("En transit" as TourStatus);
+      await onStatusChange("En transit");
     }
   };
 
   const handleStartDelivery = async () => {
     if (onStatusChange) {
-      await onStatusChange("Livraison en cours" as TourStatus);
+      await onStatusChange("Livraison en cours");
     }
   };
 
   const handleComplete = async () => {
     if (onStatusChange) {
-      await onStatusChange("Terminée" as TourStatus);
+      await onStatusChange("Terminée");
     }
   };
 
