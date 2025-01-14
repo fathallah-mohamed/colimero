@@ -31,14 +31,15 @@ export default function Navigation() {
 
     const initSession = async () => {
       try {
-        // First try to recover the session
+        // First clear any potentially corrupted session data
+        localStorage.removeItem('supabase.auth.token');
+        
+        // Try to establish a fresh session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          // Clear potentially corrupted session data
           await supabase.auth.signOut();
-          localStorage.removeItem('supabase.auth.token');
           return;
         }
 
@@ -67,10 +68,14 @@ export default function Navigation() {
 
         // If there's no session, try to refresh it
         if (!session) {
-          const { error: refreshError } = await supabase.auth.refreshSession();
+          console.log('No session found, attempting refresh...');
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
           if (refreshError) {
             console.error("Session refresh error:", refreshError);
-            localStorage.removeItem('supabase.auth.token');
+            await supabase.auth.signOut();
+          } else if (refreshData.session) {
+            console.log('Session refreshed successfully');
           }
         }
 
@@ -79,7 +84,7 @@ export default function Navigation() {
         };
       } catch (error) {
         console.error("Session initialization error:", error);
-        localStorage.removeItem('supabase.auth.token');
+        await supabase.auth.signOut();
       }
     };
 
