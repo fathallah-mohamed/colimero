@@ -71,19 +71,18 @@ export function BookingActions({
   
   // Pour les transporteurs:
   // - Si la tournée est "Programmée": autoriser modification/annulation des réservations en attente
-  // - Si la tournée est "Ramassage en cours": autoriser le ramassage des réservations en attente
-  const canCarrierModify = userType === "carrier" && status === "pending";
-  const canCarrierCollect = userType === "carrier" && status === "pending" && tourStatus === "Ramassage en cours";
-  const canCarrierEditOrCancel = userType === "carrier" && status === "pending" && tourStatus === "Programmée";
+  // - Si la tournée est "Ramassage en cours": autoriser toutes les actions sur les réservations en attente
+  const canCarrierModifyInCollection = userType === "carrier" && status === "pending" && tourStatus === "Ramassage en cours";
+  const canCarrierModifyInPlanned = userType === "carrier" && status === "pending" && tourStatus === "Programmée";
 
-  if (!canClientModify && !canCarrierModify) {
+  if (!canClientModify && !canCarrierModifyInCollection && !canCarrierModifyInPlanned) {
     return null;
   }
 
   return (
     <div className="flex items-center gap-2">
       {/* Bouton "Marquer comme ramassée" - uniquement pour les transporteurs pendant la phase de ramassage */}
-      {canCarrierCollect && (
+      {canCarrierModifyInCollection && (
         <Button
           variant="outline"
           size="sm"
@@ -96,7 +95,7 @@ export function BookingActions({
       )}
       
       {/* Bouton Modifier - si le client peut modifier ou si le transporteur peut modifier */}
-      {(canClientModify || canCarrierEditOrCancel) && (
+      {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
         <Button
           variant="outline"
           size="sm"
@@ -109,7 +108,7 @@ export function BookingActions({
       )}
       
       {/* Bouton Annuler - si le client peut modifier ou si le transporteur peut modifier */}
-      {(canClientModify || canCarrierEditOrCancel) && (
+      {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
