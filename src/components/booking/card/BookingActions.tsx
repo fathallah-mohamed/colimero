@@ -38,6 +38,8 @@ export function BookingActions({
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
+      console.log("Changing booking status:", { bookingId, newStatus });
+      
       const { error } = await supabase
         .from('bookings')
         .update({ 
@@ -46,8 +48,12 @@ export function BookingActions({
         })
         .eq('id', bookingId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating booking status:", error);
+        throw error;
+      }
 
+      // Appeler les callbacks pour mettre à jour l'UI
       await onStatusChange(bookingId, newStatus);
       await onUpdate();
 
