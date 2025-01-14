@@ -31,32 +31,36 @@ export default function Navigation() {
 
     const initSession = async () => {
       try {
-        // Clear any stale session data first
-        localStorage.removeItem('supabase.auth.token');
-        
-        // Get fresh session
+        // Get current session first
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
+          // Clear potentially corrupted session data
+          localStorage.removeItem('supabase.auth.token');
           return;
         }
 
         // Set up auth state change listener
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (event, session) => {
+        } = supabase.auth.onAuthStateChange(async (event, newSession) => {
           if (!mounted) return;
 
           console.log('Auth event:', event);
 
-          if (event === 'TOKEN_REFRESHED') {
-            console.log('Session token refreshed successfully');
+          if (event === 'SIGNED_IN') {
+            console.log('User signed in successfully');
           } else if (event === 'SIGNED_OUT') {
+            console.log('User signed out');
             localStorage.removeItem('supabase.auth.token');
             if (location.pathname.includes('/reserver/')) {
               window.location.href = '/';
             }
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log('Session token refreshed');
+          } else if (event === 'USER_UPDATED') {
+            console.log('User data updated');
           }
         });
 
