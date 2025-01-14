@@ -31,12 +31,13 @@ export default function Navigation() {
 
     const initSession = async () => {
       try {
-        // Get current session first
+        // First try to recover the session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
           // Clear potentially corrupted session data
+          await supabase.auth.signOut();
           localStorage.removeItem('supabase.auth.token');
           return;
         }
@@ -63,6 +64,15 @@ export default function Navigation() {
             console.log('User data updated');
           }
         });
+
+        // If there's no session, try to refresh it
+        if (!session) {
+          const { error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError) {
+            console.error("Session refresh error:", refreshError);
+            localStorage.removeItem('supabase.auth.token');
+          }
+        }
 
         return () => {
           subscription.unsubscribe();
