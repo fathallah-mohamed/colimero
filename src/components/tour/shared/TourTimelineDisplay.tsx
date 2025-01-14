@@ -3,7 +3,7 @@ import { TimelineStatus } from "../timeline/TimelineStatus";
 import { TimelineProgress } from "../timeline/TimelineProgress";
 import { CancelledStatus } from "../timeline/CancelledStatus";
 import { Button } from "@/components/ui/button";
-import { XCircle } from "lucide-react";
+import { XCircle, Edit } from "lucide-react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -18,10 +18,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { motion } from "framer-motion";
 import { TimelineMobileView } from "../timeline/TimelineMobileView";
+import { useNavigate } from "react-router-dom";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
-  onStatusChange?: (newStatus: TourStatus) => Promise<void>;
+  onStatusChange?: (newStatus: string) => Promise<void>;
   tourId: number;
   userType?: string;
   canEdit?: boolean;
@@ -37,15 +38,17 @@ export function TourTimelineDisplay({
   variant = 'carrier'
 }: TourTimelineDisplayProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const navigate = useNavigate();
 
   if (status === "Annulée") {
     return <CancelledStatus />;
   }
 
-  const statusOrder: TourStatus[] = [
+  const statusOrder = [
     "Programmée",
     "Ramassage en cours",
     "En transit",
+    "Livraison en cours",
     "Terminée"
   ];
 
@@ -54,9 +57,13 @@ export function TourTimelineDisplay({
 
   const handleCancel = async () => {
     if (onStatusChange) {
-      await onStatusChange("Annulée" as TourStatus);
+      await onStatusChange("Annulée");
     }
     setShowCancelDialog(false);
+  };
+
+  const handleEdit = () => {
+    navigate(`/planifier-une-tournee?tourId=${tourId}`);
   };
 
   return (
@@ -78,6 +85,13 @@ export function TourTimelineDisplay({
           const isCurrent = index === currentIndex;
           const isNext = index === currentIndex + 1;
 
+          // Combiner les étapes "Livraison en cours" et "Terminée"
+          if (statusItem === "Terminée") {
+            return null;
+          }
+
+          const label = statusItem === "Livraison en cours" ? "Livraison" : statusItem;
+
           return (
             <TimelineStatus
               key={statusItem}
@@ -86,15 +100,24 @@ export function TourTimelineDisplay({
               isCurrent={isCurrent}
               isNext={isNext && canEdit}
               onClick={() => isNext && canEdit && onStatusChange && onStatusChange(statusItem)}
-              label={statusItem}
+              label={label}
               variant={variant}
             />
           );
         })}
       </div>
 
-      {status !== "Terminée" && canEdit && onStatusChange && (
-        <div className="flex justify-end mt-8">
+      {status !== "Terminée" && canEdit && (
+        <div className="flex justify-end gap-3 mt-8">
+          <Button
+            variant="outline"
+            onClick={handleEdit}
+            className="gap-2"
+          >
+            <Edit className="h-4 w-4" />
+            Modifier la tournée
+          </Button>
+
           <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" className="gap-2 hover:bg-destructive/90 transition-colors">

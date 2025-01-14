@@ -9,6 +9,7 @@ import { BookingCard } from "../booking/BookingCard";
 import { cn } from "@/lib/utils";
 import { TourStatusBadge } from "./TourStatusBadge";
 import { Badge } from "@/components/ui/badge";
+import { TourTimelineDisplay } from "./shared/TourTimelineDisplay";
 import type { Tour } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
 
@@ -52,6 +53,33 @@ export function TourCard({
     }
   };
 
+  const handleTourStatusChange = async (newStatus: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('tours')
+        .update({ status: newStatus })
+        .eq('id', tour.id);
+
+      if (error) throw error;
+
+      if (onUpdate) {
+        await onUpdate();
+      }
+
+      toast({
+        title: "Statut mis à jour",
+        description: `La tournée est maintenant en statut "${newStatus}"`,
+      });
+    } catch (error) {
+      console.error('Error updating tour status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la tournée",
+      });
+    }
+  };
+
   const hasBookings = tour.bookings && tour.bookings.length > 0;
 
   return (
@@ -89,6 +117,13 @@ export function TourCard({
           </Button>
         )}
       </div>
+
+      <TourTimelineDisplay
+        status={tour.status}
+        tourId={tour.id}
+        onStatusChange={handleTourStatusChange}
+        canEdit={true}
+      />
 
       <TourCapacityInfo
         totalCapacity={tour.total_capacity}
