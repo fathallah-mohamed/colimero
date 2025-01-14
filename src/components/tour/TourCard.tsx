@@ -7,6 +7,8 @@ import { generateTourPDF } from "./tour-card/PDFGenerator";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCard } from "../booking/BookingCard";
 import { cn } from "@/lib/utils";
+import { TourStatusBadge } from "./TourStatusBadge";
+import { Badge } from "@/components/ui/badge";
 import type { Tour } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
 
@@ -58,7 +60,7 @@ export function TourCard({
       isEven ? "bg-secondary hover:bg-secondary/90" : "bg-muted hover:bg-muted/90",
       "transition-colors duration-200"
     )}>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-start mb-6">
         <div>
           <h3 className="text-lg font-semibold">
             Tournée du {new Date(tour.departure_date).toLocaleDateString()}
@@ -66,6 +68,12 @@ export function TourCard({
           <p className="text-sm text-gray-500">
             {tour.departure_country} → {tour.destination_country}
           </p>
+          <div className="flex items-center gap-2 mt-2">
+            <TourStatusBadge status={tour.status} />
+            <Badge variant={tour.type === "public" ? "default" : "secondary"}>
+              {tour.type === "public" ? "Publique" : "Privée"}
+            </Badge>
+          </div>
         </div>
         
         <Button
