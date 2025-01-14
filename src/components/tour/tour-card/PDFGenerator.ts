@@ -37,99 +37,101 @@ export async function generateTourPDF(tour: any) {
 
     if (!bookings || bookings.length === 0) {
       doc.text("Aucune réservation pour cette tournée.", 20, yPos);
-    } else {
-      // Group bookings by delivery city
-      const bookingsByCity = bookings.reduce((acc: { [key: string]: any[] }, booking) => {
-        if (!acc[booking.delivery_city]) {
-          acc[booking.delivery_city] = [];
-        }
-        acc[booking.delivery_city].push(booking);
-        return acc;
-      }, {});
-
-      // For each city
-      Object.entries(bookingsByCity).forEach(([city, cityBookings]) => {
-        if (yPos > 250) {
-          doc.addPage();
-          yPos = 20;
-        }
-
-        // Add city header
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text(`Ville de livraison: ${city}`, 20, yPos);
-        yPos += 10;
-
-        // Process each booking
-        cityBookings.forEach((booking) => {
-          if (yPos > 250) {
-            doc.addPage();
-            yPos = 20;
-          }
-
-          doc.setFontSize(12);
-          doc.setFont(undefined, 'normal');
-
-          // Booking header
-          doc.text(`Réservation #${booking.tracking_number}`, 20, yPos);
-          yPos += 7;
-
-          // Sender info
-          doc.text("Expéditeur:", 25, yPos);
-          yPos += 5;
-          doc.setFontSize(10);
-          doc.text(`${booking.sender_name}`, 30, yPos);
-          yPos += 5;
-          doc.text(`Tél: ${booking.sender_phone}`, 30, yPos);
-          yPos += 5;
-          doc.text(`Ville: ${booking.pickup_city}`, 30, yPos);
-          yPos += 8;
-
-          // Recipient info
-          doc.setFontSize(12);
-          doc.text("Destinataire:", 25, yPos);
-          yPos += 5;
-          doc.setFontSize(10);
-          doc.text(`${booking.recipient_name}`, 30, yPos);
-          yPos += 5;
-          doc.text(`Tél: ${booking.recipient_phone}`, 30, yPos);
-          yPos += 5;
-          doc.text(`Adresse: ${booking.recipient_address}`, 30, yPos);
-          yPos += 8;
-
-          // Package details
-          doc.setFontSize(12);
-          doc.text("Détails du colis:", 25, yPos);
-          yPos += 5;
-          doc.setFontSize(10);
-          doc.text(`Poids: ${booking.weight}kg`, 30, yPos);
-          yPos += 5;
-          
-          if (booking.content_types?.length > 0) {
-            doc.text(`Types de contenu: ${booking.content_types.join(", ")}`, 30, yPos);
-            yPos += 5;
-          }
-
-          if (booking.special_items?.length > 0) {
-            const specialItems = booking.special_items.map((item: any) => 
-              `${item.name}${item.quantity ? ` (${item.quantity})` : ''}`
-            ).join(", ");
-            doc.text(`Objets spéciaux: ${specialItems}`, 30, yPos);
-            yPos += 5;
-          }
-
-          if (booking.package_description) {
-            doc.text(`Description: ${booking.package_description}`, 30, yPos);
-            yPos += 5;
-          }
-
-          doc.text(`Statut: ${booking.status}`, 30, yPos);
-          yPos += 15;
-        });
-
-        yPos += 10; // Add space between cities
-      });
+      doc.save(`tournee-${tour.id}-${format(new Date(tour.departure_date), "dd-MM-yyyy")}.pdf`);
+      return true;
     }
+
+    // Table headers
+    const headers = [
+      "N° Suivi",
+      "Expéditeur",
+      "Destinataire",
+      "Ville collecte",
+      "Ville livraison",
+      "Poids",
+      "Statut"
+    ];
+
+    // Configure table
+    const startY = yPos;
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.width;
+    const tableWidth = pageWidth - 2 * margin;
+    const columnWidth = tableWidth / headers.length;
+
+    // Draw table header
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, startY - 5, tableWidth, 10, "F");
+    doc.setFont(undefined, "bold");
+    headers.forEach((header, i) => {
+      doc.text(header, margin + (i * columnWidth), startY);
+    });
+
+    // Draw table content
+    doc.setFont(undefined, "normal");
+    let currentY = startY + 10;
+
+    bookings.forEach((booking: any) => {
+      // Add new page if needed
+      if (currentY > 250) {
+        doc.addPage();
+        currentY = 20;
+      }
+
+      const row = [
+        booking.tracking_number,
+        `${booking.sender_name}\n${booking.sender_phone}`,
+        `${booking.recipient_name}\n${booking.recipient_phone}`,
+        booking.pickup_city,
+        booking.delivery_city,
+        `${booking.weight} kg`,
+        booking.status
+      ];
+
+      // Draw row
+      row.forEach((cell, i) => {
+        const lines = doc.splitTextToSize(cell.toString(), columnWidth - 4);
+        doc.text(lines, margin + (i * columnWidth), currentY);
+      });
+
+      // Calculate max height for this row
+      const maxLines = Math.max(...row.map(cell => 
+        doc.splitTextToSize(cell.toString(), columnWidth - 4).length
+      ));
+      currentY += 7 * maxLines;
+
+      // Add details section if special items or content types exist
+      if (booking.special_items?.length > 0 || booking.content_types?.length > 0) {
+        currentY += 5;
+        doc.setFont(undefined, "bold");
+        doc.text("Détails supplémentaires:", margin, currentY);
+        doc.setFont(undefined, "normal");
+        currentY += 7;
+
+        if (booking.special_items?.length > 0) {
+          const specialItems = booking.special_items.map((item: any) => 
+            `${item.name}${item.quantity ? ` (${item.quantity})` : ''}`
+          ).join(", ");
+          const lines = doc.splitTextToSize(`Objets spéciaux: ${specialItems}`, tableWidth);
+          doc.text(lines, margin, currentY);
+          currentY += 7 * lines.length;
+        }
+
+        if (booking.content_types?.length > 0) {
+          const lines = doc.splitTextToSize(`Types de contenu: ${booking.content_types.join(", ")}`, tableWidth);
+          doc.text(lines, margin, currentY);
+          currentY += 7 * lines.length;
+        }
+
+        if (booking.package_description) {
+          const lines = doc.splitTextToSize(`Description: ${booking.package_description}`, tableWidth);
+          doc.text(lines, margin, currentY);
+          currentY += 7 * lines.length;
+        }
+
+        currentY += 5;
+      }
+    });
 
     // Save the PDF
     doc.save(`tournee-${tour.id}-${format(new Date(tour.departure_date), "dd-MM-yyyy")}.pdf`);
