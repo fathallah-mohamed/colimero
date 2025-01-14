@@ -70,7 +70,7 @@ export default function CreateTour() {
               title: "Succès",
               description: "La tournée a été créée avec succès",
             });
-            navigate("/mes-tournees");
+            navigate("/transporteur/tournees");
           }} 
         />
       </div>
