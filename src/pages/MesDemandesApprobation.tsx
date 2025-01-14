@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
+import { ProfileLoading } from "@/components/profile/ProfileLoading";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
@@ -18,12 +19,19 @@ export default function MesDemandesApprobation() {
   const userType = user?.user_metadata?.user_type;
   const userId = user?.id;
 
+  console.log('Current user:', user);
+  console.log('User type:', userType);
+  console.log('User ID:', userId);
+
   const { 
     requests, 
     loading, 
     handleCancelRequest,
     handleDeleteRequest
   } = useApprovalRequests(userType, userId);
+
+  console.log('Requests:', requests);
+  console.log('Loading state:', loading);
 
   useEffect(() => {
     if (!isSessionLoading && !session) {
@@ -36,7 +44,7 @@ export default function MesDemandesApprobation() {
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">Chargement...</div>
+          <ProfileLoading />
         </div>
       </div>
     );
@@ -44,7 +52,7 @@ export default function MesDemandesApprobation() {
 
   const pendingRequests = requests?.filter(req => req.status === 'pending') || [];
   const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
-  const rejectedRequests = requests?.filter(req => req.status === 'rejected') || [];
+  const rejectedRequests = requests?.filter(req => req.status === 'rejected' || req.status === 'cancelled') || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -79,9 +87,11 @@ export default function MesDemandesApprobation() {
                   />
                 ))
               ) : (
-                <p className="text-gray-600 text-center py-8">
-                  Aucune demande en attente
-                </p>
+                <div className="bg-white shadow rounded-lg p-6">
+                  <p className="text-gray-600 text-center">
+                    Aucune demande en attente
+                  </p>
+                </div>
               )}
             </TabsContent>
 
@@ -96,9 +106,11 @@ export default function MesDemandesApprobation() {
                   />
                 ))
               ) : (
-                <p className="text-gray-600 text-center py-8">
-                  Aucune demande validée
-                </p>
+                <div className="bg-white shadow rounded-lg p-6">
+                  <p className="text-gray-600 text-center">
+                    Aucune demande validée
+                  </p>
+                </div>
               )}
             </TabsContent>
 
@@ -113,9 +125,11 @@ export default function MesDemandesApprobation() {
                   />
                 ))
               ) : (
-                <p className="text-gray-600 text-center py-8">
-                  Aucune demande refusée
-                </p>
+                <div className="bg-white shadow rounded-lg p-6">
+                  <p className="text-gray-600 text-center">
+                    Aucune demande refusée
+                  </p>
+                </div>
               )}
             </TabsContent>
           </Tabs>
