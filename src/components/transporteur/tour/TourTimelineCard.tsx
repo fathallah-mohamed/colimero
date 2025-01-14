@@ -143,8 +143,8 @@ export function TourTimelineCard({
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog} 
-        onClose={() => setShowAuthDialog(false)}
+        open={showAuthDialog} 
+        onOpenChange={setShowAuthDialog}
         onSuccess={() => {
           setShowAuthDialog(false);
           if (selectedPickupCity) {

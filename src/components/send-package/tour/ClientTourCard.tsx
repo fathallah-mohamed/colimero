@@ -125,8 +125,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
         onSuccess={() => {
           setShowAuthDialog(false);
           if (selectedPoint) {

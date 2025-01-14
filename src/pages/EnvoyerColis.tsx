@@ -152,8 +152,8 @@ export default function EnvoyerColis() {
       </div>
 
       <AuthDialog 
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"
       />

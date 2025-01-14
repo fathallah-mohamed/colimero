@@ -193,8 +193,8 @@ export function TourExpandedContent({
       </Button>
 
       <AuthDialog 
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
         onSuccess={() => {
           setShowAuthDialog(false);
           handlePrivateTourAction();

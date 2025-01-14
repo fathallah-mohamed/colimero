@@ -4,11 +4,13 @@ import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { useState } from "react";
 import { Button } from "../ui/button";
 
+export type UserType = "client" | "carrier" | "admin";
+
 export interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-  requiredUserType?: string;
+  requiredUserType?: UserType;
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
 }
