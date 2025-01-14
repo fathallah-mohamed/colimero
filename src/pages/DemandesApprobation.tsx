@@ -6,17 +6,21 @@ import { Loader2, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { ApprovalRequestCard } from "@/components/approval-requests/ApprovalRequestCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
   const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   const userType = session?.user?.user_metadata?.user_type;
   const userId = session?.user?.id;
 
   const { 
     requests, 
     loading, 
+    handleApproveRequest,
+    handleRejectRequest,
     handleCancelRequest,
     handleDeleteRequest
   } = useApprovalRequests(userType, userId);
@@ -53,7 +57,7 @@ export default function DemandesApprobation() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <h1 className="text-3xl font-bold mb-8">
           {userType === 'carrier' ? 'Demandes d\'approbation reçues' : 'Mes demandes d\'approbation'}
         </h1>
@@ -81,7 +85,8 @@ export default function DemandesApprobation() {
                   key={request.id}
                   request={request}
                   userType={userType}
-                  onStatusChange={() => {}}
+                  onApprove={() => handleApproveRequest(request)}
+                  onReject={() => handleRejectRequest(request)}
                   onCancel={() => handleCancelRequest(request.id)}
                   onDelete={() => handleDeleteRequest(request.id)}
                 />
@@ -100,7 +105,6 @@ export default function DemandesApprobation() {
                   key={request.id}
                   request={request}
                   userType={userType}
-                  onStatusChange={() => {}}
                   onCancel={() => handleCancelRequest(request.id)}
                   onDelete={() => handleDeleteRequest(request.id)}
                 />
@@ -119,7 +123,6 @@ export default function DemandesApprobation() {
                   key={request.id}
                   request={request}
                   userType={userType}
-                  onStatusChange={() => {}}
                   onCancel={() => handleCancelRequest(request.id)}
                   onDelete={() => handleDeleteRequest(request.id)}
                 />

@@ -47,7 +47,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
-      // Filter based on user type
       if (userType === 'carrier') {
         query = query.eq('tour.carrier_id', userId);
       } else {
@@ -56,10 +55,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
       const { data: approvalData, error } = await query;
 
-      if (error) {
-        console.error('Error fetching approval requests:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       console.log('Fetched approval requests:', approvalData);
       setRequests(approvalData || []);
@@ -72,6 +68,76 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApproveRequest = async (request: any) => {
+    try {
+      const { error: updateError } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'approved',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (updateError) throw updateError;
+
+      // Créer une réservation automatiquement pour le client
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          user_id: request.user_id,
+          tour_id: request.tour_id,
+          pickup_city: request.pickup_city || request.tour.route[0].name,
+          delivery_city: request.delivery_city || request.tour.route[request.tour.route.length - 1].name,
+          status: 'confirmed',
+          approval_request_id: request.id
+        });
+
+      if (bookingError) throw bookingError;
+
+      toast({
+        title: "Demande approuvée",
+        description: "La demande a été approuvée et une réservation a été créée",
+      });
+
+      await fetchRequests();
+    } catch (error: any) {
+      console.error('Error approving request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'approbation",
+      });
+    }
+  };
+
+  const handleRejectRequest = async (request: any) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'rejected',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande rejetée",
+        description: "La demande a été rejetée avec succès",
+      });
+
+      await fetchRequests();
+    } catch (error: any) {
+      console.error('Error rejecting request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors du rejet",
+      });
     }
   };
 
@@ -93,7 +159,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       });
 
       await fetchRequests();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error cancelling request:', error);
       toast({
         variant: "destructive",
@@ -135,7 +201,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       });
 
       await fetchRequests();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting request:', error);
       toast({
         variant: "destructive",
@@ -155,6 +221,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   return { 
     requests, 
     loading,
+    handleApproveRequest,
+    handleRejectRequest,
     handleCancelRequest,
     handleDeleteRequest
   };

@@ -6,6 +6,7 @@ interface RequestActionsProps {
   onApprove?: () => void;
   onReject?: () => void;
   onCancel?: () => void;
+  onDelete?: () => void;
 }
 
 export function RequestActions({ 
@@ -13,8 +14,21 @@ export function RequestActions({
   userType, 
   onApprove, 
   onReject, 
-  onCancel 
+  onCancel,
+  onDelete
 }: RequestActionsProps) {
+  if (status === 'cancelled' && onDelete) {
+    return (
+      <Button
+        variant="destructive"
+        onClick={onDelete}
+        className="w-full"
+      >
+        Supprimer la demande
+      </Button>
+    );
+  }
+
   if (status !== 'pending') return null;
 
   return (
@@ -24,11 +38,14 @@ export function RequestActions({
           <Button
             variant="outline"
             onClick={onReject}
-            className="text-red-600 hover:text-red-700"
+            className="text-red-600 hover:text-red-700 flex-1"
           >
             Rejeter
           </Button>
-          <Button onClick={onApprove}>
+          <Button 
+            onClick={onApprove}
+            className="bg-[#00B0F0] hover:bg-[#0082b3] text-white flex-1"
+          >
             Approuver
           </Button>
         </>
@@ -36,7 +53,7 @@ export function RequestActions({
         <Button
           variant="outline"
           onClick={onCancel}
-          className="text-red-600 hover:text-red-700"
+          className="text-red-600 hover:text-red-700 w-full"
         >
           Annuler la demande
         </Button>

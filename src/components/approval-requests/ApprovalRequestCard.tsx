@@ -12,7 +12,6 @@ interface ApprovalRequestCardProps {
     reason: string;
     pickup_city: string;
   };
-  onStatusChange: (status: string) => void;
   userType?: string;
   onApprove?: () => void;
   onReject?: () => void;
@@ -22,7 +21,6 @@ interface ApprovalRequestCardProps {
 
 export function ApprovalRequestCard({ 
   request, 
-  onStatusChange,
   userType,
   onApprove,
   onReject,
@@ -56,6 +54,7 @@ export function ApprovalRequestCard({
           onApprove={onApprove}
           onReject={onReject}
           onCancel={onCancel}
+          onDelete={onDelete}
         />
       </div>
     </div>
