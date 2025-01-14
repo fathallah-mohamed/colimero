@@ -11,34 +11,19 @@ interface RequestHeaderProps {
     };
     departure_date?: string;
   };
-  user?: {
-    first_name?: string;
-    last_name?: string;
-    phone?: string;
-  };
 }
 
-export function RequestHeader({ tour, user }: RequestHeaderProps) {
+export function RequestHeader({ tour }: RequestHeaderProps) {
   return (
-    <div>
-      <h2 className="text-lg font-semibold">
-        {tour?.departure_country} → {tour?.destination_country}
-      </h2>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <span className="font-medium">{tour?.departure_country}</span>
+        <span>→</span>
+        <span className="font-medium">{tour?.destination_country}</span>
+      </div>
       <p className="text-gray-600">
         Transporteur : {tour?.carriers?.company_name}
       </p>
-      {user && (
-        <>
-          <p className="text-gray-600">
-            Client : {user.first_name} {user.last_name}
-          </p>
-          {user.phone && (
-            <p className="text-gray-600">
-              Téléphone : {user.phone}
-            </p>
-          )}
-        </>
-      )}
       <p className="text-gray-600">
         Date de départ : {tour?.departure_date ? 
           format(new Date(tour.departure_date), "EEEE d MMMM yyyy", { locale: fr }) : 
