@@ -30,8 +30,8 @@ export function PlanningDialogs({
   return (
     <>
       <AuthDialog
-        isOpen={isAuthDialogOpen}
-        onClose={onAuthClose}
+        open={isAuthDialogOpen}
+        onOpenChange={onAuthClose}
         onSuccess={onAuthSuccess}
         requiredUserType="carrier"
         onRegisterClick={() => onAuthClose()}
