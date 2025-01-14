@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp, Edit2, XCircle, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
 import { BookingStatusBadge } from "./BookingStatusBadge";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,13 +55,33 @@ export function BookingCard({
   };
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
-    await onStatusChange(booking.id, newStatus);
-    await onUpdate();
-    const message = newStatus === "cancelled" ? "annulée" : "ramassée";
-    toast({
-      title: `Réservation ${message}`,
-      description: `La réservation a été ${message} avec succès.`,
-    });
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus 
+        })
+        .eq('id', booking.id);
+
+      if (error) throw error;
+
+      await onStatusChange(booking.id, newStatus);
+      await onUpdate();
+
+      const message = newStatus === "cancelled" ? "annulée" : "ramassée";
+      toast({
+        title: `Réservation ${message}`,
+        description: `La réservation a été ${message} avec succès.`,
+      });
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la réservation",
+      });
+    }
   };
 
   return (
