@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { ApprovalRequestCard } from "@/components/approval-requests/ApprovalRequestCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
@@ -45,6 +46,10 @@ export default function DemandesApprobation() {
     );
   }
 
+  const pendingRequests = requests?.filter(req => req.status === 'pending') || [];
+  const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
+  const rejectedRequests = requests?.filter(req => req.status === 'rejected') || [];
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -52,23 +57,80 @@ export default function DemandesApprobation() {
         <h1 className="text-3xl font-bold mb-8">
           {userType === 'carrier' ? 'Demandes d\'approbation reçues' : 'Mes demandes d\'approbation'}
         </h1>
-        <div className="grid gap-6">
-          {requests.map((request) => (
-            <ApprovalRequestCard
-              key={request.id}
-              request={request}
-              userType={userType}
-              onStatusChange={() => {}}
-              onCancel={() => handleCancelRequest(request.id)}
-              onDelete={() => handleDeleteRequest(request.id)}
-            />
-          ))}
-          {requests.length === 0 && (
-            <p className="text-gray-600 text-center py-8">
-              Aucune demande d'approbation
-            </p>
-          )}
-        </div>
+
+        <Tabs defaultValue="pending" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="pending" className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              En attente ({pendingRequests.length})
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Validées ({approvedRequests.length})
+            </TabsTrigger>
+            <TabsTrigger value="rejected" className="flex items-center gap-2">
+              <XCircle className="h-4 w-4" />
+              Refusées ({rejectedRequests.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="pending" className="space-y-6">
+            {pendingRequests.length > 0 ? (
+              pendingRequests.map((request) => (
+                <ApprovalRequestCard
+                  key={request.id}
+                  request={request}
+                  userType={userType}
+                  onStatusChange={() => {}}
+                  onCancel={() => handleCancelRequest(request.id)}
+                  onDelete={() => handleDeleteRequest(request.id)}
+                />
+              ))
+            ) : (
+              <p className="text-gray-600 text-center py-8">
+                Aucune demande en attente
+              </p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="approved" className="space-y-6">
+            {approvedRequests.length > 0 ? (
+              approvedRequests.map((request) => (
+                <ApprovalRequestCard
+                  key={request.id}
+                  request={request}
+                  userType={userType}
+                  onStatusChange={() => {}}
+                  onCancel={() => handleCancelRequest(request.id)}
+                  onDelete={() => handleDeleteRequest(request.id)}
+                />
+              ))
+            ) : (
+              <p className="text-gray-600 text-center py-8">
+                Aucune demande validée
+              </p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="rejected" className="space-y-6">
+            {rejectedRequests.length > 0 ? (
+              rejectedRequests.map((request) => (
+                <ApprovalRequestCard
+                  key={request.id}
+                  request={request}
+                  userType={userType}
+                  onStatusChange={() => {}}
+                  onCancel={() => handleCancelRequest(request.id)}
+                  onDelete={() => handleDeleteRequest(request.id)}
+                />
+              ))
+            ) : (
+              <p className="text-gray-600 text-center py-8">
+                Aucune demande refusée
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
