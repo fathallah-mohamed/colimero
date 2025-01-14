@@ -91,7 +91,7 @@ export default function Navigation() {
         }`}
       >
         <div className="px-2 pt-2 pb-3 space-y-1 bg-white shadow-lg">
-          <MenuItems mobile />
+          <MenuItems isMobile={true} />
         </div>
       </div>
 

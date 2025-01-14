@@ -5,31 +5,23 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 
 interface AuthDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-  onRegisterClick?: () => void;
-  onCarrierRegisterClick?: () => void;
-  requiredUserType?: "client" | "carrier";
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export default function AuthDialog({
-  isOpen,
-  onClose,
-  onSuccess,
-  onRegisterClick,
-  onCarrierRegisterClick,
-  requiredUserType,
+export function AuthDialog({
+  open,
+  onOpenChange,
 }: AuthDialogProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleForgotPasswordSuccess = () => {
     setShowForgotPassword(false);
-    onClose();
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
@@ -53,30 +45,9 @@ export default function AuthDialog({
         ) : (
           <div className="space-y-4">
             <LoginForm
-              onSuccess={onSuccess}
+              onSuccess={() => onOpenChange(false)}
               onForgotPasswordClick={() => setShowForgotPassword(true)}
-              requiredUserType={requiredUserType}
             />
-            <div className="flex flex-col gap-2">
-              {onRegisterClick && (
-                <Button
-                  variant="outline"
-                  onClick={onRegisterClick}
-                  className="w-full"
-                >
-                  Créer un compte client
-                </Button>
-              )}
-              {onCarrierRegisterClick && (
-                <Button
-                  variant="outline"
-                  onClick={onCarrierRegisterClick}
-                  className="w-full"
-                >
-                  Devenir transporteur
-                </Button>
-              )}
-            </div>
           </div>
         )}
       </DialogContent>

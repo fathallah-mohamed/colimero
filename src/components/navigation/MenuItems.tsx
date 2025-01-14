@@ -10,9 +10,14 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export default function MenuItems() {
+interface MenuItemsProps {
+  isMobile?: boolean;
+}
+
+export default function MenuItems({ isMobile }: MenuItemsProps) {
   const location = useLocation();
-  const isMobile = useIsMobile();
+  const isDefaultMobile = useIsMobile();
+  const isMobileView = isMobile || isDefaultMobile;
 
   const renderMenuItem = (item: typeof menuItems[0]) => {
     const isActive = location.pathname === item.href;
@@ -32,12 +37,12 @@ export default function MenuItems() {
           className={cn(
             "w-5 h-5 shrink-0",
             isActive ? "text-primary" : item.highlight ? "text-white" : "text-gray-500",
-            isMobile ? "mr-3" : "mr-2"
+            isMobileView ? "mr-3" : "mr-2"
           )}
         />
         <span className={cn(
           "whitespace-nowrap",
-          isMobile ? "block" : item.hideTextOnMobile ? "hidden xl:block" : "block"
+          isMobileView ? "block" : item.hideTextOnMobile ? "hidden xl:block" : "block"
         )}>
           {item.name}
         </span>
@@ -53,7 +58,7 @@ export default function MenuItems() {
       </motion.div>
     );
 
-    return isMobile ? (
+    return isMobileView ? (
       <Link
         key={item.name}
         to={item.href}
