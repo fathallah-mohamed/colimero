@@ -60,6 +60,7 @@ export function TourTimelineDisplay({
     }
   };
 
+  // If the tour is cancelled, show cancelled message
   if (status === "Annulée") {
     return (
       <div className="flex items-center justify-center p-4 bg-red-50 rounded-lg">
@@ -68,6 +69,8 @@ export function TourTimelineDisplay({
       </div>
     );
   }
+
+  const isActive = !["Terminée", "Annulée"].includes(status);
 
   return (
     <div className="space-y-6">
@@ -113,7 +116,7 @@ export function TourTimelineDisplay({
         )}
       </div>
 
-      {status !== "Terminée" && status !== "Annulée" && canEdit && (
+      {isActive && canEdit && (
         <div className="flex justify-end gap-3 mt-8">
           <Button
             variant="outline"
