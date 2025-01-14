@@ -4,13 +4,16 @@ import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCardDetails } from "./card/BookingCardDetails";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, Calendar, MapPin } from "lucide-react";
+import { ChevronDown, ChevronUp, Calendar, MapPin, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
 import { BookingCardHeader } from "./card/BookingCardHeader";
 import { BookingAddressInfo } from "./card/BookingAddressInfo";
 import { BookingActions } from "./card/BookingActions";
 import { useNavigation } from "@/hooks/use-navigation";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
 
 interface BookingCardProps {
   booking: any;
@@ -50,24 +53,61 @@ export function BookingCard({
             <BookingCardHeader booking={booking} />
             <BookingAddressInfo booking={booking} />
             
-            {/* Dates importantes */}
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="h-4 w-4" />
-                <div>
-                  <p className="text-sm text-gray-500">Date de départ</p>
-                  <p className="text-sm font-medium">
-                    {booking.tours?.departure_date_formatted || "Non définie"}
-                  </p>
+            {/* Informations sur la tournée */}
+            <div className="mt-4 border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-500 mb-2">Informations sur la tournée</h4>
+              <div className="space-y-3">
+                {booking.tours?.carriers && (
+                  <div className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-gray-500" />
+                    <div>
+                      <p className="text-sm font-medium">{booking.tours.carriers.company_name}</p>
+                      {booking.tours.carriers.phone && (
+                        <p className="text-sm text-gray-600">{booking.tours.carriers.phone}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <div>
+                      <p className="text-sm text-gray-500">Date de départ</p>
+                      <p className="text-sm font-medium">
+                        {booking.tours?.departure_date 
+                          ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
+                          : "Non définie"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <div>
+                      <p className="text-sm text-gray-500">Date de collecte</p>
+                      <p className="text-sm font-medium">
+                        {booking.tours?.collection_date 
+                          ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
+                          : "Non définie"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="h-4 w-4" />
+
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-500">Trajet</p>
+                    <p className="text-sm font-medium">
+                      {booking.tours?.departure_country} → {booking.tours?.destination_country}
+                    </p>
+                  </div>
+                </div>
+
                 <div>
-                  <p className="text-sm text-gray-500">Date de collecte</p>
-                  <p className="text-sm font-medium">
-                    {booking.tours?.collection_date_formatted || "Non définie"}
-                  </p>
+                  <Badge variant="outline" className="text-sm">
+                    Statut de la tournée: {booking.tours?.status || "Non défini"}
+                  </Badge>
                 </div>
               </div>
             </div>
