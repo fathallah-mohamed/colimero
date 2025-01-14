@@ -31,12 +31,6 @@ export default function Navigation() {
 
     const initSession = async () => {
       try {
-        // Clear all auth data to start fresh
-        await supabase.auth.signOut();
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Get a fresh session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -58,8 +52,6 @@ export default function Navigation() {
               break;
             case 'SIGNED_OUT':
               console.log('User signed out');
-              localStorage.clear();
-              sessionStorage.clear();
               if (location.pathname.includes('/reserver/')) {
                 window.location.href = '/';
               }
