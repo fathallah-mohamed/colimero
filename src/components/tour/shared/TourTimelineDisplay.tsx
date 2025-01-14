@@ -1,23 +1,8 @@
 import { TourStatus } from "@/types/tour";
-import { TimelineStatus } from "../timeline/TimelineStatus";
-import { TimelineProgress } from "../timeline/TimelineProgress";
-import { CancelledStatus } from "../timeline/CancelledStatus";
 import { Button } from "@/components/ui/button";
-import { XCircle, Edit } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Edit, XCircle, Truck } from "lucide-react";
 import { useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { motion } from "framer-motion";
-import { TimelineMobileView } from "../timeline/TimelineMobileView";
 import { useNavigate } from "react-router-dom";
 
 interface TourTimelineDisplayProps {
@@ -40,21 +25,6 @@ export function TourTimelineDisplay({
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const navigate = useNavigate();
 
-  if (status === "Annulée") {
-    return <CancelledStatus />;
-  }
-
-  const statusOrder: TourStatus[] = [
-    "Programmée",
-    "Ramassage en cours",
-    "En transit",
-    "Livraison en cours",
-    "Terminée"
-  ];
-
-  const currentIndex = statusOrder.indexOf(status);
-  const progress = ((currentIndex) / (statusOrder.length - 1)) * 100;
-
   const handleCancel = async () => {
     if (onStatusChange) {
       await onStatusChange("Annulée" as TourStatus);
@@ -66,45 +36,33 @@ export function TourTimelineDisplay({
     navigate(`/planifier-une-tournee?tourId=${tourId}`);
   };
 
+  const handleStartCollection = async () => {
+    if (onStatusChange) {
+      await onStatusChange("Ramassage en cours" as TourStatus);
+    }
+  };
+
+  if (status === "Annulée") {
+    return (
+      <div className="flex items-center justify-center p-4 bg-red-50 rounded-lg">
+        <XCircle className="h-5 w-5 text-red-500 mr-2" />
+        <span className="text-red-700 font-medium">Cette tournée a été annulée</span>
+      </div>
+    );
+  }
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
-    >
-      {/* Vue mobile */}
-      <TimelineMobileView status={status} variant={variant} />
-
-      {/* Vue desktop */}
-      <div className="relative hidden lg:flex justify-between items-center w-full mt-8 px-4">
-        <TimelineProgress progress={progress} variant={variant} />
-        
-        {statusOrder.map((statusItem, index) => {
-          const isCompleted = index < currentIndex;
-          const isCurrent = index === currentIndex;
-          const isNext = index === currentIndex + 1;
-
-          // Combiner les étapes "Livraison en cours" et "Terminée"
-          if (statusItem === "Terminée") {
-            return null;
-          }
-
-          const label = statusItem === "Livraison en cours" ? "Livraison" : statusItem;
-
-          return (
-            <TimelineStatus
-              key={statusItem}
-              status={statusItem}
-              isCompleted={isCompleted}
-              isCurrent={isCurrent}
-              isNext={isNext && canEdit}
-              onClick={() => isNext && canEdit && onStatusChange && onStatusChange(statusItem)}
-              label={label}
-              variant={variant}
-            />
-          );
-        })}
+    <div className="space-y-6">
+      <div className="flex flex-col items-center gap-4">
+        {status === "Programmée" && canEdit && (
+          <Button 
+            onClick={handleStartCollection}
+            className="w-full bg-primary hover:bg-primary/90"
+          >
+            <Truck className="h-4 w-4 mr-2" />
+            Démarrer le ramassage
+          </Button>
+        )}
       </div>
 
       {status !== "Terminée" && canEdit && (
@@ -142,6 +100,6 @@ export function TourTimelineDisplay({
           </AlertDialog>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

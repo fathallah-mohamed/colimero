@@ -56,7 +56,7 @@ export function TourCard({
 
   const handleTourStatusChange = async (newStatus: TourStatus) => {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('tours')
         .update({ status: newStatus })
         .eq('id', tour.id);
