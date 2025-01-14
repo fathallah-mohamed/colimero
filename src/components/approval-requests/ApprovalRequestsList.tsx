@@ -10,7 +10,14 @@ export function ApprovalRequestsList() {
   const [page] = useState(1);
   const user = useUser();
   const userType = user?.user_metadata?.user_type;
-  const { requests, loading, handleCancelRequest, handleDeleteRequest } = useApprovalRequests(userType, user?.id);
+  const { 
+    requests, 
+    loading, 
+    handleApproveRequest,
+    handleRejectRequest,
+    handleCancelRequest, 
+    handleDeleteRequest 
+  } = useApprovalRequests(userType, user?.id);
 
   console.log('Current user:', user);
   console.log('User type:', userType);
@@ -46,7 +53,8 @@ export function ApprovalRequestsList() {
           key={request.id} 
           request={request} 
           userType={userType}
-          onStatusChange={() => {}}
+          onApprove={() => handleApproveRequest(request)}
+          onReject={() => handleRejectRequest(request)}
           onCancel={() => handleCancelRequest(request.id)}
           onDelete={() => handleDeleteRequest(request.id)}
         />

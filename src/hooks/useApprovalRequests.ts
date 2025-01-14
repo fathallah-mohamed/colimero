@@ -84,15 +84,22 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       if (updateError) throw updateError;
 
       // Créer une réservation automatiquement pour le client
-      const { error: bookingError } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: request.user_id,
-          tour_id: request.tour_id,
-          pickup_city: request.pickup_city || request.tour.route[0].name,
-          delivery_city: request.delivery_city || request.tour.route[request.tour.route.length - 1].name,
-          status: 'confirmed',
-          approval_request_id: request.id
+      const { data: bookingData, error: bookingError } = await supabase
+        .rpc('create_booking_with_capacity_update', {
+          p_tour_id: request.tour_id,
+          p_user_id: request.user_id,
+          p_weight: 5, // Default weight
+          p_pickup_city: request.pickup_city || request.tour.route[0].name,
+          p_delivery_city: request.delivery_city || request.tour.route[request.tour.route.length - 1].name,
+          p_recipient_name: `${request.user.first_name} ${request.user.last_name}`,
+          p_recipient_address: "À renseigner",
+          p_recipient_phone: request.user.phone || "À renseigner",
+          p_sender_name: `${request.user.first_name} ${request.user.last_name}`,
+          p_sender_phone: request.user.phone || "À renseigner",
+          p_item_type: "Colis standard",
+          p_special_items: "[]",
+          p_content_types: [],
+          p_photos: []
         });
 
       if (bookingError) throw bookingError;
