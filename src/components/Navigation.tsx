@@ -31,15 +31,16 @@ export default function Navigation() {
 
     const initSession = async () => {
       try {
-        // First clear any potentially corrupted session data
-        localStorage.removeItem('supabase.auth.token');
+        // Clear all auth data to start fresh
+        await supabase.auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
         
-        // Try to establish a fresh session
+        // Get a fresh session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          await supabase.auth.signOut();
           return;
         }
 
@@ -51,18 +52,24 @@ export default function Navigation() {
 
           console.log('Auth event:', event);
 
-          if (event === 'SIGNED_IN') {
-            console.log('User signed in successfully');
-          } else if (event === 'SIGNED_OUT') {
-            console.log('User signed out');
-            localStorage.removeItem('supabase.auth.token');
-            if (location.pathname.includes('/reserver/')) {
-              window.location.href = '/';
-            }
-          } else if (event === 'TOKEN_REFRESHED') {
-            console.log('Session token refreshed');
-          } else if (event === 'USER_UPDATED') {
-            console.log('User data updated');
+          switch (event) {
+            case 'SIGNED_IN':
+              console.log('User signed in successfully');
+              break;
+            case 'SIGNED_OUT':
+              console.log('User signed out');
+              localStorage.clear();
+              sessionStorage.clear();
+              if (location.pathname.includes('/reserver/')) {
+                window.location.href = '/';
+              }
+              break;
+            case 'TOKEN_REFRESHED':
+              console.log('Session token refreshed');
+              break;
+            case 'USER_UPDATED':
+              console.log('User data updated');
+              break;
           }
         });
 
@@ -73,7 +80,11 @@ export default function Navigation() {
           
           if (refreshError) {
             console.error("Session refresh error:", refreshError);
-            await supabase.auth.signOut();
+            toast({
+              variant: "destructive",
+              title: "Erreur de session",
+              description: "Veuillez vous reconnecter",
+            });
           } else if (refreshData.session) {
             console.log('Session refreshed successfully');
           }
@@ -84,7 +95,11 @@ export default function Navigation() {
         };
       } catch (error) {
         console.error("Session initialization error:", error);
-        await supabase.auth.signOut();
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de l'initialisation de la session",
+        });
       }
     };
 
@@ -101,7 +116,7 @@ export default function Navigation() {
       mounted = false;
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [location.pathname]);
+  }, [location.pathname, toast]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
