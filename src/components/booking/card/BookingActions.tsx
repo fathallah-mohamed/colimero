@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface BookingActionsProps {
   bookingId: string;
@@ -35,6 +36,7 @@ export function BookingActions({
   userType
 }: BookingActionsProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
@@ -52,6 +54,10 @@ export function BookingActions({
         console.error("Error updating booking status:", error);
         throw error;
       }
+
+      // Invalider les caches pour forcer le rechargement
+      await queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
 
       // Appeler les callbacks pour mettre à jour l'UI
       await onStatusChange(bookingId, newStatus);
