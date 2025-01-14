@@ -4,14 +4,22 @@ import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { useState } from "react";
 import { Button } from "../ui/button";
 
-interface AuthDialogProps {
+export interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
+  requiredUserType?: string;
+  onRegisterClick?: () => void;
+  onCarrierRegisterClick?: () => void;
 }
 
 export function AuthDialog({
   open,
   onOpenChange,
+  onSuccess,
+  requiredUserType,
+  onRegisterClick,
+  onCarrierRegisterClick
 }: AuthDialogProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
@@ -45,8 +53,14 @@ export function AuthDialog({
         ) : (
           <div className="space-y-4">
             <LoginForm
-              onSuccess={() => onOpenChange(false)}
+              onSuccess={() => {
+                onOpenChange(false);
+                onSuccess?.();
+              }}
               onForgotPasswordClick={() => setShowForgotPassword(true)}
+              onRegisterClick={onRegisterClick}
+              onCarrierRegisterClick={onCarrierRegisterClick}
+              requiredUserType={requiredUserType}
             />
           </div>
         )}

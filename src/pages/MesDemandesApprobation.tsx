@@ -40,8 +40,8 @@ export default function MesDemandesApprobation() {
           <ApprovalRequestsList />
         ) : (
           <AuthDialog 
-            isOpen={showAuthDialog} 
-            onClose={() => setShowAuthDialog(false)}
+            open={showAuthDialog} 
+            onOpenChange={setShowAuthDialog}
             requiredUserType="client"
           />
         )}
