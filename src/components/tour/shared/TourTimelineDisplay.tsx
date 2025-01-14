@@ -1,7 +1,7 @@
 import { TourStatus } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Edit, XCircle, Truck, Plane } from "lucide-react";
+import { Edit, XCircle, Truck, Plane, Package, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -48,6 +48,18 @@ export function TourTimelineDisplay({
     }
   };
 
+  const handleStartDelivery = async () => {
+    if (onStatusChange) {
+      await onStatusChange("Livraison en cours" as TourStatus);
+    }
+  };
+
+  const handleComplete = async () => {
+    if (onStatusChange) {
+      await onStatusChange("Terminée" as TourStatus);
+    }
+  };
+
   if (status === "Annulée") {
     return (
       <div className="flex items-center justify-center p-4 bg-red-50 rounded-lg">
@@ -79,9 +91,29 @@ export function TourTimelineDisplay({
             Démarrer le transit
           </Button>
         )}
+
+        {status === "En transit" && canEdit && (
+          <Button 
+            onClick={handleStartDelivery}
+            className="w-full bg-primary hover:bg-primary/90"
+          >
+            <Package className="h-4 w-4 mr-2" />
+            Démarrer la livraison
+          </Button>
+        )}
+
+        {status === "Livraison en cours" && canEdit && (
+          <Button 
+            onClick={handleComplete}
+            className="w-full bg-primary hover:bg-primary/90"
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Terminer la tournée
+          </Button>
+        )}
       </div>
 
-      {status !== "Terminée" && canEdit && (
+      {status !== "Terminée" && status !== "Annulée" && canEdit && (
         <div className="flex justify-end gap-3 mt-8">
           <Button
             variant="outline"
