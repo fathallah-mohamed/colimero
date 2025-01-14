@@ -6,6 +6,7 @@ import { TourCapacityInfo } from "./TourCapacityInfo";
 import { generateTourPDF } from "./tour-card/PDFGenerator";
 import { useToast } from "@/hooks/use-toast";
 import { BookingCard } from "../booking/BookingCard";
+import { cn } from "@/lib/utils";
 import type { Tour } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
 
