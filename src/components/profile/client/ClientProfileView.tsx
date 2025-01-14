@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ClientProfileForm } from "./ClientProfileForm";
 import { ProfileHeader } from "../ProfileHeader";
 import { Profile } from "@/types/profile";
+import { Mail, Phone, MapPin, User } from "lucide-react";
 
 interface ClientProfileViewProps {
   profile: Profile;
@@ -10,6 +11,16 @@ interface ClientProfileViewProps {
 
 export function ClientProfileView({ profile }: ClientProfileViewProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
+
+  const InfoItem = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null }) => (
+    <div className="flex items-start gap-2">
+      <Icon className="h-4 w-4 text-primary/70 mt-1" />
+      <div>
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="text-sm font-medium">{value || "Non renseigné"}</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -21,27 +32,26 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
 
       <div className="bg-white shadow rounded-lg p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Nom complet</h3>
-            <p className="mt-1 text-sm text-gray-900">
-              {profile.first_name} {profile.last_name}
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Email</h3>
-            <p className="mt-1 text-sm text-gray-900">{profile.email}</p>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Téléphone</h3>
-            <p className="mt-1 text-sm text-gray-900">{profile.phone || "Non renseigné"}</p>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-medium text-gray-500">Adresse</h3>
-            <p className="mt-1 text-sm text-gray-900">{profile.address || "Non renseignée"}</p>
-          </div>
+          <InfoItem 
+            icon={User} 
+            label="Nom complet" 
+            value={`${profile.first_name || ''} ${profile.last_name || ''}`} 
+          />
+          <InfoItem 
+            icon={Mail} 
+            label="Email" 
+            value={profile.email} 
+          />
+          <InfoItem 
+            icon={Phone} 
+            label="Téléphone" 
+            value={profile.phone} 
+          />
+          <InfoItem 
+            icon={MapPin} 
+            label="Adresse" 
+            value={profile.address} 
+          />
         </div>
       </div>
 
