@@ -1,7 +1,7 @@
 import { TourStatus } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Edit, XCircle, Truck } from "lucide-react";
+import { Edit, XCircle, Truck, Plane } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -42,6 +42,12 @@ export function TourTimelineDisplay({
     }
   };
 
+  const handleStartTransit = async () => {
+    if (onStatusChange) {
+      await onStatusChange("En transit" as TourStatus);
+    }
+  };
+
   if (status === "Annulée") {
     return (
       <div className="flex items-center justify-center p-4 bg-red-50 rounded-lg">
@@ -61,6 +67,16 @@ export function TourTimelineDisplay({
           >
             <Truck className="h-4 w-4 mr-2" />
             Démarrer le ramassage
+          </Button>
+        )}
+
+        {status === "Ramassage en cours" && canEdit && (
+          <Button 
+            onClick={handleStartTransit}
+            className="w-full bg-primary hover:bg-primary/90"
+          >
+            <Plane className="h-4 w-4 mr-2" />
+            Démarrer le transit
           </Button>
         )}
       </div>
