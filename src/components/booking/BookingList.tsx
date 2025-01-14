@@ -19,6 +19,7 @@ export function BookingList() {
             departure_date,
             destination_country,
             route,
+            status,
             carriers (
               company_name,
               avatar_url,
