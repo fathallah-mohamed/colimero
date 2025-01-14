@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
 import MenuItems from "@/components/navigation/MenuItems";
@@ -23,6 +23,7 @@ export default function Navigation() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const { toast } = useToast();
 
@@ -31,13 +32,24 @@ export default function Navigation() {
 
     const initSession = async () => {
       try {
-        // Get current session first
+        // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          // Clear potentially corrupted session data
-          localStorage.removeItem('supabase.auth.token');
+          if (sessionError.message.includes('refresh_token_not_found')) {
+            // Clear all auth data and redirect to login
+            await supabase.auth.signOut();
+            localStorage.removeItem('supabase.auth.token');
+            if (mounted) {
+              toast({
+                variant: "destructive",
+                title: "Session expirée",
+                description: "Veuillez vous reconnecter.",
+              });
+              navigate('/');
+            }
+          }
           return;
         }
 
@@ -54,8 +66,9 @@ export default function Navigation() {
           } else if (event === 'SIGNED_OUT') {
             console.log('User signed out');
             localStorage.removeItem('supabase.auth.token');
+            sessionStorage.removeItem('returnPath');
             if (location.pathname.includes('/reserver/')) {
-              window.location.href = '/';
+              navigate('/');
             }
           } else if (event === 'TOKEN_REFRESHED') {
             console.log('Session token refreshed');
@@ -69,7 +82,15 @@ export default function Navigation() {
         };
       } catch (error) {
         console.error("Session initialization error:", error);
+        // Clear potentially corrupted session data
         localStorage.removeItem('supabase.auth.token');
+        if (mounted) {
+          toast({
+            variant: "destructive",
+            title: "Erreur de session",
+            description: "Une erreur est survenue lors de l'initialisation de la session.",
+          });
+        }
       }
     };
 
@@ -86,7 +107,7 @@ export default function Navigation() {
       mounted = false;
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [location.pathname]);
+  }, [location.pathname, navigate, toast]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
