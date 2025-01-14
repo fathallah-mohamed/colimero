@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useApprovalActions } from "./useApprovalActions";
+import { useRequestManagement } from "./useRequestManagement";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<any[]>([]);
-  const { toast } = useToast();
+  const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
+  const { handleCancelRequest, handleDeleteRequest } = useRequestManagement();
 
   const fetchRequests = async () => {
     if (!userId) {
@@ -61,160 +63,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger les demandes d'approbation",
-      });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleApproveRequest = async (request: any) => {
-    try {
-      const { error: updateError } = await supabase
-        .from('approval_requests')
-        .update({
-          status: 'approved',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', request.id);
-
-      if (updateError) throw updateError;
-
-      // Créer une réservation automatiquement pour le client
-      const { data: bookingData, error: bookingError } = await supabase
-        .rpc('create_booking_with_capacity_update', {
-          p_tour_id: request.tour_id,
-          p_user_id: request.user_id,
-          p_weight: 5, // Default weight
-          p_pickup_city: request.pickup_city || request.tour.route[0].name,
-          p_delivery_city: request.delivery_city || request.tour.route[request.tour.route.length - 1].name,
-          p_recipient_name: `${request.user.first_name} ${request.user.last_name}`,
-          p_recipient_address: "À renseigner",
-          p_recipient_phone: request.user.phone || "À renseigner",
-          p_sender_name: `${request.user.first_name} ${request.user.last_name}`,
-          p_sender_phone: request.user.phone || "À renseigner",
-          p_item_type: "Colis standard",
-          p_special_items: "[]",
-          p_content_types: [],
-          p_photos: []
-        });
-
-      if (bookingError) throw bookingError;
-
-      toast({
-        title: "Demande approuvée",
-        description: "La demande a été approuvée et une réservation a été créée",
-      });
-
-      await fetchRequests();
-    } catch (error: any) {
-      console.error('Error approving request:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'approbation",
-      });
-    }
-  };
-
-  const handleRejectRequest = async (request: any) => {
-    try {
-      const { error } = await supabase
-        .from('approval_requests')
-        .update({
-          status: 'rejected',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', request.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Demande rejetée",
-        description: "La demande a été rejetée avec succès",
-      });
-
-      await fetchRequests();
-    } catch (error: any) {
-      console.error('Error rejecting request:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors du rejet",
-      });
-    }
-  };
-
-  const handleCancelRequest = async (requestId: string) => {
-    try {
-      const { error } = await supabase
-        .from('approval_requests')
-        .update({
-          status: 'cancelled',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', requestId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "La demande a été annulée avec succès",
-      });
-
-      await fetchRequests();
-    } catch (error: any) {
-      console.error('Error cancelling request:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'annulation de la demande",
-      });
-    }
-  };
-
-  const handleDeleteRequest = async (requestId: string) => {
-    try {
-      const { error: checkError, data: request } = await supabase
-        .from('approval_requests')
-        .select('status')
-        .eq('id', requestId)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
-
-      if (request?.status !== 'cancelled') {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Seules les demandes annulées peuvent être supprimées",
-        });
-        return;
-      }
-
-      const { error } = await supabase
-        .from('approval_requests')
-        .delete()
-        .eq('id', requestId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "La demande a été supprimée avec succès",
-      });
-
-      await fetchRequests();
-    } catch (error: any) {
-      console.error('Error deleting request:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression de la demande",
-      });
     }
   };
 
@@ -228,9 +78,21 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   return { 
     requests, 
     loading,
-    handleApproveRequest,
-    handleRejectRequest,
-    handleCancelRequest,
-    handleDeleteRequest
+    handleApproveRequest: async (request: any) => {
+      const { success } = await handleApproveRequest(request);
+      if (success) await fetchRequests();
+    },
+    handleRejectRequest: async (request: any) => {
+      const { success } = await handleRejectRequest(request);
+      if (success) await fetchRequests();
+    },
+    handleCancelRequest: async (requestId: string) => {
+      const { success } = await handleCancelRequest(requestId);
+      if (success) await fetchRequests();
+    },
+    handleDeleteRequest: async (requestId: string) => {
+      const { success } = await handleDeleteRequest(requestId);
+      if (success) await fetchRequests();
+    }
   };
 }
