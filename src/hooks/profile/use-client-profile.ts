@@ -2,47 +2,57 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function fetchClientProfile(userId: string, userEmail: string | undefined) {
   try {
-    // First attempt to get the existing profile
+    console.log('Fetching client profile for user:', userId, 'email:', userEmail);
+    
     const { data: existingProfile, error: fetchError } = await supabase
       .from('clients')
       .select('*')
       .eq('id', userId)
-      .maybeSingle();
+      .single();
 
-    if (fetchError) throw fetchError;
+    if (fetchError) {
+      console.error('Error fetching client profile:', fetchError);
+      throw fetchError;
+    }
 
-    // If profile exists, return it
     if (existingProfile) {
+      console.log('Existing profile found:', existingProfile);
+      // Si l'email n'est pas défini dans le profil mais qu'on a un email dans userEmail
+      if (!existingProfile.email && userEmail) {
+        const { error: updateError } = await supabase
+          .from('clients')
+          .update({ email: userEmail })
+          .eq('id', userId);
+
+        if (updateError) {
+          console.error('Error updating client email:', updateError);
+        } else {
+          existingProfile.email = userEmail;
+        }
+      }
       return existingProfile;
     }
 
-    // If no profile exists, try to create one
-    const { data: userData } = await supabase.auth.getUser();
-    const metadata = userData?.user?.user_metadata || {};
-
-    const { data: newProfile, error: upsertError } = await supabase
+    // Si aucun profil n'existe, on en crée un nouveau
+    const { data: newProfile, error: createError } = await supabase
       .from('clients')
-      .upsert([
+      .insert([
         {
           id: userId,
           email: userEmail,
-          first_name: metadata.first_name || null,
-          last_name: metadata.last_name || null,
-          phone: metadata.phone || null,
-          address: metadata.address || null,
           status: 'active'
         }
-      ], 
-      { 
-        onConflict: 'id',
-        ignoreDuplicates: false
-      })
+      ])
       .select()
       .single();
 
-    if (upsertError) throw upsertError;
+    if (createError) {
+      console.error('Error creating client profile:', createError);
+      throw createError;
+    }
+
+    console.log('New profile created:', newProfile);
     return newProfile;
-    
   } catch (error) {
     console.error('Error in fetchClientProfile:', error);
     throw error;

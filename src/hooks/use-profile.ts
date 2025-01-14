@@ -55,6 +55,7 @@ export function useProfile() {
 
       const userType = session.user.user_metadata?.user_type || 'admin';
       console.log("Fetching profile for user type:", userType);
+      console.log("User email from session:", session.user.email);
       
       let profileData = null;
 
@@ -67,7 +68,8 @@ export function useProfile() {
             first_name: session.user.user_metadata?.first_name || 'Admin',
             last_name: session.user.user_metadata?.last_name || 'User',
             address: session.user.user_metadata?.address || 'À renseigner',
-            phone: session.user.user_metadata?.phone || ''
+            phone: session.user.user_metadata?.phone || '',
+            email: session.user.email
           };
           profileData = await createAdminProfile(session.user.id, session.user.email, metadata);
         }
@@ -79,6 +81,10 @@ export function useProfile() {
 
       if (profileData) {
         console.log('Profile data loaded:', profileData);
+        // Assurez-vous que l'email est défini
+        if (!profileData.email && session.user.email) {
+          profileData.email = session.user.email;
+        }
         setProfile(profileData);
       } else {
         console.log('No profile data found');
