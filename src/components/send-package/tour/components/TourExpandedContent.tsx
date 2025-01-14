@@ -83,7 +83,8 @@ export function TourExpandedContent({
           .insert({
             user_id: session.user.id,
             tour_id: tour.id,
-            status: 'pending'
+            status: 'pending',
+            pickup_city: selectedPoint
           });
 
         if (error) throw error;
@@ -91,7 +92,7 @@ export function TourExpandedContent({
         setApprovalStatus('pending');
         toast({
           title: "Demande envoyée",
-          description: "Votre demande d'approbation a été envoyée au transporteur. Vous serez notifié par email de sa décision.",
+          description: "Votre demande d'approbation a été envoyée au transporteur",
         });
       } catch (error) {
         console.error('Error creating approval request:', error);
