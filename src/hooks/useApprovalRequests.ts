@@ -156,7 +156,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     requests, 
     loading,
     handleCancelRequest,
-    handleDeleteRequest,
-    refetch: fetchRequests
+    handleDeleteRequest
   };
 }
