@@ -20,7 +20,9 @@ export default function Activation() {
       }
 
       try {
-        // Vérifier le token et la date d'expiration
+        console.log('Attempting to activate account with token:', token);
+
+        // Vérifier le token et activer le compte
         const { data: client, error: clientError } = await supabase
           .from('clients')
           .select('*')
@@ -28,8 +30,11 @@ export default function Activation() {
           .maybeSingle();
 
         if (clientError || !client) {
+          console.error('Error fetching client:', clientError);
           throw new Error('Token invalide');
         }
+
+        console.log('Found client:', client);
 
         // Vérifier si le token n'a pas expiré
         if (new Date(client.activation_expires_at) < new Date()) {
@@ -47,9 +52,11 @@ export default function Activation() {
           .eq('id', client.id);
 
         if (updateError) {
+          console.error('Error updating client:', updateError);
           throw updateError;
         }
 
+        console.log('Account activated successfully');
         setStatus('success');
         toast({
           title: "Compte activé",
@@ -61,7 +68,7 @@ export default function Activation() {
           navigate('/envoyer-colis');
         }, 3000);
 
-      } catch (error) {
+      } catch (error: any) {
         console.error('Activation error:', error);
         setStatus('error');
         toast({

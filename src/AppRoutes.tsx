@@ -19,6 +19,7 @@ import AdminClients from "@/pages/AdminClients";
 import AdminManagement from "@/pages/AdminManagement";
 import CreateTour from "@/pages/CreateTour";
 import Reserver from "@/pages/Reserver";
+import Activation from "@/pages/Activation";
 
 export function AppRoutes() {
   return (
@@ -43,6 +44,7 @@ export function AppRoutes() {
       <Route path="/admin/gestion" element={<AdminManagement />} />
       <Route path="/transporteur/tournees/creer" element={<CreateTour />} />
       <Route path="/reserver/:tourId" element={<Reserver />} />
+      <Route path="/activation" element={<Activation />} />
     </Routes>
   );
 }
