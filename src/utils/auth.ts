@@ -70,6 +70,29 @@ export const authenticateUser = async (email: string, password: string): Promise
 
     console.log("Connexion réussie, données utilisateur:", signInData.user);
     
+    // Vérifier si l'email est vérifié pour les clients
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('email_verified')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    if (clientData && !clientData.email_verified) {
+      toast({
+        variant: "destructive",
+        title: "Email non vérifié",
+        description: "Veuillez vérifier votre email avant de vous connecter.",
+      });
+      // Déconnexion automatique si l'email n'est pas vérifié
+      await supabase.auth.signOut();
+      return { success: false };
+    }
+
+    toast({
+      title: "Connexion réussie",
+      description: "Vous êtes maintenant connecté",
+    });
+
     // Vérifier si l'utilisateur est un admin
     const { data: adminData } = await supabase
       .from('administrators')
