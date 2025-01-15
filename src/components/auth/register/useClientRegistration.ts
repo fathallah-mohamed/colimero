@@ -1,44 +1,52 @@
 import { supabase } from "@/integrations/supabase/client";
 import { RegisterFormState } from "./types";
-import { useToast } from "@/hooks/use-toast";
 
 export async function registerClient(formData: RegisterFormState) {
-  console.log("Starting client registration with data:", {
+  console.log("Starting registration process with data:", {
     ...formData,
     password: "[REDACTED]"
   });
 
   try {
     // 1. Create auth user with proper metadata
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const signUpData = {
       email: formData.email.trim(),
       password: formData.password.trim(),
       options: {
         data: {
           user_type: 'client',
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
+          first_name: formData.firstName.trim(),
+          last_name: formData.lastName.trim(),
+          phone: formData.phone.trim(),
           birth_date: formData.birthDate,
-          address: formData.address
+          address: formData.address?.trim()
         },
       },
+    };
+
+    console.log("Attempting signUp with data:", {
+      ...signUpData,
+      password: "[REDACTED]"
     });
 
-    console.log("Auth signup response:", { data: authData, error: authError });
+    const { data: authData, error: authError } = await supabase.auth.signUp(signUpData);
+
+    console.log("SignUp response:", { data: authData, error: authError });
 
     if (authError) {
-      if (authError.message.includes("User already registered") || 
-          authError.message === "User already registered" ||
-          authError.message.includes("already exists")) {
-        return { data: null, error: { message: "User already registered" } };
-      }
-      throw authError;
+      console.error("Auth error details:", {
+        message: authError.message,
+        status: authError.status,
+        name: authError.name
+      });
+      return { data: null, error: authError };
     }
 
     if (!authData.user) {
-      throw new Error("Erreur lors de la création du compte");
+      throw new Error("No user data received");
     }
+
+    console.log("Auth successful, user created:", authData.user.id);
 
     // 2. Upload ID document if provided
     if (formData.idDocument) {
@@ -50,29 +58,35 @@ export async function registerClient(formData: RegisterFormState) {
         .from('id-documents')
         .upload(fileName, formData.idDocument);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw uploadError;
+      }
     }
 
     // 3. Insert client consents
-    console.log("Inserting client consents...");
-    const consentsToInsert = formData.acceptedConsents.map(consentId => ({
-      client_id: authData.user.id,
-      consent_type_id: consentId,
-      accepted: true,
-      accepted_at: new Date().toISOString()
-    }));
+    if (formData.acceptedConsents.length > 0) {
+      console.log("Inserting client consents...");
+      const consentsToInsert = formData.acceptedConsents.map(consentId => ({
+        client_id: authData.user.id,
+        consent_type_id: consentId,
+        accepted: true,
+        accepted_at: new Date().toISOString()
+      }));
 
-    if (consentsToInsert.length > 0) {
       const { error: consentsError } = await supabase
         .from('client_consents')
         .upsert(consentsToInsert);
 
-      if (consentsError) throw consentsError;
+      if (consentsError) {
+        console.error("Consents error:", consentsError);
+        throw consentsError;
+      }
     }
 
     return { data: authData, error: null };
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("Complete registration error:", error);
     return { data: null, error };
   }
 }

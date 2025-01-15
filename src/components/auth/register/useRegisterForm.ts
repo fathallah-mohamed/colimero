@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useConsentValidation } from "./useConsentValidation";
 import { registerClient } from "./useClientRegistration";
-import { supabase } from "@/integrations/supabase/client";
 import { RegisterFormState } from "./types";
 
 export function useRegisterForm(onLogin: () => void) {
@@ -19,43 +17,28 @@ export function useRegisterForm(onLogin: () => void) {
   const [acceptedConsents, setAcceptedConsents] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const { requiredConsentsCount, allRequiredConsentsAccepted } = useConsentValidation(acceptedConsents);
-
-  const areRequiredFieldsFilled = () => {
-    return (
-      firstName.trim() !== "" &&
-      lastName.trim() !== "" &&
-      email.trim() !== "" &&
-      phone.trim() !== "" &&
-      password.trim() !== "" &&
-      confirmPassword.trim() !== "" &&
-      password === confirmPassword &&
-      allRequiredConsentsAccepted
-    );
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submission started");
     
     if (!areRequiredFieldsFilled()) {
       toast({
         variant: "destructive",
-        title: "Erreur",
+        title: "Champs requis",
         description: "Veuillez remplir tous les champs obligatoires",
       });
       return;
     }
 
     setIsLoading(true);
-    console.log("Starting registration process...");
 
     try {
       const formData: RegisterFormState = {
         firstName,
         lastName,
-        email: email.trim(),
+        email,
         phone,
-        password: password.trim(),
+        password,
         confirmPassword,
         birthDate,
         address,
@@ -67,35 +50,26 @@ export function useRegisterForm(onLogin: () => void) {
       const { data, error } = await registerClient(formData);
 
       if (error) {
-        if (error.message === "User already registered") {
-          toast({
-            title: "Compte existant",
-            description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
-          });
+        let errorMessage = "Une erreur est survenue lors de l'inscription";
+        
+        if (error.message.includes("User already registered")) {
+          errorMessage = "Un compte existe déjà avec cet email. Veuillez vous connecter.";
           onLogin();
           return;
         }
-        throw error;
+
+        toast({
+          variant: "destructive",
+          title: "Erreur d'inscription",
+          description: errorMessage,
+        });
+        return;
       }
 
       if (!data?.user?.id) {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      console.log("Account created successfully, sending activation email...");
-      const { error: emailError } = await supabase.functions.invoke("send-activation-email", {
-        body: {
-          email: email.trim(),
-          first_name: firstName.trim(),
-        },
-      });
-
-      if (emailError) {
-        console.error("Erreur lors de l'envoi de l'email d'activation:", emailError);
-        throw new Error("Erreur lors de l'envoi de l'email d'activation");
-      }
-
-      console.log("Registration process completed successfully");
       toast({
         title: "Compte créé avec succès",
         description: "Un email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
@@ -103,19 +77,11 @@ export function useRegisterForm(onLogin: () => void) {
 
       onLogin();
     } catch (error: any) {
-      console.error("Erreur complète:", error);
-      let errorMessage = "Une erreur est survenue lors de l'inscription";
-      
-      if (error.message === "Invalid login credentials") {
-        errorMessage = "Email ou mot de passe incorrect";
-      } else if (error.message === "Email not confirmed") {
-        errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-      }
-
+      console.error("Complete error:", error);
       toast({
         variant: "destructive",
-        title: "Erreur d'inscription",
-        description: errorMessage,
+        title: "Erreur inattendue",
+        description: "Une erreur inattendue s'est produite. Veuillez réessayer.",
       });
     } finally {
       setIsLoading(false);
@@ -127,6 +93,18 @@ export function useRegisterForm(onLogin: () => void) {
       accepted 
         ? [...prev, consentId]
         : prev.filter(id => id !== consentId)
+    );
+  };
+
+  const areRequiredFieldsFilled = () => {
+    return (
+      firstName.trim() !== "" &&
+      lastName.trim() !== "" &&
+      email.trim() !== "" &&
+      phone.trim() !== "" &&
+      password.trim() !== "" &&
+      confirmPassword.trim() !== "" &&
+      password === confirmPassword
     );
   };
 
@@ -153,8 +131,6 @@ export function useRegisterForm(onLogin: () => void) {
     acceptedConsents,
     handleConsentChange,
     handleSubmit,
-    requiredConsentsCount,
-    allRequiredConsentsAccepted,
     areRequiredFieldsFilled,
   };
 }
