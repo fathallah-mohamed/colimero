@@ -36,6 +36,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     setIsLoading(true);
 
     try {
+      console.log("Checking if email exists...");
       // 1. Vérifier si l'email existe déjà
       const { data: existingClient } = await supabase
         .from('clients')
@@ -44,10 +45,13 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         .maybeSingle();
 
       if (existingClient) {
+        console.log("Email exists, showing existing user modal");
+        setIsLoading(false);
         onSuccess('existing');
         return;
       }
 
+      console.log("Creating auth account...");
       // 2. Créer le compte auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
@@ -62,12 +66,16 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        console.error("SignUp error:", signUpError);
+        throw signUpError;
+      }
 
       if (!signUpData?.user?.id) {
         throw new Error("Erreur lors de la création du compte");
       }
 
+      console.log("Creating client profile...");
       // 3. Créer le profil client
       const { error: clientError } = await supabase
         .from('clients')
@@ -82,21 +90,26 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
           }
         ]);
 
-      if (clientError) throw clientError;
+      if (clientError) {
+        console.error("Client profile creation error:", clientError);
+        throw clientError;
+      }
 
+      console.log("Sending activation email...");
       // 4. Envoyer l'email d'activation
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { email: email.trim() }
       });
 
       if (emailError) {
-        console.error("Erreur d'envoi d'email:", emailError);
+        console.error("Email sending error:", emailError);
         throw new Error("Erreur lors de l'envoi de l'email d'activation");
       }
 
       // 5. Déconnexion après inscription réussie
       await supabase.auth.signOut();
-
+      
+      console.log("Registration successful, showing success modal");
       onSuccess('new');
       
     } catch (error: any) {
