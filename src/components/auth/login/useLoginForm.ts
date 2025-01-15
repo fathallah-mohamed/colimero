@@ -39,11 +39,7 @@ export function useLoginForm(props?: UseLoginFormProps) {
         }
 
         if (!clientData?.email_verified) {
-          toast({
-            variant: "destructive",
-            title: "Compte non activé",
-            description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
-          });
+          setShowVerificationDialog(true);
           setIsLoading(false);
           // Déconnexion immédiate si déjà connecté
           await supabase.auth.signOut();
@@ -62,7 +58,8 @@ export function useLoginForm(props?: UseLoginFormProps) {
         if (signInError.message === "Invalid login credentials") {
           throw new Error("Email ou mot de passe incorrect");
         } else if (signInError.message === "Email not confirmed") {
-          throw new Error("Veuillez confirmer votre email avant de vous connecter");
+          setShowVerificationDialog(true);
+          return;
         }
         throw signInError;
       }
@@ -94,20 +91,11 @@ export function useLoginForm(props?: UseLoginFormProps) {
 
         if (!client?.email_verified) {
           await supabase.auth.signOut();
-          toast({
-            variant: "destructive",
-            title: "Compte non activé",
-            description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
-          });
+          setShowVerificationDialog(true);
           setIsLoading(false);
           return;
         }
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté",
-      });
 
       if (onSuccess) {
         onSuccess();
@@ -138,11 +126,6 @@ export function useLoginForm(props?: UseLoginFormProps) {
     } catch (error: any) {
       console.error("Complete error:", error);
       setError(error.message);
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message,
-      });
     } finally {
       setIsLoading(false);
     }

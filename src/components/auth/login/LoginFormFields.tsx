@@ -1,16 +1,17 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EmailVerificationDialog } from "../EmailVerificationDialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
 
 interface LoginFormFieldsProps {
   email: string;
   password: string;
   isLoading: boolean;
   error: string | null;
+  showVerificationDialog?: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
-  showVerificationDialog?: boolean;
-  setShowVerificationDialog?: (show: boolean) => void;
+  onVerificationDialogClose?: () => void;
 }
 
 export function LoginFormFields({
@@ -18,27 +19,27 @@ export function LoginFormFields({
   password,
   isLoading,
   error,
+  showVerificationDialog = false,
   onEmailChange,
   onPasswordChange,
-  showVerificationDialog = false,
-  setShowVerificationDialog,
+  onVerificationDialogClose,
 }: LoginFormFieldsProps) {
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-2">
+    <div className="space-y-4">
+      <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
-          placeholder="exemple@email.com"
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
           disabled={isLoading}
           required
+          placeholder="exemple@email.com"
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="space-y-2">
         <Label htmlFor="password">Mot de passe</Label>
         <Input
           id="password"
@@ -51,13 +52,15 @@ export function LoginFormFields({
       </div>
 
       {error && (
-        <div className="text-sm text-red-500">{error}</div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {showVerificationDialog && setShowVerificationDialog && (
+      {showVerificationDialog && (
         <EmailVerificationDialog
           isOpen={showVerificationDialog}
-          onClose={() => setShowVerificationDialog(false)}
+          onClose={() => onVerificationDialogClose?.()}
           email={email}
         />
       )}
