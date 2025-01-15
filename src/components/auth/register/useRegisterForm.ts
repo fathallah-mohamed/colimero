@@ -27,6 +27,7 @@ export function useRegisterForm(onLogin: () => void) {
     setIsLoading(true);
 
     try {
+      // Créer le compte sans connexion automatique
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
@@ -37,6 +38,7 @@ export function useRegisterForm(onLogin: () => void) {
             last_name: lastName.trim(),
             phone: phone.trim(),
           },
+          emailRedirectTo: `${window.location.origin}/activation`,
         },
       });
 
@@ -57,18 +59,29 @@ export function useRegisterForm(onLogin: () => void) {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      toast({
-        title: "Compte créé avec succès",
-        description: "Vous pouvez maintenant vous connecter avec vos identifiants.",
+      // Envoyer l'email d'activation via notre fonction Edge
+      const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
+        body: { email: email.trim() }
       });
 
+      if (emailError) {
+        console.error("Erreur d'envoi d'email:", emailError);
+        throw new Error("Erreur lors de l'envoi de l'email d'activation");
+      }
+
+      toast({
+        title: "Compte créé avec succès",
+        description: "Un email d'activation a été envoyé à votre adresse email. Veuillez cliquer sur le lien dans l'email pour activer votre compte.",
+      });
+
+      // Rediriger vers la page de connexion
       onLogin();
     } catch (error: any) {
       console.error("Complete error:", error);
       toast({
         variant: "destructive",
         title: "Erreur inattendue",
-        description: "Une erreur inattendue s'est produite. Veuillez réessayer.",
+        description: error.message || "Une erreur inattendue s'est produite. Veuillez réessayer.",
       });
     } finally {
       setIsLoading(false);

@@ -47,15 +47,15 @@ serve(async (req) => {
         'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
       },
       body: JSON.stringify({
-        from: 'Colis Express <activation@colisexpress.com>',
+        from: 'Colimero <activation@colimero.com>',
         to: [email],
-        subject: 'Activez votre compte Colis Express',
+        subject: 'Activez votre compte Colimero',
         html: `
-          <h1>Bienvenue sur Colis Express !</h1>
+          <h1>Bienvenue sur Colimero !</h1>
           <p>Pour activer votre compte, veuillez cliquer sur le lien ci-dessous :</p>
           <p><a href="${activationLink}">Activer mon compte</a></p>
           <p>Ce lien est valable pendant 24 heures.</p>
-          <p>Si vous n'avez pas créé de compte sur Colis Express, vous pouvez ignorer cet email.</p>
+          <p>Si vous n'avez pas créé de compte sur Colimero, vous pouvez ignorer cet email.</p>
         `
       })
     })
