@@ -1,9 +1,9 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -28,13 +28,13 @@ export function ErrorDialog({
         <DialogHeader>
           <div className="flex items-center gap-2">
             <XCircle className="h-6 w-6 text-red-500" />
-            <DialogTitle className="text-red-600">{title}</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
           </div>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button onClick={onClose} className="w-full">
-            J'ai compris
+            Fermer
           </Button>
         </DialogFooter>
       </DialogContent>
