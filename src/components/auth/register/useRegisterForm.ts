@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError } from "@supabase/supabase-js";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +36,19 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     setIsLoading(true);
 
     try {
+      // Vérifier d'abord si l'utilisateur existe
+      const { data: existingUser } = await supabase
+        .from('clients')
+        .select('email')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (existingUser) {
+        onSuccess('existing');
+        return;
+      }
+
+      // Si l'utilisateur n'existe pas, procéder à l'inscription
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
@@ -52,13 +64,10 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       });
 
       if (signUpError) {
-        console.error("SignUp error:", signUpError);
-        
         if (signUpError.message.includes("User already registered")) {
           onSuccess('existing');
           return;
         }
-
         throw signUpError;
       }
 
@@ -66,8 +75,10 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         throw new Error("Erreur lors de la création du compte");
       }
 
+      // Déconnexion après inscription réussie
       await supabase.auth.signOut();
 
+      // Envoyer l'email d'activation
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { email: email.trim() }
       });
@@ -78,24 +89,14 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       }
 
       onSuccess('new');
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Complete error:", error);
+      
       let errorMessage = "Une erreur inattendue s'est produite. Veuillez réessayer.";
       
-      if (error instanceof AuthError) {
-        switch (error.message) {
-          case "User already registered":
-            onSuccess('existing');
-            return;
-          case "Password should be at least 6 characters":
-            errorMessage = "Le mot de passe doit contenir au moins 6 caractères.";
-            break;
-          case "Email not confirmed":
-            errorMessage = "Veuillez confirmer votre email avant de vous connecter.";
-            break;
-          default:
-            errorMessage = error.message;
-        }
+      if (error.message.includes("User already registered")) {
+        onSuccess('existing');
+        return;
       }
       
       toast({
