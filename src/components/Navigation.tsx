@@ -49,19 +49,31 @@ export default function Navigation() {
               .from('clients')
               .select('email_verified')
               .eq('id', newSession?.user?.id)
-              .single();
+              .maybeSingle();
 
-            if (clientError && clientError.code !== 'PGRST116') {
+            if (clientError) {
               console.error("Error fetching client:", clientError);
               return;
             }
 
             if (client && !client?.email_verified) {
-              toast({
-                variant: "destructive",
-                title: "Compte non activé",
-                description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
+              setShowAuthDialog(false);
+              const dialog = document.createElement('dialog');
+              dialog.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                  <h3 class="text-lg font-semibold mb-4">Compte non activé</h3>
+                  <p class="mb-4">Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.</p>
+                  <button class="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90">OK</button>
+                </div>
+              `;
+              document.body.appendChild(dialog);
+              dialog.showModal();
+              
+              dialog.querySelector('button')?.addEventListener('click', () => {
+                dialog.close();
+                dialog.remove();
               });
+
               await supabase.auth.signOut();
               return;
             }
