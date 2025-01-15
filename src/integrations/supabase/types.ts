@@ -499,6 +499,8 @@ export type Database = {
       }
       clients: {
         Row: {
+          activation_expires_at: string | null
+          activation_token: string | null
           address: string | null
           created_at: string
           email: string | null
@@ -509,6 +511,8 @@ export type Database = {
           phone: string | null
         }
         Insert: {
+          activation_expires_at?: string | null
+          activation_token?: string | null
           address?: string | null
           created_at?: string
           email?: string | null
@@ -519,6 +523,8 @@ export type Database = {
           phone?: string | null
         }
         Update: {
+          activation_expires_at?: string | null
+          activation_token?: string | null
           address?: string | null
           created_at?: string
           email?: string | null
