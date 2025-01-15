@@ -1,16 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import { Resend } from 'https://esm.sh/@resend/node'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-console.log("Starting send-activation-email function")
+console.log("Loading send-activation-email function")
 
 serve(async (req) => {
-  // Handle CORS
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -37,29 +36,34 @@ serve(async (req) => {
       throw new Error('Client not found')
     }
 
-    // Initialize Resend
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
-
     // Create activation link
     const activationLink = `${Deno.env.get('SITE_URL')}/activation?token=${client.activation_token}`
 
-    // Send email
-    const { data, error: emailError } = await resend.emails.send({
-      from: 'Colis Express <activation@colisexpress.com>',
-      to: email,
-      subject: 'Activez votre compte Colis Express',
-      html: `
-        <h1>Bienvenue sur Colis Express !</h1>
-        <p>Pour activer votre compte, veuillez cliquer sur le lien ci-dessous :</p>
-        <p><a href="${activationLink}">Activer mon compte</a></p>
-        <p>Ce lien est valable pendant 24 heures.</p>
-        <p>Si vous n'avez pas créé de compte sur Colis Express, vous pouvez ignorer cet email.</p>
-      `
+    // Send email using Resend API
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
+      },
+      body: JSON.stringify({
+        from: 'Colis Express <activation@colisexpress.com>',
+        to: [email],
+        subject: 'Activez votre compte Colis Express',
+        html: `
+          <h1>Bienvenue sur Colis Express !</h1>
+          <p>Pour activer votre compte, veuillez cliquer sur le lien ci-dessous :</p>
+          <p><a href="${activationLink}">Activer mon compte</a></p>
+          <p>Ce lien est valable pendant 24 heures.</p>
+          <p>Si vous n'avez pas créé de compte sur Colis Express, vous pouvez ignorer cet email.</p>
+        `
+      })
     })
 
-    if (emailError) {
-      console.error("Error sending email:", emailError)
-      throw emailError
+    if (!emailResponse.ok) {
+      const error = await emailResponse.text()
+      console.error("Error sending email:", error)
+      throw new Error('Failed to send activation email')
     }
 
     // Log email sending
@@ -82,7 +86,10 @@ serve(async (req) => {
     console.error("Function error:", error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
     )
   }
 })
