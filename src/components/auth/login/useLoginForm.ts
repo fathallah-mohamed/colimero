@@ -15,6 +15,7 @@ export function useLoginForm(props?: UseLoginFormProps) {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,11 +38,7 @@ export function useLoginForm(props?: UseLoginFormProps) {
         }
 
         if (!clientData?.email_verified) {
-          toast({
-            variant: "destructive",
-            title: "Email non vérifié",
-            description: "Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception et vos spams.",
-          });
+          setShowVerificationDialog(true);
           setIsLoading(false);
           return;
         }
@@ -122,5 +119,7 @@ export function useLoginForm(props?: UseLoginFormProps) {
     isLoading,
     error,
     handleSubmit,
+    showVerificationDialog,
+    setShowVerificationDialog,
   };
 }

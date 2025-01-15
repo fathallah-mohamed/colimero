@@ -1,15 +1,16 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { EmailVerificationDialog } from "../EmailVerificationDialog";
 
 interface LoginFormFieldsProps {
   email: string;
   password: string;
   isLoading: boolean;
-  error?: string | null;
+  error: string | null;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  showVerificationDialog?: boolean;
+  setShowVerificationDialog?: (show: boolean) => void;
 }
 
 export function LoginFormFields({
@@ -19,43 +20,47 @@ export function LoginFormFields({
   error,
   onEmailChange,
   onPasswordChange,
+  showVerificationDialog = false,
+  setShowVerificationDialog,
 }: LoginFormFieldsProps) {
   return (
-    <div className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-2">
+    <div className="grid gap-4">
+      <div className="grid gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
+          placeholder="exemple@email.com"
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
-          placeholder="votre@email.fr"
-          required
           disabled={isLoading}
-          className="w-full"
+          required
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="grid gap-2">
         <Label htmlFor="password">Mot de passe</Label>
         <Input
           id="password"
           type="password"
           value={password}
           onChange={(e) => onPasswordChange(e.target.value)}
-          placeholder="Votre mot de passe"
-          required
           disabled={isLoading}
-          className="w-full"
+          required
         />
       </div>
+
+      {error && (
+        <div className="text-sm text-red-500">{error}</div>
+      )}
+
+      {showVerificationDialog && setShowVerificationDialog && (
+        <EmailVerificationDialog
+          isOpen={showVerificationDialog}
+          onClose={() => setShowVerificationDialog(false)}
+          email={email}
+        />
+      )}
     </div>
   );
 }
