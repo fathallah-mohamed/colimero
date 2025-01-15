@@ -17,13 +17,25 @@ export function useUserData(userType: string | null) {
 
       let profileData;
       if (userType === 'admin') {
-        const { data } = await supabase.from('administrators').select('first_name, last_name, email').eq('id', user.id).single();
+        const { data } = await supabase
+          .from('administrators')
+          .select('first_name, last_name, email')
+          .eq('id', user.id)
+          .maybeSingle();
         profileData = data;
       } else if (userType === 'carrier') {
-        const { data } = await supabase.from('carriers').select('first_name, last_name, email').eq('id', user.id).single();
+        const { data } = await supabase
+          .from('carriers')
+          .select('first_name, last_name, email')
+          .eq('id', user.id)
+          .maybeSingle();
         profileData = data;
       } else {
-        const { data } = await supabase.from('clients').select('first_name, last_name, email').eq('id', user.id).single();
+        const { data } = await supabase
+          .from('clients')
+          .select('first_name, last_name, email')
+          .eq('id', user.id)
+          .maybeSingle();
         profileData = data;
       }
 
