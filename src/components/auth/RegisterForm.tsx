@@ -3,6 +3,7 @@ import { RegisterFormFields } from "./register/RegisterFormFields";
 import { useRegisterForm } from "./register/useRegisterForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface RegisterFormProps {
   onLogin: () => void;
@@ -83,7 +84,14 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
               className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
               disabled={isLoading || !areRequiredFieldsFilled()}
             >
-              {isLoading ? "Création en cours..." : "Créer mon compte"}
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Création en cours...
+                </div>
+              ) : (
+                "Créer mon compte"
+              )}
             </Button>
 
             <div className="text-center text-sm pb-2">
