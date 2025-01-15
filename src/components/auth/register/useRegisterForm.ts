@@ -36,7 +36,7 @@ export function useRegisterForm(onLogin: () => void) {
     setIsLoading(true);
 
     try {
-      // Create account without auto sign-in
+      // Create account with auto sign-in disabled
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
