@@ -1,59 +1,74 @@
 import { supabase } from "@/integrations/supabase/client";
 import { RegisterFormState } from "./types";
+import { useToast } from "@/hooks/use-toast";
 
 export async function registerClient(formData: RegisterFormState) {
+  console.log("Starting client registration with data:", {
+    ...formData,
+    password: "[REDACTED]"
+  });
+
   try {
-    const { data, error } = await supabase.auth.signUp({
+    // 1. Create auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
       options: {
         data: {
+          user_type: 'client',
           first_name: formData.firstName,
           last_name: formData.lastName,
-          user_type: 'client'
+          phone: formData.phone,
+          birth_date: formData.birthDate,
+          address: formData.address
         },
       },
     });
 
-    if (error) {
-      // Check specifically for user already exists error
-      if (error.message.includes("User already registered") || 
-          error.message === "User already registered" ||
-          error.message.includes("already exists")) {
+    console.log("Auth signup response:", { data: authData, error: authError });
+
+    if (authError) {
+      if (authError.message.includes("User already registered") || 
+          authError.message === "User already registered" ||
+          authError.message.includes("already exists")) {
         return { data: null, error: { message: "User already registered" } };
       }
-      throw error;
+      throw authError;
     }
 
-    if (!data.user) {
+    if (!authData.user) {
       throw new Error("Erreur lors de la création du compte");
     }
 
-    await updateClientProfile(data.user.id, formData);
+    // 2. Upload ID document if provided
     if (formData.idDocument) {
-      await uploadIdDocument(data.user.id, formData.idDocument);
+      console.log("Uploading ID document...");
+      await uploadIdDocument(authData.user.id, formData.idDocument);
     }
-    await insertClientConsents(data.user.id, formData.acceptedConsents);
 
-    return { data, error: null };
+    // 3. Insert client consents
+    console.log("Inserting client consents...");
+    await insertClientConsents(authData.user.id, formData.acceptedConsents);
+
+    // 4. Send activation email
+    console.log("Sending activation email...");
+    const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
+      body: {
+        email: formData.email,
+        first_name: formData.firstName
+      }
+    });
+
+    if (emailError) {
+      console.error("Error sending activation email:", emailError);
+      throw new Error("Erreur lors de l'envoi de l'email d'activation");
+    }
+
+    return { data: authData, error: null };
   } catch (error: any) {
+    console.error("Registration error:", error);
     return { data: null, error };
   }
-}
-
-async function updateClientProfile(userId: string, formData: RegisterFormState) {
-  const { error: clientError } = await supabase
-    .from('clients')
-    .update({
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      phone: formData.phone,
-      birth_date: formData.birthDate || null,
-      address: formData.address || null,
-    })
-    .eq('id', userId);
-
-  if (clientError) throw clientError;
 }
 
 async function uploadIdDocument(userId: string, idDocument: File) {

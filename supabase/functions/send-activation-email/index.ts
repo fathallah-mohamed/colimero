@@ -5,7 +5,6 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 interface ActivationEmailRequest {
   email: string;
   first_name: string;
-  activation_token: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -16,10 +15,22 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Get the request data
-    const { email, first_name, activation_token }: ActivationEmailRequest = await req.json();
+    const { email, first_name }: ActivationEmailRequest = await req.json();
     console.log("Sending activation email to:", email);
 
-    const activationUrl = `${req.headers.get("origin")}/activation?token=${activation_token}`;
+    // Get client data including activation token
+    const { data: client, error: clientError } = await supabase
+      .from("clients")
+      .select("activation_token")
+      .eq("email", email)
+      .single();
+
+    if (clientError || !client?.activation_token) {
+      console.error("Error fetching client data:", clientError);
+      throw new Error("Impossible de récupérer les informations du client");
+    }
+
+    const activationUrl = `${req.headers.get("origin")}/activation?token=${client.activation_token}`;
 
     // Send email via Resend
     const res = await fetch("https://api.resend.com/emails", {
