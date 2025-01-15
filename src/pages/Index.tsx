@@ -1,10 +1,10 @@
-import { Hero } from "@/components/Hero";
-import { Services } from "@/components/Services";
-import { HowItWorks } from "@/components/HowItWorks";
-import { Advantages } from "@/components/Advantages";
-import { Testimonials } from "@/components/Testimonials";
-import { CarrierCTA } from "@/components/CarrierCTA";
-import { ClientCTA } from "@/components/ClientCTA";
+import Hero from "@/components/Hero";
+import Services from "@/components/Services";
+import HowItWorks from "@/components/HowItWorks";
+import Advantages from "@/components/Advantages";
+import Testimonials from "@/components/Testimonials";
+import CarrierCTA from "@/components/CarrierCTA";
+import ClientCTA from "@/components/ClientCTA";
 import { TestEmailButton } from "@/components/auth/TestEmailButton";
 
 export default function Index() {
