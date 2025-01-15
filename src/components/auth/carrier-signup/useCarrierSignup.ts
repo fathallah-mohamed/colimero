@@ -1,11 +1,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useModalDialog } from "@/hooks/use-modal-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formSchema, type FormValues } from "./FormSchema";
 
 export function useCarrierSignup(onSuccess: () => void) {
-  const { showDialog } = useModalDialog();
+  const { toast } = useToast();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -47,19 +47,18 @@ export function useCarrierSignup(onSuccess: () => void) {
 
       if (registrationError) throw registrationError;
 
-      showDialog({
+      toast({
         title: "Inscription réussie",
         description: "Votre demande d'inscription a été envoyée avec succès",
-        variant: "default"
       });
 
       onSuccess();
     } catch (error) {
       console.error("Error during signup:", error);
-      showDialog({
+      toast({
+        variant: "destructive",
         title: "Erreur",
         description: "Une erreur est survenue lors de l'inscription",
-        variant: "destructive"
       });
     }
   };

@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { useModalDialog } from "@/hooks/use-modal-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonalInfoFields } from "../form/PersonalInfoFields";
 import * as z from "zod";
@@ -20,7 +20,7 @@ interface ClientProfileFormProps {
 }
 
 export function ClientProfileForm({ initialData, onClose }: ClientProfileFormProps) {
-  const { showDialog } = useModalDialog();
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -37,10 +37,10 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        showDialog({
+        toast({
+          variant: "destructive",
           title: "Erreur",
           description: "Vous devez être connecté pour modifier votre profil",
-          variant: "destructive"
         });
         return;
       }
@@ -68,18 +68,17 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
 
       if (profileError) throw profileError;
 
-      showDialog({
+      toast({
         title: "Succès",
         description: "Profil mis à jour avec succès",
-        variant: "default"
       });
       
       onClose();
     } catch (error: any) {
-      showDialog({
+      toast({
+        variant: "destructive",
         title: "Erreur",
         description: error.message,
-        variant: "destructive"
       });
     }
   }

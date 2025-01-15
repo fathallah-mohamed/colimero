@@ -1,7 +1,7 @@
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useModalDialog } from "@/hooks/use-modal-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
@@ -17,7 +17,7 @@ import {
 
 export const DeleteAccountButton = () => {
   const navigate = useNavigate();
-  const { showDialog } = useModalDialog();
+  const { toast } = useToast();
 
   const handleDeleteProfile = async () => {
     try {
@@ -29,16 +29,15 @@ export const DeleteAccountButton = () => {
 
       await supabase.auth.signOut();
       navigate('/');
-      showDialog({
+      toast({
         title: "Compte désactivé",
         description: "Votre compte a été désactivé avec succès",
-        variant: "default"
       });
     } catch (error: any) {
-      showDialog({
+      toast({
+        variant: "destructive",
         title: "Erreur",
         description: "Impossible de supprimer le profil",
-        variant: "destructive"
       });
     }
   };

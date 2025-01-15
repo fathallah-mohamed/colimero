@@ -1,119 +1,236 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useSessionContext } from "@supabase/auth-helpers-react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import AccountMenu from "@/components/navigation/AccountMenu";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigation } from "@/hooks/use-navigation";
+import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
 import MenuItems from "@/components/navigation/MenuItems";
 import MobileMenu from "@/components/navigation/MobileMenu";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { ModalDialog } from "@/components/ui/modal-dialog";
-import { useModalDialog } from "@/hooks/use-modal-dialog";
-import { AuthSection } from "./navigation/AuthSection";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import CarrierSignupForm from "@/components/auth/carrier-signup/CarrierSignupForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { AuthSection } from "@/components/navigation/AuthSection";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Navigation() {
-  const navigate = useNavigate();
-  const { session, isLoading } = useSessionContext();
+  const [isOpen, setIsOpen] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { isOpen, dialogState, showDialog, closeDialog } = useModalDialog();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const userType = session?.user?.user_metadata?.user_type;
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
+  const { user, userType, handleLogout } = useNavigation();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        if (event === "SIGNED_IN") {
-          try {
+    let mounted = true;
+
+    const initSession = async () => {
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          return;
+        }
+
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+          if (!mounted) return;
+
+          if (event === 'SIGNED_IN') {
             const { data: client, error: clientError } = await supabase
               .from('clients')
               .select('email_verified')
               .eq('id', newSession?.user?.id)
-              .maybeSingle();
+              .single();
 
-            if (clientError) {
+            if (clientError && clientError.code !== 'PGRST116') {
               console.error("Error fetching client:", clientError);
               return;
             }
 
             if (client && !client?.email_verified) {
-              setShowAuthDialog(false);
-              showDialog({
+              toast({
+                variant: "destructive",
                 title: "Compte non activé",
                 description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
-                variant: "destructive"
               });
               await supabase.auth.signOut();
               return;
             }
-          } catch (error) {
-            console.error("Error checking email verification:", error);
+
+            if (sessionStorage.getItem('returnPath')) {
+              const returnPath = sessionStorage.getItem('returnPath');
+              sessionStorage.removeItem('returnPath');
+              navigate(returnPath || '/');
+            }
+          } else if (event === 'SIGNED_OUT') {
+            if (location.pathname.includes('/reserver/')) {
+              navigate('/');
+            }
+          }
+        });
+
+        if (!session) {
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
+          if (refreshError && refreshError.message !== 'Auth session missing!') {
+            console.error("Session refresh error:", refreshError);
+          } else if (refreshData.session) {
+            console.log('Session refreshed successfully');
           }
         }
+
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error: any) {
+        if (error.message !== 'Auth session missing!' && error.code !== 'PGRST116') {
+          console.error("Session initialization error:", error);
+        }
       }
-    );
+    };
+
+    initSession();
+
+    const handleScroll = () => {
+      if (!mounted) return;
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [location.pathname, navigate, toast]);
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      showDialog({
-        title: "Déconnexion réussie",
-        description: "Vous avez été déconnecté avec succès.",
-        variant: "default"
-      });
-      navigate('/');
-    } catch (error) {
-      console.error("Logout error:", error);
-      showDialog({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la déconnexion.",
-        variant: "destructive"
-      });
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        mobileButtonRef.current &&
+        !mobileButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (location.pathname.includes('/reserver/')) {
+      sessionStorage.setItem('returnPath', location.pathname);
     }
-  };
+  }, [location.pathname]);
 
   return (
-    <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
-        <div className="container mx-auto flex justify-between items-center py-4">
-          <Link to="/" className="text-xl font-bold">Logo</Link>
-          <div className="hidden md:flex space-x-4">
+    <nav className={cn(
+      "fixed top-0 left-0 right-0 bg-white z-50 transition-all duration-300",
+      isScrolled ? "shadow-lg py-2" : "shadow-sm py-4"
+    )}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center">
+          {/* Logo Section */}
+          <motion.div 
+            className="flex items-center"
+            initial={false}
+            animate={{ scale: isScrolled ? 0.95 : 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Link 
+              to="/" 
+              className="text-2xl lg:text-3xl font-bold text-primary hover:opacity-90 transition-opacity"
+            >
+              Colimero
+            </Link>
+          </motion.div>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
             <MenuItems />
-            <AuthSection 
-              user={session?.user}
+          </div>
+
+          {/* Auth Section */}
+          <div className="flex items-center space-x-6 lg:space-x-8">
+            <AuthSection
+              user={user}
               userType={userType}
               handleLogout={handleLogout}
               setShowAuthDialog={setShowAuthDialog}
             />
+            
+            <MobileMenuButton 
+              ref={mobileButtonRef}
+              isOpen={isOpen}
+              onClick={() => setIsOpen(!isOpen)}
+              className="block lg:hidden"
+            />
           </div>
-          <MobileMenu 
-            isOpen={mobileMenuOpen}
-            setIsOpen={setMobileMenuOpen}
-            user={session?.user}
-            userType={userType}
-            handleLogout={handleLogout}
-            onLoginClick={() => setShowAuthDialog(true)}
-          />
         </div>
-      </nav>
+      </div>
 
-      <AuthDialog
+      {/* Mobile Menu */}
+      <div 
+        ref={mobileMenuRef}
+        className={cn(
+          "block lg:hidden transition-all duration-300 ease-in-out",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+      >
+        <MobileMenu
+          isOpen={isOpen}
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setIsOpen={setIsOpen}
+          setShowAuthDialog={setShowAuthDialog}
+        />
+      </div>
+
+      {/* Dialogs */}
+      <AuthDialog 
         isOpen={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
         onSuccess={() => setShowAuthDialog(false)}
+        onRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowRegisterForm(true);
+        }}
+        onCarrierRegisterClick={() => {
+          setShowAuthDialog(false);
+          setShowCarrierSignupForm(true);
+        }}
       />
 
-      <ModalDialog
-        isOpen={isOpen}
-        onClose={closeDialog}
-        title={dialogState.title}
-        description={dialogState.description}
-        variant={dialogState.variant}
-      />
-    </>
+      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
+        <DialogContent className="max-w-2xl">
+          <RegisterForm onLogin={() => {
+            setShowRegisterForm(false);
+            setShowAuthDialog(true);
+          }} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCarrierSignupForm} onOpenChange={setShowCarrierSignupForm}>
+        <DialogContent className="max-w-2xl">
+          <CarrierSignupForm onSuccess={() => {
+            setShowCarrierSignupForm(false);
+          }} />
+        </DialogContent>
+      </Dialog>
+    </nav>
   );
 }
