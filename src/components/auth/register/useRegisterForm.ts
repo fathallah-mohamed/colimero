@@ -104,14 +104,16 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
           });
           return;
         }
+
+        // Show success message
+        toast({
+          title: "Compte créé avec succès",
+          description: "Un email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
+        });
+
+        // Redirect to login
+        onLogin();
       }
-
-      toast({
-        title: "Compte créé avec succès",
-        description: "Un email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception.",
-      });
-
-      onLogin();
     } catch (error: any) {
       console.error("Erreur complète:", error);
       let errorMessage = "Une erreur est survenue lors de l'inscription";
