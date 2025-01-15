@@ -10,6 +10,12 @@ export function BookingList() {
   const { data: bookings, isLoading, refetch } = useQuery({
     queryKey: ["bookings"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       const { data, error } = await supabase
         .from("bookings")
         .select(`
@@ -30,6 +36,7 @@ export function BookingList() {
             )
           )
         `)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
