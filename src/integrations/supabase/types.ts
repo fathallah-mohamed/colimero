@@ -497,135 +497,36 @@ export type Database = {
         }
         Relationships: []
       }
-      client_consent_types: {
-        Row: {
-          code: string
-          created_at: string
-          description: string
-          id: string
-          label: string
-          required: boolean | null
-          updated_at: string
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          description: string
-          id?: string
-          label: string
-          required?: boolean | null
-          updated_at?: string
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          description?: string
-          id?: string
-          label?: string
-          required?: boolean | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      client_consents: {
-        Row: {
-          accepted: boolean
-          accepted_at: string | null
-          client_id: string
-          consent_type_id: string
-          created_at: string
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          accepted?: boolean
-          accepted_at?: string | null
-          client_id: string
-          consent_type_id: string
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Update: {
-          accepted?: boolean
-          accepted_at?: string | null
-          client_id?: string
-          consent_type_id?: string
-          created_at?: string
-          id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_consents_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_consents_consent_type_id_fkey"
-            columns: ["consent_type_id"]
-            isOneToOne: false
-            referencedRelation: "client_consent_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       clients: {
         Row: {
-          activation_expires_at: string | null
-          activation_token: string | null
           address: string | null
-          birth_date: string | null
           created_at: string
           email: string | null
           email_verified: boolean | null
           first_name: string | null
           id: string
-          id_document: string | null
-          is_activated: boolean | null
           last_name: string | null
           phone: string | null
-          status: string
-          terms_accepted: boolean | null
-          terms_accepted_at: string | null
         }
         Insert: {
-          activation_expires_at?: string | null
-          activation_token?: string | null
           address?: string | null
-          birth_date?: string | null
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
           id: string
-          id_document?: string | null
-          is_activated?: boolean | null
           last_name?: string | null
           phone?: string | null
-          status?: string
-          terms_accepted?: boolean | null
-          terms_accepted_at?: string | null
         }
         Update: {
-          activation_expires_at?: string | null
-          activation_token?: string | null
           address?: string | null
-          birth_date?: string | null
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
           id?: string
-          id_document?: string | null
-          is_activated?: boolean | null
           last_name?: string | null
           phone?: string | null
-          status?: string
-          terms_accepted?: boolean | null
-          terms_accepted_at?: string | null
         }
         Relationships: []
       }

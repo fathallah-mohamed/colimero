@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { registerClient } from "./useClientRegistration";
-import { RegisterFormState } from "./types";
-import { useConsentValidation } from "./useConsentValidation";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useRegisterForm(onLogin: () => void) {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,13 +10,7 @@ export function useRegisterForm(onLogin: () => void) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [address, setAddress] = useState("");
-  const [idDocument, setIdDocument] = useState<File | null>(null);
-  const [acceptedConsents, setAcceptedConsents] = useState<string[]>([]);
   const { toast } = useToast();
-
-  const { requiredConsentsCount, allRequiredConsentsAccepted } = useConsentValidation(acceptedConsents);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,40 +28,34 @@ export function useRegisterForm(onLogin: () => void) {
     setIsLoading(true);
 
     try {
-      const formData: RegisterFormState = {
-        firstName,
-        lastName,
-        email,
-        phone,
-        password,
-        confirmPassword,
-        birthDate,
-        address,
-        idDocument,
-        acceptedConsents,
-      };
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password.trim(),
+        options: {
+          data: {
+            user_type: 'client',
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            phone: phone.trim(),
+          },
+        },
+      });
 
-      console.log("Calling registerClient with data:", { ...formData, password: "[REDACTED]" });
-      const { data, error } = await registerClient(formData);
-
-      if (error) {
-        let errorMessage = "Une erreur est survenue lors de l'inscription";
-        
-        if (error.message.includes("User already registered")) {
-          errorMessage = "Un compte existe déjà avec cet email. Veuillez vous connecter.";
+      if (signUpError) {
+        if (signUpError.message.includes("User already registered")) {
+          toast({
+            variant: "destructive",
+            title: "Erreur d'inscription",
+            description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
+          });
           onLogin();
           return;
         }
 
-        toast({
-          variant: "destructive",
-          title: "Erreur d'inscription",
-          description: errorMessage,
-        });
-        return;
+        throw signUpError;
       }
 
-      if (!data?.user?.id) {
+      if (!signUpData?.user?.id) {
         throw new Error("Erreur lors de la création du compte");
       }
 
@@ -89,14 +75,6 @@ export function useRegisterForm(onLogin: () => void) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleConsentChange = (consentId: string, accepted: boolean) => {
-    setAcceptedConsents(prev => 
-      accepted 
-        ? [...prev, consentId]
-        : prev.filter(id => id !== consentId)
-    );
   };
 
   const areRequiredFieldsFilled = () => {
@@ -125,17 +103,7 @@ export function useRegisterForm(onLogin: () => void) {
     setPassword,
     confirmPassword,
     setConfirmPassword,
-    birthDate,
-    setBirthDate,
-    address,
-    setAddress,
-    idDocument,
-    setIdDocument,
-    acceptedConsents,
-    handleConsentChange,
     handleSubmit,
-    requiredConsentsCount,
-    allRequiredConsentsAccepted,
     areRequiredFieldsFilled,
   };
 }

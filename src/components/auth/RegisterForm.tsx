@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./register/RegisterFormFields";
-import { RegisterTerms } from "./register/RegisterTerms";
 import { useRegisterForm } from "./register/useRegisterForm";
 
 interface RegisterFormProps {
@@ -22,17 +21,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     setPassword,
     confirmPassword,
     setConfirmPassword,
-    birthDate,
-    setBirthDate,
-    address,
-    setAddress,
-    idDocument,
-    setIdDocument,
-    acceptedConsents,
-    handleConsentChange,
     handleSubmit,
-    requiredConsentsCount,
-    allRequiredConsentsAccepted,
     areRequiredFieldsFilled,
   } = useRegisterForm(onLogin);
 
@@ -54,23 +43,12 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
             phone={phone}
             password={password}
             confirmPassword={confirmPassword}
-            birthDate={birthDate}
-            address={address}
-            idDocument={idDocument}
             onFirstNameChange={setFirstName}
             onLastNameChange={setLastName}
             onEmailChange={setEmail}
             onPhoneChange={setPhone}
             onPasswordChange={setPassword}
             onConfirmPasswordChange={setConfirmPassword}
-            onBirthDateChange={setBirthDate}
-            onAddressChange={setAddress}
-            onIdDocumentChange={setIdDocument}
-          />
-
-          <RegisterTerms
-            acceptedConsents={acceptedConsents}
-            onConsentChange={handleConsentChange}
           />
 
           <div className="sticky bottom-0 pt-4 space-y-4 border-t mt-4 bg-white">
@@ -78,7 +56,6 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
               type="submit"
               className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
               disabled={isLoading || !areRequiredFieldsFilled()}
-              onClick={handleSubmit}
             >
               {isLoading ? "Création en cours..." : "Créer mon compte"}
             </Button>

@@ -1,8 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
-import { HTMLAttributes } from "react";
 
 interface RegisterFormFieldsProps {
   firstName: string;
@@ -11,23 +8,12 @@ interface RegisterFormFieldsProps {
   phone: string;
   password: string;
   confirmPassword: string;
-  birthDate: string;
-  address: string;
-  idDocument: File | null;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onConfirmPasswordChange: (value: string) => void;
-  onBirthDateChange: (value: string) => void;
-  onAddressChange: (value: string) => void;
-  onIdDocumentChange: (file: File | null) => void;
-}
-
-interface LabelProps extends HTMLAttributes<HTMLLabelElement> {
-  children: React.ReactNode;
-  htmlFor?: string;
 }
 
 export function RegisterFormFields({
@@ -37,37 +23,20 @@ export function RegisterFormFields({
   phone,
   password,
   confirmPassword,
-  birthDate,
-  address,
-  idDocument,
   onFirstNameChange,
   onLastNameChange,
   onEmailChange,
   onPhoneChange,
   onPasswordChange,
   onConfirmPasswordChange,
-  onBirthDateChange,
-  onAddressChange,
-  onIdDocumentChange,
 }: RegisterFormFieldsProps) {
-  const RequiredLabel = ({ children, htmlFor, ...props }: LabelProps) => (
-    <Label htmlFor={htmlFor} className="flex items-center gap-1" {...props}>
-      {children}
-      <span className="text-red-500">*</span>
-    </Label>
-  );
-
-  const OptionalLabel = ({ children, htmlFor, ...props }: LabelProps) => (
-    <Label htmlFor={htmlFor} className="flex items-center gap-1" {...props}>
-      {children}
-    </Label>
-  );
-
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <RequiredLabel htmlFor="firstName">Prénom</RequiredLabel>
+          <Label htmlFor="firstName" className="flex items-center gap-1">
+            Prénom<span className="text-red-500">*</span>
+          </Label>
           <Input
             id="firstName"
             value={firstName}
@@ -76,7 +45,9 @@ export function RegisterFormFields({
           />
         </div>
         <div className="space-y-2">
-          <RequiredLabel htmlFor="lastName">Nom</RequiredLabel>
+          <Label htmlFor="lastName" className="flex items-center gap-1">
+            Nom<span className="text-red-500">*</span>
+          </Label>
           <Input
             id="lastName"
             value={lastName}
@@ -87,7 +58,9 @@ export function RegisterFormFields({
       </div>
 
       <div className="space-y-2">
-        <RequiredLabel htmlFor="registerEmail">Email</RequiredLabel>
+        <Label htmlFor="registerEmail" className="flex items-center gap-1">
+          Email<span className="text-red-500">*</span>
+        </Label>
         <Input
           id="registerEmail"
           type="email"
@@ -98,7 +71,9 @@ export function RegisterFormFields({
       </div>
 
       <div className="space-y-2">
-        <RequiredLabel htmlFor="phone">Téléphone</RequiredLabel>
+        <Label htmlFor="phone" className="flex items-center gap-1">
+          Téléphone<span className="text-red-500">*</span>
+        </Label>
         <Input
           id="phone"
           type="tel"
@@ -109,7 +84,9 @@ export function RegisterFormFields({
       </div>
 
       <div className="space-y-2">
-        <RequiredLabel htmlFor="registerPassword">Mot de passe</RequiredLabel>
+        <Label htmlFor="registerPassword" className="flex items-center gap-1">
+          Mot de passe<span className="text-red-500">*</span>
+        </Label>
         <Input
           id="registerPassword"
           type="password"
@@ -120,58 +97,15 @@ export function RegisterFormFields({
       </div>
 
       <div className="space-y-2">
-        <RequiredLabel htmlFor="confirmPassword">Confirmer le mot de passe</RequiredLabel>
+        <Label htmlFor="confirmPassword" className="flex items-center gap-1">
+          Confirmer le mot de passe<span className="text-red-500">*</span>
+        </Label>
         <Input
           id="confirmPassword"
           type="password"
           value={confirmPassword}
           onChange={(e) => onConfirmPasswordChange(e.target.value)}
           required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <OptionalLabel htmlFor="birthDate">Date de naissance</OptionalLabel>
-        <Input
-          id="birthDate"
-          type="date"
-          value={birthDate}
-          onChange={(e) => onBirthDateChange(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <OptionalLabel htmlFor="address">Adresse</OptionalLabel>
-        <Input
-          id="address"
-          value={address}
-          onChange={(e) => onAddressChange(e.target.value)}
-          placeholder="Votre adresse complète"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <OptionalLabel htmlFor="idDocument">Pièce d'identité</OptionalLabel>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => document.getElementById('idDocument')?.click()}
-            className="flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            {idDocument ? 'Changer le fichier' : 'Télécharger'}
-          </Button>
-          {idDocument && (
-            <span className="text-sm text-gray-500">{idDocument.name}</span>
-          )}
-        </div>
-        <input
-          id="idDocument"
-          type="file"
-          className="hidden"
-          accept="image/*,.pdf"
-          onChange={(e) => onIdDocumentChange(e.target.files?.[0] || null)}
         />
       </div>
     </div>
