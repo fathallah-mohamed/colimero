@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
+import { AuthError } from "@supabase/supabase-js";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -27,39 +27,53 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
     setShowErrorDialog(false);
 
     try {
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      console.log("Tentative de connexion avec:", { email, password });
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (signInError) {
+        console.error("Erreur de connexion:", signInError);
         let errorMessage = "Une erreur est survenue lors de la connexion";
         
         if (signInError.message === "Invalid login credentials") {
           errorMessage = "Email ou mot de passe incorrect";
+          setShowErrorDialog(true);
         } else if (signInError.message === "Email not confirmed") {
           setShowVerificationDialog(true);
-          setPassword("");
-          setIsLoading(false);
-          return;
+          // Envoyer un nouvel email d'activation
+          const { error: resendError } = await supabase.auth.resend({
+            type: 'signup',
+            email: email.trim(),
+          });
+          
+          if (resendError) {
+            console.error("Erreur lors de l'envoi de l'email:", resendError);
+          }
+          
+          errorMessage = "Veuillez vérifier votre email pour activer votre compte. Un nouvel email d'activation vient d'être envoyé.";
         }
 
         setError(errorMessage);
-        setShowErrorDialog(true);
         setPassword("");
+        setIsLoading(false);
         return;
       }
 
-      if (!user) {
+      if (!data.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = user.user_metadata?.user_type;
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         setShowErrorDialog(true);
         await supabase.auth.signOut();
+        setIsLoading(false);
         return;
       }
 
@@ -68,44 +82,55 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
         const { data: clientData } = await supabase
           .from('clients')
           .select('email_verified')
-          .eq('id', user.id)
-          .maybeSingle();
+          .eq('id', data.user.id)
+          .single();
 
         if (clientData && !clientData.email_verified) {
           setShowVerificationDialog(true);
+          // Envoyer un nouvel email d'activation
+          const { error: resendError } = await supabase.auth.resend({
+            type: 'signup',
+            email: email.trim(),
+          });
+          
+          if (resendError) {
+            console.error("Erreur lors de l'envoi de l'email:", resendError);
+          }
+          
+          setError("Veuillez vérifier votre email pour activer votre compte. Un nouvel email d'activation vient d'être envoyé.");
           await supabase.auth.signOut();
+          setIsLoading(false);
           return;
         }
-      }
-
-      if (onSuccess) {
-        onSuccess();
-        return;
-      }
-
-      switch (userType) {
-        case 'admin':
-          navigate("/admin");
-          break;
-        case 'carrier':
-          navigate("/mes-tournees");
-          break;
-        default:
-          const returnPath = sessionStorage.getItem('returnPath');
-          if (returnPath) {
-            sessionStorage.removeItem('returnPath');
-            navigate(returnPath);
-          } else {
-            navigate("/");
-          }
       }
 
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",
       });
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        switch (userType) {
+          case 'admin':
+            navigate("/admin");
+            break;
+          case 'carrier':
+            navigate("/mes-tournees");
+            break;
+          default:
+            const returnPath = sessionStorage.getItem('returnPath');
+            if (returnPath) {
+              sessionStorage.removeItem('returnPath');
+              navigate(returnPath);
+            } else {
+              navigate("/");
+            }
+        }
+      }
     } catch (error: any) {
-      console.error("Complete error:", error);
+      console.error("Erreur complète:", error);
       setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
       setPassword("");
