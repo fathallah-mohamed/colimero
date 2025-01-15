@@ -36,19 +36,19 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     setIsLoading(true);
 
     try {
-      // Vérifier d'abord si l'utilisateur existe
-      const { data: existingUser } = await supabase
+      // 1. Vérifier si l'email existe déjà
+      const { data: existingClient } = await supabase
         .from('clients')
         .select('email')
         .eq('email', email.trim())
         .maybeSingle();
 
-      if (existingUser) {
+      if (existingClient) {
         onSuccess('existing');
         return;
       }
 
-      // Si l'utilisateur n'existe pas, procéder à l'inscription
+      // 2. Créer le compte auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
@@ -58,27 +58,33 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
             first_name: firstName.trim(),
             last_name: lastName.trim(),
             phone: phone.trim(),
-          },
-          emailRedirectTo: `${window.location.origin}/activation`,
-        },
+          }
+        }
       });
 
-      if (signUpError) {
-        if (signUpError.message.includes("User already registered")) {
-          onSuccess('existing');
-          return;
-        }
-        throw signUpError;
-      }
+      if (signUpError) throw signUpError;
 
       if (!signUpData?.user?.id) {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      // Déconnexion après inscription réussie
-      await supabase.auth.signOut();
+      // 3. Créer le profil client
+      const { error: clientError } = await supabase
+        .from('clients')
+        .insert([
+          {
+            id: signUpData.user.id,
+            email: email.trim(),
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            phone: phone.trim(),
+            email_verified: false
+          }
+        ]);
 
-      // Envoyer l'email d'activation
+      if (clientError) throw clientError;
+
+      // 4. Envoyer l'email d'activation
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { email: email.trim() }
       });
@@ -88,7 +94,11 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         throw new Error("Erreur lors de l'envoi de l'email d'activation");
       }
 
+      // 5. Déconnexion après inscription réussie
+      await supabase.auth.signOut();
+
       onSuccess('new');
+      
     } catch (error: any) {
       console.error("Complete error:", error);
       

@@ -6,10 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-console.log('Loading send-activation-email function...')
-
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -21,7 +18,6 @@ serve(async (req) => {
       throw new Error('Email is required')
     }
 
-    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -39,20 +35,17 @@ serve(async (req) => {
       throw new Error('Client not found')
     }
 
-    // Get the base URL from environment, fallback to a default if not set
     let baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
       console.error('SITE_URL environment variable is not set')
       throw new Error('Server configuration error')
     }
 
-    // Clean the base URL: remove trailing slashes and ensure no trailing colon
     baseUrl = baseUrl.replace(/\/+$/, '').replace(/:+$/, '')
     const activationLink = `${baseUrl}/activation?token=${client.activation_token}`
 
     console.log('Activation link generated:', activationLink)
 
-    // Send email using Resend API
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
       console.error('RESEND_API_KEY environment variable is not set')
@@ -74,84 +67,28 @@ serve(async (req) => {
           <html>
             <head>
               <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>Activation de votre compte Colimero</title>
-              <style>
-                body {
-                  font-family: Arial, sans-serif;
-                  line-height: 1.6;
-                  margin: 0;
-                  padding: 0;
-                  color: #333333;
-                }
-                .container {
-                  max-width: 600px;
-                  margin: 0 auto;
-                  padding: 20px;
-                }
-                .header {
-                  text-align: center;
-                  padding: 20px 0;
-                  background-color: #00B0F0;
-                }
-                .logo {
-                  max-width: 200px;
-                }
-                .content {
-                  padding: 20px;
-                  background-color: #ffffff;
-                }
-                .button {
-                  display: inline-block;
-                  padding: 12px 24px;
-                  background-color: #00B0F0;
-                  color: #ffffff;
-                  text-decoration: none;
-                  border-radius: 4px;
-                  margin: 20px 0;
-                }
-                .footer {
-                  text-align: center;
-                  padding: 20px;
-                  font-size: 12px;
-                  color: #666666;
-                }
-                .link {
-                  word-break: break-all;
-                  color: #00B0F0;
-                }
-              </style>
             </head>
             <body>
-              <div class="container">
-                <div class="header">
-                  <!-- Logo Colimero -->
-                  <img src="https://colimero.com/logo.png" alt="Colimero" class="logo">
-                </div>
-                <div class="content">
-                  <h2>Bonjour ${client.first_name || ''}</h2>
-                  
-                  <p>Merci de rejoindre <strong>Colimero</strong>, votre plateforme de confiance pour l'expédition de colis !</p>
-                  
-                  <p>Pour activer votre compte et commencer à explorer nos services, veuillez cliquer sur le bouton ci-dessous :</p>
-                  
-                  <div style="text-align: center;">
-                    <a href="${activationLink}" class="button">Activer mon compte</a>
-                  </div>
-                  
-                  <p>Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :</p>
-                  <p class="link">${activationLink}</p>
-                  
-                  <p><strong>Ce lien est valable pendant 48 heures.</strong></p>
-                  <p>Si vous n'avez pas créé de compte sur Colimero, vous pouvez ignorer cet email.</p>
-                  
-                  <p>En cas de besoin, n'hésitez pas à nous contacter :<br>
-                  <a href="mailto:support@colimero.com" class="link">support@colimero.com</a></p>
-                </div>
-                <div class="footer">
-                  <p><strong>À très bientôt sur Colimero,</strong><br>
-                  L'équipe Colimero</p>
-                </div>
+              <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2>Bonjour ${client.first_name || ''}</h2>
+                
+                <p>Merci de rejoindre <strong>Colimero</strong> !</p>
+                
+                <p>Pour activer votre compte, cliquez sur le lien ci-dessous :</p>
+                
+                <p><a href="${activationLink}" style="color: #00B0F0;">Activer mon compte</a></p>
+                
+                <p>Si le lien ne fonctionne pas, copiez et collez cette adresse dans votre navigateur :</p>
+                <p>${activationLink}</p>
+                
+                <p><strong>Ce lien est valable pendant 48 heures.</strong></p>
+                
+                <p>Si vous n'avez pas créé de compte sur Colimero, ignorez cet email.</p>
+                
+                <p>Besoin d'aide ? Contactez-nous : <a href="mailto:support@colimero.com">support@colimero.com</a></p>
+                
+                <p>À très bientôt sur Colimero !</p>
               </div>
             </body>
           </html>
@@ -165,7 +102,6 @@ serve(async (req) => {
       throw new Error('Failed to send activation email')
     }
 
-    // Log the successful email sending
     await supabase
       .from('email_logs')
       .insert({
