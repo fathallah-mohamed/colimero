@@ -54,7 +54,7 @@ export default function AuthDialog({
           <div className="space-y-4">
             <LoginForm
               onSuccess={onSuccess}
-              onForgotPasswordClick={() => setShowForgotPassword(true)}
+              onForgotPassword={() => setShowForgotPassword(true)}
               requiredUserType={requiredUserType}
             />
             <div className="flex flex-col gap-2">

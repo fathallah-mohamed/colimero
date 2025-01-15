@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ClientProfileForm } from "./client/ClientProfileForm";
-import { ProfileHeader } from "../ProfileHeader";
+import { ProfileHeader } from "./ProfileHeader";
 import { Profile } from "@/types/profile";
 import { Mail, Phone, MapPin, User } from "lucide-react";
 
