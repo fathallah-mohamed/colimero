@@ -31,6 +31,13 @@ export interface Database {
         };
         Returns: string;
       };
+      sync_user_verification: {
+        Args: {
+          user_id: string;
+          is_verified: boolean;
+        };
+        Returns: void;
+      };
       create_test_user: {
         Args: {
           email: string;

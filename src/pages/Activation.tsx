@@ -74,7 +74,7 @@ export default function Activation() {
 
         console.log('Client verification status updated successfully');
 
-        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users via une fonction RPC
+        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users via une RPC
         const { error: rpcError } = await supabase.rpc('sync_user_verification', {
           user_id: client.id,
           is_verified: true
