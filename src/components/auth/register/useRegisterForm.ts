@@ -101,12 +101,15 @@ export function useRegisterForm(onLogin: () => void) {
   };
 
   const areRequiredFieldsFilled = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(\+33|0)[1-9](\d{8}|\s\d{2}\s\d{2}\s\d{2}\s\d{2})$/;
+    
     return (
       firstName.trim() !== "" &&
       lastName.trim() !== "" &&
-      email.trim() !== "" &&
-      phone.trim() !== "" &&
-      password.trim() !== "" &&
+      emailRegex.test(email.trim()) &&
+      phoneRegex.test(phone.trim()) &&
+      password.trim().length >= 8 &&
       confirmPassword.trim() !== "" &&
       password === confirmPassword
     );
