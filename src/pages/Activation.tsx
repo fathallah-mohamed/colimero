@@ -33,26 +33,28 @@ export default function Activation() {
         // Récupérer le client avec le token d'activation
         const { data: client, error: clientError } = await supabase
           .from('clients')
-          .select('*')
+          .select('id, email, email_verified')
           .eq('activation_token', token)
           .single();
 
-        if (clientError) {
+        if (clientError || !client) {
           console.error('Error fetching client:', clientError);
-          throw new Error(clientError.message);
-        }
-
-        if (!client) {
-          console.error('No client found with token:', token);
           throw new Error('Token invalide ou compte déjà activé');
         }
 
         console.log('Client found:', client);
 
-        // Vérifier si le token n'a pas expiré
-        if (new Date(client.activation_expires_at) < new Date()) {
-          console.error('Token expired. Expiry:', client.activation_expires_at);
-          throw new Error('Le lien d\'activation a expiré');
+        if (client.email_verified) {
+          console.log('Account already verified');
+          if (mounted) {
+            setStatus('success');
+            toast({
+              title: "Compte déjà activé",
+              description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
+            });
+            setTimeout(() => mounted && navigate('/connexion'), 3000);
+          }
+          return;
         }
 
         // Mettre à jour le statut de vérification du client
@@ -63,7 +65,8 @@ export default function Activation() {
             activation_token: null,
             activation_expires_at: null
           })
-          .eq('id', client.id);
+          .eq('id', client.id)
+          .select();
 
         if (updateError) {
           console.error('Error updating client verification status:', updateError);
@@ -94,7 +97,7 @@ export default function Activation() {
           // Rediriger après 3 secondes
           setTimeout(() => {
             if (mounted) {
-              navigate('/');
+              navigate('/connexion');
             }
           }, 3000);
         }
@@ -136,13 +139,13 @@ export default function Activation() {
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
               <h2 className="text-xl font-semibold text-green-600">Compte activé !</h2>
               <p className="text-gray-500">
-                Votre compte a été activé avec succès. Vous allez être redirigé vers la page d'accueil...
+                Votre compte a été activé avec succès. Vous allez être redirigé vers la page de connexion...
               </p>
               <Button 
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/connexion')}
                 className="w-full"
               >
-                Retourner à l'accueil
+                Aller à la page de connexion
               </Button>
             </div>
           )}
@@ -155,11 +158,11 @@ export default function Activation() {
                 Le lien d'activation est invalide ou a expiré. Veuillez réessayer ou contacter le support.
               </p>
               <Button 
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/connexion')}
                 variant="outline"
                 className="w-full"
               >
-                Retourner à l'accueil
+                Retourner à la page de connexion
               </Button>
             </div>
           )}
