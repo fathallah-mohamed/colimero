@@ -11,6 +11,7 @@ import AuthDialog from "@/components/auth/AuthDialog";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -20,6 +21,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -44,6 +46,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   };
 
   const handleBookingButtonClick = async () => {
+    console.log("handleBookingButtonClick called");
+    
     if (!selectedPoint) {
       toast({
         variant: "destructive",
@@ -56,6 +60,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
+      console.log("No session, showing auth dialog");
       const bookingPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`;
       sessionStorage.setItem('returnPath', bookingPath);
       setShowAuthDialog(true);
@@ -63,13 +68,11 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     }
 
     const userType = session.user.user_metadata?.user_type;
+    console.log("User type:", userType);
     
     if (userType === 'carrier') {
-      toast({
-        variant: "destructive",
-        title: "Accès refusé",
-        description: "Les transporteurs ne peuvent pas effectuer de réservations",
-      });
+      console.log("User is carrier, showing access denied");
+      setShowAccessDeniedDialog(true);
       return;
     }
 
@@ -85,6 +88,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       return;
     }
 
+    console.log("Navigating to booking page");
     navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
   };
 
@@ -93,7 +97,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   };
 
   return (
-    <CardCustom className="bg-white hover:bg-gray-50 transition-colors duration-200">
+    <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
         <div className="flex flex-col space-y-6">
           <TourMainInfo tour={tour} />
@@ -134,6 +138,12 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           }
         }}
         requiredUserType="client"
+      />
+
+      <AccessDeniedMessage
+        userType="carrier"
+        isOpen={showAccessDeniedDialog}
+        onClose={() => setShowAccessDeniedDialog(false)}
       />
     </CardCustom>
   );
