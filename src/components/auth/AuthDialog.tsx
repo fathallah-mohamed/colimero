@@ -9,6 +9,7 @@ interface AuthDialogProps {
   onClose: () => void;
   onSuccess?: () => void;
   onRegisterClick?: () => void;
+  onCarrierRegisterClick?: () => void;
   requiredUserType?: "client" | "carrier";
 }
 
@@ -17,6 +18,7 @@ export default function AuthDialog({
   onClose,
   onSuccess,
   onRegisterClick,
+  onCarrierRegisterClick,
   requiredUserType,
 }: AuthDialogProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
