@@ -25,27 +25,34 @@ export function useLoginForm(props?: UseLoginFormProps) {
     setError(null);
 
     try {
-      const response = await authenticateUser(email, password);
-      
-      if (response.success) {
-        // Vérifier si l'email est vérifié
-        const { data: clientData } = await supabase
+      // Vérifier d'abord si l'email est vérifié pour les clients
+      if (requiredUserType === 'client') {
+        const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('email_verified')
-          .eq('email', email)
+          .eq('email', email.trim())
           .single();
 
+        if (clientError) {
+          console.error("Erreur lors de la vérification du client:", clientError);
+          throw new Error("Une erreur est survenue lors de la vérification de votre compte");
+        }
+
         if (!clientData?.email_verified) {
-          setError("Veuillez vérifier votre email avant de vous connecter.");
+          setError("Veuillez vérifier votre email avant de vous connecter");
           toast({
             variant: "destructive",
             title: "Email non vérifié",
-            description: "Veuillez vérifier votre email avant de vous connecter.",
+            description: "Veuillez vérifier votre email avant de vous connecter. Vérifiez votre boîte de réception et vos spams.",
           });
           setIsLoading(false);
           return;
         }
+      }
 
+      const response = await authenticateUser(email, password);
+      
+      if (response.success) {
         toast({
           title: "Connexion réussie",
           description: "Vous êtes maintenant connecté",
