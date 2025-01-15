@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { useModalDialog } from "@/hooks/use-modal-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -12,7 +12,7 @@ interface ForgotPasswordFormProps {
 export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const { showDialog } = useModalDialog();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,9 +25,10 @@ export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
 
       if (error) throw error;
 
-      toast({
+      showDialog({
         title: "Email envoyé",
         description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe",
+        variant: "default"
       });
 
       if (onSuccess) {
@@ -35,10 +36,10 @@ export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
       }
     } catch (error: any) {
       console.error("Erreur complète:", error);
-      toast({
+      showDialog({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi de l'email",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);

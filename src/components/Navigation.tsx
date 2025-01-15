@@ -15,6 +15,8 @@ export default function Navigation() {
   const { session, isLoading } = useSessionContext();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { isOpen, dialogState, showDialog, closeDialog } = useModalDialog();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const userType = session?.user?.user_metadata?.user_type;
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -54,6 +56,25 @@ export default function Navigation() {
     };
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      showDialog({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès.",
+        variant: "default"
+      });
+      navigate('/');
+    } catch (error) {
+      console.error("Logout error:", error);
+      showDialog({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la déconnexion.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
@@ -63,12 +84,23 @@ export default function Navigation() {
             <Link to="/about" className="text-gray-700 hover:text-gray-900">À propos</Link>
             <Link to="/contact" className="text-gray-700 hover:text-gray-900">Contact</Link>
             {session ? (
-              <AccountMenu />
+              <AccountMenu 
+                user={session.user}
+                userType={userType}
+                handleLogout={handleLogout}
+              />
             ) : (
               <Button onClick={() => setShowAuthDialog(true)}>Se connecter</Button>
             )}
           </div>
-          <MobileMenu />
+          <MobileMenu 
+            isOpen={mobileMenuOpen}
+            setIsOpen={setMobileMenuOpen}
+            user={session?.user}
+            userType={userType}
+            handleLogout={handleLogout}
+            onLoginClick={() => setShowAuthDialog(true)}
+          />
         </div>
       </nav>
 
