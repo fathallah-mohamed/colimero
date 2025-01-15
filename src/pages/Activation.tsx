@@ -64,8 +64,7 @@ export default function Activation() {
             activation_token: null,
             activation_expires_at: null
           })
-          .eq('id', client.id)
-          .select();
+          .eq('id', client.id);
 
         if (updateError) {
           console.error('Error updating client verification status:', updateError);
@@ -74,7 +73,7 @@ export default function Activation() {
 
         console.log('Client verification status updated successfully');
 
-        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users
+        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users via la fonction Edge
         const { error: syncError } = await supabase.functions.invoke('sync-user-verification', {
           body: { 
             user_id: client.id,
