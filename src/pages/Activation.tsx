@@ -30,10 +30,10 @@ export default function Activation() {
       try {
         console.log('Starting account activation with token:', token);
 
-        // 1. Récupérer le client et vérifier son statut
+        // 1. Récupérer le client avec le token d'activation
         const { data: client, error: clientError } = await supabase
           .from('clients')
-          .select('id, email, email_verified, activation_expires_at')
+          .select('id, email, email_verified')
           .eq('activation_token', token)
           .single();
 
@@ -56,13 +56,7 @@ export default function Activation() {
           return;
         }
 
-        // 3. Vérifier si le token n'a pas expiré
-        if (client.activation_expires_at && new Date(client.activation_expires_at) < new Date()) {
-          console.error('Token expired');
-          throw new Error('Le lien d\'activation a expiré');
-        }
-
-        // 4. Mettre à jour le statut de vérification du client
+        // 3. Mettre à jour le statut de vérification du client
         const { error: updateError } = await supabase
           .from('clients')
           .update({
@@ -80,17 +74,15 @@ export default function Activation() {
 
         console.log('Client verification status updated successfully');
 
-        // 5. Mettre à jour les métadonnées de l'utilisateur
-        const { error: authUpdateError } = await supabase.auth.updateUser({
-          data: { 
-            email_verified: true,
-            email_confirmed_at: new Date().toISOString()
-          }
+        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users via une fonction RPC
+        const { error: rpcError } = await supabase.rpc('sync_user_verification', {
+          user_id: client.id,
+          is_verified: true
         });
 
-        if (authUpdateError) {
-          console.error('Error updating auth user metadata:', authUpdateError);
-          throw authUpdateError;
+        if (rpcError) {
+          console.error('Error updating auth user metadata:', rpcError);
+          throw rpcError;
         }
 
         console.log('Auth user metadata updated successfully');
