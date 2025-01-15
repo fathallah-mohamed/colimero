@@ -514,7 +514,7 @@ export type Database = {
           activation_expires_at?: string | null
           activation_token?: string | null
           address?: string | null
-          created_at?: string
+          created_at: string
           email?: string | null
           email_verified?: boolean | null
           first_name?: string | null
@@ -862,9 +862,12 @@ export type Database = {
         }
         Returns: string
       }
-      create_test_tours_for_carriers: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
+      sync_user_verification: {
+        Args: {
+          user_id: string
+          is_verified: boolean
+        }
+        Returns: void
       }
       create_test_user: {
         Args: {
@@ -884,18 +887,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      create_tours_for_specific_carrier: {
-        Args: {
-          carrier_email: string
-        }
-        Returns: undefined
-      }
-      generate_company_name: {
-        Args: {
-          id: string
-        }
-        Returns: string
-      }
       generate_diverse_tours: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -911,10 +902,6 @@ export type Database = {
             }
             Returns: Json
           }
-      generate_tours_with_all_statuses: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       random_last_city: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -981,7 +968,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
