@@ -36,23 +36,21 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     setIsLoading(true);
 
     try {
-      console.log("Checking if email exists...");
-      // 1. Vérifier si l'email existe déjà
+      console.log("1. Vérification de l'existence de l'email...");
       const { data: existingClient } = await supabase
         .from('clients')
-        .select('email')
+        .select('id')
         .eq('email', email.trim())
         .maybeSingle();
 
       if (existingClient) {
-        console.log("Email exists, showing existing user modal");
+        console.log("Email déjà utilisé");
         setIsLoading(false);
         onSuccess('existing');
         return;
       }
 
-      console.log("Creating auth account...");
-      // 2. Créer le compte auth
+      console.log("2. Création du compte auth...");
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
@@ -67,16 +65,15 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       });
 
       if (signUpError) {
-        console.error("SignUp error:", signUpError);
+        console.error("Erreur lors de la création du compte auth:", signUpError);
         throw signUpError;
       }
 
-      if (!signUpData?.user?.id) {
-        throw new Error("Erreur lors de la création du compte");
+      if (!signUpData.user?.id) {
+        throw new Error("Aucun ID utilisateur reçu");
       }
 
-      console.log("Creating client profile...");
-      // 3. Créer le profil client
+      console.log("3. Création du profil client...");
       const { error: clientError } = await supabase
         .from('clients')
         .insert([
@@ -86,34 +83,31 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
             first_name: firstName.trim(),
             last_name: lastName.trim(),
             phone: phone.trim(),
-            email_verified: false
+            email_verified: false,
           }
         ]);
 
       if (clientError) {
-        console.error("Client profile creation error:", clientError);
+        console.error("Erreur lors de la création du profil client:", clientError);
         throw clientError;
       }
 
-      console.log("Sending activation email...");
-      // 4. Envoyer l'email d'activation
+      console.log("4. Envoi de l'email d'activation...");
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { email: email.trim() }
       });
 
       if (emailError) {
-        console.error("Email sending error:", emailError);
-        throw new Error("Erreur lors de l'envoi de l'email d'activation");
+        console.error("Erreur lors de l'envoi de l'email d'activation:", emailError);
+        throw emailError;
       }
 
-      // 5. Déconnexion après inscription réussie
+      console.log("5. Déconnexion et affichage du succès");
       await supabase.auth.signOut();
-      
-      console.log("Registration successful, showing success modal");
       onSuccess('new');
       
     } catch (error: any) {
-      console.error("Complete error:", error);
+      console.error("Erreur complète:", error);
       
       let errorMessage = "Une erreur inattendue s'est produite. Veuillez réessayer.";
       

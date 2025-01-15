@@ -13,6 +13,7 @@ serve(async (req) => {
 
   try {
     const { email } = await req.json()
+    console.log('Received request to send activation email to:', email)
 
     if (!email) {
       throw new Error('Email is required')
@@ -23,7 +24,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get client details
+    // Get client details and activation token
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('first_name, activation_token')
@@ -31,27 +32,26 @@ serve(async (req) => {
       .single()
 
     if (clientError || !client) {
-      console.error('Client fetch error:', clientError)
+      console.error('Error fetching client:', clientError)
       throw new Error('Client not found')
     }
 
-    let baseUrl = Deno.env.get('SITE_URL')
+    console.log('Found client:', client)
+
+    const baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
-      console.error('SITE_URL environment variable is not set')
-      throw new Error('Server configuration error')
+      throw new Error('SITE_URL environment variable is not set')
     }
 
-    baseUrl = baseUrl.replace(/\/+$/, '').replace(/:+$/, '')
-    const activationLink = `${baseUrl}/activation?token=${client.activation_token}`
-
-    console.log('Activation link generated:', activationLink)
+    const activationLink = `${baseUrl.replace(/\/+$/, '')}/activation?token=${client.activation_token}`
+    console.log('Generated activation link:', activationLink)
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
-      console.error('RESEND_API_KEY environment variable is not set')
-      throw new Error('Server configuration error')
+      throw new Error('RESEND_API_KEY environment variable is not set')
     }
 
+    console.log('Sending email via Resend...')
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -61,7 +61,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'Colimero <no-reply@colimero.com>',
         to: email,
-        subject: 'Activez votre compte Colimero dès maintenant !',
+        subject: 'Activez votre compte Colimero',
         html: `
           <!DOCTYPE html>
           <html>
@@ -77,18 +77,37 @@ serve(async (req) => {
                 
                 <p>Pour activer votre compte, cliquez sur le lien ci-dessous :</p>
                 
-                <p><a href="${activationLink}" style="color: #00B0F0;">Activer mon compte</a></p>
+                <p style="margin: 20px 0;">
+                  <a href="${activationLink}" 
+                     style="background-color: #00B0F0; 
+                            color: white; 
+                            padding: 12px 24px; 
+                            text-decoration: none; 
+                            border-radius: 4px;
+                            display: inline-block;">
+                    Activer mon compte
+                  </a>
+                </p>
                 
-                <p>Si le lien ne fonctionne pas, copiez et collez cette adresse dans votre navigateur :</p>
-                <p>${activationLink}</p>
+                <p>Si le bouton ne fonctionne pas, copiez et collez cette adresse dans votre navigateur :</p>
+                <p style="background-color: #f5f5f5; padding: 10px; word-break: break-all;">
+                  ${activationLink}
+                </p>
                 
                 <p><strong>Ce lien est valable pendant 48 heures.</strong></p>
                 
-                <p>Si vous n'avez pas créé de compte sur Colimero, ignorez cet email.</p>
+                <p style="color: #666; font-size: 0.9em; margin-top: 30px;">
+                  Si vous n'avez pas créé de compte sur Colimero, ignorez cet email.
+                </p>
                 
-                <p>Besoin d'aide ? Contactez-nous : <a href="mailto:support@colimero.com">support@colimero.com</a></p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
                 
-                <p>À très bientôt sur Colimero !</p>
+                <p style="color: #666; font-size: 0.8em;">
+                  Besoin d'aide ? Contactez-nous : 
+                  <a href="mailto:support@colimero.com" style="color: #00B0F0;">
+                    support@colimero.com
+                  </a>
+                </p>
               </div>
             </body>
           </html>
@@ -98,10 +117,13 @@ serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json()
-      console.error('Email send error:', errorData)
+      console.error('Email sending failed:', errorData)
       throw new Error('Failed to send activation email')
     }
 
+    console.log('Email sent successfully')
+
+    // Log the email sending
     await supabase
       .from('email_logs')
       .insert({
@@ -112,7 +134,12 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ message: 'Activation email sent successfully' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     )
 
   } catch (error) {
