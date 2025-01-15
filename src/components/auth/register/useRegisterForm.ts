@@ -36,7 +36,7 @@ export function useRegisterForm(onLogin: () => void) {
     setIsLoading(true);
 
     try {
-      // Créer le compte sans connexion automatique
+      // Create account without auto sign-in
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
@@ -68,7 +68,10 @@ export function useRegisterForm(onLogin: () => void) {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      // Envoyer l'email d'activation via notre fonction Edge
+      // Immediately sign out the user after account creation
+      await supabase.auth.signOut();
+
+      // Send activation email via Edge function
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { email: email.trim() }
       });
@@ -83,7 +86,7 @@ export function useRegisterForm(onLogin: () => void) {
         description: "Un email d'activation a été envoyé à votre adresse email. Veuillez cliquer sur le lien dans l'email pour activer votre compte.",
       });
 
-      // Rediriger vers la page de connexion
+      // Redirect to login page
       onLogin();
     } catch (error: any) {
       console.error("Complete error:", error);
