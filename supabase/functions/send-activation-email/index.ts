@@ -34,11 +34,74 @@ const handler = async (req: Request): Promise<Response> => {
         to: [email],
         subject: "Activez votre compte Colimero",
         html: `
-          <h2>Bienvenue sur Colimero, ${first_name} !</h2>
-          <p>Pour activer votre compte et commencer à utiliser nos services, veuillez cliquer sur le lien ci-dessous :</p>
-          <p><a href="${activationUrl}">Activer mon compte</a></p>
-          <p>Ce lien est valable pendant 24 heures.</p>
-          <p>Si vous n'avez pas créé de compte sur Colimero, vous pouvez ignorer cet email.</p>
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  line-height: 1.6;
+                  color: #333;
+                  max-width: 600px;
+                  margin: 0 auto;
+                  padding: 20px;
+                }
+                .header {
+                  background-color: #00B0F0;
+                  color: white;
+                  padding: 20px;
+                  text-align: center;
+                  border-radius: 5px 5px 0 0;
+                }
+                .content {
+                  padding: 20px;
+                  background: #f9f9f9;
+                  border: 1px solid #ddd;
+                  border-radius: 0 0 5px 5px;
+                }
+                .button {
+                  display: inline-block;
+                  padding: 12px 24px;
+                  background-color: #00B0F0;
+                  color: white;
+                  text-decoration: none;
+                  border-radius: 5px;
+                  margin: 20px 0;
+                }
+                .footer {
+                  text-align: center;
+                  margin-top: 20px;
+                  font-size: 12px;
+                  color: #666;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>Bienvenue sur Colimero !</h1>
+              </div>
+              <div class="content">
+                <h2>Bonjour ${first_name},</h2>
+                <p>Merci d'avoir créé votre compte sur Colimero. Pour commencer à utiliser nos services, veuillez activer votre compte en cliquant sur le bouton ci-dessous :</p>
+                
+                <div style="text-align: center;">
+                  <a href="${activationUrl}" class="button">Activer mon compte</a>
+                </div>
+
+                <p>Si le bouton ne fonctionne pas, vous pouvez copier et coller le lien suivant dans votre navigateur :</p>
+                <p style="word-break: break-all;">${activationUrl}</p>
+
+                <p><strong>Important :</strong> Ce lien d'activation est valable pendant 24 heures.</p>
+
+                <p>Si vous n'avez pas créé de compte sur Colimero, vous pouvez ignorer cet email.</p>
+              </div>
+              <div class="footer">
+                <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+                <p>© 2024 Colimero. Tous droits réservés.</p>
+              </div>
+            </body>
+          </html>
         `,
       }),
     });
