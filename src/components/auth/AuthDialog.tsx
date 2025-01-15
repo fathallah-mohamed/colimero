@@ -56,17 +56,9 @@ export default function AuthDialog({
               onSuccess={onSuccess}
               onForgotPassword={() => setShowForgotPassword(true)}
               onRegister={onRegisterClick}
+              onCarrierRegister={onCarrierRegisterClick}
               requiredUserType={requiredUserType}
             />
-            {onRegisterClick && (
-              <Button
-                variant="outline"
-                onClick={onRegisterClick}
-                className="w-full"
-              >
-                Créer un compte
-              </Button>
-            )}
           </div>
         )}
       </DialogContent>

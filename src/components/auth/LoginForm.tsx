@@ -6,6 +6,7 @@ import { useLoginForm } from "./login/useLoginForm";
 interface LoginFormProps {
   onForgotPassword: () => void;
   onRegister: () => void;
+  onCarrierRegister: () => void;
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
   hideRegisterButton?: boolean;
@@ -14,6 +15,7 @@ interface LoginFormProps {
 export function LoginForm({
   onForgotPassword,
   onRegister,
+  onCarrierRegister,
   onSuccess,
   requiredUserType,
   hideRegisterButton = false,
@@ -61,14 +63,25 @@ export function LoginForm({
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onRegister}
-              className="w-full"
-            >
-              Créer un compte
-            </Button>
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onRegister}
+                className="w-full"
+              >
+                Créer un compte client
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCarrierRegister}
+                className="w-full"
+              >
+                Créer un compte transporteur
+              </Button>
+            </div>
           </>
         )}
 
