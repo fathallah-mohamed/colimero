@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { CardCustom } from "@/components/ui/card-custom";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
@@ -98,7 +98,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           <TourMainInfo tour={tour} />
           
           <TourRoute 
-            route={tour.route} 
+            stops={tour.route} 
             onPointSelect={handlePointSelect}
             selectedPoint={selectedPoint}
           />
@@ -122,7 +122,13 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           </div>
 
           {isExpanded && (
-            <TourExpandedContent tour={tour} />
+            <TourExpandedContent 
+              tour={tour}
+              selectedPoint={selectedPoint}
+              onPointSelect={handlePointSelect}
+              onBookingClick={handleBookingButtonClick}
+              isBookingEnabled={!!selectedPoint}
+            />
           )}
         </div>
       </div>
@@ -131,11 +137,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         isOpen={showAuthDialog}
         onClose={handleCloseAuthDialog}
         onSuccess={handleAuthSuccess}
-        mode="login"
-        dialogProps={{
-          title: "Connexion requise",
-          description: "Veuillez vous connecter pour réserver une tournée",
-        }}
         requiredUserType="client"
       />
 
