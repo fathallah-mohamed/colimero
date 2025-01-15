@@ -76,7 +76,28 @@ export function useProfile() {
       } else if (userType === 'carrier') {
         profileData = await fetchCarrierProfile(session.user.id, session.user.email);
       } else {
-        profileData = await fetchClientProfile(session.user.id, session.user.email);
+        // Utilisation de maybeSingle() au lieu de single() pour les clients
+        const { data: clientData, error } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching client profile:', error);
+          throw error;
+        }
+
+        if (!clientData) {
+          console.log('No client profile found');
+          toast({
+            variant: "destructive",
+            title: "Profil introuvable",
+            description: "Impossible de trouver votre profil client",
+          });
+        } else {
+          profileData = clientData;
+        }
       }
 
       if (profileData) {
