@@ -26,20 +26,27 @@ export default function Navigation() {
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const { toast } = useToast();
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     let mounted = true;
 
     const initSession = async () => {
       try {
+        setIsInitializing(true);
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
+          toast({
+            variant: "destructive",
+            title: "Erreur de session",
+            description: "Une erreur est survenue lors de la récupération de votre session. Veuillez vous reconnecter.",
+          });
+          await handleLogout();
           return;
         }
 
-        // Set up auth state change listener
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, newSession) => {
@@ -48,7 +55,6 @@ export default function Navigation() {
           console.log('Auth event:', event);
 
           if (event === 'SIGNED_IN') {
-            // Vérifier si le compte est activé
             const { data: client, error: clientError } = await supabase
               .from('clients')
               .select('email_verified')
@@ -70,17 +76,17 @@ export default function Navigation() {
               return;
             }
 
-            console.log('User signed in successfully');
             if (sessionStorage.getItem('returnPath')) {
               const returnPath = sessionStorage.getItem('returnPath');
               sessionStorage.removeItem('returnPath');
               navigate(returnPath || '/');
             }
           } else if (event === 'SIGNED_OUT') {
-            console.log('User signed out');
             if (location.pathname.includes('/reserver/')) {
               navigate('/');
             }
+          } else if (event === 'TOKEN_REFRESHED') {
+            console.log('Token refreshed successfully');
           }
         });
 
@@ -94,8 +100,9 @@ export default function Navigation() {
             toast({
               variant: "destructive",
               title: "Erreur de session",
-              description: "Veuillez vous reconnecter",
+              description: "Votre session a expiré. Veuillez vous reconnecter.",
             });
+            await handleLogout();
           } else if (refreshData.session) {
             console.log('Session refreshed successfully');
           }
@@ -111,6 +118,10 @@ export default function Navigation() {
           title: "Erreur",
           description: "Une erreur est survenue lors de l'initialisation de la session",
         });
+      } finally {
+        if (mounted) {
+          setIsInitializing(false);
+        }
       }
     };
 
@@ -127,7 +138,7 @@ export default function Navigation() {
       mounted = false;
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [location.pathname, navigate, toast]);
+  }, [location.pathname, navigate, toast, handleLogout]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -151,6 +162,10 @@ export default function Navigation() {
       sessionStorage.setItem('returnPath', location.pathname);
     }
   }, [location.pathname]);
+
+  if (isInitializing) {
+    return null; // Or a loading spinner if you prefer
+  }
 
   return (
     <nav className={cn(
