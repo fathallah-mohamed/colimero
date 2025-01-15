@@ -51,12 +51,12 @@ export default function Navigation() {
               .eq('id', newSession?.user?.id)
               .single();
 
-            if (clientError) {
+            if (clientError && clientError.code !== 'PGRST116') {
               console.error("Error fetching client:", clientError);
               return;
             }
 
-            if (!client?.email_verified) {
+            if (client && !client?.email_verified) {
               toast({
                 variant: "destructive",
                 title: "Compte non activé",
@@ -81,7 +81,7 @@ export default function Navigation() {
         if (!session) {
           const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
           
-          if (refreshError) {
+          if (refreshError && refreshError.message !== 'Auth session missing!') {
             console.error("Session refresh error:", refreshError);
           } else if (refreshData.session) {
             console.log('Session refreshed successfully');
@@ -91,8 +91,10 @@ export default function Navigation() {
         return () => {
           subscription.unsubscribe();
         };
-      } catch (error) {
-        console.error("Session initialization error:", error);
+      } catch (error: any) {
+        if (error.message !== 'Auth session missing!' && error.code !== 'PGRST116') {
+          console.error("Session initialization error:", error);
+        }
       }
     };
 
