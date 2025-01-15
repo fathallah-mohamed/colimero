@@ -18,6 +18,7 @@ export function useBookingFlow() {
       return;
     }
 
+    // Vérifier le type d'utilisateur
     const userType = user.user_metadata?.user_type;
     
     if (userType === 'carrier') {
@@ -52,10 +53,7 @@ export function useBookingFlow() {
       return;
     }
 
-    // Naviguer vers la page de réservation
-    const bookingPath = `/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`;
-    console.log("Navigating to:", bookingPath);
-    navigate(bookingPath);
+    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
   };
 
   const handleAuthSuccess = () => {

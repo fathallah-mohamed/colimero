@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
@@ -32,6 +33,7 @@ export function TourTimelineCard({
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
 
@@ -64,8 +66,8 @@ export function TourTimelineCard({
     }
 
     const userType = session.user.user_metadata?.user_type;
-    if (userType !== 'client') {
-      setShowAuthDialog(true);
+    if (userType === 'carrier') {
+      setShowAccessDeniedDialog(true);
       return;
     }
 
@@ -154,6 +156,12 @@ export function TourTimelineCard({
           }
         }}
         requiredUserType="client"
+      />
+
+      <AccessDeniedMessage
+        userType="carrier"
+        isOpen={showAccessDeniedDialog}
+        onClose={() => setShowAccessDeniedDialog(false)}
       />
 
       <ApprovalRequestDialog
