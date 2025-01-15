@@ -30,34 +30,39 @@ export default function Activation() {
       try {
         console.log('Starting account activation with token:', token);
 
-        // Récupérer le client avec le token d'activation
+        // 1. Récupérer le client et vérifier son statut
         const { data: client, error: clientError } = await supabase
           .from('clients')
-          .select('id, email, email_verified')
+          .select('id, email, email_verified, activation_expires_at')
           .eq('activation_token', token)
           .single();
 
         if (clientError || !client) {
           console.error('Error fetching client:', clientError);
-          throw new Error('Token invalide ou compte déjà activé');
+          throw new Error('Token invalide ou compte introuvable');
         }
 
         console.log('Client found:', client);
 
+        // 2. Vérifier si le compte est déjà activé
         if (client.email_verified) {
           console.log('Account already verified');
-          if (mounted) {
-            setStatus('success');
-            toast({
-              title: "Compte déjà activé",
-              description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
-            });
-            setTimeout(() => mounted && navigate('/connexion'), 3000);
-          }
+          setStatus('success');
+          toast({
+            title: "Compte déjà activé",
+            description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
+          });
+          setTimeout(() => mounted && navigate('/connexion'), 3000);
           return;
         }
 
-        // Mettre à jour le statut de vérification du client
+        // 3. Vérifier si le token n'a pas expiré
+        if (client.activation_expires_at && new Date(client.activation_expires_at) < new Date()) {
+          console.error('Token expired');
+          throw new Error('Le lien d\'activation a expiré');
+        }
+
+        // 4. Mettre à jour le statut de vérification du client
         const { error: updateError } = await supabase
           .from('clients')
           .update({
@@ -75,9 +80,12 @@ export default function Activation() {
 
         console.log('Client verification status updated successfully');
 
-        // Mettre à jour les métadonnées de l'utilisateur dans auth.users
+        // 5. Mettre à jour les métadonnées de l'utilisateur
         const { error: authUpdateError } = await supabase.auth.updateUser({
-          data: { email_verified: true }
+          data: { 
+            email_verified: true,
+            email_confirmed_at: new Date().toISOString()
+          }
         });
 
         if (authUpdateError) {
@@ -93,13 +101,7 @@ export default function Activation() {
             title: "Compte activé",
             description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
           });
-
-          // Rediriger après 3 secondes
-          setTimeout(() => {
-            if (mounted) {
-              navigate('/connexion');
-            }
-          }, 3000);
+          setTimeout(() => mounted && navigate('/connexion'), 3000);
         }
 
       } catch (error: any) {
