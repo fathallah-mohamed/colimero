@@ -12,39 +12,67 @@ export function useUserData(userType: string | null) {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.log('No authenticated user found');
+          return;
+        }
 
-      let profileData;
-      if (userType === 'admin') {
-        const { data } = await supabase
-          .from('administrators')
-          .select('first_name, last_name, email')
-          .eq('id', user.id)
-          .maybeSingle();
-        profileData = data;
-      } else if (userType === 'carrier') {
-        const { data } = await supabase
-          .from('carriers')
-          .select('first_name, last_name, email')
-          .eq('id', user.id)
-          .maybeSingle();
-        profileData = data;
-      } else {
-        const { data } = await supabase
-          .from('clients')
-          .select('first_name, last_name, email')
-          .eq('id', user.id)
-          .maybeSingle();
-        profileData = data;
-      }
+        let profileData;
+        if (userType === 'admin') {
+          const { data, error } = await supabase
+            .from('administrators')
+            .select('first_name, last_name, email')
+            .eq('id', user.id)
+            .maybeSingle();
+            
+          if (error) {
+            console.error('Error fetching admin profile:', error);
+            return;
+          }
+          profileData = data;
+          
+        } else if (userType === 'carrier') {
+          const { data, error } = await supabase
+            .from('carriers')
+            .select('first_name, last_name, email')
+            .eq('id', user.id)
+            .maybeSingle();
+            
+          if (error) {
+            console.error('Error fetching carrier profile:', error);
+            return;
+          }
+          profileData = data;
+          
+        } else {
+          const { data, error } = await supabase
+            .from('clients')
+            .select('first_name, last_name, email')
+            .eq('id', user.id)
+            .maybeSingle();
+            
+          if (error) {
+            console.error('Error fetching client profile:', error);
+            return;
+          }
+          profileData = data;
+        }
 
-      if (profileData) {
-        setUserData(profileData);
+        if (profileData) {
+          setUserData(profileData);
+        } else {
+          console.log(`No ${userType} profile found for user:`, user.id);
+        }
+      } catch (error) {
+        console.error('Error in fetchUserData:', error);
       }
     };
 
-    fetchUserData();
+    if (userType) {
+      fetchUserData();
+    }
   }, [userType]);
 
   return userData;
