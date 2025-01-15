@@ -23,6 +23,10 @@ export function GeneralLoginForm({
     password,
     setPassword,
     error,
+    showVerificationDialog,
+    showErrorDialog,
+    setShowVerificationDialog,
+    setShowErrorDialog,
     handleSubmit,
   } = useLoginForm({ onSuccess });
 
@@ -33,8 +37,12 @@ export function GeneralLoginForm({
         password={password}
         isLoading={isLoading}
         error={error}
+        showVerificationDialog={showVerificationDialog}
+        showErrorDialog={showErrorDialog}
         onEmailChange={setEmail}
         onPasswordChange={setPassword}
+        onVerificationDialogClose={() => setShowVerificationDialog(false)}
+        onErrorDialogClose={() => setShowErrorDialog(false)}
       />
 
       <div className="space-y-4">
