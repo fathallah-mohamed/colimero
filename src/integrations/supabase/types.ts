@@ -510,7 +510,7 @@ export type Database = {
           activation_token: string | null
           address: string | null
           created_at: string
-          email: string | null
+          email: string
           email_verified: boolean | null
           first_name: string | null
           id: string
@@ -522,7 +522,7 @@ export type Database = {
           activation_token?: string | null
           address?: string | null
           created_at?: string
-          email?: string | null
+          email: string
           email_verified?: boolean | null
           first_name?: string | null
           id: string
@@ -534,7 +534,7 @@ export type Database = {
           activation_token?: string | null
           address?: string | null
           created_at?: string
-          email?: string | null
+          email?: string
           email_verified?: boolean | null
           first_name?: string | null
           id?: string
