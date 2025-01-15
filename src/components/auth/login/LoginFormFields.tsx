@@ -1,19 +1,19 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
-import { ErrorDialog } from "@/components/ui/error-dialog";
 
 interface LoginFormFieldsProps {
   email: string;
   password: string;
   isLoading: boolean;
   error: string | null;
-  showVerificationDialog?: boolean;
-  showErrorDialog?: boolean;
+  showVerificationDialog: boolean;
+  showErrorDialog: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
-  onVerificationDialogClose?: () => void;
-  onErrorDialogClose?: () => void;
+  onVerificationDialogClose: () => void;
+  onErrorDialogClose: () => void;
 }
 
 export function LoginFormFields({
@@ -21,8 +21,8 @@ export function LoginFormFields({
   password,
   isLoading,
   error,
-  showVerificationDialog = false,
-  showErrorDialog = false,
+  showVerificationDialog,
+  showErrorDialog,
   onEmailChange,
   onPasswordChange,
   onVerificationDialogClose,
@@ -38,8 +38,8 @@ export function LoginFormFields({
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
           disabled={isLoading}
-          required
           placeholder="exemple@email.com"
+          required
         />
       </div>
 
@@ -55,22 +55,17 @@ export function LoginFormFields({
         />
       </div>
 
-      {showVerificationDialog && (
-        <EmailVerificationDialog
-          isOpen={showVerificationDialog}
-          onClose={() => onVerificationDialogClose?.()}
-          email={email}
-        />
+      {error && showErrorDialog && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      {error && showErrorDialog && (
-        <ErrorDialog
-          isOpen={showErrorDialog}
-          onClose={() => onErrorDialogClose?.()}
-          title="Erreur de connexion"
-          description={error}
-        />
-      )}
+      <EmailVerificationDialog
+        isOpen={showVerificationDialog}
+        onClose={onVerificationDialogClose}
+        email={email}
+      />
     </div>
   );
 }
