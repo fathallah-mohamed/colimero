@@ -12,6 +12,17 @@ interface CommitmentStatusProps {
   description: string;
 }
 
+interface CommitmentType {
+  id: string;
+  label: string;
+  description: string;
+}
+
+interface CarrierCommitment {
+  accepted: boolean;
+  commitment_type: CommitmentType;
+}
+
 function CommitmentStatus({ label, description }: CommitmentStatusProps) {
   return (
     <div className="flex items-start gap-4">
@@ -54,7 +65,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
       }
       
       console.log("Fetched commitments:", commitments);
-      return commitments;
+      return commitments as CarrierCommitment[];
     },
   });
 
