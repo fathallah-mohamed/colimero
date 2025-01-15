@@ -52,6 +52,8 @@ export function useRegisterForm(onLogin: () => void) {
       });
 
       if (signUpError) {
+        console.error("SignUp error:", signUpError);
+        
         if (signUpError.message.includes("User already registered")) {
           toast({
             variant: "destructive",
@@ -61,7 +63,13 @@ export function useRegisterForm(onLogin: () => void) {
           onLogin();
           return;
         }
-        throw signUpError;
+
+        toast({
+          variant: "destructive",
+          title: "Erreur d'inscription",
+          description: signUpError.message || "Une erreur est survenue lors de l'inscription.",
+        });
+        return;
       }
 
       if (!signUpData?.user?.id) {
