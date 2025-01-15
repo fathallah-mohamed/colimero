@@ -21,6 +21,23 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
         return { success: false };
       }
 
+      // Vérifier si l'utilisateur a déjà une réservation pour cette tournée
+      const { data: existingBooking } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('tour_id', tourId)
+        .maybeSingle();
+
+      if (existingBooking) {
+        toast({
+          variant: "destructive",
+          title: "Réservation impossible",
+          description: "Vous avez déjà une réservation pour cette tournée",
+        });
+        return { success: false };
+      }
+
       // Start a transaction by using RPC
       const { data: result, error } = await supabase.rpc('create_booking_with_capacity_update', {
         p_tour_id: tourId,
@@ -39,7 +56,18 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
         p_photos: formData.photos?.map(file => URL.createObjectURL(file)) || []
       });
 
-      if (error) throw error;
+      if (error) {
+        // Gérer l'erreur de contrainte unique
+        if (error.message?.includes('unique_user_tour')) {
+          toast({
+            variant: "destructive",
+            title: "Réservation impossible",
+            description: "Vous avez déjà une réservation pour cette tournée",
+          });
+          return { success: false };
+        }
+        throw error;
+      }
 
       toast({
         title: "Réservation créée",
