@@ -24,6 +24,15 @@ export function useRegisterForm(onLogin: () => void) {
       return;
     }
 
+    if (password !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
