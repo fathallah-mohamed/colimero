@@ -27,30 +27,44 @@ export function useLoginForm(props?: UseLoginFormProps) {
       const response = await authenticateUser(email, password);
       
       if (response.success) {
+        // Vérifier si l'email est vérifié
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('email_verified')
+          .eq('email', email)
+          .single();
+
+        if (!clientData?.email_verified) {
+          setError("Veuillez vérifier votre email avant de vous connecter.");
+          toast({
+            variant: "destructive",
+            title: "Email non vérifié",
+            description: "Veuillez vérifier votre email avant de vous connecter.",
+          });
+          setIsLoading(false);
+          return;
+        }
+
         toast({
           title: "Connexion réussie",
           description: "Vous êtes maintenant connecté",
         });
 
-        // Si onSuccess est fourni, l'appeler
         if (onSuccess) {
           onSuccess();
-          return; // Important: arrêter ici pour laisser onSuccess gérer la redirection
+          return;
         }
 
-        // Vérifier s'il y a un chemin de retour stocké
         const returnPath = sessionStorage.getItem('returnPath');
         if (returnPath) {
-          sessionStorage.removeItem('returnPath'); // Nettoyer après utilisation
+          sessionStorage.removeItem('returnPath');
           navigate(returnPath);
           return;
         }
 
-        // Si un redirectTo est spécifié, l'utiliser
         if (redirectTo) {
           navigate(redirectTo);
         } else {
-          // Sinon, utiliser la redirection par défaut basée sur le type d'utilisateur
           if (response.redirectTo) {
             navigate(response.redirectTo);
           } else {
