@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthError } from "@supabase/supabase-js";
 
 export function useRegisterForm(onLogin: () => void) {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,12 +65,7 @@ export function useRegisterForm(onLogin: () => void) {
           return;
         }
 
-        toast({
-          variant: "destructive",
-          title: "Erreur d'inscription",
-          description: signUpError.message || "Une erreur est survenue lors de l'inscription.",
-        });
-        return;
+        throw signUpError;
       }
 
       if (!signUpData?.user?.id) {
@@ -96,12 +92,31 @@ export function useRegisterForm(onLogin: () => void) {
 
       // Redirect to login page
       onLogin();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Complete error:", error);
+      let errorMessage = "Une erreur inattendue s'est produite. Veuillez réessayer.";
+      
+      if (error instanceof AuthError) {
+        switch (error.message) {
+          case "User already registered":
+            errorMessage = "Un compte existe déjà avec cet email. Veuillez vous connecter.";
+            onLogin();
+            break;
+          case "Password should be at least 6 characters":
+            errorMessage = "Le mot de passe doit contenir au moins 6 caractères.";
+            break;
+          case "Email not confirmed":
+            errorMessage = "Veuillez confirmer votre email avant de vous connecter.";
+            break;
+          default:
+            errorMessage = error.message;
+        }
+      }
+      
       toast({
         variant: "destructive",
-        title: "Erreur inattendue",
-        description: error.message || "Une erreur inattendue s'est produite. Veuillez réessayer.",
+        title: "Erreur",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
