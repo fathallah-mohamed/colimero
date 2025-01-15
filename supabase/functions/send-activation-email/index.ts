@@ -36,8 +36,9 @@ serve(async (req) => {
       throw new Error('Client not found')
     }
 
-    // Create activation link
-    const activationLink = `${Deno.env.get('SITE_URL')}/activation?token=${client.activation_token}`
+    // Créer le lien d'activation en utilisant SITE_URL directement
+    const siteUrl = Deno.env.get('SITE_URL') || 'http://localhost:5173'
+    const activationLink = `${siteUrl}/activation?token=${client.activation_token}`
 
     // Send email using Resend API
     const emailResponse = await fetch('https://api.resend.com/emails', {
