@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
 import MenuItems from "@/components/navigation/MenuItems";
@@ -23,6 +23,7 @@ export default function Navigation() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const { toast } = useToast();
 
@@ -46,22 +47,40 @@ export default function Navigation() {
 
           console.log('Auth event:', event);
 
-          switch (event) {
-            case 'SIGNED_IN':
-              console.log('User signed in successfully');
-              break;
-            case 'SIGNED_OUT':
-              console.log('User signed out');
-              if (location.pathname.includes('/reserver/')) {
-                window.location.href = '/';
-              }
-              break;
-            case 'TOKEN_REFRESHED':
-              console.log('Session token refreshed');
-              break;
-            case 'USER_UPDATED':
-              console.log('User data updated');
-              break;
+          if (event === 'SIGNED_IN') {
+            // Vérifier si le compte est activé
+            const { data: client, error: clientError } = await supabase
+              .from('clients')
+              .select('email_verified')
+              .eq('id', newSession?.user?.id)
+              .single();
+
+            if (clientError) {
+              console.error("Error fetching client:", clientError);
+              return;
+            }
+
+            if (!client?.email_verified) {
+              toast({
+                variant: "destructive",
+                title: "Compte non activé",
+                description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
+              });
+              await supabase.auth.signOut();
+              return;
+            }
+
+            console.log('User signed in successfully');
+            if (sessionStorage.getItem('returnPath')) {
+              const returnPath = sessionStorage.getItem('returnPath');
+              sessionStorage.removeItem('returnPath');
+              navigate(returnPath || '/');
+            }
+          } else if (event === 'SIGNED_OUT') {
+            console.log('User signed out');
+            if (location.pathname.includes('/reserver/')) {
+              navigate('/');
+            }
           }
         });
 
@@ -108,7 +127,7 @@ export default function Navigation() {
       mounted = false;
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [location.pathname, toast]);
+  }, [location.pathname, navigate, toast]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
