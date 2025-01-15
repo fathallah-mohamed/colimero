@@ -45,25 +45,28 @@ export default function Navigation() {
           if (!mounted) return;
 
           if (event === 'SIGNED_IN') {
-            const { data: client, error: clientError } = await supabase
-              .from('clients')
-              .select('email_verified')
-              .eq('id', newSession?.user?.id)
-              .single();
+            // Only check email verification for clients
+            if (newSession?.user?.user_metadata?.user_type === 'client') {
+              const { data: client, error: clientError } = await supabase
+                .from('clients')
+                .select('email_verified')
+                .eq('id', newSession.user.id)
+                .maybeSingle();
 
-            if (clientError && clientError.code !== 'PGRST116') {
-              console.error("Error fetching client:", clientError);
-              return;
-            }
+              if (clientError && clientError.code !== 'PGRST116') {
+                console.error("Error fetching client:", clientError);
+                return;
+              }
 
-            if (client && !client?.email_verified) {
-              toast({
-                variant: "destructive",
-                title: "Compte non activé",
-                description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
-              });
-              await supabase.auth.signOut();
-              return;
+              if (client && !client?.email_verified) {
+                toast({
+                  variant: "destructive",
+                  title: "Compte non activé",
+                  description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
+                });
+                await supabase.auth.signOut();
+                return;
+              }
             }
 
             if (sessionStorage.getItem('returnPath')) {
