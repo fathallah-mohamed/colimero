@@ -37,6 +37,8 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
           errorMessage = "Email ou mot de passe incorrect";
         } else if (signInError.message === "Email not confirmed") {
           setShowVerificationDialog(true);
+          setPassword("");
+          setIsLoading(false);
           return;
         }
 
