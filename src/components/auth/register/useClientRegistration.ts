@@ -8,7 +8,7 @@ export async function registerClient(formData: RegisterFormState) {
   });
 
   try {
-    // 1. Create auth user with proper metadata
+    // Create auth user with proper metadata
     const signUpData = {
       email: formData.email.trim(),
       password: formData.password.trim(),
@@ -17,8 +17,7 @@ export async function registerClient(formData: RegisterFormState) {
           user_type: 'client',
           first_name: formData.firstName.trim(),
           last_name: formData.lastName.trim(),
-          phone: formData.phone.trim(),
-          birth_date: formData.birthDate,
+          phone: formData.phone?.trim(),
           address: formData.address?.trim()
         },
       },
@@ -47,42 +46,6 @@ export async function registerClient(formData: RegisterFormState) {
     }
 
     console.log("Auth successful, user created:", authData.user.id);
-
-    // 2. Upload ID document if provided
-    if (formData.idDocument) {
-      console.log("Uploading ID document...");
-      const fileExt = formData.idDocument.name.split('.').pop();
-      const fileName = `${authData.user.id}-${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('id-documents')
-        .upload(fileName, formData.idDocument);
-
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        throw uploadError;
-      }
-    }
-
-    // 3. Insert client consents
-    if (formData.acceptedConsents.length > 0) {
-      console.log("Inserting client consents...");
-      const consentsToInsert = formData.acceptedConsents.map(consentId => ({
-        client_id: authData.user.id,
-        consent_type_id: consentId,
-        accepted: true,
-        accepted_at: new Date().toISOString()
-      }));
-
-      const { error: consentsError } = await supabase
-        .from('client_consents')
-        .upsert(consentsToInsert);
-
-      if (consentsError) {
-        console.error("Consents error:", consentsError);
-        throw consentsError;
-      }
-    }
 
     return { data: authData, error: null };
   } catch (error: any) {

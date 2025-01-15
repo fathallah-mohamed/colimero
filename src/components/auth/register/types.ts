@@ -5,10 +5,7 @@ export interface RegisterFormState {
   phone: string;
   password: string;
   confirmPassword: string;
-  birthDate: string;
-  address: string;
-  idDocument: File | null;
-  acceptedConsents: string[];
+  address?: string;
 }
 
 export interface UseRegisterFormReturn extends RegisterFormState {
@@ -19,12 +16,7 @@ export interface UseRegisterFormReturn extends RegisterFormState {
   setPhone: (value: string) => void;
   setPassword: (value: string) => void;
   setConfirmPassword: (value: string) => void;
-  setBirthDate: (value: string) => void;
   setAddress: (value: string) => void;
-  setIdDocument: (file: File | null) => void;
-  handleConsentChange: (consentId: string, accepted: boolean) => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
-  requiredConsentsCount: number;
-  allRequiredConsentsAccepted: boolean;
   areRequiredFieldsFilled: () => boolean;
 }
