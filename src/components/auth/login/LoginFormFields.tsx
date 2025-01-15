@@ -63,10 +63,11 @@ export function LoginFormFields({
         />
       )}
 
-      {error && (
+      {error && showErrorDialog && (
         <ErrorDialog
           isOpen={showErrorDialog}
           onClose={() => onErrorDialogClose?.()}
+          title="Erreur de connexion"
           description={error}
         />
       )}
