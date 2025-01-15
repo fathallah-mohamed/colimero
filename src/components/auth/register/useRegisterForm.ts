@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useConsentValidation } from "./useConsentValidation";
 import { registerClient } from "./useClientRegistration";
-import { UseRegisterFormReturn } from "./types";
 import { supabase } from "@/integrations/supabase/client";
+import { RegisterFormState } from "./types";
 
-export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
+export function useRegisterForm(onLogin: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -50,12 +50,12 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
     console.log("Starting registration process...");
 
     try {
-      const formData = {
+      const formData: RegisterFormState = {
         firstName,
         lastName,
-        email,
+        email: email.trim(),
         phone,
-        password,
+        password: password.trim(),
         confirmPassword,
         birthDate,
         address,
@@ -63,7 +63,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         acceptedConsents,
       };
 
-      console.log("Calling registerClient...");
+      console.log("Calling registerClient with data:", { ...formData, password: "[REDACTED]" });
       const { data, error } = await registerClient(formData);
 
       if (error) {
@@ -82,7 +82,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      console.log("Account created, sending activation email...");
+      console.log("Account created successfully, sending activation email...");
       const { error: emailError } = await supabase.functions.invoke("send-activation-email", {
         body: {
           email: email.trim(),
