@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { UserCircle2 } from "lucide-react";
 import AccountMenu from "./AccountMenu";
+import { User } from "@supabase/supabase-js";
 
 interface AuthSectionProps {
-  user: any;
+  user: User | null;
   userType: string | null;
   handleLogout: () => void;
   setShowAuthDialog: (show: boolean) => void;
@@ -29,8 +30,9 @@ export function AuthSection({ user, userType, handleLogout, setShowAuthDialog }:
   return (
     <div className="hidden lg:block">
       <AccountMenu 
+        user={user}
         userType={userType}
-        onClose={handleLogout}
+        handleLogout={handleLogout}
       />
     </div>
   );
