@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       administrators: {
@@ -357,7 +357,7 @@ export interface Database {
           phone: string
           phone_secondary?: string | null
           price_per_kg?: number | null
-          reason?: string
+          reason?: string | null
           services?: string[] | null
           siret: string
           status?: string
@@ -577,7 +577,7 @@ export interface Database {
           code: string
           created_at?: string
           description?: string | null
-          id: string
+          id?: string
           label: string
           required?: boolean | null
           updated_at?: string
@@ -837,13 +837,6 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      sync_user_verification: {
-        Args: {
-          user_id: string;
-          is_verified: boolean;
-        };
-        Returns: void;
-      };
       cancel_booking_and_update_capacity: {
         Args: {
           booking_id: string
@@ -852,22 +845,22 @@ export interface Database {
       }
       create_booking_with_capacity_update: {
         Args: {
-          p_tour_id: number;
-          p_user_id: string;
-          p_weight: number;
-          p_pickup_city: string;
-          p_delivery_city: string;
-          p_recipient_name: string;
-          p_recipient_address: string;
-          p_recipient_phone: string;
-          p_sender_name: string;
-          p_sender_phone: string;
-          p_item_type: string;
-          p_special_items: Json;
-          p_content_types: string[];
-          p_photos: string[];
+          p_tour_id: number
+          p_user_id: string
+          p_weight: number
+          p_pickup_city: string
+          p_delivery_city: string
+          p_recipient_name: string
+          p_recipient_address: string
+          p_recipient_phone: string
+          p_sender_name: string
+          p_sender_phone: string
+          p_item_type: string
+          p_special_items: Json
+          p_content_types: string[]
+          p_photos: string[]
         }
-        Returns: string;
+        Returns: string
       }
       create_test_tours_for_carriers: {
         Args: Record<PropertyKey, never>
@@ -875,89 +868,203 @@ export interface Database {
       }
       create_test_user: {
         Args: {
-          email: string;
-          user_type: string;
-          first_name: string;
-          last_name: string;
-          company_name?: string;
-          siret?: string;
-          address?: string;
+          email: string
+          user_type: string
+          first_name: string
+          last_name: string
+          company_name?: string
+          siret?: string
+          address?: string
         }
-        Returns: string;
+        Returns: string
       }
       create_tours_for_carrier: {
         Args: {
-          carrier_uuid: string;
+          carrier_uuid: string
         }
-        Returns: undefined;
+        Returns: undefined
       }
       create_tours_for_specific_carrier: {
         Args: {
-          carrier_email: string;
+          carrier_email: string
         }
-        Returns: undefined;
+        Returns: undefined
       }
       generate_company_name: {
         Args: {
-          id: string;
+          id: string
         }
-        Returns: string;
+        Returns: string
       }
       generate_diverse_tours: {
         Args: Record<PropertyKey, never>
-        Returns: undefined;
+        Returns: undefined
       }
       generate_random_route:
         | {
             Args: Record<PropertyKey, never>
-            Returns: Json;
+            Returns: Json
           }
         | {
             Args: {
-              departure_country: string;
+              departure_country: string
             }
-            Returns: Json;
+            Returns: Json
           }
       generate_tours_with_all_statuses: {
         Args: Record<PropertyKey, never>
-        Returns: undefined;
+        Returns: undefined
       }
       random_last_city: {
         Args: Record<PropertyKey, never>
-        Returns: Json;
+        Returns: Json
       }
       update_carrier_profile: {
         Args: {
-          carrier_uuid: string;
-          index: number;
+          carrier_uuid: string
+          index: number
         }
-        Returns: undefined;
+        Returns: undefined
       }
       update_carriers_with_random_avatars: {
         Args: Record<PropertyKey, never>
-        Returns: undefined;
+        Returns: undefined
       }
       validate_route_structure: {
         Args: {
-          route: Json;
+          route: Json
         }
-        Returns: boolean;
+        Returns: boolean
       }
     }
     Enums: {
-      algerian_city: "Alger" | "Oran" | "Constantine" | "Annaba" | "Sétif";
-      booking_status: "pending" | "confirmed" | "cancelled" | "collected" | "in_transit";
-      french_city: "Paris" | "Lyon" | "Marseille" | "Toulouse" | "Bordeaux" | "Montpellier" | "Gênes";
-      maghreb_country: "TN" | "MA" | "DZ";
-      moroccan_city: "Casablanca" | "Rabat" | "Tanger" | "Marrakech" | "Agadir";
-      registration_status: "pending" | "approved" | "rejected";
-      status_type: "en_cours" | "terminé" | "annulé";
-      tour_status: "planned" | "collecting" | "in_transit" | "completed" | "cancelled";
-      tour_type: "public" | "private";
-      tunisian_city: "Tunis" | "Sfax" | "Sousse" | "Bizerte" | "Kairouan";
+      algerian_city: "Alger" | "Oran" | "Constantine" | "Annaba" | "Sétif"
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "cancelled"
+        | "collected"
+        | "in_transit"
+      french_city:
+        | "Paris"
+        | "Lyon"
+        | "Marseille"
+        | "Toulouse"
+        | "Bordeaux"
+        | "Montpellier"
+        | "Gênes"
+      maghreb_country: "TN" | "MA" | "DZ"
+      moroccan_city: "Casablanca" | "Rabat" | "Tanger" | "Marrakech" | "Agadir"
+      registration_status: "pending" | "approved" | "rejected"
+      status_type: "en_cours" | "terminé" | "annulé"
+      tour_status:
+        | "planned"
+        | "collecting"
+        | "in_transit"
+        | "completed"
+        | "cancelled"
+      tour_type: "public" | "private"
+      tunisian_city: "Tunis" | "Sfax" | "Sousse" | "Bizerte" | "Kairouan"
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
 
-export type Tables = Database['public']['Tables']
-export type Enums = Database['public']['Enums']
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
