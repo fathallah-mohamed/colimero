@@ -14,6 +14,8 @@ interface ActivationEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log("Starting send-activation-email function");
+
   try {
     // Handle CORS
     if (req.method === "OPTIONS") {
@@ -37,6 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (client.is_activated) {
+      console.log("Account already activated for:", email);
       return new Response(
         JSON.stringify({ message: "Le compte est déjà activé" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -44,9 +47,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const activationUrl = `${req.headers.get("origin")}/activation?token=${client.activation_token}`;
-    console.log("Activation URL:", activationUrl);
+    console.log("Generated activation URL:", activationUrl);
 
     // Send email via Resend
+    console.log("Attempting to send email via Resend...");
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {

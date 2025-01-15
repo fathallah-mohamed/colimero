@@ -36,6 +36,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!areRequiredFieldsFilled()) {
       toast({
         variant: "destructive",
@@ -46,6 +47,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
     }
 
     setIsLoading(true);
+    console.log("Starting registration process...");
 
     try {
       const formData = {
@@ -61,6 +63,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         acceptedConsents,
       };
 
+      console.log("Calling registerClient...");
       const { data, error } = await registerClient(formData);
 
       if (error) {
@@ -79,7 +82,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      // Envoyer l'email d'activation
+      console.log("Account created, sending activation email...");
       const { error: emailError } = await supabase.functions.invoke("send-activation-email", {
         body: {
           email: email.trim(),
@@ -92,6 +95,7 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         throw new Error("Erreur lors de l'envoi de l'email d'activation");
       }
 
+      console.log("Registration process completed successfully");
       toast({
         title: "Compte créé avec succès",
         description: "Un email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
