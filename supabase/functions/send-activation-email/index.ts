@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -40,15 +40,15 @@ serve(async (req) => {
     }
 
     // Get the base URL from environment, fallback to a default if not set
-    const baseUrl = Deno.env.get('SITE_URL')
+    let baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
       console.error('SITE_URL environment variable is not set')
       throw new Error('Server configuration error')
     }
 
-    // Construct the activation link, ensuring no trailing slashes
-    const cleanBaseUrl = baseUrl.replace(/\/+$/, '')
-    const activationLink = `${cleanBaseUrl}/activation?token=${client.activation_token}`
+    // Clean the base URL: remove trailing slashes and ensure no trailing colon
+    baseUrl = baseUrl.replace(/\/+$/, '').replace(/:+$/, '')
+    const activationLink = `${baseUrl}/activation?token=${client.activation_token}`
 
     console.log('Activation link generated:', activationLink)
 
@@ -84,6 +84,15 @@ serve(async (req) => {
       console.error('Email send error:', errorData)
       throw new Error('Failed to send activation email')
     }
+
+    // Log the successful email sending
+    await supabase
+      .from('email_logs')
+      .insert({
+        email: email,
+        status: 'sent',
+        email_type: 'activation'
+      })
 
     return new Response(
       JSON.stringify({ message: 'Activation email sent successfully' }),
