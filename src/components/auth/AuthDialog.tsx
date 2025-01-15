@@ -9,7 +9,6 @@ interface AuthDialogProps {
   onClose: () => void;
   onSuccess?: () => void;
   onRegisterClick?: () => void;
-  onCarrierRegisterClick?: () => void;
   requiredUserType?: "client" | "carrier";
 }
 
@@ -18,7 +17,6 @@ export default function AuthDialog({
   onClose,
   onSuccess,
   onRegisterClick,
-  onCarrierRegisterClick,
   requiredUserType,
 }: AuthDialogProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -58,26 +56,15 @@ export default function AuthDialog({
               onRegister={onRegisterClick}
               requiredUserType={requiredUserType}
             />
-            <div className="flex flex-col gap-2">
-              {onRegisterClick && (
-                <Button
-                  variant="outline"
-                  onClick={onRegisterClick}
-                  className="w-full"
-                >
-                  Créer un compte client
-                </Button>
-              )}
-              {onCarrierRegisterClick && (
-                <Button
-                  variant="outline"
-                  onClick={onCarrierRegisterClick}
-                  className="w-full"
-                >
-                  Devenir transporteur
-                </Button>
-              )}
-            </div>
+            {onRegisterClick && (
+              <Button
+                variant="outline"
+                onClick={onRegisterClick}
+                className="w-full"
+              >
+                Créer un compte
+              </Button>
+            )}
           </div>
         )}
       </DialogContent>

@@ -48,7 +48,7 @@ export function LoginForm({
           {isLoading ? "Connexion..." : "Se connecter"}
         </Button>
 
-        {(!requiredUserType || requiredUserType === 'client') && !hideRegisterButton && (
+        {!hideRegisterButton && (
           <>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -67,7 +67,7 @@ export function LoginForm({
               onClick={onRegister}
               className="w-full"
             >
-              Créer un compte client
+              Créer un compte
             </Button>
           </>
         )}

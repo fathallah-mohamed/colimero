@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { authenticateUser } from "@/utils/auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UseLoginFormProps {
@@ -34,12 +33,10 @@ export function useLoginForm(props?: UseLoginFormProps) {
           .single();
 
         if (clientError) {
-          console.error("Erreur lors de la vérification du client:", clientError);
           throw new Error("Une erreur est survenue lors de la vérification de votre compte");
         }
 
         if (!clientData?.email_verified) {
-          setError("Veuillez vérifier votre email avant de vous connecter");
           toast({
             variant: "destructive",
             title: "Email non vérifié",
@@ -50,34 +47,58 @@ export function useLoginForm(props?: UseLoginFormProps) {
         }
       }
 
-      const response = await authenticateUser(email, password);
-      
-      if (response.success) {
-        toast({
-          title: "Connexion réussie",
-          description: "Vous êtes maintenant connecté",
-        });
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
 
-        if (onSuccess) {
-          onSuccess();
-          return;
+      if (signInError) {
+        if (signInError.message === "Invalid login credentials") {
+          throw new Error("Email ou mot de passe incorrect");
         }
+        throw signInError;
+      }
 
-        const returnPath = sessionStorage.getItem('returnPath');
-        if (returnPath) {
-          sessionStorage.removeItem('returnPath');
-          navigate(returnPath);
-          return;
-        }
+      if (!signInData.user) {
+        throw new Error("Erreur lors de la connexion");
+      }
 
-        if (redirectTo) {
-          navigate(redirectTo);
-        } else {
-          if (response.redirectTo) {
-            navigate(response.redirectTo);
-          } else {
+      const userType = signInData.user.user_metadata?.user_type;
+
+      if (requiredUserType && userType !== requiredUserType) {
+        await supabase.auth.signOut();
+        throw new Error(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+      }
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
+
+      if (onSuccess) {
+        onSuccess();
+        return;
+      }
+
+      const returnPath = sessionStorage.getItem('returnPath');
+      if (returnPath) {
+        sessionStorage.removeItem('returnPath');
+        navigate(returnPath);
+        return;
+      }
+
+      if (redirectTo) {
+        navigate(redirectTo);
+      } else {
+        switch (userType) {
+          case 'carrier':
+            navigate("/mes-tournees");
+            break;
+          case 'admin':
+            navigate("/admin");
+            break;
+          default:
             navigate("/");
-          }
         }
       }
     } catch (error: any) {
