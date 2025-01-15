@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { AuthError } from "@supabase/supabase-js";
+import { AuthError, AuthApiError } from "@supabase/supabase-js";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -18,6 +18,23 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleAuthError = (error: AuthError) => {
+    console.error("Authentication error:", error);
+    
+    if (error instanceof AuthApiError) {
+      switch (error.message) {
+        case "Invalid login credentials":
+          return "Email ou mot de passe incorrect";
+        case "Email not confirmed":
+          setShowVerificationDialog(true);
+          return "Veuillez vérifier votre email pour activer votre compte";
+        default:
+          return error.message;
+      }
+    }
+    return "Une erreur inattendue s'est produite";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,15 +52,11 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
       });
 
       if (signInError) {
-        console.error("Login error:", signInError);
-        
-        if (signInError.message === "Invalid login credentials") {
-          setError("Email ou mot de passe incorrect");
-          setShowErrorDialog(true);
-        } else if (signInError.message === "Email not confirmed") {
-          setShowVerificationDialog(true);
-          
-          // Send a new verification email
+        const errorMessage = handleAuthError(signInError);
+        setError(errorMessage);
+        setShowErrorDialog(true);
+
+        if (signInError.message === "Email not confirmed") {
           const { error: resendError } = await supabase.auth.resend({
             type: 'signup',
             email: email.trim(),
@@ -51,10 +64,17 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
           
           if (resendError) {
             console.error("Error sending verification email:", resendError);
+            toast({
+              variant: "destructive",
+              title: "Erreur",
+              description: "Impossible d'envoyer l'email de vérification",
+            });
+          } else {
+            toast({
+              title: "Email envoyé",
+              description: "Un nouvel email de vérification vous a été envoyé",
+            });
           }
-        } else {
-          setError("Une erreur est survenue lors de la connexion");
-          setShowErrorDialog(true);
         }
         
         setPassword("");
@@ -75,7 +95,6 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
         return;
       }
 
-      // Check if email is verified for clients
       if (userType === 'client') {
         const { data: clientData } = await supabase
           .from('clients')
@@ -85,7 +104,6 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
 
         if (clientData && !clientData.email_verified) {
           setShowVerificationDialog(true);
-          // Send a new verification email
           const { error: resendError } = await supabase.auth.resend({
             type: 'signup',
             email: email.trim(),
@@ -93,6 +111,16 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
           
           if (resendError) {
             console.error("Error sending verification email:", resendError);
+            toast({
+              variant: "destructive",
+              title: "Erreur",
+              description: "Impossible d'envoyer l'email de vérification",
+            });
+          } else {
+            toast({
+              title: "Email envoyé",
+              description: "Un nouvel email de vérification vous a été envoyé",
+            });
           }
           
           await supabase.auth.signOut();
