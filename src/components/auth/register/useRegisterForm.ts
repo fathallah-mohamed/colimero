@@ -55,7 +55,7 @@ export function useRegisterForm(onLogin: () => void) {
         if (signUpError.message.includes("User already registered")) {
           toast({
             variant: "destructive",
-            title: "Erreur d'inscription",
+            title: "Email déjà utilisé",
             description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
           });
           onLogin();
