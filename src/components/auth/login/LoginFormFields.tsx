@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ErrorDialog } from "@/components/ui/error-dialog";
 
 interface LoginFormFieldsProps {
   email: string;
@@ -64,14 +64,11 @@ export function LoginFormFields({
       )}
 
       {error && (
-        <Dialog open={showErrorDialog} onOpenChange={() => onErrorDialogClose?.()}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Erreur</DialogTitle>
-              <DialogDescription>{error}</DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
+        <ErrorDialog
+          isOpen={showErrorDialog}
+          onClose={() => onErrorDialogClose?.()}
+          description={error}
+        />
       )}
     </div>
   );
