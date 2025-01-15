@@ -55,6 +55,7 @@ export default function AuthDialog({
             <LoginForm
               onSuccess={onSuccess}
               onForgotPassword={() => setShowForgotPassword(true)}
+              onRegister={onRegisterClick}
               requiredUserType={requiredUserType}
             />
             <div className="flex flex-col gap-2">
