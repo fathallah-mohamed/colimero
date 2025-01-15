@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./register/RegisterFormFields";
 import { useRegisterForm } from "./register/useRegisterForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface RegisterFormProps {
   onLogin: () => void;
 }
 
 export function RegisterForm({ onLogin }: RegisterFormProps) {
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const {
     isLoading,
     firstName,
@@ -23,7 +26,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     setConfirmPassword,
     handleSubmit,
     areRequiredFieldsFilled,
-  } = useRegisterForm(onLogin);
+  } = useRegisterForm(() => setShowSuccessDialog(true));
 
   return (
     <div className="flex flex-col h-full max-h-[80vh]">
@@ -72,6 +75,28 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
           </div>
         </form>
       </div>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Compte créé avec succès</DialogTitle>
+            <DialogDescription>
+              Un email d'activation a été envoyé à votre adresse email. Veuillez cliquer sur le lien dans l'email pour activer votre compte.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              onClick={() => {
+                setShowSuccessDialog(false);
+                onLogin();
+              }}
+              className="w-full"
+            >
+              J'ai compris
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

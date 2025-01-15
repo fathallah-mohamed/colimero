@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthError } from "@supabase/supabase-js";
 
-export function useRegisterForm(onLogin: () => void) {
+export function useRegisterForm(onSuccess: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -37,7 +37,6 @@ export function useRegisterForm(onLogin: () => void) {
     setIsLoading(true);
 
     try {
-      // Create account with auto sign-in disabled
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
@@ -61,7 +60,7 @@ export function useRegisterForm(onLogin: () => void) {
             title: "Email déjà utilisé",
             description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
           });
-          onLogin();
+          onSuccess();
           return;
         }
 
@@ -72,10 +71,8 @@ export function useRegisterForm(onLogin: () => void) {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      // Immediately sign out the user after account creation
       await supabase.auth.signOut();
 
-      // Send activation email via Edge function
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { email: email.trim() }
       });
@@ -85,13 +82,7 @@ export function useRegisterForm(onLogin: () => void) {
         throw new Error("Erreur lors de l'envoi de l'email d'activation");
       }
 
-      toast({
-        title: "Compte créé avec succès",
-        description: "Un email d'activation a été envoyé à votre adresse email. Veuillez cliquer sur le lien dans l'email pour activer votre compte.",
-      });
-
-      // Redirect to login page
-      onLogin();
+      onSuccess();
     } catch (error: unknown) {
       console.error("Complete error:", error);
       let errorMessage = "Une erreur inattendue s'est produite. Veuillez réessayer.";
@@ -100,7 +91,7 @@ export function useRegisterForm(onLogin: () => void) {
         switch (error.message) {
           case "User already registered":
             errorMessage = "Un compte existe déjà avec cet email. Veuillez vous connecter.";
-            onLogin();
+            onSuccess();
             break;
           case "Password should be at least 6 characters":
             errorMessage = "Le mot de passe doit contenir au moins 6 caractères.";
