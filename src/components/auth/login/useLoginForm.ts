@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UseLoginFormProps {
@@ -16,13 +15,15 @@ export function useLoginForm(props?: UseLoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setShowErrorDialog(false);
+    setShowVerificationDialog(false);
 
     try {
       // Vérifier d'abord si l'email est vérifié pour les clients
@@ -56,7 +57,9 @@ export function useLoginForm(props?: UseLoginFormProps) {
         console.error("Erreur d'authentification:", signInError);
         
         if (signInError.message === "Invalid login credentials") {
-          throw new Error("Email ou mot de passe incorrect");
+          setError("Email ou mot de passe incorrect");
+          setShowErrorDialog(true);
+          return;
         } else if (signInError.message === "Email not confirmed") {
           setShowVerificationDialog(true);
           return;
@@ -72,7 +75,9 @@ export function useLoginForm(props?: UseLoginFormProps) {
 
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
-        throw new Error(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+        setShowErrorDialog(true);
+        return;
       }
 
       // Vérification supplémentaire après la connexion pour les clients
@@ -126,6 +131,7 @@ export function useLoginForm(props?: UseLoginFormProps) {
     } catch (error: any) {
       console.error("Complete error:", error);
       setError(error.message);
+      setShowErrorDialog(true);
     } finally {
       setIsLoading(false);
     }
@@ -138,8 +144,10 @@ export function useLoginForm(props?: UseLoginFormProps) {
     setPassword,
     isLoading,
     error,
-    handleSubmit,
     showVerificationDialog,
+    showErrorDialog,
     setShowVerificationDialog,
+    setShowErrorDialog,
+    handleSubmit,
   };
 }

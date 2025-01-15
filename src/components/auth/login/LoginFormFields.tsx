@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface LoginFormFieldsProps {
   email: string;
@@ -9,9 +9,11 @@ interface LoginFormFieldsProps {
   isLoading: boolean;
   error: string | null;
   showVerificationDialog?: boolean;
+  showErrorDialog?: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onVerificationDialogClose?: () => void;
+  onErrorDialogClose?: () => void;
 }
 
 export function LoginFormFields({
@@ -20,9 +22,11 @@ export function LoginFormFields({
   isLoading,
   error,
   showVerificationDialog = false,
+  showErrorDialog = false,
   onEmailChange,
   onPasswordChange,
   onVerificationDialogClose,
+  onErrorDialogClose,
 }: LoginFormFieldsProps) {
   return (
     <div className="space-y-4">
@@ -51,18 +55,23 @@ export function LoginFormFields({
         />
       </div>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
       {showVerificationDialog && (
         <EmailVerificationDialog
           isOpen={showVerificationDialog}
           onClose={() => onVerificationDialogClose?.()}
           email={email}
         />
+      )}
+
+      {error && (
+        <Dialog open={showErrorDialog} onOpenChange={() => onErrorDialogClose?.()}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Erreur</DialogTitle>
+              <DialogDescription>{error}</DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
