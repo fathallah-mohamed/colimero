@@ -9,7 +9,7 @@ export async function registerClient(formData: RegisterFormState) {
   });
 
   try {
-    // 1. Create auth user
+    // 1. Create auth user with proper metadata
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
@@ -43,25 +43,31 @@ export async function registerClient(formData: RegisterFormState) {
     // 2. Upload ID document if provided
     if (formData.idDocument) {
       console.log("Uploading ID document...");
-      await uploadIdDocument(authData.user.id, formData.idDocument);
+      const fileExt = formData.idDocument.name.split('.').pop();
+      const fileName = `${authData.user.id}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('id-documents')
+        .upload(fileName, formData.idDocument);
+
+      if (uploadError) throw uploadError;
     }
 
     // 3. Insert client consents
     console.log("Inserting client consents...");
-    await insertClientConsents(authData.user.id, formData.acceptedConsents);
+    const consentsToInsert = formData.acceptedConsents.map(consentId => ({
+      client_id: authData.user.id,
+      consent_type_id: consentId,
+      accepted: true,
+      accepted_at: new Date().toISOString()
+    }));
 
-    // 4. Send activation email
-    console.log("Sending activation email...");
-    const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
-      body: {
-        email: formData.email,
-        first_name: formData.firstName
-      }
-    });
+    if (consentsToInsert.length > 0) {
+      const { error: consentsError } = await supabase
+        .from('client_consents')
+        .upsert(consentsToInsert);
 
-    if (emailError) {
-      console.error("Error sending activation email:", emailError);
-      throw new Error("Erreur lors de l'envoi de l'email d'activation");
+      if (consentsError) throw consentsError;
     }
 
     return { data: authData, error: null };
@@ -69,42 +75,4 @@ export async function registerClient(formData: RegisterFormState) {
     console.error("Registration error:", error);
     return { data: null, error };
   }
-}
-
-async function uploadIdDocument(userId: string, idDocument: File) {
-  const fileExt = idDocument.name.split('.').pop();
-  const fileName = `${userId}-${Date.now()}.${fileExt}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from('id-documents')
-    .upload(fileName, idDocument);
-
-  if (uploadError) throw uploadError;
-
-  const { error: updateError } = await supabase
-    .from('clients')
-    .update({
-      id_document: fileName
-    })
-    .eq('id', userId);
-
-  if (updateError) throw updateError;
-}
-
-async function insertClientConsents(userId: string, acceptedConsents: string[]) {
-  const consentsToUpsert = acceptedConsents.map(consentId => ({
-    client_id: userId,
-    consent_type_id: consentId,
-    accepted: true,
-    accepted_at: new Date().toISOString()
-  }));
-
-  const { error: consentsError } = await supabase
-    .from('client_consents')
-    .upsert(consentsToUpsert, {
-      onConflict: 'client_id,consent_type_id',
-      ignoreDuplicates: false
-    });
-
-  if (consentsError) throw consentsError;
 }
