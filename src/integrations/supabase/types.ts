@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       administrators: {
@@ -959,6 +959,5 @@ export type Database = {
   }
 }
 
-export type { Json } from './tables';
-export type Tables = Database['public']['Tables'];
-export type Enums = Database['public']['Enums'];
+export type Tables = Database['public']['Tables']
+export type Enums = Database['public']['Enums']
