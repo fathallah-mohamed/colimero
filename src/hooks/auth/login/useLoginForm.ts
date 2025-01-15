@@ -27,7 +27,7 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
     setShowErrorDialog(false);
 
     try {
-      console.log("Tentative de connexion avec:", { email, password });
+      console.log("Attempting login with:", { email: email.trim() });
       
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -35,30 +35,29 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
       });
 
       if (signInError) {
-        console.error("Erreur de connexion:", signInError);
-        let errorMessage = "Une erreur est survenue lors de la connexion";
+        console.error("Login error:", signInError);
         
         if (signInError.message === "Invalid login credentials") {
-          errorMessage = "Email ou mot de passe incorrect";
+          setError("Email ou mot de passe incorrect");
           setShowErrorDialog(true);
         } else if (signInError.message === "Email not confirmed") {
           setShowVerificationDialog(true);
-          // Envoyer un nouvel email d'activation
+          
+          // Send a new verification email
           const { error: resendError } = await supabase.auth.resend({
             type: 'signup',
             email: email.trim(),
           });
           
           if (resendError) {
-            console.error("Erreur lors de l'envoi de l'email:", resendError);
+            console.error("Error sending verification email:", resendError);
           }
-          
-          errorMessage = "Veuillez vérifier votre email pour activer votre compte. Un nouvel email d'activation vient d'être envoyé.";
+        } else {
+          setError("Une erreur est survenue lors de la connexion");
+          setShowErrorDialog(true);
         }
-
-        setError(errorMessage);
+        
         setPassword("");
-        setIsLoading(false);
         return;
       }
 
@@ -67,17 +66,16 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
       }
 
       const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
+      console.log("User type:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         setShowErrorDialog(true);
         await supabase.auth.signOut();
-        setIsLoading(false);
         return;
       }
 
-      // Vérifier si l'email est vérifié pour les clients
+      // Check if email is verified for clients
       if (userType === 'client') {
         const { data: clientData } = await supabase
           .from('clients')
@@ -87,19 +85,17 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
 
         if (clientData && !clientData.email_verified) {
           setShowVerificationDialog(true);
-          // Envoyer un nouvel email d'activation
+          // Send a new verification email
           const { error: resendError } = await supabase.auth.resend({
             type: 'signup',
             email: email.trim(),
           });
           
           if (resendError) {
-            console.error("Erreur lors de l'envoi de l'email:", resendError);
+            console.error("Error sending verification email:", resendError);
           }
           
-          setError("Veuillez vérifier votre email pour activer votre compte. Un nouvel email d'activation vient d'être envoyé.");
           await supabase.auth.signOut();
-          setIsLoading(false);
           return;
         }
       }
@@ -130,7 +126,7 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
         }
       }
     } catch (error: any) {
-      console.error("Erreur complète:", error);
+      console.error("Complete error:", error);
       setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
       setPassword("");
