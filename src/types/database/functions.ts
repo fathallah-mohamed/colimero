@@ -51,6 +51,10 @@ export interface DatabaseFunctions {
     };
     Returns: undefined;
   };
+  create_test_tours_for_carriers: {
+    Args: Record<PropertyKey, never>;
+    Returns: undefined;
+  };
   generate_diverse_tours: {
     Args: Record<PropertyKey, never>;
     Returns: undefined;
