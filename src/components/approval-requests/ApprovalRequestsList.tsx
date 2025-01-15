@@ -22,13 +22,7 @@ export function ApprovalRequestsList() {
     handleDeleteRequest 
   } = useApprovalRequests(userType, user?.id);
 
-  console.log('Current user:', user);
-  console.log('User type:', userType);
-  console.log('User ID:', user?.id);
-  console.log('Approval requests:', requests);
-
   if (!user) {
-    console.log('No user found');
     return (
       <div className="bg-white shadow rounded-lg p-6">
         <div className="text-center space-y-4">
@@ -46,19 +40,17 @@ export function ApprovalRequestsList() {
   }
 
   if (loading) {
-    console.log('Loading state');
     return <ProfileLoading />;
   }
 
   if (!requests?.length) {
-    console.log('No requests found');
     return (
       <div className="bg-white shadow rounded-lg p-6">
         <div className="text-center space-y-4">
           <p className="text-gray-500">
             {userType === 'carrier' 
               ? "Vous n'avez pas encore reçu de demandes d'approbation pour vos tournées privées."
-              : "Vous n'avez pas encore fait de demande d'approbation pour une tournée privée."}
+              : "Vous n'avez pas encore fait de demande d'approbation pour une tournée privée. Pour réserver une tournée privée, vous devez d'abord faire une demande d'approbation auprès du transporteur."}
           </p>
           <Button asChild>
             <Link to="/tours" className="inline-flex items-center">
@@ -70,7 +62,6 @@ export function ApprovalRequestsList() {
     );
   }
 
-  console.log('Rendering requests list:', requests.length, 'items');
   return (
     <div className="space-y-4">
       {requests.map((request) => (
