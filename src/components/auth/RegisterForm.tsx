@@ -9,7 +9,30 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ onLogin }: RegisterFormProps) {
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogContent, setDialogContent] = useState<{
+    title: string;
+    description: string;
+  }>({
+    title: "",
+    description: ""
+  });
+
+  const handleSuccess = (type: 'new' | 'existing') => {
+    if (type === 'new') {
+      setDialogContent({
+        title: "Compte créé avec succès",
+        description: "Un email d'activation a été envoyé à votre adresse email. Veuillez cliquer sur le lien dans l'email pour activer votre compte."
+      });
+    } else {
+      setDialogContent({
+        title: "Email déjà utilisé",
+        description: "Un compte existe déjà avec cet email. Veuillez vous connecter."
+      });
+    }
+    setShowDialog(true);
+  };
+
   const {
     isLoading,
     firstName,
@@ -26,7 +49,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     setConfirmPassword,
     handleSubmit,
     areRequiredFieldsFilled,
-  } = useRegisterForm(() => setShowSuccessDialog(true));
+  } = useRegisterForm(handleSuccess);
 
   return (
     <div className="flex flex-col h-full max-h-[80vh]">
@@ -76,18 +99,18 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         </form>
       </div>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Compte créé avec succès</DialogTitle>
+            <DialogTitle>{dialogContent.title}</DialogTitle>
             <DialogDescription>
-              Un email d'activation a été envoyé à votre adresse email. Veuillez cliquer sur le lien dans l'email pour activer votre compte.
+              {dialogContent.description}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button 
               onClick={() => {
-                setShowSuccessDialog(false);
+                setShowDialog(false);
                 onLogin();
               }}
               className="w-full"

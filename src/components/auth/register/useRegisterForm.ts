@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthError } from "@supabase/supabase-js";
 
-export function useRegisterForm(onSuccess: () => void) {
+export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -55,12 +55,7 @@ export function useRegisterForm(onSuccess: () => void) {
         console.error("SignUp error:", signUpError);
         
         if (signUpError.message.includes("User already registered")) {
-          toast({
-            variant: "destructive",
-            title: "Email déjà utilisé",
-            description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
-          });
-          onSuccess();
+          onSuccess('existing');
           return;
         }
 
@@ -82,7 +77,7 @@ export function useRegisterForm(onSuccess: () => void) {
         throw new Error("Erreur lors de l'envoi de l'email d'activation");
       }
 
-      onSuccess();
+      onSuccess('new');
     } catch (error: unknown) {
       console.error("Complete error:", error);
       let errorMessage = "Une erreur inattendue s'est produite. Veuillez réessayer.";
@@ -90,9 +85,8 @@ export function useRegisterForm(onSuccess: () => void) {
       if (error instanceof AuthError) {
         switch (error.message) {
           case "User already registered":
-            errorMessage = "Un compte existe déjà avec cet email. Veuillez vous connecter.";
-            onSuccess();
-            break;
+            onSuccess('existing');
+            return;
           case "Password should be at least 6 characters":
             errorMessage = "Le mot de passe doit contenir au moins 6 caractères.";
             break;
