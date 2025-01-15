@@ -20,7 +20,11 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
   const { toast } = useToast();
 
   const handleAuthError = (error: AuthError) => {
-    console.error("Authentication error:", error);
+    console.error("Authentication error details:", {
+      message: error.message,
+      status: error instanceof AuthApiError ? error.status : null,
+      name: error.name
+    });
     
     if (error instanceof AuthApiError) {
       switch (error.message) {
@@ -29,8 +33,10 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
         case "Email not confirmed":
           setShowVerificationDialog(true);
           return "Veuillez vérifier votre email pour activer votre compte";
+        case "Invalid email or password":
+          return "Email ou mot de passe invalide";
         default:
-          return error.message;
+          return `Erreur d'authentification: ${error.message}`;
       }
     }
     return "Une erreur inattendue s'est produite";
