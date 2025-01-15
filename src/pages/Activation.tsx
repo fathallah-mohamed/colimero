@@ -26,13 +26,9 @@ export default function Activation() {
           return;
         }
 
-        const { data: client, error: fetchError } = await supabase
-          .from("clients")
-          .select("*")
-          .eq("activation_token", token)
-          .single();
+        const { data: { user }, error } = await supabase.auth.getUser();
 
-        if (fetchError || !client) {
+        if (error || !user) {
           toast({
             variant: "destructive",
             title: "Erreur d'activation",
@@ -42,35 +38,12 @@ export default function Activation() {
           return;
         }
 
-        if (client.is_activated) {
-          toast({
-            title: "Compte déjà activé",
-            description: "Votre compte est déjà activé. Vous pouvez vous connecter.",
-          });
-          navigate("/");
-          return;
-        }
-
-        const now = new Date();
-        const expiresAt = new Date(client.activation_expires_at);
-        if (now > expiresAt) {
-          toast({
-            variant: "destructive",
-            title: "Lien expiré",
-            description: "Le lien d'activation a expiré. Veuillez vous réinscrire.",
-          });
-          navigate("/");
-          return;
-        }
-
         const { error: updateError } = await supabase
           .from("clients")
           .update({ 
-            is_activated: true,
-            activation_token: null,
-            activation_expires_at: null
+            email_verified: true
           })
-          .eq("id", client.id);
+          .eq("id", user.id);
 
         if (updateError) {
           throw updateError;

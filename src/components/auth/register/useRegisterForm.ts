@@ -14,7 +14,6 @@ export function useRegisterForm(onLogin: () => void) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submission started");
     
     if (!areRequiredFieldsFilled()) {
       toast({
@@ -51,7 +50,6 @@ export function useRegisterForm(onLogin: () => void) {
           onLogin();
           return;
         }
-
         throw signUpError;
       }
 
@@ -61,7 +59,7 @@ export function useRegisterForm(onLogin: () => void) {
 
       toast({
         title: "Compte créé avec succès",
-        description: "Un email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
+        description: "Vous pouvez maintenant vous connecter avec vos identifiants.",
       });
 
       onLogin();
