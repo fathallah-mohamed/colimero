@@ -37,11 +37,16 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
     try {
       console.log("1. Vérification de l'existence de l'email...");
-      const { data: existingClient } = await supabase
+      const { data: existingClient, error: clientError } = await supabase
         .from('clients')
         .select('id')
         .eq('email', email.trim())
         .maybeSingle();
+
+      if (clientError) {
+        console.error("Erreur lors de la vérification de l'email:", clientError);
+        throw clientError;
+      }
 
       if (existingClient) {
         console.log("Email déjà utilisé");
@@ -70,11 +75,12 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       }
 
       if (!signUpData.user?.id) {
+        console.error("Aucun ID utilisateur reçu");
         throw new Error("Aucun ID utilisateur reçu");
       }
 
       console.log("3. Création du profil client...");
-      const { error: clientError } = await supabase
+      const { error: insertError } = await supabase
         .from('clients')
         .insert([
           {
@@ -87,9 +93,9 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
           }
         ]);
 
-      if (clientError) {
-        console.error("Erreur lors de la création du profil client:", clientError);
-        throw clientError;
+      if (insertError) {
+        console.error("Erreur lors de la création du profil client:", insertError);
+        throw insertError;
       }
 
       console.log("4. Envoi de l'email d'activation...");
