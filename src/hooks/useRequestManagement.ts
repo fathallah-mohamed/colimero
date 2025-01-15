@@ -1,8 +1,8 @@
-import { useToast } from "@/hooks/use-toast";
+import { useModalDialog } from "@/hooks/use-modal-dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useRequestManagement() {
-  const { toast } = useToast();
+  const { showDialog } = useModalDialog();
 
   const handleCancelRequest = async (requestId: string) => {
     try {
@@ -16,18 +16,19 @@ export function useRequestManagement() {
 
       if (error) throw error;
 
-      toast({
+      showDialog({
         title: "Succès",
         description: "La demande a été annulée avec succès",
+        variant: "default"
       });
 
       return { success: true };
     } catch (error: any) {
       console.error('Error cancelling request:', error);
-      toast({
-        variant: "destructive",
+      showDialog({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'annulation de la demande",
+        variant: "destructive"
       });
       return { success: false, error };
     }
@@ -44,10 +45,10 @@ export function useRequestManagement() {
       if (checkError) throw checkError;
 
       if (request?.status !== 'cancelled') {
-        toast({
-          variant: "destructive",
+        showDialog({
           title: "Erreur",
           description: "Seules les demandes annulées peuvent être supprimées",
+          variant: "destructive"
         });
         return { success: false };
       }
@@ -59,18 +60,19 @@ export function useRequestManagement() {
 
       if (error) throw error;
 
-      toast({
+      showDialog({
         title: "Succès",
         description: "La demande a été supprimée avec succès",
+        variant: "default"
       });
 
       return { success: true };
     } catch (error: any) {
       console.error('Error deleting request:', error);
-      toast({
-        variant: "destructive",
+      showDialog({
         title: "Erreur",
         description: "Une erreur est survenue lors de la suppression de la demande",
+        variant: "destructive"
       });
       return { success: false, error };
     }
