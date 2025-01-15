@@ -16,32 +16,37 @@ export default function Activation() {
     const activateAccount = async () => {
       if (!token) {
         setStatus('error');
+        toast({
+          variant: "destructive",
+          title: "Erreur d'activation",
+          description: "Token d'activation manquant",
+        });
         return;
       }
 
       try {
-        console.log('Attempting to activate account with token:', token);
+        console.log('Tentative d\'activation avec le token:', token);
 
-        // Vérifier le token et activer le compte
+        // Récupérer le client avec le token d'activation
         const { data: client, error: clientError } = await supabase
           .from('clients')
           .select('*')
           .eq('activation_token', token)
-          .maybeSingle();
+          .single();
 
         if (clientError || !client) {
-          console.error('Error fetching client:', clientError);
-          throw new Error('Token invalide');
+          console.error('Erreur lors de la récupération du client:', clientError);
+          throw new Error('Token invalide ou compte déjà activé');
         }
 
-        console.log('Found client:', client);
+        console.log('Client trouvé:', client);
 
         // Vérifier si le token n'a pas expiré
         if (new Date(client.activation_expires_at) < new Date()) {
           throw new Error('Le lien d\'activation a expiré');
         }
 
-        // Mettre à jour le statut de vérification
+        // Mettre à jour le statut de vérification du client
         const { error: updateError } = await supabase
           .from('clients')
           .update({
@@ -49,25 +54,24 @@ export default function Activation() {
             activation_token: null,
             activation_expires_at: null
           })
-          .eq('id', client.id)
-          .select();
+          .eq('id', client.id);
 
         if (updateError) {
-          console.error('Error updating client:', updateError);
+          console.error('Erreur lors de la mise à jour du client:', updateError);
           throw updateError;
         }
 
-        // Mettre à jour les métadonnées de l'utilisateur
+        // Mettre à jour les métadonnées de l'utilisateur dans auth.users
         const { error: authUpdateError } = await supabase.auth.updateUser({
           data: { email_verified: true }
         });
 
         if (authUpdateError) {
-          console.error('Error updating auth user:', authUpdateError);
+          console.error('Erreur lors de la mise à jour des métadonnées:', authUpdateError);
           throw authUpdateError;
         }
 
-        console.log('Account activated successfully');
+        console.log('Compte activé avec succès');
         setStatus('success');
         toast({
           title: "Compte activé",
@@ -80,7 +84,7 @@ export default function Activation() {
         }, 3000);
 
       } catch (error: any) {
-        console.error('Activation error:', error);
+        console.error('Erreur d\'activation:', error);
         setStatus('error');
         toast({
           variant: "destructive",
@@ -94,8 +98,8 @@ export default function Activation() {
   }, [token, navigate, toast]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full mx-auto p-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
         <div className="bg-white rounded-lg shadow-lg p-6 text-center">
           {status === 'loading' && (
             <div className="space-y-4">
@@ -109,10 +113,12 @@ export default function Activation() {
             <div className="space-y-4">
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
               <h2 className="text-xl font-semibold text-green-600">Compte activé !</h2>
-              <p className="text-gray-500">Votre compte a été activé avec succès. Vous allez être redirigé...</p>
+              <p className="text-gray-500">
+                Votre compte a été activé avec succès. Vous allez être redirigé vers la page d'accueil...
+              </p>
               <Button 
                 onClick={() => navigate('/')}
-                className="mt-4"
+                className="w-full"
               >
                 Retourner à l'accueil
               </Button>
@@ -129,7 +135,7 @@ export default function Activation() {
               <Button 
                 onClick={() => navigate('/')}
                 variant="outline"
-                className="mt-4"
+                className="w-full"
               >
                 Retourner à l'accueil
               </Button>
