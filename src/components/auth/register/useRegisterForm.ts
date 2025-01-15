@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { registerClient } from "./useClientRegistration";
 import { RegisterFormState } from "./types";
+import { useConsentValidation } from "./useConsentValidation";
 
 export function useRegisterForm(onLogin: () => void) {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +17,8 @@ export function useRegisterForm(onLogin: () => void) {
   const [idDocument, setIdDocument] = useState<File | null>(null);
   const [acceptedConsents, setAcceptedConsents] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const { requiredConsentsCount, allRequiredConsentsAccepted } = useConsentValidation(acceptedConsents);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,6 +134,8 @@ export function useRegisterForm(onLogin: () => void) {
     acceptedConsents,
     handleConsentChange,
     handleSubmit,
+    requiredConsentsCount,
+    allRequiredConsentsAccepted,
     areRequiredFieldsFilled,
   };
 }
