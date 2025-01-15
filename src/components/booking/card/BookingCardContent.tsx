@@ -29,6 +29,7 @@ export function BookingCardContent({
 }: BookingCardContentProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [selectedPoint, setSelectedPoint] = useState("");
   const { toast } = useToast();
 
   const handleEdit = () => {
@@ -49,6 +50,10 @@ export function BookingCardContent({
     await onUpdate();
   };
 
+  const handlePointSelect = (point: string) => {
+    setSelectedPoint(point);
+  };
+
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
       <div className="space-y-4">
@@ -66,7 +71,11 @@ export function BookingCardContent({
 
         {booking.tours?.route && (
           <div className="mt-4 border-t pt-4">
-            <TourRoute tour={booking.tours} />
+            <TourRoute 
+              stops={booking.tours.route} 
+              selectedPoint={selectedPoint}
+              onPointSelect={handlePointSelect}
+            />
           </div>
         )}
 

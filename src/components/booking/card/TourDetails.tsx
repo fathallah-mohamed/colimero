@@ -3,13 +3,20 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
+import { useState } from "react";
 
 interface TourDetailsProps {
   tour: any;
 }
 
 export function TourDetails({ tour }: TourDetailsProps) {
+  const [selectedPoint, setSelectedPoint] = useState("");
+
   if (!tour) return null;
+
+  const handlePointSelect = (point: string) => {
+    setSelectedPoint(point);
+  };
 
   return (
     <div className="space-y-4">
@@ -58,7 +65,11 @@ export function TourDetails({ tour }: TourDetailsProps) {
 
       {tour.route && (
         <div className="pt-2">
-          <TourRoute tour={tour} />
+          <TourRoute 
+            stops={tour.route}
+            selectedPoint={selectedPoint}
+            onPointSelect={handlePointSelect}
+          />
         </div>
       )}
     </div>
