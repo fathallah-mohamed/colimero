@@ -94,6 +94,13 @@ export type Database = {
             foreignKeyName: "fk_approval_requests_clients"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "client_consents"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "fk_approval_requests_clients"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -834,7 +841,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      client_consents: {
+        Row: {
+          accepted: boolean | null
+          accepted_at: string | null
+          client_id: string | null
+          consent_type_id: string | null
+          email: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_consents_consent_type_id_fkey"
+            columns: ["consent_type_id"]
+            isOneToOne: false
+            referencedRelation: "consent_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       cancel_booking_and_update_capacity: {

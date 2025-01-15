@@ -1,5 +1,3 @@
-import { Json } from '../tables';
-
 export interface AuthFunctions {
   sync_user_verification: {
     Args: {

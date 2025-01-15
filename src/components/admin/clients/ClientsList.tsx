@@ -12,7 +12,7 @@ export function ClientsList() {
         .from('clients')
         .select(`
           *,
-          client_consents (
+          user_consents (
             consent_type_id,
             accepted,
             accepted_at
