@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { UserMenuItems } from "./UserMenuItems";
 
 export interface AccountMenuProps {
   user: User;
@@ -22,26 +23,8 @@ export default function AccountMenu({ user, userType, handleLogout }: AccountMen
           {user.user_metadata.first_name || user.email}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem asChild>
-          <Link to="/profile" className="w-full cursor-pointer">
-            Mon profil
-          </Link>
-        </DropdownMenuItem>
-        {userType === 'carrier' && (
-          <DropdownMenuItem asChild>
-            <Link to="/mes-tournees" className="w-full cursor-pointer">
-              Mes tournées
-            </Link>
-          </DropdownMenuItem>
-        )}
-        {userType === 'client' && (
-          <DropdownMenuItem asChild>
-            <Link to="/mes-reservations" className="w-full cursor-pointer">
-              Mes réservations
-            </Link>
-          </DropdownMenuItem>
-        )}
+      <DropdownMenuContent align="end" className="w-56">
+        <UserMenuItems userType={userType} />
         <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
           Se déconnecter
         </DropdownMenuItem>

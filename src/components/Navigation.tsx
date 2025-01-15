@@ -9,6 +9,7 @@ import MobileMenu from "@/components/navigation/MobileMenu";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { ModalDialog } from "@/components/ui/modal-dialog";
 import { useModalDialog } from "@/hooks/use-modal-dialog";
+import { AuthSection } from "./navigation/AuthSection";
 
 export default function Navigation() {
   const navigate = useNavigate();
@@ -81,17 +82,13 @@ export default function Navigation() {
         <div className="container mx-auto flex justify-between items-center py-4">
           <Link to="/" className="text-xl font-bold">Logo</Link>
           <div className="hidden md:flex space-x-4">
-            <Link to="/about" className="text-gray-700 hover:text-gray-900">À propos</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-gray-900">Contact</Link>
-            {session ? (
-              <AccountMenu 
-                user={session.user}
-                userType={userType}
-                handleLogout={handleLogout}
-              />
-            ) : (
-              <Button onClick={() => setShowAuthDialog(true)}>Se connecter</Button>
-            )}
+            <MenuItems />
+            <AuthSection 
+              user={session?.user}
+              userType={userType}
+              handleLogout={handleLogout}
+              setShowAuthDialog={setShowAuthDialog}
+            />
           </div>
           <MobileMenu 
             isOpen={mobileMenuOpen}
