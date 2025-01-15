@@ -49,23 +49,34 @@ export default function Activation() {
             activation_token: null,
             activation_expires_at: null
           })
-          .eq('id', client.id);
+          .eq('id', client.id)
+          .select();
 
         if (updateError) {
           console.error('Error updating client:', updateError);
           throw updateError;
         }
 
+        // Mettre à jour les métadonnées de l'utilisateur
+        const { error: authUpdateError } = await supabase.auth.updateUser({
+          data: { email_verified: true }
+        });
+
+        if (authUpdateError) {
+          console.error('Error updating auth user:', authUpdateError);
+          throw authUpdateError;
+        }
+
         console.log('Account activated successfully');
         setStatus('success');
         toast({
           title: "Compte activé",
-          description: "Votre compte a été activé avec succès",
+          description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
         });
 
         // Rediriger après 3 secondes
         setTimeout(() => {
-          navigate('/envoyer-colis');
+          navigate('/');
         }, 3000);
 
       } catch (error: any) {
@@ -100,7 +111,7 @@ export default function Activation() {
               <h2 className="text-xl font-semibold text-green-600">Compte activé !</h2>
               <p className="text-gray-500">Votre compte a été activé avec succès. Vous allez être redirigé...</p>
               <Button 
-                onClick={() => navigate('/envoyer-colis')}
+                onClick={() => navigate('/')}
                 className="mt-4"
               >
                 Retourner à l'accueil
