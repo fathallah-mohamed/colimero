@@ -31,15 +31,22 @@ export function useLoginForm(props?: UseLoginFormProps) {
           .from('clients')
           .select('email_verified')
           .eq('email', email.trim())
-          .single();
+          .maybeSingle();
 
-        if (clientError) {
+        if (clientError && clientError.code !== 'PGRST116') {
+          console.error('Error fetching client:', clientError);
           throw new Error("Une erreur est survenue lors de la vérification de votre compte");
         }
 
         if (!clientData?.email_verified) {
-          setShowVerificationDialog(true);
+          toast({
+            variant: "destructive",
+            title: "Compte non activé",
+            description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
+          });
           setIsLoading(false);
+          // Déconnexion immédiate si déjà connecté
+          await supabase.auth.signOut();
           return;
         }
       }
@@ -50,8 +57,12 @@ export function useLoginForm(props?: UseLoginFormProps) {
       });
 
       if (signInError) {
+        console.error("Erreur d'authentification:", signInError);
+        
         if (signInError.message === "Invalid login credentials") {
           throw new Error("Email ou mot de passe incorrect");
+        } else if (signInError.message === "Email not confirmed") {
+          throw new Error("Veuillez confirmer votre email avant de vous connecter");
         }
         throw signInError;
       }
@@ -65,6 +76,32 @@ export function useLoginForm(props?: UseLoginFormProps) {
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
         throw new Error(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+      }
+
+      // Vérification supplémentaire après la connexion pour les clients
+      if (userType === 'client') {
+        const { data: client, error: clientError } = await supabase
+          .from('clients')
+          .select('email_verified')
+          .eq('id', signInData.user.id)
+          .single();
+
+        if (clientError) {
+          console.error('Error fetching client after signin:', clientError);
+          await supabase.auth.signOut();
+          throw new Error("Une erreur est survenue lors de la vérification de votre compte");
+        }
+
+        if (!client?.email_verified) {
+          await supabase.auth.signOut();
+          toast({
+            variant: "destructive",
+            title: "Compte non activé",
+            description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
+          });
+          setIsLoading(false);
+          return;
+        }
       }
 
       toast({
@@ -99,7 +136,7 @@ export function useLoginForm(props?: UseLoginFormProps) {
         }
       }
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("Complete error:", error);
       setError(error.message);
       toast({
         variant: "destructive",
