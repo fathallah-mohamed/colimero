@@ -3,7 +3,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useConsentValidation } from "./useConsentValidation";
 import { registerClient } from "./useClientRegistration";
 import { UseRegisterFormReturn } from "./types";
-import { supabase } from "@/integrations/supabase/client";
 
 export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
   const [isLoading, setIsLoading] = useState(false);
@@ -79,41 +78,12 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
         throw new Error("Erreur lors de la création du compte");
       }
 
-      // Send activation email
-      const { data: client } = await supabase
-        .from('clients')
-        .select('activation_token')
-        .eq('id', data.user.id)
-        .single();
+      toast({
+        title: "Compte créé avec succès",
+        description: "Un email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
+      });
 
-      if (client?.activation_token) {
-        const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
-          body: {
-            email: email.trim(),
-            first_name: firstName,
-            activation_token: client.activation_token,
-          },
-        });
-
-        if (emailError) {
-          console.error('Error sending activation email:', emailError);
-          toast({
-            variant: "destructive",
-            title: "Erreur d'envoi d'email",
-            description: "L'email d'activation n'a pas pu être envoyé. Veuillez réessayer.",
-          });
-          return;
-        }
-
-        // Show success message
-        toast({
-          title: "Compte créé avec succès",
-          description: "Un email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception pour activer votre compte.",
-        });
-
-        // Redirect to login
-        onLogin();
-      }
+      onLogin();
     } catch (error: any) {
       console.error("Erreur complète:", error);
       let errorMessage = "Une erreur est survenue lors de l'inscription";

@@ -1,6 +1,11 @@
 import { corsHeaders } from "../_shared/cors.ts";
+import { createClient } from '@supabase/supabase-js';
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
 interface ActivationEmailRequest {
   email: string;
@@ -122,11 +127,14 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to send activation email");
     }
 
+    const data = await res.json();
+    console.log("Email sent successfully:", data);
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in send-activation-email function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
@@ -138,4 +146,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-Deno.serve(handler);
+serve(handler);
