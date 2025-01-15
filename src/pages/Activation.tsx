@@ -13,8 +13,11 @@ export default function Activation() {
   const token = searchParams.get('token');
 
   useEffect(() => {
+    let mounted = true;
+    
     const activateAccount = async () => {
       if (!token) {
+        console.log('No activation token found in URL');
         setStatus('error');
         toast({
           variant: "destructive",
@@ -25,7 +28,7 @@ export default function Activation() {
       }
 
       try {
-        console.log('Tentative d\'activation avec le token:', token);
+        console.log('Starting account activation with token:', token);
 
         // Récupérer le client avec le token d'activation
         const { data: client, error: clientError } = await supabase
@@ -34,15 +37,21 @@ export default function Activation() {
           .eq('activation_token', token)
           .single();
 
-        if (clientError || !client) {
-          console.error('Erreur lors de la récupération du client:', clientError);
+        if (clientError) {
+          console.error('Error fetching client:', clientError);
+          throw new Error(clientError.message);
+        }
+
+        if (!client) {
+          console.error('No client found with token:', token);
           throw new Error('Token invalide ou compte déjà activé');
         }
 
-        console.log('Client trouvé:', client);
+        console.log('Client found:', client);
 
         // Vérifier si le token n'a pas expiré
         if (new Date(client.activation_expires_at) < new Date()) {
+          console.error('Token expired. Expiry:', client.activation_expires_at);
           throw new Error('Le lien d\'activation a expiré');
         }
 
@@ -57,9 +66,11 @@ export default function Activation() {
           .eq('id', client.id);
 
         if (updateError) {
-          console.error('Erreur lors de la mise à jour du client:', updateError);
+          console.error('Error updating client verification status:', updateError);
           throw updateError;
         }
+
+        console.log('Client verification status updated successfully');
 
         // Mettre à jour les métadonnées de l'utilisateur dans auth.users
         const { error: authUpdateError } = await supabase.auth.updateUser({
@@ -67,34 +78,45 @@ export default function Activation() {
         });
 
         if (authUpdateError) {
-          console.error('Erreur lors de la mise à jour des métadonnées:', authUpdateError);
+          console.error('Error updating auth user metadata:', authUpdateError);
           throw authUpdateError;
         }
 
-        console.log('Compte activé avec succès');
-        setStatus('success');
-        toast({
-          title: "Compte activé",
-          description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
-        });
+        console.log('Auth user metadata updated successfully');
 
-        // Rediriger après 3 secondes
-        setTimeout(() => {
-          navigate('/');
-        }, 3000);
+        if (mounted) {
+          setStatus('success');
+          toast({
+            title: "Compte activé",
+            description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
+          });
+
+          // Rediriger après 3 secondes
+          setTimeout(() => {
+            if (mounted) {
+              navigate('/');
+            }
+          }, 3000);
+        }
 
       } catch (error: any) {
-        console.error('Erreur d\'activation:', error);
-        setStatus('error');
-        toast({
-          variant: "destructive",
-          title: "Erreur d'activation",
-          description: error.message || "Une erreur est survenue lors de l'activation",
-        });
+        console.error('Account activation failed:', error);
+        if (mounted) {
+          setStatus('error');
+          toast({
+            variant: "destructive",
+            title: "Erreur d'activation",
+            description: error.message || "Une erreur est survenue lors de l'activation",
+          });
+        }
       }
     };
 
     activateAccount();
+
+    return () => {
+      mounted = false;
+    };
   }, [token, navigate, toast]);
 
   return (
