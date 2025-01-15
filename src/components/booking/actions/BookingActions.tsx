@@ -34,12 +34,17 @@ export function BookingActions({
     try {
       console.log('Changing status to:', newStatus);
 
-      if (newStatus === 'cancelled') {
-        const { error } = await supabase.rpc('cancel_booking_and_update_capacity', {
-          booking_id: bookingId
-        });
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus 
+        })
+        .eq('id', bookingId);
 
-        if (error) throw error;
+      if (error) {
+        console.error('Error updating booking status:', error);
+        throw error;
       }
 
       // Invalider les caches pour forcer le rechargement
@@ -88,7 +93,7 @@ export function BookingActions({
         />
       )}
 
-      {status === "pending" && tourStatus === "Programmée" && (
+      {status === "pending" && tourStatus === "Ramassage en cours" && (
         <>
           <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
           <ActionButton
