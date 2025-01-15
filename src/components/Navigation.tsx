@@ -1,18 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
-import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
-import MenuItems from "@/components/navigation/MenuItems";
-import MobileMenu from "@/components/navigation/MobileMenu";
-import AuthDialog from "@/components/auth/AuthDialog";
-import { RegisterForm } from "@/components/auth/RegisterForm";
-import CarrierSignupForm from "@/components/auth/carrier-signup/CarrierSignupForm";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { AuthSection } from "@/components/navigation/AuthSection";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import MobileMenu from "@/components/navigation/MobileMenu";
+import { useSessionInitializer } from "./navigation/SessionInitializer";
+import { AuthDialogs } from "./navigation/AuthDialogs";
+import { NavigationHeader } from "./navigation/NavigationHeader";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,100 +16,23 @@ export default function Navigation() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
-  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
-  const { toast } = useToast();
 
-  useEffect(() => {
-    let mounted = true;
+  // Initialize session and handle auth state changes
+  useSessionInitializer();
 
-    const initSession = async () => {
-      try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-          return;
-        }
-
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-          if (!mounted) return;
-
-          if (event === 'SIGNED_IN') {
-            // Only check email verification for clients
-            if (newSession?.user?.user_metadata?.user_type === 'client') {
-              const { data: client, error: clientError } = await supabase
-                .from('clients')
-                .select('email_verified')
-                .eq('id', newSession.user.id)
-                .maybeSingle();
-
-              if (clientError && clientError.code !== 'PGRST116') {
-                console.error("Error fetching client:", clientError);
-                return;
-              }
-
-              if (client && !client?.email_verified) {
-                toast({
-                  variant: "destructive",
-                  title: "Compte non activé",
-                  description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
-                });
-                await supabase.auth.signOut();
-                return;
-              }
-            }
-
-            if (sessionStorage.getItem('returnPath')) {
-              const returnPath = sessionStorage.getItem('returnPath');
-              sessionStorage.removeItem('returnPath');
-              navigate(returnPath || '/');
-            }
-          } else if (event === 'SIGNED_OUT') {
-            if (location.pathname.includes('/reserver/')) {
-              navigate('/');
-            }
-          }
-        });
-
-        if (!session) {
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          
-          if (refreshError && refreshError.message !== 'Auth session missing!') {
-            console.error("Session refresh error:", refreshError);
-          } else if (refreshData.session) {
-            console.log('Session refreshed successfully');
-          }
-        }
-
-        return () => {
-          subscription.unsubscribe();
-        };
-      } catch (error: any) {
-        if (error.message !== 'Auth session missing!' && error.code !== 'PGRST116') {
-          console.error("Session initialization error:", error);
-        }
-      }
-    };
-
-    initSession();
-
+  // Handle scroll effect
+  React.useEffect(() => {
     const handleScroll = () => {
-      if (!mounted) return;
       setIsScrolled(window.scrollY > 0);
     };
 
     window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    return () => {
-      mounted = false;
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [location.pathname, navigate, toast]);
-
-  useEffect(() => {
+  // Handle click outside mobile menu
+  React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isOpen &&
@@ -133,7 +49,8 @@ export default function Navigation() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  useEffect(() => {
+  // Store return path for auth redirects
+  React.useEffect(() => {
     if (location.pathname.includes('/reserver/')) {
       sessionStorage.setItem('returnPath', location.pathname);
     }
@@ -145,47 +62,18 @@ export default function Navigation() {
       isScrolled ? "shadow-lg py-2" : "shadow-sm py-4"
     )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center">
-          {/* Logo Section */}
-          <motion.div 
-            className="flex items-center"
-            initial={false}
-            animate={{ scale: isScrolled ? 0.95 : 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Link 
-              to="/" 
-              className="text-2xl lg:text-3xl font-bold text-primary hover:opacity-90 transition-opacity"
-            >
-              Colimero
-            </Link>
-          </motion.div>
-
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
-            <MenuItems />
-          </div>
-
-          {/* Auth Section */}
-          <div className="flex items-center space-x-6 lg:space-x-8">
-            <AuthSection
-              user={user}
-              userType={userType}
-              handleLogout={handleLogout}
-              setShowAuthDialog={setShowAuthDialog}
-            />
-            
-            <MobileMenuButton 
-              ref={mobileButtonRef}
-              isOpen={isOpen}
-              onClick={() => setIsOpen(!isOpen)}
-              className="block lg:hidden"
-            />
-          </div>
-        </div>
+        <NavigationHeader
+          isScrolled={isScrolled}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setShowAuthDialog={setShowAuthDialog}
+          mobileButtonRef={mobileButtonRef}
+        />
       </div>
 
-      {/* Mobile Menu */}
       <div 
         ref={mobileMenuRef}
         className={cn(
@@ -203,37 +91,14 @@ export default function Navigation() {
         />
       </div>
 
-      {/* Dialogs */}
-      <AuthDialog 
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
-        onSuccess={() => setShowAuthDialog(false)}
-        onRegisterClick={() => {
-          setShowAuthDialog(false);
-          setShowRegisterForm(true);
-        }}
-        onCarrierRegisterClick={() => {
-          setShowAuthDialog(false);
-          setShowCarrierSignupForm(true);
-        }}
+      <AuthDialogs
+        showAuthDialog={showAuthDialog}
+        setShowAuthDialog={setShowAuthDialog}
+        showRegisterForm={showRegisterForm}
+        setShowRegisterForm={setShowRegisterForm}
+        showCarrierSignupForm={showCarrierSignupForm}
+        setShowCarrierSignupForm={setShowCarrierSignupForm}
       />
-
-      <Dialog open={showRegisterForm} onOpenChange={setShowRegisterForm}>
-        <DialogContent className="max-w-2xl">
-          <RegisterForm onLogin={() => {
-            setShowRegisterForm(false);
-            setShowAuthDialog(true);
-          }} />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showCarrierSignupForm} onOpenChange={setShowCarrierSignupForm}>
-        <DialogContent className="max-w-2xl">
-          <CarrierSignupForm onSuccess={() => {
-            setShowCarrierSignupForm(false);
-          }} />
-        </DialogContent>
-      </Dialog>
     </nav>
   );
 }
