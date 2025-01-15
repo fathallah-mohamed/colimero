@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useConsentValidation } from "./useConsentValidation";
 import { registerClient } from "./useClientRegistration";
 import { UseRegisterFormReturn } from "./types";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
   const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +77,19 @@ export function useRegisterForm(onLogin: () => void): UseRegisterFormReturn {
 
       if (!data?.user?.id) {
         throw new Error("Erreur lors de la création du compte");
+      }
+
+      // Envoyer l'email d'activation
+      const { error: emailError } = await supabase.functions.invoke("send-activation-email", {
+        body: {
+          email: email.trim(),
+          first_name: firstName.trim(),
+        },
+      });
+
+      if (emailError) {
+        console.error("Erreur lors de l'envoi de l'email d'activation:", emailError);
+        throw new Error("Erreur lors de l'envoi de l'email d'activation");
       }
 
       toast({

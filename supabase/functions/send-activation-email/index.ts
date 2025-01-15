@@ -27,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get client data including activation token
     const { data: client, error: clientError } = await supabase
       .from("clients")
-      .select("activation_token")
+      .select("activation_token, is_activated")
       .eq("email", email)
       .single();
 
@@ -36,7 +36,15 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Impossible de récupérer les informations du client");
     }
 
+    if (client.is_activated) {
+      return new Response(
+        JSON.stringify({ message: "Le compte est déjà activé" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const activationUrl = `${req.headers.get("origin")}/activation?token=${client.activation_token}`;
+    console.log("Activation URL:", activationUrl);
 
     // Send email via Resend
     const res = await fetch("https://api.resend.com/emails", {
@@ -131,10 +139,13 @@ const handler = async (req: Request): Promise<Response> => {
     const data = await res.json();
     console.log("Email sent successfully:", data);
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({ success: true, message: "Email d'activation envoyé" }), 
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
   } catch (error: any) {
     console.error("Error in send-activation-email function:", error);
     return new Response(
