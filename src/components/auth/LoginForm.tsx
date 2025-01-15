@@ -46,9 +46,25 @@ export function LoginForm({
         return;
       }
 
-      // First, check if the user exists
-      console.log("Tentative de connexion avec:", trimmedEmail);
-      
+      // For client users, check if account is activated
+      if (requiredUserType === 'client') {
+        const { data: client } = await supabase
+          .from('clients')
+          .select('is_activated')
+          .eq('email', trimmedEmail)
+          .single();
+
+        if (client && !client.is_activated) {
+          toast({
+            variant: "destructive",
+            title: "Compte non activé",
+            description: "Veuillez activer votre compte via le lien reçu par email avant de vous connecter.",
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // Attempt authentication
       const { data, error } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
@@ -78,17 +94,14 @@ export function LoginForm({
           description: errorMessage,
         });
         setPassword("");
-        setIsLoading(false);
         return;
       }
 
       if (!data.user) {
-        console.error("Aucune donnée utilisateur reçue");
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
       const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur connecté:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
         toast({
@@ -96,7 +109,6 @@ export function LoginForm({
           title: "Accès refusé",
           description: `Cette section est réservée aux ${requiredUserType}s.`,
         });
-        setIsLoading(false);
         return;
       }
 
