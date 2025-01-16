@@ -1,5 +1,5 @@
 import { BookingStatus } from "@/types/booking";
-import { Edit2, XCircle, Package, ThumbsUp } from "lucide-react";
+import { Edit2, RotateCcw, Package, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,7 +55,8 @@ export function BookingActions({
         collected: "ramassée",
         ready_to_deliver: "prête à livrer",
         delivered: "livrée",
-        cancelled: "annulée"
+        cancelled: "annulée",
+        in_transit: "en transit"
       };
 
       toast({
@@ -116,7 +117,7 @@ export function BookingActions({
         <ConfirmDialog
           title="Confirmer l'annulation"
           description="Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée."
-          icon={XCircle}
+          icon={RotateCcw}
           buttonLabel="Annuler"
           buttonColorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
           onConfirm={() => handleStatusChange("cancelled")}

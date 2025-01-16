@@ -14,6 +14,8 @@ export const getStatusBadgeVariant = (status: BookingStatus) => {
       return "secondary";
     case "delivered":
       return "success";
+    case "in_transit":
+      return "info";
     default:
       return "secondary";
   }
@@ -33,6 +35,8 @@ export const getStatusLabel = (status: BookingStatus) => {
       return "Prêt à livrer";
     case "delivered":
       return "Livré";
+    case "in_transit":
+      return "En transit";
     default:
       return status;
   }

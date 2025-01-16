@@ -1,5 +1,40 @@
-export type BookingStatus = "pending" | "confirmed" | "cancelled" | "collected" | "in_transit";
+export type BookingStatus = 
+  | "pending" 
+  | "confirmed" 
+  | "cancelled" 
+  | "collected" 
+  | "ready_to_deliver"
+  | "delivered"
+  | "in_transit";
+
 export type BookingFilterStatus = BookingStatus | "all";
+
+export interface BookingFormState {
+  weight: number;
+  selectedContentTypes: string[];
+  selectedSpecialItems: string[];
+  itemQuantities: Record<string, number>;
+  photos: File[];
+  formData: BookingFormData;
+}
+
+export interface BookingFormData {
+  sender_name: string;
+  sender_phone: string;
+  sender_email?: string;
+  recipient_name: string;
+  recipient_phone: string;
+  recipient_email?: string;
+  recipient_address: string;
+  delivery_city: string;
+  pickup_city?: string;
+  weight?: number;
+  item_type?: string;
+  special_items?: Array<{ name: string; quantity: number }>;
+  content_types?: string[];
+  photos?: File[];
+  package_description?: string;
+}
 
 export interface Booking {
   id: string;
@@ -9,6 +44,7 @@ export interface Booking {
   delivery_city: string;
   tracking_number: string;
   created_at: string;
+  updated_at: string;
   weight: number;
   item_type: string;
   recipient_name: string;
@@ -43,3 +79,9 @@ export interface Booking {
     };
   };
 }
+
+export interface BookingDetailsProps {
+  booking: Booking;
+}
+
+export interface FormData extends BookingFormData {}
