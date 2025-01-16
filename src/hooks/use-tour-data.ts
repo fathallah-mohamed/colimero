@@ -22,16 +22,19 @@ export function useTourData({
 
   const fetchTours = async () => {
     try {
-      console.log('Fetching tours with filters:', { departureCountry, destinationCountry, sortBy, status, carrierOnly });
+      setLoading(true);
       
       // Get the current user's ID first
       const { data: { user } } = await supabase.auth.getUser();
-      if (carrierOnly && !user) {
-        console.log('No authenticated user found');
-        setTours([]);
-        setLoading(false);
-        return;
-      }
+      
+      console.log('Fetching tours with filters:', { 
+        departureCountry, 
+        destinationCountry, 
+        sortBy, 
+        status, 
+        carrierOnly,
+        userId: user?.id 
+      });
 
       let query = supabase
         .from('tours')
@@ -73,6 +76,7 @@ export function useTourData({
         .eq('departure_country', departureCountry)
         .eq('destination_country', destinationCountry);
 
+      // Only apply carrier filter if we're in carrier mode and have a valid user
       if (carrierOnly && user) {
         console.log('Filtering for carrier:', user.id);
         query = query.eq('carrier_id', user.id);
@@ -87,6 +91,7 @@ export function useTourData({
 
       if (error) {
         console.error('Error fetching tours:', error);
+        setTours([]);
         return;
       }
 
