@@ -67,15 +67,25 @@ export function CustomDialog({
             return child;
           }
 
-          // Only add ref to DOM elements or components that can accept refs
+          // Type guard to ensure child.type exists and is of the correct type
+          if (child.type === null) {
+            return child;
+          }
+
+          // Check if the component can accept refs
           const isRefableComponent = 
             typeof child.type === 'string' || 
-            (typeof child.type === 'function' && 'render' in child.type) ||
+            (typeof child.type === 'function' && ('render' in child.type || child.type.prototype?.render)) ||
             (typeof child.type === 'object' && child.type !== null && 'render' in child.type);
 
-          return isRefableComponent
-            ? React.cloneElement(child, { ref: initialFocusRef })
-            : child;
+          if (isRefableComponent) {
+            return React.cloneElement(child, {
+              ...child.props,
+              ref: initialFocusRef
+            });
+          }
+
+          return child;
         })}
       </DialogContent>
     </Dialog>
