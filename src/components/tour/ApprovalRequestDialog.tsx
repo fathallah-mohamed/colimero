@@ -48,6 +48,7 @@ export function ApprovalRequestDialog({
           tour_id: tourId,
           status: 'pending',
           message: message.trim() || null,
+          pickup_city: pickupCity // Add the pickup_city field
         });
 
       if (error) throw error;
