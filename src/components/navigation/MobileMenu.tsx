@@ -36,12 +36,12 @@ export default function MobileMenu({
         "translate-x-0"
       )}
     >
-      <div className="px-4 pt-2 pb-3 space-y-1">
+      <div className="flex flex-col space-y-1 px-4 pt-2 pb-3">
         <MenuItems />
         {user && (
           <>
             {userData && (
-              <div className="px-3 py-2 text-base font-medium text-gray-700">
+              <div className="text-base font-medium text-gray-700 px-3 py-2">
                 {userData.first_name} {userData.last_name}
               </div>
             )}
@@ -49,19 +49,19 @@ export default function MobileMenu({
               <>
                 <Link
                   to="/profile"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                 >
                   Profil Transporteur
                 </Link>
                 <Link
                   to="/mes-tournees"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                 >
                   Mes tournées
                 </Link>
                 <Link
                   to="/demandes-approbation"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                 >
                   Demandes d'approbation
                 </Link>
@@ -69,7 +69,7 @@ export default function MobileMenu({
                   variant="destructive"
                   size="sm"
                   onClick={handleLogout}
-                  className="w-full mt-2 text-white"
+                  className="flex items-center justify-start px-3 py-2 text-base font-medium w-full text-white hover:bg-red-600 rounded-lg"
                 >
                   Déconnexion
                 </Button>
@@ -79,13 +79,13 @@ export default function MobileMenu({
               <>
                 <Link
                   to="/profile"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                 >
                   Profil Client
                 </Link>
                 <Link
                   to="/mes-reservations"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                 >
                   Mes réservations
                 </Link>
@@ -93,7 +93,7 @@ export default function MobileMenu({
                   variant="destructive"
                   size="sm"
                   onClick={handleLogout}
-                  className="w-full mt-2 text-white"
+                  className="flex items-center justify-start px-3 py-2 text-base font-medium w-full text-white hover:bg-red-600 rounded-lg"
                 >
                   Déconnexion
                 </Button>
@@ -103,13 +103,13 @@ export default function MobileMenu({
               <>
                 <Link
                   to="/profile"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                 >
                   Profil Administrateur
                 </Link>
                 <Link
                   to="/admin/dashboard"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                  className="flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
                 >
                   Tableau de bord
                 </Link>
@@ -117,7 +117,7 @@ export default function MobileMenu({
                   variant="destructive"
                   size="sm"
                   onClick={handleLogout}
-                  className="w-full mt-2 text-white"
+                  className="flex items-center justify-start px-3 py-2 text-base font-medium w-full text-white hover:bg-red-600 rounded-lg"
                 >
                   Déconnexion
                 </Button>
@@ -128,12 +128,12 @@ export default function MobileMenu({
       </div>
 
       {!user && (
-        <div className="px-4 py-3 border-t border-gray-200">
+        <div className="px-4 py-3">
           <Button
             variant="outline"
             size="sm"
             onClick={handleLoginClick}
-            className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
+            className="flex items-center justify-start w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white rounded-lg"
           >
             <UserCircle2 className="w-4 h-4 mr-2" />
             Se connecter
