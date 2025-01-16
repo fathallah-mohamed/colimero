@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
-export default function Activation() {
+interface ActivationProps {
+  onShowAuthDialog?: () => void;
+}
+
+export default function Activation({ onShowAuthDialog }: ActivationProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -52,7 +56,12 @@ export default function Activation() {
             title: "Compte déjà activé",
             description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
           });
-          setTimeout(() => mounted && navigate('/connexion'), 3000);
+          setTimeout(() => {
+            if (mounted) {
+              navigate('/');
+              if (onShowAuthDialog) onShowAuthDialog();
+            }
+          }, 2000);
           return;
         }
 
@@ -94,7 +103,13 @@ export default function Activation() {
             title: "Compte activé",
             description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
           });
-          setTimeout(() => mounted && navigate('/connexion'), 3000);
+          // Rediriger vers la page d'accueil et ouvrir la pop-in de connexion après 2 secondes
+          setTimeout(() => {
+            if (mounted) {
+              navigate('/');
+              if (onShowAuthDialog) onShowAuthDialog();
+            }
+          }, 2000);
         }
 
       } catch (error: any) {
@@ -115,7 +130,7 @@ export default function Activation() {
     return () => {
       mounted = false;
     };
-  }, [token, navigate, toast]);
+  }, [token, navigate, toast, onShowAuthDialog]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -134,14 +149,8 @@ export default function Activation() {
               <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
               <h2 className="text-xl font-semibold text-green-600">Compte activé !</h2>
               <p className="text-gray-500">
-                Votre compte a été activé avec succès. Vous allez être redirigé vers la page de connexion...
+                Votre compte a été activé avec succès. Vous allez être redirigé...
               </p>
-              <Button 
-                onClick={() => navigate('/connexion')}
-                className="w-full"
-              >
-                Aller à la page de connexion
-              </Button>
             </div>
           )}
 
@@ -153,11 +162,11 @@ export default function Activation() {
                 Le lien d'activation est invalide ou a expiré. Veuillez réessayer ou contacter le support.
               </p>
               <Button 
-                onClick={() => navigate('/connexion')}
+                onClick={() => navigate('/')}
                 variant="outline"
                 className="w-full"
               >
-                Retourner à la page de connexion
+                Retourner à la page d'accueil
               </Button>
             </div>
           )}
