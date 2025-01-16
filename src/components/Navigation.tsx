@@ -7,9 +7,13 @@ import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { AuthDialogs } from "./navigation/AuthDialogs";
 import { NavigationHeader } from "./navigation/NavigationHeader";
 
-export default function Navigation() {
+interface NavigationProps {
+  showAuthDialog?: boolean;
+  setShowAuthDialog?: (show: boolean) => void;
+}
+
+export default function Navigation({ showAuthDialog: externalShowAuthDialog, setShowAuthDialog: externalSetShowAuthDialog }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showRegisterForm, setShowRegisterForm] = useState(false);
   const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
@@ -17,6 +21,11 @@ export default function Navigation() {
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Use internal state if no external state is provided
+  const [internalShowAuthDialog, setInternalShowAuthDialog] = useState(false);
+  const showAuthDialogValue = externalShowAuthDialog ?? internalShowAuthDialog;
+  const setShowAuthDialogValue = externalSetShowAuthDialog ?? setInternalShowAuthDialog;
 
   // Initialize session and handle auth state changes
   useSessionInitializer();
@@ -69,7 +78,7 @@ export default function Navigation() {
           user={user}
           userType={userType}
           handleLogout={handleLogout}
-          setShowAuthDialog={setShowAuthDialog}
+          setShowAuthDialog={setShowAuthDialogValue}
           mobileButtonRef={mobileButtonRef}
         />
       </div>
@@ -87,13 +96,13 @@ export default function Navigation() {
           userType={userType}
           handleLogout={handleLogout}
           setIsOpen={setIsOpen}
-          setShowAuthDialog={setShowAuthDialog}
+          setShowAuthDialog={setShowAuthDialogValue}
         />
       </div>
 
       <AuthDialogs
-        showAuthDialog={showAuthDialog}
-        setShowAuthDialog={setShowAuthDialog}
+        showAuthDialog={showAuthDialogValue}
+        setShowAuthDialog={setShowAuthDialogValue}
         showRegisterForm={showRegisterForm}
         setShowRegisterForm={setShowRegisterForm}
         showCarrierSignupForm={showCarrierSignupForm}
