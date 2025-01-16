@@ -11,7 +11,6 @@ interface NavigationHeaderProps {
   user: any;
   userType: string | null;
   handleLogout: () => void;
-  setShowAuthDialog: (show: boolean) => void;
   mobileButtonRef: React.RefObject<HTMLButtonElement>;
 }
 
@@ -22,7 +21,6 @@ export function NavigationHeader({
   user,
   userType,
   handleLogout,
-  setShowAuthDialog,
   mobileButtonRef,
 }: NavigationHeaderProps) {
   const navigate = useNavigate();

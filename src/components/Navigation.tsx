@@ -4,7 +4,6 @@ import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
 import MobileMenu from "@/components/navigation/MobileMenu";
 import { useSessionInitializer } from "./navigation/SessionInitializer";
-import { AuthDialogs } from "./navigation/AuthDialogs";
 import { NavigationHeader } from "./navigation/NavigationHeader";
 
 interface NavigationProps {
@@ -14,18 +13,11 @@ interface NavigationProps {
 
 export default function Navigation({ showAuthDialog: externalShowAuthDialog, setShowAuthDialog: externalSetShowAuthDialog }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [showRegisterForm, setShowRegisterForm] = useState(false);
-  const [showCarrierSignupForm, setShowCarrierSignupForm] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  
-  // Use internal state if no external state is provided
-  const [internalShowAuthDialog, setInternalShowAuthDialog] = useState(false);
-  const showAuthDialogValue = externalShowAuthDialog ?? internalShowAuthDialog;
-  const setShowAuthDialogValue = externalSetShowAuthDialog ?? setInternalShowAuthDialog;
 
   // Initialize session and handle auth state changes
   useSessionInitializer();
@@ -78,7 +70,6 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           user={user}
           userType={userType}
           handleLogout={handleLogout}
-          setShowAuthDialog={setShowAuthDialogValue}
           mobileButtonRef={mobileButtonRef}
         />
       </div>
@@ -96,18 +87,8 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           userType={userType}
           handleLogout={handleLogout}
           setIsOpen={setIsOpen}
-          setShowAuthDialog={setShowAuthDialogValue}
         />
       </div>
-
-      <AuthDialogs
-        showAuthDialog={showAuthDialogValue}
-        setShowAuthDialog={setShowAuthDialogValue}
-        showRegisterForm={showRegisterForm}
-        setShowRegisterForm={setShowRegisterForm}
-        showCarrierSignupForm={showCarrierSignupForm}
-        setShowCarrierSignupForm={setShowCarrierSignupForm}
-      />
     </nav>
   );
 }
