@@ -15,10 +15,27 @@ export function useNavigation() {
 
     const initializeAuth = async () => {
       try {
+        // First try to get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error("Session error:", sessionError);
+          // If there's a session error, try to refresh
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
+          if (refreshError) {
+            console.error("Session refresh error:", refreshError);
+            if (mounted) {
+              setUser(null);
+              setUserType(null);
+            }
+            return;
+          }
+          
+          if (mounted && refreshData.session) {
+            setUser(refreshData.session.user);
+            setUserType(refreshData.session.user.user_metadata?.user_type ?? null);
+          }
           return;
         }
 
@@ -33,7 +50,7 @@ export function useNavigation() {
           if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             setUser(session?.user ?? null);
             setUserType(session?.user?.user_metadata?.user_type ?? null);
-          } else if (event === 'SIGNED_OUT') {
+          } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
             setUser(null);
             setUserType(null);
             navigate('/');
@@ -45,6 +62,10 @@ export function useNavigation() {
         };
       } catch (error) {
         console.error("Auth initialization error:", error);
+        if (mounted) {
+          setUser(null);
+          setUserType(null);
+        }
       }
     };
 
