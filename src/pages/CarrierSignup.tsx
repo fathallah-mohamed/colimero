@@ -8,17 +8,16 @@ export default function CarrierSignup() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-light/20 to-white">
       <Navigation />
-      <div className="bg-gradient-to-r from-primary to-primary-light py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center">
+      <div className="max-w-4xl mx-auto px-4 pb-12 pt-8">
+        <div className="bg-[#8B5CF6] p-8 rounded-lg shadow-lg text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            Devenez transporteur partenaire
+            Rejoignez notre réseau de transporteurs !
           </h1>
-          <p className="text-lg text-white/90 mb-8">
-            Rejoignez notre réseau de transporteurs et développez votre activité en accédant à des tournées optimisées
+          <p className="text-lg text-white/90">
+            Inscrivez-vous dès aujourd'hui pour accéder à des tournées optimisées et développer votre activité. 
+            Remplissez les informations ci-dessous, et notre équipe examinera votre demande rapidement.
           </p>
         </div>
-      </div>
-      <div className="max-w-4xl mx-auto -mt-8 px-4 pb-12">
         <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
           <CarrierSignupForm onSuccess={() => navigate("/")} />
         </div>
