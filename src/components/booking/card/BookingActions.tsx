@@ -129,6 +129,7 @@ export function BookingActions({
             <StatusActionButton
               icon={XCircle}
               label="Annuler"
+              onClick={() => {}} // Add empty onClick handler to satisfy TypeScript
               colorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
             />
           </AlertDialogTrigger>
