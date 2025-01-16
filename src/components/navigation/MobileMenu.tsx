@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import MenuItems from "./MenuItems";
 import { Button } from "../ui/button";
 import { UserCircle2 } from "lucide-react";
