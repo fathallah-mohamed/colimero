@@ -18,7 +18,7 @@ export function TourHeader() {
           </p>
         </div>
         <Button 
-          onClick={() => navigate('/planifier-une-tournee')}
+          onClick={() => navigate('/transporteur/tournees/creer')}
           className="w-full md:w-auto"
           size="lg"
         >
