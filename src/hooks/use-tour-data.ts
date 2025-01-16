@@ -24,6 +24,15 @@ export function useTourData({
     try {
       console.log('Fetching tours with filters:', { departureCountry, destinationCountry, sortBy, status, carrierOnly });
       
+      // Get the current user's ID first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (carrierOnly && !user) {
+        console.log('No authenticated user found');
+        setTours([]);
+        setLoading(false);
+        return;
+      }
+
       let query = supabase
         .from('tours')
         .select(`
@@ -64,11 +73,9 @@ export function useTourData({
         .eq('departure_country', departureCountry)
         .eq('destination_country', destinationCountry);
 
-      if (carrierOnly) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          query = query.eq('carrier_id', user.id);
-        }
+      if (carrierOnly && user) {
+        console.log('Filtering for carrier:', user.id);
+        query = query.eq('carrier_id', user.id);
       }
 
       if (status !== 'all') {
