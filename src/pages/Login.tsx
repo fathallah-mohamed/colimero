@@ -10,7 +10,7 @@ export default function Login() {
   };
 
   const handleRegister = () => {
-    navigate('/inscription');
+    navigate('/creer-compte');
   };
 
   const handleCarrierRegister = () => {

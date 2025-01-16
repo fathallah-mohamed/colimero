@@ -37,7 +37,7 @@ export function LoginForm({
   } = useLoginForm({ onSuccess, requiredUserType });
 
   const handleClientRegister = () => {
-    navigate("/inscription");
+    navigate("/creer-compte");
   };
 
   const handleCarrierRegister = () => {
