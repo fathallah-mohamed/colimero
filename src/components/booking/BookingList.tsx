@@ -57,7 +57,7 @@ interface BookingWithRelations {
 }
 
 export function BookingList() {
-  const { data: bookings, isLoading, refetch } = useQuery({
+  const { data: bookings, isLoading, error } = useQuery({
     queryKey: ["bookings"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -86,18 +86,6 @@ export function BookingList() {
               last_name,
               email
             )
-          ),
-          sender:clients!bookings_user_id_fkey (
-            id,
-            email,
-            first_name,
-            last_name
-          ),
-          recipient:clients!bookings_recipient_id_fkey (
-            id,
-            email,
-            first_name,
-            last_name
           )
         `)
         .eq('user_id', user.id)
@@ -112,8 +100,6 @@ export function BookingList() {
       
       return (data as unknown as BookingWithRelations[])?.map(booking => ({
         ...booking,
-        sender_email: booking.sender?.email,
-        recipient_email: booking.recipient?.email,
         special_items: Array.isArray(booking.special_items) 
           ? booking.special_items.map(item => {
               if (typeof item === 'string') return { name: item, quantity: 1 };
@@ -147,21 +133,29 @@ export function BookingList() {
         console.error("Error updating booking status:", error);
         throw error;
       }
-      
-      await refetch();
     } catch (err) {
       console.error("Error updating booking status:", err);
     }
-  };
-
-  const handleUpdate = async (): Promise<void> => {
-    await refetch();
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white shadow rounded-lg p-6 text-center">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          Erreur lors du chargement des réservations
+        </h3>
+        <p className="text-gray-500">
+          Une erreur est survenue lors du chargement de vos réservations. Veuillez réessayer.
+        </p>
       </div>
     );
   }
@@ -188,7 +182,7 @@ export function BookingList() {
           booking={booking} 
           isCollecting={true}
           onStatusChange={handleStatusChange}
-          onUpdate={handleUpdate}
+          onUpdate={async () => {}}
           isEven={false}
         />
       ))}
