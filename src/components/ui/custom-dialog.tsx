@@ -2,7 +2,6 @@ import * as React from "react";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface CustomDialogProps {
@@ -22,7 +21,7 @@ export function CustomDialog({
   showCloseConfirmation = false,
   title,
 }: CustomDialogProps) {
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const firstInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -69,8 +68,10 @@ export function CustomDialog({
             </DialogClose>
           </div>
           {React.Children.map(children, (child) => {
-            if (React.isValidElement(child)) {
-              return React.cloneElement(child, { ref: firstInputRef });
+            if (React.isValidElement(child) && typeof child.type !== 'string') {
+              return React.cloneElement(child, {
+                ref: firstInputRef
+              });
             }
             return child;
           })}
