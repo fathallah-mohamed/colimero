@@ -13,7 +13,6 @@ import { TourTimelineDisplay } from "./shared/TourTimelineDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tour, TourStatus } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
-import { TourEditDialog } from "./TourEditDialog";
 
 interface TourCardProps {
   tour: Tour;
@@ -30,7 +29,6 @@ export function TourCard({
 }: TourCardProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showBookings, setShowBookings] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
   const { toast } = useToast();
 
   const handleDownloadPDF = async () => {
@@ -83,17 +81,6 @@ export function TourCard({
     }
   };
 
-  const handleEditComplete = async () => {
-    setShowEditDialog(false);
-    if (onUpdate) {
-      await onUpdate();
-    }
-    toast({
-      title: "Succès",
-      description: "La tournée a été mise à jour",
-    });
-  };
-
   const hasBookings = tour.bookings && tour.bookings.length > 0;
 
   return (
@@ -118,32 +105,22 @@ export function TourCard({
           </div>
         </div>
         
-        <div className="flex gap-2">
-          {hasBookings && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDownloadPDF}
-              disabled={isGeneratingPDF}
-              className="flex items-center gap-2"
-            >
-              <FileDown className="h-4 w-4" />
-              {isGeneratingPDF ? "Génération..." : "Télécharger PDF"}
-            </Button>
-          )}
+        {hasBookings && (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowEditDialog(true)}
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
             className="flex items-center gap-2"
           >
-            Modifier
+            <FileDown className="h-4 w-4" />
+            {isGeneratingPDF ? "Génération..." : "Télécharger PDF"}
           </Button>
-        </div>
+        )}
       </div>
 
-      <TourTimelineDisplay 
-        status={tour.status} 
+      <TourTimelineDisplay
+        status={tour.status}
         tourId={tour.id}
         onStatusChange={handleTourStatusChange}
         canEdit={true}
@@ -192,13 +169,6 @@ export function TourCard({
           ))}
         </div>
       )}
-
-      <TourEditDialog
-        isOpen={showEditDialog}
-        onClose={() => setShowEditDialog(false)}
-        tour={tour}
-        onComplete={handleEditComplete}
-      />
     </Card>
   );
 }
