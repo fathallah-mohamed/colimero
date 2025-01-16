@@ -63,13 +63,19 @@ export function CustomDialog({
       >
         <DialogHeader title={title} onClose={onClose} />
         {React.Children.map(children, (child) => {
-          if (React.isValidElement(child)) {
-            const isRefable = typeof child.type === 'string' || ('ref' in child.type);
-            return isRefable
-              ? React.cloneElement(child, { ref: initialFocusRef })
-              : child;
+          if (!React.isValidElement(child)) {
+            return child;
           }
-          return child;
+
+          // Only add ref to DOM elements or components that can accept refs
+          const isRefableComponent = 
+            typeof child.type === 'string' || 
+            (typeof child.type === 'function' && 'render' in child.type) ||
+            (typeof child.type === 'object' && child.type !== null && 'render' in child.type);
+
+          return isRefableComponent
+            ? React.cloneElement(child, { ref: initialFocusRef })
+            : child;
         })}
       </DialogContent>
     </Dialog>
