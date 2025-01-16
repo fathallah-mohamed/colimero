@@ -21,15 +21,21 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
         return { success: false };
       }
 
-      // Récupérer les informations de la tournée pour le tracking number
-      const { data: tourData } = await supabase
-        .from('tours')
-        .select('departure_country, destination_country')
-        .eq('id', tourId)
-        .single();
+      // Check if user already has a booking for this tour
+      const { data: existingBooking } = await supabase
+        .from('bookings')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('tour_id', tourId)
+        .maybeSingle();
 
-      if (!tourData) {
-        throw new Error("Impossible de récupérer les informations de la tournée");
+      if (existingBooking) {
+        toast({
+          variant: "destructive",
+          title: "Réservation impossible",
+          description: "Vous avez déjà une réservation pour cette tournée",
+        });
+        return { success: false };
       }
 
       // Start a transaction by using RPC
@@ -51,16 +57,13 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
       });
 
       if (error) {
-        // Gérer l'erreur de contrainte unique
-        if (error.message?.includes('unique_user_tour')) {
-          toast({
-            variant: "destructive",
-            title: "Réservation impossible",
-            description: "Vous avez déjà une réservation pour cette tournée",
-          });
-          return { success: false };
-        }
-        throw error;
+        console.error('Error creating booking:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la création de la réservation",
+        });
+        return { success: false };
       }
 
       toast({
