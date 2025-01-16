@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus, RouteStop } from "@/types/tour";
+import type { Tour, TourStatus } from "@/types/tour";
 
 interface UseTourDataProps {
   departureCountry: string;
@@ -36,10 +36,24 @@ export function useTourData({
         userId: user?.id 
       });
 
+      // If we're in carrier mode and there's no user, return empty array
+      if (carrierOnly && !user) {
+        console.log('No authenticated user found for carrier mode');
+        setTours([]);
+        setLoading(false);
+        return;
+      }
+
       let query = supabase
         .from('tours')
         .select(`
           *,
+          carriers (
+            *,
+            carrier_capacities (
+              *
+            )
+          ),
           bookings (
             id,
             user_id,
@@ -62,15 +76,6 @@ export function useTourData({
             updated_at,
             terms_accepted,
             customs_declaration
-          ),
-          carriers (
-            company_name,
-            first_name,
-            last_name,
-            avatar_url,
-            carrier_capacities (
-              price_per_kg
-            )
           )
         `)
         .eq('departure_country', departureCountry)
@@ -83,9 +88,11 @@ export function useTourData({
       }
 
       if (status !== 'all') {
-        console.log('Applying status filter:', status);
         query = query.eq('status', status);
       }
+
+      const [sortField, sortDirection] = sortBy.split('_');
+      query = query.order(sortField === 'created' ? 'created_at' : 'departure_date', { ascending: sortDirection === 'asc' });
 
       const { data: toursData, error } = await query;
 
@@ -96,59 +103,7 @@ export function useTourData({
       }
 
       console.log('Fetched tours:', toursData);
-
-      const transformedTours = toursData?.map(tour => {
-        const routeData = typeof tour.route === 'string' 
-          ? JSON.parse(tour.route) 
-          : tour.route;
-
-        const parsedRoute: RouteStop[] = Array.isArray(routeData) 
-          ? routeData.map(stop => ({
-              name: stop.name,
-              location: stop.location,
-              time: stop.time,
-              type: stop.type,
-              collection_date: stop.collection_date
-            }))
-          : [];
-
-        return {
-          ...tour,
-          route: parsedRoute,
-          status: tour.status as TourStatus,
-          previous_status: tour.previous_status as TourStatus | null,
-          bookings: tour.bookings?.map(booking => ({
-            ...booking,
-            special_items: booking.special_items || [],
-            content_types: booking.content_types || [],
-            terms_accepted: booking.terms_accepted || false,
-            customs_declaration: booking.customs_declaration || false
-          })) || [],
-          carriers: tour.carriers ? {
-            ...tour.carriers,
-            carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
-              ? tour.carriers.carrier_capacities[0]
-              : tour.carriers.carrier_capacities
-          } : undefined
-        } as Tour;
-      }) || [];
-
-      const sortedTours = [...transformedTours].sort((a, b) => {
-        switch (sortBy) {
-          case 'departure_asc':
-            return new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime();
-          case 'departure_desc':
-            return new Date(b.departure_date).getTime() - new Date(a.departure_date).getTime();
-          case 'price_asc':
-            return (a.carriers?.carrier_capacities?.price_per_kg || 0) - (b.carriers?.carrier_capacities?.price_per_kg || 0);
-          case 'price_desc':
-            return (b.carriers?.carrier_capacities?.price_per_kg || 0) - (a.carriers?.carrier_capacities?.price_per_kg || 0);
-          default:
-            return 0;
-        }
-      });
-
-      setTours(sortedTours);
+      setTours(toursData || []);
     } catch (error) {
       console.error('Error in fetchTours:', error);
       setTours([]);
@@ -158,7 +113,6 @@ export function useTourData({
   };
 
   useEffect(() => {
-    console.log('Filters changed, fetching tours with status:', status);
     fetchTours();
   }, [departureCountry, destinationCountry, sortBy, status, carrierOnly]);
 
