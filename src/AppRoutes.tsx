@@ -22,6 +22,7 @@ import Reserver from "@/pages/Reserver";
 import Activation from "@/pages/Activation";
 import CarrierSignup from "@/pages/CarrierSignup";
 import ClientSignup from "@/pages/ClientSignup";
+import Login from "@/pages/Login";
 
 export function AppRoutes() {
   return (
@@ -49,6 +50,7 @@ export function AppRoutes() {
       <Route path="/activation" element={<Activation />} />
       <Route path="/devenir-transporteur" element={<CarrierSignup />} />
       <Route path="/creer-compte" element={<ClientSignup />} />
+      <Route path="/connexion" element={<Login />} />
     </Routes>
   );
 }
