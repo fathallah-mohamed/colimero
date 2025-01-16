@@ -32,8 +32,8 @@ export default function MobileMenu({
     <div
       className={cn(
         "fixed inset-y-0 right-0 w-[80%] bg-white border-l shadow-lg h-[calc(100vh-65px)] top-[65px] overflow-y-auto",
-        "transform transition-transform duration-300 ease-in-out",
-        isOpen ? "translate-x-0" : "translate-x-full"
+        "transform transition-transform duration-300 ease-in-out lg:hidden",
+        "translate-x-0"
       )}
     >
       {user ? (
@@ -41,7 +41,7 @@ export default function MobileMenu({
           <div className="px-4 pt-2 pb-3 space-y-1">
             <MenuItems />
           </div>
-          <div className="border-t border-gray-200">
+          <div className="border-t border-gray-200 mt-auto">
             <div className="px-4 py-2">
               <UserMenuItems userType={userType} />
             </div>
@@ -61,7 +61,7 @@ export default function MobileMenu({
           <div className="px-4 pt-2 pb-3 space-y-1">
             <MenuItems />
           </div>
-          <div className="px-4 py-3 border-t border-gray-200">
+          <div className="px-4 py-3 border-t border-gray-200 mt-auto">
             <Button
               variant="outline"
               size="sm"
