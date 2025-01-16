@@ -1,10 +1,9 @@
 import { BookingStatus } from "@/types/booking";
-import { Edit2, RotateCcw, Package, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ActionButton } from "@/components/shared/ActionButton";
-import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { CarrierActions } from "./actions/CarrierActions";
+import { ClientActions } from "./actions/ClientActions";
 
 interface BookingActionsProps {
   bookingId: string;
@@ -73,54 +72,21 @@ export function BookingActions({
     }
   };
 
-  // Pour les clients, n'autoriser les modifications que si le statut est "pending" et la tournée est "Programmée"
-  const canClientModify = userType === "client" && status === "pending" && tourStatus === "Programmée";
-  
-  // Pour les transporteurs
-  const canCarrierModifyInCollection = userType === "carrier" && status === "pending" && tourStatus === "Ramassage en cours";
-  const canCarrierModifyInPlanned = userType === "carrier" && (status === "pending" || status === "confirmed") && tourStatus === "Programmée";
-
-  if (!canClientModify && !canCarrierModifyInCollection && !canCarrierModifyInPlanned) {
-    return null;
-  }
-
   return (
     <div className="flex items-center gap-2">
-      {canCarrierModifyInPlanned && status === "pending" && (
-        <ActionButton
-          icon={ThumbsUp}
-          label="Confirmer"
-          onClick={() => handleStatusChange("confirmed")}
-          colorClass="bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
+      {userType === "carrier" ? (
+        <CarrierActions
+          status={status}
+          tourStatus={tourStatus}
+          onStatusChange={handleStatusChange}
+          onEdit={onEdit}
         />
-      )}
-      
-      {canCarrierModifyInCollection && (
-        <ActionButton
-          icon={Package}
-          label="Marquer comme ramassée"
-          onClick={() => handleStatusChange("collected")}
-          colorClass="bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
-        />
-      )}
-      
-      {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
-        <ActionButton
-          icon={Edit2}
-          label="Modifier"
-          onClick={onEdit}
-          colorClass="bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
-        />
-      )}
-      
-      {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
-        <ConfirmDialog
-          title="Confirmer l'annulation"
-          description="Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée."
-          icon={RotateCcw}
-          buttonLabel="Annuler"
-          buttonColorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
-          onConfirm={() => handleStatusChange("cancelled")}
+      ) : (
+        <ClientActions
+          status={status}
+          tourStatus={tourStatus}
+          onStatusChange={handleStatusChange}
+          onEdit={onEdit}
         />
       )}
     </div>
