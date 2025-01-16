@@ -131,3 +131,80 @@ export const authenticateUser = async (email: string, password: string): Promise
     return { success: false };
   }
 };
+
+// Add the new function for password reset
+export const resetPassword = async (email: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) {
+      console.error("Error requesting password reset:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la demande de réinitialisation.",
+      });
+      return false;
+    }
+
+    // Log the email request
+    await supabase.from('email_logs').insert([
+      {
+        email: email,
+        status: 'sent',
+        email_type: 'password_reset'
+      }
+    ]);
+
+    toast({
+      title: "Email envoyé",
+      description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe.",
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Une erreur est survenue lors de la demande de réinitialisation.",
+    });
+    return false;
+  }
+};
+
+// Add function to update password
+export const updatePassword = async (newPassword: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      console.error("Error updating password:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du mot de passe.",
+      });
+      return false;
+    }
+
+    toast({
+      title: "Mot de passe mis à jour",
+      description: "Votre mot de passe a été modifié avec succès.",
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error in updatePassword:", error);
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Une erreur est survenue lors de la mise à jour du mot de passe.",
+    });
+    return false;
+  }
+};
