@@ -50,6 +50,7 @@ export type Database = {
           email_sent: boolean | null
           id: string
           message: string | null
+          pickup_city: string
           reason: string | null
           status: string
           tour_id: number
@@ -63,6 +64,7 @@ export type Database = {
           email_sent?: boolean | null
           id?: string
           message?: string | null
+          pickup_city: string
           reason?: string | null
           status: string
           tour_id: number
@@ -76,6 +78,7 @@ export type Database = {
           email_sent?: boolean | null
           id?: string
           message?: string | null
+          pickup_city?: string
           reason?: string | null
           status?: string
           tour_id?: number
