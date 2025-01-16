@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Search, Check, User } from "lucide-react";
+import { Search, Check, User, Eye } from "lucide-react";
 import { useState } from "react";
 import { ClientDetailsDialog } from "../client-details/ClientDetailsDialog";
 
@@ -53,15 +53,26 @@ export function NewRequestsTable({
               <TableCell>
                 <div className="space-y-1">
                   <p>Tél: {request.user?.phone || "Non renseigné"}</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedClient(request.user)}
-                    className="w-full mt-2"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Voir détails client
-                  </Button>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedClient(request.user)}
+                      className="flex items-center gap-2"
+                    >
+                      <User className="h-4 w-4" />
+                      Voir client
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewDetails(request)}
+                      className="flex items-center gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      Détails
+                    </Button>
+                  </div>
                 </div>
               </TableCell>
               <TableCell>
