@@ -755,6 +755,7 @@ export type Database = {
           status: string | null
           terms_accepted: boolean | null
           total_capacity: number
+          tour_number: string
           type: Database["public"]["Enums"]["tour_type"]
           updated_at: string
         }
@@ -773,6 +774,7 @@ export type Database = {
           status?: string | null
           terms_accepted?: boolean | null
           total_capacity: number
+          tour_number: string
           type?: Database["public"]["Enums"]["tour_type"]
           updated_at?: string
         }
@@ -791,6 +793,7 @@ export type Database = {
           status?: string | null
           terms_accepted?: boolean | null
           total_capacity?: number
+          tour_number?: string
           type?: Database["public"]["Enums"]["tour_type"]
           updated_at?: string
         }

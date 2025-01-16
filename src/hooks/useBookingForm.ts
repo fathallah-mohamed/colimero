@@ -21,21 +21,15 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
         return { success: false };
       }
 
-      // Vérifier si l'utilisateur a déjà une réservation pour cette tournée
-      const { data: existingBooking } = await supabase
-        .from('bookings')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('tour_id', tourId)
-        .maybeSingle();
+      // Récupérer les informations de la tournée pour le tracking number
+      const { data: tourData } = await supabase
+        .from('tours')
+        .select('departure_country, destination_country')
+        .eq('id', tourId)
+        .single();
 
-      if (existingBooking) {
-        toast({
-          variant: "destructive",
-          title: "Réservation impossible",
-          description: "Vous avez déjà une réservation pour cette tournée",
-        });
-        return { success: false };
+      if (!tourData) {
+        throw new Error("Impossible de récupérer les informations de la tournée");
       }
 
       // Start a transaction by using RPC
