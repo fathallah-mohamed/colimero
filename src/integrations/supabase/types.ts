@@ -935,6 +935,10 @@ export type Database = {
             }
             Returns: Json
           }
+      generate_test_bookings: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_tours_with_all_statuses: {
         Args: Record<PropertyKey, never>
         Returns: undefined

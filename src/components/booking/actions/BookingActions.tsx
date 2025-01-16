@@ -1,5 +1,5 @@
 import { BookingStatus } from "@/types/booking";
-import { Edit2, RotateCcw, CheckSquare } from "lucide-react";
+import { Edit2, RotateCcw, CheckSquare, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,7 @@ export function BookingActions({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  if (!isCollecting) return null;
+  if (!isCollecting && tourStatus !== "Programmée") return null;
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
@@ -59,7 +59,8 @@ export function BookingActions({
       const actionLabel = {
         cancelled: "annulée",
         collected: "ramassée",
-        pending: "remise en attente"
+        pending: "remise en attente",
+        confirmed: "confirmée"
       }[newStatus];
 
       toast({
@@ -93,15 +94,27 @@ export function BookingActions({
         />
       )}
 
-      {status === "pending" && tourStatus === "Ramassage en cours" && (
+      {status === "pending" && (
         <>
-          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-          <ActionButton
-            icon={CheckSquare}
-            label="Marquer comme ramassée"
-            onClick={() => handleStatusChange("collected")}
-            colorClass="text-green-600 hover:text-green-700 border-green-200 hover:border-green-300 hover:bg-green-50"
-          />
+          {tourStatus === "Programmée" && (
+            <ActionButton
+              icon={ThumbsUp}
+              label="Confirmer"
+              onClick={() => handleStatusChange("confirmed")}
+              colorClass="text-green-600 hover:text-green-700 border-green-200 hover:border-green-300 hover:bg-green-50"
+            />
+          )}
+          {tourStatus === "Ramassage en cours" && (
+            <>
+              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+              <ActionButton
+                icon={CheckSquare}
+                label="Marquer comme ramassée"
+                onClick={() => handleStatusChange("collected")}
+                colorClass="text-green-600 hover:text-green-700 border-green-200 hover:border-green-300 hover:bg-green-50"
+              />
+            </>
+          )}
         </>
       )}
     </div>
