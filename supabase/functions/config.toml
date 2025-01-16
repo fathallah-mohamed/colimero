@@ -1,4 +1,4 @@
 project_id = "dsmahpgrhjoikcxuiqrw"
 
-[send-activation-email]
+[send-reset-email]
 verify_jwt = false
