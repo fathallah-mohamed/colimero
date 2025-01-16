@@ -16,6 +16,8 @@ export function BookingList() {
         throw new Error("User not authenticated");
       }
 
+      console.log("Fetching bookings for user:", user.id);
+
       const { data, error } = await supabase
         .from("bookings")
         .select(`
@@ -35,11 +37,15 @@ export function BookingList() {
               email
             )
           ),
-          sender:user_id (
-            email
+          sender:clients!bookings_user_id_fkey (
+            email,
+            first_name,
+            last_name
           ),
-          recipient:recipient_id (
-            email
+          recipient:clients!bookings_recipient_id_fkey (
+            email,
+            first_name,
+            last_name
           )
         `)
         .eq('user_id', user.id)
@@ -49,6 +55,8 @@ export function BookingList() {
         console.error("Error fetching bookings:", error);
         throw error;
       }
+
+      console.log("Fetched bookings:", data);
       
       return data?.map(booking => ({
         ...booking,

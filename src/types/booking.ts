@@ -1,45 +1,5 @@
-export type BookingStatus = 
-  | 'pending'
-  | 'confirmed' 
-  | 'collected'
-  | 'ready_to_deliver'
-  | 'delivered'
-  | 'cancelled';
-
-export type BookingFilterStatus = BookingStatus | 'all';
-
-export interface FormData {
-  sender_name: string;
-  sender_phone: string;
-  recipient_name: string;
-  recipient_phone: string;
-  recipient_address: string;
-  delivery_city: string;
-}
-
-export interface BookingFormState {
-  weight: number;
-  selectedContentTypes: string[];
-  selectedSpecialItems: string[];
-  itemQuantities: Record<string, number>;
-  photos: File[];
-  formData: FormData;
-}
-
-export interface BookingFormData {
-  weight: number;
-  pickup_city: string;
-  delivery_city: string;
-  recipient_name: string;
-  recipient_address: string;
-  recipient_phone: string;
-  sender_name: string;
-  sender_phone: string;
-  item_type?: string;
-  special_items?: any[];
-  content_types?: string[];
-  photos?: File[];
-}
+export type BookingStatus = "pending" | "confirmed" | "cancelled" | "collected" | "in_transit";
+export type BookingFilterStatus = BookingStatus | "all";
 
 export interface Booking {
   id: string;
@@ -48,35 +8,38 @@ export interface Booking {
   pickup_city: string;
   delivery_city: string;
   tracking_number: string;
+  created_at: string;
   weight: number;
-  status: BookingStatus;
   item_type: string;
   recipient_name: string;
-  recipient_phone: string;
   recipient_address: string;
-  delivery_notes?: string;
-  terms_accepted: boolean;
-  customs_declaration: boolean;
-  package_description?: string;
-  special_items?: any[];
+  recipient_phone: string;
+  sender_name: string | null;
+  sender_phone: string | null;
+  status: BookingStatus;
+  delivery_status: string | null;
+  special_items: Array<{ name: string; quantity: number }>;
   content_types?: string[];
   photos?: string[];
-  sender_name?: string;
-  sender_phone?: string;
-  created_at: string;
-  updated_at?: string;
+  package_description?: string;
+  created_at_formatted?: string;
+  departure_date_formatted?: string | null;
+  collection_date_formatted?: string | null;
+  sender_email?: string;
+  recipient_email?: string;
   tours?: {
     collection_date: string;
     departure_date: string;
     destination_country: string;
+    route: any;
+    status: string;
     carriers?: {
-      company_name: string | null;
-      avatar_url: string | null;
-      phone: string | null;
+      company_name: string;
+      avatar_url: string;
+      phone: string;
+      first_name: string;
+      last_name: string;
+      email: string;
     };
   };
-}
-
-export interface BookingDetailsProps {
-  booking: Booking;
 }
