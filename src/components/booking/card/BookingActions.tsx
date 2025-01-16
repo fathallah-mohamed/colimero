@@ -1,6 +1,9 @@
-import { Button } from "@/components/ui/button";
-import type { BookingStatus } from "@/types/booking";
+import { BookingStatus } from "@/types/booking";
 import { Edit2, XCircle, Package, ThumbsUp } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { StatusActionButton } from "@/components/shared/StatusActionButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,9 +15,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface BookingActionsProps {
   bookingId: string;
@@ -26,9 +26,9 @@ interface BookingActionsProps {
   userType?: string | null;
 }
 
-export function BookingActions({ 
-  bookingId, 
-  status, 
+export function BookingActions({
+  bookingId,
+  status,
   tourStatus,
   onStatusChange,
   onUpdate,
@@ -50,23 +50,28 @@ export function BookingActions({
         })
         .eq('id', bookingId);
 
-      if (error) {
-        console.error("Error updating booking status:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       // Invalider les caches pour forcer le rechargement
       await queryClient.invalidateQueries({ queryKey: ['bookings'] });
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
 
-      // Appeler les callbacks pour mettre à jour l'UI
       await onStatusChange(bookingId, newStatus);
       await onUpdate();
 
+      const statusLabels: Record<BookingStatus, string> = {
+        pending: "en attente",
+        confirmed: "confirmée",
+        collected: "ramassée",
+        ready_to_deliver: "prête à livrer",
+        delivered: "livrée",
+        cancelled: "annulée"
+      };
+
       toast({
-        title: `Réservation ${newStatus === "collected" ? "ramassée" : "mise à jour"}`,
-        description: `La réservation a été ${newStatus === "collected" ? "ramassée" : "mise à jour"} avec succès.`,
+        title: `Réservation ${statusLabels[newStatus]}`,
+        description: `La réservation a été ${statusLabels[newStatus]} avec succès.`,
       });
     } catch (error) {
       console.error('Error updating booking status:', error);
@@ -81,9 +86,7 @@ export function BookingActions({
   // Pour les clients, n'autoriser les modifications que si le statut est "pending" et la tournée est "Programmée"
   const canClientModify = userType === "client" && status === "pending" && tourStatus === "Programmée";
   
-  // Pour les transporteurs:
-  // - Si la tournée est "Programmée": autoriser modification/annulation des réservations en attente
-  // - Si la tournée est "Ramassage en cours": autoriser toutes les actions sur les réservations en attente
+  // Pour les transporteurs
   const canCarrierModifyInCollection = userType === "carrier" && status === "pending" && tourStatus === "Ramassage en cours";
   const canCarrierModifyInPlanned = userType === "carrier" && status === "pending" && tourStatus === "Programmée";
 
@@ -93,57 +96,41 @@ export function BookingActions({
 
   return (
     <div className="flex items-center gap-2">
-      {/* Bouton "Confirmer" - uniquement pour les transporteurs quand la tournée est programmée */}
       {canCarrierModifyInPlanned && (
-        <Button
-          variant="outline"
-          size="sm"
+        <StatusActionButton
+          icon={ThumbsUp}
+          label="Confirmer"
           onClick={() => handleStatusChange("confirmed")}
-          className="flex items-center gap-2 bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
-        >
-          <ThumbsUp className="h-4 w-4" />
-          Confirmer
-        </Button>
+          colorClass="bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
+        />
       )}
       
-      {/* Bouton "Marquer comme ramassée" - uniquement pour les transporteurs pendant la phase de ramassage */}
       {canCarrierModifyInCollection && (
-        <Button
-          variant="outline"
-          size="sm"
+        <StatusActionButton
+          icon={Package}
+          label="Marquer comme ramassée"
           onClick={() => handleStatusChange("collected")}
-          className="flex items-center gap-2 bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
-        >
-          <Package className="h-4 w-4" />
-          Marquer comme ramassée
-        </Button>
+          colorClass="bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
+        />
       )}
       
-      {/* Bouton Modifier - si le client peut modifier ou si le transporteur peut modifier */}
       {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
-        <Button
-          variant="outline"
-          size="sm"
+        <StatusActionButton
+          icon={Edit2}
+          label="Modifier"
           onClick={onEdit}
-          className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
-        >
-          <Edit2 className="h-4 w-4" />
-          Modifier
-        </Button>
+          colorClass="bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
+        />
       )}
       
-      {/* Bouton Annuler - si le client peut modifier ou si le transporteur peut modifier */}
       {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
-            >
-              <XCircle className="h-4 w-4" />
-              Annuler
-            </Button>
+            <StatusActionButton
+              icon={XCircle}
+              label="Annuler"
+              colorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
+            />
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
