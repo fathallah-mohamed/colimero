@@ -39,6 +39,7 @@ export function LoginFormFields({
           onChange={(e) => onEmailChange(e.target.value)}
           disabled={isLoading}
           placeholder="exemple@email.com"
+          className="h-12"
           required
         />
       </div>
@@ -51,6 +52,8 @@ export function LoginFormFields({
           value={password}
           onChange={(e) => onPasswordChange(e.target.value)}
           disabled={isLoading}
+          placeholder="Votre mot de passe"
+          className="h-12"
           required
         />
       </div>
