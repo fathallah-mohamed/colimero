@@ -57,7 +57,7 @@ export default function MenuItems() {
       <Link
         key={item.name}
         to={item.href}
-        className="w-full"
+        className="w-full block"
       >
         {content}
       </Link>
@@ -84,8 +84,8 @@ export default function MenuItems() {
 
   return (
     <div className={cn(
-      "flex items-center space-x-1",
-      "lg:flex-nowrap lg:overflow-x-auto lg:pb-2",
+      "flex",
+      isMobile ? "flex-col space-y-1" : "items-center space-x-1 lg:flex-nowrap lg:overflow-x-auto lg:pb-2",
       "scrollbar-hide"
     )}>
       {menuItems.map(renderMenuItem)}
