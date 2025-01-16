@@ -38,20 +38,22 @@ export default function MobileMenu({
     >
       {user ? (
         <>
-          <div className="px-4 py-3 border-b border-gray-200">
-            <AccountMenu
-              userType={userType}
-              onClose={() => {
-                handleLogout();
-                setIsOpen(false);
-              }}
-            />
-          </div>
-          <div className="px-4 py-2">
-            <UserMenuItems userType={userType} />
-          </div>
-          <div className="px-4 pt-2 pb-3 space-y-1 border-t border-gray-200">
+          <div className="px-4 pt-2 pb-3 space-y-1">
             <MenuItems />
+          </div>
+          <div className="border-t border-gray-200">
+            <div className="px-4 py-2">
+              <UserMenuItems userType={userType} />
+            </div>
+            <div className="px-4 py-3 border-t border-gray-200">
+              <AccountMenu
+                userType={userType}
+                onClose={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+              />
+            </div>
           </div>
         </>
       ) : (
