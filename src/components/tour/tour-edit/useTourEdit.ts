@@ -24,15 +24,15 @@ export function useTourEdit(tour: any, onComplete: () => void) {
         throw new Error("Les dates de collecte doivent être antérieures à la date de départ");
       }
 
-      if (values.remaining_capacity > values.total_capacity) {
+      if (Number(values.remaining_capacity) > Number(values.total_capacity)) {
         throw new Error("La capacité restante ne peut pas être supérieure à la capacité totale");
       }
 
       const { error } = await supabase
         .from('tours')
         .update({
-          total_capacity: values.total_capacity,
-          remaining_capacity: values.remaining_capacity,
+          total_capacity: Number(values.total_capacity),
+          remaining_capacity: Number(values.remaining_capacity),
           type: values.type,
           departure_date: departureDate.toISOString(),
           route: values.route,
