@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Tour } from "@/types/tour";
+import { Tour, TourStatus } from "@/types/tour";
 import { AnimatePresence } from "framer-motion";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
@@ -13,6 +13,7 @@ import { TourExpandedContent } from "./components/TourExpandedContent";
 interface TourTimelineCardProps {
   tour: Tour;
   onBookingClick: (tourId: number, pickupCity: string) => void;
+  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
   hideAvatar?: boolean;
   userType?: string;
   isUpcoming?: boolean;
@@ -21,6 +22,7 @@ interface TourTimelineCardProps {
 export function TourTimelineCard({ 
   tour, 
   onBookingClick, 
+  onStatusChange,
   hideAvatar, 
   userType,
   isUpcoming = false
@@ -138,6 +140,7 @@ export function TourTimelineCard({
               isActionEnabled={isActionEnabled()}
               actionButtonText={getActionButtonText()}
               userType={userType}
+              onStatusChange={onStatusChange}
             />
           )}
         </AnimatePresence>
