@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
 
 export function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -37,7 +37,9 @@ export function ResetPasswordForm() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = await supabase.auth.updateUser({ 
+        password: password 
+      });
 
       if (error) throw error;
 
@@ -46,11 +48,12 @@ export function ResetPasswordForm() {
         description: "Votre mot de passe a été mis à jour avec succès",
       });
 
+      // Rediriger vers la page de connexion après un court délai
       setTimeout(() => {
         navigate("/");
       }, 2000);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error resetting password:", error);
       toast({
         title: "Erreur",
@@ -63,36 +66,39 @@ export function ResetPasswordForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Input
-          type="password"
-          placeholder="Nouveau mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
-        />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="password">Nouveau mot de passe</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+            placeholder="Entrez votre nouveau mot de passe"
+            className="h-12"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={6}
+            placeholder="Confirmez votre nouveau mot de passe"
+            className="h-12"
+          />
+        </div>
       </div>
-      <div>
-        <Input
-          type="password"
-          placeholder="Confirmer le mot de passe"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          minLength={6}
-        />
-      </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Réinitialisation en cours...
-          </>
-        ) : (
-          "Réinitialiser le mot de passe"
-        )}
+
+      <Button type="submit" className="w-full h-12" disabled={loading}>
+        {loading ? "Réinitialisation..." : "Réinitialiser le mot de passe"}
       </Button>
     </form>
   );

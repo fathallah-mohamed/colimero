@@ -23,26 +23,13 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
       const trimmedEmail = email.trim();
       const resetLink = `${window.location.origin}/reset-password`;
 
-      // First, try to send the reset email through Supabase
       const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
         redirectTo: resetLink,
       });
 
       if (error) {
-        console.error("Erreur de réinitialisation Supabase:", error);
-        
-        // If Supabase fails, try our custom email function
-        const response = await supabase.functions.invoke('send-reset-email', {
-          body: {
-            email: trimmedEmail,
-            resetLink,
-          }
-        });
-
-        if ('error' in response) {
-          console.error("Erreur de la fonction d'envoi d'email:", response.error);
-          throw new Error(response.error || "Erreur lors de l'envoi de l'email");
-        }
+        console.error("Erreur de réinitialisation:", error);
+        throw error;
       }
 
       // Log success
@@ -59,7 +46,6 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
         description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe",
       });
 
-      // Important: Call onSuccess to close the dialog
       if (onSuccess) {
         onSuccess();
       }
@@ -79,7 +65,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur inattendue s'est produite. Veuillez réessayer.",
+        description: "Une erreur est survenue lors de l'envoi de l'email. Veuillez réessayer.",
       });
     } finally {
       setIsLoading(false);
@@ -98,6 +84,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="exemple@email.com"
+            className="h-12"
           />
         </div>
 
@@ -105,12 +92,12 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full h-12"
             onClick={onCancel}
           >
             Retour
           </Button>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12" disabled={isLoading}>
             {isLoading ? "Envoi..." : "Envoyer le lien"}
           </Button>
         </div>
