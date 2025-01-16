@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { BookingStatus } from "@/types/booking";
-import { Edit2, XCircle, Package } from "lucide-react";
+import { Edit2, XCircle, Package, ThumbsUp } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -93,6 +93,19 @@ export function BookingActions({
 
   return (
     <div className="flex items-center gap-2">
+      {/* Bouton "Confirmer" - uniquement pour les transporteurs quand la tournée est programmée */}
+      {canCarrierModifyInPlanned && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleStatusChange("confirmed")}
+          className="flex items-center gap-2 bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
+        >
+          <ThumbsUp className="h-4 w-4" />
+          Confirmer
+        </Button>
+      )}
+      
       {/* Bouton "Marquer comme ramassée" - uniquement pour les transporteurs pendant la phase de ramassage */}
       {canCarrierModifyInCollection && (
         <Button

@@ -15,7 +15,7 @@ import { TourDetails } from "./card/TourDetails";
 
 interface BookingCardProps {
   booking: any;
-  isCollecting: boolean;
+  isCollecting?: boolean;
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
   onUpdate: () => Promise<void>;
   isEven?: boolean;
@@ -24,7 +24,7 @@ interface BookingCardProps {
 
 export function BookingCard({ 
   booking, 
-  isCollecting, 
+  isCollecting = false, 
   onStatusChange,
   onUpdate,
   tourStatus
