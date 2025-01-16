@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Tour, TourStatus } from "@/types/tour";
 import { AnimatePresence } from "framer-motion";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
