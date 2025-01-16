@@ -79,8 +79,13 @@ export function RouteSection({ form }: RouteSectionProps) {
               <FormControl>
                 <Input 
                   type="date" 
-                  {...field}
-                  value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : field.value}
+                  onChange={(e) => {
+                    // Convert string date to Date object
+                    const date = new Date(e.target.value);
+                    field.onChange(date);
+                  }}
+                  value={field.value instanceof Date ? field.value.toISOString().split('T')[0] : ''}
+                  min={new Date().toISOString().split('T')[0]}
                 />
               </FormControl>
               <FormMessage />
