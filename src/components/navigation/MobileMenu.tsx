@@ -3,8 +3,6 @@ import { cn } from "@/lib/utils";
 import MenuItems from "./MenuItems";
 import { Button } from "../ui/button";
 import { UserCircle2 } from "lucide-react";
-import AccountMenu from "./AccountMenu";
-import { UserMenuItems } from "./UserMenuItems";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -37,31 +35,83 @@ export default function MobileMenu({
       )}
     >
       {user ? (
-        <>
+        <div className="flex flex-col h-full">
           <div className="px-4 pt-2 pb-3 space-y-1">
             <MenuItems />
+            {userType === 'carrier' && (
+              <>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Profil Transporteur
+                </Link>
+                <Link
+                  to="/mes-tournees"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Mes tournées
+                </Link>
+                <Link
+                  to="/demandes-approbation"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Demandes d'approbation
+                </Link>
+              </>
+            )}
+            {userType === 'client' && (
+              <>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Profil Client
+                </Link>
+                <Link
+                  to="/mes-reservations"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Mes réservations
+                </Link>
+              </>
+            )}
+            {userType === 'admin' && (
+              <>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Profil Administrateur
+                </Link>
+                <Link
+                  to="/admin/dashboard"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Tableau de bord
+                </Link>
+              </>
+            )}
           </div>
-          <div className="border-t border-gray-200 mt-auto">
-            <div className="px-4 py-2">
-              <UserMenuItems userType={userType} />
-            </div>
-            <div className="px-4 py-3 border-t border-gray-200">
-              <AccountMenu
-                userType={userType}
-                onClose={() => {
-                  handleLogout();
-                  setIsOpen(false);
-                }}
-              />
+          <div className="mt-auto border-t border-gray-200">
+            <div className="px-4 py-3">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleLogout}
+                className="w-full text-white"
+              >
+                Déconnexion
+              </Button>
             </div>
           </div>
-        </>
+        </div>
       ) : (
-        <>
+        <div className="flex flex-col h-full">
           <div className="px-4 pt-2 pb-3 space-y-1">
             <MenuItems />
           </div>
-          <div className="px-4 py-3 border-t border-gray-200 mt-auto">
+          <div className="mt-auto px-4 py-3 border-t border-gray-200">
             <Button
               variant="outline"
               size="sm"
@@ -72,7 +122,7 @@ export default function MobileMenu({
               Se connecter
             </Button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
