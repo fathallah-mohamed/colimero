@@ -56,12 +56,12 @@ export function TourCard({
     }
   };
 
-  const handleTourStatusChange = async (newStatus: TourStatus) => {
+  const handleTourStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
       const { error } = await supabase
         .from('tours')
         .update({ status: newStatus })
-        .eq('id', tour.id);
+        .eq('id', tourId);
 
       if (error) throw error;
 
@@ -78,7 +78,7 @@ export function TourCard({
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la tournée",
+        description: "Impossible de mettre à jour le statut",
       });
     }
   };

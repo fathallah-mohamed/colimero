@@ -12,6 +12,7 @@ interface TourExpandedContentProps {
   isActionEnabled: boolean;
   actionButtonText: string;
   userType?: string;
+  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
 }
 
 export function TourExpandedContent({
@@ -21,7 +22,8 @@ export function TourExpandedContent({
   onActionClick,
   isActionEnabled,
   actionButtonText,
-  userType
+  userType,
+  onStatusChange
 }: TourExpandedContentProps) {
   return (
     <motion.div
@@ -35,6 +37,7 @@ export function TourExpandedContent({
         <ClientTimeline 
           status={tour.status} 
           tourId={tour.id}
+          onStatusChange={onStatusChange}
         />
 
         <div>

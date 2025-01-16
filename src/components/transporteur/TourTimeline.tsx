@@ -3,7 +3,7 @@ import { TourTimelineDisplay } from "@/components/tour/shared/TourTimelineDispla
 
 interface TourTimelineProps {
   status: TourStatus;
-  onStatusChange?: (newStatus: TourStatus) => Promise<void>;
+  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
   tourId: number;
 }
 
