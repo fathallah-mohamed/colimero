@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, ChevronDown, ChevronUp, Hash } from "lucide-react";
+import { FileDown, ChevronDown, ChevronUp, Hash, ArrowRight } from "lucide-react";
 import { TourCapacityInfo } from "./TourCapacityInfo";
 import { generateTourPDF } from "./tour-card/PDFGenerator";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +21,20 @@ interface TourCardProps {
   onStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
   onUpdate?: () => Promise<void>;
 }
+
+const countryNames: { [key: string]: string } = {
+  'FR': 'France',
+  'TN': 'Tunisie',
+  'DZ': 'Algérie',
+  'MA': 'Maroc'
+};
+
+const countryFlags: { [key: string]: string } = {
+  'FR': '🇫🇷',
+  'TN': '🇹🇳',
+  'DZ': '🇩🇿',
+  'MA': '🇲🇦'
+};
 
 export function TourCard({ 
   tour,
@@ -107,8 +121,16 @@ export function TourCard({
           <h3 className="text-lg font-semibold">
             Tournée du {new Date(tour.departure_date).toLocaleDateString()}
           </h3>
-          <p className="text-sm text-gray-500">
-            {tour.departure_country} → {tour.destination_country}
+          <p className="text-sm text-gray-500 flex items-center gap-2">
+            <span className="flex items-center">
+              <span className="text-xl mr-1">{countryFlags[tour.departure_country]}</span>
+              {countryNames[tour.departure_country]}
+            </span>
+            <ArrowRight className="h-5 w-5 text-primary mx-1 stroke-2" />
+            <span className="flex items-center">
+              <span className="text-xl mr-1">{countryFlags[tour.destination_country]}</span>
+              {countryNames[tour.destination_country]}
+            </span>
           </p>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 text-gray-600">
