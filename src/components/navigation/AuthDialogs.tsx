@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import CarrierSignupForm from "@/components/auth/carrier-signup/CarrierSignupForm";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
