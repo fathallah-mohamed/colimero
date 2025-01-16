@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields } from "./LoginFormFields";
 import { useLoginForm } from "./useLoginForm";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -20,6 +21,7 @@ export function LoginForm({
   requiredUserType,
   hideRegisterButton = false,
 }: LoginFormProps) {
+  const navigate = useNavigate();
   const {
     isLoading,
     email,
@@ -33,6 +35,14 @@ export function LoginForm({
     setShowErrorDialog,
     handleSubmit,
   } = useLoginForm({ onSuccess, requiredUserType });
+
+  const handleClientRegister = () => {
+    navigate("/inscription");
+  };
+
+  const handleCarrierRegister = () => {
+    navigate("/devenir-transporteur");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -49,10 +59,10 @@ export function LoginForm({
         onErrorDialogClose={() => setShowErrorDialog(false)}
       />
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-primary-hover text-white h-12 text-base font-semibold"
+          className="w-full bg-primary hover:bg-primary/90 text-white"
           disabled={isLoading}
         >
           {isLoading ? "Connexion..." : "Se connecter"}
@@ -71,23 +81,23 @@ export function LoginForm({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
               <Button
                 type="button"
                 variant="outline"
-                onClick={onRegister}
-                className="h-12 border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+                onClick={handleClientRegister}
+                className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors"
               >
-                Compte client
+                Créer un compte client
               </Button>
 
               <Button
                 type="button"
                 variant="outline"
-                onClick={onCarrierRegister}
-                className="h-12 border-2 border-client text-client hover:bg-client hover:text-white transition-colors"
+                onClick={handleCarrierRegister}
+                className="w-full border-2 border-client text-client hover:bg-client hover:text-white transition-colors"
               >
-                Compte transporteur
+                Devenir transporteur
               </Button>
             </div>
           </>
@@ -96,7 +106,7 @@ export function LoginForm({
         <div className="text-center">
           <button
             type="button"
-            className="text-sm text-primary hover:text-primary-hover hover:underline transition-colors"
+            className="text-sm text-primary hover:text-primary/90 hover:underline transition-colors"
             onClick={onForgotPassword}
           >
             Mot de passe oublié ?

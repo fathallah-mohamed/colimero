@@ -1,18 +1,18 @@
-import { Menu, X } from "lucide-react";
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
 
 interface MobileMenuButtonProps {
   isOpen: boolean;
   onClick: () => void;
+  className?: string;
 }
 
 export const MobileMenuButton = forwardRef<HTMLButtonElement, MobileMenuButtonProps>(
-  ({ isOpen, onClick }, ref) => {
+  ({ isOpen, onClick, className }, ref) => {
     const Path = (props: any) => (
       <motion.path
         fill="transparent"
-        strokeWidth="2"
+        strokeWidth="2.5"
         stroke="currentColor"
         strokeLinecap="round"
         {...props}
@@ -23,35 +23,37 @@ export const MobileMenuButton = forwardRef<HTMLButtonElement, MobileMenuButtonPr
       <button
         ref={ref}
         onClick={onClick}
-        className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200"
+        className={`inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200 ${className}`}
         aria-expanded={isOpen}
       >
         <span className="sr-only">
           {isOpen ? "Fermer le menu" : "Ouvrir le menu"}
         </span>
-        <svg width="23" height="23" viewBox="0 0 23 23">
+        <svg width="24" height="24" viewBox="0 0 23 23">
           <Path
             variants={{
-              closed: { d: "M 2 2.5 L 20 2.5" },
-              open: { d: "M 3 16.5 L 17 2.5" }
+              closed: { d: "M 2 4 L 20 4" },
+              open: { d: "M 3 19 L 17 5" }
             }}
             animate={isOpen ? "open" : "closed"}
+            transition={{ duration: 0.3 }}
           />
           <Path
-            d="M 2 9.423 L 20 9.423"
+            d="M 2 11.5 L 20 11.5"
             variants={{
               closed: { opacity: 1 },
               open: { opacity: 0 }
             }}
             animate={isOpen ? "open" : "closed"}
-            transition={{ duration: 0.1 }}
+            transition={{ duration: 0.2 }}
           />
           <Path
             variants={{
-              closed: { d: "M 2 16.346 L 20 16.346" },
-              open: { d: "M 3 2.5 L 17 16.346" }
+              closed: { d: "M 2 19 L 20 19" },
+              open: { d: "M 3 5 L 17 19" }
             }}
             animate={isOpen ? "open" : "closed"}
+            transition={{ duration: 0.3 }}
           />
         </svg>
       </button>
