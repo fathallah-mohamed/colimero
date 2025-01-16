@@ -10,7 +10,6 @@ interface CompanyInfoFieldsProps {
 export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Informations de l'entreprise</h3>
       <div className="grid grid-cols-1 gap-4">
         <FormField
           control={form.control}
@@ -40,16 +39,12 @@ export function CompanyInfoFields({ form }: CompanyInfoFieldsProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                SIRET <span className="text-red-500">*</span>
+                SIRET
               </FormLabel>
               <FormControl>
                 <Input 
-                  placeholder="Numéro SIRET" 
+                  placeholder="Numéro SIRET (optionnel)" 
                   {...field}
-                  onBlur={(e) => {
-                    field.onBlur();
-                    form.trigger("siret");
-                  }}
                 />
               </FormControl>
               <FormMessage />

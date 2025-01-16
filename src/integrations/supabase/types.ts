@@ -340,7 +340,7 @@ export type Database = {
           price_per_kg: number | null
           reason: string | null
           services: string[] | null
-          siret: string
+          siret: string | null
           status: string
           total_capacity: number | null
           total_deliveries: number | null
@@ -366,7 +366,7 @@ export type Database = {
           price_per_kg?: number | null
           reason?: string | null
           services?: string[] | null
-          siret: string
+          siret?: string | null
           status?: string
           total_capacity?: number | null
           total_deliveries?: number | null
@@ -392,7 +392,7 @@ export type Database = {
           price_per_kg?: number | null
           reason?: string | null
           services?: string[] | null
-          siret?: string
+          siret?: string | null
           status?: string
           total_capacity?: number | null
           total_deliveries?: number | null
@@ -456,7 +456,7 @@ export type Database = {
           last_name: string
           phone: string
           phone_secondary: string
-          siret: string
+          siret: string | null
           status: string
           total_deliveries: number
         }
@@ -477,7 +477,7 @@ export type Database = {
           last_name: string
           phone: string
           phone_secondary?: string
-          siret: string
+          siret?: string | null
           status?: string
           total_deliveries?: number
         }
@@ -498,7 +498,7 @@ export type Database = {
           last_name?: string
           phone?: string
           phone_secondary?: string
-          siret?: string
+          siret?: string | null
           status?: string
           total_deliveries?: number
         }
