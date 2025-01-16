@@ -21,6 +21,7 @@ import CreateTour from "@/pages/CreateTour";
 import Reserver from "@/pages/Reserver";
 import Activation from "@/pages/Activation";
 import CarrierSignup from "@/pages/CarrierSignup";
+import ClientSignup from "@/pages/ClientSignup";
 
 export function AppRoutes() {
   return (
@@ -47,6 +48,7 @@ export function AppRoutes() {
       <Route path="/reserver/:tourId" element={<Reserver />} />
       <Route path="/activation" element={<Activation />} />
       <Route path="/devenir-transporteur" element={<CarrierSignup />} />
+      <Route path="/creer-compte" element={<ClientSignup />} />
     </Routes>
   );
 }
