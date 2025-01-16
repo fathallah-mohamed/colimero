@@ -68,7 +68,7 @@ export function CustomDialog({
             </DialogClose>
           </div>
           {React.Children.map(children, (child) => {
-            if (React.isValidElement(child) && typeof child.type !== 'string') {
+            if (React.isValidElement(child) && typeof child.type !== 'string' && 'ref' in child.type) {
               return React.cloneElement(child, {
                 ref: firstInputRef
               });
