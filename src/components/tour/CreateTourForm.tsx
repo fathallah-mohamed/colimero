@@ -85,6 +85,12 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const tourNumber = `TRN-${values.departure_country}${values.destination_country}-${timestamp}-${Math.random().toString(36).substring(2, 10)}`;
 
+      console.log("Creating tour with data:", {
+        ...values,
+        carrier_id: user.id,
+        tour_number: tourNumber
+      });
+
       const { data, error } = await supabase.from("tours").insert({
         carrier_id: user.id,
         departure_country: values.departure_country,
@@ -101,17 +107,24 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         tour_number: tourNumber
       }).select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating tour:", error);
+        throw error;
+      }
 
-      console.log("Tour created successfully:", data);
+      if (!data || data.length === 0) {
+        throw new Error("La tournée n'a pas été créée correctement");
+      }
+
+      console.log("Tour created successfully:", data[0]);
       setShowSuccessDialog(true);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating tour:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de la création de la tournée",
+        description: error.message || "Une erreur est survenue lors de la création de la tournée",
       });
     } finally {
       setIsSubmitting(false);
@@ -122,7 +135,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
   const handleSuccessConfirm = () => {
     setShowSuccessDialog(false);
     onSuccess();
-    navigate("/transporteur/tournees");
+    navigate("/mes-tournees");
   };
 
   const isFormValid = form.formState.isValid && form.watch('terms_accepted') && form.watch('customs_declaration');
