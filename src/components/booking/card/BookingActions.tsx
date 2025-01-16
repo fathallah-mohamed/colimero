@@ -3,18 +3,8 @@ import { Edit2, XCircle, Package, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { StatusActionButton } from "@/components/shared/StatusActionButton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ActionButton } from "@/components/shared/ActionButton";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 
 interface BookingActionsProps {
   bookingId: string;
@@ -52,7 +42,6 @@ export function BookingActions({
 
       if (error) throw error;
 
-      // Invalider les caches pour forcer le rechargement
       await queryClient.invalidateQueries({ queryKey: ['bookings'] });
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
@@ -97,7 +86,7 @@ export function BookingActions({
   return (
     <div className="flex items-center gap-2">
       {canCarrierModifyInPlanned && (
-        <StatusActionButton
+        <ActionButton
           icon={ThumbsUp}
           label="Confirmer"
           onClick={() => handleStatusChange("confirmed")}
@@ -106,7 +95,7 @@ export function BookingActions({
       )}
       
       {canCarrierModifyInCollection && (
-        <StatusActionButton
+        <ActionButton
           icon={Package}
           label="Marquer comme ramassée"
           onClick={() => handleStatusChange("collected")}
@@ -115,7 +104,7 @@ export function BookingActions({
       )}
       
       {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
-        <StatusActionButton
+        <ActionButton
           icon={Edit2}
           label="Modifier"
           onClick={onEdit}
@@ -124,33 +113,14 @@ export function BookingActions({
       )}
       
       {(canClientModify || canCarrierModifyInCollection || canCarrierModifyInPlanned) && (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <StatusActionButton
-              icon={XCircle}
-              label="Annuler"
-              onClick={() => {}} // Add empty onClick handler to satisfy TypeScript
-              colorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
-            />
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirmer l'annulation</AlertDialogTitle>
-              <AlertDialogDescription>
-                Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="border-gray-200">Retour</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => handleStatusChange("cancelled")}
-                className="bg-red-600 text-white hover:bg-red-700"
-              >
-                Confirmer l'annulation
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog
+          title="Confirmer l'annulation"
+          description="Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée."
+          icon={XCircle}
+          buttonLabel="Annuler"
+          buttonColorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
+          onConfirm={() => handleStatusChange("cancelled")}
+        />
       )}
     </div>
   );
