@@ -7,7 +7,7 @@ import { useTours } from "@/hooks/use-tours";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { Package2, ShieldCheck, Clock4, Loader2 } from "lucide-react";
 import type { TourStatus } from "@/types/tour";
 

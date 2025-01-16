@@ -4,7 +4,7 @@ import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 import { ApprovalRequestsList } from "@/components/approval-requests/ApprovalRequestsList";
 import { ApprovalRequestCard } from "@/components/approval-requests/ApprovalRequestCard";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react";

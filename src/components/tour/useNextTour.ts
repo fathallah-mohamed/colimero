@@ -23,7 +23,7 @@ export function useNextTour() {
               )
             )
           `)
-          .eq('status', 'planned')  // Using 'planned' instead of 'Programmée'
+          .eq('status', 'Programmée')
           .eq('type', 'public')
           .gte('departure_date', new Date().toISOString())
           .order('departure_date', { ascending: true })

@@ -1,54 +1,52 @@
 import { Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Blog from "./pages/Blog";
-import Contact from "./pages/Contact";
-import APropos from "./pages/APropos";
-import Tours from "./pages/Tours";
-import Profile from "./pages/Profile";
-import Transporteurs from "./pages/Transporteurs";
-import TransporteurDetails from "./pages/TransporteurDetails";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminManagement from "./pages/AdminManagement";
-import AdminClients from "./pages/AdminClients";
-import CarrierSignup from "./pages/CarrierSignup";
-import ClientSignup from "./pages/ClientSignup";
-import ResetPassword from "./pages/ResetPassword";
-import Activation from "./pages/Activation";
-import CreateTour from "./pages/CreateTour";
-import PlanifierTournee from "./pages/PlanifierTournee";
-import MesTournees from "./pages/MesTournees";
-import MesReservations from "./pages/MesReservations";
-import DemandesApprobation from "./pages/DemandesApprobation";
-import MesDemandesApprobation from "./pages/MesDemandesApprobation";
-import EnvoyerColis from "./pages/EnvoyerColis";
-import Reserver from "./pages/Reserver";
+import Index from "@/pages/Index";
+import APropos from "@/pages/APropos";
+import Blog from "@/pages/Blog";
+import Contact from "@/pages/Contact";
+import EnvoyerColis from "@/pages/EnvoyerColis";
+import PlanifierTournee from "@/pages/PlanifierTournee";
+import Profile from "@/pages/Profile";
+import ResetPassword from "@/pages/ResetPassword";
+import Tours from "@/pages/Tours";
+import TransporteurDetails from "@/pages/TransporteurDetails";
+import Transporteurs from "@/pages/Transporteurs";
+import MesReservations from "@/pages/MesReservations";
+import MesTournees from "@/pages/MesTournees";
+import DemandesApprobation from "@/pages/DemandesApprobation";
+import MesDemandesApprobation from "@/pages/MesDemandesApprobation";
+import AdminDashboard from "@/pages/AdminDashboard";
+import AdminClients from "@/pages/AdminClients";
+import AdminManagement from "@/pages/AdminManagement";
+import CreateTour from "@/pages/CreateTour";
+import Reserver from "@/pages/Reserver";
+import Activation from "@/pages/Activation";
+import CarrierSignup from "@/pages/CarrierSignup";
 
-export default function AppRoutes() {
+export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
+      <Route path="/a-propos" element={<APropos />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/a-propos" element={<APropos />} />
-      <Route path="/tours" element={<Tours />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/transporteurs" element={<Transporteurs />} />
-      <Route path="/transporteur/:id" element={<TransporteurDetails />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/gestion" element={<AdminManagement />} />
-      <Route path="/admin/clients" element={<AdminClients />} />
-      <Route path="/devenir-transporteur" element={<CarrierSignup />} />
-      <Route path="/inscription" element={<ClientSignup />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/activation" element={<Activation />} />
-      <Route path="/creer-tournee" element={<CreateTour />} />
+      <Route path="/envoyer-colis" element={<EnvoyerColis />} />
       <Route path="/planifier-tournee" element={<PlanifierTournee />} />
-      <Route path="/mes-tournees" element={<MesTournees />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/tours" element={<Tours />} />
+      <Route path="/transporteur/:id" element={<TransporteurDetails />} />
+      <Route path="/transporteurs" element={<Transporteurs />} />
       <Route path="/mes-reservations" element={<MesReservations />} />
+      <Route path="/mes-tournees" element={<MesTournees />} />
       <Route path="/demandes-approbation" element={<DemandesApprobation />} />
       <Route path="/mes-demandes-approbation" element={<MesDemandesApprobation />} />
-      <Route path="/envoyer-colis" element={<EnvoyerColis />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/clients" element={<AdminClients />} />
+      <Route path="/admin/gestion" element={<AdminManagement />} />
+      <Route path="/transporteur/tournees/creer" element={<CreateTour />} />
       <Route path="/reserver/:tourId" element={<Reserver />} />
+      <Route path="/activation" element={<Activation />} />
+      <Route path="/devenir-transporteur" element={<CarrierSignup />} />
     </Routes>
   );
 }

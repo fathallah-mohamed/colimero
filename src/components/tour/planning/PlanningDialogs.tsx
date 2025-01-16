@@ -1,6 +1,6 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CarrierSignupForm from "@/components/auth/carrier-signup/CarrierSignupForm";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { useToast } from "@/hooks/use-toast";
 
