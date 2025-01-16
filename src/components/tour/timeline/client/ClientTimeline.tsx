@@ -7,9 +7,10 @@ import { motion } from "framer-motion";
 interface ClientTimelineProps {
   status: TourStatus;
   tourId: number;
+  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
 }
 
-export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
+export function ClientTimeline({ status, tourId, onStatusChange }: ClientTimelineProps) {
   if (status === "Annulée") {
     return <CancelledStatus />;
   }
@@ -53,7 +54,7 @@ export function ClientTimeline({ status, tourId }: ClientTimelineProps) {
             isCompleted={isCompleted}
             isCurrent={isCurrent}
             isNext={isNext}
-            onClick={() => {}}
+            onClick={() => isNext && onStatusChange?.(tourId, statusItem)}
             label={label}
             variant="client"
           />
