@@ -51,7 +51,6 @@ export function ToursList({
           tour={tour}
           isEven={index % 2 === 0}
           onStatusChange={onStatusChange}
-          onUpdate={() => Promise.resolve()}
         />
       ))}
     </div>

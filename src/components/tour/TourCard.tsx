@@ -56,9 +56,17 @@ export function TourCard({
         <TourCapacityInfo
           totalCapacity={tour.total_capacity}
           remainingCapacity={tour.remaining_capacity}
+          bookingsCount={0}
         />
 
-        <TourStatusTimeline tour={tour} />
+        <TourStatusTimeline 
+          tourId={tour.id} 
+          status={tour.status} 
+          onStatusChange={(newStatus) => {
+            // Handle status change
+            console.log("Status changed to:", newStatus);
+          }} 
+        />
 
         {showBookings && (
           <>
