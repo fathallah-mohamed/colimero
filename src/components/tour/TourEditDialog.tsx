@@ -4,11 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { TourEditForm } from "./tour-edit/TourEditForm";
 import { tourFormSchema } from "./tour-edit/TourValidationSchema";
 import { useTourEdit } from "./tour-edit/useTourEdit";
+import { Tour } from "@/types/tour";
 
 interface TourEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  tour: any;
+  tour: Tour;
   onComplete: () => void;
 }
 

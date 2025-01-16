@@ -13,6 +13,7 @@ import { TourTimelineDisplay } from "./shared/TourTimelineDisplay";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tour, TourStatus } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
+import { TourEditDialog } from "./TourEditDialog";
 
 interface TourCardProps {
   tour: Tour;
@@ -29,6 +30,7 @@ export function TourCard({
 }: TourCardProps) {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showBookings, setShowBookings] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const handleDownloadPDF = async () => {
@@ -79,6 +81,17 @@ export function TourCard({
         description: "Impossible de mettre à jour le statut de la tournée",
       });
     }
+  };
+
+  const handleEditComplete = async () => {
+    setIsEditDialogOpen(false);
+    if (onUpdate) {
+      await onUpdate();
+    }
+    toast({
+      title: "Tournée mise à jour",
+      description: "Les modifications ont été enregistrées avec succès",
+    });
   };
 
   const hasBookings = tour.bookings && tour.bookings.length > 0;
@@ -132,11 +145,19 @@ export function TourCard({
         bookingsCount={tour.bookings?.length || 0}
       />
 
-      {hasBookings && (
-        <div className="mt-4">
+      <div className="flex justify-between items-center mt-4 gap-4">
+        <Button
+          variant="outline"
+          className="flex-1"
+          onClick={() => setIsEditDialogOpen(true)}
+        >
+          Modifier la tournée
+        </Button>
+
+        {hasBookings && (
           <Button
             variant="ghost"
-            className="w-full flex items-center justify-center gap-2"
+            className="flex items-center justify-center gap-2"
             onClick={() => setShowBookings(!showBookings)}
           >
             {showBookings ? (
@@ -151,8 +172,8 @@ export function TourCard({
               </>
             )}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       {showBookings && hasBookings && (
         <div className="mt-6 space-y-4">
@@ -169,6 +190,13 @@ export function TourCard({
           ))}
         </div>
       )}
+
+      <TourEditDialog 
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        tour={tour}
+        onComplete={handleEditComplete}
+      />
     </Card>
   );
 }
