@@ -19,7 +19,7 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleAuthError = (error: AuthError) => {
+  const handleAuthError = async (error: AuthError) => {
     console.error("Authentication error details:", {
       message: error.message,
       status: error instanceof AuthApiError ? error.status : null,
@@ -31,6 +31,29 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
         case "Invalid login credentials":
           return "Email ou mot de passe incorrect";
         case "Email not confirmed":
+          // Envoyer un nouvel email d'activation
+          try {
+            console.log("Tentative de renvoi de l'email d'activation à:", email);
+            const { error: resendError } = await supabase.functions.invoke('send-activation-email', {
+              body: { email }
+            });
+
+            if (resendError) {
+              console.error("Erreur lors de l'envoi de l'email:", resendError);
+              toast({
+                variant: "destructive",
+                title: "Erreur",
+                description: "Impossible d'envoyer l'email d'activation",
+              });
+            } else {
+              toast({
+                title: "Email envoyé",
+                description: "Un nouvel email d'activation vous a été envoyé",
+              });
+            }
+          } catch (resendError) {
+            console.error("Erreur lors de l'envoi de l'email:", resendError);
+          }
           setShowVerificationDialog(true);
           return "Veuillez vérifier votre email pour activer votre compte";
         case "Invalid email or password":
@@ -50,7 +73,7 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
     setShowErrorDialog(false);
 
     try {
-      console.log("Attempting login with:", { email: email.trim() });
+      console.log("Tentative de connexion avec:", { email: email.trim() });
       
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -58,31 +81,9 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
       });
 
       if (signInError) {
-        const errorMessage = handleAuthError(signInError);
+        const errorMessage = await handleAuthError(signInError);
         setError(errorMessage);
         setShowErrorDialog(true);
-
-        if (signInError.message === "Email not confirmed") {
-          const { error: resendError } = await supabase.auth.resend({
-            type: 'signup',
-            email: email.trim(),
-          });
-          
-          if (resendError) {
-            console.error("Error sending verification email:", resendError);
-            toast({
-              variant: "destructive",
-              title: "Erreur",
-              description: "Impossible d'envoyer l'email de vérification",
-            });
-          } else {
-            toast({
-              title: "Email envoyé",
-              description: "Un nouvel email de vérification vous a été envoyé",
-            });
-          }
-        }
-        
         setPassword("");
         return;
       }
@@ -92,7 +93,7 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
       }
 
       const userType = data.user.user_metadata?.user_type;
-      console.log("User type:", userType);
+      console.log("Type d'utilisateur:", userType);
 
       if (requiredUserType && userType !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
@@ -110,22 +111,22 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
 
         if (clientData && !clientData.email_verified) {
           setShowVerificationDialog(true);
-          const { error: resendError } = await supabase.auth.resend({
-            type: 'signup',
-            email: email.trim(),
+          // Envoyer un nouvel email d'activation
+          const { error: resendError } = await supabase.functions.invoke('send-activation-email', {
+            body: { email: email.trim() }
           });
           
           if (resendError) {
-            console.error("Error sending verification email:", resendError);
+            console.error("Erreur lors de l'envoi de l'email:", resendError);
             toast({
               variant: "destructive",
               title: "Erreur",
-              description: "Impossible d'envoyer l'email de vérification",
+              description: "Impossible d'envoyer l'email d'activation",
             });
           } else {
             toast({
               title: "Email envoyé",
-              description: "Un nouvel email de vérification vous a été envoyé",
+              description: "Un nouvel email d'activation vous a été envoyé",
             });
           }
           
