@@ -51,7 +51,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       terms_accepted: false,
       customs_declaration: false,
     },
-    mode: "onChange", // Active la validation en temps réel
+    mode: "onChange",
   });
 
   async function onSubmit(values: z.infer<typeof tourFormSchema>) {
@@ -82,7 +82,6 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         return;
       }
 
-      // Générer le timestamp pour le numéro de tournée
       const timestamp = Math.floor(Date.now() / 1000).toString();
 
       const { error } = await supabase.from("tours").insert({
@@ -124,7 +123,6 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
     navigate("/transporteur/tournees");
   };
 
-  // Vérifier si le formulaire est valide
   const isFormValid = form.formState.isValid && form.watch('terms_accepted') && form.watch('customs_declaration');
 
   return (
