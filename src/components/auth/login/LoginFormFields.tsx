@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
+import { ErrorDialog } from "@/components/ui/error-dialog";
 
 interface LoginFormFieldsProps {
   email: string;
@@ -39,7 +39,6 @@ export function LoginFormFields({
           onChange={(e) => onEmailChange(e.target.value)}
           disabled={isLoading}
           placeholder="exemple@email.com"
-          className="h-12"
           required
         />
       </div>
@@ -52,23 +51,26 @@ export function LoginFormFields({
           value={password}
           onChange={(e) => onPasswordChange(e.target.value)}
           disabled={isLoading}
-          placeholder="Votre mot de passe"
-          className="h-12"
           required
         />
       </div>
 
-      {error && showErrorDialog && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      {showVerificationDialog && (
+        <EmailVerificationDialog
+          isOpen={showVerificationDialog}
+          onClose={onVerificationDialogClose}
+          email={email}
+        />
       )}
 
-      <EmailVerificationDialog
-        isOpen={showVerificationDialog}
-        onClose={onVerificationDialogClose}
-        email={email}
-      />
+      {showErrorDialog && error && (
+        <ErrorDialog
+          isOpen={showErrorDialog}
+          onClose={onErrorDialogClose}
+          title="Erreur de connexion"
+          description={error}
+        />
+      )}
     </div>
   );
 }

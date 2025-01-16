@@ -102,37 +102,17 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
         return;
       }
 
-      if (userType === 'client') {
-        const { data: clientData } = await supabase
-          .from('clients')
-          .select('email_verified')
-          .eq('id', data.user.id)
-          .single();
+      // Vérifier si l'email est vérifié pour les clients
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('email_verified')
+        .eq('email', email.trim())
+        .maybeSingle();
 
-        if (clientData && !clientData.email_verified) {
-          setShowVerificationDialog(true);
-          // Envoyer un nouvel email d'activation
-          const { error: resendError } = await supabase.functions.invoke('send-activation-email', {
-            body: { email: email.trim() }
-          });
-          
-          if (resendError) {
-            console.error("Erreur lors de l'envoi de l'email:", resendError);
-            toast({
-              variant: "destructive",
-              title: "Erreur",
-              description: "Impossible d'envoyer l'email d'activation",
-            });
-          } else {
-            toast({
-              title: "Email envoyé",
-              description: "Un nouvel email d'activation vous a été envoyé",
-            });
-          }
-          
-          await supabase.auth.signOut();
-          return;
-        }
+      if (clientData && !clientData.email_verified) {
+        setShowVerificationDialog(true);
+        setPassword("");
+        return;
       }
 
       toast({
