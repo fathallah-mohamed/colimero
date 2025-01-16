@@ -5,6 +5,13 @@ interface BookingCardDetailsProps {
 }
 
 export function BookingCardDetails({ booking }: BookingCardDetailsProps) {
+  console.log("Booking details:", {
+    sender: booking.sender_name,
+    sender_email: booking.sender_email,
+    recipient: booking.recipient_name,
+    recipient_email: booking.recipient_email
+  });
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
@@ -12,7 +19,9 @@ export function BookingCardDetails({ booking }: BookingCardDetailsProps) {
           <h4 className="text-sm font-medium text-gray-500 mb-2">Expéditeur</h4>
           <p className="font-medium">{booking.sender_name}</p>
           <p className="text-sm text-gray-600">{booking.sender_phone}</p>
-          <p className="text-sm text-gray-600">{booking.sender_email}</p>
+          {booking.sender_email && (
+            <p className="text-sm text-gray-600">{booking.sender_email}</p>
+          )}
         </div>
         <div>
           <h4 className="text-sm font-medium text-gray-500 mb-2">Destinataire</h4>
