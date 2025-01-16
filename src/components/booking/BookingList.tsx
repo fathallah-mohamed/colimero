@@ -19,9 +19,26 @@ interface BookingWithRelations {
   tour_id: number;
   status: BookingStatus;
   created_at: string;
-  // ... other booking fields
-  sender: SenderRecipient;
-  recipient: SenderRecipient;
+  pickup_city: string;
+  delivery_city: string;
+  tracking_number: string;
+  weight: number;
+  item_type: string;
+  recipient_name: string;
+  recipient_address: string;
+  recipient_phone: string;
+  sender_name: string | null;
+  sender_phone: string | null;
+  delivery_status: string | null;
+  delivery_notes: string | null;
+  terms_accepted: boolean | null;
+  customs_declaration: boolean | null;
+  package_description: string | null;
+  special_items: Array<{ name: string; quantity: number }>;
+  content_types: string[] | null;
+  photos: string[] | null;
+  sender: SenderRecipient | null;
+  recipient: SenderRecipient | null;
   tours: {
     collection_date: string;
     departure_date: string;
@@ -36,7 +53,7 @@ interface BookingWithRelations {
       last_name: string;
       email: string;
     };
-  };
+  } | null;
 }
 
 export function BookingList() {
@@ -93,7 +110,7 @@ export function BookingList() {
 
       console.log("Fetched bookings:", data);
       
-      return (data as BookingWithRelations[])?.map(booking => ({
+      return (data as unknown as BookingWithRelations[])?.map(booking => ({
         ...booking,
         sender_email: booking.sender?.email,
         recipient_email: booking.recipient?.email,
