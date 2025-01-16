@@ -30,7 +30,7 @@ export default function MobileMenu({
   return (
     <div
       className={cn(
-        "fixed inset-x-0 top-[65px] bg-white border-t shadow-lg",
+        "fixed inset-x-0 top-[65px] bg-white border-t shadow-lg h-[calc(100vh-65px)] overflow-y-auto",
         "transform transition-transform duration-300 ease-in-out",
         isOpen ? "translate-y-0" : "-translate-y-full"
       )}
