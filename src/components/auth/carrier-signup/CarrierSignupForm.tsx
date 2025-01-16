@@ -97,38 +97,26 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="text-center mb-8 bg-gradient-primary p-8 rounded-lg text-white">
-        <h1 className="text-3xl font-bold mb-3">
-          Rejoignez notre réseau de transporteurs !
-        </h1>
-        <p className="text-lg opacity-90">
-          Inscrivez-vous dès aujourd'hui pour accéder à des tournées optimisées et développer votre activité. 
-          Remplissez les informations ci-dessous, et notre équipe examinera votre demande rapidement.
-        </p>
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <ScrollArea className="h-[calc(100vh-300px)] pr-4">
+          <FormSections form={form} />
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <ScrollArea className="h-[calc(100vh-300px)] pr-4">
-            <FormSections form={form} />
-
-            <div className="mt-8 text-center">
-              <Button 
-                type="submit" 
-                className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
-                disabled={!isValid || !allConsentsAccepted}
-              >
-                Envoyer ma demande d'inscription
-              </Button>
-              <p className="text-sm text-muted-foreground mt-4">
-                Une fois votre demande envoyée, nous vous contacterons pour finaliser votre inscription.
-              </p>
-            </div>
-          </ScrollArea>
-        </form>
-      </Form>
-    </div>
+          <div className="mt-8 text-center">
+            <Button 
+              type="submit" 
+              className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
+              disabled={!isValid || !allConsentsAccepted}
+            >
+              Envoyer ma demande d'inscription
+            </Button>
+            <p className="text-sm text-muted-foreground mt-4">
+              Une fois votre demande envoyée, nous vous contacterons pour finaliser votre inscription.
+            </p>
+          </div>
+        </ScrollArea>
+      </form>
+    </Form>
   );
 };
 
