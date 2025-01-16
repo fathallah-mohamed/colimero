@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { UserCircle2, X } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { menuItems } from "./config/menuItems";
 import { UserMenuItems } from "./UserMenuItems";
@@ -56,6 +56,16 @@ export default function MobileMenu({
     }
   };
 
+  const Path = (props: any) => (
+    <motion.path
+      fill="transparent"
+      strokeWidth="3"
+      stroke="currentColor"
+      strokeLinecap="round"
+      {...props}
+    />
+  );
+
   return (
     <motion.div 
       initial="closed"
@@ -69,10 +79,25 @@ export default function MobileMenu({
       <div className="flex justify-end p-4">
         <button
           onClick={() => setIsOpen(false)}
-          className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+          className="relative flex items-center justify-center w-12 h-12 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200"
         >
-          <X className="h-6 w-6" />
           <span className="sr-only">Fermer le menu</span>
+          <svg width="32" height="32" viewBox="0 0 23 23">
+            <Path
+              variants={{
+                closed: { d: "M 3 19 L 17 5", opacity: 1 },
+                open: { d: "M 3 19 L 17 5", opacity: 1 }
+              }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            />
+            <Path
+              variants={{
+                closed: { d: "M 3 5 L 17 19", opacity: 1 },
+                open: { d: "M 3 5 L 17 19", opacity: 1 }
+              }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            />
+          </svg>
         </button>
       </div>
 
