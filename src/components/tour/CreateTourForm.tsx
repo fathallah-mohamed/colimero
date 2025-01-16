@@ -51,6 +51,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       terms_accepted: false,
       customs_declaration: false,
     },
+    mode: "onChange", // Active la validation en temps réel
   });
 
   async function onSubmit(values: z.infer<typeof tourFormSchema>) {
@@ -123,6 +124,9 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
     navigate("/transporteur/tournees");
   };
 
+  // Vérifier si le formulaire est valide
+  const isFormValid = form.formState.isValid && form.watch('terms_accepted') && form.watch('customs_declaration');
+
   return (
     <>
       <ScrollArea className="h-[calc(100vh-4rem)]">
@@ -137,7 +141,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
               <TermsSection form={form} />
               <TourSubmitButton 
                 isSubmitting={isSubmitting}
-                isValid={form.formState.isValid}
+                isValid={isFormValid}
               />
             </form>
           </Form>
