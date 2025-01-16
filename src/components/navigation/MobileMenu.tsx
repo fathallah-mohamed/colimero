@@ -4,6 +4,7 @@ import MenuItems from "./MenuItems";
 import { Button } from "../ui/button";
 import { UserCircle2 } from "lucide-react";
 import AccountMenu from "./AccountMenu";
+import { UserMenuItems } from "./UserMenuItems";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -35,30 +36,42 @@ export default function MobileMenu({
         isOpen ? "translate-x-0" : "translate-x-full"
       )}
     >
-      <div className="px-4 pt-2 pb-3 space-y-1">
-        <MenuItems />
-      </div>
-      <div className="px-4 py-3 border-t border-gray-200">
-        {!user ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLoginClick}
-            className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
-          >
-            <UserCircle2 className="w-4 h-4 mr-2" />
-            Se connecter
-          </Button>
-        ) : (
-          <AccountMenu
-            userType={userType}
-            onClose={() => {
-              handleLogout();
-              setIsOpen(false);
-            }}
-          />
-        )}
-      </div>
+      {user ? (
+        <>
+          <div className="px-4 py-3 border-b border-gray-200">
+            <AccountMenu
+              userType={userType}
+              onClose={() => {
+                handleLogout();
+                setIsOpen(false);
+              }}
+            />
+          </div>
+          <div className="px-4 py-2">
+            <UserMenuItems userType={userType} />
+          </div>
+          <div className="px-4 pt-2 pb-3 space-y-1 border-t border-gray-200">
+            <MenuItems />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="px-4 pt-2 pb-3 space-y-1">
+            <MenuItems />
+          </div>
+          <div className="px-4 py-3 border-t border-gray-200">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLoginClick}
+              className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
+            >
+              <UserCircle2 className="w-4 h-4 mr-2" />
+              Se connecter
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
