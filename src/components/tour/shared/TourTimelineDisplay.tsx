@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Edit, XCircle, Truck, Plane, Package, CheckCircle } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
@@ -12,6 +11,7 @@ interface TourTimelineDisplayProps {
   userType?: string;
   canEdit?: boolean;
   variant?: 'client' | 'carrier';
+  onEdit?: () => void;
 }
 
 export function TourTimelineDisplay({ 
@@ -20,20 +20,16 @@ export function TourTimelineDisplay({
   tourId,
   userType,
   canEdit = false,
-  variant = 'carrier'
+  variant = 'carrier',
+  onEdit
 }: TourTimelineDisplayProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const navigate = useNavigate();
 
   const handleCancel = async () => {
     if (onStatusChange) {
       await onStatusChange("Annulée");
     }
     setShowCancelDialog(false);
-  };
-
-  const handleEdit = () => {
-    navigate(`/planifier-une-tournee?tourId=${tourId}`);
   };
 
   const handleStartCollection = async () => {
@@ -120,7 +116,7 @@ export function TourTimelineDisplay({
         <div className="flex justify-end gap-3 mt-8">
           <Button
             variant="outline"
-            onClick={handleEdit}
+            onClick={onEdit}
             className="gap-2"
           >
             <Edit className="h-4 w-4" />

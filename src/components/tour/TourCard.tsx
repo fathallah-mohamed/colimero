@@ -137,6 +137,7 @@ export function TourCard({
         tourId={tour.id}
         onStatusChange={handleTourStatusChange}
         canEdit={true}
+        onEdit={() => setIsEditDialogOpen(true)}
       />
 
       <TourCapacityInfo
@@ -145,19 +146,11 @@ export function TourCard({
         bookingsCount={tour.bookings?.length || 0}
       />
 
-      <div className="flex justify-between items-center mt-4 gap-4">
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => setIsEditDialogOpen(true)}
-        >
-          Modifier la tournée
-        </Button>
-
-        {hasBookings && (
+      {hasBookings && (
+        <div className="mt-4">
           <Button
             variant="ghost"
-            className="flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2"
             onClick={() => setShowBookings(!showBookings)}
           >
             {showBookings ? (
@@ -172,8 +165,8 @@ export function TourCard({
               </>
             )}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {showBookings && hasBookings && (
         <div className="mt-6 space-y-4">
