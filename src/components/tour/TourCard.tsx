@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, ChevronDown, ChevronUp } from "lucide-react";
+import { FileDown, ChevronDown, ChevronUp, Hash } from "lucide-react";
 import { TourCapacityInfo } from "./TourCapacityInfo";
 import { generateTourPDF } from "./tour-card/PDFGenerator";
 import { useToast } from "@/hooks/use-toast";
@@ -103,13 +103,21 @@ export function TourCard({
       "transition-colors duration-200"
     )}>
       <div className="flex justify-between items-start mb-6">
-        <div>
+        <div className="space-y-2">
           <h3 className="text-lg font-semibold">
             Tournée du {new Date(tour.departure_date).toLocaleDateString()}
           </h3>
           <p className="text-sm text-gray-500">
             {tour.departure_country} → {tour.destination_country}
           </p>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-gray-600">
+              <Hash className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-sm font-medium text-primary">
+                {tour.tour_number || "Numéro non défini"}
+              </span>
+            </div>
+          </div>
           <div className="flex items-center gap-2 mt-2">
             <TourStatusBadge status={tour.status} />
             <Badge variant={tour.type === "public" ? "default" : "secondary"}>
