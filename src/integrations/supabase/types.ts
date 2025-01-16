@@ -145,6 +145,7 @@ export type Database = {
           photos: string[] | null
           pickup_city: string
           recipient_address: string
+          recipient_id: string | null
           recipient_name: string
           recipient_phone: string
           sender_name: string | null
@@ -172,6 +173,7 @@ export type Database = {
           photos?: string[] | null
           pickup_city: string
           recipient_address: string
+          recipient_id?: string | null
           recipient_name: string
           recipient_phone: string
           sender_name?: string | null
@@ -199,6 +201,7 @@ export type Database = {
           photos?: string[] | null
           pickup_city?: string
           recipient_address?: string
+          recipient_id?: string | null
           recipient_name?: string
           recipient_phone?: string
           sender_name?: string | null
@@ -218,6 +221,20 @@ export type Database = {
             columns: ["approval_request_id"]
             isOneToOne: false
             referencedRelation: "approval_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "client_consents"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "bookings_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {

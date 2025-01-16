@@ -38,11 +38,13 @@ export function BookingList() {
             )
           ),
           sender:clients!bookings_user_id_fkey (
+            id,
             email,
             first_name,
             last_name
           ),
           recipient:clients!bookings_recipient_id_fkey (
+            id,
             email,
             first_name,
             last_name
