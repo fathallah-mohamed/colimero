@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
-import { Eye } from "lucide-react";
+import { Eye, Hash } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import AuthDialog from "@/components/auth/AuthDialog";
@@ -128,13 +128,22 @@ export function TourTimelineCard({
   return (
     <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Hash className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-primary">
+                {tour.tour_number || "Numéro non défini"}
+              </span>
+              {isUpcoming && (
+                <Badge className="bg-[#9b87f5]/10 text-[#9b87f5] hover:bg-[#9b87f5]/20 transition-colors ml-2">
+                  Prochaine tournée
+                </Badge>
+              )}
+            </div>
+          </div>
+
           <TourCardHeader tour={tour} hideAvatar={hideAvatar} />
-          {isUpcoming && (
-            <Badge className="bg-[#9b87f5]/10 text-[#9b87f5] hover:bg-[#9b87f5]/20 transition-colors">
-              Prochaine tournée
-            </Badge>
-          )}
         </div>
 
         <Button
