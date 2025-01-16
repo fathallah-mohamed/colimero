@@ -1,8 +1,10 @@
 import { TourStatus } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Edit, XCircle, Truck, Plane, Package, CheckCircle } from "lucide-react";
+import { Edit, XCircle, Truck, Plane, Package, CheckCircle, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
@@ -24,6 +26,8 @@ export function TourTimelineDisplay({
   onEdit
 }: TourTimelineDisplayProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showPendingBookingsDialog, setShowPendingBookingsDialog] = useState(false);
+  const { toast } = useToast();
 
   const handleCancel = async () => {
     if (onStatusChange) {
@@ -32,8 +36,35 @@ export function TourTimelineDisplay({
     setShowCancelDialog(false);
   };
 
+  const checkPendingBookings = async () => {
+    try {
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('tour_id', tourId)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+
+      if (bookings && bookings.length > 0) {
+        setShowPendingBookingsDialog(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking pending bookings:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de vérifier les réservations en attente",
+      });
+      return true;
+    }
+  };
+
   const handleStartCollection = async () => {
-    if (onStatusChange) {
+    const hasPendingBookings = await checkPendingBookings();
+    if (!hasPendingBookings && onStatusChange) {
       await onStatusChange("Ramassage en cours");
     }
   };
@@ -147,6 +178,25 @@ export function TourTimelineDisplay({
           </AlertDialog>
         </div>
       )}
+
+      <AlertDialog open={showPendingBookingsDialog} onOpenChange={setShowPendingBookingsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-yellow-500" />
+              Réservations en attente
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Il y a des réservations en attente sur cette tournée. Vous devez confirmer ou annuler toutes les réservations en attente avant de démarrer le ramassage.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowPendingBookingsDialog(false)}>
+              Compris
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
