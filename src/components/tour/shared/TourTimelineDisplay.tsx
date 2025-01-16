@@ -7,7 +7,7 @@ import { useTourStatusManagement } from "../timeline/hooks/useTourStatusManageme
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
-  onStatusChange?: (newStatus: TourStatus) => Promise<void>;
+  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
   tourId: number;
   userType?: string;
   canEdit?: boolean;
@@ -34,7 +34,10 @@ export function TourTimelineDisplay({
     handleStartTransit,
     handleStartDelivery,
     handleComplete
-  } = useTourStatusManagement({ tourId, onStatusChange });
+  } = useTourStatusManagement({ 
+    tourId, 
+    onStatusChange: (newStatus) => onStatusChange?.(tourId, newStatus)
+  });
 
   // If the tour is cancelled, show cancelled message
   if (status === "Annulée") {
