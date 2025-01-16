@@ -83,8 +83,9 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
       }
 
       const timestamp = Math.floor(Date.now() / 1000).toString();
+      const tourNumber = `TRN-${values.departure_country}${values.destination_country}-${timestamp}-${Math.random().toString(36).substring(2, 10)}`;
 
-      const { error } = await supabase.from("tours").insert({
+      const { data, error } = await supabase.from("tours").insert({
         carrier_id: user.id,
         departure_country: values.departure_country,
         destination_country: values.destination_country,
@@ -97,11 +98,12 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         status: "Programmée",
         terms_accepted: values.terms_accepted,
         customs_declaration: values.customs_declaration,
-        tour_number: `TRN-${values.departure_country}${values.destination_country}-${timestamp}-${Math.random().toString(36).substring(2, 10)}`
-      });
+        tour_number: tourNumber
+      }).select();
 
       if (error) throw error;
 
+      console.log("Tour created successfully:", data);
       setShowSuccessDialog(true);
       
     } catch (error) {
