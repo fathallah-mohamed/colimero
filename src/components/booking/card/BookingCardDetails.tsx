@@ -18,7 +18,9 @@ export function BookingCardDetails({ booking }: BookingCardDetailsProps) {
           <h4 className="text-sm font-medium text-gray-500 mb-2">Destinataire</h4>
           <p className="font-medium">{booking.recipient_name}</p>
           <p className="text-sm text-gray-600">{booking.recipient_phone}</p>
-          <p className="text-sm text-gray-600">{booking.recipient_email}</p>
+          {booking.recipient_email && (
+            <p className="text-sm text-gray-600">{booking.recipient_email}</p>
+          )}
           <p className="text-sm text-gray-600">{booking.recipient_address}</p>
         </div>
       </div>
