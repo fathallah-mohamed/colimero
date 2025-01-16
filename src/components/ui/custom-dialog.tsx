@@ -1,101 +1,81 @@
-import * as React from "react";
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
-import { X } from "lucide-react";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import { X } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog"
+import { cn } from "@/lib/utils"
 
 interface CustomDialogProps {
-  open: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
-  className?: string;
-  showCloseConfirmation?: boolean;
-  title?: string;
+  children: React.ReactNode
+  open?: boolean
+  onClose: () => void
+  title?: string
+  className?: string
 }
 
-export function CustomDialog({
-  open,
-  onClose,
-  children,
-  className,
-  showCloseConfirmation = false,
-  title,
-}: CustomDialogProps) {
-  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
-  const firstInputRef = React.useRef<HTMLInputElement>(null);
+export function CustomDialog({ children, open, onClose, title, className }: CustomDialogProps) {
+  const firstInputRef = React.useRef<HTMLInputElement>(null)
+  const [showDialog, setShowDialog] = React.useState(open)
 
   React.useEffect(() => {
-    if (open && firstInputRef.current) {
+    setShowDialog(open)
+  }, [open])
+
+  React.useEffect(() => {
+    if (showDialog) {
+      // Focus the first input after dialog opens
       setTimeout(() => {
-        firstInputRef.current?.focus();
-      }, 100);
+        firstInputRef.current?.focus()
+      }, 100)
     }
-  }, [open]);
+  }, [showDialog])
 
   const handleClose = () => {
-    if (showCloseConfirmation) {
-      setShowConfirmDialog(true);
-    } else {
-      onClose();
-    }
-  };
-
-  const confirmClose = () => {
-    setShowConfirmDialog(false);
-    onClose();
-  };
+    setShowDialog(false)
+    onClose()
+  }
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={() => handleClose()} modal>
-        <DialogContent
-          className={cn(
-            "data-[state=open]:animate-contentShow max-h-[90vh] overflow-y-auto",
-            className
+    <Dialog open={showDialog} onOpenChange={handleClose}>
+      <DialogContent
+        className={cn(
+          "max-w-lg overflow-y-auto max-h-[90vh]",
+          className
+        )}
+      >
+        <DialogHeader>
+          {title && (
+            <DialogTitle className="text-xl font-semibold">
+              {title}
+            </DialogTitle>
           )}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault(); // Prevent default focus behavior
-          }}
-        >
-          <div className="flex justify-between items-center mb-6">
-            {title && <h2 className="text-2xl font-bold">{title}</h2>}
-            <DialogClose
-              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+          <div className="absolute right-4 top-4">
+            <button
               onClick={handleClose}
+              className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Fermer</span>
-            </DialogClose>
+              <span className="sr-only">Close</span>
+            </button>
           </div>
-          {React.Children.map(children, (child) => {
-            if (React.isValidElement(child) && typeof child.type !== 'string' && 'ref' in child.type) {
-              return React.cloneElement(child, {
-                ref: firstInputRef
-              });
-            }
-            return child;
-          })}
-        </DialogContent>
-      </Dialog>
+        </DialogHeader>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Les informations saisies seront perdues.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>
-              Continuer la saisie
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmClose}>
-              Quitter
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
+        {React.Children.map(children, (child) => {
+          if (React.isValidElement(child)) {
+            // Check if the child component can accept refs
+            const isRefable = typeof child.type === 'function' || 
+                            typeof child.type === 'object' || 
+                            child.type === 'input' || 
+                            child.type === 'textarea' || 
+                            child.type === 'select'
+
+            if (isRefable) {
+              return React.cloneElement(child as React.ReactElement<any>, {
+                ref: firstInputRef
+              })
+            }
+          }
+          return child
+        })}
+      </DialogContent>
+    </Dialog>
+  )
 }
