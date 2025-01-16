@@ -20,6 +20,7 @@ import { useBookingForm } from "@/hooks/useBookingForm";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
+import { BookingErrorDialog } from "./form/BookingErrorDialog";
 import { useToast } from "@/hooks/use-toast";
 
 const specialItems = [
@@ -65,6 +66,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [photos, setPhotos] = useState<File[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [formValues, setFormValues] = useState<any>(null);
   const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
   const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
@@ -120,6 +123,20 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       photos: photos,
       special_items: formattedSpecialItems,
     };
+
+    // Check if user already has a booking
+    const { data: existingBooking } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('user_id', userData?.id)
+      .eq('tour_id', tourId)
+      .maybeSingle();
+
+    if (existingBooking) {
+      setErrorMessage("Vous avez déjà une réservation pour cette tournée");
+      setShowErrorDialog(true);
+      return;
+    }
 
     setFormValues(formData);
     setShowConfirmDialog(true);
@@ -328,6 +345,12 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         responsibilityAccepted={responsibilityAccepted}
         onResponsibilityChange={setResponsibilityAccepted}
         onConfirm={handleConfirmBooking}
+      />
+
+      <BookingErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        message={errorMessage}
       />
     </Form>
   );
