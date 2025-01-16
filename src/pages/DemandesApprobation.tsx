@@ -2,11 +2,22 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
-import { ApprovalRequestCard } from "@/components/approval-requests/ApprovalRequestCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
@@ -54,6 +65,96 @@ export default function DemandesApprobation() {
   const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
   const rejectedRequests = requests?.filter(req => req.status === 'rejected') || [];
 
+  const RequestsTable = ({ requests, showActions = true }) => (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date de demande</TableHead>
+            <TableHead>{userType === 'carrier' ? 'Client' : 'Transporteur'}</TableHead>
+            <TableHead>Tournée</TableHead>
+            <TableHead>Ville de collecte</TableHead>
+            <TableHead>Message</TableHead>
+            {showActions && <TableHead>Actions</TableHead>}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {requests.map((request) => (
+            <TableRow key={request.id}>
+              <TableCell>
+                {format(new Date(request.created_at), "dd MMMM yyyy", { locale: fr })}
+              </TableCell>
+              <TableCell>
+                {userType === 'carrier' 
+                  ? `${request.user.first_name} ${request.user.last_name}`
+                  : request.tour.carriers.company_name
+                }
+              </TableCell>
+              <TableCell>
+                {request.tour.departure_country} → {request.tour.destination_country}
+                <br />
+                <Badge variant="outline" className="mt-1">
+                  {format(new Date(request.tour.departure_date), "dd/MM/yyyy")}
+                </Badge>
+              </TableCell>
+              <TableCell>{request.pickup_city}</TableCell>
+              <TableCell>{request.message || "-"}</TableCell>
+              {showActions && (
+                <TableCell>
+                  <div className="flex gap-2">
+                    {request.status === 'pending' && userType === 'carrier' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleApproveRequest(request)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Approuver
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRejectRequest(request)}
+                        >
+                          Refuser
+                        </Button>
+                      </>
+                    )}
+                    {request.status === 'pending' && userType !== 'carrier' && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleCancelRequest(request.id)}
+                      >
+                        Annuler
+                      </Button>
+                    )}
+                    {request.status === 'cancelled' && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeleteRequest(request.id)}
+                      >
+                        Supprimer
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              )}
+            </TableRow>
+          ))}
+          {requests.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={showActions ? 6 : 5} className="text-center py-8 text-gray-500">
+                Aucune demande dans cette catégorie
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -63,75 +164,28 @@ export default function DemandesApprobation() {
         </h1>
 
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="pending" className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
+          <TabsList className="mb-8">
+            <TabsTrigger value="pending">
               En attente ({pendingRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="approved" className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
+            <TabsTrigger value="approved">
               Validées ({approvedRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="rejected" className="flex items-center gap-2">
-              <XCircle className="h-4 w-4" />
+            <TabsTrigger value="rejected">
               Refusées ({rejectedRequests.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pending" className="space-y-6">
-            {pendingRequests.length > 0 ? (
-              pendingRequests.map((request) => (
-                <ApprovalRequestCard
-                  key={request.id}
-                  request={request}
-                  userType={userType}
-                  onApprove={() => handleApproveRequest(request)}
-                  onReject={() => handleRejectRequest(request)}
-                  onCancel={() => handleCancelRequest(request.id)}
-                  onDelete={() => handleDeleteRequest(request.id)}
-                />
-              ))
-            ) : (
-              <p className="text-gray-600 text-center py-8">
-                Aucune demande en attente
-              </p>
-            )}
+          <TabsContent value="pending">
+            <RequestsTable requests={pendingRequests} />
           </TabsContent>
 
-          <TabsContent value="approved" className="space-y-6">
-            {approvedRequests.length > 0 ? (
-              approvedRequests.map((request) => (
-                <ApprovalRequestCard
-                  key={request.id}
-                  request={request}
-                  userType={userType}
-                  onCancel={() => handleCancelRequest(request.id)}
-                  onDelete={() => handleDeleteRequest(request.id)}
-                />
-              ))
-            ) : (
-              <p className="text-gray-600 text-center py-8">
-                Aucune demande validée
-              </p>
-            )}
+          <TabsContent value="approved">
+            <RequestsTable requests={approvedRequests} showActions={false} />
           </TabsContent>
 
-          <TabsContent value="rejected" className="space-y-6">
-            {rejectedRequests.length > 0 ? (
-              rejectedRequests.map((request) => (
-                <ApprovalRequestCard
-                  key={request.id}
-                  request={request}
-                  userType={userType}
-                  onCancel={() => handleCancelRequest(request.id)}
-                  onDelete={() => handleDeleteRequest(request.id)}
-                />
-              ))
-            ) : (
-              <p className="text-gray-600 text-center py-8">
-                Aucune demande refusée
-              </p>
-            )}
+          <TabsContent value="rejected">
+            <RequestsTable requests={rejectedRequests} showActions={false} />
           </TabsContent>
         </Tabs>
       </div>
