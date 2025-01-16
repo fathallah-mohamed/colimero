@@ -1,5 +1,4 @@
-import { UseFormReturn } from "react-hook-form";
-import { FormField, FormItem } from "@/components/ui/form";
+import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
@@ -52,10 +51,7 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
             name={`consents.${consent.code}`}
             render={({ field }) => (
               <FormItem className="space-y-4">
-                <div 
-                  className="flex items-start gap-4 p-6 bg-white rounded-lg border border-gray-100 hover:border-primary/20 transition-colors cursor-pointer"
-                  onClick={() => field.onChange(!field.value)}
-                >
+                <div className="flex items-start gap-4 p-6 bg-white rounded-lg border border-gray-100 hover:border-primary/20 transition-colors">
                   <div className="flex-shrink-0 mt-1">
                     <Shield className={`h-5 w-5 ${field.value ? 'text-primary' : 'text-gray-400'}`} />
                   </div>
@@ -71,6 +67,10 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
                         <label 
                           htmlFor={`consent-${consent.code}`}
                           className="font-medium text-gray-900 cursor-pointer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            field.onChange(!field.value);
+                          }}
                         >
                           {consent.label}
                         </label>
@@ -94,6 +94,7 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
                     </Alert>
                   </div>
                 </div>
+                <FormMessage />
               </FormItem>
             )}
           />
