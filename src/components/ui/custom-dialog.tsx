@@ -1,81 +1,77 @@
-import * as React from "react"
-import { X } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader as BaseDialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-interface CustomDialogProps {
-  children: React.ReactNode
-  open?: boolean
-  onClose: () => void
-  title?: string
-  className?: string
+interface DialogHeaderProps {
+  title: string;
+  onClose: () => void;
 }
 
-export function CustomDialog({ children, open, onClose, title, className }: CustomDialogProps) {
-  const firstInputRef = React.useRef<HTMLInputElement>(null)
-  const [showDialog, setShowDialog] = React.useState(open)
+const DialogHeader = ({ title, onClose }: DialogHeaderProps) => (
+  <BaseDialogHeader className="relative">
+    <DialogTitle>{title}</DialogTitle>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="absolute right-0 top-0"
+      onClick={onClose}
+    >
+      <X className="h-4 w-4" />
+    </Button>
+  </BaseDialogHeader>
+);
+
+interface CustomDialogProps {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function CustomDialog({
+  open,
+  onClose,
+  title,
+  children,
+  className,
+}: CustomDialogProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+  const initialFocusRef = React.useRef<HTMLElement>(null);
 
   React.useEffect(() => {
-    setShowDialog(open)
-  }, [open])
+    setIsMounted(true);
+  }, []);
 
-  React.useEffect(() => {
-    if (showDialog) {
-      // Focus the first input after dialog opens
-      setTimeout(() => {
-        firstInputRef.current?.focus()
-      }, 100)
-    }
-  }, [showDialog])
-
-  const handleClose = () => {
-    setShowDialog(false)
-    onClose()
+  if (!isMounted) {
+    return null;
   }
 
   return (
-    <Dialog open={showDialog} onOpenChange={handleClose}>
+    <Dialog open={open} modal={true}>
       <DialogContent
-        className={cn(
-          "max-w-lg overflow-y-auto max-h-[90vh]",
-          className
-        )}
+        className={className}
+        onInteractOutside={(e) => {
+          e.preventDefault(); // Empêche la fermeture au clic extérieur
+        }}
       >
-        <DialogHeader>
-          {title && (
-            <DialogTitle className="text-xl font-semibold">
-              {title}
-            </DialogTitle>
-          )}
-          <div className="absolute right-4 top-4">
-            <button
-              onClick={handleClose}
-              className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </button>
-          </div>
-        </DialogHeader>
-
+        <DialogHeader title={title} onClose={onClose} />
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child)) {
-            // Check if the child component can accept refs
-            const isRefable = typeof child.type === 'function' || 
-                            typeof child.type === 'object' || 
-                            child.type === 'input' || 
-                            child.type === 'textarea' || 
-                            child.type === 'select'
-
-            if (isRefable) {
-              return React.cloneElement(child as React.ReactElement<any>, {
-                ref: firstInputRef
-              })
-            }
+            const isRefable = typeof child.type === 'string' || ('ref' in child.type);
+            return isRefable
+              ? React.cloneElement(child, { ref: initialFocusRef })
+              : child;
           }
-          return child
+          return child;
         })}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

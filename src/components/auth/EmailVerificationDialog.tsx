@@ -1,16 +1,16 @@
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { X } from "lucide-react";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -58,15 +58,25 @@ export function EmailVerificationDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+    <Dialog open={isOpen} modal={true}>
+      <DialogContent 
+        onInteractOutside={(e) => e.preventDefault()}
+        className="sm:max-w-[425px]"
+      >
+        <DialogHeader className="relative">
           <DialogTitle>Email non vérifié</DialogTitle>
-          <DialogDescription>
-            Votre compte n'a pas encore été activé. Veuillez vérifier votre boîte de réception et vos spams pour trouver l'email d'activation.
-          </DialogDescription>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </DialogHeader>
-
+        <p className="text-lg text-gray-600">
+          Votre compte n'a pas encore été activé. Veuillez vérifier votre boîte de réception et vos spams pour trouver l'email d'activation.
+        </p>
         <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
           <Button
             variant="outline"
