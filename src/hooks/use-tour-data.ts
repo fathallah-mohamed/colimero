@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus } from "@/types/tour";
+import type { Tour, TourStatus, RouteStop } from "@/types/tour";
 
 interface UseTourDataProps {
   departureCountry: string;
@@ -103,7 +103,45 @@ export function useTourData({
       }
 
       console.log('Fetched tours:', toursData);
-      setTours(toursData || []);
+
+      // Transform the data to match the Tour type
+      const transformedTours = toursData?.map(tour => {
+        const routeData = typeof tour.route === 'string' 
+          ? JSON.parse(tour.route) 
+          : tour.route;
+
+        const parsedRoute: RouteStop[] = Array.isArray(routeData) 
+          ? routeData.map(stop => ({
+              name: stop.name,
+              location: stop.location,
+              time: stop.time,
+              type: stop.type,
+              collection_date: stop.collection_date
+            }))
+          : [];
+
+        return {
+          ...tour,
+          route: parsedRoute,
+          status: tour.status as TourStatus,
+          type: tour.type,
+          carriers: tour.carriers ? {
+            ...tour.carriers,
+            carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
+              ? tour.carriers.carrier_capacities[0]
+              : tour.carriers.carrier_capacities
+          } : undefined,
+          bookings: tour.bookings?.map(booking => ({
+            ...booking,
+            special_items: booking.special_items || [],
+            content_types: booking.content_types || [],
+            terms_accepted: booking.terms_accepted || false,
+            customs_declaration: booking.customs_declaration || false
+          })) || []
+        } as Tour;
+      }) || [];
+
+      setTours(transformedTours);
     } catch (error) {
       console.error('Error in fetchTours:', error);
       setTours([]);
