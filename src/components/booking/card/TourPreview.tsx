@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Badge } from "lucide-react";
+import { Calendar, MapPin, Badge, Hash } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge as UIBadge } from "@/components/ui/badge";
@@ -12,6 +12,12 @@ export function TourPreview({ tour }: TourPreviewProps) {
 
   return (
     <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <Hash className="h-4 w-4 text-gray-500" />
+        <span className="text-sm font-medium text-primary">
+          {tour.tour_number || "Numéro non défini"}
+        </span>
+      </div>
       <div className="flex items-center gap-2">
         <MapPin className="h-4 w-4 text-gray-500" />
         <span className="text-sm">

@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Truck } from "lucide-react";
+import { Calendar, MapPin, Truck, Hash } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,13 @@ export function TourDetails({ tour }: TourDetailsProps) {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Hash className="h-4 w-4 text-gray-500" />
+        <span className="text-sm font-medium text-primary">
+          {tour.tour_number || "Numéro non défini"}
+        </span>
+      </div>
+
       {tour.carriers && (
         <div className="flex items-center gap-2">
           <Truck className="h-4 w-4 text-gray-500" />
