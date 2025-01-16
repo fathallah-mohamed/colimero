@@ -10,7 +10,7 @@ export default function Login() {
   };
 
   const handleRegister = () => {
-    navigate('/creer-compte');
+    navigate('/inscription');
   };
 
   const handleCarrierRegister = () => {
@@ -18,11 +18,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <Navigation />
       
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary to-primary-light py-12 px-4">
+      <div className="bg-gradient-to-br from-primary via-primary to-primary-light py-16 px-4 shadow-lg">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Bienvenue sur votre espace personnel
@@ -34,8 +34,8 @@ export default function Login() {
       </div>
 
       {/* Login Form Section */}
-      <div className="max-w-md mx-auto -mt-8 px-4 relative z-10">
-        <div className="bg-white p-8 rounded-lg shadow-lg">
+      <div className="max-w-md mx-auto -mt-8 px-4 relative z-10 pb-16">
+        <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100">
           <h2 className="text-2xl font-bold text-center mb-8">
             Connexion
           </h2>
