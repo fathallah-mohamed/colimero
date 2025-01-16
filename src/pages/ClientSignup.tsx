@@ -1,31 +1,24 @@
-import { RegisterForm } from "@/components/auth/RegisterForm";
 import Navigation from "@/components/Navigation";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 import { useNavigate } from "react-router-dom";
 
 export default function ClientSignup() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    navigate('/');
-    // Petit délai pour laisser le temps à la navigation de se faire
-    setTimeout(() => {
-      const loginButton = document.querySelector('[data-login-button]');
-      if (loginButton instanceof HTMLElement) {
-        loginButton.click();
-      }
-    }, 100);
+    navigate("/connexion");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-client-light/20 to-white">
       <Navigation />
-      <div className="bg-gradient-to-r from-blue-600 to-blue-400 py-16">
+      <div className="bg-gradient-client py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
             Créez votre compte client
           </h1>
-          <p className="text-lg text-gray-100 mb-8">
-            Rejoignez notre communauté et commencez à expédier vos colis en toute simplicité
+          <p className="text-lg text-white/90 mb-8">
+            Rejoignez notre communauté et commencez à expédier vos colis en toute simplicité vers le Maghreb
           </p>
         </div>
       </div>
