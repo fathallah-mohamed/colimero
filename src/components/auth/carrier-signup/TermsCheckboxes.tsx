@@ -1,9 +1,9 @@
-import { FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { UseFormReturn } from "react-hook-form";
+import { FormField, FormItem } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { Link } from "react-router-dom";
-import { Shield } from "lucide-react";
 import type { FormValues } from "./FormSchema";
 
 interface TermsCheckboxesProps {
@@ -50,51 +50,45 @@ export function TermsCheckboxes({ form }: TermsCheckboxesProps) {
             control={form.control}
             name={`consents.${consent.code}`}
             render={({ field }) => (
-              <FormItem className="space-y-4">
-                <div className="flex items-start gap-4 p-6 bg-white rounded-lg border border-gray-100 hover:border-primary/20 transition-colors">
-                  <div className="flex-shrink-0 mt-1">
-                    <Shield className={`h-5 w-5 ${field.value ? 'text-primary' : 'text-gray-400'}`} />
-                  </div>
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          id={`consent-${consent.code}`}
-                          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                        />
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      id={`consent-${consent.code}`}
+                    />
+                    <div 
+                      className="space-y-1 flex-1 cursor-pointer" 
+                      onClick={() => field.onChange(!field.value)}
+                    >
+                      <div className="text-sm font-medium flex items-center gap-2">
                         <label 
                           htmlFor={`consent-${consent.code}`}
-                          className="font-medium text-gray-900 cursor-pointer"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            field.onChange(!field.value);
-                          }}
+                          className="cursor-pointer"
                         >
                           {consent.label}
                         </label>
+                        {getDocumentLink(consent.code) && (
+                          <Link 
+                            to={getDocumentLink(consent.code)!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline text-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            (Voir le document)
+                          </Link>
+                        )}
                       </div>
-                      {getDocumentLink(consent.code) && (
-                        <Link 
-                          to={getDocumentLink(consent.code)!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:text-primary-hover text-sm font-medium hover:underline"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Voir le document
-                        </Link>
-                      )}
+                      <Alert>
+                        <AlertDescription className="text-sm text-muted-foreground">
+                          {consent.description}
+                        </AlertDescription>
+                      </Alert>
                     </div>
-                    <Alert className="bg-gray-50/80 border-gray-100">
-                      <AlertDescription className="text-sm text-gray-600">
-                        {consent.description}
-                      </AlertDescription>
-                    </Alert>
                   </div>
                 </div>
-                <FormMessage />
               </FormItem>
             )}
           />
