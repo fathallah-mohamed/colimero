@@ -78,7 +78,7 @@ export function BookingActions({
   
   // Pour les transporteurs
   const canCarrierModifyInCollection = userType === "carrier" && status === "pending" && tourStatus === "Ramassage en cours";
-  const canCarrierModifyInPlanned = userType === "carrier" && status === "pending" && tourStatus === "Programmée";
+  const canCarrierModifyInPlanned = userType === "carrier" && (status === "pending" || status === "confirmed") && tourStatus === "Programmée";
 
   if (!canClientModify && !canCarrierModifyInCollection && !canCarrierModifyInPlanned) {
     return null;
@@ -86,7 +86,7 @@ export function BookingActions({
 
   return (
     <div className="flex items-center gap-2">
-      {canCarrierModifyInPlanned && (
+      {canCarrierModifyInPlanned && status === "pending" && (
         <ActionButton
           icon={ThumbsUp}
           label="Confirmer"
