@@ -15,7 +15,7 @@ export const getStatusBadgeVariant = (status: BookingStatus) => {
     case "delivered":
       return "success";
     case "in_transit":
-      return "info";
+      return "secondary"; // Changed from "info" to "secondary"
     default:
       return "secondary";
   }
