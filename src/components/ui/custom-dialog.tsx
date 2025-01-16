@@ -75,8 +75,8 @@ export function CustomDialog({
           // Check if the component can accept refs
           const isRefableComponent = 
             typeof child.type === 'string' || 
-            (typeof child.type === 'function' && ('render' in child.type || child.type.prototype?.render)) ||
-            (typeof child.type === 'object' && 'render' in child.type);
+            (typeof child.type === 'function' && ('render' in child.type || (child.type as any).prototype?.render)) ||
+            (typeof child.type === 'object' && child.type && 'render' in child.type);
 
           if (isRefableComponent) {
             return React.cloneElement(child, {
