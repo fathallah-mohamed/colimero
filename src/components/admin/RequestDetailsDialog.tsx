@@ -152,11 +152,14 @@ export default function RequestDetailsDialog({
 
         <div className="grid grid-cols-2 gap-4 py-4">
           <PersonalInfo
-            firstName={request.first_name}
-            lastName={request.last_name}
-            email={request.email}
-            phone={request.phone}
-            phoneSecondary={request.phone_secondary}
+            firstName={request.user?.first_name}
+            lastName={request.user?.last_name}
+            email={request.user?.email}
+            phone={request.user?.phone}
+            phoneSecondary={request.user?.phone_secondary}
+            address={request.user?.address}
+            emailVerified={request.user?.email_verified}
+            createdAt={request.user?.created_at}
           />
 
           <CompanyInfo

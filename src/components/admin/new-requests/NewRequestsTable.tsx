@@ -28,9 +28,10 @@ export function NewRequestsTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Entreprise</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Téléphone</TableHead>
+          <TableHead>Client</TableHead>
+          <TableHead>Contact</TableHead>
+          <TableHead>Détails</TableHead>
+          <TableHead>Tournée</TableHead>
           <TableHead>Date de demande</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
@@ -38,9 +39,38 @@ export function NewRequestsTable({
       <TableBody>
         {requests?.map((request) => (
           <TableRow key={request.id}>
-            <TableCell className="font-medium">{request.company_name}</TableCell>
-            <TableCell>{request.email}</TableCell>
-            <TableCell>{request.phone}</TableCell>
+            <TableCell className="font-medium">
+              <div className="space-y-1">
+                <p>{request.user?.first_name} {request.user?.last_name}</p>
+                <p className="text-sm text-gray-500">{request.user?.email}</p>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="space-y-1">
+                <p>Tél: {request.user?.phone || "Non renseigné"}</p>
+                <p className="text-sm text-gray-500">
+                  Adresse: {request.user?.address || "Non renseignée"}
+                </p>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="space-y-1">
+                <p>Ville de collecte: {request.pickup_city}</p>
+                <p className="text-sm text-gray-500">
+                  Message: {request.message || "-"}
+                </p>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="space-y-1">
+                <p>{request.tour?.departure_country} → {request.tour?.destination_country}</p>
+                <p className="text-sm text-gray-500">
+                  {format(new Date(request.tour?.departure_date), "dd MMMM yyyy", {
+                    locale: fr,
+                  })}
+                </p>
+              </div>
+            </TableCell>
             <TableCell>
               {format(new Date(request.created_at), "dd MMMM yyyy", {
                 locale: fr,
