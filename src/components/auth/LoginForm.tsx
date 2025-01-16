@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields } from "./login/LoginFormFields";
 import { useLoginForm } from "./login/useLoginForm";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -20,6 +21,7 @@ export function LoginForm({
   requiredUserType,
   hideRegisterButton = false,
 }: LoginFormProps) {
+  const navigate = useNavigate();
   const {
     isLoading,
     email,
@@ -33,6 +35,10 @@ export function LoginForm({
     setShowErrorDialog,
     handleSubmit,
   } = useLoginForm({ onSuccess, requiredUserType });
+
+  const handleCarrierRegister = () => {
+    navigate("/devenir-transporteur");
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -84,7 +90,7 @@ export function LoginForm({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onCarrierRegister}
+                onClick={handleCarrierRegister}
                 className="w-full"
               >
                 Créer un compte transporteur
