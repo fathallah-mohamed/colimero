@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import MenuItems from "./MenuItems";
 import { Button } from "../ui/button";
 import { UserCircle2 } from "lucide-react";
+import { useUserData } from "./menu/useUserData";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export default function MobileMenu({
   setIsOpen,
 }: MobileMenuProps) {
   const navigate = useNavigate();
+  const userData = useUserData(userType);
 
   const handleLoginClick = () => {
     setIsOpen(false);
@@ -34,10 +36,15 @@ export default function MobileMenu({
         "translate-x-0"
       )}
     >
-      {user ? (
-        <div className="flex flex-col h-full">
-          <div className="px-4 pt-2 pb-3 space-y-1">
-            <MenuItems />
+      <div className="px-4 pt-2 pb-3 space-y-1">
+        <MenuItems />
+        {user && (
+          <>
+            {userData && (
+              <div className="px-3 py-2 text-base font-medium text-gray-700">
+                {userData.first_name} {userData.last_name}
+              </div>
+            )}
             {userType === 'carrier' && (
               <>
                 <Link
@@ -58,6 +65,14 @@ export default function MobileMenu({
                 >
                   Demandes d'approbation
                 </Link>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="w-full mt-2 text-white"
+                >
+                  Déconnexion
+                </Button>
               </>
             )}
             {userType === 'client' && (
@@ -74,6 +89,14 @@ export default function MobileMenu({
                 >
                   Mes réservations
                 </Link>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="w-full mt-2 text-white"
+                >
+                  Déconnexion
+                </Button>
               </>
             )}
             {userType === 'admin' && (
@@ -90,38 +113,31 @@ export default function MobileMenu({
                 >
                   Tableau de bord
                 </Link>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="w-full mt-2 text-white"
+                >
+                  Déconnexion
+                </Button>
               </>
             )}
-          </div>
-          <div className="mt-auto border-t border-gray-200">
-            <div className="px-4 py-3">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleLogout}
-                className="w-full text-white"
-              >
-                Déconnexion
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col h-full">
-          <div className="px-4 pt-2 pb-3 space-y-1">
-            <MenuItems />
-          </div>
-          <div className="mt-auto px-4 py-3 border-t border-gray-200">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLoginClick}
-              className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
-            >
-              <UserCircle2 className="w-4 h-4 mr-2" />
-              Se connecter
-            </Button>
-          </div>
+          </>
+        )}
+      </div>
+
+      {!user && (
+        <div className="px-4 py-3 border-t border-gray-200">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLoginClick}
+            className="w-full border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white"
+          >
+            <UserCircle2 className="w-4 h-4 mr-2" />
+            Se connecter
+          </Button>
         </div>
       )}
     </div>
