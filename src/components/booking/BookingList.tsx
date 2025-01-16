@@ -34,6 +34,12 @@ export function BookingList() {
               last_name,
               email
             )
+          ),
+          sender:user_id (
+            email
+          ),
+          recipient:recipient_id (
+            email
           )
         `)
         .eq('user_id', user.id)
@@ -46,6 +52,8 @@ export function BookingList() {
       
       return data?.map(booking => ({
         ...booking,
+        sender_email: booking.sender?.email,
+        recipient_email: booking.recipient?.email,
         special_items: Array.isArray(booking.special_items) 
           ? booking.special_items.map(item => {
               if (typeof item === 'string') return { name: item, quantity: 1 };
