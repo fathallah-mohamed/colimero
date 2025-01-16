@@ -2,7 +2,7 @@ import { Tour } from "@/types/tour";
 import { TransporteurAvatar } from "./TransporteurAvatar";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MapPin, Calendar, Truck, CreditCard } from "lucide-react";
+import { MapPin, Calendar, Truck, CreditCard, Hash } from "lucide-react";
 
 interface TourCardHeaderProps {
   tour: Tour;
@@ -26,10 +26,16 @@ export function TourCardHeader({ tour, hideAvatar, type, userType }: TourCardHea
             size="md"
           />
         )}
-        <div>
+        <div className="flex flex-col gap-2">
           <h3 className="text-lg font-semibold text-gray-900">
             {tour.carriers?.company_name}
           </h3>
+          <div className="flex items-center gap-2 text-gray-600">
+            <Hash className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-sm font-medium text-primary">
+              {tour.tour_number || "Numéro non défini"}
+            </span>
+          </div>
         </div>
       </div>
 
