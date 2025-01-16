@@ -52,6 +52,13 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     areRequiredFieldsFilled,
   } = useRegisterForm(handleSuccess);
 
+  const handleDialogClose = () => {
+    setShowDialog(false);
+    if (dialogContent.title === "Email déjà utilisé") {
+      onLogin();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full max-h-[80vh]">
       <div className="flex-1 overflow-y-auto px-4">
@@ -107,7 +114,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         </form>
       </div>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog open={showDialog} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{dialogContent.title}</DialogTitle>
@@ -117,10 +124,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
           </DialogHeader>
           <DialogFooter>
             <Button 
-              onClick={() => {
-                setShowDialog(false);
-                onLogin();
-              }}
+              onClick={handleDialogClose}
               className="w-full"
             >
               J'ai compris

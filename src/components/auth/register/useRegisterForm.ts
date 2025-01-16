@@ -13,7 +13,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const { toast } = useToast();
 
   const validateInputs = () => {
-    // Validation du prénom
     if (firstName.trim().length < 2) {
       toast({
         variant: "destructive",
@@ -23,7 +22,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       return false;
     }
 
-    // Validation du nom
     if (lastName.trim().length < 2) {
       toast({
         variant: "destructive",
@@ -33,7 +31,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       return false;
     }
 
-    // Validation de l'email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       toast({
@@ -44,7 +41,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       return false;
     }
 
-    // Validation du téléphone
     const phoneRegex = /^(\+33|0)[1-9](\d{8}|\s\d{2}\s\d{2}\s\d{2}\s\d{2})$/;
     if (!phoneRegex.test(phone.trim())) {
       toast({
@@ -55,7 +51,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       return false;
     }
 
-    // Validation du mot de passe
     if (password.length < 8) {
       toast({
         variant: "destructive",
@@ -65,7 +60,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       return false;
     }
 
-    // Vérification de la correspondance des mots de passe
     if (password !== confirmPassword) {
       toast({
         variant: "destructive",
@@ -122,12 +116,16 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       });
 
       if (signUpError) {
+        if (signUpError.message.includes("User already registered")) {
+          setIsLoading(false);
+          onSuccess('existing');
+          return;
+        }
         console.error("Erreur signup:", signUpError);
         throw signUpError;
       }
 
       if (!signUpData.user?.id) {
-        console.error("Pas d'ID utilisateur reçu");
         throw new Error("Aucun ID utilisateur reçu");
       }
 
@@ -141,7 +139,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         throw emailError;
       }
 
-      console.log("4. Déconnexion et affichage du succès");
       await supabase.auth.signOut();
       onSuccess('new');
       
