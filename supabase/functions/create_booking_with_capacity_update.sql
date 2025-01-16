@@ -37,7 +37,7 @@ BEGIN
   END IF;
 
   -- Generate timestamp for tracking number
-  v_timestamp := SUBSTRING(EXTRACT(EPOCH FROM NOW())::text, 1, 10);
+  v_timestamp := to_char(current_timestamp, 'YYYYMMDD');
   
   -- Generate booking ID
   v_booking_id := gen_random_uuid();
