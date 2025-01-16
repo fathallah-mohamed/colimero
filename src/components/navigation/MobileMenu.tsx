@@ -4,6 +4,7 @@ import MenuItems from "./MenuItems";
 import { Button } from "../ui/button";
 import { UserCircle2 } from "lucide-react";
 import AccountMenu from "./AccountMenu";
+import { UserMenuItems } from "./UserMenuItems";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -35,11 +36,39 @@ export default function MobileMenu({
         isOpen ? "translate-x-0" : "translate-x-full"
       )}
     >
-      <div className="px-4 pt-2 pb-3 space-y-1">
-        <MenuItems />
-      </div>
-      <div className="px-4 py-3 border-t border-gray-200">
-        {!user ? (
+      {user ? (
+        <div className="flex flex-col">
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <div className="flex items-center gap-3 mb-2">
+              <UserCircle2 className="h-8 w-8 text-gray-500" />
+              <div>
+                <p className="font-medium text-gray-900">
+                  {user.user_metadata?.first_name} {user.user_metadata?.last_name}
+                </p>
+                <p className="text-sm text-gray-500">{user.email}</p>
+              </div>
+            </div>
+            <UserMenuItems userType={userType} />
+          </div>
+          <div className="px-4 pt-2 pb-3 space-y-1">
+            <MenuItems />
+          </div>
+          <div className="px-4 py-3 border-t border-gray-200">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                handleLogout();
+                setIsOpen(false);
+              }}
+              className="w-full"
+            >
+              Se déconnecter
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="px-4 py-3">
           <Button
             variant="outline"
             size="sm"
@@ -49,16 +78,11 @@ export default function MobileMenu({
             <UserCircle2 className="w-4 h-4 mr-2" />
             Se connecter
           </Button>
-        ) : (
-          <AccountMenu
-            userType={userType}
-            onClose={() => {
-              handleLogout();
-              setIsOpen(false);
-            }}
-          />
-        )}
-      </div>
+          <div className="mt-4">
+            <MenuItems />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
