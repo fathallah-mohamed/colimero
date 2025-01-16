@@ -17,10 +17,20 @@ export default function ClientSignup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Navigation />
-      <div className="max-w-2xl mx-auto pt-32 px-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-400 py-16">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+            Créez votre compte client
+          </h1>
+          <p className="text-lg text-gray-100 mb-8">
+            Rejoignez notre communauté et commencez à expédier vos colis en toute simplicité
+          </p>
+        </div>
+      </div>
+      <div className="max-w-2xl mx-auto -mt-8 px-4 pb-12">
+        <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
           <RegisterForm onLogin={handleLogin} />
         </div>
       </div>
