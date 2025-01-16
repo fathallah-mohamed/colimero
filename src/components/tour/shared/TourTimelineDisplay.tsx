@@ -1,10 +1,9 @@
 import { TourStatus } from "@/types/tour";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Edit, XCircle, Truck, Plane, Package, CheckCircle, AlertCircle } from "lucide-react";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Edit, Truck, Plane, Package, CheckCircle, XCircle } from "lucide-react";
+import { CancelTourDialog } from "../timeline/dialogs/CancelTourDialog";
+import { PendingBookingsDialog } from "../timeline/dialogs/PendingBookingsDialog";
+import { useTourStatusManagement } from "../timeline/hooks/useTourStatusManagement";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
@@ -25,67 +24,17 @@ export function TourTimelineDisplay({
   variant = 'carrier',
   onEdit
 }: TourTimelineDisplayProps) {
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showPendingBookingsDialog, setShowPendingBookingsDialog] = useState(false);
-  const { toast } = useToast();
-
-  const handleCancel = async () => {
-    if (onStatusChange) {
-      await onStatusChange("Annulée");
-    }
-    setShowCancelDialog(false);
-  };
-
-  const checkPendingBookings = async () => {
-    try {
-      const { data: bookings, error } = await supabase
-        .from('bookings')
-        .select('status')
-        .eq('tour_id', tourId)
-        .eq('status', 'pending');
-
-      if (error) throw error;
-
-      if (bookings && bookings.length > 0) {
-        setShowPendingBookingsDialog(true);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error checking pending bookings:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de vérifier les réservations en attente",
-      });
-      return true;
-    }
-  };
-
-  const handleStartCollection = async () => {
-    const hasPendingBookings = await checkPendingBookings();
-    if (!hasPendingBookings && onStatusChange) {
-      await onStatusChange("Ramassage en cours");
-    }
-  };
-
-  const handleStartTransit = async () => {
-    if (onStatusChange) {
-      await onStatusChange("En transit");
-    }
-  };
-
-  const handleStartDelivery = async () => {
-    if (onStatusChange) {
-      await onStatusChange("Livraison en cours");
-    }
-  };
-
-  const handleComplete = async () => {
-    if (onStatusChange) {
-      await onStatusChange("Terminée");
-    }
-  };
+  const {
+    showCancelDialog,
+    setShowCancelDialog,
+    showPendingBookingsDialog,
+    setShowPendingBookingsDialog,
+    handleCancel,
+    handleStartCollection,
+    handleStartTransit,
+    handleStartDelivery,
+    handleComplete
+  } = useTourStatusManagement({ tourId, onStatusChange });
 
   // If the tour is cancelled, show cancelled message
   if (status === "Annulée") {
@@ -154,49 +103,18 @@ export function TourTimelineDisplay({
             Modifier la tournée
           </Button>
 
-          <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2 hover:bg-destructive/90 transition-colors">
-                <XCircle className="h-4 w-4" />
-                Annuler la tournée
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Annuler la tournée ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action est irréversible. La tournée sera définitivement annulée.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Confirmer l'annulation
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <CancelTourDialog 
+            open={showCancelDialog}
+            onOpenChange={setShowCancelDialog}
+            onCancel={handleCancel}
+          />
         </div>
       )}
 
-      <AlertDialog open={showPendingBookingsDialog} onOpenChange={setShowPendingBookingsDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-yellow-500" />
-              Réservations en attente
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Il y a des réservations en attente sur cette tournée. Vous devez confirmer ou annuler toutes les réservations en attente avant de démarrer le ramassage.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowPendingBookingsDialog(false)}>
-              Compris
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <PendingBookingsDialog 
+        open={showPendingBookingsDialog}
+        onOpenChange={setShowPendingBookingsDialog}
+      />
     </div>
   );
 }
