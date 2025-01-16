@@ -60,6 +60,7 @@ export interface Tour {
   bookings?: Booking[];
   terms_accepted: boolean;
   customs_declaration: boolean;
+  tour_number?: string;
   carriers?: {
     company_name: string;
     avatar_url: string;
