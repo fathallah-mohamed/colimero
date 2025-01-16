@@ -24,7 +24,7 @@ import CarrierSignup from "@/pages/CarrierSignup";
 import ClientSignup from "@/pages/ClientSignup";
 import Login from "@/pages/Login";
 
-export function AppRoutes() {
+export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Index />} />
@@ -36,7 +36,7 @@ export function AppRoutes() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/tours" element={<Tours />} />
-      <Route path="/transporteur/:id" element={<TransporteurDetails />} />
+      <Route path="/transporteurs/:id" element={<TransporteurDetails />} />
       <Route path="/transporteurs" element={<Transporteurs />} />
       <Route path="/mes-reservations" element={<MesReservations />} />
       <Route path="/mes-tournees" element={<MesTournees />} />
