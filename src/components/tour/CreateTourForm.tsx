@@ -81,6 +81,9 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         return;
       }
 
+      // Générer le timestamp pour le numéro de tournée
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+
       const { error } = await supabase.from("tours").insert({
         carrier_id: user.id,
         departure_country: values.departure_country,
@@ -94,6 +97,7 @@ export default function CreateTourForm({ onSuccess }: CreateTourFormProps) {
         status: "Programmée",
         terms_accepted: values.terms_accepted,
         customs_declaration: values.customs_declaration,
+        tour_number: `TRN-${values.departure_country}${values.destination_country}-${timestamp}-${Math.random().toString(36).substring(2, 10)}`
       });
 
       if (error) throw error;
