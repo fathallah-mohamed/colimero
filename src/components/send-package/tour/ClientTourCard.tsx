@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { CardCustom } from "@/components/ui/card-custom";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";

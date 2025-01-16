@@ -7,7 +7,8 @@ import { SelectableCollectionPointsList } from "@/components/tour/SelectableColl
 import { Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import AuthDialog from "@/components/auth/AuthDialog";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { supabase } from "@/integrations/supabase/client";
@@ -173,3 +174,4 @@ export function TourTimelineCard({
     </div>
   );
 }
+
