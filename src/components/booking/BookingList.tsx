@@ -6,6 +6,39 @@ import type { BookingStatus } from "@/types/booking";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+interface SenderRecipient {
+  id: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+interface BookingWithRelations {
+  id: string;
+  user_id: string;
+  tour_id: number;
+  status: BookingStatus;
+  created_at: string;
+  // ... other booking fields
+  sender: SenderRecipient;
+  recipient: SenderRecipient;
+  tours: {
+    collection_date: string;
+    departure_date: string;
+    destination_country: string;
+    route: any;
+    status: string;
+    carriers?: {
+      company_name: string;
+      avatar_url: string;
+      phone: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+    };
+  };
+}
+
 export function BookingList() {
   const { data: bookings, isLoading, refetch } = useQuery({
     queryKey: ["bookings"],
@@ -60,7 +93,7 @@ export function BookingList() {
 
       console.log("Fetched bookings:", data);
       
-      return data?.map(booking => ({
+      return (data as BookingWithRelations[])?.map(booking => ({
         ...booking,
         sender_email: booking.sender?.email,
         recipient_email: booking.recipient?.email,
