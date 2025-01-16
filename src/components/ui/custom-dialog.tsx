@@ -67,8 +67,8 @@ export function CustomDialog({
             return child;
           }
 
-          // Type guard to ensure child.type exists and is of the correct type
-          if (child.type === null) {
+          // Type guard to ensure child.type exists
+          if (!child.type) {
             return child;
           }
 
@@ -76,7 +76,7 @@ export function CustomDialog({
           const isRefableComponent = 
             typeof child.type === 'string' || 
             (typeof child.type === 'function' && ('render' in child.type || child.type.prototype?.render)) ||
-            (typeof child.type === 'object' && child.type !== null && 'render' in child.type);
+            (typeof child.type === 'object' && 'render' in child.type);
 
           if (isRefableComponent) {
             return React.cloneElement(child, {
