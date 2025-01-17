@@ -12,6 +12,7 @@ export function useBookings() {
     queryKey: ["bookings", user?.id],
     queryFn: async () => {
       if (!user) {
+        console.log("No user found in useBookings");
         throw new Error("User not authenticated");
       }
 
