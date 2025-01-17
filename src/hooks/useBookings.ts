@@ -18,7 +18,7 @@ export function useBookings() {
 
       console.log("Fetching bookings for user:", user.id);
 
-      const { data, error } = await supabase
+      const { data: bookingsData, error } = await supabase
         .from("bookings")
         .select(`
           *,
@@ -39,22 +39,21 @@ export function useBookings() {
             )
           )
         `)
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .eq("user_id", user.id);
 
       if (error) {
         console.error("Error fetching bookings:", error);
         throw error;
       }
 
-      console.log("Raw bookings data:", data);
+      console.log("Raw bookings data:", bookingsData);
       
-      if (!data) {
+      if (!bookingsData) {
         console.log("No bookings found");
         return [];
       }
 
-      return data.map((booking: any) => ({
+      const formattedBookings = bookingsData.map((booking: any) => ({
         ...booking,
         special_items: Array.isArray(booking.special_items) 
           ? booking.special_items.map((item: any) => {
@@ -70,6 +69,9 @@ export function useBookings() {
           ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
           : null
       }));
+
+      console.log("Formatted bookings:", formattedBookings);
+      return formattedBookings;
     },
     enabled: !!user,
   });

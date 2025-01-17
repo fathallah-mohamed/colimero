@@ -28,8 +28,7 @@ export function BookingList() {
           status: newStatus,
           delivery_status: newStatus 
         })
-        .eq('id', bookingId)
-        .eq('user_id', user?.id);
+        .eq('id', bookingId);
 
       if (error) {
         console.error("Error updating booking status:", error);
