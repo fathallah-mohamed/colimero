@@ -4,28 +4,41 @@ import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingList } from "@/components/booking/BookingList";
 import { Loader2 } from "lucide-react";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MesReservations() {
   const navigate = useNavigate();
-  const user = useUser();
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/connexion');
-    }
-  }, [user, navigate]);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour accéder à vos réservations.",
+        });
+        navigate('/connexion');
+        return;
+      }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen">
-        <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </div>
-    );
-  }
+      // Vérifier si l'utilisateur est un client
+      const userType = session.user?.user_metadata?.user_type;
+      if (userType !== 'client') {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Cette page est réservée aux clients.",
+        });
+        navigate('/');
+        return;
+      }
+    };
+
+    checkAuth();
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
