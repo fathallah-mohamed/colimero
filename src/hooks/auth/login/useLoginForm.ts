@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/auth-service";
 
 interface UseLoginFormProps {
@@ -16,7 +15,6 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,11 +39,6 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
       setIsLoading(false);
       return;
     }
-
-    toast({
-      title: "Connexion réussie",
-      description: "Vous êtes maintenant connecté",
-    });
 
     if (onSuccess) {
       onSuccess();

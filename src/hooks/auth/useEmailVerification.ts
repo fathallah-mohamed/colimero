@@ -27,11 +27,6 @@ export function useEmailVerification() {
       return true;
     } catch (error: any) {
       console.error("Erreur lors de l'envoi de l'email:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'envoyer l'email d'activation. Veuillez réessayer.",
-      });
       return false;
     } finally {
       setIsResending(false);
