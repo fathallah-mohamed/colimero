@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields } from "./LoginFormFields";
-import { useLoginForm } from "./useLoginForm";
+import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
 import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
