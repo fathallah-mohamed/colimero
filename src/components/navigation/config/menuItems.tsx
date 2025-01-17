@@ -1,4 +1,4 @@
-import { Calendar, Package, Info, Mail, Truck } from "lucide-react";
+import { Calendar, Package, Info, Mail, Truck, List } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 interface MenuItem {
@@ -22,6 +22,12 @@ export const menuItems: MenuItem[] = [
     href: "/envoyer-colis", 
     icon: Package,
     highlight: true,
+  },
+  { 
+    name: "Réservations", 
+    href: "/mes-reservations", 
+    icon: List,
+    hideTextOnMobile: true,
   },
   { 
     name: "Transporteurs", 
