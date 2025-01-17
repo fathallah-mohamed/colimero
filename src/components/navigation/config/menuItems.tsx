@@ -7,25 +7,24 @@ interface MenuItem {
   icon: LucideIcon;
   highlight?: boolean;
   hideTextOnMobile?: boolean;
-  className?: string;
 }
 
 export const menuItems: MenuItem[] = [
-  { 
-    name: "Planifier une tournée", 
-    href: "/planifier-tournee", 
+  {
+    name: "Envoyer un colis",
+    href: "/envoyer-colis",
+    icon: Package,
+    highlight: true,
+  },
+  {
+    name: "Planifier une tournée",
+    href: "/planifier-tournee",
     icon: Calendar,
     highlight: true,
   },
   { 
-    name: "Envoyer un colis", 
-    href: "/envoyer-colis", 
-    icon: Package,
-    highlight: true,
-  },
-  { 
     name: "Réservations", 
-    href: "/mes-reservations", 
+    href: "/client/reservations", 
     icon: List,
     hideTextOnMobile: true,
   },
@@ -35,15 +34,15 @@ export const menuItems: MenuItem[] = [
     icon: Truck,
     hideTextOnMobile: true,
   },
-  { 
-    name: "À propos", 
-    href: "/a-propos", 
+  {
+    name: "À propos",
+    href: "/a-propos",
     icon: Info,
     hideTextOnMobile: true,
   },
-  { 
-    name: "Contact", 
-    href: "/contact", 
+  {
+    name: "Contact",
+    href: "/contact",
     icon: Mail,
     hideTextOnMobile: true,
   },

@@ -11,6 +11,7 @@ import Tours from "@/pages/Tours";
 import TransporteurDetails from "@/pages/TransporteurDetails";
 import Transporteurs from "@/pages/Transporteurs";
 import MesReservations from "@/pages/MesReservations";
+import ClientReservations from "@/pages/ClientReservations";
 import MesTournees from "@/pages/MesTournees";
 import DemandesApprobation from "@/pages/DemandesApprobation";
 import MesDemandesApprobation from "@/pages/MesDemandesApprobation";
@@ -39,6 +40,7 @@ export default function AppRoutes() {
       <Route path="/transporteurs/:id" element={<TransporteurDetails />} />
       <Route path="/transporteurs" element={<Transporteurs />} />
       <Route path="/mes-reservations" element={<MesReservations />} />
+      <Route path="/client/reservations" element={<ClientReservations />} />
       <Route path="/mes-tournees" element={<MesTournees />} />
       <Route path="/demandes-approbation" element={<DemandesApprobation />} />
       <Route path="/mes-demandes-approbation" element={<MesDemandesApprobation />} />
