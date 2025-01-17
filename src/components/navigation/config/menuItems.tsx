@@ -1,4 +1,4 @@
-import { Calendar, Package, Info, Mail, Truck, List } from "lucide-react";
+import { Calendar, Package, Info, Mail, Truck } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 interface MenuItem {
@@ -7,26 +7,21 @@ interface MenuItem {
   icon: LucideIcon;
   highlight?: boolean;
   hideTextOnMobile?: boolean;
+  className?: string;
 }
 
 export const menuItems: MenuItem[] = [
-  {
-    name: "Envoyer un colis",
-    href: "/envoyer-colis",
-    icon: Package,
-    highlight: true,
-  },
-  {
-    name: "Planifier une tournée",
-    href: "/planifier-tournee",
+  { 
+    name: "Planifier une tournée", 
+    href: "/planifier-tournee", 
     icon: Calendar,
     highlight: true,
   },
   { 
-    name: "Réservations", 
-    href: "/client/reservations", 
-    icon: List,
-    hideTextOnMobile: true,
+    name: "Envoyer un colis", 
+    href: "/envoyer-colis", 
+    icon: Package,
+    highlight: true,
   },
   { 
     name: "Transporteurs", 
@@ -34,15 +29,15 @@ export const menuItems: MenuItem[] = [
     icon: Truck,
     hideTextOnMobile: true,
   },
-  {
-    name: "À propos",
-    href: "/a-propos",
+  { 
+    name: "À propos", 
+    href: "/a-propos", 
     icon: Info,
     hideTextOnMobile: true,
   },
-  {
-    name: "Contact",
-    href: "/contact",
+  { 
+    name: "Contact", 
+    href: "/contact", 
     icon: Mail,
     hideTextOnMobile: true,
   },
