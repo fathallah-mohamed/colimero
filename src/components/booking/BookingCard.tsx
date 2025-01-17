@@ -17,7 +17,7 @@ interface BookingCardProps {
   booking: any;
   isCollecting?: boolean;
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
-  onUpdate: () => void; // Changed from Promise<void> to void
+  onUpdate: () => Promise<void>;
   isEven?: boolean;
   tourStatus?: string;
 }
@@ -36,8 +36,8 @@ export function BookingCard({
 
   const currentTourStatus = booking.tours?.status || tourStatus || "Programmée";
 
-  const handleEditSuccess = () => {
-    onUpdate();
+  const handleEditSuccess = async () => {
+    await onUpdate();
     setShowEditDialog(false);
     toast({
       title: "Réservation mise à jour",
