@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingList } from "@/components/booking/BookingList";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function MesReservations() {
