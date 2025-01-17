@@ -63,6 +63,21 @@ export interface Booking {
   collection_date_formatted?: string | null;
   sender_email?: string;
   recipient_email?: string;
+}
+
+export interface BookingWithRelations extends Booking {
+  sender?: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+  recipient?: {
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
   tours?: {
     collection_date: string;
     departure_date: string;
