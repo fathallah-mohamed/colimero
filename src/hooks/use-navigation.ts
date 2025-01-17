@@ -73,31 +73,33 @@ export function useNavigation() {
       setUser(null);
       setUserType(null);
 
-      // Try to refresh the session before signing out
-      const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+      // Get current session
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (refreshError) {
-        console.log("Session refresh error:", refreshError);
+      if (!session) {
+        // If no session exists, just handle as successful logout
+        toast({
+          title: "Déconnexion réussie",
+          description: "À bientôt !",
+        });
+        navigate('/');
+        return;
       }
 
       // Attempt to sign out
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({
+        scope: 'local' // Only clear local session to avoid token errors
+      });
       
       if (error) {
         console.error("Logout error:", error);
-        // Handle session-related errors gracefully
-        if (error.message.includes('session_not_found') || 
-            error.message.includes('Session') || 
-            error.status === 403) {
-          toast({
-            title: "Déconnexion réussie",
-            description: "Votre session a été terminée.",
-          });
-          navigate('/');
-          return;
-        }
-        // For other errors, throw them to be caught below
-        throw error;
+        // Handle any error as successful local logout
+        toast({
+          title: "Déconnexion réussie",
+          description: "Votre session a été terminée.",
+        });
+        navigate('/');
+        return;
       }
 
       toast({
