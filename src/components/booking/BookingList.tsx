@@ -5,6 +5,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import type { BookingStatus } from "@/types/booking";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface SenderRecipient {
   id: string;
@@ -57,11 +58,11 @@ interface BookingWithRelations {
 }
 
 export function BookingList() {
+  const user = useUser();
+  
   const { data: bookings, isLoading, error } = useQuery({
-    queryKey: ["bookings"],
+    queryKey: ["bookings", user?.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user) {
         throw new Error("User not authenticated");
       }
@@ -115,6 +116,7 @@ export function BookingList() {
           : null
       }));
     },
+    enabled: !!user,
   });
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
@@ -127,7 +129,8 @@ export function BookingList() {
           status: newStatus,
           delivery_status: newStatus 
         })
-        .eq('id', bookingId);
+        .eq('id', bookingId)
+        .eq('user_id', user?.id); // Ensure user can only update their own bookings
 
       if (error) {
         console.error("Error updating booking status:", error);
