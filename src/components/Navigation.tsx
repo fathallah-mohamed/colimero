@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import MobileMenu from "@/components/navigation/MobileMenu";
 import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { NavigationHeader } from "./navigation/NavigationHeader";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
