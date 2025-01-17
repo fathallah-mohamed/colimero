@@ -29,11 +29,6 @@ export function NewRequestsTable({
   onApprove 
 }: NewRequestsTableProps) {
   const [selectedClient, setSelectedClient] = useState<any>(null);
-  const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
-
-  const toggleRequestDetails = (requestId: string) => {
-    setExpandedRequest(expandedRequest === requestId ? null : requestId);
-  };
 
   return (
     <>
@@ -41,7 +36,7 @@ export function NewRequestsTable({
         {requests?.map((request) => (
           <Card key={request.id} className="p-6">
             <div className="space-y-6">
-              {/* En-tête avec les informations principales */}
+              {/* En-tête avec les informations du client */}
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -57,6 +52,10 @@ export function NewRequestsTable({
                   <div className="flex items-center gap-2 text-gray-500">
                     <Phone className="h-4 w-4" />
                     <p>{request.user?.phone || "Non renseigné"}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <MapPin className="h-4 w-4" />
+                    <p>Ville de collecte: {request.pickup_city}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -88,8 +87,10 @@ export function NewRequestsTable({
                       })}
                     </p>
                     <p>
-                      <span className="text-gray-500">Ville de collecte:</span>{" "}
-                      {request.pickup_city}
+                      <span className="text-gray-500">Date de collecte:</span>{" "}
+                      {format(new Date(request.tour?.collection_date), "dd MMMM yyyy", {
+                        locale: fr,
+                      })}
                     </p>
                   </div>
                 </div>
