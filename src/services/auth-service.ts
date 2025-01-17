@@ -10,7 +10,7 @@ interface AuthResponse {
 export const authService = {
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
-      // Vérifier si le compte est vérifié
+      // Vérifier d'abord si le compte est vérifié
       const { data: clientData } = await supabase
         .from('clients')
         .select('email_verified')
@@ -25,7 +25,7 @@ export const authService = {
         };
       }
 
-      // Tenter la connexion
+      // Tenter la connexion seulement si le compte est vérifié
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),

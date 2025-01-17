@@ -5,9 +5,10 @@ import { authService } from "@/services/auth-service";
 interface UseLoginFormProps {
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
+  onVerificationNeeded?: () => void;
 }
 
-export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps = {}) {
+export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded }: UseLoginFormProps = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,38 +24,46 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
     setShowVerificationDialog(false);
     setShowErrorDialog(false);
 
-    const response = await authService.signIn(email, password);
+    try {
+      const response = await authService.signIn(email, password);
 
-    if (response.needsVerification) {
-      setShowVerificationDialog(true);
-      setPassword("");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!response.success) {
-      if (response.error) {
-        setError(response.error);
-        setShowErrorDialog(true);
+      if (response.needsVerification) {
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        } else {
+          setShowVerificationDialog(true);
+        }
+        setIsLoading(false);
+        return;
       }
-      setPassword("");
-      setIsLoading(false);
-      return;
-    }
 
-    if (onSuccess) {
-      onSuccess();
-    } else {
-      const returnPath = sessionStorage.getItem('returnPath');
-      if (returnPath) {
-        sessionStorage.removeItem('returnPath');
-        navigate(returnPath);
+      if (!response.success) {
+        if (response.error) {
+          setError(response.error);
+          setShowErrorDialog(true);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (onSuccess) {
+        onSuccess();
       } else {
-        navigate("/");
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        } else {
+          navigate("/");
+        }
       }
+    } catch (error: any) {
+      console.error("Complete error:", error);
+      setError("Une erreur inattendue s'est produite");
+      setShowErrorDialog(true);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return {

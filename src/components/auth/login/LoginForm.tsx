@@ -34,7 +34,14 @@ export function LoginForm({
     setShowVerificationDialog,
     setShowErrorDialog,
     handleSubmit,
-  } = useLoginForm({ onSuccess, requiredUserType });
+  } = useLoginForm({ 
+    onSuccess, 
+    requiredUserType,
+    onVerificationNeeded: () => {
+      setShowVerificationDialog(true);
+      setPassword("");
+    }
+  });
 
   const handleClientRegister = () => {
     navigate("/creer-compte");
