@@ -18,8 +18,21 @@ export function BookingList() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        toast({
+          variant: "destructive",
+          title: "Erreur de session",
+          description: "Une erreur est survenue avec votre session. Veuillez vous reconnecter.",
+        });
+        navigate('/connexion');
+        return;
+      }
+
       if (!session) {
+        console.log("No session found");
         toast({
           variant: "destructive",
           title: "Accès refusé",
@@ -28,6 +41,8 @@ export function BookingList() {
         navigate('/connexion');
         return;
       }
+
+      console.log("Session found:", session.user.id);
     };
 
     checkAuth();
