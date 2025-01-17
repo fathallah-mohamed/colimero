@@ -16,11 +16,19 @@ export default function MesReservations() {
   }, []);
 
   const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No session found, redirecting to login");
+        navigate('/connexion');
+        return;
+      }
+      console.log("User session found:", session.user.id);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error checking user:', error);
       navigate('/connexion');
     }
-    setLoading(false);
   };
 
   if (loading) {

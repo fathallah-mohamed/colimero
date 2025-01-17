@@ -63,10 +63,11 @@ export function BookingList() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        console.error("No user found");
         throw new Error("User not authenticated");
       }
 
-      console.log("Fetching bookings for user:", user.id);
+      console.log("Current user ID:", user.id);
 
       const { data, error } = await supabase
         .from("bookings")
@@ -96,7 +97,7 @@ export function BookingList() {
         throw error;
       }
 
-      console.log("Fetched bookings:", data);
+      console.log("Fetched bookings for user:", user.id, data);
       
       return (data as unknown as BookingWithRelations[])?.map(booking => ({
         ...booking,
@@ -116,27 +117,6 @@ export function BookingList() {
       }));
     },
   });
-
-  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
-    try {
-      console.log("Updating booking status:", { bookingId, newStatus });
-      
-      const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: newStatus,
-          delivery_status: newStatus 
-        })
-        .eq('id', bookingId);
-
-      if (error) {
-        console.error("Error updating booking status:", error);
-        throw error;
-      }
-    } catch (err) {
-      console.error("Error updating booking status:", err);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -181,7 +161,26 @@ export function BookingList() {
           key={booking.id} 
           booking={booking} 
           isCollecting={true}
-          onStatusChange={handleStatusChange}
+          onStatusChange={async (bookingId: string, newStatus: BookingStatus) => {
+            try {
+              console.log("Updating booking status:", { bookingId, newStatus });
+              
+              const { error } = await supabase
+                .from('bookings')
+                .update({ 
+                  status: newStatus,
+                  delivery_status: newStatus 
+                })
+                .eq('id', bookingId);
+
+              if (error) {
+                console.error("Error updating booking status:", error);
+                throw error;
+              }
+            } catch (err) {
+              console.error("Error updating booking status:", err);
+            }
+          }}
           onUpdate={async () => {}}
           isEven={false}
         />
