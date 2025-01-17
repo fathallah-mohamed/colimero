@@ -5,6 +5,7 @@ import { EmptyBookingList } from "./EmptyBookingList";
 import { useBookings } from "@/hooks/useBookings";
 import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function BookingList() {
   const { data: bookings, isLoading, error, refetch } = useBookings();

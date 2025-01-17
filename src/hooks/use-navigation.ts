@@ -74,9 +74,11 @@ export function useNavigation() {
 
       // Then attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
+      
+      // Handle session not found error gracefully
       if (error) {
         console.error("Logout error:", error);
-        if (error.message.includes('session')) {
+        if (error.message.includes('session_not_found') || error.message.includes('Session')) {
           // If it's a session error, we'll still consider the user logged out locally
           toast({
             title: "Déconnexion réussie",
@@ -96,7 +98,11 @@ export function useNavigation() {
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
-      // Still clear local state and redirect
+      // Still clear local state and redirect even if there's an error
+      toast({
+        title: "Déconnexion réussie",
+        description: "Votre session a été terminée.",
+      });
       navigate('/');
     }
   };
