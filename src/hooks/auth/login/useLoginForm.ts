@@ -39,6 +39,7 @@ export function useLoginForm({
         } else {
           setShowVerificationDialog(true);
         }
+        setPassword("");
         setIsLoading(false);
         return;
       }
@@ -53,16 +54,18 @@ export function useLoginForm({
             description: response.error
           });
         }
+        setPassword("");
         setIsLoading(false);
         return;
       }
 
-      // Only navigate if login was successful
+      // Si la connexion est réussie
       toast({
         title: "Connexion réussie",
         description: "Bienvenue !"
       });
 
+      // Gérer la redirection
       if (onSuccess) {
         onSuccess();
       } else {
@@ -84,6 +87,7 @@ export function useLoginForm({
         title: "Erreur",
         description: errorMessage
       });
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
