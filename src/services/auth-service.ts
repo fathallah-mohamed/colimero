@@ -18,7 +18,7 @@ export const authService = {
         .eq('email', email.trim())
         .maybeSingle();
 
-      if (clientData && !clientData.email_verified) {
+      if (clientData && clientData.email_verified === false) {
         console.log('Account not verified:', email);
         return {
           success: false,
@@ -27,7 +27,7 @@ export const authService = {
         };
       }
 
-      // Tenter la connexion seulement si le compte est vérifié ou n'est pas un client
+      // Tenter la connexion
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),

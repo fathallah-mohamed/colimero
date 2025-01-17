@@ -65,7 +65,7 @@ export function useLoginForm({
         description: "Bienvenue !"
       });
 
-      // Gérer la redirection
+      // Gérer la redirection uniquement après une connexion réussie
       if (onSuccess) {
         onSuccess();
       } else {

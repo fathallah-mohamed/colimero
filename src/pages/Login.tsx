@@ -8,11 +8,19 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est déjà connecté
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('email_verified')
+          .eq('id', session.user.id)
+          .single();
+
+        // Ne rediriger que si l'utilisateur est vérifié ou n'est pas un client
+        if (!clientData || clientData.email_verified) {
+          navigate('/');
+        }
       }
     };
     
