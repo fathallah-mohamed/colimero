@@ -1,132 +1,62 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { AlertCircle } from "lucide-react";
 import { BookingCard } from "./BookingCard";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { BookingListLoading } from "./BookingListLoading";
+import { EmptyBookingList } from "./EmptyBookingList";
+import { useBookings } from "@/hooks/useBookings";
 import type { BookingStatus } from "@/types/booking";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-
-interface SenderRecipient {
-  id: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-}
-
-interface BookingWithRelations {
-  id: string;
-  user_id: string;
-  tour_id: number;
-  status: BookingStatus;
-  created_at: string;
-  pickup_city: string;
-  delivery_city: string;
-  tracking_number: string;
-  weight: number;
-  item_type: string;
-  recipient_name: string;
-  recipient_address: string;
-  recipient_phone: string;
-  sender_name: string | null;
-  sender_phone: string | null;
-  delivery_status: string | null;
-  delivery_notes: string | null;
-  terms_accepted: boolean | null;
-  customs_declaration: boolean | null;
-  package_description: string | null;
-  special_items: Array<{ name: string; quantity: number }>;
-  content_types: string[] | null;
-  photos: string[] | null;
-  sender: SenderRecipient | null;
-  recipient: SenderRecipient | null;
-  tours: {
-    collection_date: string;
-    departure_date: string;
-    destination_country: string;
-    route: any;
-    status: string;
-    carriers?: {
-      company_name: string;
-      avatar_url: string;
-      phone: string;
-      first_name: string;
-      last_name: string;
-      email: string;
-    };
-  } | null;
-}
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@supabase/auth-helpers-react";
+import { useToast } from "@/hooks/use-toast";
 
 export function BookingList() {
-  const { data: bookings, isLoading, error } = useQuery({
-    queryKey: ["bookings"],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+  const { data: bookings, isLoading, error, refetch } = useBookings();
+  const { toast } = useToast();
+  const user = useUser();
+
+  console.log("BookingList - Current user:", user?.id);
+  console.log("BookingList - Bookings data:", bookings);
+  console.log("BookingList - Loading state:", isLoading);
+  console.log("BookingList - Error state:", error);
+
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    try {
+      console.log("Updating booking status:", { bookingId, newStatus });
       
-      if (!user) {
-        console.error("No user found");
-        throw new Error("User not authenticated");
-      }
-
-      console.log("Current user ID:", user.id);
-
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(`
-          *,
-          tours (
-            collection_date,
-            departure_date,
-            destination_country,
-            route,
-            status,
-            carriers (
-              company_name,
-              avatar_url,
-              phone,
-              first_name,
-              last_name,
-              email
-            )
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus 
+        })
+        .eq('id', bookingId);
 
       if (error) {
-        console.error("Error fetching bookings:", error);
+        console.error("Error updating booking status:", error);
         throw error;
       }
 
-      console.log("Fetched bookings for user:", user.id, data);
-      
-      return (data as unknown as BookingWithRelations[])?.map(booking => ({
-        ...booking,
-        special_items: Array.isArray(booking.special_items) 
-          ? booking.special_items.map(item => {
-              if (typeof item === 'string') return { name: item, quantity: 1 };
-              return item;
-            })
-          : [],
-        created_at_formatted: format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr }),
-        departure_date_formatted: booking.tours?.departure_date 
-          ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
-          : null,
-        collection_date_formatted: booking.tours?.collection_date
-          ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
-          : null
-      }));
-    },
-  });
+      await refetch();
+
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut de la réservation a été mis à jour avec succès.",
+      });
+    } catch (err) {
+      console.error("Error updating booking status:", err);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du statut.",
+      });
+    }
+  };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <BookingListLoading />;
   }
 
   if (error) {
+    console.error("Error loading bookings:", error);
     return (
       <div className="bg-white shadow rounded-lg p-6 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -141,17 +71,7 @@ export function BookingList() {
   }
 
   if (!bookings?.length) {
-    return (
-      <div className="bg-white shadow rounded-lg p-6 text-center">
-        <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Aucune réservation
-        </h3>
-        <p className="text-gray-500">
-          Vous n'avez pas encore effectué de réservation.
-        </p>
-      </div>
-    );
+    return <EmptyBookingList />;
   }
 
   return (
@@ -161,27 +81,8 @@ export function BookingList() {
           key={booking.id} 
           booking={booking} 
           isCollecting={true}
-          onStatusChange={async (bookingId: string, newStatus: BookingStatus) => {
-            try {
-              console.log("Updating booking status:", { bookingId, newStatus });
-              
-              const { error } = await supabase
-                .from('bookings')
-                .update({ 
-                  status: newStatus,
-                  delivery_status: newStatus 
-                })
-                .eq('id', bookingId);
-
-              if (error) {
-                console.error("Error updating booking status:", error);
-                throw error;
-              }
-            } catch (err) {
-              console.error("Error updating booking status:", err);
-            }
-          }}
-          onUpdate={async () => {}}
+          onStatusChange={handleStatusChange}
+          onUpdate={async () => { await refetch(); }}
           isEven={false}
         />
       ))}

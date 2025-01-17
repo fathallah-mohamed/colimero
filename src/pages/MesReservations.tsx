@@ -1,46 +1,50 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { BookingList } from "@/components/booking/BookingList";
-import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export default function MesReservations() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const user = useUser();
 
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    try {
+    const checkAuth = async () => {
+      console.log("MesReservations - Checking auth for user:", user?.id);
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
-        console.log("No session found, redirecting to login");
+        console.log("MesReservations - No session found");
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour accéder à vos réservations.",
+        });
         navigate('/connexion');
         return;
       }
-      console.log("User session found:", session.user.id);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error checking user:', error);
-      navigate('/connexion');
-    }
-  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen">
-        <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </div>
-    );
-  }
+      // Vérifier si l'utilisateur est un client
+      const userType = session.user?.user_metadata?.user_type;
+      console.log("MesReservations - User type:", userType);
+      
+      if (userType !== 'client') {
+        console.log("MesReservations - User is not a client");
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Cette page est réservée aux clients.",
+        });
+        navigate('/');
+        return;
+      }
+    };
+
+    checkAuth();
+  }, [navigate, toast, user]);
 
   return (
     <div className="min-h-screen bg-gray-50">
