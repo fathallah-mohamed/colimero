@@ -33,8 +33,10 @@ export function useLoginForm({ onSuccess, requiredUserType }: UseLoginFormProps 
     }
 
     if (!response.success) {
-      setError(response.error || "Une erreur est survenue");
-      setShowErrorDialog(true);
+      if (response.error) {
+        setError(response.error);
+        setShowErrorDialog(true);
+      }
       setPassword("");
       setIsLoading(false);
       return;
