@@ -14,6 +14,7 @@ export default function MesReservations() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
+        sessionStorage.setItem('returnPath', '/mes-reservations');
         toast({
           variant: "destructive",
           title: "Accès refusé",

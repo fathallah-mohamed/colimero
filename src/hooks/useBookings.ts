@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import type { Booking } from "@/types/booking";
 
 export function useBookings() {
   const user = useUser();
