@@ -20,21 +20,9 @@ export function useNavigation() {
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          // If there's a session error, try to refresh
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          
-          if (refreshError) {
-            console.error("Session refresh error:", refreshError);
-            if (mounted) {
-              setUser(null);
-              setUserType(null);
-            }
-            return;
-          }
-          
-          if (mounted && refreshData.session) {
-            setUser(refreshData.session.user);
-            setUserType(refreshData.session.user.user_metadata?.user_type ?? null);
+          if (mounted) {
+            setUser(null);
+            setUserType(null);
           }
           return;
         }
@@ -46,6 +34,8 @@ export function useNavigation() {
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (!mounted) return;
+
+          console.log("Auth state change:", event, session?.user?.id);
 
           if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             setUser(session?.user ?? null);
@@ -86,7 +76,16 @@ export function useNavigation() {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Logout error:", error);
-        // Even if there's an error, we'll show success since the local state is cleared
+        if (error.message.includes('session')) {
+          // If it's a session error, we'll still consider the user logged out locally
+          toast({
+            title: "Déconnexion réussie",
+            description: "Votre session a été terminée.",
+          });
+          navigate('/');
+          return;
+        }
+        throw error;
       }
 
       toast({

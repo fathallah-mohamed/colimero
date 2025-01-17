@@ -13,7 +13,7 @@ export function useBookings() {
     queryFn: async () => {
       if (!user) {
         console.log("No user found in useBookings");
-        throw new Error("User not authenticated");
+        return [];
       }
 
       console.log("Fetching bookings for user:", user.id);

@@ -12,10 +12,10 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      flowType: 'pkce',
-      storage: window.localStorage,
+      storage: localStorage,
       storageKey: 'supabase.auth.token',
-      debug: true // This will help us debug auth issues
+      flowType: 'pkce',
+      debug: process.env.NODE_ENV === 'development'
     }
   }
 );
