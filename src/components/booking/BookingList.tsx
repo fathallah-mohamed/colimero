@@ -1,9 +1,8 @@
+import { AlertCircle } from "lucide-react";
 import { BookingCard } from "./BookingCard";
 import { BookingListLoading } from "./BookingListLoading";
 import { EmptyBookingList } from "./EmptyBookingList";
-import { BookingError } from "./BookingError";
 import { useBookings } from "@/hooks/useBookings";
-import { useSessionCheck } from "@/hooks/useSessionCheck";
 import type { BookingStatus } from "@/types/booking";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -14,8 +13,10 @@ export function BookingList() {
   const { toast } = useToast();
   const user = useUser();
 
-  // Use the new session check hook
-  useSessionCheck();
+  console.log("BookingList - Current user:", user?.id);
+  console.log("BookingList - Bookings data:", bookings);
+  console.log("BookingList - Loading state:", isLoading);
+  console.log("BookingList - Error state:", error);
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     try {
@@ -29,7 +30,10 @@ export function BookingList() {
         })
         .eq('id', bookingId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating booking status:", error);
+        throw error;
+      }
 
       await refetch();
 
@@ -47,15 +51,6 @@ export function BookingList() {
     }
   };
 
-  if (!user) {
-    return (
-      <BookingError
-        title="Authentification requise"
-        description="Veuillez vous connecter pour voir vos réservations."
-      />
-    );
-  }
-
   if (isLoading) {
     return <BookingListLoading />;
   }
@@ -63,10 +58,15 @@ export function BookingList() {
   if (error) {
     console.error("Error loading bookings:", error);
     return (
-      <BookingError
-        title="Erreur lors du chargement des réservations"
-        description="Une erreur est survenue lors du chargement de vos réservations. Veuillez réessayer."
-      />
+      <div className="bg-white shadow rounded-lg p-6 text-center">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          Erreur lors du chargement des réservations
+        </h3>
+        <p className="text-gray-500">
+          Une erreur est survenue lors du chargement de vos réservations. Veuillez réessayer.
+        </p>
+      </div>
     );
   }
 

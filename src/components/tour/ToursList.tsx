@@ -14,7 +14,7 @@ interface ToursListProps {
 }
 
 export function ToursList({ 
-  tours = [], // Provide default empty array
+  tours, 
   isCompleted, 
   onEdit, 
   onDelete, 
@@ -22,10 +22,7 @@ export function ToursList({
 }: ToursListProps) {
   const navigate = useNavigate();
 
-  // Ensure tours is always an array
-  const toursList = Array.isArray(tours) ? tours : [];
-
-  if (toursList.length === 0) {
+  if (tours.length === 0) {
     return (
       <div className="bg-white shadow rounded-lg p-6 text-center">
         <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -48,7 +45,7 @@ export function ToursList({
 
   return (
     <div className="space-y-4">
-      {toursList.map((tour, index) => (
+      {tours.map((tour, index) => (
         <TourCard
           key={tour.id}
           tour={tour}

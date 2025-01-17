@@ -13,7 +13,7 @@ export function useBookings() {
     queryFn: async () => {
       if (!user) {
         console.log("No user found in useBookings");
-        return [];
+        throw new Error("User not authenticated");
       }
 
       console.log("Fetching bookings for user:", user.id);
@@ -46,7 +46,14 @@ export function useBookings() {
         throw error;
       }
 
-      return bookingsData?.map((booking: any) => ({
+      console.log("Raw bookings data:", bookingsData);
+      
+      if (!bookingsData) {
+        console.log("No bookings found");
+        return [];
+      }
+
+      const formattedBookings = bookingsData.map((booking: any) => ({
         ...booking,
         special_items: Array.isArray(booking.special_items) 
           ? booking.special_items.map((item: any) => {
@@ -61,7 +68,10 @@ export function useBookings() {
         collection_date_formatted: booking.tours?.collection_date
           ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
           : null
-      })) || [];
+      }));
+
+      console.log("Formatted bookings:", formattedBookings);
+      return formattedBookings;
     },
     enabled: !!user,
   });

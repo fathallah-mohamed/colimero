@@ -43,7 +43,6 @@ export function TourContent({ carrierOnly = false }: TourContentProps) {
     );
   }
 
-  // Ensure tours is an array
   const toursList = Array.isArray(tours) ? tours : [];
 
   // Split the selectedRoute into departure and destination countries
