@@ -1,11 +1,10 @@
 import React, { useState, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
 import MobileMenu from "@/components/navigation/MobileMenu";
 import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { NavigationHeader } from "./navigation/NavigationHeader";
-import { supabase } from "@/integrations/supabase/client";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
@@ -18,7 +17,6 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
-  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Initialize session and handle auth state changes
@@ -52,24 +50,12 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // Store return path for auth redirects and handle protected routes
+  // Store return path for auth redirects
   React.useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // If we're on a protected route and not authenticated
-      if (location.pathname === '/mes-reservations') {
-        if (!session) {
-          sessionStorage.setItem('returnPath', location.pathname);
-          navigate('/connexion');
-        } else if (session.user.user_metadata?.user_type !== 'client') {
-          navigate('/');
-        }
-      }
-    };
-
-    checkAuth();
-  }, [location.pathname, navigate]);
+    if (location.pathname.includes('/reserver/')) {
+      sessionStorage.setItem('returnPath', location.pathname);
+    }
+  }, [location.pathname]);
 
   return (
     <nav className={cn(
