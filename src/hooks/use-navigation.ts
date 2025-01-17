@@ -20,9 +20,21 @@ export function useNavigation() {
         
         if (sessionError) {
           console.error("Session error:", sessionError);
-          if (mounted) {
-            setUser(null);
-            setUserType(null);
+          // Try to refresh the session
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
+          if (refreshError) {
+            console.error("Session refresh error:", refreshError);
+            if (mounted) {
+              setUser(null);
+              setUserType(null);
+            }
+            return;
+          }
+          
+          if (mounted && refreshData.session) {
+            setUser(refreshData.session.user);
+            setUserType(refreshData.session.user.user_metadata?.user_type ?? null);
           }
           return;
         }
