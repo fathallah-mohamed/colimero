@@ -69,7 +69,7 @@ export function BookingList() {
 
       console.log("Fetching bookings for user:", user.id);
 
-      const { data: bookingsData, error: bookingsError } = await supabase
+      const { data, error } = await supabase
         .from("bookings")
         .select(`
           *,
@@ -104,19 +104,19 @@ export function BookingList() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (bookingsError) {
-        console.error("Error fetching bookings:", bookingsError);
-        throw bookingsError;
+      if (error) {
+        console.error("Error fetching bookings:", error);
+        throw error;
       }
 
-      console.log("Raw bookings data:", bookingsData);
+      console.log("Raw bookings data:", data);
       
-      if (!bookingsData) {
+      if (!data) {
         console.log("No bookings found");
         return [];
       }
 
-      return (bookingsData as unknown as BookingWithRelations[])?.map(booking => ({
+      return (data as unknown as BookingWithRelations[]).map(booking => ({
         ...booking,
         special_items: Array.isArray(booking.special_items) 
           ? booking.special_items.map(item => {
