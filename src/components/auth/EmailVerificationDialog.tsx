@@ -6,11 +6,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -23,37 +20,12 @@ export function EmailVerificationDialog({
   onClose,
   email,
 }: EmailVerificationDialogProps) {
-  const [isResending, setIsResending] = useState(false);
-  const { toast } = useToast();
+  const { isResending, resendActivationEmail } = useEmailVerification();
 
   const handleResendEmail = async () => {
-    try {
-      setIsResending(true);
-      console.log("Tentative de renvoi de l'email d'activation à:", email);
-
-      const { error } = await supabase.functions.invoke('send-activation-email', {
-        body: { email }
-      });
-
-      if (error) {
-        console.error("Erreur lors de l'invocation de la fonction:", error);
-        throw error;
-      }
-
-      toast({
-        title: "Email envoyé",
-        description: "Un nouvel email d'activation vous a été envoyé.",
-      });
+    const success = await resendActivationEmail(email);
+    if (success) {
       onClose();
-    } catch (error: any) {
-      console.error("Erreur lors de l'envoi de l'email:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'envoyer l'email d'activation. Veuillez réessayer.",
-      });
-    } finally {
-      setIsResending(false);
     }
   };
 
