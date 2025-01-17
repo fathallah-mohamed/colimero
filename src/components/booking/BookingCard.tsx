@@ -17,7 +17,7 @@ interface BookingCardProps {
   booking: any;
   isCollecting?: boolean;
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
-  onUpdate: () => Promise<void>;
+  onUpdate: () => void; // Changed from Promise<void> to void
   isEven?: boolean;
   tourStatus?: string;
 }
@@ -34,11 +34,10 @@ export function BookingCard({
   const { toast } = useToast();
   const { userType } = useNavigation();
 
-  // Récupérer le statut de la tournée depuis l'objet booking
   const currentTourStatus = booking.tours?.status || tourStatus || "Programmée";
 
-  const handleEditSuccess = async () => {
-    await onUpdate();
+  const handleEditSuccess = () => {
+    onUpdate();
     setShowEditDialog(false);
     toast({
       title: "Réservation mise à jour",

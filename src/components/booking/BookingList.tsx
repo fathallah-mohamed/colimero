@@ -78,7 +78,7 @@ export function BookingList() {
           booking={booking} 
           isCollecting={true}
           onStatusChange={handleStatusChange}
-          onUpdate={refetch}
+          onUpdate={() => { refetch(); }} // Wrapped refetch in a void function
           isEven={false}
         />
       ))}
