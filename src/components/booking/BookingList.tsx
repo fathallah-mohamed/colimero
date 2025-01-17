@@ -73,6 +73,18 @@ export function BookingList() {
         .from("bookings")
         .select(`
           *,
+          sender:user_id (
+            id,
+            email,
+            first_name,
+            last_name
+          ),
+          recipient:recipient_id (
+            id,
+            email,
+            first_name,
+            last_name
+          ),
           tours (
             collection_date,
             departure_date,
