@@ -22,6 +22,7 @@ export function useBookings() {
         .select(`
           *,
           tours (
+            id,
             collection_date,
             departure_date,
             destination_country,
@@ -67,7 +68,7 @@ export function useBookings() {
         collection_date_formatted: booking.tours?.collection_date
           ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
           : null
-      })) as Booking[];
+      }));
     },
     enabled: !!user,
   });

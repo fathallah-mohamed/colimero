@@ -9,7 +9,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function BookingList() {
-  const { data: bookings, isLoading, error } = useBookings();
+  const { data: bookings, isLoading, error, refetch } = useBookings();
   const { toast } = useToast();
   const user = useUser();
 
@@ -31,6 +31,8 @@ export function BookingList() {
         throw error;
       }
 
+      await refetch();
+
       toast({
         title: "Statut mis à jour",
         description: "Le statut de la réservation a été mis à jour avec succès.",
@@ -50,6 +52,7 @@ export function BookingList() {
   }
 
   if (error) {
+    console.error("Error loading bookings:", error);
     return (
       <div className="bg-white shadow rounded-lg p-6 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -75,7 +78,7 @@ export function BookingList() {
           booking={booking} 
           isCollecting={true}
           onStatusChange={handleStatusChange}
-          onUpdate={async () => {}}
+          onUpdate={refetch}
           isEven={false}
         />
       ))}

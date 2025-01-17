@@ -1,29 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { BookingList } from "@/components/booking/BookingList";
 import { Loader2 } from "lucide-react";
+import { useUser } from "@supabase/auth-helpers-react";
 
 export default function MesReservations() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const user = useUser();
 
   useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!user) {
       navigate('/connexion');
     }
-    setLoading(false);
-  };
+  }, [user, navigate]);
 
-  if (loading) {
+  if (!user) {
     return (
       <div className="min-h-screen">
         <Navigation />
