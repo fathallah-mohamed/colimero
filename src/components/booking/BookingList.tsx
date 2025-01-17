@@ -13,6 +13,11 @@ export function BookingList() {
   const { toast } = useToast();
   const user = useUser();
 
+  console.log("BookingList - Current user:", user?.id);
+  console.log("BookingList - Bookings data:", bookings);
+  console.log("BookingList - Loading state:", isLoading);
+  console.log("BookingList - Error state:", error);
+
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     try {
       console.log("Updating booking status:", { bookingId, newStatus });
