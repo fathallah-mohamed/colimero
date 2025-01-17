@@ -101,7 +101,8 @@ export function BookingList() {
             )
           )
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error("Error fetching bookings:", error);
@@ -129,6 +130,28 @@ export function BookingList() {
     },
     enabled: !!user,
   });
+
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    try {
+      console.log("Updating booking status:", { bookingId, newStatus });
+      
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus 
+        })
+        .eq('id', bookingId)
+        .eq('user_id', user?.id);
+
+      if (error) {
+        console.error("Error updating booking status:", error);
+        throw error;
+      }
+    } catch (err) {
+      console.error("Error updating booking status:", err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -173,7 +196,7 @@ export function BookingList() {
           key={booking.id} 
           booking={booking} 
           isCollecting={true}
-          onStatusChange={async () => {}}
+          onStatusChange={handleStatusChange}
           onUpdate={async () => {}}
           isEven={false}
         />
