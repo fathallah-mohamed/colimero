@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "@/services/auth-service";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -20,6 +21,7 @@ export function useLoginForm({
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +47,21 @@ export function useLoginForm({
         if (response.error) {
           setError(response.error);
           setShowErrorDialog(true);
+          toast({
+            variant: "destructive",
+            title: "Erreur de connexion",
+            description: response.error
+          });
         }
         setIsLoading(false);
         return;
       }
+
+      // Only navigate if login was successful
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue !"
+      });
 
       if (onSuccess) {
         onSuccess();
@@ -63,8 +76,14 @@ export function useLoginForm({
       }
     } catch (error: any) {
       console.error("Complete error:", error);
-      setError("Une erreur inattendue s'est produite");
+      const errorMessage = "Une erreur inattendue s'est produite";
+      setError(errorMessage);
       setShowErrorDialog(true);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: errorMessage
+      });
     } finally {
       setIsLoading(false);
     }

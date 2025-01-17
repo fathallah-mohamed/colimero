@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { AuthError } from "@supabase/supabase-js";
 
 interface AuthResponse {
   success: boolean;
@@ -32,6 +33,7 @@ export const authService = {
       });
 
       if (signInError) {
+        console.error("Sign in error:", signInError);
         return {
           success: false,
           error: signInError.message === "Invalid login credentials" 
