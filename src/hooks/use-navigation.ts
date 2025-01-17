@@ -32,6 +32,7 @@ export function useNavigation() {
           setUserType(session.user.user_metadata?.user_type ?? null);
         }
 
+        // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (!mounted) return;
 
@@ -72,14 +73,22 @@ export function useNavigation() {
       setUser(null);
       setUserType(null);
 
-      // Then attempt to sign out from Supabase
+      // Try to refresh the session before signing out
+      const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.log("Session refresh error:", refreshError);
+      }
+
+      // Attempt to sign out
       const { error } = await supabase.auth.signOut();
       
-      // Handle session not found error gracefully
       if (error) {
         console.error("Logout error:", error);
-        if (error.message.includes('session_not_found') || error.message.includes('Session')) {
-          // If it's a session error, we'll still consider the user logged out locally
+        // Handle session-related errors gracefully
+        if (error.message.includes('session_not_found') || 
+            error.message.includes('Session') || 
+            error.status === 403) {
           toast({
             title: "Déconnexion réussie",
             description: "Votre session a été terminée.",
@@ -87,6 +96,7 @@ export function useNavigation() {
           navigate('/');
           return;
         }
+        // For other errors, throw them to be caught below
         throw error;
       }
 
@@ -98,7 +108,7 @@ export function useNavigation() {
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
-      // Still clear local state and redirect even if there's an error
+      // Ensure user is logged out locally even if there's an error
       toast({
         title: "Déconnexion réussie",
         description: "Votre session a été terminée.",
