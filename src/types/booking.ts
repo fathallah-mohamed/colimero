@@ -80,21 +80,6 @@ export interface Booking {
   };
 }
 
-export interface BookingWithRelations extends Booking {
-  sender?: {
-    id: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-  } | null;
-  recipient?: {
-    id: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-  } | null;
-}
-
 export interface BookingDetailsProps {
   booking: Booking;
 }
