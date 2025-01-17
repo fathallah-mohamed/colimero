@@ -966,9 +966,21 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      is_activation_token_expired: {
+        Args: {
+          token: string
+        }
+        Returns: boolean
+      }
       random_last_city: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      renew_activation_token: {
+        Args: {
+          p_email: string
+        }
+        Returns: string
       }
       update_carrier_profile: {
         Args: {
