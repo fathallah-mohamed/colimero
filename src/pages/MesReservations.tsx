@@ -4,20 +4,16 @@ import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingList } from "@/components/booking/BookingList";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@supabase/auth-helpers-react";
 
 export default function MesReservations() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const user = useUser();
 
   useEffect(() => {
     const checkAuth = async () => {
-      console.log("MesReservations - Checking auth for user:", user?.id);
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        console.log("MesReservations - No session found");
         toast({
           variant: "destructive",
           title: "Accès refusé",
@@ -29,10 +25,8 @@ export default function MesReservations() {
 
       // Vérifier si l'utilisateur est un client
       const userType = session.user?.user_metadata?.user_type;
-      console.log("MesReservations - User type:", userType);
       
       if (userType !== 'client') {
-        console.log("MesReservations - User is not a client");
         toast({
           variant: "destructive",
           title: "Accès refusé",
@@ -44,7 +38,7 @@ export default function MesReservations() {
     };
 
     checkAuth();
-  }, [navigate, toast, user]);
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
