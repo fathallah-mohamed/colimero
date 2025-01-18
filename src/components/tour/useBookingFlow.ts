@@ -27,7 +27,7 @@ export function useBookingFlow() {
     }
 
     // Vérifier uniquement les réservations en attente
-    const { data: existingBookings, error } = await supabase
+    const { data: pendingBookings, error } = await supabase
       .from('bookings')
       .select('*')
       .eq('user_id', user.id)
@@ -44,7 +44,7 @@ export function useBookingFlow() {
       return;
     }
 
-    if (existingBookings) {
+    if (pendingBookings) {
       toast({
         variant: "destructive",
         title: "Réservation impossible",
