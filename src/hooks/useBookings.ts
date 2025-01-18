@@ -79,7 +79,7 @@ export function useBookings() {
         };
       });
 
-      console.log("Formatted bookings:", formattedBookings);
+      console.log("Formatted bookings for user:", session.user.id, formattedBookings);
       return formattedBookings;
     },
     enabled: true,
