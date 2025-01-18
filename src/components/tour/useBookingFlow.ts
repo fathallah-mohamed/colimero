@@ -12,10 +12,9 @@ export function useBookingFlow() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      // Sauvegarder le chemin complet avec les paramètres
       const bookingPath = `/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`;
       sessionStorage.setItem('returnPath', bookingPath);
-      setShowAuthDialog(true);
+      navigate('/connexion');
       return;
     }
 
@@ -27,12 +26,12 @@ export function useBookingFlow() {
       return;
     }
 
-    // Vérifier si l'utilisateur a déjà une réservation en cours
+    // Vérifier uniquement les réservations en attente
     const { data: existingBookings, error } = await supabase
       .from('bookings')
       .select('*')
       .eq('user_id', user.id)
-      .in('status', ['pending', 'confirmed', 'in_transit'])
+      .eq('status', 'pending')
       .maybeSingle();
 
     if (error) {
@@ -49,7 +48,7 @@ export function useBookingFlow() {
       toast({
         variant: "destructive",
         title: "Réservation impossible",
-        description: "Vous avez déjà une réservation en cours. Veuillez attendre que votre colis soit livré avant d'effectuer une nouvelle réservation.",
+        description: "Vous avez déjà une réservation en attente. Veuillez attendre que votre réservation soit traitée avant d'en effectuer une nouvelle.",
       });
       return;
     }
