@@ -8,6 +8,9 @@ import { useNavigation } from "@/hooks/use-navigation";
 import { TourPreview } from "./card/TourPreview";
 import { BookingCardContent } from "./card/BookingCardContent";
 import { useBookingCard } from "@/hooks/useBookingCard";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Calendar } from "lucide-react";
 
 interface BookingCardProps {
   booking: any;
@@ -35,11 +38,17 @@ export function BookingCard({
   } = useBookingCard(onStatusChange, onUpdate);
 
   const currentTourStatus = booking.tours?.status || tourStatus || "Programmée";
+  const createdAt = booking.created_at ? format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr }) : "Date inconnue";
 
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow duration-200">
       <div className="space-y-4">
         <BookingCardHeader booking={booking} />
+
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Calendar className="h-4 w-4" />
+          <span>Réservé le {createdAt}</span>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
