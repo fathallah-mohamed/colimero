@@ -3,9 +3,9 @@ import { BookingCard } from "./BookingCard";
 import { BookingListLoading } from "./BookingListLoading";
 import { EmptyBookingList } from "./EmptyBookingList";
 import { useBookings } from "@/hooks/useBookings";
-import type { BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { BookingStatus } from "@/types/booking";
 
 export function BookingList() {
   const { data: bookings = [], isLoading, error, refetch } = useBookings();
@@ -30,9 +30,6 @@ export function BookingList() {
         <p className="text-gray-500">
           Une erreur est survenue lors du chargement de vos réservations. Veuillez réessayer.
         </p>
-        <pre className="mt-4 text-left text-sm bg-gray-100 p-4 rounded">
-          {JSON.stringify(error, null, 2)}
-        </pre>
       </div>
     );
   }

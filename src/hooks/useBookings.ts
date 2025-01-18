@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import type { Booking } from "@/types/booking";
 
 export function useBookings() {
   const user = useUser();
@@ -12,11 +13,10 @@ export function useBookings() {
     queryFn: async () => {
       if (!user) {
         console.log("No user found in useBookings");
-        throw new Error("User not authenticated");
+        return [];
       }
 
       console.log("Fetching bookings for user:", user.id);
-      console.log("User metadata:", user.user_metadata);
 
       const { data: bookingsData, error } = await supabase
         .from("bookings")
@@ -55,7 +55,6 @@ export function useBookings() {
       }
 
       const formattedBookings = bookingsData.map((booking: any) => {
-        // Parse special_items if it's a string
         let specialItems = [];
         try {
           if (typeof booking.special_items === 'string') {
