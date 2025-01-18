@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { BookingErrorDialog } from "./form/BookingErrorDialog";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const specialItems = [
   { name: "Vélo", price: 50, icon: "bicycle" },
@@ -72,6 +73,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
   const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -148,8 +150,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     const { success } = await createBooking(formValues);
     if (success) {
       toast({
-        title: "Réservation créée",
-        description: "Votre réservation a été créée avec succès",
+        title: "Réservation envoyée",
+        description: "Votre demande de réservation a été envoyée avec succès. Le transporteur l'examinera et vous serez notifié de sa décision.",
       });
       form.reset();
       setWeight(5);
@@ -159,6 +161,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       setPhotos([]);
       setShowConfirmDialog(false);
       setResponsibilityAccepted(false);
+      navigate('/mes-reservations');
     }
   };
 
