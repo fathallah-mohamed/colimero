@@ -65,15 +65,16 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         return;
       }
 
-      // Vérifier si l'utilisateur a déjà une réservation pour cette tournée
-      const { data: existingBooking } = await supabase
+      // Vérifier uniquement les réservations en attente
+      const { data: pendingBooking } = await supabase
         .from('bookings')
         .select('id')
         .eq('user_id', session.user.id)
         .eq('tour_id', tour.id)
+        .eq('status', 'pending')
         .maybeSingle();
 
-      if (existingBooking) {
+      if (pendingBooking) {
         setShowExistingBookingDialog(true);
         return;
       }
@@ -143,7 +144,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           <DialogHeader>
             <DialogTitle>Réservation existante</DialogTitle>
             <DialogDescription>
-              Vous avez déjà une réservation pour cette tournée.
+              Vous avez déjà une réservation en attente pour cette tournée.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-2">
