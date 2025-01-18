@@ -16,6 +16,20 @@ interface EditBookingDialogProps {
 }
 
 export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: EditBookingDialogProps) {
+  // Parse special_items if it's a string, otherwise use as is
+  const parseSpecialItems = (items: any) => {
+    if (!items) return [];
+    if (typeof items === 'string') {
+      try {
+        return JSON.parse(items);
+      } catch (e) {
+        console.error('Error parsing special items:', e);
+        return [];
+      }
+    }
+    return Array.isArray(items) ? items : [];
+  };
+
   const [formData, setFormData] = useState({
     sender_name: booking?.sender_name || "",
     sender_phone: booking?.sender_phone || "",
@@ -25,14 +39,17 @@ export function EditBookingDialog({ booking, open, onOpenChange, onSuccess }: Ed
     delivery_city: booking?.delivery_city || "",
     weight: booking?.weight || 5,
     content_types: booking?.content_types || [],
-    special_items: booking?.special_items?.map((item: any) => item.name) || [],
+    special_items: parseSpecialItems(booking?.special_items).map((item: any) => 
+      typeof item === 'string' ? item : item.name
+    ),
   });
 
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>(
-    booking?.special_items?.reduce((acc: Record<string, number>, item: any) => {
-      acc[item.name] = item.quantity || 1;
+    parseSpecialItems(booking?.special_items).reduce((acc: Record<string, number>, item: any) => {
+      const itemName = typeof item === 'string' ? item : item.name;
+      acc[itemName] = typeof item === 'string' ? 1 : (item.quantity || 1);
       return acc;
-    }, {}) || {}
+    }, {})
   );
 
   const { isSubmitting, updateBooking } = useBookingEdit(booking.id, onSuccess);
