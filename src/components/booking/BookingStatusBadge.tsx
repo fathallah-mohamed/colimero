@@ -11,9 +11,9 @@ export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
       case "pending":
         return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
       case "confirmed":
-        return "bg-green-100 text-green-800 hover:bg-green-100";
-      case "collected":
         return "bg-blue-100 text-blue-800 hover:bg-blue-100";
+      case "collected":
+        return "bg-orange-100 text-orange-800 hover:bg-orange-100";
       case "ready_to_deliver":
         return "bg-purple-100 text-purple-800 hover:bg-purple-100";
       case "delivered":
@@ -34,7 +34,7 @@ export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
       case "confirmed":
         return "Confirmée";
       case "collected":
-        return "Collectée";
+        return "Ramassée";
       case "ready_to_deliver":
         return "Prête à livrer";
       case "delivered":
