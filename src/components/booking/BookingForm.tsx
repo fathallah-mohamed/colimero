@@ -1,17 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { BookingContentTypes } from "./BookingContentTypes";
 import { BookingWeightSelector } from "./BookingWeightSelector";
 import { BookingPhotoUpload } from "./BookingPhotoUpload";
@@ -23,6 +13,9 @@ import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { BookingErrorDialog } from "./form/BookingErrorDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { BookingFormFields } from "./form/BookingFormFields";
+import { formSchema } from "./form/schema";
+import { useBookingFormState } from "./form/useBookingFormState";
 
 const specialItems = [
   { name: "Vélo", price: 50, icon: "bicycle" },
@@ -42,17 +35,6 @@ const contentTypes = [
   "Autres",
 ];
 
-const formSchema = z.object({
-  weight: z.number().min(5).max(30),
-  recipient_name: z.string().min(2, "Le nom du destinataire est requis"),
-  recipient_address: z.string().min(5, "L'adresse de livraison est requise"),
-  recipient_phone: z.string().min(8, "Le numéro de téléphone est requis"),
-  sender_name: z.string().min(2, "Votre nom est requis"),
-  sender_phone: z.string().min(8, "Votre numéro de téléphone est requis"),
-  item_type: z.string().min(2, "Le type de colis est requis"),
-  special_items: z.string().optional(),
-});
-
 export interface BookingFormProps {
   tourId: number;
   pickupCity: string;
@@ -60,20 +42,45 @@ export interface BookingFormProps {
 }
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
-  const [weight, setWeight] = useState(5);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
-  const [photos, setPhotos] = useState<File[]>([]);
   const [userData, setUserData] = useState<any>(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [formValues, setFormValues] = useState<any>(null);
-  const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
-  const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      weight: 5,
+      recipient_name: "",
+      recipient_address: "",
+      recipient_phone: "",
+      sender_name: "",
+      sender_phone: "",
+      item_type: "",
+      special_items: "",
+    },
+  });
+
+  const {
+    weight,
+    selectedTypes,
+    selectedItems,
+    itemQuantities,
+    photos,
+    showConfirmDialog,
+    showErrorDialog,
+    errorMessage,
+    formValues,
+    responsibilityAccepted,
+    setShowConfirmDialog,
+    setShowErrorDialog,
+    setFormValues,
+    setResponsibilityAccepted,
+    handleWeightChange,
+    handleTypeToggle,
+    handleItemToggle,
+    handleQuantityChange,
+    handlePhotoUpload,
+  } = useBookingFormState();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -96,20 +103,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     fetchUserData();
   }, []);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      weight: 5,
-      recipient_name: "",
-      recipient_address: "",
-      recipient_phone: "",
-      sender_name: "",
-      sender_phone: "",
-      item_type: "",
-      special_items: "",
-    },
-  });
-
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     const formattedSpecialItems = selectedItems.map(itemName => ({
       name: itemName,
@@ -126,7 +119,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: formattedSpecialItems,
     };
 
-    // Check if user already has a booking
     const { data: existingBooking } = await supabase
       .from('bookings')
       .select('id')
@@ -154,52 +146,9 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         description: "Votre demande de réservation a été envoyée avec succès. Le transporteur l'examinera et vous serez notifié de sa décision.",
       });
       form.reset();
-      setWeight(5);
-      setSelectedTypes([]);
-      setSelectedItems([]);
-      setItemQuantities({});
-      setPhotos([]);
       setShowConfirmDialog(false);
       setResponsibilityAccepted(false);
       navigate('/mes-reservations');
-    }
-  };
-
-  const handleWeightChange = (increment: boolean) => {
-    setWeight((prev) => {
-      if (increment && prev < 30) return prev + 1;
-      if (!increment && prev > 5) return prev - 1;
-      return prev;
-    });
-  };
-
-  const handleTypeToggle = (type: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type)
-        ? prev.filter((t) => t !== type)
-        : [...prev, type]
-    );
-  };
-
-  const handleItemToggle = (item: string) => {
-    setSelectedItems(prev => 
-      prev.includes(item)
-        ? prev.filter(i => i !== item)
-        : [...prev, item]
-    );
-  };
-
-  const handleQuantityChange = (itemName: string, increment: boolean) => {
-    setItemQuantities(prev => ({
-      ...prev,
-      [itemName]: Math.max(1, (prev[itemName] || 1) + (increment ? 1 : -1))
-    }));
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newPhotos = Array.from(e.target.files);
-      setPhotos((prev) => [...prev, ...newPhotos]);
     }
   };
 
@@ -225,112 +174,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           onQuantityChange={handleQuantityChange}
         />
 
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="sender_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Votre nom</FormLabel>
-                <FormControl>
-                  <Input {...field} readOnly className="bg-gray-100" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="sender_phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Votre téléphone</FormLabel>
-                <FormControl>
-                  <Input {...field} type="tel" readOnly className="bg-gray-100" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="recipient_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom du destinataire</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="recipient_address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Adresse de livraison</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="recipient_phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Téléphone du destinataire</FormLabel>
-                <FormControl>
-                  <Input {...field} type="tel" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="item_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description du colis</FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="Ex: Vêtements, documents..." />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="special_items"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Instructions spéciales (optionnel)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="Ex: Fragile, manipuler avec précaution..."
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <BookingFormFields form={form} />
 
         <BookingPhotoUpload
           photos={photos}
