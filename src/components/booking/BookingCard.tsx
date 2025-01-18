@@ -2,7 +2,6 @@ import { EditBookingDialog } from "./EditBookingDialog";
 import type { BookingStatus } from "@/types/booking";
 import { Card } from "@/components/ui/card";
 import { BookingCardHeader } from "./card/BookingCardHeader";
-import { BookingAddressInfo } from "./card/BookingAddressInfo";
 import { BookingActions } from "./card/BookingActions";
 import { useNavigation } from "@/hooks/use-navigation";
 import { TourPreview } from "./card/TourPreview";
@@ -50,19 +49,12 @@ export function BookingCard({
           <span>Réservé le {createdAt}</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {booking.tours && (
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-2">Détails de la livraison</h4>
-            <BookingAddressInfo booking={booking} />
+            <h4 className="text-sm font-medium text-gray-500 mb-2">Aperçu de la tournée</h4>
+            <TourPreview tour={booking.tours} />
           </div>
-
-          {booking.tours && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-500 mb-2">Aperçu de la tournée</h4>
-              <TourPreview tour={booking.tours} />
-            </div>
-          )}
-        </div>
+        )}
 
         <div className="flex justify-end">
           <BookingActions

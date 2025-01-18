@@ -1,4 +1,4 @@
-import { Calendar, MapPin, Badge, Hash } from "lucide-react";
+import { Calendar, MapPin, Hash, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge as UIBadge } from "@/components/ui/badge";
@@ -9,6 +9,10 @@ interface TourPreviewProps {
 
 export function TourPreview({ tour }: TourPreviewProps) {
   if (!tour) return null;
+
+  const getCountryFlag = (countryCode: string) => {
+    return countryCode === 'FR' ? '🇫🇷' : '🇹🇳';
+  };
 
   return (
     <div className="space-y-4">
@@ -30,10 +34,18 @@ export function TourPreview({ tour }: TourPreviewProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-gray-500" />
-          <span className="text-sm">
-            {tour.departure_country} → {tour.destination_country}
-          </span>
+          <Flag className="h-4 w-4 text-gray-500" />
+          <div className="flex items-center gap-2">
+            <span className="text-sm flex items-center gap-1">
+              <span>{getCountryFlag(tour.departure_country)}</span>
+              <span>{tour.departure_country}</span>
+            </span>
+            <span className="text-gray-500">→</span>
+            <span className="text-sm flex items-center gap-1">
+              <span>{getCountryFlag(tour.destination_country)}</span>
+              <span>{tour.destination_country}</span>
+            </span>
+          </div>
         </div>
       </div>
 
