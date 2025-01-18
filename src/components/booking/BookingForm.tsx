@@ -86,19 +86,28 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: clientData } = await supabase
-          .from('clients')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
-        
-        if (clientData) {
-          setUserData(clientData);
-          form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
-          form.setValue('sender_phone', clientData.phone || '');
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: clientData, error } = await supabase
+            .from('clients')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          if (error) {
+            console.error('Erreur lors de la récupération des données client:', error);
+            return;
+          }
+          
+          if (clientData) {
+            setUserData(clientData);
+            form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
+            form.setValue('sender_phone', clientData.phone || '');
+          }
         }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données utilisateur:', error);
       }
     };
 
@@ -106,6 +115,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   }, []);
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log("Soumission du formulaire avec les valeurs:", values);
+    
     const formattedSpecialItems = selectedItems.map(itemName => ({
       name: itemName,
       quantity: itemQuantities[itemName] || 1
@@ -126,10 +137,15 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   };
 
   const handleConfirmBooking = async () => {
-    if (!formValues) return;
+    if (!formValues) {
+      console.error("Aucune donnée de formulaire disponible");
+      return;
+    }
 
     try {
+      console.log("Tentative de création de la réservation avec:", formValues);
       const { success } = await createBooking(formValues);
+      
       if (success) {
         toast({
           title: "Réservation créée avec succès",
