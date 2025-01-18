@@ -10,8 +10,6 @@ interface TourPreviewProps {
 export function TourPreview({ tour }: TourPreviewProps) {
   if (!tour) return null;
 
-  const route = tour.route || [];
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -31,23 +29,11 @@ export function TourPreview({ tour }: TourPreviewProps) {
           </span>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium">Villes de collecte:</span>
-          </div>
-          <div className="ml-6 space-y-1">
-            {Array.isArray(route) && route.map((stop: any, index: number) => (
-              <div 
-                key={index}
-                className="flex items-center gap-2 text-sm"
-              >
-                <div className="w-2 h-2 rounded-full bg-primary"></div>
-                <span>{stop.name}</span>
-                <span className="text-gray-500">({stop.time})</span>
-              </div>
-            ))}
-          </div>
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-gray-500" />
+          <span className="text-sm">
+            {tour.departure_country} → {tour.destination_country}
+          </span>
         </div>
       </div>
 
