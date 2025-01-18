@@ -55,7 +55,6 @@ export function useBookings() {
       }
 
       const formattedBookings = bookingsData.map((booking: any) => {
-        // Parse special_items if it's a string
         let specialItems = [];
         try {
           if (typeof booking.special_items === 'string') {
