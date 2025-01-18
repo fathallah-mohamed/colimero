@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export function BookingList() {
-  const { data: bookings, isLoading, error, refetch } = useBookings();
+  const { data: bookings = [], isLoading, error, refetch } = useBookings();
   const { toast } = useToast();
 
   console.log("BookingList - Loading state:", isLoading);

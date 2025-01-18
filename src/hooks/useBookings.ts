@@ -85,7 +85,5 @@ export function useBookings() {
       return formattedBookings;
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 3,
   });
 }
