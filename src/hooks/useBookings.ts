@@ -11,11 +11,8 @@ export function useBookings() {
     queryKey: ["bookings", user?.id],
     queryFn: async () => {
       if (!user) {
-        console.log("No user found in useBookings");
         throw new Error("User not authenticated");
       }
-
-      console.log("Fetching bookings for user:", user.id);
 
       const { data: bookingsData, error } = await supabase
         .from("bookings")
@@ -45,11 +42,8 @@ export function useBookings() {
         console.error("Error fetching bookings:", error);
         throw error;
       }
-
-      console.log("Raw bookings data:", bookingsData);
       
       if (!bookingsData) {
-        console.log("No bookings found");
         return [];
       }
 
@@ -79,7 +73,6 @@ export function useBookings() {
         };
       });
 
-      console.log("Formatted bookings:", formattedBookings);
       return formattedBookings;
     },
     enabled: !!user,

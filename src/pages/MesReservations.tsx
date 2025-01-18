@@ -25,21 +25,6 @@ export default function MesReservations() {
         navigate('/connexion');
         return;
       }
-
-      // Vérifier si l'utilisateur est un client
-      const userType = session.user?.user_metadata?.user_type;
-      console.log("User type:", userType);
-      console.log("User session:", session);
-      
-      if (userType !== 'client') {
-        toast({
-          variant: "destructive",
-          title: "Accès refusé",
-          description: "Cette page est réservée aux clients.",
-        });
-        navigate('/');
-        return;
-      }
     };
 
     checkAuth();
@@ -52,10 +37,10 @@ export default function MesReservations() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
         <h1 className="text-3xl font-bold mb-8">Mes réservations</h1>
         <BookingList />
-      </div>
+      </main>
     </div>
   );
 }

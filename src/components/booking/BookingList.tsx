@@ -11,16 +11,11 @@ export function BookingList() {
   const { data: bookings, isLoading, error, refetch } = useBookings();
   const { toast } = useToast();
 
-  console.log("BookingList - Loading state:", isLoading);
-  console.log("BookingList - Error state:", error);
-  console.log("BookingList - Bookings data:", bookings);
-
   if (isLoading) {
     return <BookingListLoading />;
   }
 
   if (error) {
-    console.error("Error loading bookings:", error);
     return (
       <div className="bg-white shadow rounded-lg p-6 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -30,15 +25,11 @@ export function BookingList() {
         <p className="text-gray-500">
           Une erreur est survenue lors du chargement de vos réservations. Veuillez réessayer.
         </p>
-        <pre className="mt-4 text-left text-sm bg-gray-100 p-4 rounded">
-          {JSON.stringify(error, null, 2)}
-        </pre>
       </div>
     );
   }
 
   if (!bookings || bookings.length === 0) {
-    console.log("No bookings found");
     return <EmptyBookingList />;
   }
 
@@ -51,8 +42,6 @@ export function BookingList() {
           isCollecting={true}
           onStatusChange={async (bookingId: string, newStatus: BookingStatus) => {
             try {
-              console.log("Updating booking status:", { bookingId, newStatus });
-              
               const { error: updateError } = await supabase
                 .from('bookings')
                 .update({ 
@@ -62,7 +51,6 @@ export function BookingList() {
                 .eq('id', bookingId);
 
               if (updateError) {
-                console.error("Error updating booking status:", updateError);
                 throw updateError;
               }
 
