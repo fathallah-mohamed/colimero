@@ -16,7 +16,6 @@ export function useBookings() {
       }
 
       console.log("Fetching bookings for user:", user.id);
-      console.log("User metadata:", user.user_metadata);
 
       const { data: bookingsData, error } = await supabase
         .from("bookings")
