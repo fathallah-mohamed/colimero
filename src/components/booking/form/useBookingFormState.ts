@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { File } from "@web-std/file";
 
 export function useBookingFormState() {
   const [weight, setWeight] = useState(5);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
-  const [photos, setPhotos] = useState<File[]>([]);
+  const [photos, setPhotos] = useState<File[]>([]); // Using standard File type
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");

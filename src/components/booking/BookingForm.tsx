@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { BookingFormFields } from "./form/BookingFormFields";
 import { formSchema } from "./form/schema";
 import { useBookingFormState } from "./form/useBookingFormState";
+import * as z from "zod"; // Added zod import
 
 const specialItems = [
   { name: "Vélo", price: 50, icon: "bicycle" },
@@ -80,6 +81,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     handleItemToggle,
     handleQuantityChange,
     handlePhotoUpload,
+    setErrorMessage, // Added missing import
   } = useBookingFormState();
 
   useEffect(() => {
