@@ -11,9 +11,9 @@ export function BookingList() {
   const { data: bookings, isLoading, error, refetch } = useBookings();
   const { toast } = useToast();
 
-  console.log("BookingList - Bookings data:", bookings);
   console.log("BookingList - Loading state:", isLoading);
   console.log("BookingList - Error state:", error);
+  console.log("BookingList - Bookings data:", bookings);
 
   if (isLoading) {
     return <BookingListLoading />;
@@ -37,42 +37,10 @@ export function BookingList() {
     );
   }
 
-  if (!bookings?.length) {
+  if (!bookings || bookings.length === 0) {
+    console.log("No bookings found");
     return <EmptyBookingList />;
   }
-
-  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
-    try {
-      console.log("Updating booking status:", { bookingId, newStatus });
-      
-      const { error: updateError } = await supabase
-        .from('bookings')
-        .update({ 
-          status: newStatus,
-          delivery_status: newStatus 
-        })
-        .eq('id', bookingId);
-
-      if (updateError) {
-        console.error("Error updating booking status:", updateError);
-        throw updateError;
-      }
-
-      await refetch();
-
-      toast({
-        title: "Statut mis à jour",
-        description: "Le statut de la réservation a été mis à jour avec succès.",
-      });
-    } catch (err) {
-      console.error("Error updating booking status:", err);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du statut.",
-      });
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -81,7 +49,38 @@ export function BookingList() {
           key={booking.id} 
           booking={booking} 
           isCollecting={true}
-          onStatusChange={handleStatusChange}
+          onStatusChange={async (bookingId: string, newStatus: BookingStatus) => {
+            try {
+              console.log("Updating booking status:", { bookingId, newStatus });
+              
+              const { error: updateError } = await supabase
+                .from('bookings')
+                .update({ 
+                  status: newStatus,
+                  delivery_status: newStatus 
+                })
+                .eq('id', bookingId);
+
+              if (updateError) {
+                console.error("Error updating booking status:", updateError);
+                throw updateError;
+              }
+
+              await refetch();
+
+              toast({
+                title: "Statut mis à jour",
+                description: "Le statut de la réservation a été mis à jour avec succès.",
+              });
+            } catch (err) {
+              console.error("Error updating booking status:", err);
+              toast({
+                variant: "destructive",
+                title: "Erreur",
+                description: "Une erreur est survenue lors de la mise à jour du statut.",
+              });
+            }
+          }}
           onUpdate={async () => { await refetch(); }}
           isEven={false}
         />

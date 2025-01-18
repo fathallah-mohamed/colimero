@@ -12,7 +12,7 @@ export function useBookings() {
     queryFn: async () => {
       if (!user) {
         console.log("No user found in useBookings");
-        return [];
+        throw new Error("User not authenticated");
       }
 
       console.log("Fetching bookings for user:", user.id);
@@ -85,5 +85,7 @@ export function useBookings() {
       return formattedBookings;
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 3,
   });
 }
