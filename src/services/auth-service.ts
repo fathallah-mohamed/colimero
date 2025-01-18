@@ -13,7 +13,7 @@ export const authService = {
     try {
       console.log("Attempting to sign in with email:", email.trim());
       
-      // Vérifier d'abord si le compte est vérifié
+      // First check if the user exists and if email is verified
       const { data: clientData } = await supabase
         .from('clients')
         .select('email_verified')
@@ -29,7 +29,7 @@ export const authService = {
         };
       }
 
-      // Tenter la connexion
+      // Attempt login
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -43,6 +43,10 @@ export const authService = {
           errorMessage = "Email ou mot de passe incorrect";
         } else if (signInError.message === "Email not confirmed") {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        } else if (signInError.message.includes("Invalid email")) {
+          errorMessage = "Format d'email invalide";
+        } else if (signInError.message.includes("Password")) {
+          errorMessage = "Le mot de passe est incorrect";
         }
 
         return {
@@ -58,7 +62,9 @@ export const authService = {
         };
       }
 
-      console.log("Sign in successful for user:", data.user.id);
+      const userType = data.user.user_metadata?.user_type;
+      console.log("Type d'utilisateur:", userType);
+
       return {
         success: true
       };
