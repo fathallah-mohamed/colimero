@@ -1,22 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useUser } from "@supabase/auth-helpers-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { Booking } from "@/types/booking";
 
 export function useBookings() {
-  const user = useUser();
-
   return useQuery({
-    queryKey: ["bookings", user?.id],
+    queryKey: ["bookings"],
     queryFn: async () => {
-      if (!user) {
-        console.log("No user found in useBookings");
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log("No session found in useBookings");
         return [];
       }
 
-      console.log("Fetching bookings for user:", user.id);
+      console.log("Fetching bookings for user:", session.user.id);
 
       const { data: bookingsData, error } = await supabase
         .from("bookings")
@@ -39,7 +38,7 @@ export function useBookings() {
             )
           )
         `)
-        .eq("user_id", user.id)
+        .eq("user_id", session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -83,6 +82,6 @@ export function useBookings() {
       console.log("Formatted bookings:", formattedBookings);
       return formattedBookings;
     },
-    enabled: !!user,
+    enabled: true,
   });
 }

@@ -1,28 +1,44 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 import { BookingList } from "@/components/booking/BookingList";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function MesReservations() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const user = useUser();
 
   useEffect(() => {
-    if (!user) {
-      sessionStorage.setItem('returnPath', '/mes-reservations');
-      toast({
-        variant: "destructive",
-        title: "Accès refusé",
-        description: "Vous devez être connecté pour accéder à vos réservations.",
-      });
-      navigate('/connexion');
-    }
-  }, [user, navigate, toast]);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        sessionStorage.setItem('returnPath', '/mes-reservations');
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour accéder à vos réservations.",
+        });
+        navigate('/connexion');
+        return;
+      }
 
-  if (!user) return null;
+      // Vérifier si l'utilisateur est un client
+      const userType = session.user?.user_metadata?.user_type;
+      if (userType !== 'client') {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Cette page est réservée aux clients.",
+        });
+        navigate('/');
+        return;
+      }
+    };
+
+    checkAuth();
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
