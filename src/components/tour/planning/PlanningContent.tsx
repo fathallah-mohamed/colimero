@@ -4,6 +4,7 @@ import { PlanningBenefits } from "./PlanningBenefits";
 import { PlanningExample } from "./PlanningExample";
 import { PlanningHero } from "./PlanningHero";
 import { PlanningSteps } from "./PlanningSteps";
+import { useNavigate } from "react-router-dom";
 
 interface PlanningContentProps {
   isAuthenticated: boolean;
@@ -16,9 +17,25 @@ export function PlanningContent({
   onCreateTourClick, 
   onAuthClick 
 }: PlanningContentProps) {
+  const navigate = useNavigate();
+
+  const handleAuthClick = () => {
+    sessionStorage.setItem('returnPath', '/planifier-tournee');
+    navigate('/connexion');
+  };
+
+  const handleCreateTourClick = () => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem('returnPath', '/planifier-tournee');
+      navigate('/connexion');
+      return;
+    }
+    onCreateTourClick();
+  };
+
   return (
     <>
-      <PlanningHero onCreateTourClick={onCreateTourClick} />
+      <PlanningHero onCreateTourClick={handleCreateTourClick} />
       <PlanningAdvantages />
       <PlanningSteps />
       <PlanningExample />
@@ -30,7 +47,7 @@ export function PlanningContent({
         </p>
         <div className="space-y-4">
           <Button
-            onClick={onCreateTourClick}
+            onClick={handleCreateTourClick}
             size="lg"
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 rounded-lg font-semibold text-lg transform transition hover:scale-105"
           >
@@ -38,7 +55,7 @@ export function PlanningContent({
           </Button>
           {!isAuthenticated && (
             <Button
-              onClick={onAuthClick}
+              onClick={handleAuthClick}
               variant="outline"
               size="lg"
               className="w-full max-w-md"

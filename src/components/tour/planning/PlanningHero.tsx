@@ -1,11 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Users, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface PlanningHeroProps {
   onCreateTourClick: () => void;
 }
 
 export function PlanningHero({ onCreateTourClick }: PlanningHeroProps) {
+  const navigate = useNavigate();
+  
+  const handleCreateTourClick = () => {
+    // Store the current path for redirect after login
+    sessionStorage.setItem('returnPath', '/planifier-tournee');
+    navigate('/connexion');
+  };
+
   const benefits = [
     {
       icon: TrendingUp,
