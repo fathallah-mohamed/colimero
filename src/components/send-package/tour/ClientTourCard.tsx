@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { CardCustom } from "@/components/ui/card-custom";
-import AuthDialog from "@/components/auth/AuthDialog";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
@@ -26,7 +25,6 @@ interface ClientTourCardProps {
 export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [showExistingBookingDialog, setShowExistingBookingDialog] = useState(false);
   const navigate = useNavigate();
@@ -38,15 +36,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
   const handleExpandClick = () => {
     setIsExpanded(!isExpanded);
-  };
-
-  const handleAuthSuccess = () => {
-    setShowAuthDialog(false);
-    const returnPath = sessionStorage.getItem('returnPath');
-    if (returnPath) {
-      sessionStorage.removeItem('returnPath');
-      navigate(returnPath);
-    }
   };
 
   const handleBookingButtonClick = async () => {
@@ -65,7 +54,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       if (!session) {
         const bookingPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`;
         sessionStorage.setItem('returnPath', bookingPath);
-        setShowAuthDialog(true);
+        navigate('/connexion');
         return;
       }
 
@@ -109,10 +98,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     }
   };
 
-  const handleCloseAuthDialog = () => {
-    setShowAuthDialog(false);
-  };
-
   return (
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
@@ -146,13 +131,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           )}
         </div>
       </div>
-
-      <AuthDialog
-        isOpen={showAuthDialog}
-        onClose={handleCloseAuthDialog}
-        onSuccess={handleAuthSuccess}
-        requiredUserType="client"
-      />
 
       <AccessDeniedMessage
         userType="carrier"
