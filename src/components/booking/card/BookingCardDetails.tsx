@@ -5,11 +5,19 @@ interface BookingCardDetailsProps {
 }
 
 export function BookingCardDetails({ booking }: BookingCardDetailsProps) {
+  // Ensure special_items is always an array
+  const specialItems = Array.isArray(booking.special_items) 
+    ? booking.special_items 
+    : typeof booking.special_items === 'string' 
+      ? JSON.parse(booking.special_items) 
+      : [];
+
   console.log("Booking details:", {
     sender: booking.sender_name,
     sender_email: booking.sender_email,
     recipient: booking.recipient_name,
-    recipient_email: booking.recipient_email
+    recipient_email: booking.recipient_email,
+    special_items: specialItems
   });
 
   return (
@@ -56,11 +64,11 @@ export function BookingCardDetails({ booking }: BookingCardDetailsProps) {
         </div>
       </div>
 
-      {booking.special_items && booking.special_items.length > 0 && (
+      {specialItems && specialItems.length > 0 && (
         <div>
           <p className="text-sm text-gray-500 mb-2">Objets spéciaux</p>
           <div className="flex flex-wrap gap-2">
-            {booking.special_items.map((item: any, index: number) => (
+            {specialItems.map((item: any, index: number) => (
               <span key={index} className="px-2 py-1 bg-gray-100 rounded text-sm">
                 {item.name} {item.quantity > 1 && `(${item.quantity})`}
               </span>
