@@ -34,7 +34,18 @@ export function LoginForm({
     setShowVerificationDialog,
     setShowErrorDialog,
     handleSubmit,
-  } = useLoginForm({ onSuccess, requiredUserType });
+  } = useLoginForm({ 
+    onSuccess: () => {
+      const returnPath = sessionStorage.getItem('returnPath');
+      if (returnPath) {
+        sessionStorage.removeItem('returnPath');
+        navigate(returnPath);
+      } else {
+        navigate('/');
+      }
+    }, 
+    requiredUserType 
+  });
 
   const handleCarrierRegister = () => {
     navigate("/devenir-transporteur");
