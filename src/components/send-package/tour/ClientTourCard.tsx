@@ -125,21 +125,13 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             selectedPoint={selectedPoint}
           />
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-center">
             <Button
               variant="outline"
               onClick={handleExpandClick}
-              className="text-gray-600"
+              className="text-gray-600 hover:bg-primary/10"
             >
-              {isExpanded ? "Voir moins" : "Voir plus"}
-            </Button>
-
-            <Button
-              onClick={handleBookingButtonClick}
-              className="bg-primary hover:bg-primary/90"
-              disabled={!selectedPoint}
-            >
-              Réserver
+              {isExpanded ? "Voir moins" : "Voir les détails de la tournée"}
             </Button>
           </div>
 
