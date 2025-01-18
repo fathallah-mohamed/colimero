@@ -11,6 +11,8 @@ interface AuthResponse {
 export const authService = {
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
+      console.log("Attempting to sign in with email:", email.trim());
+      
       // Vérifier d'abord si le compte est vérifié
       const { data: clientData } = await supabase
         .from('clients')
@@ -35,11 +37,17 @@ export const authService = {
 
       if (signInError) {
         console.error("Sign in error:", signInError);
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+        
+        if (signInError.message === "Invalid login credentials") {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else if (signInError.message === "Email not confirmed") {
+          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+        }
+
         return {
           success: false,
-          error: signInError.message === "Invalid login credentials" 
-            ? "Email ou mot de passe incorrect"
-            : "Une erreur est survenue lors de la connexion"
+          error: errorMessage
         };
       }
 
@@ -50,6 +58,7 @@ export const authService = {
         };
       }
 
+      console.log("Sign in successful for user:", data.user.id);
       return {
         success: true
       };
