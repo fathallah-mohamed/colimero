@@ -16,6 +16,7 @@ export function useBookings() {
       }
 
       console.log("Fetching bookings for user:", user.id);
+      console.log("User metadata:", user.user_metadata);
 
       const { data: bookingsData, error } = await supabase
         .from("bookings")
@@ -53,22 +54,32 @@ export function useBookings() {
         return [];
       }
 
-      const formattedBookings = bookingsData.map((booking: any) => ({
-        ...booking,
-        special_items: Array.isArray(booking.special_items) 
-          ? booking.special_items.map((item: any) => {
-              if (typeof item === 'string') return { name: item, quantity: 1 };
-              return item;
-            })
-          : [],
-        created_at_formatted: format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr }),
-        departure_date_formatted: booking.tours?.departure_date 
-          ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
-          : null,
-        collection_date_formatted: booking.tours?.collection_date
-          ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
-          : null
-      }));
+      const formattedBookings = bookingsData.map((booking: any) => {
+        // Parse special_items if it's a string
+        let specialItems = [];
+        try {
+          if (typeof booking.special_items === 'string') {
+            specialItems = JSON.parse(booking.special_items);
+          } else {
+            specialItems = booking.special_items || [];
+          }
+        } catch (e) {
+          console.error('Error parsing special_items:', e);
+          specialItems = [];
+        }
+
+        return {
+          ...booking,
+          special_items: specialItems,
+          created_at_formatted: format(new Date(booking.created_at), "d MMMM yyyy", { locale: fr }),
+          departure_date_formatted: booking.tours?.departure_date 
+            ? format(new Date(booking.tours.departure_date), "d MMMM yyyy", { locale: fr })
+            : null,
+          collection_date_formatted: booking.tours?.collection_date
+            ? format(new Date(booking.tours.collection_date), "d MMMM yyyy", { locale: fr })
+            : null
+        };
+      });
 
       console.log("Formatted bookings:", formattedBookings);
       return formattedBookings;

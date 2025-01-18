@@ -26,6 +26,8 @@ export default function MesReservations() {
 
       // Vérifier si l'utilisateur est un client
       const userType = session.user?.user_metadata?.user_type;
+      console.log("User type:", userType);
+      console.log("User session:", session);
       
       if (userType !== 'client') {
         toast({
@@ -36,6 +38,14 @@ export default function MesReservations() {
         navigate('/');
         return;
       }
+
+      // Vérifier si l'utilisateur a des réservations
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('user_id', session.user.id);
+
+      console.log("Initial bookings check:", { bookings, error });
     };
 
     checkAuth();
