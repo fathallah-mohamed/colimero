@@ -14,6 +14,10 @@ export function TourPreview({ tour }: TourPreviewProps) {
     return countryCode === 'FR' ? '🇫🇷' : '🇹🇳';
   };
 
+  // Assurons-nous que nous avons les bonnes valeurs pour les pays
+  const departureCountry = tour.departure_country || 'FR';
+  const destinationCountry = tour.destination_country || 'TN';
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -37,13 +41,13 @@ export function TourPreview({ tour }: TourPreviewProps) {
           <Flag className="h-4 w-4 text-gray-500" />
           <div className="flex items-center gap-2">
             <span className="text-sm flex items-center gap-1">
-              <span>{getCountryFlag(tour.departure_country)}</span>
-              <span>{tour.departure_country}</span>
+              <span>{getCountryFlag(departureCountry)}</span>
+              <span>{departureCountry}</span>
             </span>
             <span className="text-gray-500">→</span>
             <span className="text-sm flex items-center gap-1">
-              <span>{getCountryFlag(tour.destination_country)}</span>
-              <span>{tour.destination_country}</span>
+              <span>{getCountryFlag(destinationCountry)}</span>
+              <span>{destinationCountry}</span>
             </span>
           </div>
         </div>
