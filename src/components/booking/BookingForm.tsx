@@ -92,7 +92,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           .from('clients')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
         
         if (clientData) {
           setUserData(clientData);
@@ -128,16 +128,26 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const handleConfirmBooking = async () => {
     if (!formValues) return;
 
-    const { success } = await createBooking(formValues);
-    if (success) {
-      toast({
-        title: "Réservation envoyée",
-        description: "Votre demande de réservation a été envoyée avec succès. Le transporteur l'examinera et vous serez notifié de sa décision.",
-      });
-      form.reset();
-      setShowConfirmDialog(false);
-      setResponsibilityAccepted(false);
-      navigate('/mes-reservations');
+    try {
+      const { success } = await createBooking(formValues);
+      if (success) {
+        toast({
+          title: "Réservation créée avec succès",
+          description: "Votre demande de réservation a été envoyée. Vous serez notifié de son statut.",
+          variant: "default",
+        });
+        form.reset();
+        setShowConfirmDialog(false);
+        setResponsibilityAccepted(false);
+        navigate('/mes-reservations');
+      } else {
+        setErrorMessage("Une erreur est survenue lors de la création de la réservation");
+        setShowErrorDialog(true);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la création de la réservation:", error);
+      setErrorMessage("Une erreur est survenue lors de la création de la réservation");
+      setShowErrorDialog(true);
     }
   };
 
