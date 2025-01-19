@@ -3,6 +3,7 @@ import { Tour, TourStatus } from "@/types/tour";
 import { AnimatePresence } from "framer-motion";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,7 @@ export function TourTimelineCard({
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
@@ -68,10 +70,16 @@ export function TourTimelineCard({
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!user) {
+    if (!session) {
       setShowAuthDialog(true);
+      return;
+    }
+
+    const userType = session.user.user_metadata?.user_type;
+    if (userType === 'carrier') {
+      setShowAccessDeniedDialog(true);
       return;
     }
 
@@ -154,6 +162,12 @@ export function TourTimelineCard({
           checkExistingRequest();
         }}
         requiredUserType="client"
+      />
+
+      <AccessDeniedMessage
+        userType="carrier"
+        isOpen={showAccessDeniedDialog}
+        onClose={() => setShowAccessDeniedDialog(false)}
       />
 
       <ApprovalRequestDialog
