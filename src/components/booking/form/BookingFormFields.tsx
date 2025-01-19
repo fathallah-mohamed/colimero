@@ -8,6 +8,21 @@ import { BookingContentTypes } from "../BookingContentTypes";
 import { BookingSpecialItems } from "../BookingSpecialItems";
 import { BookingPhotoUpload } from "../BookingPhotoUpload";
 
+const availableContentTypes = [
+  "Documents",
+  "Vêtements",
+  "Électronique",
+  "Nourriture",
+  "Médicaments",
+  "Autres"
+];
+
+const availableSpecialItems = [
+  { name: "Fragile", price: 10, icon: "package" },
+  { name: "Lourd", price: 15, icon: "package" },
+  { name: "Périssable", price: 20, icon: "package" }
+];
+
 export interface BookingFormFieldsProps {
   form: UseFormReturn<BookingFormData>;
   weight: number;
@@ -150,6 +165,7 @@ export function BookingFormFields({
         <BookingContentTypes
           selectedTypes={contentTypes}
           onTypeToggle={onContentTypeToggle}
+          contentTypes={availableContentTypes}
         />
 
         <BookingSpecialItems
@@ -157,6 +173,7 @@ export function BookingFormFields({
           onItemToggle={onSpecialItemToggle}
           itemQuantities={itemQuantities}
           onQuantityChange={onQuantityChange}
+          specialItems={availableSpecialItems}
         />
 
         <FormField
