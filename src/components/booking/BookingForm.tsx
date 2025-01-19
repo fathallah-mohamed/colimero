@@ -16,6 +16,7 @@ import { useBookingSubmit } from "./form/useBookingSubmit";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import * as z from "zod";
+import { useToast } from "@/hooks/use-toast";
 
 const specialItems = [
   { name: "Vélo", price: 50, icon: "bicycle" },
@@ -43,6 +44,7 @@ export interface BookingFormProps {
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const {
     weight,
     selectedTypes,
@@ -98,14 +100,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     fetchUserInfo();
   }, [form]);
 
-  const { handleSubmit, isLoading } = useBookingSubmit(
-    tourId,
-    onSuccess,
-    setTrackingNumber,
-    setShowConfirmDialog,
-    setErrorMessage,
-    setShowErrorDialog
-  );
+  const { handleSubmit, isLoading } = useBookingSubmit(tourId);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const formattedSpecialItems = selectedItems.map(itemName => ({
@@ -129,7 +124,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       item_type: values.item_type
     };
 
-    await handleSubmit(values, formData);
+    try {
+      await handleSubmit(formData);
+      setTrackingNumber('RSV-' + Math.random().toString(36).substring(7));
+      setShowConfirmDialog(true);
+    } catch (error: any) {
+      setErrorMessage(error.message);
+      setShowErrorDialog(true);
+    }
   };
 
   return (
