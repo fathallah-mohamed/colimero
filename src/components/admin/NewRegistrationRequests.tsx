@@ -14,6 +14,7 @@ export default function NewRegistrationRequests() {
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ["approval-requests"],
     queryFn: async () => {
+      console.log("Fetching approval requests...");
       const { data, error } = await supabase
         .from("approval_requests")
         .select(`
@@ -35,12 +36,12 @@ export default function NewRegistrationRequests() {
               phone
             )
           ),
-          client:clients!inner(
+          client:auth.users!inner(
             id,
-            first_name,
-            last_name,
             email,
-            phone
+            raw_user_meta_data->first_name,
+            raw_user_meta_data->last_name,
+            raw_user_meta_data->phone
           )
         `)
         .order("created_at", { ascending: false });
@@ -53,7 +54,13 @@ export default function NewRegistrationRequests() {
       // Transform the data to match our interface
       const transformedData = data.map(request => ({
         ...request,
-        client: Array.isArray(request.client) ? request.client[0] : request.client
+        client: {
+          id: request.client?.id,
+          first_name: request.client?.first_name,
+          last_name: request.client?.last_name,
+          email: request.client?.email,
+          phone: request.client?.phone
+        }
       })) as ApprovalRequest[];
       
       console.log("Fetched approval requests:", transformedData);
