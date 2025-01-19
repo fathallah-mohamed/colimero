@@ -6,24 +6,30 @@ import { PackageSection } from "./sections/PackageSection";
 
 export interface BookingFormFieldsProps {
   form: UseFormReturn<BookingFormData>;
+  weight: number;
+  onWeightChange: (increment: boolean) => void;
   contentTypes: string[];
   onContentTypeToggle: (type: string) => void;
-  selectedItems: string[];
-  onItemToggle: (item: string) => void;
+  specialItems: string[];
+  onSpecialItemToggle: (item: string) => void;
   itemQuantities: Record<string, number>;
   onQuantityChange: (itemName: string, increment: boolean) => void;
-  onPhotosChange: (files: File[]) => void;
+  photos: File[];
+  onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function BookingFormFields({
   form,
+  weight,
+  onWeightChange,
   contentTypes,
   onContentTypeToggle,
-  selectedItems,
-  onItemToggle,
+  specialItems,
+  onSpecialItemToggle,
   itemQuantities,
   onQuantityChange,
-  onPhotosChange
+  photos,
+  onPhotoUpload
 }: BookingFormFieldsProps) {
   return (
     <div className="space-y-8">
@@ -31,13 +37,16 @@ export function BookingFormFields({
       <RecipientSection form={form} />
       <PackageSection
         form={form}
+        weight={weight}
+        onWeightChange={onWeightChange}
         contentTypes={contentTypes}
         onContentTypeToggle={onContentTypeToggle}
-        selectedItems={selectedItems}
-        onItemToggle={onItemToggle}
+        specialItems={specialItems}
+        onSpecialItemToggle={onSpecialItemToggle}
         itemQuantities={itemQuantities}
         onQuantityChange={onQuantityChange}
-        onPhotosChange={onPhotosChange}
+        photos={photos}
+        onPhotoUpload={onPhotoUpload}
       />
     </div>
   );

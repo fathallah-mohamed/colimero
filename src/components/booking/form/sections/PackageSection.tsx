@@ -6,29 +6,36 @@ import { BookingFormData } from "../schema";
 import { BookingContentTypes } from "../../BookingContentTypes";
 import { BookingSpecialItems } from "../../BookingSpecialItems";
 import { BookingPhotoUpload } from "../../BookingPhotoUpload";
+import { BookingWeightSelector } from "../../BookingWeightSelector";
 import { availableContentTypes } from "../constants/contentTypes";
 import { availableSpecialItems } from "../constants/specialItems";
 
 interface PackageSectionProps {
   form: UseFormReturn<BookingFormData>;
+  weight: number;
+  onWeightChange: (increment: boolean) => void;
   contentTypes: string[];
   onContentTypeToggle: (type: string) => void;
-  selectedItems: string[];
-  onItemToggle: (item: string) => void;
+  specialItems: string[];
+  onSpecialItemToggle: (item: string) => void;
   itemQuantities: Record<string, number>;
   onQuantityChange: (itemName: string, increment: boolean) => void;
-  onPhotosChange: (files: File[]) => void;
+  photos: File[];
+  onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function PackageSection({
   form,
+  weight,
+  onWeightChange,
   contentTypes,
   onContentTypeToggle,
-  selectedItems,
-  onItemToggle,
+  specialItems,
+  onSpecialItemToggle,
   itemQuantities,
   onQuantityChange,
-  onPhotosChange
+  photos,
+  onPhotoUpload
 }: PackageSectionProps) {
   return (
     <div className="space-y-6">
@@ -47,18 +54,23 @@ export function PackageSection({
         )}
       />
 
+      <BookingWeightSelector
+        weight={weight}
+        onWeightChange={onWeightChange}
+      />
+
       <BookingContentTypes
         selectedTypes={contentTypes}
         onTypeToggle={onContentTypeToggle}
-        contentTypes={availableContentTypes}
+        contentTypes={[...availableContentTypes]}
       />
 
       <BookingSpecialItems
-        selectedItems={selectedItems}
-        onItemToggle={onItemToggle}
+        selectedItems={specialItems}
+        onItemToggle={onSpecialItemToggle}
+        specialItems={[...availableSpecialItems]}
         itemQuantities={itemQuantities}
         onQuantityChange={onQuantityChange}
-        specialItems={availableSpecialItems}
       />
 
       <FormField
@@ -78,7 +90,10 @@ export function PackageSection({
         )}
       />
 
-      <BookingPhotoUpload onPhotosChange={onPhotosChange} />
+      <BookingPhotoUpload 
+        photos={photos}
+        onPhotoUpload={onPhotoUpload}
+      />
     </div>
   );
 }

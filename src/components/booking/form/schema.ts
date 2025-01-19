@@ -9,6 +9,7 @@ export const formSchema = z.object({
   recipient_city: z.string().min(1, "La ville de livraison est requise"),
   item_type: z.string().min(1, "Le type de colis est requis"),
   special_instructions: z.string().optional(),
+  package_description: z.string().optional(),
 });
 
 export type BookingFormData = z.infer<typeof formSchema>;
