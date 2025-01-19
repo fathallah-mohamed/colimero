@@ -1,32 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { Tour } from "@/types/tour";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { motion } from "framer-motion";
 
 interface TourExpandedContentProps {
   tour: Tour;
   selectedPoint: string;
   onPointSelect: (point: string) => void;
-  onBookingClick: () => void;
-  isBookingEnabled: boolean;
+  onActionClick: () => void;
+  isActionEnabled: boolean;
+  actionButtonText: string;
+  userType?: string;
+  onStatusChange?: (tourId: number, newStatus: string) => Promise<void>;
 }
 
 export function TourExpandedContent({ 
   tour, 
   selectedPoint, 
   onPointSelect,
-  onBookingClick,
-  isBookingEnabled
+  onActionClick,
+  isActionEnabled,
+  actionButtonText,
+  userType,
+  onStatusChange
 }: TourExpandedContentProps) {
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -60,7 +71,16 @@ export function TourExpandedContent({
     checkApprovalStatus();
   }, [tour.id, tour.type]);
 
-  const handlePrivateTourAction = async () => {
+  const handleActionClick = async () => {
+    if (!selectedPoint) {
+      toast({
+        variant: "destructive",
+        title: "Point de collecte requis",
+        description: "Veuillez sélectionner un point de collecte",
+      });
+      return;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
@@ -68,76 +88,20 @@ export function TourExpandedContent({
       return;
     }
 
-    if (!selectedPoint) {
-      toast({
-        variant: "destructive",
-        title: "Point de ramassage requis",
-        description: "Veuillez sélectionner un point de ramassage",
-      });
+    const userType = session.user.user_metadata?.user_type;
+    if (userType === 'carrier') {
+      setShowAccessDeniedDialog(true);
       return;
     }
 
-    // Vérifier uniquement les réservations en attente
-    const { data: pendingBooking, error } = await supabase
-      .from('bookings')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .eq('tour_id', tour.id)
-      .eq('status', 'pending')
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error checking existing bookings:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la vérification de vos réservations",
-      });
-      return;
-    }
-
-    if (pendingBooking) {
-      toast({
-        variant: "destructive",
-        title: "Réservation impossible",
-        description: "Vous avez déjà une réservation en attente pour cette tournée.",
-      });
-      return;
-    }
-
-    // Si pas de demande existante, créer une nouvelle demande
-    if (!approvalStatus) {
-      try {
-        const { error } = await supabase
-          .from('approval_requests')
-          .insert({
-            user_id: session.user.id,
-            tour_id: tour.id,
-            status: 'pending',
-            pickup_city: selectedPoint
-          });
-
-        if (error) throw error;
-
-        setApprovalStatus('pending');
-        toast({
-          title: "Demande envoyée",
-          description: "Votre demande d'approbation a été envoyée au transporteur",
-        });
-      } catch (error) {
-        console.error('Error creating approval request:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de l'envoi de la demande",
-        });
+    if (tour.type === 'private') {
+      if (approvalStatus === 'approved') {
+        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+      } else {
+        setShowApprovalDialog(true);
       }
-      return;
-    }
-
-    // Si approuvé, permettre la réservation
-    if (approvalStatus === 'approved') {
-      onBookingClick();
+    } else {
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
     }
   };
 
@@ -145,58 +109,14 @@ export function TourExpandedContent({
     stop.type === 'pickup' || stop.type === 'ramassage'
   ) || [];
 
-  const getButtonText = () => {
-    if (tour.status !== "Programmée") {
-      return "Cette tournée n'est plus disponible pour les réservations";
-    }
-
-    if (tour.type === "private") {
-      if (!approvalStatus) {
-        return !selectedPoint 
-          ? "Sélectionnez un point de ramassage pour demander une approbation" 
-          : "Demander une approbation";
-      }
-      
-      switch (approvalStatus) {
-        case "pending":
-          return "Demande d'approbation en cours";
-        case "rejected":
-          return "Demande d'approbation refusée";
-        case "approved":
-          return !selectedPoint 
-            ? "Sélectionnez un point de ramassage pour réserver" 
-            : "Réserver maintenant";
-        default:
-          return "Demander une approbation";
-      }
-    }
-
-    return !selectedPoint 
-      ? "Sélectionnez un point de ramassage pour réserver" 
-      : "Réserver maintenant";
-  };
-
-  const getButtonStyle = () => {
-    if (tour.type === "private") {
-      if (approvalStatus === "pending") return "bg-gray-500 hover:bg-gray-600";
-      if (approvalStatus === "rejected") return "bg-red-600 hover:bg-red-700";
-      if (approvalStatus === "approved") return "bg-green-600 hover:bg-green-700";
-      return "bg-purple-600 hover:bg-purple-700";
-    }
-    return "bg-blue-600 hover:bg-blue-700";
-  };
-
-  const isActionDisabled = () => {
-    if (tour.status !== "Programmée") return true;
-    if (tour.type === "private") {
-      if (approvalStatus === "pending" || approvalStatus === "rejected") return true;
-      if (approvalStatus === "approved" && !selectedPoint) return true;
-    }
-    return !selectedPoint;
-  };
-
   return (
-    <div className="mt-6 space-y-6 animate-in slide-in-from-top-4 duration-200">
+    <motion.div 
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: "auto", opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="pt-6 space-y-6"
+    >
       <ClientTimeline 
         status={tour.status} 
         tourId={tour.id}
@@ -207,31 +127,49 @@ export function TourExpandedContent({
         remainingCapacity={tour.remaining_capacity} 
       />
       
-      <SelectableCollectionPointsList
-        points={pickupPoints}
-        selectedPoint={selectedPoint}
-        onPointSelect={onPointSelect}
-        isSelectionEnabled={tour.status === "Programmée"}
-        tourDepartureDate={tour.departure_date}
-      />
+      <div>
+        <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
+        <SelectableCollectionPointsList
+          points={pickupPoints}
+          selectedPoint={selectedPoint}
+          onPointSelect={onPointSelect}
+          isSelectionEnabled={tour.status === "Programmée"}
+          tourDepartureDate={tour.departure_date}
+        />
+      </div>
 
-      <Button 
-        className={`w-full transition-colors ${getButtonStyle()} text-white`}
-        onClick={tour.type === "private" ? handlePrivateTourAction : onBookingClick}
-        disabled={isActionDisabled()}
-      >
-        {getButtonText()}
-      </Button>
+      <div>
+        <Button 
+          onClick={handleActionClick}
+          className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
+          disabled={!isActionEnabled || isLoading}
+        >
+          {actionButtonText}
+        </Button>
+      </div>
 
       <AuthDialog 
         isOpen={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
         onSuccess={() => {
           setShowAuthDialog(false);
-          handlePrivateTourAction();
+          handleActionClick();
         }}
         requiredUserType="client"
       />
-    </div>
+
+      <AccessDeniedMessage
+        userType="carrier"
+        isOpen={showAccessDeniedDialog}
+        onClose={() => setShowAccessDeniedDialog(false)}
+      />
+
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={tour.id}
+        pickupCity={selectedPoint}
+      />
+    </motion.div>
   );
 }
