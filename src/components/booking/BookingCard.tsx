@@ -50,10 +50,38 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
     };
   }, [booking.id]);
 
+  const checkPendingBooking = async (userId: string, tourId: number) => {
+    const { data: existingBookings, error } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('tour_id', tourId)
+      .eq('status', 'pending');
+
+    if (error) {
+      console.error('Error checking pending bookings:', error);
+      return true;
+    }
+
+    return existingBookings && existingBookings.length > 0;
+  };
+
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
       console.log("Updating booking status:", { bookingId: booking.id, newStatus });
       
+      if (newStatus === 'pending') {
+        const hasPendingBooking = await checkPendingBooking(booking.user_id, booking.tour_id);
+        if (hasPendingBooking) {
+          toast({
+            variant: "destructive",
+            title: "Action impossible",
+            description: "Ce client a déjà une réservation en attente pour cette tournée.",
+          });
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from('bookings')
         .update({ 
@@ -64,7 +92,6 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
 
       if (error) throw error;
 
-      // Invalider les caches pour forcer le rechargement
       await queryClient.invalidateQueries({ queryKey: ['bookings'] });
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
