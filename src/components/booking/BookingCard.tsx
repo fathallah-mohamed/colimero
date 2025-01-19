@@ -2,13 +2,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Info } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { BookingStatusBadge } from "./BookingStatusBadge";
 import { BookingActions } from "./actions/BookingActions";
-import { useQueryClient } from "@tanstack/react-query";
+import { BookingHeader } from "./card/BookingHeader";
 import type { Booking, BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -22,37 +21,8 @@ interface BookingCardProps {
 export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, tourStatus }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [localBooking, setLocalBooking] = useState(booking);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const specialItems = booking.special_items || [];
-
-  useEffect(() => {
-    const channel = supabase
-      .channel('booking_updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'bookings',
-          filter: `id=eq.${booking.id}`
-        },
-        (payload) => {
-          console.log('Booking updated:', payload);
-          setLocalBooking(payload.new as Booking);
-          // Invalider le cache pour forcer un rafraîchissement
-          queryClient.invalidateQueries({ queryKey: ['bookings'] });
-          queryClient.invalidateQueries({ queryKey: ['next-tour'] });
-          queryClient.invalidateQueries({ queryKey: ['tours'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [booking.id, queryClient]);
 
   const checkPendingBooking = async (userId: string, tourId: number) => {
     const { data: existingBookings, error } = await supabase
@@ -128,20 +98,10 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
     <Card className="p-4">
       <div className="space-y-4">
         <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-lg font-medium">{localBooking.delivery_city}</h3>
-              <div className="text-sm text-gray-600">
-                <p>{localBooking.recipient_name}</p>
-                <p>{localBooking.recipient_phone}</p>
-              </div>
-            </div>
-            <BookingStatusBadge status={localBooking.status} />
-          </div>
-
+          <BookingHeader booking={booking} />
           <div className="flex justify-end">
             <BookingActions
-              status={localBooking.status}
+              status={booking.status}
               isCollecting={isCollecting}
               onStatusChange={handleStatusChange}
               onEdit={handleEdit}
@@ -216,7 +176,7 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
       </div>
 
       <EditBookingDialog
-        booking={localBooking}
+        booking={booking}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         onSuccess={onUpdate}
