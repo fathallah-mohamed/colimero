@@ -13,6 +13,13 @@ export function BookingStatusSection({ booking }: BookingStatusSectionProps) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // Mettre à jour le statut local quand le booking change
+    setLocalStatus(booking.status);
+  }, [booking.status]);
+
+  useEffect(() => {
+    console.log("Setting up realtime subscription for booking:", booking.id);
+    
     const channel = supabase
       .channel(`booking_status_${booking.id}`)
       .on(
@@ -27,14 +34,19 @@ export function BookingStatusSection({ booking }: BookingStatusSectionProps) {
           console.log('Booking status updated:', payload);
           const newBooking = payload.new as Booking;
           setLocalStatus(newBooking.status);
+          
+          // Invalider le cache pour forcer le rechargement
           queryClient.invalidateQueries({ queryKey: ['bookings'] });
           queryClient.invalidateQueries({ queryKey: ['next-tour'] });
           queryClient.invalidateQueries({ queryKey: ['tours'] });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
 
     return () => {
+      console.log("Cleaning up realtime subscription");
       supabase.removeChannel(channel);
     };
   }, [booking.id, queryClient]);

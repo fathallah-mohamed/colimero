@@ -6,9 +6,10 @@ import { useState } from "react";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { BookingActions } from "./actions/BookingActions";
+import { BookingActions } from "./card/BookingActions";
 import { BookingHeaderSection } from "./header/BookingHeaderSection";
 import { BookingDetailsContent } from "./details/BookingDetailsContent";
+import { BookingStatusSection } from "./status/BookingStatusSection";
 import type { Booking, BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -93,15 +94,20 @@ export function BookingCard({
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        <BookingHeaderSection booking={booking} />
+        <div className="flex justify-between items-center">
+          <BookingHeaderSection booking={booking} />
+          <BookingStatusSection booking={booking} />
+        </div>
         
         <div className="flex justify-end">
           <BookingActions
+            bookingId={booking.id}
             status={booking.status}
-            isCollecting={isCollecting}
+            tourStatus={tourStatus || ''}
             onStatusChange={handleStatusChange}
+            onUpdate={onUpdate}
             onEdit={handleEdit}
-            tourStatus={tourStatus}
+            userType="carrier"
           />
         </div>
 

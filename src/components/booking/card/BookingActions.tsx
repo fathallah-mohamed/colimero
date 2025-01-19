@@ -35,12 +35,14 @@ export function BookingActions({
         .from('bookings')
         .update({ 
           status: newStatus,
-          delivery_status: newStatus 
+          delivery_status: newStatus,
+          updated_at: new Date().toISOString()
         })
         .eq('id', bookingId);
 
       if (error) throw error;
 
+      // Invalider immédiatement le cache
       await queryClient.invalidateQueries({ queryKey: ['bookings'] });
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
