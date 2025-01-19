@@ -49,21 +49,6 @@ export function BookingActions({
 
       await onStatusChange(bookingId, newStatus);
       await onUpdate();
-
-      const statusLabels: Record<BookingStatus, string> = {
-        pending: "en attente",
-        confirmed: "confirmée",
-        collected: "ramassée",
-        ready_to_deliver: "prête à livrer",
-        delivered: "livrée",
-        cancelled: "annulée",
-        in_transit: "en transit"
-      };
-
-      toast({
-        title: `Réservation ${statusLabels[newStatus]}`,
-        description: `La réservation a été ${statusLabels[newStatus]} avec succès.`,
-      });
     } catch (error) {
       console.error('Error updating booking status:', error);
       toast({
