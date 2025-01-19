@@ -60,7 +60,7 @@ export function CarrierActions({
         />
       )}
       
-      {canModifyInTransit && status !== "cancelled" && (
+      {canModifyInTransit && (
         <ActionButton
           icon={AlertTriangle}
           label="Signaler"
@@ -76,7 +76,7 @@ export function CarrierActions({
           icon={RotateCcw}
           buttonLabel="Annuler"
           buttonColorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
-          onConfirm={() => onStatusChange("cancelled")}
+          onConfirm={() => onStatusChange("cancelled" as BookingStatus)}
         />
       )}
     </>
