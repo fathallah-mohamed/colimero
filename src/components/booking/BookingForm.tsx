@@ -10,6 +10,7 @@ import { useBookingForm } from "@/hooks/useBookingForm";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingErrorDialog } from "./form/BookingErrorDialog";
+import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BookingFormFields } from "./form/BookingFormFields";
@@ -51,6 +52,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -114,16 +117,12 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         special_items: formattedSpecialItems,
       };
 
-      const { success, message } = await createBooking(formData);
+      const { success, message, bookingId, tracking } = await createBooking(formData);
       
-      if (success) {
-        toast({
-          title: "Réservation créée avec succès",
-          description: "Votre demande de réservation a été envoyée. Vous serez notifié de son statut.",
-          variant: "default",
-        });
+      if (success && tracking) {
+        setTrackingNumber(tracking);
+        setShowConfirmDialog(true);
         form.reset();
-        navigate('/mes-reservations');
       } else {
         setErrorMessage(message || "Une erreur est survenue lors de la création de la réservation");
         setShowErrorDialog(true);
@@ -209,6 +208,16 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         open={showErrorDialog}
         onOpenChange={setShowErrorDialog}
         message={errorMessage}
+      />
+
+      <BookingConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        trackingNumber={trackingNumber}
+        onConfirm={() => {
+          setShowConfirmDialog(false);
+          navigate('/mes-reservations');
+        }}
       />
     </Form>
   );

@@ -1,57 +1,38 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { CheckCircle2 } from "lucide-react";
 
 interface BookingConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  responsibilityAccepted: boolean;
-  onResponsibilityChange: (checked: boolean) => void;
   onConfirm: () => void;
+  trackingNumber: string;
 }
 
 export function BookingConfirmDialog({
   open,
   onOpenChange,
-  responsibilityAccepted,
-  onResponsibilityChange,
   onConfirm,
+  trackingNumber,
 }: BookingConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Confirmation de réservation</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle2 className="h-6 w-6 text-green-500" />
+            Réservation confirmée
+          </DialogTitle>
           <DialogDescription>
-            Veuillez lire attentivement et accepter les conditions suivantes avant de confirmer votre réservation.
+            Votre réservation a été créée avec succès. Votre numéro de suivi est : {trackingNumber}
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="py-6">
-          <div className="space-y-6">
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="responsibility"
-                checked={responsibilityAccepted}
-                onCheckedChange={(checked) => onResponsibilityChange(checked as boolean)}
-              />
-              <Label htmlFor="responsibility" className="text-sm leading-relaxed">
-                Je reconnais que Colimero ne peut être tenu responsable du contenu de mon colis ni des éventuelles infractions liées à son transport. Toute responsabilité repose sur moi en tant qu'expéditeur.
-              </Label>
-            </div>
-          </div>
-        </div>
-
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Annuler
-          </Button>
           <Button 
             onClick={onConfirm}
-            disabled={!responsibilityAccepted}
+            className="w-full"
           >
-            Confirmer la réservation
+            J'ai compris
           </Button>
         </DialogFooter>
       </DialogContent>
