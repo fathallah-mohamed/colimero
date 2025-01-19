@@ -17,6 +17,31 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
         };
       }
 
+      // Upload photos if they exist and get their URLs
+      let photoUrls: string[] = [];
+      if (formData.photos && formData.photos.length > 0) {
+        const uploadPromises = formData.photos.map(async (file: File) => {
+          const fileExt = file.name.split('.').pop();
+          const filePath = `${crypto.randomUUID()}.${fileExt}`;
+          
+          const { data, error: uploadError } = await supabase.storage
+            .from('bookings')
+            .upload(filePath, file);
+
+          if (uploadError) {
+            throw uploadError;
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('bookings')
+            .getPublicUrl(filePath);
+
+          return publicUrl;
+        });
+
+        photoUrls = await Promise.all(uploadPromises);
+      }
+
       const { data, error } = await supabase.rpc(
         'create_booking_with_capacity_update',
         {
@@ -33,7 +58,7 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
           p_item_type: formData.item_type,
           p_special_items: formData.special_items,
           p_content_types: formData.content_types,
-          p_photos: formData.photos
+          p_photos: photoUrls
         }
       );
 
