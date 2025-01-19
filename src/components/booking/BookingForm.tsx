@@ -13,6 +13,8 @@ import { BookingFormFields } from "./form/BookingFormFields";
 import { formSchema } from "./form/schema";
 import { useBookingFormState } from "./form/useBookingFormState";
 import { useBookingSubmit } from "./form/useBookingSubmit";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import * as z from "zod";
 
 const specialItems = [
@@ -75,6 +77,26 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: "",
     },
   });
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('first_name, last_name, phone')
+          .eq('id', user.id)
+          .single();
+
+        if (clientData) {
+          form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
+          form.setValue('sender_phone', clientData.phone || '');
+        }
+      }
+    };
+
+    fetchUserInfo();
+  }, [form]);
 
   const { handleSubmit, isLoading } = useBookingSubmit(
     tourId,
