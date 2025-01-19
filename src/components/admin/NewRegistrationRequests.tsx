@@ -35,13 +35,6 @@ export default function NewRegistrationRequests() {
               email,
               phone
             )
-          ),
-          client:auth.users!inner(
-            id,
-            email,
-            raw_user_meta_data->first_name,
-            raw_user_meta_data->last_name,
-            raw_user_meta_data->phone
           )
         `)
         .order("created_at", { ascending: false });
@@ -50,21 +43,39 @@ export default function NewRegistrationRequests() {
         console.error("Error fetching approval requests:", error);
         throw error;
       }
+
+      // Fetch user data separately for each request
+      const requestsWithUserData = await Promise.all(
+        data.map(async (request) => {
+          const { data: userData, error: userError } = await supabase
+            .from("clients")
+            .select("id, first_name, last_name, email, phone")
+            .eq("id", request.user_id)
+            .single();
+
+          if (userError) {
+            console.error("Error fetching user data:", userError);
+            return {
+              ...request,
+              client: {
+                id: request.user_id,
+                first_name: "Unknown",
+                last_name: "User",
+                email: "",
+                phone: ""
+              }
+            };
+          }
+
+          return {
+            ...request,
+            client: userData
+          };
+        })
+      );
       
-      // Transform the data to match our interface
-      const transformedData = data.map(request => ({
-        ...request,
-        client: {
-          id: request.client?.id,
-          first_name: request.client?.first_name,
-          last_name: request.client?.last_name,
-          email: request.client?.email,
-          phone: request.client?.phone
-        }
-      })) as ApprovalRequest[];
-      
-      console.log("Fetched approval requests:", transformedData);
-      return transformedData;
+      console.log("Fetched approval requests:", requestsWithUserData);
+      return requestsWithUserData as ApprovalRequest[];
     },
   });
 
