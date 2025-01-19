@@ -41,13 +41,23 @@ interface ApprovalRequest {
   status: string;
   tour: Tour;
   clients: Client;
+  created_at: string;
+  updated_at: string;
+  message: string | null;
+  reason: string | null;
+  email_sent: boolean | null;
+  activation_token: string | null;
+  activation_expires_at: string | null;
+  pickup_city: string;
+  tour_id: number;
+  user_id: string;
 }
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
 
-  const { data: requests, isLoading } = useQuery<ApprovalRequest[]>({
+  const { data: requests = [], isLoading } = useQuery<ApprovalRequest[]>({
     queryKey: ["approval-requests"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -85,8 +95,14 @@ export default function NewRegistrationRequests() {
         throw error;
       }
       
-      console.log("Fetched approval requests:", data);
-      return data;
+      // Transform the data to match our interface
+      const transformedData = data.map(request => ({
+        ...request,
+        clients: Array.isArray(request.clients) ? request.clients[0] : request.clients
+      }));
+      
+      console.log("Fetched approval requests:", transformedData);
+      return transformedData;
     },
   });
 
