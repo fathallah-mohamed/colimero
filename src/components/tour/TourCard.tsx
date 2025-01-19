@@ -200,14 +200,13 @@ export function TourCard({
 
       {showBookings && hasBookings && (
         <div className="mt-6 space-y-4">
-          {tour.bookings?.map((booking: any, index: number) => (
+          {tour.bookings?.map((booking: any) => (
             <BookingCard
               key={booking.id}
               booking={booking}
               isCollecting={tour.status === "Ramassage en cours"}
               onStatusChange={onStatusChange || (() => Promise.resolve())}
               onUpdate={onUpdate || (() => Promise.resolve())}
-              isEven={index % 2 === 0}
               tourStatus={tour.status}
             />
           ))}

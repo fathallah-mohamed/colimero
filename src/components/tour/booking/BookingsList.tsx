@@ -18,14 +18,13 @@ export function BookingsList({
 }: BookingsListProps) {
   return (
     <div className="space-y-4">
-      {bookings.map((booking, index) => (
+      {bookings.map((booking) => (
         <BookingCard
           key={booking.id}
           booking={booking}
           isCollecting={isCollecting}
           onStatusChange={onStatusChange}
           onUpdate={onUpdate}
-          isEven={index % 2 === 0}
           tourStatus={tourStatus}
         />
       ))}
