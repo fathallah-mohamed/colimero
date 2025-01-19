@@ -54,7 +54,7 @@ export function BookingList() {
                 .from('bookings')
                 .update({ 
                   status: newStatus,
-                  delivery_status: newStatus 
+                  delivery_status: newStatus // Make sure this matches the allowed values
                 })
                 .eq('id', bookingId);
 
