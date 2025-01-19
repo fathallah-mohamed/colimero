@@ -24,12 +24,12 @@ interface RequestDetailsDialogProps {
   showApproveButton?: boolean;
 }
 
-export default function RequestDetailsDialog({ 
+export const RequestDetailsDialog = ({ 
   request, 
   onClose,
   onApprove,
   showApproveButton = false,
-}: RequestDetailsDialogProps) {
+}: RequestDetailsDialogProps) => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -201,4 +201,4 @@ export default function RequestDetailsDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};
