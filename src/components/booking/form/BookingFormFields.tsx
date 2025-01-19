@@ -37,109 +37,126 @@ export function BookingFormFields({
 }: BookingFormFieldsProps) {
   return (
     <div className="space-y-6">
-      <BookingWeightSelector weight={weight} onWeightChange={onWeightChange} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Informations expéditeur</h3>
+          <FormField
+            control={form.control}
+            name="sender_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom de l'expéditeur</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nom complet" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="sender_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone de l'expéditeur</FormLabel>
+                <FormControl>
+                  <Input placeholder="+33 6 XX XX XX XX" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-      <div className="space-y-4">
-        <FormField
-          control={form.control}
-          name="sender_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Votre nom</FormLabel>
-              <FormControl>
-                <Input {...field} readOnly className="bg-gray-100" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="sender_phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Votre téléphone</FormLabel>
-              <FormControl>
-                <Input {...field} type="tel" readOnly className="bg-gray-100" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Informations destinataire</h3>
+          <FormField
+            control={form.control}
+            name="recipient_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nom du destinataire</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nom complet" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="recipient_phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Téléphone du destinataire</FormLabel>
+                <FormControl>
+                  <Input placeholder="+33 6 XX XX XX XX" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="recipient_address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Adresse de livraison</FormLabel>
+                <FormControl>
+                  <Input placeholder="Adresse complète" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="recipient_city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ville de livraison</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ville" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
 
       <div className="space-y-4">
-        <FormField
-          control={form.control}
-          name="recipient_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom du destinataire</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+        <h3 className="text-lg font-medium">Informations du colis</h3>
+        
+        <BookingWeightSelector
+          weight={weight}
+          onWeightChange={onWeightChange}
         />
 
-        <FormField
-          control={form.control}
-          name="recipient_address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse de livraison</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="recipient_phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone du destinataire</FormLabel>
-              <FormControl>
-                <Input {...field} type="tel" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="recipient_city"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ville de livraison</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <div className="space-y-4">
         <FormField
           control={form.control}
           name="item_type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description du colis</FormLabel>
+              <FormLabel>Type de colis</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Ex: Vêtements, documents..." />
+                <Input placeholder="Ex: Carton, valise..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
+        />
+
+        <BookingContentTypes
+          selectedTypes={contentTypes}
+          onTypeToggle={onContentTypeToggle}
+        />
+
+        <BookingSpecialItems
+          selectedItems={specialItems}
+          onItemToggle={onSpecialItemToggle}
+          itemQuantities={itemQuantities}
+          onQuantityChange={onQuantityChange}
         />
 
         <FormField
@@ -147,11 +164,11 @@ export function BookingFormFields({
           name="special_instructions"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Instructions spéciales (optionnel)</FormLabel>
+              <FormLabel>Instructions spéciales</FormLabel>
               <FormControl>
                 <Textarea
+                  placeholder="Instructions particulières pour la manipulation ou la livraison..."
                   {...field}
-                  placeholder="Ex: Fragile, manipuler avec précaution..."
                 />
               </FormControl>
               <FormMessage />
@@ -159,24 +176,6 @@ export function BookingFormFields({
           )}
         />
       </div>
-
-      <BookingContentTypes
-        selectedTypes={contentTypes}
-        onTypeToggle={onContentTypeToggle}
-        contentTypes={["Vêtements", "Alimentaire", "Électronique", "Documents"]}
-      />
-
-      <BookingSpecialItems
-        selectedItems={specialItems}
-        onItemToggle={onSpecialItemToggle}
-        specialItems={[
-          { name: "Fragile", price: 10, icon: "package" },
-          { name: "Lourd", price: 15, icon: "package" },
-          { name: "Périssable", price: 20, icon: "package" }
-        ]}
-        itemQuantities={itemQuantities}
-        onQuantityChange={onQuantityChange}
-      />
 
       <BookingPhotoUpload photos={photos} onPhotoUpload={onPhotoUpload} />
     </div>
