@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { File } from "@supabase/storage-js";
 
 export function useBookingFormState() {
   const [weight, setWeight] = useState(5);
