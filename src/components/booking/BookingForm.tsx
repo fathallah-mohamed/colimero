@@ -125,11 +125,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         form.reset();
         navigate('/mes-reservations');
       } else {
-        if (message?.includes('duplicate key value')) {
-          setErrorMessage("Vous avez déjà une réservation pour cette tournée");
-        } else {
-          setErrorMessage(message || "Une erreur est survenue lors de la création de la réservation");
-        }
+        setErrorMessage(message || "Une erreur est survenue lors de la création de la réservation");
         setShowErrorDialog(true);
       }
     } catch (error: any) {

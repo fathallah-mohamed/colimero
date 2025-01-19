@@ -16,12 +16,10 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
       
       if (!user) {
         console.error("Utilisateur non connecté");
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Vous devez être connecté pour effectuer une réservation",
-        });
-        return { success: false };
+        return { 
+          success: false, 
+          message: "Vous devez être connecté pour effectuer une réservation" 
+        };
       }
 
       // Appel de la fonction RPC pour créer la réservation
@@ -44,34 +42,28 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
 
       if (error) {
         console.error('Erreur lors de la création de la réservation:', error);
-        if (error.message.includes('Insufficient capacity')) {
-          toast({
-            variant: "destructive",
-            title: "Capacité insuffisante",
-            description: "La capacité restante de la tournée est insuffisante pour votre colis",
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Une erreur est survenue lors de la création de la réservation",
-          });
+        if (error.message.includes('duplicate key value')) {
+          return { 
+            success: false, 
+            message: "Vous avez déjà une réservation pour cette tournée" 
+          };
         }
-        return { success: false };
+        return { 
+          success: false, 
+          message: error.message || "Une erreur est survenue lors de la création de la réservation" 
+        };
       }
 
       console.log("Réservation créée avec succès", data);
       onSuccess?.();
-      return { success: true };
+      return { success: true, message: "Réservation créée avec succès" };
       
     } catch (error: any) {
       console.error('Erreur inattendue:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur inattendue est survenue",
-      });
-      return { success: false };
+      return { 
+        success: false, 
+        message: error.message || "Une erreur inattendue est survenue" 
+      };
     } finally {
       setIsLoading(false);
     }
