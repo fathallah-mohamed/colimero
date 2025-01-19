@@ -1,18 +1,45 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { formSchema } from "./schema";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { BookingWeightSelector } from "../BookingWeightSelector";
+import { BookingContentTypes } from "../BookingContentTypes";
+import { BookingSpecialItems } from "../BookingSpecialItems";
+import { BookingPhotoUpload } from "../BookingPhotoUpload";
 
-interface BookingFormFieldsProps {
+export interface BookingFormFieldsProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
-  readOnly?: boolean;
+  weight: number;
+  onWeightChange: (increment: boolean) => void;
+  contentTypes: string[];
+  onContentTypeToggle: (type: string) => void;
+  specialItems: string[];
+  onSpecialItemToggle: (item: string) => void;
+  itemQuantities: Record<string, number>;
+  onQuantityChange: (itemName: string, increment: boolean) => void;
+  photos: File[];
+  onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsProps) {
+export function BookingFormFields({
+  form,
+  weight,
+  onWeightChange,
+  contentTypes,
+  onContentTypeToggle,
+  specialItems,
+  onSpecialItemToggle,
+  itemQuantities,
+  onQuantityChange,
+  photos,
+  onPhotoUpload
+}: BookingFormFieldsProps) {
   return (
-    <>
+    <div className="space-y-6">
+      <BookingWeightSelector weight={weight} onWeightChange={onWeightChange} />
+
       <div className="space-y-4">
         <FormField
           control={form.control}
@@ -51,7 +78,7 @@ export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsP
             <FormItem>
               <FormLabel>Nom du destinataire</FormLabel>
               <FormControl>
-                <Input {...field} readOnly={readOnly} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -65,7 +92,7 @@ export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsP
             <FormItem>
               <FormLabel>Adresse de livraison</FormLabel>
               <FormControl>
-                <Input {...field} readOnly={readOnly} />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -79,7 +106,21 @@ export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsP
             <FormItem>
               <FormLabel>Téléphone du destinataire</FormLabel>
               <FormControl>
-                <Input {...field} type="tel" readOnly={readOnly} />
+                <Input {...field} type="tel" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="recipient_city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ville de livraison</FormLabel>
+              <FormControl>
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,7 +136,7 @@ export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsP
             <FormItem>
               <FormLabel>Description du colis</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Ex: Vêtements, documents..." readOnly={readOnly} />
+                <Input {...field} placeholder="Ex: Vêtements, documents..." />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -104,7 +145,7 @@ export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsP
 
         <FormField
           control={form.control}
-          name="special_items"
+          name="special_instructions"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Instructions spéciales (optionnel)</FormLabel>
@@ -112,7 +153,6 @@ export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsP
                 <Textarea
                   {...field}
                   placeholder="Ex: Fragile, manipuler avec précaution..."
-                  readOnly={readOnly}
                 />
               </FormControl>
               <FormMessage />
@@ -120,6 +160,26 @@ export function BookingFormFields({ form, readOnly = false }: BookingFormFieldsP
           )}
         />
       </div>
-    </>
+
+      <BookingContentTypes
+        selectedTypes={contentTypes}
+        onTypeToggle={onContentTypeToggle}
+        contentTypes={["Vêtements", "Alimentaire", "Électronique", "Documents"]}
+      />
+
+      <BookingSpecialItems
+        selectedItems={specialItems}
+        onItemToggle={onSpecialItemToggle}
+        specialItems={[
+          { name: "Fragile", price: 10, icon: "package" },
+          { name: "Lourd", price: 15, icon: "package" },
+          { name: "Périssable", price: 20, icon: "package" }
+        ]}
+        itemQuantities={itemQuantities}
+        onQuantityChange={onQuantityChange}
+      />
+
+      <BookingPhotoUpload photos={photos} onPhotoUpload={onPhotoUpload} />
+    </div>
   );
 }
