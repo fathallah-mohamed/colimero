@@ -18,6 +18,7 @@ export function BookingActions({
   onEdit,
   tourStatus
 }: BookingActionsProps) {
+  // On autorise les actions si on est en collecte OU si la tournée est programmée
   if (!isCollecting && tourStatus !== "Programmée") return null;
 
   const handleStatusChange = (newStatus: BookingStatus) => {
