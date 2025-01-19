@@ -9,11 +9,45 @@ import { NewRequestsTable } from "./new-requests/NewRequestsTable";
 import Navigation from "@/components/Navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+interface Client {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+}
+
+interface Carrier {
+  id: string;
+  company_name: string;
+  email: string;
+  phone: string;
+}
+
+interface Tour {
+  id: number;
+  departure_country: string;
+  destination_country: string;
+  departure_date: string;
+  collection_date: string;
+  route: any;
+  total_capacity: number;
+  remaining_capacity: number;
+  carriers: Carrier;
+}
+
+interface ApprovalRequest {
+  id: string;
+  status: string;
+  tour: Tour;
+  clients: Client;
+}
+
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
 
-  const { data: requests, isLoading } = useQuery({
+  const { data: requests, isLoading } = useQuery<ApprovalRequest[]>({
     queryKey: ["approval-requests"],
     queryFn: async () => {
       const { data, error } = await supabase
