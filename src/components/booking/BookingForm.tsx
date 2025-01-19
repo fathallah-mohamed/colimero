@@ -9,6 +9,7 @@ import { BookingSpecialItems } from "./BookingSpecialItems";
 import { useBookingForm } from "@/hooks/useBookingForm";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { BookingErrorDialog } from "./form/BookingErrorDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -66,16 +67,20 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     selectedItems,
     itemQuantities,
     photos,
+    showConfirmDialog,
     showErrorDialog,
     errorMessage,
     formValues,
+    responsibilityAccepted,
+    setShowConfirmDialog,
+    setShowErrorDialog,
+    setFormValues,
+    setResponsibilityAccepted,
     handleWeightChange,
     handleTypeToggle,
     handleItemToggle,
     handleQuantityChange,
     handlePhotoUpload,
-    setShowErrorDialog,
-    setFormValues,
     setErrorMessage,
   } = useBookingFormState();
 
@@ -127,9 +132,19 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: formattedSpecialItems,
     };
 
+    setFormValues(formData);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!formValues) {
+      console.error("Aucune donnée de formulaire disponible");
+      return;
+    }
+
     try {
-      console.log("Tentative de création de la réservation avec:", formData);
-      const { success } = await createBooking(formData);
+      console.log("Tentative de création de la réservation avec:", formValues);
+      const { success } = await createBooking(formValues);
       
       if (success) {
         toast({
@@ -138,6 +153,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           variant: "default",
         });
         form.reset();
+        setShowConfirmDialog(false);
+        setResponsibilityAccepted(false);
         navigate('/mes-reservations');
       } else {
         setErrorMessage("Une erreur est survenue lors de la création de la réservation");
@@ -183,6 +200,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           {isLoading ? "Création en cours..." : "Réserver"}
         </Button>
       </form>
+
+      <BookingConfirmDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        responsibilityAccepted={responsibilityAccepted}
+        onResponsibilityChange={setResponsibilityAccepted}
+        onConfirm={handleConfirmBooking}
+      />
 
       <BookingErrorDialog
         open={showErrorDialog}
