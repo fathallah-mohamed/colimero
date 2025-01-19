@@ -3,19 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formSchema } from "./form/schema";
+import { formSchema, BookingFormData } from "./form/schema";
 import { useBookingSubmit } from "./form/useBookingSubmit";
 import { BookingFormFields } from "./form/BookingFormFields";
 import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { BookingErrorDialog } from "./form/BookingErrorDialog";
 import { useState } from "react";
 
-interface BookingFormProps {
+export interface BookingFormProps {
   tourId: number;
   pickupCity: string;
+  onSuccess?: () => void;
 }
 
-export function BookingForm({ tourId, pickupCity }: BookingFormProps) {
+export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const navigate = useNavigate();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
@@ -28,7 +29,7 @@ export function BookingForm({ tourId, pickupCity }: BookingFormProps) {
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
 
-  const form = useForm({
+  const form = useForm<BookingFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       sender_name: "",
@@ -44,7 +45,7 @@ export function BookingForm({ tourId, pickupCity }: BookingFormProps) {
 
   const { isLoading, handleSubmit } = useBookingSubmit(tourId);
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: BookingFormData) => {
     try {
       const formData = {
         ...values,
@@ -108,7 +109,11 @@ export function BookingForm({ tourId, pickupCity }: BookingFormProps) {
     setSpecialItems([]);
     setItemQuantities({});
     setPhotos([]);
-    navigate('/mes-reservations');
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      navigate('/mes-reservations');
+    }
   };
 
   return (
