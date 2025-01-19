@@ -41,6 +41,10 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
         (payload) => {
           console.log('Booking updated:', payload);
           setLocalBooking(payload.new as Booking);
+          // Invalider le cache pour forcer un rafraîchissement
+          queryClient.invalidateQueries({ queryKey: ['bookings'] });
+          queryClient.invalidateQueries({ queryKey: ['next-tour'] });
+          queryClient.invalidateQueries({ queryKey: ['tours'] });
         }
       )
       .subscribe();
@@ -48,7 +52,7 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [booking.id]);
+  }, [booking.id, queryClient]);
 
   const checkPendingBooking = async (userId: string, tourId: number) => {
     const { data: existingBookings, error } = await supabase
@@ -91,10 +95,6 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
         .eq('id', booking.id);
 
       if (error) throw error;
-
-      await queryClient.invalidateQueries({ queryKey: ['bookings'] });
-      await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
-      await queryClient.invalidateQueries({ queryKey: ['tours'] });
 
       onStatusChange(booking.id, newStatus);
       
