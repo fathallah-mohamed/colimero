@@ -117,16 +117,23 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         special_items: formattedSpecialItems,
       };
 
-      const { success, message, bookingId, tracking } = await createBooking(formData);
+      const bookingId = await createBooking(formData);
       
-      if (success && tracking) {
-        setTrackingNumber(tracking);
-        setShowConfirmDialog(true);
-        form.reset();
-      } else {
-        setErrorMessage(message || "Une erreur est survenue lors de la création de la réservation");
-        setShowErrorDialog(true);
+      // Fetch the booking details to get the tracking number
+      const { data: bookingData, error: bookingError } = await supabase
+        .from('bookings')
+        .select('tracking_number')
+        .eq('id', bookingId)
+        .single();
+
+      if (bookingError) {
+        throw bookingError;
       }
+
+      setTrackingNumber(bookingData.tracking_number);
+      setShowConfirmDialog(true);
+      form.reset();
+      
     } catch (error: any) {
       console.error("Erreur lors de la création de la réservation:", error);
       setErrorMessage(error?.message || "Une erreur est survenue lors de la création de la réservation");

@@ -58,9 +58,12 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
   }, []);
 
   const handleSubmit = async (values: BookingFormData) => {
-    const result = await createBooking(values);
-    if (result.success) {
+    try {
+      await createBooking(values);
       onSuccess();
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      throw error;
     }
   };
 
