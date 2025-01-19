@@ -1,70 +1,24 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
-import { RefreshCw, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import RequestDetailsDialog from "./RequestDetailsDialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { NewRequestsTable } from "./new-requests/NewRequestsTable";
-import Navigation from "@/components/Navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface Client {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-}
-
-interface Carrier {
-  id: string;
-  company_name: string;
-  email: string;
-  phone: string;
-}
-
-interface Tour {
-  id: number;
-  departure_country: string;
-  destination_country: string;
-  departure_date: string;
-  collection_date: string;
-  route: any;
-  total_capacity: number;
-  remaining_capacity: number;
-  carriers: Carrier;
-}
-
-interface ApprovalRequest {
-  id: string;
-  status: string;
-  tour: Tour;
-  clients: Client;
-  created_at: string;
-  updated_at: string;
-  message: string | null;
-  reason: string | null;
-  email_sent: boolean | null;
-  activation_token: string | null;
-  activation_expires_at: string | null;
-  pickup_city: string;
-  tour_id: number;
-  user_id: string;
-}
+import { RequestList } from "./approval-requests/RequestList";
+import { SearchBar } from "./approval-requests/SearchBar";
+import { RequestDetailsDialog } from "./RequestDetailsDialog";
+import { ApprovalRequest } from "./approval-requests/types";
+import { Loader2 } from "lucide-react";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
 
-  const { data: requests = [], isLoading } = useQuery<ApprovalRequest[]>({
+  const { data: requests = [], isLoading } = useQuery({
     queryKey: ["approval-requests"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("approval_requests")
         .select(`
           *,
-          tour:tours!inner (
+          tour:tours(
             id,
             departure_country,
             destination_country,
@@ -73,14 +27,15 @@ export default function NewRegistrationRequests() {
             route,
             total_capacity,
             remaining_capacity,
-            carriers!inner (
+            type,
+            carriers(
               id,
               company_name,
               email,
               phone
             )
           ),
-          clients!inner (
+          client:clients!inner(
             id,
             first_name,
             last_name,
@@ -98,102 +53,36 @@ export default function NewRegistrationRequests() {
       // Transform the data to match our interface
       const transformedData = data.map(request => ({
         ...request,
-        clients: Array.isArray(request.clients) ? request.clients[0] : request.clients
-      }));
+        client: Array.isArray(request.client) ? request.client[0] : request.client
+      })) as ApprovalRequest[];
       
       console.log("Fetched approval requests:", transformedData);
       return transformedData;
     },
   });
 
-  const filteredRequests = requests?.filter((request) =>
-    request.clients?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.clients?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.clients?.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const pendingRequests = filteredRequests?.filter(req => req.status === 'pending') || [];
-  const approvedRequests = filteredRequests?.filter(req => req.status === 'approved') || [];
-  const rejectedRequests = filteredRequests?.filter(req => req.status === 'rejected') || [];
-
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div>
-      <Navigation />
+    <div className="space-y-6">
+      <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 space-y-4">
-        <h1 className="text-3xl font-bold mb-8">
-          Demandes d'approbation reçues
-        </h1>
+      <RequestList
+        requests={requests}
+        searchTerm={searchTerm}
+        onSelect={setSelectedRequest}
+      />
 
-        <div className="flex flex-col sm:flex-row gap-4 items-center mb-6">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Rechercher par nom ou email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full"
-            />
-          </div>
-        </div>
-
-        <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="mb-8">
-            <TabsTrigger value="pending">
-              En attente ({pendingRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="approved">
-              Validées ({approvedRequests.length})
-            </TabsTrigger>
-            <TabsTrigger value="rejected">
-              Refusées ({rejectedRequests.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="pending">
-            <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
-              <NewRequestsTable
-                requests={pendingRequests}
-                onViewDetails={setSelectedRequest}
-                showApproveButton={true}
-              />
-            </ScrollArea>
-          </TabsContent>
-
-          <TabsContent value="approved">
-            <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
-              <NewRequestsTable
-                requests={approvedRequests}
-                onViewDetails={setSelectedRequest}
-                showApproveButton={false}
-              />
-            </ScrollArea>
-          </TabsContent>
-
-          <TabsContent value="rejected">
-            <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
-              <NewRequestsTable
-                requests={rejectedRequests}
-                onViewDetails={setSelectedRequest}
-                showApproveButton={false}
-              />
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-
-        <RequestDetailsDialog
-          request={selectedRequest}
-          onClose={() => setSelectedRequest(null)}
-        />
-      </div>
+      <RequestDetailsDialog
+        request={selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+      />
     </div>
   );
 }
