@@ -90,6 +90,21 @@ export function BookingActions({
           )}
         </>
       )}
+
+      {status === "confirmed" && tourStatus === "Ramassage en cours" && (
+        <>
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-green-500 hover:text-green-600 gap-2"
+            onClick={() => handleStatusChange("collected")}
+          >
+            <CheckSquare className="h-4 w-4" />
+            Marquer comme collectée
+          </Button>
+        </>
+      )}
     </div>
   );
 }
