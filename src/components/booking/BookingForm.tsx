@@ -16,7 +16,6 @@ import { useBookingSubmit } from "./form/useBookingSubmit";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import * as z from "zod";
-import { useToast } from "@/hooks/use-toast";
 
 const specialItems = [
   { name: "Vélo", price: 50, icon: "bicycle" },
@@ -44,7 +43,6 @@ export interface BookingFormProps {
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const {
     weight,
     selectedTypes,

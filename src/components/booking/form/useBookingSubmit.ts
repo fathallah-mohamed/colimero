@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function useBookingSubmit(tourId: number, onSuccess?: () => void) {
+export function useBookingSubmit(tourId: number) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -38,26 +38,13 @@ export function useBookingSubmit(tourId: number, onSuccess?: () => void) {
 
       if (error) throw error;
 
-      toast({
-        title: "Réservation créée",
-        description: "Votre réservation a été créée avec succès.",
-      });
-
       // Invalider le cache des réservations pour forcer un rafraîchissement
       await queryClient.invalidateQueries({ queryKey: ["bookings"] });
       
-      if (onSuccess) {
-        onSuccess();
-      }
-      
-      navigate("/mes-reservations");
+      return result;
     } catch (error: any) {
       console.error("Error creating booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la création de la réservation.",
-      });
+      throw error;
     } finally {
       setIsLoading(false);
     }
