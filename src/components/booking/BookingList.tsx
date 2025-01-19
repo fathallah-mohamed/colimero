@@ -79,7 +79,6 @@ export function BookingList() {
             }
           }}
           onUpdate={async () => { await refetch(); }}
-          isEven={false}
         />
       ))}
     </div>

@@ -6,19 +6,20 @@ import { useState } from "react";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Booking, BookingStatus } from "@/types/booking";
 import { BookingStatusBadge } from "./BookingStatusBadge";
-import { BookingActions } from "./BookingActions";
+import { BookingActions } from "./actions/BookingActions";
 import { useQueryClient } from "@tanstack/react-query";
+import type { Booking, BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
   booking: Booking;
   isCollecting: boolean;
   onStatusChange: (bookingId: string, status: BookingStatus) => void;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
+  tourStatus?: string;
 }
 
-export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }: BookingCardProps) {
+export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, tourStatus }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
@@ -93,6 +94,9 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate }:
               isCollecting={isCollecting}
               onStatusChange={handleStatusChange}
               onEdit={handleEdit}
+              bookingId={booking.id}
+              tourStatus={tourStatus}
+              onUpdate={onUpdate}
             />
           </div>
         </div>
