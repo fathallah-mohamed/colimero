@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function useBookingSubmit(tourId: number) {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -38,10 +36,19 @@ export function useBookingSubmit(tourId: number) {
 
       if (error) throw error;
 
+      // Récupérer les détails de la réservation créée pour avoir le tracking_number
+      const { data: bookingDetails, error: bookingError } = await supabase
+        .from('bookings')
+        .select('tracking_number')
+        .eq('id', result)
+        .single();
+
+      if (bookingError) throw bookingError;
+
       // Invalider le cache des réservations pour forcer un rafraîchissement
       await queryClient.invalidateQueries({ queryKey: ["bookings"] });
       
-      return result;
+      return bookingDetails.tracking_number;
     } catch (error: any) {
       console.error("Error creating booking:", error);
       throw error;

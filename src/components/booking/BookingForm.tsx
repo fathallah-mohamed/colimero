@@ -41,7 +41,7 @@ export interface BookingFormProps {
   onSuccess: () => void;
 }
 
-export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
+export function BookingForm({ tourId, pickupCity }: BookingFormProps) {
   const navigate = useNavigate();
   const {
     weight,
@@ -123,8 +123,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     };
 
     try {
-      await handleSubmit(formData);
-      setTrackingNumber('RSV-' + Math.random().toString(36).substring(7));
+      const trackingNumber = await handleSubmit(formData);
+      setTrackingNumber(trackingNumber);
       setShowConfirmDialog(true);
     } catch (error: any) {
       setErrorMessage(error.message);
