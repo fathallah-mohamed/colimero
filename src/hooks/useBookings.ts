@@ -83,5 +83,8 @@ export function useBookings() {
       return formattedBookings;
     },
     enabled: true,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Les données sont considérées comme périmées immédiatement
   });
 }
