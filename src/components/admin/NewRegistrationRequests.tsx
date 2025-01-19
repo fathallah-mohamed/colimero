@@ -5,7 +5,6 @@ import { RefreshCw, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import RequestDetailsDialog from "./RequestDetailsDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { NewRequestCard } from "./new-requests/NewRequestCard";
 import { NewRequestsTable } from "./new-requests/NewRequestsTable";
 import Navigation from "@/components/Navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,7 +20,7 @@ export default function NewRegistrationRequests() {
         .from("approval_requests")
         .select(`
           *,
-          tour:tours (
+          tour:tours!inner (
             id,
             departure_country,
             destination_country,
@@ -30,14 +29,14 @@ export default function NewRegistrationRequests() {
             route,
             total_capacity,
             remaining_capacity,
-            carriers (
+            carriers!inner (
               id,
               company_name,
               email,
               phone
             )
           ),
-          user:clients (
+          user:clients!inner (
             id,
             first_name,
             last_name,
@@ -47,17 +46,20 @@ export default function NewRegistrationRequests() {
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching approval requests:", error);
+        throw error;
+      }
+      
       console.log("Fetched approval requests:", data);
       return data;
     },
   });
 
-  const filteredRequests = requests?.filter(
-    (request) =>
-      request.user?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.user?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRequests = requests?.filter((request) =>
+    request.user?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.user?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const pendingRequests = filteredRequests?.filter(req => req.status === 'pending') || [];
