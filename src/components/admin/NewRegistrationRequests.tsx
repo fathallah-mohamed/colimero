@@ -36,7 +36,7 @@ export default function NewRegistrationRequests() {
               phone
             )
           ),
-          user:clients!inner (
+          clients!inner (
             id,
             first_name,
             last_name,
@@ -57,9 +57,9 @@ export default function NewRegistrationRequests() {
   });
 
   const filteredRequests = requests?.filter((request) =>
-    request.user?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.user?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    request.clients?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.clients?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.clients?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const pendingRequests = filteredRequests?.filter(req => req.status === 'pending') || [];
