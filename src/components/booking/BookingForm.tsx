@@ -107,6 +107,10 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         quantity: itemQuantities[itemName] || 1
       }));
 
+      if (!values.sender_name || !values.sender_phone) {
+        throw new Error("Les informations de l'expéditeur sont requises");
+      }
+
       const formData = {
         ...values,
         weight,
@@ -115,6 +119,12 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         content_types: selectedTypes,
         photos,
         special_items: formattedSpecialItems,
+        sender_name: values.sender_name,
+        sender_phone: values.sender_phone,
+        recipient_name: values.recipient_name,
+        recipient_address: values.recipient_address,
+        recipient_phone: values.recipient_phone,
+        item_type: values.item_type
       };
 
       const bookingId = await createBooking(formData);
