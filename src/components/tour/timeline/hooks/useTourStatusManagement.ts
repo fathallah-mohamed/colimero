@@ -45,7 +45,7 @@ export function useTourStatusManagement({ tourId, onStatusChange }: UseTourStatu
         .from('bookings')
         .select('status')
         .eq('tour_id', tourId)
-        .not('status', 'in', ['collected', 'cancelled']);
+        .not('status', 'in', '(collected,cancelled)');
 
       if (error) throw error;
 
