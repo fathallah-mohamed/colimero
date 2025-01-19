@@ -40,6 +40,11 @@ export function CarrierActions({
     onStatusChange("reported");
   };
 
+  const handleCancel = () => {
+    console.log("Cancelling booking...");
+    onStatusChange("cancelled" as BookingStatus);
+  };
+
   return (
     <>
       {canModifyInPlanned && status === "pending" && (
@@ -76,7 +81,7 @@ export function CarrierActions({
           icon={RotateCcw}
           buttonLabel="Annuler"
           buttonColorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
-          onConfirm={() => onStatusChange("cancelled" as BookingStatus)}
+          onConfirm={handleCancel}
         />
       )}
     </>
