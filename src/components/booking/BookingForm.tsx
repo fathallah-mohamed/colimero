@@ -9,13 +9,11 @@ import { BookingSpecialItems } from "./BookingSpecialItems";
 import { useBookingForm } from "@/hooks/useBookingForm";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { BookingErrorDialog } from "./form/BookingErrorDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BookingFormFields } from "./form/BookingFormFields";
 import { formSchema } from "./form/schema";
-import { useBookingFormState } from "./form/useBookingFormState";
 import * as z from "zod";
 
 const specialItems = [
@@ -47,6 +45,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const { toast } = useToast();
   const navigate = useNavigate();
   const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
+  const [weight, setWeight] = useState(5);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,29 +66,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: "",
     },
   });
-
-  const {
-    weight,
-    selectedTypes,
-    selectedItems,
-    itemQuantities,
-    photos,
-    showConfirmDialog,
-    showErrorDialog,
-    errorMessage,
-    formValues,
-    responsibilityAccepted,
-    setShowConfirmDialog,
-    setShowErrorDialog,
-    setFormValues,
-    setResponsibilityAccepted,
-    handleWeightChange,
-    handleTypeToggle,
-    handleItemToggle,
-    handleQuantityChange,
-    handlePhotoUpload,
-    setErrorMessage,
-  } = useBookingFormState();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -115,36 +98,23 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   }, []);
 
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("Soumission du formulaire avec les valeurs:", values);
-    
-    const formattedSpecialItems = selectedItems.map(itemName => ({
-      name: itemName,
-      quantity: itemQuantities[itemName] || 1
-    }));
-
-    const formData = {
-      ...values,
-      weight,
-      pickup_city: pickupCity,
-      delivery_city: "À définir",
-      content_types: selectedTypes,
-      photos: photos,
-      special_items: formattedSpecialItems,
-    };
-
-    setFormValues(formData);
-    setShowConfirmDialog(true);
-  };
-
-  const handleConfirmBooking = async () => {
-    if (!formValues) {
-      console.error("Aucune donnée de formulaire disponible");
-      return;
-    }
-
     try {
-      console.log("Tentative de création de la réservation avec:", formValues);
-      const { success } = await createBooking(formValues);
+      const formattedSpecialItems = selectedItems.map(itemName => ({
+        name: itemName,
+        quantity: itemQuantities[itemName] || 1
+      }));
+
+      const formData = {
+        ...values,
+        weight,
+        pickup_city: pickupCity,
+        delivery_city: "À définir",
+        content_types: selectedTypes,
+        photos: photos,
+        special_items: formattedSpecialItems,
+      };
+
+      const { success, error } = await createBooking(formData);
       
       if (success) {
         toast({
@@ -153,17 +123,55 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           variant: "default",
         });
         form.reset();
-        setShowConfirmDialog(false);
-        setResponsibilityAccepted(false);
         navigate('/mes-reservations');
       } else {
-        setErrorMessage("Une erreur est survenue lors de la création de la réservation");
+        if (error?.message?.includes('duplicate key value')) {
+          setErrorMessage("Vous avez déjà une réservation pour cette tournée");
+        } else {
+          setErrorMessage(error?.message || "Une erreur est survenue lors de la création de la réservation");
+        }
         setShowErrorDialog(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de la création de la réservation:", error);
-      setErrorMessage("Une erreur est survenue lors de la création de la réservation");
+      setErrorMessage(error?.message || "Une erreur est survenue lors de la création de la réservation");
       setShowErrorDialog(true);
+    }
+  };
+
+  const handleWeightChange = (increment: boolean) => {
+    setWeight(prev => {
+      const newWeight = increment ? prev + 1 : prev - 1;
+      return Math.min(Math.max(newWeight, 5), 30);
+    });
+  };
+
+  const handleTypeToggle = (type: string) => {
+    setSelectedTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const handleItemToggle = (itemName: string) => {
+    setSelectedItems(prev =>
+      prev.includes(itemName) ? prev.filter(i => i !== itemName) : [...prev, itemName]
+    );
+    if (!itemQuantities[itemName]) {
+      setItemQuantities(prev => ({ ...prev, [itemName]: 1 }));
+    }
+  };
+
+  const handleQuantityChange = (itemName: string, increment: boolean) => {
+    setItemQuantities(prev => ({
+      ...prev,
+      [itemName]: Math.max(1, prev[itemName] + (increment ? 1 : -1))
+    }));
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setPhotos(prev => [...prev, ...newFiles]);
     }
   };
 
@@ -200,14 +208,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           {isLoading ? "Création en cours..." : "Réserver"}
         </Button>
       </form>
-
-      <BookingConfirmDialog
-        open={showConfirmDialog}
-        onOpenChange={setShowConfirmDialog}
-        responsibilityAccepted={responsibilityAccepted}
-        onResponsibilityChange={setResponsibilityAccepted}
-        onConfirm={handleConfirmBooking}
-      />
 
       <BookingErrorDialog
         open={showErrorDialog}
