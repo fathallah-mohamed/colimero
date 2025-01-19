@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useToast } from "./use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { BookingFormData } from "@/types/booking";
 
 export function useBookingForm(tourId: number, onSuccess?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const createBooking = async (formData: Partial<BookingFormData>) => {
     try {
@@ -42,10 +40,11 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
 
       if (error) {
         console.error('Erreur lors de la création de la réservation:', error);
-        if (error.message.includes('duplicate key value')) {
+        // Gérer spécifiquement l'erreur de capacité insuffisante
+        if (error.message.includes('Insufficient capacity')) {
           return { 
             success: false, 
-            message: "Vous avez déjà une réservation pour cette tournée" 
+            message: "La capacité restante de la tournée est insuffisante pour votre colis" 
           };
         }
         return { 
