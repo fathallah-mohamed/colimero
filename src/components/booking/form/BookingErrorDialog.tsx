@@ -1,38 +1,29 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
 interface BookingErrorDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  message: string;
+  onClose: () => void;
+  errorMessage: string;
 }
 
-export function BookingErrorDialog({
-  open,
-  onOpenChange,
-  message,
-}: BookingErrorDialogProps) {
+export function BookingErrorDialog({ open, onClose, errorMessage }: BookingErrorDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
-            <AlertCircle className="h-5 w-5" />
-            Réservation impossible
+            <AlertCircle className="h-6 w-6" />
+            Erreur
           </DialogTitle>
-          <DialogDescription>{message}</DialogDescription>
         </DialogHeader>
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>J'ai compris</Button>
-        </DialogFooter>
+        <div className="space-y-4">
+          <p className="text-gray-600">{errorMessage}</p>
+          <Button onClick={onClose} variant="outline" className="w-full">
+            Fermer
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

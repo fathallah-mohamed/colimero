@@ -8,29 +8,32 @@ export function useBookingSubmit(tourId: number) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (formData: any) => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not found");
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("Vous devez être connecté pour effectuer une réservation");
+      }
 
       const { data: result, error } = await supabase.rpc(
         'create_booking_with_capacity_update',
         {
           p_tour_id: tourId,
-          p_user_id: user.id,
-          p_weight: data.weight,
-          p_pickup_city: data.pickup_city,
-          p_delivery_city: data.delivery_city,
-          p_recipient_name: data.recipient_name,
-          p_recipient_address: data.recipient_address,
-          p_recipient_phone: data.recipient_phone,
-          p_sender_name: data.sender_name,
-          p_sender_phone: data.sender_phone,
-          p_item_type: data.item_type,
-          p_special_items: data.special_items,
-          p_content_types: data.content_types,
-          p_photos: data.photos || []
+          p_user_id: session.user.id,
+          p_weight: formData.weight,
+          p_pickup_city: formData.pickup_city,
+          p_delivery_city: formData.delivery_city,
+          p_recipient_name: formData.recipient_name,
+          p_recipient_address: formData.recipient_address,
+          p_recipient_phone: formData.recipient_phone,
+          p_sender_name: formData.sender_name,
+          p_sender_phone: formData.sender_phone,
+          p_item_type: formData.item_type,
+          p_special_items: formData.special_items,
+          p_content_types: formData.content_types,
+          p_photos: formData.photos || []
         }
       );
 
@@ -57,5 +60,13 @@ export function useBookingSubmit(tourId: number) {
     }
   };
 
-  return { handleSubmit, isLoading };
+  const handleComplete = () => {
+    navigate('/mes-reservations');
+  };
+
+  return {
+    isLoading,
+    handleSubmit,
+    handleComplete
+  };
 }
