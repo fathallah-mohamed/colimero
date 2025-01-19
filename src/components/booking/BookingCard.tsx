@@ -7,7 +7,6 @@ import { EditBookingDialog } from "./EditBookingDialog";
 import { BookingActions } from "./card/BookingActions";
 import { BookingHeaderSection } from "./header/BookingHeaderSection";
 import { BookingDetailsContent } from "./details/BookingDetailsContent";
-import { BookingStatusSection } from "./status/BookingStatusSection";
 import type { Booking, BookingStatus } from "@/types/booking";
 
 interface BookingCardProps {
@@ -36,10 +35,7 @@ export function BookingCard({
   return (
     <Card className="p-4">
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <BookingHeaderSection booking={booking} />
-          <BookingStatusSection booking={booking} />
-        </div>
+        <BookingHeaderSection booking={booking} />
         
         <div className="flex justify-end">
           <BookingActions
