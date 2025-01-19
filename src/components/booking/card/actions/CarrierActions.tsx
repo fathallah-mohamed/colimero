@@ -24,13 +24,18 @@ export function CarrierActions({
     return null;
   }
 
+  const handleConfirm = () => {
+    console.log("Confirming booking...");
+    onStatusChange("confirmed");
+  };
+
   return (
     <>
       {canModifyInPlanned && status === "pending" && (
         <ActionButton
           icon={ThumbsUp}
           label="Confirmer"
-          onClick={() => onStatusChange("confirmed")}
+          onClick={handleConfirm}
           colorClass="bg-white hover:bg-gray-50 text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
         />
       )}
