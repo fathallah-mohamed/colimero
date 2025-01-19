@@ -110,7 +110,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         pickup_city: pickupCity,
         delivery_city: "À définir",
         content_types: selectedTypes,
-        photos: photos,
+        photos,
         special_items: formattedSpecialItems,
       };
 
@@ -125,10 +125,10 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         form.reset();
         navigate('/mes-reservations');
       } else {
-        if (error?.message?.includes('duplicate key value')) {
+        if (error?.includes('duplicate key value')) {
           setErrorMessage("Vous avez déjà une réservation pour cette tournée");
         } else {
-          setErrorMessage(error?.message || "Une erreur est survenue lors de la création de la réservation");
+          setErrorMessage(error || "Une erreur est survenue lors de la création de la réservation");
         }
         setShowErrorDialog(true);
       }
