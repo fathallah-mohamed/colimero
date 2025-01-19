@@ -1,20 +1,22 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import type { BookingFormData } from "@/types/booking";
 
 export function useBookingForm(tourId: number, onSuccess?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const createBooking = async (formData: Partial<BookingFormData>) => {
+  const createBooking = async (formData: BookingFormData) => {
     try {
       setIsLoading(true);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        return { 
-          success: false, 
-          message: "Vous devez être connecté pour effectuer une réservation" 
-        };
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("No session found");
       }
 
       // Upload photos if they exist and get their URLs
@@ -46,7 +48,7 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
         'create_booking_with_capacity_update',
         {
           p_tour_id: tourId,
-          p_user_id: user.id,
+          p_user_id: session.user.id,
           p_weight: formData.weight,
           p_pickup_city: formData.pickup_city,
           p_delivery_city: formData.delivery_city,
@@ -63,47 +65,35 @@ export function useBookingForm(tourId: number, onSuccess?: () => void) {
       );
 
       if (error) {
-        console.error('Erreur lors de la création de la réservation:', error);
         if (error.message.includes('Insufficient capacity')) {
-          return { 
-            success: false, 
-            message: "La capacité restante de la tournée est insuffisante pour votre colis" 
-          };
+          toast({
+            variant: "destructive",
+            title: "Capacité insuffisante",
+            description: "La capacité restante de la tournée est insuffisante pour votre réservation.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Une erreur est survenue lors de la création de la réservation.",
+          });
         }
-        return { 
-          success: false, 
-          message: error.message 
-        };
+        throw error;
       }
 
-      // Récupérer le numéro de suivi de la réservation créée
-      const { data: bookingData, error: bookingError } = await supabase
-        .from('bookings')
-        .select('tracking_number')
-        .eq('id', data)
-        .single();
+      toast({
+        title: "Réservation créée",
+        description: "Votre réservation a été créée avec succès.",
+      });
 
-      if (bookingError) {
-        console.error('Erreur lors de la récupération du numéro de suivi:', bookingError);
-        return {
-          success: true,
-          bookingId: data,
-          tracking: 'N/A'
-        };
+      if (onSuccess) {
+        onSuccess();
       }
 
-      return {
-        success: true,
-        bookingId: data,
-        tracking: bookingData.tracking_number
-      };
-
-    } catch (error: any) {
-      console.error('Erreur lors de la création de la réservation:', error);
-      return { 
-        success: false, 
-        message: error.message 
-      };
+      return data;
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
