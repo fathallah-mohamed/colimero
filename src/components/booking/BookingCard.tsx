@@ -94,9 +94,7 @@ export function BookingCard({ booking, isCollecting, onStatusChange, onUpdate, t
               isCollecting={isCollecting}
               onStatusChange={handleStatusChange}
               onEdit={handleEdit}
-              bookingId={booking.id}
               tourStatus={tourStatus}
-              onUpdate={onUpdate}
             />
           </div>
         </div>
