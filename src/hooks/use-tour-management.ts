@@ -69,12 +69,31 @@ export function useTourManagement() {
 
   const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
-      const { error } = await supabase
+      // If transitioning from "Ramassage en cours" to "En transit"
+      if (newStatus === "En transit") {
+        // Update all non-cancelled bookings to "collected" status
+        const { error: bookingsError } = await supabase
+          .from('bookings')
+          .update({ 
+            status: 'collected',
+            delivery_status: 'collected' 
+          })
+          .eq('tour_id', tourId)
+          .neq('status', 'cancelled');
+
+        if (bookingsError) {
+          console.error('Error updating bookings status:', bookingsError);
+          throw bookingsError;
+        }
+      }
+
+      // Update tour status
+      const { error: tourError } = await supabase
         .from('tours')
         .update({ status: newStatus })
         .eq('id', tourId);
 
-      if (error) throw error;
+      if (tourError) throw tourError;
 
       toast({
         title: "Statut mis à jour",
