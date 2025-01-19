@@ -1,11 +1,9 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Info } from "lucide-react";
-import { useState } from "react";
 import { EditBookingDialog } from "./EditBookingDialog";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { BookingActions } from "./card/BookingActions";
 import { BookingHeaderSection } from "./header/BookingHeaderSection";
 import { BookingDetailsContent } from "./details/BookingDetailsContent";
@@ -29,62 +27,6 @@ export function BookingCard({
 }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { toast } = useToast();
-
-  const checkPendingBooking = async (userId: string, tourId: number) => {
-    const { data: existingBookings, error } = await supabase
-      .from('bookings')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('tour_id', tourId)
-      .eq('status', 'pending');
-
-    if (error) {
-      console.error('Error checking pending bookings:', error);
-      return true;
-    }
-
-    return existingBookings && existingBookings.length > 0;
-  };
-
-  const handleStatusChange = async (newStatus: BookingStatus) => {
-    try {
-      console.log("Updating booking status:", { bookingId: booking.id, newStatus });
-      
-      if (newStatus === 'pending') {
-        const hasPendingBooking = await checkPendingBooking(booking.user_id, booking.tour_id);
-        if (hasPendingBooking) {
-          toast({
-            variant: "destructive",
-            title: "Action impossible",
-            description: "Ce client a déjà une réservation en attente pour cette tournée.",
-          });
-          return;
-        }
-      }
-
-      onStatusChange(booking.id, newStatus);
-      
-      toast({
-        title: "Statut mis à jour",
-        description: `La réservation a été marquée comme ${
-          newStatus === 'collected' ? 'collectée' : 
-          newStatus === 'cancelled' ? 'annulée' : 
-          newStatus === 'confirmed' ? 'confirmée' :
-          'en attente'
-        }`,
-      });
-      
-      await onUpdate();
-    } catch (error) {
-      console.error('Error updating booking status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la réservation",
-      });
-    }
-  };
 
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", booking.id);
@@ -104,7 +46,7 @@ export function BookingCard({
             bookingId={booking.id}
             status={booking.status}
             tourStatus={tourStatus || ''}
-            onStatusChange={handleStatusChange}
+            onStatusChange={onStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
             userType="carrier"
