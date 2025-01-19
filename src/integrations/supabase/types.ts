@@ -994,6 +994,7 @@ export type Database = {
         | "cancelled"
         | "collected"
         | "in_transit"
+        | "reported"
       french_city:
         | "Paris"
         | "Lyon"

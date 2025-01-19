@@ -1,5 +1,5 @@
 import { BookingStatus } from "@/types/booking";
-import { ThumbsUp } from "lucide-react";
+import { ThumbsUp, AlertTriangle } from "lucide-react";
 import { ActionButton } from "@/components/shared/ActionButton";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { Edit2, RotateCcw } from "lucide-react";
@@ -17,16 +17,21 @@ export function CarrierActions({
   onStatusChange,
   onEdit
 }: CarrierActionsProps) {
-  const canModifyInCollection = status === "pending" && tourStatus === "Ramassage en cours";
+  const canModifyInTransit = tourStatus === "En transit";
   const canModifyInPlanned = (status === "pending" || status === "confirmed") && tourStatus === "Programmée";
 
-  if (!canModifyInCollection && !canModifyInPlanned) {
+  if (!canModifyInTransit && !canModifyInPlanned) {
     return null;
   }
 
   const handleConfirm = () => {
     console.log("Confirming booking...");
     onStatusChange("confirmed");
+  };
+
+  const handleReport = () => {
+    console.log("Reporting booking...");
+    onStatusChange("reported");
   };
 
   return (
@@ -46,6 +51,15 @@ export function CarrierActions({
         onClick={onEdit}
         colorClass="bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
       />
+      
+      {canModifyInTransit && (
+        <ActionButton
+          icon={AlertTriangle}
+          label="Signaler"
+          onClick={handleReport}
+          colorClass="bg-white hover:bg-gray-50 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+        />
+      )}
       
       <ConfirmDialog
         title="Confirmer l'annulation"

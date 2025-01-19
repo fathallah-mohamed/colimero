@@ -5,7 +5,8 @@ export type BookingStatus =
   | "collected" 
   | "ready_to_deliver"
   | "delivered"
-  | "in_transit";
+  | "in_transit"
+  | "reported";
 
 export type BookingFilterStatus = BookingStatus | "all";
 
