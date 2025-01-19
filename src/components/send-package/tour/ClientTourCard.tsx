@@ -127,8 +127,9 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               tour={tour}
               selectedPoint={selectedPoint}
               onPointSelect={handlePointSelect}
-              onBookingClick={handleBookingButtonClick}
-              isBookingEnabled={!!selectedPoint}
+              onActionClick={handleBookingButtonClick}
+              isActionEnabled={!!selectedPoint}
+              actionButtonText="Réserver cette tournée"
             />
           )}
         </div>
