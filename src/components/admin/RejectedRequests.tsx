@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { NewRequestCard } from "./new-requests/NewRequestCard";
 import { NewRequestsTable } from "./new-requests/NewRequestsTable";
 import Navigation from "@/components/Navigation";
-import RequestDetailsDialog from "./RequestDetailsDialog";
+import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
 
