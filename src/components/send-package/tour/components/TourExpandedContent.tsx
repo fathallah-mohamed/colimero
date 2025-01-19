@@ -1,12 +1,13 @@
-import { Tour } from "@/types/tour";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { Tour } from "@/types/tour";
 
 interface TourExpandedContentProps {
   tour: Tour;
@@ -27,6 +28,7 @@ export function TourExpandedContent({
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkApprovalStatus = async () => {
@@ -71,6 +73,34 @@ export function TourExpandedContent({
         variant: "destructive",
         title: "Point de ramassage requis",
         description: "Veuillez sélectionner un point de ramassage",
+      });
+      return;
+    }
+
+    // Vérifier uniquement les réservations en attente
+    const { data: pendingBooking, error } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('tour_id', tour.id)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing bookings:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la vérification de vos réservations",
+      });
+      return;
+    }
+
+    if (pendingBooking) {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Vous avez déjà une réservation en attente pour cette tournée.",
       });
       return;
     }

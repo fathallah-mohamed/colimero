@@ -66,7 +66,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       }
 
       // Vérifier uniquement les réservations en attente
-      const { data: pendingBooking } = await supabase
+      const { data: pendingBooking, error } = await supabase
         .from('bookings')
         .select('id')
         .eq('user_id', session.user.id)
@@ -74,17 +74,18 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         .eq('status', 'pending')
         .maybeSingle();
 
-      if (pendingBooking) {
-        setShowExistingBookingDialog(true);
-        return;
-      }
-
-      if (!tour.id) {
+      if (error) {
+        console.error('Error checking existing bookings:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Impossible de trouver l'identifiant de la tournée",
+          description: "Une erreur est survenue lors de la vérification de vos réservations",
         });
+        return;
+      }
+
+      if (pendingBooking) {
+        setShowExistingBookingDialog(true);
         return;
       }
 
