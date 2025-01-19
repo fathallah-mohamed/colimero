@@ -45,6 +45,8 @@ export function CarrierActions({
     onStatusChange("cancelled" as BookingStatus);
   };
 
+  const isNotCancelled = status !== "cancelled" as BookingStatus;
+
   return (
     <>
       {canModifyInPlanned && status === "pending" && (
@@ -56,7 +58,7 @@ export function CarrierActions({
         />
       )}
       
-      {status !== "cancelled" && (
+      {isNotCancelled && (
         <ActionButton
           icon={Edit2}
           label="Modifier"
@@ -74,7 +76,7 @@ export function CarrierActions({
         />
       )}
       
-      {status !== "cancelled" && (
+      {isNotCancelled && (
         <ConfirmDialog
           title="Confirmer l'annulation"
           description="Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée."
