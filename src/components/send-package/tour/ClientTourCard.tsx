@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Tour } from "@/types/tour";
 import { useToast } from "@/hooks/use-toast";
 import { CardCustom } from "@/components/ui/card-custom";
+import { Button } from "@/components/ui/button";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
