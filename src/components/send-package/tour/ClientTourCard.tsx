@@ -10,6 +10,7 @@ import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { ShareTourButton } from "@/components/tour/shared/ShareTourButton";
+import { Eye } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -113,7 +114,18 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             <div className="cursor-pointer" onClick={handleTourClick}>
               <TourMainInfo tour={tour} />
             </div>
-            <ShareTourButton tourId={tour.id} className="shrink-0" />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/tours/${tour.id}`)}
+                className="flex items-center gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                Consulter
+              </Button>
+              <ShareTourButton tourId={tour.id} className="shrink-0" />
+            </div>
           </div>
           
           <TourRoute 
