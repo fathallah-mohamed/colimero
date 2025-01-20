@@ -1,8 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { TourCard } from "@/components/tour/TourCard";
-import type { Tour, RouteStop, TourStatus } from "@/types/tour";
+import { Tour, RouteStop, TourStatus, BookingStatus } from "@/types/tour";
+import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
+import { Loader2 } from "lucide-react";
 
 export default function TourDetails() {
   const { tourId } = useParams();
@@ -42,7 +43,11 @@ export default function TourDetails() {
         previous_status: data.previous_status as TourStatus | null,
         type: data.type || "public",
         terms_accepted: data.terms_accepted || false,
-        customs_declaration: data.customs_declaration || false
+        customs_declaration: data.customs_declaration || false,
+        bookings: data.bookings?.map((booking: any) => ({
+          ...booking,
+          status: booking.status as BookingStatus
+        }))
       };
 
       return transformedTour;
@@ -52,7 +57,7 @@ export default function TourDetails() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -68,7 +73,7 @@ export default function TourDetails() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <TourCard tour={tour} />
+      <ClientTourCard tour={tour} />
     </div>
   );
 }
