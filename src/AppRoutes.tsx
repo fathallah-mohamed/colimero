@@ -10,8 +10,12 @@ import PlanifierTournee from "@/pages/PlanifierTournee";
 import Transporteurs from "@/pages/Transporteurs";
 import TransporteurDetails from "@/pages/TransporteurDetails";
 import CreateTour from "@/pages/CreateTour";
+import { useSessionInitializer } from "@/components/navigation/SessionInitializer";
 
 export default function AppRoutes() {
+  // Initialize session here, where we have access to router context
+  useSessionInitializer();
+
   return (
     <Routes>
       <Route path="/" element={<Index />} />
