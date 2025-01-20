@@ -53,9 +53,18 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
         console.error("Error fetching commitments:", commitmentsError);
         throw commitmentsError;
       }
+
+      // Transform the data to match CarrierCommitment type
+      const transformedData = data?.map(item => ({
+        accepted: item.accepted,
+        commitment_type: {
+          id: item.commitment_type[0].id,
+          label: item.commitment_type[0].label,
+          description: item.commitment_type[0].description
+        }
+      })) as CarrierCommitment[];
       
-      console.log("Fetched commitments:", commitments);
-      return data as unknown as CarrierCommitment[];
+      return transformedData;
     },
   });
 
