@@ -6,6 +6,10 @@ import Tours from "@/pages/Tours";
 import TourDetails from "@/pages/TourDetails";
 import MesDemandesApprobation from "@/pages/MesDemandesApprobation";
 import EnvoyerColis from "@/pages/EnvoyerColis";
+import PlanifierTournee from "@/pages/PlanifierTournee";
+import Transporteurs from "@/pages/Transporteurs";
+import TransporteurDetails from "@/pages/TransporteurDetails";
+import CreateTour from "@/pages/CreateTour";
 
 export default function AppRoutes() {
   return (
@@ -17,6 +21,10 @@ export default function AppRoutes() {
       <Route path="/tours/:id" element={<TourDetails />} />
       <Route path="/mes-demandes-approbation" element={<MesDemandesApprobation />} />
       <Route path="/envoyer-colis" element={<EnvoyerColis />} />
+      <Route path="/planifier-tournee" element={<PlanifierTournee />} />
+      <Route path="/transporteurs" element={<Transporteurs />} />
+      <Route path="/transporteurs/:id" element={<TransporteurDetails />} />
+      <Route path="/transporteur/tournees/creer" element={<CreateTour />} />
     </Routes>
   );
 }
