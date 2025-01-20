@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Share2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TourDetails } from "@/components/send-package/card/TourDetails";
+import { TourDetails } from "../card/TourDetails";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Tour } from "@/types/tour";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 
