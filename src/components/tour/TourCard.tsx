@@ -11,9 +11,24 @@ import { TourStatusBadge } from "./TourStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { TourTimelineDisplay } from "./shared/TourTimelineDisplay";
 import { ShareTourButton } from "./shared/ShareTourButton";
+import { TourEditDialog } from "./tour-edit/TourEditDialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tour, TourStatus } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
+
+const countryNames: { [key: string]: string } = {
+  'FR': 'France',
+  'TN': 'Tunisie',
+  'DZ': 'Algérie',
+  'MA': 'Maroc'
+};
+
+const countryFlags: { [key: string]: string } = {
+  'FR': '🇫🇷',
+  'TN': '🇹🇳',
+  'DZ': '🇩🇿',
+  'MA': '🇲🇦'
+};
 
 interface TourCardProps {
   tour: Tour;
