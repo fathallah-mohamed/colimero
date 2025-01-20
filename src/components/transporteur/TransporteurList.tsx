@@ -15,14 +15,20 @@ const countryNames: { [key: string]: string } = {
   'DZ': 'Algérie'
 };
 
-export function TransporteurList() {
+interface TransporteurListProps {
+  searchTerm: string;
+  sortBy: string;
+  filterCountry: string;
+}
+
+export function TransporteurList({ searchTerm, sortBy, filterCountry }: TransporteurListProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const { data: carriers, isLoading } = useQuery({
-    queryKey: ["carriers"],
+    queryKey: ["carriers", searchTerm, sortBy, filterCountry],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("carriers")
         .select(`
           *,
@@ -36,8 +42,34 @@ export function TransporteurList() {
             icon
           )
         `)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
+        .eq('status', 'active');
+
+      // Apply filters
+      if (filterCountry !== 'all') {
+        query = query.contains('coverage_area', [filterCountry]);
+      }
+
+      if (searchTerm) {
+        query = query.or(`
+          company_name.ilike.%${searchTerm}%,
+          first_name.ilike.%${searchTerm}%,
+          last_name.ilike.%${searchTerm}%
+        `);
+      }
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'rating':
+          query = query.order('rating', { ascending: false });
+          break;
+        case 'deliveries':
+          query = query.order('total_deliveries', { ascending: false });
+          break;
+        default:
+          query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         toast({
@@ -55,7 +87,7 @@ export function TransporteurList() {
   if (isLoading) {
     return (
       <div className="text-center py-8">
-        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="text-gray-600">Chargement des transporteurs...</p>
       </div>
     );
@@ -99,18 +131,18 @@ export function TransporteurList() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-blue-500" />
+                      <MapPin className="h-4 w-4 text-primary" />
                       <span>
                         {carrier.coverage_area?.map(code => countryNames[code] || code).join(" ↔ ")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-blue-500" />
+                      <Phone className="h-4 w-4 text-primary" />
                       <span>{carrier.phone}</span>
                     </div>
                     {carrier.address && (
                       <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-blue-500" />
+                        <MapPin className="h-4 w-4 text-primary" />
                         <span>{carrier.address}</span>
                       </div>
                     )}
@@ -121,7 +153,7 @@ export function TransporteurList() {
                   variant="outline" 
                   size="sm"
                   onClick={() => navigate(`/transporteurs/${carrier.id}`)}
-                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                  className="text-primary border-primary hover:bg-primary/10"
                 >
                   Voir le profil
                 </Button>
