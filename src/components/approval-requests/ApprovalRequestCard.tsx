@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { User, Mail, Phone, MapPin, Check, X } from "lucide-react";
-import { Link } from "react-router-dom";
 
 interface ApprovalRequestCardProps {
   request: any;
@@ -25,35 +24,6 @@ export function ApprovalRequestCard({
   onCancel,
   onDelete
 }: ApprovalRequestCardProps) {
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'outline';
-      case 'approved':
-        return 'success';
-      case 'rejected':
-      case 'cancelled':
-        return 'destructive';
-      default:
-        return 'default';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'En attente';
-      case 'approved':
-        return 'Approuvée';
-      case 'rejected':
-        return 'Refusée';
-      case 'cancelled':
-        return 'Annulée';
-      default:
-        return status;
-    }
-  };
-
   return (
     <Card className="p-6">
       <div className="space-y-6">
@@ -80,8 +50,9 @@ export function ApprovalRequestCard({
             </div>
           </div>
           <div className="text-right">
-            <Badge variant={getStatusBadgeVariant(request.status)}>
-              {getStatusLabel(request.status)}
+            <Badge variant={request.status === 'pending' ? 'outline' : request.status === 'approved' ? 'success' : 'destructive'}>
+              {request.status === 'pending' ? 'En attente' : 
+               request.status === 'approved' ? 'Approuvée' : 'Refusée'}
             </Badge>
             <p className="text-sm text-gray-500 mt-2">
               Demande du {format(new Date(request.created_at), "dd MMMM yyyy", {
@@ -142,58 +113,46 @@ export function ApprovalRequestCard({
         {/* Actions */}
         {showActions && (
           <div className="flex justify-end gap-3">
-            {request.status === 'pending' && (
+            {request.status === 'pending' && userType === 'carrier' && (
               <>
-                {userType === 'carrier' ? (
-                  <>
-                    <Button
-                      variant="destructive"
-                      onClick={() => onReject?.(request)}
-                      className="flex items-center gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      Refuser
-                    </Button>
-                    <Button
-                      variant="default"
-                      onClick={() => onApprove?.(request)}
-                      className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
-                    >
-                      <Check className="h-4 w-4" />
-                      Approuver
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    variant="destructive"
-                    onClick={() => onCancel?.(request)}
-                    className="flex items-center gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Annuler ma demande
-                  </Button>
-                )}
+                <Button
+                  variant="default"
+                  onClick={() => onApprove?.(request)}
+                  className="bg-green-600 hover:bg-green-700 flex items-center gap-2"
+                >
+                  <Check className="h-4 w-4" />
+                  Approuver
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => onReject?.(request)}
+                  className="flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Refuser
+                </Button>
               </>
             )}
-            {request.status === 'cancelled' && userType !== 'carrier' && (
+            {request.status === 'pending' && userType !== 'carrier' && (
               <Button
                 variant="destructive"
-                onClick={() => onDelete?.(request)}
+                onClick={() => onCancel?.(request.id)}
+                className="flex items-center gap-2"
+              >
+                <X className="h-4 w-4" />
+                Annuler
+              </Button>
+            )}
+            {request.status === 'cancelled' && (
+              <Button
+                variant="destructive"
+                onClick={() => onDelete?.(request.id)}
                 className="flex items-center gap-2"
               >
                 <X className="h-4 w-4" />
                 Supprimer
               </Button>
             )}
-            <Button
-              variant="outline"
-              asChild
-              className="flex items-center gap-2"
-            >
-              <Link to={`/tours/${request.tour_id}`}>
-                Voir la tournée
-              </Link>
-            </Button>
           </div>
         )}
       </div>

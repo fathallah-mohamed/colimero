@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Loader2 } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,7 +20,7 @@ export function TransporteurList() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const { data: carriers, isLoading, error } = useQuery({
+  const { data: carriers, isLoading } = useQuery({
     queryKey: ["carriers"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -49,23 +49,16 @@ export function TransporteurList() {
         throw error;
       }
 
+      console.log("Carriers data:", data); // Debug log
       return data;
     },
-    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
       <div className="text-center py-8">
-        <p className="text-red-600">Une erreur est survenue lors du chargement des transporteurs.</p>
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600">Chargement des transporteurs...</p>
       </div>
     );
   }
