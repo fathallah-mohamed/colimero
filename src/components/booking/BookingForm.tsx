@@ -5,13 +5,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, BookingFormData } from "./form/schema";
 import { useBookingSubmit } from "./form/useBookingSubmit";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StepIndicator } from "./form/steps/StepIndicator";
 import { SenderStep } from "./form/steps/SenderStep";
 import { RecipientStep } from "./form/steps/RecipientStep";
 import { PackageStep } from "./form/steps/PackageStep";
 import { ConfirmationStep } from "./form/steps/ConfirmationStep";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface BookingFormProps {
   tourId: number;
@@ -41,6 +42,36 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       package_description: "",
     },
   });
+
+  useEffect(() => {
+    const fetchClientProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: clientData, error } = await supabase
+            .from('clients')
+            .select('first_name, last_name, phone')
+            .eq('id', user.id)
+            .single();
+
+          if (error) {
+            console.error('Error fetching client profile:', error);
+            return;
+          }
+
+          if (clientData) {
+            const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
+            form.setValue('sender_name', fullName);
+            form.setValue('sender_phone', clientData.phone || '');
+          }
+        }
+      } catch (error) {
+        console.error('Error in fetchClientProfile:', error);
+      }
+    };
+
+    fetchClientProfile();
+  }, [form]);
 
   const { isLoading, handleSubmit } = useBookingSubmit(tourId);
 
