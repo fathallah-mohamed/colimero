@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { TourTimelineDisplay } from "./shared/TourTimelineDisplay";
 import { ShareTourButton } from "./shared/ShareTourButton";
 import { supabase } from "@/integrations/supabase/client";
+import { TourEditDialog } from "./TourEditDialog";
+import { countryFlags, countryNames } from "@/constants/countries";
 import type { Tour, TourStatus } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
 

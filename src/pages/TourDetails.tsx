@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TourCard } from "@/components/tour/TourCard";
+import type { Tour, RouteStop } from "@/types/tour";
 
 export default function TourDetails() {
   const { tourId } = useParams();
@@ -25,7 +26,18 @@ export default function TourDetails() {
         .single();
 
       if (error) throw error;
-      return data;
+
+      // Transform the route data to match the RouteStop[] type
+      const transformedTour: Tour = {
+        ...data,
+        route: Array.isArray(data.route) 
+          ? data.route 
+          : typeof data.route === 'string' 
+            ? JSON.parse(data.route) 
+            : data.route
+      };
+
+      return transformedTour;
     }
   });
 
