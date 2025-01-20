@@ -1,7 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Tour, RouteStop, TourStatus, BookingStatus } from "@/types/tour";
+import { Tour, RouteStop, TourStatus } from "@/types/tour";
+import { BookingStatus } from "@/types/booking";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
 import { Loader2 } from "lucide-react";
 
