@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -27,6 +28,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [selectedPoint, setSelectedPoint] = useState<string>("");
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [showExistingBookingDialog, setShowExistingBookingDialog] = useState(false);
+  const [showPendingApprovalDialog, setShowPendingApprovalDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -36,6 +39,23 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
   const handleExpandClick = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const checkExistingApprovalRequest = async (userId: string) => {
+    const { data: approvalRequest, error } = await supabase
+      .from('approval_requests')
+      .select('status')
+      .eq('tour_id', tour.id)
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking approval request:', error);
+      return false;
+    }
+
+    return approvalRequest !== null;
   };
 
   const handleBookingButtonClick = async () => {
@@ -65,6 +85,14 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         return;
       }
 
+      if (tour.type === 'private') {
+        const hasPendingRequest = await checkExistingApprovalRequest(session.user.id);
+        if (hasPendingRequest) {
+          setShowPendingApprovalDialog(true);
+          return;
+        }
+      }
+
       // Vérifier uniquement les réservations en attente
       const { data: pendingBooking, error } = await supabase
         .from('bookings')
@@ -89,7 +117,11 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         return;
       }
 
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+      if (tour.type === 'private') {
+        setShowApprovalDialog(true);
+      } else {
+        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+      }
     } catch (error) {
       console.error("Error in handleBookingButtonClick:", error);
       toast({
@@ -129,7 +161,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               onPointSelect={handlePointSelect}
               onActionClick={handleBookingButtonClick}
               isActionEnabled={!!selectedPoint}
-              actionButtonText="Réserver cette tournée"
+              actionButtonText={tour.type === 'private' ? "Demander une approbation" : "Réserver cette tournée"}
             />
           )}
         </div>
@@ -167,6 +199,32 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showPendingApprovalDialog} onOpenChange={setShowPendingApprovalDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Demande en attente</DialogTitle>
+            <DialogDescription>
+              Vous avez déjà une demande d'approbation en attente pour cette tournée. 
+              Veuillez attendre la réponse du transporteur avant d'effectuer une nouvelle demande.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              onClick={() => setShowPendingApprovalDialog(false)}
+            >
+              Compris
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={tour.id}
+        pickupCity={selectedPoint}
+      />
     </CardCustom>
   );
 }
