@@ -6,6 +6,7 @@ import { useToast } from "./use-toast";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [requests, setRequests] = useState<any[]>([]);
   const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
   const { handleCancelRequest, handleDeleteRequest } = useRequestManagement();
@@ -44,19 +45,19 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
-      // Add condition based on user type
       if (userType === 'carrier') {
         console.log('Filtering for carrier:', userId);
         query = query.eq('tour.carrier_id', userId);
-      } else if (userType === 'client') {
+      } else {
         console.log('Filtering for client:', userId);
         query = query.eq('user_id', userId);
       }
 
-      const { data: approvalData, error } = await query;
+      const { data: approvalData, error: fetchError } = await query;
 
-      if (error) {
-        console.error('Error fetching approval requests:', error);
+      if (fetchError) {
+        console.error('Error fetching approval requests:', fetchError);
+        setError(fetchError);
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -68,7 +69,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
       console.log('Approval data received:', approvalData);
 
-      // If we have approval data, fetch the associated user data
       if (approvalData) {
         const requestsWithUserData = await Promise.all(
           approvalData.map(async (request) => {
@@ -101,11 +101,13 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
         console.log('Fetched approval requests with user data:', requestsWithUserData);
         setRequests(requestsWithUserData);
+        setError(null);
       } else {
         setRequests([]);
       }
-    } catch (error: any) {
-      console.error('Error in fetchRequests:', error);
+    } catch (err: any) {
+      console.error('Error in fetchRequests:', err);
+      setError(err);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -128,6 +130,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   return { 
     requests, 
     loading,
+    error,
     handleApproveRequest: async (request: any) => {
       const { success } = await handleApproveRequest(request);
       if (success) await fetchRequests();
