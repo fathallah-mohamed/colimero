@@ -21,6 +21,7 @@ interface TourExpandedContentProps {
   actionButtonText: string;
   userType?: string;
   onStatusChange?: (tourId: number, newStatus: string) => Promise<void>;
+  onBookingSuccess?: () => void;
 }
 
 export function TourExpandedContent({ 
@@ -31,7 +32,8 @@ export function TourExpandedContent({
   isActionEnabled,
   actionButtonText,
   userType,
-  onStatusChange
+  onStatusChange,
+  onBookingSuccess
 }: TourExpandedContentProps) {
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,11 +99,13 @@ export function TourExpandedContent({
     if (tour.type === 'private') {
       if (approvalStatus === 'approved') {
         navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+        onBookingSuccess?.();
       } else {
         setShowApprovalDialog(true);
       }
     } else {
       navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+      onBookingSuccess?.();
     }
   };
 
