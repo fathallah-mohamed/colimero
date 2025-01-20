@@ -15,43 +15,7 @@ export const supabase = createClient<Database>(
       storage: localStorage,
       storageKey: 'supabase.auth.token',
       flowType: 'pkce',
-      debug: true
-    },
-    global: {
-      headers: {
-        'X-Client-Info': 'supabase-js-web',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      },
-      fetch: (url: RequestInfo | URL, options: RequestInit = {}) => {
-        const defaultOptions: RequestInit = {
-          credentials: 'include' as RequestCredentials,
-          mode: 'cors' as RequestMode,
-          ...options,
-          headers: {
-            ...options.headers,
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        };
-
-        return fetch(url, defaultOptions).catch(error => {
-          console.error('Fetch error:', error);
-          throw error;
-        });
-      }
+      debug: process.env.NODE_ENV === 'development'
     }
   }
 );
-
-// Add debug logging for initialization
-console.log('Supabase client initialized with URL:', SUPABASE_URL);
-
-// Add session check on init
-supabase.auth.getSession().then(({ data, error }) => {
-  if (error) {
-    console.error('Error checking initial session:', error);
-  } else {
-    console.log('Initial session check:', data.session ? 'Session found' : 'No session');
-  }
-});
