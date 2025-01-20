@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ClientTourCardProps {
   tour: Tour;
+  showBookingButton?: boolean;
+  onBookingClick?: () => void;
 }
 
 export function ClientTourCard({ tour }: ClientTourCardProps) {
