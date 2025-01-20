@@ -9,14 +9,6 @@ import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -26,7 +18,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<string>("");
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
-  const [showExistingBookingDialog, setShowExistingBookingDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -85,7 +76,11 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       }
 
       if (pendingBooking) {
-        setShowExistingBookingDialog(true);
+        toast({
+          variant: "destructive",
+          title: "Réservation existante",
+          description: "Vous avez déjà une réservation en attente pour cette tournée",
+        });
         return;
       }
 
@@ -129,7 +124,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               onPointSelect={handlePointSelect}
               onActionClick={handleBookingButtonClick}
               isActionEnabled={!!selectedPoint}
-              actionButtonText="Réserver cette tournée"
+              actionButtonText={tour.type === 'private' ? "Demander l'approbation" : "Réserver cette tournée"}
             />
           )}
         </div>
@@ -140,33 +135,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         isOpen={showAccessDeniedDialog}
         onClose={() => setShowAccessDeniedDialog(false)}
       />
-
-      <Dialog open={showExistingBookingDialog} onOpenChange={setShowExistingBookingDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Réservation existante</DialogTitle>
-            <DialogDescription>
-              Vous avez déjà une réservation en attente pour cette tournée.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowExistingBookingDialog(false)}
-            >
-              Fermer
-            </Button>
-            <Button 
-              onClick={() => {
-                setShowExistingBookingDialog(false);
-                navigate('/mes-reservations');
-              }}
-            >
-              Voir mes réservations
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </CardCustom>
   );
 }
