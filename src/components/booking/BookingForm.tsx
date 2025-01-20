@@ -13,6 +13,8 @@ import { ConfirmationStep } from "./form/steps/ConfirmationStep";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { useBookingCreation } from "@/hooks/useBookingCreation";
+import { useFormValidation } from "./form/useFormValidation";
 
 export interface BookingFormProps {
   tourId: number;
@@ -29,7 +31,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [specialItems, setSpecialItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(formSchema),
@@ -45,26 +47,16 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     },
   });
 
+  const { validateStep } = useFormValidation(form);
+
   useEffect(() => {
     const fetchClientProfile = async () => {
       try {
-        setIsLoading(true);
         console.log('Checking authentication status...');
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          toast({
-            variant: "destructive",
-            title: "Erreur d'authentification",
-            description: "Veuillez vous reconnecter.",
-          });
-          navigate('/connexion');
-          return;
-        }
-
-        if (!session) {
-          console.log('No active session found');
+        if (sessionError || !session) {
+          console.error('Session error or no session:', sessionError);
           navigate('/connexion');
           return;
         }
@@ -94,8 +86,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         }
       } catch (error) {
         console.error('Error in fetchClientProfile:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -140,85 +130,28 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   const onSubmit = async (values: BookingFormData) => {
     try {
-      setIsLoading(true);
-      console.log('Starting booking submission...');
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("No session found");
-      }
-
-      console.log('Preparing booking data...');
-      const specialItemsData = specialItems.map(item => ({
-        name: item,
-        quantity: itemQuantities[item] || 1
-      }));
-
-      const { data, error } = await supabase.rpc(
-        'create_booking_with_capacity_update',
-        {
-          p_tour_id: tourId,
-          p_user_id: session.user.id,
-          p_weight: weight,
-          p_pickup_city: pickupCity,
-          p_delivery_city: values.recipient_city,
-          p_recipient_name: values.recipient_name,
-          p_recipient_address: values.recipient_address,
-          p_recipient_phone: values.recipient_phone,
-          p_sender_name: values.sender_name,
-          p_sender_phone: values.sender_phone,
-          p_item_type: values.item_type,
-          p_special_items: specialItemsData,
-          p_content_types: contentTypes,
-          p_photos: []
-        }
-      );
-
-      if (error) {
-        console.error('Booking creation error:', error);
-        throw error;
-      }
-
-      console.log('Booking created successfully:', data);
-      toast({
-        title: "Réservation créée",
-        description: "Votre réservation a été créée avec succès.",
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/mes-reservations');
-      }
-    } catch (error: any) {
-      console.error("Error submitting booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la création de la réservation.",
-      });
-    } finally {
-      setIsLoading(false);
+      const bookingData = {
+        ...values,
+        weight,
+        pickup_city: pickupCity,
+        special_items: specialItems,
+        content_types: contentTypes,
+        itemQuantities,
+        photos: photos
+      };
+      await createBooking(bookingData);
+    } catch (error) {
+      console.error("Error in form submission:", error);
     }
   };
 
-  const validateStep = async () => {
-    const fields = {
-      1: ["sender_name", "sender_phone"],
-      2: ["recipient_name", "recipient_phone", "recipient_address", "recipient_city"],
-      3: ["item_type"]
-    };
-
-    if (currentStep < 4) {
-      const currentFields = fields[currentStep as keyof typeof fields];
-      const result = await form.trigger(currentFields as any);
-      
-      if (result) {
-        if (!completedSteps.includes(currentStep)) {
-          setCompletedSteps(prev => [...prev, currentStep]);
-        }
-        setCurrentStep(prev => prev + 1);
+  const handleNextStep = async () => {
+    const isValid = await validateStep(currentStep);
+    if (isValid) {
+      if (!completedSteps.includes(currentStep)) {
+        setCompletedSteps(prev => [...prev, currentStep]);
       }
+      setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -296,7 +229,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           {currentStep < 4 ? (
             <Button
               type="button"
-              onClick={validateStep}
+              onClick={handleNextStep}
               disabled={isLoading}
               className="flex items-center gap-2"
             >

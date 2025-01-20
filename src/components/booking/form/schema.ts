@@ -8,8 +8,14 @@ export const formSchema = z.object({
   recipient_address: z.string().min(1, "L'adresse de livraison est requise"),
   recipient_city: z.string().min(1, "La ville de livraison est requise"),
   item_type: z.string().min(1, "Le type de colis est requis"),
-  special_instructions: z.string().optional(),
   package_description: z.string().optional(),
+  pickup_city: z.string().optional(),
+  delivery_city: z.string().optional(),
+  weight: z.number().optional(),
+  special_items: z.array(z.string()).optional(),
+  content_types: z.array(z.string()).optional(),
+  photos: z.array(z.any()).optional(),
+  itemQuantities: z.record(z.string(), z.number()).optional(),
 });
 
 export type BookingFormData = z.infer<typeof formSchema>;
