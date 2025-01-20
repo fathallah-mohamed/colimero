@@ -9,7 +9,6 @@ import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
-import { ShareTourButton } from "@/components/tour/shared/ShareTourButton";
 import {
   Dialog,
   DialogContent,
@@ -37,10 +36,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
   const handleExpandClick = () => {
     setIsExpanded(!isExpanded);
-  };
-
-  const handleTourClick = () => {
-    navigate(`/tours/${tour.id}`);
   };
 
   const handleBookingButtonClick = async () => {
@@ -109,12 +104,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
         <div className="flex flex-col space-y-6">
-          <div className="flex justify-between items-start">
-            <div className="cursor-pointer" onClick={handleTourClick}>
-              <TourMainInfo tour={tour} />
-            </div>
-            <ShareTourButton tourId={tour.id} className="shrink-0" />
-          </div>
+          <TourMainInfo tour={tour} />
           
           <TourRoute 
             stops={tour.route} 
