@@ -10,17 +10,11 @@ import { cn } from "@/lib/utils";
 import { TourStatusBadge } from "./TourStatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { TourTimelineDisplay } from "./shared/TourTimelineDisplay";
+import { ShareTourButton } from "./shared/ShareTourButton";
+import { TourEditDialog } from "./tour-edit/TourEditDialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tour, TourStatus } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
-import { TourEditDialog } from "./TourEditDialog";
-
-interface TourCardProps {
-  tour: Tour;
-  isEven?: boolean;
-  onStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
-  onUpdate?: () => Promise<void>;
-}
 
 const countryNames: { [key: string]: string } = {
   'FR': 'France',
@@ -35,6 +29,13 @@ const countryFlags: { [key: string]: string } = {
   'DZ': '🇩🇿',
   'MA': '🇲🇦'
 };
+
+interface TourCardProps {
+  tour: Tour;
+  isEven?: boolean;
+  onStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
+  onUpdate?: () => Promise<void>;
+}
 
 export function TourCard({ 
   tour,
@@ -148,18 +149,21 @@ export function TourCard({
           </div>
         </div>
         
-        {hasBookings && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownloadPDF}
-            disabled={isGeneratingPDF}
-            className="flex items-center gap-2"
-          >
-            <FileDown className="h-4 w-4" />
-            {isGeneratingPDF ? "Génération..." : "Télécharger PDF"}
-          </Button>
-        )}
+        <div className="flex gap-2">
+          <ShareTourButton tourId={tour.id} />
+          {hasBookings && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPDF}
+              className="flex items-center gap-2"
+            >
+              <FileDown className="h-4 w-4" />
+              {isGeneratingPDF ? "Génération..." : "Télécharger PDF"}
+            </Button>
+          )}
+        </div>
       </div>
 
       <TourTimelineDisplay

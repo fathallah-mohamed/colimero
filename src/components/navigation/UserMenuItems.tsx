@@ -1,101 +1,75 @@
 import { Link } from "react-router-dom";
-import { User, FileText, Users, UserCircle2 } from "lucide-react";
+import { FileText, Package2, Truck, User } from "lucide-react";
 
 interface UserMenuItemsProps {
   userType: string | null;
+  onClose?: () => void;
 }
 
-export function UserMenuItems({ userType }: UserMenuItemsProps) {
-  if (userType === "admin") {
+export default function UserMenuItems({ userType, onClose }: UserMenuItemsProps) {
+  const handleClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  if (userType === 'carrier') {
     return (
-      <div className="flex flex-col space-y-1">
+      <>
         <Link
           to="/profile"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil Administrateur
-        </Link>
-        <Link
-          to="/admin/dashboard"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <FileText className="w-4 h-4 mr-2" />
-          Demandes d'inscription
-        </Link>
-        <Link
-          to="/admin/clients"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <Users className="w-4 h-4 mr-2" />
-          Clients
-        </Link>
-        <Link
-          to="/admin/gestion"
+          onClick={handleClick}
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
           <User className="w-4 h-4 mr-2" />
-          Administrateurs
-        </Link>
-      </div>
-    );
-  }
-
-  if (userType === "carrier") {
-    return (
-      <div className="flex flex-col space-y-1">
-        <Link
-          to="/profile"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil Transporteur
+          Mon profil
         </Link>
         <Link
           to="/mes-tournees"
+          onClick={handleClick}
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
-          <FileText className="w-4 h-4 mr-2" />
+          <Truck className="w-4 h-4 mr-2" />
           Mes tournées
         </Link>
         <Link
           to="/demandes-approbation"
+          onClick={handleClick}
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
           <FileText className="w-4 h-4 mr-2" />
           Demandes d'approbation
         </Link>
-      </div>
+      </>
     );
   }
 
-  if (userType === "client") {
-    return (
-      <div className="flex flex-col space-y-1">
-        <Link
-          to="/profile"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <UserCircle2 className="w-4 h-4 mr-2" />
-          Profil Client
-        </Link>
-        <Link
-          to="/mes-reservations"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <FileText className="w-4 h-4 mr-2" />
-          Mes réservations
-        </Link>
-        <Link
-          to="/mes-demandes-approbation"
-          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
-        >
-          <FileText className="w-4 h-4 mr-2" />
-          Mes demandes
-        </Link>
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <>
+      <Link
+        to="/profile"
+        onClick={handleClick}
+        className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+      >
+        <User className="w-4 h-4 mr-2" />
+        Mon profil
+      </Link>
+      <Link
+        to="/mes-reservations"
+        onClick={handleClick}
+        className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+      >
+        <Package2 className="w-4 h-4 mr-2" />
+        Mes réservations
+      </Link>
+      <Link
+        to="/mes-demandes"
+        onClick={handleClick}
+        className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+      >
+        <FileText className="w-4 h-4 mr-2" />
+        Mes demandes
+      </Link>
+    </>
+  );
 }

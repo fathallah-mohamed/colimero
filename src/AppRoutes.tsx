@@ -40,8 +40,8 @@ export default function AppRoutes() {
       <Route path="/transporteurs" element={<Transporteurs />} />
       <Route path="/mes-reservations" element={<MesReservations />} />
       <Route path="/mes-tournees" element={<MesTournees />} />
+      <Route path="/mes-demandes" element={<MesDemandesApprobation />} />
       <Route path="/demandes-approbation" element={<DemandesApprobation />} />
-      <Route path="/mes-demandes-approbation" element={<MesDemandesApprobation />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/clients" element={<AdminClients />} />
       <Route path="/admin/gestion" element={<AdminManagement />} />
