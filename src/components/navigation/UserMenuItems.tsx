@@ -93,6 +93,13 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
           <FileText className="w-4 h-4 mr-2" />
           Mes demandes
         </Link>
+        <Link
+          to="/destinataires"
+          className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          <Users className="w-4 h-4 mr-2" />
+          Mes destinataires
+        </Link>
       </div>
     );
   }
