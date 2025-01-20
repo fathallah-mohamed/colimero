@@ -36,7 +36,6 @@ export function RecipientStep({ form }: RecipientStepProps) {
     try {
       setIsLoading(true);
       
-      // First check if we have an authenticated session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -54,7 +53,8 @@ export function RecipientStep({ form }: RecipientStepProps) {
 
       const { data: recipientsData, error } = await supabase
         .from('recipients')
-        .select('*');
+        .select('*')
+        .eq('client_id', session.user.id);
 
       if (error) throw error;
       
@@ -87,27 +87,31 @@ export function RecipientStep({ form }: RecipientStepProps) {
           <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
           <p className="text-sm text-gray-500 mt-2">Chargement des destinataires...</p>
         </div>
-      ) : recipients.length > 0 && (
-        <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+      ) : (
+        <div className="bg-gray-50 p-4 rounded-lg space-y-3 mb-6">
           <h3 className="text-sm font-medium text-gray-700">Destinataires enregistrés</h3>
-          <div className="grid gap-2">
-            {recipients.map((recipient) => (
-              <Button
-                key={recipient.id}
-                type="button"
-                variant={selectedRecipient?.id === recipient.id ? "default" : "outline"}
-                className="w-full justify-start"
-                onClick={() => handleRecipientSelect(recipient)}
-              >
-                {selectedRecipient?.id === recipient.id ? (
-                  <Check className="w-4 h-4 mr-2" />
-                ) : (
-                  <UserPlus className="w-4 h-4 mr-2" />
-                )}
-                {recipient.first_name} {recipient.last_name}
-              </Button>
-            ))}
-          </div>
+          {recipients.length > 0 ? (
+            <div className="grid gap-2">
+              {recipients.map((recipient) => (
+                <Button
+                  key={recipient.id}
+                  type="button"
+                  variant={selectedRecipient?.id === recipient.id ? "default" : "outline"}
+                  className="w-full justify-start"
+                  onClick={() => handleRecipientSelect(recipient)}
+                >
+                  {selectedRecipient?.id === recipient.id ? (
+                    <Check className="w-4 h-4 mr-2" />
+                  ) : (
+                    <UserPlus className="w-4 h-4 mr-2" />
+                  )}
+                  {recipient.first_name} {recipient.last_name}
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">Aucun destinataire enregistré</p>
+          )}
         </div>
       )}
 
