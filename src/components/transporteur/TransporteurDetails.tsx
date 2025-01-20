@@ -106,7 +106,13 @@ export function TransporteurDetails() {
           <div className="space-y-4">
             {tours && tours.length > 0 ? (
               tours.map((tour) => (
-                <ClientTourCard key={tour.id} tour={tour} />
+                <ClientTourCard 
+                  key={tour.id} 
+                  tour={tour} 
+                  onBookingClick={(tourId, pickupCity) => {
+                    navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
+                  }}
+                />
               ))
             ) : (
               <p className="text-gray-500">Aucune tournée programmée pour le moment</p>

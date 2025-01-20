@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -6,13 +6,13 @@ import { Tour } from "@/types/tour";
 import { AnimatePresence } from "framer-motion";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
-import { TourHeader } from "./components/TourHeader";
-import { TourActions } from "./components/TourActions";
-import { TourExpandedContent } from "./components/TourExpandedContent";
+import { TourHeader } from "@/components/transporteur/tour/components/TourHeader";
+import { TourActions } from "@/components/transporteur/tour/components/TourActions";
+import { TourExpandedContent } from "@/components/transporteur/tour/components/TourExpandedContent";
 
-interface TourTimelineCardProps {
+interface ClientTourCardProps {
   tour: Tour;
-  onBookingClick: (tourId: number, pickupCity: string) => void;
+  onBookingClick?: (tourId: number, pickupCity: string) => void;
   onStatusChange?: (tourId: number, newStatus: string) => Promise<void>;
   hideAvatar?: boolean;
   userType?: string;
@@ -21,12 +21,12 @@ interface TourTimelineCardProps {
 
 export function ClientTourCard({ 
   tour, 
-  onBookingClick, 
+  onBookingClick,
   onStatusChange,
   hideAvatar, 
   userType,
   isUpcoming = false
-}: TourTimelineCardProps) {
+}: ClientTourCardProps) {
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
@@ -34,29 +34,6 @@ export function ClientTourCard({
   const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  useEffect(() => {
-    checkExistingRequest();
-  }, [tour.id]);
-
-  const checkExistingRequest = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: request, error } = await supabase
-      .from('approval_requests')
-      .select('*')
-      .eq('tour_id', tour.id)
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error checking existing request:', error);
-      return;
-    }
-
-    setExistingRequest(request);
-  };
 
   const handleActionClick = async () => {
     if (!selectedPickupCity) {
@@ -78,7 +55,7 @@ export function ClientTourCard({
       return;
     }
 
-    const userType = session.user.user_metadata?.user_type;
+    const userType = session.user.user_meta_data?.user_type;
     if (userType === 'carrier') {
       setShowAccessDeniedDialog(true);
       return;
@@ -94,7 +71,11 @@ export function ClientTourCard({
       }
       setShowApprovalDialog(true);
     } else {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+      if (onBookingClick) {
+        onBookingClick(tour.id, selectedPickupCity);
+      } else {
+        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+      }
     }
   };
 
@@ -143,8 +124,8 @@ export function ClientTourCard({
           {isExpanded && (
             <TourExpandedContent
               tour={tour}
-              selectedPickupCity={selectedPickupCity}
-              onPickupCitySelect={setSelectedPickupCity}
+              selectedPoint={selectedPickupCity || ''}
+              onPointSelect={setSelectedPickupCity}
               onActionClick={handleActionClick}
               isActionEnabled={isActionEnabled()}
               actionButtonText={getActionButtonText()}
