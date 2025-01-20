@@ -42,7 +42,14 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
         <div className="flex flex-col space-y-6">
-          <TourMainInfo tour={tour} />
+          <div className="flex items-center justify-between">
+            <TourMainInfo tour={tour} />
+            {tour.status === "Programmée" && (
+              <Badge className="bg-[#9b87f5]/10 text-[#9b87f5] hover:bg-[#9b87f5]/20 transition-colors">
+                Prochaine tournée
+              </Badge>
+            )}
+          </div>
           
           <TourRoute 
             stops={tour.route} 
@@ -61,6 +68,16 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               hasPendingRequest={existingRequest?.status === 'pending'}
             />
           )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-[#0FA0CE] hover:text-[#0FA0CE] hover:bg-[#0FA0CE]/10"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            {isExpanded ? "Masquer les détails" : "Afficher les détails"}
+          </Button>
         </div>
       </div>
 
