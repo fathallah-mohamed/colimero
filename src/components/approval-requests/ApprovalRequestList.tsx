@@ -19,7 +19,7 @@ export function ApprovalRequestList({
   onCancel,
   onDelete
 }: ApprovalRequestListProps) {
-  if (requests.length === 0) {
+  if (!requests || requests.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         Aucune demande

@@ -24,6 +24,10 @@ export function ApprovalRequestCard({
   onCancel,
   onDelete
 }: ApprovalRequestCardProps) {
+  if (!request || !request.tour || !request.user) {
+    return null;
+  }
+
   return (
     <Card className="p-6">
       <div className="space-y-6">

@@ -2,14 +2,13 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
-import { ApprovalRequestsList } from "@/components/approval-requests/ApprovalRequestsList";
-import { ApprovalRequestCard } from "@/components/approval-requests/ApprovalRequestCard";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { ProfileLoading } from "@/components/profile/ProfileLoading";
+import { ApprovalRequestCard } from "@/components/approval-requests/ApprovalRequestCard";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
@@ -83,6 +82,7 @@ export default function MesDemandesApprobation() {
                     key={request.id}
                     request={request}
                     userType={userType}
+                    showActions={true}
                     onCancel={() => handleCancelRequest(request.id)}
                   />
                 ))
@@ -102,7 +102,6 @@ export default function MesDemandesApprobation() {
                     key={request.id}
                     request={request}
                     userType={userType}
-                    onCancel={() => handleCancelRequest(request.id)}
                   />
                 ))
               ) : (
@@ -121,6 +120,7 @@ export default function MesDemandesApprobation() {
                     key={request.id}
                     request={request}
                     userType={userType}
+                    showActions={true}
                     onDelete={() => handleDeleteRequest(request.id)}
                   />
                 ))
