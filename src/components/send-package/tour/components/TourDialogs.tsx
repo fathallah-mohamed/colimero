@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import AuthDialog from "@/components/auth/AuthDialog";
 
 interface TourDialogsProps {
   showAccessDeniedDialog: boolean;
@@ -37,32 +38,17 @@ export function TourDialogs({
         onClose={() => setShowAccessDeniedDialog(false)}
       />
 
-      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Connexion requise</DialogTitle>
-            <DialogDescription>
-              Vous devez être connecté pour effectuer cette action.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowAuthDialog(false)}
-            >
-              Annuler
-            </Button>
-            <Button 
-              onClick={() => {
-                setShowAuthDialog(false);
-                navigate('/connexion');
-              }}
-            >
-              Se connecter
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onClose={() => setShowAuthDialog(false)}
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          if (pickupCity) {
+            setShowApprovalDialog(true);
+          }
+        }}
+        requiredUserType="client"
+      />
 
       <ApprovalRequestDialog
         isOpen={showApprovalDialog}
