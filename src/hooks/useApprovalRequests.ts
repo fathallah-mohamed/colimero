@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApprovalActions } from "./useApprovalActions";
 import { useRequestManagement } from "./useRequestManagement";
 import { useToast } from "./use-toast";
-import { ApprovalRequest } from "@/components/admin/approval-requests/types";
+import { ApprovalRequest, Client } from "@/components/admin/approval-requests/types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
@@ -76,7 +76,19 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       }
 
       console.log('Fetched approval requests:', data);
-      setRequests(data || []);
+
+      // Map the data to match our ApprovalRequest type
+      const mappedRequests: ApprovalRequest[] = (data || []).map(item => ({
+        ...item,
+        client: item.user as Client, // Map user to client
+        user_id: item.user_id,
+        tour: {
+          ...item.tour,
+          carriers: item.tour.carrier
+        }
+      }));
+
+      setRequests(mappedRequests);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       setError(error.message);
