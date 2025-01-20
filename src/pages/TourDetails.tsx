@@ -8,7 +8,7 @@ import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
-import type { Tour } from "@/types/tour";
+import type { Tour, RouteStop } from "@/types/tour";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useState } from "react";
@@ -47,7 +47,19 @@ export default function TourDetails() {
       if (error) throw error;
       if (!data) throw new Error("Tour not found");
 
-      return data as Tour;
+      // Transform the route data to match the RouteStop[] type
+      const transformedTour: Tour = {
+        ...data,
+        route: (data.route as any[]).map((stop): RouteStop => ({
+          name: stop.name,
+          location: stop.location,
+          time: stop.time,
+          type: stop.type,
+          collection_date: stop.collection_date
+        }))
+      };
+
+      return transformedTour;
     }
   });
 
