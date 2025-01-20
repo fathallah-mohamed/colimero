@@ -15,11 +15,29 @@ export const supabase = createClient<Database>(
       storage: localStorage,
       storageKey: 'supabase.auth.token',
       flowType: 'pkce',
-      debug: true // Activé pour le débogage
+      debug: true // Enabled for debugging
     },
     global: {
       headers: {
         'X-Client-Info': 'supabase-js-web'
+      },
+      fetch: (url, options = {}) => {
+        const defaultOptions = {
+          credentials: 'include',
+          mode: 'cors',
+          retries: 3,
+          ...options,
+          headers: {
+            ...options.headers,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        };
+
+        return fetch(url, defaultOptions).catch(error => {
+          console.error('Fetch error:', error);
+          throw error;
+        });
       }
     }
   }
