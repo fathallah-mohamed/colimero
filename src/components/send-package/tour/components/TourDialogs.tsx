@@ -1,8 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface TourDialogsProps {
   showAccessDeniedDialog: boolean;
@@ -25,14 +25,14 @@ export function TourDialogs({
   setShowApprovalDialog,
   tourId,
   pickupCity,
-  onApprovalSuccess,
+  onApprovalSuccess
 }: TourDialogsProps) {
   const navigate = useNavigate();
 
   return (
     <>
       <AccessDeniedMessage
-        userType="client"
+        userType="carrier"
         isOpen={showAccessDeniedDialog}
         onClose={() => setShowAccessDeniedDialog(false)}
       />
@@ -55,7 +55,7 @@ export function TourDialogs({
             <Button 
               onClick={() => {
                 setShowAuthDialog(false);
-                navigate('/login');
+                navigate('/connexion');
               }}
             >
               Se connecter

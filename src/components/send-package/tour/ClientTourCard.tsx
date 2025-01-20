@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Tour } from "@/types/tour";
-import { Badge } from "@/components/ui/badge";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
