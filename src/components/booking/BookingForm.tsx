@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { useBookingCreation } from "@/hooks/useBookingCreation";
 import { useFormValidation } from "./form/useFormValidation";
+import { useBookingFormState } from "@/hooks/useBookingFormState";
 
 export interface BookingFormProps {
   tourId: number;
@@ -26,11 +27,19 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-  const [weight, setWeight] = useState(5);
-  const [contentTypes, setContentTypes] = useState<string[]>([]);
-  const [specialItems, setSpecialItems] = useState<string[]>([]);
-  const [photos, setPhotos] = useState<File[]>([]);
   const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
+  const {
+    weight,
+    contentTypes,
+    specialItems,
+    itemQuantities,
+    photos,
+    handleWeightChange,
+    handleContentTypeToggle,
+    handleSpecialItemToggle,
+    handleQuantityChange,
+    handlePhotoUpload
+  } = useBookingFormState();
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(formSchema),
@@ -97,40 +106,22 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     fetchClientProfile();
   }, [form, navigate]);
 
-  const handleWeightChange = (increment: boolean) => {
-    const newWeight = increment ? weight + 1 : weight - 1;
-    const clampedWeight = Math.min(Math.max(newWeight, 5), 30);
-    setWeight(clampedWeight);
-    form.setValue('weight', clampedWeight);
-  };
-
-  const handleContentTypeToggle = (type: string) => {
-    const newTypes = contentTypes.includes(type)
-      ? contentTypes.filter(t => t !== type)
-      : [...contentTypes, type];
-    setContentTypes(newTypes);
-    form.setValue('content_types', newTypes);
-  };
-
-  const handleSpecialItemToggle = (item: string) => {
-    const newItems = specialItems.includes(item)
-      ? specialItems.filter(i => i !== item)
-      : [...specialItems, item];
-    setSpecialItems(newItems);
-    form.setValue('special_items', newItems);
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setPhotos(prev => [...prev, ...newFiles]);
-      form.setValue('photos', [...photos, ...newFiles]);
-    }
-  };
-
   const onSubmit = async (values: BookingFormData) => {
     try {
-      await createBooking(values);
+      const formattedSpecialItems = specialItems.map(item => ({
+        name: item,
+        quantity: itemQuantities[item] || 1
+      }));
+
+      const bookingData = {
+        ...values,
+        weight,
+        special_items: formattedSpecialItems,
+        content_types: contentTypes,
+        photos
+      };
+
+      await createBooking(bookingData);
     } catch (error) {
       console.error("Error in form submission:", error);
     }
@@ -166,6 +157,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             onContentTypeToggle={handleContentTypeToggle}
             specialItems={specialItems}
             onSpecialItemToggle={handleSpecialItemToggle}
+            itemQuantities={itemQuantities}
+            onQuantityChange={handleQuantityChange}
             photos={photos}
             onPhotoUpload={handlePhotoUpload}
           />
@@ -177,6 +170,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             onEdit={setCurrentStep}
             weight={weight}
             specialItems={specialItems}
+            itemQuantities={itemQuantities}
             pricePerKg={10}
           />
         );
