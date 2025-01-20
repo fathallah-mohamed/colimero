@@ -39,6 +39,7 @@ export default function TourDetails() {
             } as RouteStop))
           : [],
         status: data.status as TourStatus,
+        previous_status: data.previous_status as TourStatus | null,
         type: data.type || "public",
         terms_accepted: data.terms_accepted || false,
         customs_declaration: data.customs_declaration || false
