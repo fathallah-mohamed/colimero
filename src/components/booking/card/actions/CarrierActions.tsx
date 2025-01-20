@@ -17,14 +17,8 @@ export function CarrierActions({
   onStatusChange,
   onEdit
 }: CarrierActionsProps) {
-  const canModifyInTransit = tourStatus === "En transit" && status !== "cancelled";
+  const canModifyInTransit = tourStatus === "En transit";
   const canModifyInPlanned = (status === "pending" || status === "confirmed") && tourStatus === "Programmée";
-
-  // Si la tournée passe en transit, mettre à jour le statut des réservations
-  if (tourStatus === "En transit" && status === "confirmed") {
-    console.log("Updating booking status to in_transit");
-    onStatusChange("in_transit");
-  }
 
   if (!canModifyInTransit && !canModifyInPlanned) {
     return null;
@@ -40,13 +34,6 @@ export function CarrierActions({
     onStatusChange("reported");
   };
 
-  const handleCancel = () => {
-    console.log("Cancelling booking...");
-    onStatusChange("cancelled" as BookingStatus);
-  };
-
-  const isNotCancelled = status !== "cancelled" as BookingStatus;
-
   return (
     <>
       {canModifyInPlanned && status === "pending" && (
@@ -58,14 +45,12 @@ export function CarrierActions({
         />
       )}
       
-      {isNotCancelled && (
-        <ActionButton
-          icon={Edit2}
-          label="Modifier"
-          onClick={onEdit}
-          colorClass="bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
-        />
-      )}
+      <ActionButton
+        icon={Edit2}
+        label="Modifier"
+        onClick={onEdit}
+        colorClass="bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
+      />
       
       {canModifyInTransit && (
         <ActionButton
@@ -76,16 +61,14 @@ export function CarrierActions({
         />
       )}
       
-      {isNotCancelled && (
-        <ConfirmDialog
-          title="Confirmer l'annulation"
-          description="Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée."
-          icon={RotateCcw}
-          buttonLabel="Annuler"
-          buttonColorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
-          onConfirm={handleCancel}
-        />
-      )}
+      <ConfirmDialog
+        title="Confirmer l'annulation"
+        description="Êtes-vous sûr de vouloir annuler cette réservation ? Cette action ne peut pas être annulée."
+        icon={RotateCcw}
+        buttonLabel="Annuler"
+        buttonColorClass="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
+        onConfirm={() => onStatusChange("cancelled")}
+      />
     </>
   );
 }

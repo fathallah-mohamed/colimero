@@ -1,68 +1,74 @@
 import { useState } from "react";
-import { TourStatus } from "@/types/tour";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { TourStatus } from "@/types/tour";
 
 interface UseTourStatusManagementProps {
   tourId: number;
-  onStatusChange?: (newStatus: TourStatus) => void;
+  onStatusChange?: (newStatus: TourStatus) => Promise<void>;
 }
 
 export function useTourStatusManagement({ tourId, onStatusChange }: UseTourStatusManagementProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPendingBookingsDialog, setShowPendingBookingsDialog] = useState(false);
-  const [showUncollectedBookingsDialog, setShowUncollectedBookingsDialog] = useState(false);
+  const { toast } = useToast();
 
   const checkPendingBookings = async () => {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('status')
-      .eq('tour_id', tourId)
-      .eq('status', 'pending');
+    try {
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('tour_id', tourId)
+        .eq('status', 'pending');
 
-    if (error) throw error;
-    return data.length > 0;
+      if (error) throw error;
+
+      if (bookings && bookings.length > 0) {
+        setShowPendingBookingsDialog(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking pending bookings:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de vérifier les réservations en attente",
+      });
+      return true;
+    }
   };
 
-  const checkUncollectedBookings = async () => {
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('status')
-      .eq('tour_id', tourId)
-      .not('status', 'in', '(collected,cancelled)');
-
-    if (error) throw error;
-    return data.length > 0;
+  const handleCancel = async () => {
+    if (onStatusChange) {
+      await onStatusChange("Annulée");
+    }
+    setShowCancelDialog(false);
   };
 
   const handleStartCollection = async () => {
     const hasPendingBookings = await checkPendingBookings();
-    if (hasPendingBookings) {
-      setShowPendingBookingsDialog(true);
-      return;
+    if (!hasPendingBookings && onStatusChange) {
+      await onStatusChange("Ramassage en cours");
     }
-    await onStatusChange?.("Ramassage en cours");
   };
 
   const handleStartTransit = async () => {
-    const hasUncollectedBookings = await checkUncollectedBookings();
-    if (hasUncollectedBookings) {
-      setShowUncollectedBookingsDialog(true);
-      return;
+    if (onStatusChange) {
+      await onStatusChange("En transit");
     }
-    await onStatusChange?.("En transit");
   };
 
   const handleStartDelivery = async () => {
-    await onStatusChange?.("Livraison en cours");
+    if (onStatusChange) {
+      await onStatusChange("Livraison en cours");
+    }
   };
 
   const handleComplete = async () => {
-    await onStatusChange?.("Terminée");
-  };
-
-  const handleCancel = async () => {
-    await onStatusChange?.("Annulée");
-    setShowCancelDialog(false);
+    if (onStatusChange) {
+      await onStatusChange("Terminée");
+    }
   };
 
   return {
@@ -70,8 +76,6 @@ export function useTourStatusManagement({ tourId, onStatusChange }: UseTourStatu
     setShowCancelDialog,
     showPendingBookingsDialog,
     setShowPendingBookingsDialog,
-    showUncollectedBookingsDialog,
-    setShowUncollectedBookingsDialog,
     handleCancel,
     handleStartCollection,
     handleStartTransit,
