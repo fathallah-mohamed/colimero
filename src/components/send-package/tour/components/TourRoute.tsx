@@ -1,34 +1,47 @@
-import { RouteStop } from "@/types/tour";
-import { Truck, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface TourRouteProps {
-  stops: RouteStop[];
+  stops: any[];
   selectedPoint: string;
   onPointSelect: (point: string) => void;
+  departureDate: string;
+  collectionDate: string;
 }
 
-export function TourRoute({ stops, selectedPoint, onPointSelect }: TourRouteProps) {
-  const cities = stops?.map(stop => stop.name) || [];
-
+export function TourRoute({ 
+  stops, 
+  selectedPoint, 
+  onPointSelect,
+  departureDate,
+  collectionDate 
+}: TourRouteProps) {
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <Truck className="h-4 w-4 flex-shrink-0 text-primary/70" />
-      <div className="flex items-center gap-2 flex-wrap">
-        {cities.map((city, index) => (
-          <div 
-            key={city} 
-            className="flex items-center"
-            onClick={() => onPointSelect(city)}
-            role="button"
-            tabIndex={0}
-          >
-            <span className={selectedPoint === city ? "text-primary font-medium" : ""}>
-              {city}
-            </span>
-            {index < cities.length - 1 && (
-              <ArrowRight className="h-4 w-4 mx-1 text-primary/70" />
+    <div className="mt-4">
+      <div className="text-sm text-gray-500 mb-2">
+        <div>
+          Départ le {format(new Date(departureDate), "d MMMM yyyy", { locale: fr })}
+        </div>
+        <div>
+          Collecte à partir du {format(new Date(collectionDate), "d MMMM yyyy", { locale: fr })}
+        </div>
+      </div>
+      
+      <div className="flex flex-wrap gap-2">
+        {stops?.map((stop: any, index: number) => (
+          <button
+            key={`${stop.name}-${index}`}
+            onClick={() => onPointSelect(stop.name)}
+            className={cn(
+              "px-3 py-1 rounded-full text-sm font-medium transition-colors",
+              selectedPoint === stop.name
+                ? "bg-primary text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             )}
-          </div>
+          >
+            {stop.name}
+          </button>
         ))}
       </div>
     </div>

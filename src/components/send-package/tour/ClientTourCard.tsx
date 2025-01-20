@@ -60,6 +60,8 @@ export function ClientTourCard({ tour, onBookingSuccess }: ClientTourCardProps) 
             stops={tour.route}
             selectedPoint={selectedPoint}
             onPointSelect={setSelectedPoint}
+            departureDate={tour.departure_date}
+            collectionDate={tour.collection_date}
           />
         </div>
 
@@ -82,7 +84,7 @@ export function ClientTourCard({ tour, onBookingSuccess }: ClientTourCardProps) 
             <DialogTitle>Authentification requise</DialogTitle>
             <DialogDescription>
               <AccessDeniedMessage 
-                userType="carrier"
+                userType="client"
                 isOpen={showAuthDialog}
                 onClose={() => setShowAuthDialog(false)}
               />
