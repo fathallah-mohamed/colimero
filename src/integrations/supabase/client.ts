@@ -19,7 +19,9 @@ export const supabase = createClient<Database>(
     },
     global: {
       headers: {
-        'X-Client-Info': 'supabase-js-web'
+        'X-Client-Info': 'supabase-js-web',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
       },
       fetch: (url: RequestInfo | URL, options: RequestInit = {}) => {
         const defaultOptions: RequestInit = {
