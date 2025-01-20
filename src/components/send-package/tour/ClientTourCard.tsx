@@ -55,7 +55,7 @@ export function ClientTourCard({
       return;
     }
 
-    const userType = session.user.user_meta_data?.user_type;
+    const userType = session.user.user_metadata?.user_type;
     if (userType === 'carrier') {
       setShowAccessDeniedDialog(true);
       return;
@@ -124,8 +124,8 @@ export function ClientTourCard({
           {isExpanded && (
             <TourExpandedContent
               tour={tour}
-              selectedPoint={selectedPickupCity || ''}
-              onPointSelect={setSelectedPickupCity}
+              selectedPickupCity={selectedPickupCity || ''}
+              onPickupCitySelect={setSelectedPickupCity}
               onActionClick={handleActionClick}
               isActionEnabled={isActionEnabled()}
               actionButtonText={getActionButtonText()}
