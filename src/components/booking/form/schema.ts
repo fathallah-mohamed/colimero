@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SpecialItem } from "@/types/booking/special-items";
 
 export const formSchema = z.object({
   sender_name: z.string().min(1, "Le nom de l'expéditeur est requis"),
@@ -12,7 +13,10 @@ export const formSchema = z.object({
   pickup_city: z.string(),
   delivery_city: z.string(),
   weight: z.number().min(5).max(30),
-  special_items: z.array(z.string()),
+  special_items: z.array(z.object({
+    name: z.string(),
+    quantity: z.number().min(1)
+  })),
   content_types: z.array(z.string()),
   photos: z.array(z.any())
 });

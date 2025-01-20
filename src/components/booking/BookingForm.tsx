@@ -4,18 +4,16 @@ import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, BookingFormData } from "./form/schema";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { StepIndicator } from "./form/steps/StepIndicator";
-import { SenderStep } from "./form/steps/SenderStep";
-import { RecipientStep } from "./form/steps/RecipientStep";
-import { PackageStep } from "./form/steps/PackageStep";
-import { ConfirmationStep } from "./form/steps/ConfirmationStep";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { useBookingCreation } from "@/hooks/useBookingCreation";
-import { useFormValidation } from "./form/useFormValidation";
+import { useBookingValidation } from "@/hooks/useBookingValidation";
 import { useBookingFormState } from "@/hooks/useBookingFormState";
+import { BookingFormSteps } from "./form/BookingFormSteps";
+import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 
 export interface BookingFormProps {
   tourId: number;
@@ -28,6 +26,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
+  const { uploadPhotos, isUploading } = usePhotoUpload();
+  
   const {
     weight,
     contentTypes,
@@ -61,53 +61,12 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     }
   });
 
-  const { validateStep } = useFormValidation(form);
-
-  useEffect(() => {
-    const fetchClientProfile = async () => {
-      try {
-        console.log('Checking authentication status...');
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError || !session) {
-          console.error('Session error or no session:', sessionError);
-          navigate('/connexion');
-          return;
-        }
-
-        console.log('Fetching client data...');
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('first_name, last_name, phone')
-          .eq('id', session.user.id)
-          .single();
-
-        if (clientError) {
-          console.error('Error fetching client profile:', clientError);
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible de récupérer votre profil.",
-          });
-          return;
-        }
-
-        if (clientData) {
-          console.log('Client data found:', clientData);
-          const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
-          form.setValue('sender_name', fullName);
-          form.setValue('sender_phone', clientData.phone || '');
-        }
-      } catch (error) {
-        console.error('Error in fetchClientProfile:', error);
-      }
-    };
-
-    fetchClientProfile();
-  }, [form, navigate]);
+  const { validateStep } = useBookingValidation(form);
 
   const onSubmit = async (values: BookingFormData) => {
     try {
+      const photoUrls = await uploadPhotos(photos);
+      
       const formattedSpecialItems = specialItems.map(item => ({
         name: item,
         quantity: itemQuantities[item] || 1
@@ -118,12 +77,17 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         weight,
         special_items: formattedSpecialItems,
         content_types: contentTypes,
-        photos
+        photos: photoUrls
       };
 
       await createBooking(bookingData);
     } catch (error) {
       console.error("Error in form submission:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la création de la réservation.",
+      });
     }
   };
 
@@ -141,15 +105,22 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     setCurrentStep(prev => Math.max(1, prev - 1));
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <SenderStep form={form} />;
-      case 2:
-        return <RecipientStep form={form} />;
-      case 3:
-        return (
-          <PackageStep
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
+        <StepIndicator
+          currentStep={currentStep}
+          totalSteps={4}
+          completedSteps={completedSteps}
+        />
+
+        {(isLoading || isUploading) ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <BookingFormSteps
+            currentStep={currentStep}
             form={form}
             weight={weight}
             onWeightChange={handleWeightChange}
@@ -161,39 +132,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             onQuantityChange={handleQuantityChange}
             photos={photos}
             onPhotoUpload={handlePhotoUpload}
-          />
-        );
-      case 4:
-        return (
-          <ConfirmationStep
-            form={form}
             onEdit={setCurrentStep}
-            weight={weight}
-            specialItems={specialItems}
-            itemQuantities={itemQuantities}
-            pricePerKg={10}
           />
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
-        <StepIndicator
-          currentStep={currentStep}
-          totalSteps={4}
-          completedSteps={completedSteps}
-        />
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          renderStep()
         )}
 
         <div className="flex justify-between pt-6">
@@ -201,7 +141,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             type="button"
             variant="outline"
             onClick={handlePrevious}
-            disabled={currentStep === 1 || isLoading}
+            disabled={currentStep === 1 || isLoading || isUploading}
             className="flex items-center gap-2"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -212,7 +152,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             <Button
               type="button"
               onClick={handleNextStep}
-              disabled={isLoading}
+              disabled={isLoading || isUploading}
               className="flex items-center gap-2"
             >
               Suivant
@@ -221,10 +161,10 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           ) : (
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isUploading}
               className="flex items-center gap-2"
             >
-              {isLoading ? (
+              {isLoading || isUploading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Création...
