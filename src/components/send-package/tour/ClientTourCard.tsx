@@ -145,6 +145,15 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     }
   };
 
+  const handleApprovalRequestSuccess = () => {
+    setShowApprovalDialog(false);
+    setHasPendingRequest(true); // Mettre à jour l'état immédiatement après l'envoi réussi
+    toast({
+      title: "Demande envoyée",
+      description: "Votre demande d'approbation a été envoyée avec succès",
+    });
+  };
+
   return (
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
@@ -237,6 +246,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         onClose={() => setShowApprovalDialog(false)}
         tourId={tour.id}
         pickupCity={selectedPoint}
+        onSuccess={handleApprovalRequestSuccess}
       />
     </CardCustom>
   );
