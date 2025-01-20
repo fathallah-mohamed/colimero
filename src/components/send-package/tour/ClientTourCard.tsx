@@ -9,6 +9,7 @@ import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { Share2, Eye } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -160,6 +161,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       <AccessDeniedMessage
         isOpen={showAccessDeniedDialog}
         onClose={() => setShowAccessDeniedDialog(false)}
+        userType="client"
       />
     </CardCustom>
   );

@@ -1,4 +1,4 @@
-import { Tour, TourStatus } from "@/types/tour";
+import { Tour } from "@/types/tour";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MapPin, Calendar, Truck } from "lucide-react";
