@@ -13,14 +13,22 @@ export function ApprovalRequestsList() {
   const userType = user?.user_metadata?.user_type;
   const { toast } = useToast();
   
+  console.log("ApprovalRequestsList - User:", user?.id);
+  console.log("ApprovalRequestsList - UserType:", userType);
+
   const { 
     requests, 
     loading, 
+    error,
     handleApproveRequest,
     handleRejectRequest,
     handleCancelRequest, 
     handleDeleteRequest 
   } = useApprovalRequests(userType, user?.id);
+
+  console.log("ApprovalRequestsList - Loading:", loading);
+  console.log("ApprovalRequestsList - Requests:", requests);
+  console.log("ApprovalRequestsList - Error:", error);
 
   if (!user) {
     return (
@@ -41,6 +49,19 @@ export function ApprovalRequestsList() {
 
   if (loading) {
     return <ProfileLoading />;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="text-center space-y-4">
+          <p className="text-red-500">
+            Une erreur est survenue lors du chargement de vos demandes
+          </p>
+          <p className="text-sm text-gray-500">{error.message}</p>
+        </div>
+      </div>
+    );
   }
 
   if (!requests?.length) {
