@@ -10,8 +10,10 @@ import { useBookingFlow } from "@/hooks/useBookingFlow";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { Package2, ShieldCheck, Clock4, Loader2 } from "lucide-react";
 import type { TourStatus } from "@/types/tour";
+import { useSessionInitializer } from "@/components/navigation/SessionInitializer";
 
 export default function EnvoyerColis() {
+  useSessionInitializer(); // Initialize session
   const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
@@ -22,7 +24,14 @@ export default function EnvoyerColis() {
   const {
     loading,
     tours,
-  } = useTours();
+    error
+  } = useTours({
+    departureCountry: "FR",
+    destinationCountry: "TN",
+    sortBy,
+    status: selectedStatus,
+    tourType
+  });
 
   const {
     showAuthDialog,
@@ -33,14 +42,22 @@ export default function EnvoyerColis() {
     handleAuthSuccess
   } = useBookingFlow();
 
-  // Filtrer les tournées selon le type (public/privé) et le statut
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Une erreur est survenue lors du chargement des tournées"
+    });
+  }
+
+  // Filter tours according to type and status
   const filteredTours = tours?.filter(tour => {
     const typeMatch = tour.type === tourType;
     const statusMatch = selectedStatus === "all" || tour.status === selectedStatus;
     return typeMatch && statusMatch;
   });
 
-  // Tri des tournées
+  // Sort tours
   const sortedTours = [...(filteredTours || [])].sort((a, b) => {
     switch (sortBy) {
       case "departure_asc":
@@ -61,7 +78,6 @@ export default function EnvoyerColis() {
       <Navigation />
       <SendPackageHero />
       
-      {/* Bloc de présentation */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/20 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
@@ -145,6 +161,7 @@ export default function EnvoyerColis() {
               <ClientTourCard
                 key={tour.id}
                 tour={tour}
+                onBookingClick={handleBookingClick}
               />
             ))}
           </div>
