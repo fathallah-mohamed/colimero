@@ -145,9 +145,6 @@ export default function EnvoyerColis() {
               <ClientTourCard
                 key={tour.id}
                 tour={tour}
-                onBookingClick={(tourId, pickupCity) => {
-                  navigate(`/reserver/${tourId}?pickupCity=${encodeURIComponent(pickupCity)}`);
-                }}
               />
             ))}
           </div>
