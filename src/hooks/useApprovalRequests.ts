@@ -51,10 +51,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         `);
 
       if (userType === 'carrier') {
-        console.log('Filtering for carrier:', userId);
         query = query.eq('tour.carrier_id', userId);
       } else {
-        console.log('Filtering for client:', userId);
         query = query.eq('user_id', userId);
       }
 
@@ -67,11 +65,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           title: "Erreur",
           description: "Impossible de charger vos demandes d'approbation"
         });
-        throw error;
+        setRequests([]);
+      } else {
+        console.log('Fetched approval requests:', approvalData);
+        setRequests(approvalData || []);
       }
-
-      console.log('Fetched approval requests:', approvalData);
-      setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       toast({
@@ -79,6 +77,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         title: "Erreur",
         description: "Une erreur est survenue lors du chargement de vos demandes"
       });
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -97,20 +96,24 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     requests, 
     loading,
     handleApproveRequest: async (request: any) => {
-      const { success } = await handleApproveRequest(request);
+      const success = await handleApproveRequest(request);
       if (success) await fetchRequests();
+      return success;
     },
     handleRejectRequest: async (request: any) => {
-      const { success } = await handleRejectRequest(request);
+      const success = await handleRejectRequest(request);
       if (success) await fetchRequests();
+      return success;
     },
     handleCancelRequest: async (requestId: string) => {
-      const { success } = await handleCancelRequest(requestId);
+      const success = await handleCancelRequest(requestId);
       if (success) await fetchRequests();
+      return success;
     },
     handleDeleteRequest: async (requestId: string) => {
-      const { success } = await handleDeleteRequest(requestId);
+      const success = await handleDeleteRequest(requestId);
       if (success) await fetchRequests();
+      return success;
     }
   };
 }
