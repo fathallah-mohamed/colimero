@@ -27,7 +27,6 @@ export const supabase = createClient<Database>(
         const defaultOptions: RequestInit = {
           credentials: 'include' as RequestCredentials,
           mode: 'cors' as RequestMode,
-          ...options,
           headers: {
             ...options.headers,
             'Cache-Control': 'no-cache',
@@ -35,7 +34,14 @@ export const supabase = createClient<Database>(
           }
         };
 
-        return fetch(url, defaultOptions).catch(error => {
+        return fetch(url, {
+          ...defaultOptions,
+          ...options,
+          headers: {
+            ...defaultOptions.headers,
+            ...options.headers
+          }
+        }).catch(error => {
           console.error('Fetch error:', error);
           throw error;
         });
