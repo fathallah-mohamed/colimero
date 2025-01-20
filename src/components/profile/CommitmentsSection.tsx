@@ -36,7 +36,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
     queryFn: async () => {
       console.log("Fetching commitments for carrier:", profile.id);
       
-      const { data: commitments, error: commitmentsError } = await supabase
+      const { data, error: commitmentsError } = await supabase
         .from('carrier_commitments')
         .select(`
           accepted,
@@ -55,7 +55,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
       }
       
       console.log("Fetched commitments:", commitments);
-      return commitments as CarrierCommitment[];
+      return data as unknown as CarrierCommitment[];
     },
   });
 
