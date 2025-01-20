@@ -2,7 +2,6 @@ import { Shield, Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileData } from "@/types/profile";
-import { CarrierCommitment } from "@/types/commitments";
 
 interface CommitmentsSectionProps {
   profile: ProfileData;
@@ -11,6 +10,17 @@ interface CommitmentsSectionProps {
 interface CommitmentStatusProps {
   label: string;
   description: string;
+}
+
+interface CommitmentType {
+  id: string;
+  label: string;
+  description: string;
+}
+
+interface CarrierCommitment {
+  accepted: boolean;
+  commitment_type: CommitmentType;
 }
 
 function CommitmentStatus({ label, description }: CommitmentStatusProps) {
@@ -36,7 +46,7 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
     queryFn: async () => {
       console.log("Fetching commitments for carrier:", profile.id);
       
-      const { data, error: commitmentsError } = await supabase
+      const { data: commitments, error: commitmentsError } = await supabase
         .from('carrier_commitments')
         .select(`
           accepted,
@@ -53,18 +63,9 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
         console.error("Error fetching commitments:", commitmentsError);
         throw commitmentsError;
       }
-
-      // Transform the data to match CarrierCommitment type
-      const transformedData = data?.map(item => ({
-        accepted: item.accepted,
-        commitment_type: {
-          id: item.commitment_type[0].id,
-          label: item.commitment_type[0].label,
-          description: item.commitment_type[0].description
-        }
-      })) as CarrierCommitment[];
       
-      return transformedData;
+      console.log("Fetched commitments:", commitments);
+      return commitments as CarrierCommitment[];
     },
   });
 
