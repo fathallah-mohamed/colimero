@@ -1,5 +1,5 @@
 import { UseFormReturn } from "react-hook-form";
-import { BookingFormData } from "@/types/booking";
+import { BookingFormData } from "./schema";
 import { SenderStep } from "./steps/SenderStep";
 import { RecipientStep } from "./steps/RecipientStep";
 import { PackageStep } from "./steps/PackageStep";

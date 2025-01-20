@@ -7,7 +7,6 @@ import { formSchema, BookingFormData } from "./form/schema";
 import { useState } from "react";
 import { StepIndicator } from "./form/steps/StepIndicator";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { useBookingCreation } from "@/hooks/useBookingCreation";
 import { useBookingValidation } from "@/hooks/useBookingValidation";

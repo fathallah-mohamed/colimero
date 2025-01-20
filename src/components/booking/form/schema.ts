@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { SpecialItem } from "@/types/booking/special-items";
 
 export const formSchema = z.object({
   sender_name: z.string().min(1, "Le nom de l'expéditeur est requis"),
