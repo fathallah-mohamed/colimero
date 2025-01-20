@@ -14,11 +14,16 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     flowType: 'pkce',
   },
   global: {
+    headers: {
+      'apikey': supabaseAnonKey,
+      'Content-Type': 'application/json',
+    },
     fetch: (url, options) => {
       return fetch(url, {
         ...options,
         headers: {
           ...options?.headers,
+          'apikey': supabaseAnonKey,
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
         }
