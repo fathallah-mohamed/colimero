@@ -1,4 +1,10 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { RecipientDialog } from "./RecipientDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,40 +15,70 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
 
-interface RecipientsListProps {
-  recipients: any[];
-  onEdit: (recipient: any) => void;
-  onRefresh: () => void;
+interface Recipient {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  address: string;
+  city: string;
+  country: string;
 }
 
-export function RecipientsList({
-  recipients,
-  onEdit,
-  onRefresh,
-}: RecipientsListProps) {
+export function RecipientsList() {
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | undefined>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [recipientToDelete, setRecipientToDelete] = useState<Recipient | null>(null);
   const { toast } = useToast();
-  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
+  const fetchRecipients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('recipients')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setRecipients(data || []);
+    } catch (error) {
+      console.error('Error fetching recipients:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger les destinataires",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecipients();
+  }, []);
+
+  const handleEdit = (recipient: Recipient) => {
+    setSelectedRecipient(recipient);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (recipient: Recipient) => {
+    setRecipientToDelete(recipient);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!recipientToDelete) return;
 
     try {
       const { error } = await supabase
-        .from("recipients")
+        .from('recipients')
         .delete()
-        .eq("id", deleteId);
+        .eq('id', recipientToDelete.id);
 
       if (error) throw error;
 
@@ -50,81 +86,99 @@ export function RecipientsList({
         title: "Succès",
         description: "Le destinataire a été supprimé",
       });
-      onRefresh();
-    } catch (error: any) {
+
+      await fetchRecipients();
+    } catch (error) {
+      console.error('Error deleting recipient:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression",
+        description: "Impossible de supprimer le destinataire",
       });
     } finally {
-      setDeleteId(null);
+      setDeleteDialogOpen(false);
+      setRecipientToDelete(null);
     }
   };
 
-  if (recipients.length === 0) {
-    return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center h-40">
-          <p className="text-gray-500 text-center">
-            Vous n'avez pas encore ajouté de destinataire
-          </p>
-        </CardContent>
-      </Card>
-    );
+  if (isLoading) {
+    return <div className="text-center py-8">Chargement...</div>;
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {recipients.map((recipient) => (
-        <Card key={recipient.id}>
-          <CardHeader>
-            <CardTitle>
-              {recipient.first_name} {recipient.last_name}
-            </CardTitle>
-            <CardDescription>{recipient.phone}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm">{recipient.address}</p>
-              <p className="text-sm">
-                {recipient.city}, {recipient.country}
-              </p>
-              <div className="flex justify-end gap-2 mt-4">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Mes destinataires</h2>
+        <Button onClick={() => setDialogOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Ajouter un destinataire
+        </Button>
+      </div>
+
+      {recipients.length === 0 ? (
+        <Card className="p-6 text-center text-gray-500">
+          Vous n'avez pas encore ajouté de destinataire
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {recipients.map((recipient) => (
+            <Card key={recipient.id} className="p-4 space-y-4">
+              <div>
+                <h3 className="font-medium">
+                  {recipient.first_name} {recipient.last_name}
+                </h3>
+                <p className="text-sm text-gray-500">{recipient.phone}</p>
+              </div>
+              <div className="text-sm">
+                <p>{recipient.address}</p>
+                <p>{recipient.city}, {recipient.country}</p>
+              </div>
+              <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onEdit(recipient)}
+                  onClick={() => handleEdit(recipient)}
+                  className="gap-2"
                 >
                   <Pencil className="h-4 w-4" />
+                  Modifier
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setDeleteId(recipient.id)}
+                  onClick={() => handleDelete(recipient)}
+                  className="gap-2 text-red-500 hover:text-red-600"
                 >
                   <Trash2 className="h-4 w-4" />
+                  Supprimer
                 </Button>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </Card>
+          ))}
+        </div>
+      )}
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <RecipientDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        recipient={selectedRecipient}
+        onSuccess={() => {
+          fetchRecipients();
+          setSelectedRecipient(undefined);
+        }}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Le destinataire sera définitivement
-              supprimé.
+              Êtes-vous sûr de vouloir supprimer ce destinataire ? Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Supprimer
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>Supprimer</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
