@@ -9,6 +9,7 @@ import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
+import { Share2, Eye } from "lucide-react";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -27,6 +28,34 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
   const handleExpandClick = () => {
     setIsExpanded(!isExpanded);
+  };
+
+  const handleShare = async () => {
+    const tourUrl = `${window.location.origin}/tours/${tour.id}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Partager la tournée',
+          text: 'Consultez cette tournée',
+          url: tourUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(tourUrl);
+        toast({
+          title: "Lien copié !",
+          description: "Le lien de la tournée a été copié dans votre presse-papiers",
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de partager la tournée",
+        });
+      }
+    }
   };
 
   const handleBookingButtonClick = async () => {
@@ -99,7 +128,29 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
         <div className="flex flex-col space-y-6">
-          <TourMainInfo tour={tour} />
+          <div className="flex justify-between items-center">
+            <TourMainInfo tour={tour} />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/tours/${tour.id}`)}
+                className="flex items-center gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                Consulter
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                className="flex items-center gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                Partager
+              </Button>
+            </div>
+          </div>
           
           <TourRoute 
             stops={tour.route} 
