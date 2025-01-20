@@ -11,7 +11,7 @@ import { SenderStep } from "./form/steps/SenderStep";
 import { RecipientStep } from "./form/steps/RecipientStep";
 import { PackageStep } from "./form/steps/PackageStep";
 import { ConfirmationStep } from "./form/steps/ConfirmationStep";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -30,6 +30,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [specialItems, setSpecialItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(formSchema),
@@ -47,23 +48,52 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   useEffect(() => {
     const fetchClientProfile = async () => {
       try {
-        console.log('Fetching client profile...');
-        const { data: { user } } = await supabase.auth.getUser();
+        console.log('Checking authentication status...');
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         
-        if (!user) {
-          console.log('No authenticated user found');
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          toast({
+            variant: "destructive",
+            title: "Erreur d'authentification",
+            description: "Veuillez vous reconnecter.",
+          });
+          navigate('/connexion');
+          return;
+        }
+
+        if (!sessionData.session) {
+          console.log('No active session found');
+          navigate('/connexion');
+          return;
+        }
+
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error('User fetch error:', userError);
+          toast({
+            variant: "destructive",
+            title: "Erreur d'authentification",
+            description: "Impossible de récupérer vos informations.",
+          });
           return;
         }
 
         console.log('Fetching client data for user:', user.id);
-        const { data: clientData, error } = await supabase
+        const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('first_name, last_name, phone')
           .eq('id', user.id)
           .single();
 
-        if (error) {
-          console.error('Error fetching client profile:', error);
+        if (clientError) {
+          console.error('Error fetching client profile:', clientError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de récupérer votre profil.",
+          });
           return;
         }
 
@@ -75,46 +105,18 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         }
       } catch (error) {
         console.error('Error in fetchClientProfile:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la récupération de votre profil.",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchClientProfile();
-  }, [form]);
-
-  const { isLoading, handleSubmit } = useBookingSubmit(tourId);
-
-  const onSubmit = async (values: BookingFormData) => {
-    try {
-      console.log('Submitting booking with values:', values);
-      const formData = {
-        ...values,
-        weight,
-        pickup_city: pickupCity,
-        special_items: specialItems,
-        content_types: contentTypes,
-        photos
-      };
-
-      await handleSubmit(formData);
-      toast({
-        title: "Réservation créée",
-        description: "Votre réservation a été créée avec succès.",
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/mes-reservations');
-      }
-    } catch (error: any) {
-      console.error("Error submitting booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la création de la réservation.",
-      });
-    }
-  };
+  }, [form, navigate]);
 
   const handleWeightChange = (increment: boolean) => {
     setWeight(prev => {
@@ -149,6 +151,44 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       setPhotos(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const { handleSubmit: submitBooking } = useBookingSubmit(tourId);
+
+  const onSubmit = async (values: BookingFormData) => {
+    try {
+      setIsLoading(true);
+      console.log('Submitting booking with values:', values);
+      const formData = {
+        ...values,
+        weight,
+        pickup_city: pickupCity,
+        special_items: specialItems,
+        content_types: contentTypes,
+        photos
+      };
+
+      await submitBooking(formData);
+      toast({
+        title: "Réservation créée",
+        description: "Votre réservation a été créée avec succès.",
+      });
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/mes-reservations');
+      }
+    } catch (error: any) {
+      console.error("Error submitting booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la création de la réservation.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -223,14 +263,20 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           completedSteps={completedSteps}
         />
 
-        {renderStep()}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          renderStep()
+        )}
 
         <div className="flex justify-between pt-6">
           <Button
             type="button"
             variant="outline"
             onClick={handlePrevious}
-            disabled={currentStep === 1}
+            disabled={currentStep === 1 || isLoading}
             className="flex items-center gap-2"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -241,6 +287,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             <Button
               type="button"
               onClick={validateStep}
+              disabled={isLoading}
               className="flex items-center gap-2"
             >
               Suivant
@@ -252,7 +299,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
               disabled={isLoading}
               className="flex items-center gap-2"
             >
-              {isLoading ? "Création..." : "Créer la réservation"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Création...
+                </>
+              ) : (
+                "Créer la réservation"
+              )}
             </Button>
           )}
         </div>
