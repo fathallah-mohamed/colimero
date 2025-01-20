@@ -62,8 +62,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           title: "Erreur",
           description: "Impossible de charger vos demandes d'approbation"
         });
-        throw error;
+        setLoading(false);
+        return;
       }
+
+      console.log('Approval data received:', approvalData);
 
       // If we have approval data, fetch the associated user data
       if (approvalData) {
@@ -98,6 +101,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
 
         console.log('Fetched approval requests with user data:', requestsWithUserData);
         setRequests(requestsWithUserData);
+      } else {
+        setRequests([]);
       }
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
@@ -115,6 +120,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     console.log('useEffect triggered with userId:', userId, 'userType:', userType);
     if (userId) {
       fetchRequests();
+    } else {
+      setLoading(false);
     }
   }, [userId, userType]);
 
