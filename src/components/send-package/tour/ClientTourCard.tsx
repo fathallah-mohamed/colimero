@@ -1,47 +1,102 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { CardCustom } from "@/components/ui/card-custom";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
-import { TourDialogs } from "./components/TourDialogs";
-import { useApprovalRequest } from "./hooks/useApprovalRequest";
-import { useTourActions } from "./hooks/useTourActions";
-import { CardCustom } from "@/components/ui/card-custom";
-import { useNavigate } from "react-router-dom";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ClientTourCardProps {
   tour: Tour;
 }
 
 export function ClientTourCard({ tour }: ClientTourCardProps) {
-  const navigate = useNavigate();
-  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  
-  const { existingRequest, checkExistingRequest } = useApprovalRequest(tour.id);
-  
-  const {
-    showAuthDialog,
-    setShowAuthDialog,
-    showApprovalDialog,
-    setShowApprovalDialog,
-    showAccessDeniedDialog,
-    setShowAccessDeniedDialog,
-    handleActionClick,
-    getActionButtonText,
-    isActionEnabled
-  } = useTourActions(tour, selectedPickupCity, existingRequest);
+  const [selectedPoint, setSelectedPoint] = useState<string>("");
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
+  const [showExistingBookingDialog, setShowExistingBookingDialog] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleApprovalSuccess = () => {
-    setShowApprovalDialog(false);
-    checkExistingRequest();
+  const handlePointSelect = (point: string) => {
+    setSelectedPoint(point);
   };
 
-  const handleBookingClick = () => {
-    if (selectedPickupCity) {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+  const handleExpandClick = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleBookingButtonClick = async () => {
+    if (!selectedPoint) {
+      toast({
+        variant: "destructive",
+        title: "Point de collecte requis",
+        description: "Veuillez sélectionner un point de collecte avant de réserver",
+      });
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        const bookingPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`;
+        sessionStorage.setItem('returnPath', bookingPath);
+        navigate('/connexion');
+        return;
+      }
+
+      const userType = session.user.user_metadata?.user_type;
+      
+      if (userType === 'carrier') {
+        setShowAccessDeniedDialog(true);
+        return;
+      }
+
+      // Vérifier uniquement les réservations en attente
+      const { data: pendingBooking, error } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('tour_id', tour.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking existing bookings:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la vérification de vos réservations",
+        });
+        return;
+      }
+
+      if (pendingBooking) {
+        setShowExistingBookingDialog(true);
+        return;
+      }
+
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+    } catch (error) {
+      console.error("Error in handleBookingButtonClick:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la réservation",
+      });
     }
   };
 
@@ -53,45 +108,65 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           
           <TourRoute 
             stops={tour.route} 
-            onPointSelect={setSelectedPickupCity}
-            selectedPoint={selectedPickupCity}
+            onPointSelect={handlePointSelect}
+            selectedPoint={selectedPoint}
           />
+
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              onClick={handleExpandClick}
+              className="text-gray-600 hover:bg-primary/10"
+            >
+              {isExpanded ? "Voir moins" : "Voir les détails de la tournée"}
+            </Button>
+          </div>
 
           {isExpanded && (
             <TourExpandedContent 
               tour={tour}
-              selectedPickupCity={selectedPickupCity}
-              onPickupCitySelect={setSelectedPickupCity}
-              onActionClick={handleBookingClick}
-              isActionEnabled={isActionEnabled()}
-              actionButtonText={getActionButtonText()}
-              hasPendingRequest={existingRequest?.status === 'pending'}
+              selectedPoint={selectedPoint}
+              onPointSelect={handlePointSelect}
+              onActionClick={handleBookingButtonClick}
+              isActionEnabled={!!selectedPoint}
+              actionButtonText="Réserver cette tournée"
             />
           )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-[#0FA0CE] hover:text-[#0FA0CE] hover:bg-[#0FA0CE]/10"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            {isExpanded ? "Masquer les détails" : "Afficher les détails"}
-          </Button>
         </div>
       </div>
 
-      <TourDialogs
-        showAccessDeniedDialog={showAccessDeniedDialog}
-        setShowAccessDeniedDialog={setShowAccessDeniedDialog}
-        showAuthDialog={showAuthDialog}
-        setShowAuthDialog={setShowAuthDialog}
-        showApprovalDialog={showApprovalDialog}
-        setShowApprovalDialog={setShowApprovalDialog}
-        tourId={tour.id}
-        pickupCity={selectedPickupCity || ''}
-        onApprovalSuccess={handleApprovalSuccess}
+      <AccessDeniedMessage
+        userType="carrier"
+        isOpen={showAccessDeniedDialog}
+        onClose={() => setShowAccessDeniedDialog(false)}
       />
+
+      <Dialog open={showExistingBookingDialog} onOpenChange={setShowExistingBookingDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Réservation existante</DialogTitle>
+            <DialogDescription>
+              Vous avez déjà une réservation en attente pour cette tournée.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowExistingBookingDialog(false)}
+            >
+              Fermer
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowExistingBookingDialog(false);
+                navigate('/mes-reservations');
+              }}
+            >
+              Voir mes réservations
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </CardCustom>
   );
 }

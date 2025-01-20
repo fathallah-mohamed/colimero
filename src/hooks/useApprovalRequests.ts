@@ -3,27 +3,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApprovalActions } from "./useApprovalActions";
 import { useRequestManagement } from "./useRequestManagement";
 import { useToast } from "./use-toast";
-import { ApprovalRequest, Client } from "@/components/admin/approval-requests/types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<ApprovalRequest[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
   const { handleCancelRequest, handleDeleteRequest } = useRequestManagement();
   const { toast } = useToast();
 
   const fetchRequests = async () => {
+    if (!userId) {
+      console.log('No user ID provided');
+      setLoading(false);
+      return;
+    }
+
     try {
-      setLoading(true);
-      setError(null);
-
-      if (!userId) {
-        console.log('No user ID provided');
-        setRequests([]);
-        return;
-      }
-
       console.log('Fetching requests for user:', userId, 'type:', userType);
       
       let query = supabase
@@ -40,7 +35,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             total_capacity,
             remaining_capacity,
             type,
-            carrier:carriers (
+            carriers (
               id,
               company_name,
               email,
@@ -56,49 +51,36 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
+      // Ajout de la condition en fonction du type d'utilisateur
       if (userType === 'carrier') {
+        console.log('Filtering for carrier:', userId);
         query = query.eq('tour.carrier_id', userId);
       } else {
+        console.log('Filtering for client:', userId);
         query = query.eq('user_id', userId);
       }
 
-      const { data, error: fetchError } = await query;
+      const { data: approvalData, error } = await query;
 
-      if (fetchError) {
-        console.error('Error fetching approval requests:', fetchError);
-        setError(fetchError.message);
+      if (error) {
+        console.error('Error fetching approval requests:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
           description: "Impossible de charger vos demandes d'approbation"
         });
-        setRequests([]);
-        return;
+        throw error;
       }
 
-      console.log('Fetched approval requests:', data);
-
-      // Map the data to match our ApprovalRequest type
-      const mappedRequests: ApprovalRequest[] = (data || []).map(item => ({
-        ...item,
-        client: item.user[0] as Client, // Take first user since it's an array
-        tour: {
-          ...item.tour,
-          route: Array.isArray(item.tour.route) ? item.tour.route : [], // Ensure route is an array
-          carriers: item.tour.carrier // Map carrier to carriers
-        }
-      }));
-
-      setRequests(mappedRequests);
+      console.log('Fetched approval requests:', approvalData);
+      setRequests(approvalData || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
-      setError(error.message);
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Une erreur est survenue lors du chargement de vos demandes"
       });
-      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -108,32 +90,27 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     console.log('useEffect triggered with userId:', userId, 'userType:', userType);
     if (userId) {
       fetchRequests();
-    } else {
-      setLoading(false);
-      setRequests([]);
     }
   }, [userId, userType]);
-
-  const handleAction = async (actionFn: Function, request: any) => {
-    try {
-      const result = await actionFn(request);
-      if (result?.success) {
-        await fetchRequests();
-      }
-      return result;
-    } catch (error) {
-      console.error('Error handling action:', error);
-      return { success: false, error };
-    }
-  };
 
   return { 
     requests, 
     loading,
-    error,
-    handleApproveRequest: async (request: any) => handleAction(handleApproveRequest, request),
-    handleRejectRequest: async (request: any) => handleAction(handleRejectRequest, request),
-    handleCancelRequest: async (requestId: string) => handleAction(handleCancelRequest, requestId),
-    handleDeleteRequest: async (requestId: string) => handleAction(handleDeleteRequest, requestId)
+    handleApproveRequest: async (request: any) => {
+      const { success } = await handleApproveRequest(request);
+      if (success) await fetchRequests();
+    },
+    handleRejectRequest: async (request: any) => {
+      const { success } = await handleRejectRequest(request);
+      if (success) await fetchRequests();
+    },
+    handleCancelRequest: async (requestId: string) => {
+      const { success } = await handleCancelRequest(requestId);
+      if (success) await fetchRequests();
+    },
+    handleDeleteRequest: async (requestId: string) => {
+      const { success } = await handleDeleteRequest(requestId);
+      if (success) await fetchRequests();
+    }
   };
 }

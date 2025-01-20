@@ -57,7 +57,6 @@ export function TourTimelineCard({
       return;
     }
 
-    console.log('Existing request:', request);
     setExistingRequest(request);
   };
 
@@ -86,20 +85,10 @@ export function TourTimelineCard({
 
     if (tour.type === 'private') {
       if (existingRequest) {
-        if (existingRequest.status === 'approved') {
-          // Si la demande est approuvée, rediriger vers le formulaire de réservation
-          navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-        } else if (existingRequest.status === 'pending') {
-          toast({
-            title: "Demande en attente",
-            description: "Votre demande d'approbation est en cours de traitement",
-          });
-        } else if (existingRequest.status === 'rejected') {
-          toast({
-            title: "Demande rejetée",
-            description: "Votre demande d'approbation a été rejetée",
-          });
-        }
+        toast({
+          title: "Demande existante",
+          description: `Votre demande est ${existingRequest.status === 'pending' ? 'en attente' : existingRequest.status}`,
+        });
         return;
       }
       setShowApprovalDialog(true);
@@ -116,7 +105,7 @@ export function TourTimelineCard({
           case 'pending':
             return "Demande en attente d'approbation";
           case 'approved':
-            return "Réserver maintenant";
+            return "Demande approuvée - Réserver";
           case 'rejected':
             return "Demande rejetée";
           default:
@@ -186,10 +175,6 @@ export function TourTimelineCard({
         onClose={() => setShowApprovalDialog(false)}
         tourId={tour.id}
         pickupCity={selectedPickupCity || ''}
-        onSuccess={() => {
-          checkExistingRequest();
-          setShowApprovalDialog(false);
-        }}
       />
     </div>
   );
