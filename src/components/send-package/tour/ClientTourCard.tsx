@@ -9,12 +9,14 @@ import { TourDialogs } from "./components/TourDialogs";
 import { useApprovalRequest } from "./hooks/useApprovalRequest";
 import { useTourActions } from "./hooks/useTourActions";
 import { CardCustom } from "@/components/ui/card-custom";
+import { useNavigate } from "react-router-dom";
 
 interface ClientTourCardProps {
   tour: Tour;
 }
 
 export function ClientTourCard({ tour }: ClientTourCardProps) {
+  const navigate = useNavigate();
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -37,6 +39,12 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     checkExistingRequest();
   };
 
+  const handleBookingClick = () => {
+    if (selectedPickupCity) {
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+    }
+  };
+
   return (
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
@@ -54,7 +62,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               tour={tour}
               selectedPickupCity={selectedPickupCity}
               onPickupCitySelect={setSelectedPickupCity}
-              onActionClick={handleActionClick}
+              onActionClick={handleBookingClick}
               isActionEnabled={isActionEnabled()}
               actionButtonText={getActionButtonText()}
               hasPendingRequest={existingRequest?.status === 'pending'}
