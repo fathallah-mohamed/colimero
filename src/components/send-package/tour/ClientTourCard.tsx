@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
-import { CardCustom } from "@/components/ui/card-custom";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
@@ -15,102 +11,33 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 
 interface ClientTourCardProps {
-  tour: Tour;
+  tour: any;
+  onBookingSuccess?: () => void;
 }
 
-export function ClientTourCard({ tour }: ClientTourCardProps) {
+export function ClientTourCard({ tour, onBookingSuccess }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedPoint, setSelectedPoint] = useState<string>("");
-  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
-  const [showExistingBookingDialog, setShowExistingBookingDialog] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const handlePointSelect = (point: string) => {
-    setSelectedPoint(point);
-  };
-
-  const handleExpandClick = () => {
+  const handleTourClick = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const handleTourClick = () => {
-    navigate(`/tours/${tour.id}`);
-  };
-
-  const handleBookingButtonClick = async () => {
-    if (!selectedPoint) {
-      toast({
-        variant: "destructive",
-        title: "Point de collecte requis",
-        description: "Veuillez sélectionner un point de collecte avant de réserver",
-      });
-      return;
-    }
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        const bookingPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`;
-        sessionStorage.setItem('returnPath', bookingPath);
-        navigate('/connexion');
-        return;
-      }
-
-      const userType = session.user.user_metadata?.user_type;
-      
-      if (userType === 'carrier') {
-        setShowAccessDeniedDialog(true);
-        return;
-      }
-
-      // Vérifier uniquement les réservations en attente
-      const { data: pendingBooking, error } = await supabase
-        .from('bookings')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('tour_id', tour.id)
-        .eq('status', 'pending')
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking existing bookings:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de la vérification de vos réservations",
-        });
-        return;
-      }
-
-      if (pendingBooking) {
-        setShowExistingBookingDialog(true);
-        return;
-      }
-
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
-    } catch (error) {
-      console.error("Error in handleBookingButtonClick:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la réservation",
-      });
-    }
+  const handleBookingClick = () => {
+    setShowAuthDialog(true);
   };
 
   return (
-    <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
+    <div className="relative w-full rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="p-6">
-        <div className="flex flex-col space-y-6">
-          <div className="flex justify-between items-start">
+        <div className="flex flex-col space-y-1.5">
+          <div className="flex items-center justify-between">
             <div className="cursor-pointer" onClick={handleTourClick}>
               <TourMainInfo tour={tour} />
             </div>
@@ -128,67 +55,32 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             </div>
           </div>
           
-          <TourRoute 
-            stops={tour.route} 
-            onPointSelect={handlePointSelect}
-            selectedPoint={selectedPoint}
+          <TourRoute
+            route={tour.route}
+            departureDate={tour.departure_date}
+            collectionDate={tour.collection_date}
           />
-
-          <div className="flex justify-center">
-            <Button
-              variant="outline"
-              onClick={handleExpandClick}
-              className="text-gray-600 hover:bg-primary/10"
-            >
-              {isExpanded ? "Voir moins" : "Voir les détails de la tournée"}
-            </Button>
-          </div>
-
-          {isExpanded && (
-            <TourExpandedContent 
-              tour={tour}
-              selectedPoint={selectedPoint}
-              onPointSelect={handlePointSelect}
-              onActionClick={handleBookingButtonClick}
-              isActionEnabled={!!selectedPoint}
-              actionButtonText="Réserver cette tournée"
-            />
-          )}
         </div>
+
+        {isExpanded && (
+          <TourExpandedContent
+            tour={tour}
+            onBookingClick={handleBookingClick}
+            onBookingSuccess={onBookingSuccess}
+          />
+        )}
       </div>
 
-      <AccessDeniedMessage
-        userType="carrier"
-        isOpen={showAccessDeniedDialog}
-        onClose={() => setShowAccessDeniedDialog(false)}
-      />
-
-      <Dialog open={showExistingBookingDialog} onOpenChange={setShowExistingBookingDialog}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Réservation existante</DialogTitle>
+            <DialogTitle>Authentification requise</DialogTitle>
             <DialogDescription>
-              Vous avez déjà une réservation en attente pour cette tournée.
+              <AccessDeniedMessage />
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowExistingBookingDialog(false)}
-            >
-              Fermer
-            </Button>
-            <Button 
-              onClick={() => {
-                setShowExistingBookingDialog(false);
-                navigate('/mes-reservations');
-              }}
-            >
-              Voir mes réservations
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
-    </CardCustom>
+    </div>
   );
 }
