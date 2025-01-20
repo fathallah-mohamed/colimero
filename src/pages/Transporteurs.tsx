@@ -3,7 +3,7 @@ import { TransporteurList } from "@/components/transporteur/TransporteurList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Filter, SortAscending, TruckIcon } from "lucide-react";
+import { Filter, ArrowUpDown, TruckIcon } from "lucide-react";
 import { useState } from "react";
 
 export default function Transporteurs() {
@@ -75,7 +75,7 @@ export default function Transporteurs() {
             </Select>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <SortAscending className="h-4 w-4 text-gray-400" />
+            <ArrowUpDown className="h-4 w-4 text-gray-400" />
             <Select
               value={sortBy}
               onValueChange={setSortBy}
