@@ -1,20 +1,13 @@
-import { Tour, TourStatus } from "@/types/tour";
+import { Tour } from "@/types/tour";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import AuthDialog from "@/components/auth/AuthDialog";
-import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
-import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface TourExpandedContentProps {
   tour: Tour;
-  selectedPoint: string;
-  onPointSelect: (point: string) => void;
+  selectedPickupCity: string;
+  onPickupCitySelect: (city: string) => void;
   onActionClick: () => void;
   isActionEnabled: boolean;
   actionButtonText: string;
@@ -23,19 +16,13 @@ interface TourExpandedContentProps {
 
 export function TourExpandedContent({
   tour,
-  selectedPoint,
-  onPointSelect,
+  selectedPickupCity,
+  onPickupCitySelect,
   onActionClick,
   isActionEnabled,
   actionButtonText,
   hasPendingRequest
 }: TourExpandedContentProps) {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
-  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
   const pickupPoints = tour.route?.filter(stop => 
     stop.type === 'pickup' || stop.type === 'ramassage'
   ) || [];
@@ -57,8 +44,8 @@ export function TourExpandedContent({
         <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
         <SelectableCollectionPointsList
           points={pickupPoints}
-          selectedPoint={selectedPoint}
-          onPointSelect={onPointSelect}
+          selectedPoint={selectedPickupCity}
+          onPointSelect={onPickupCitySelect}
           isSelectionEnabled={tour.status === "Programmée"}
           tourDepartureDate={tour.departure_date}
         />
@@ -73,29 +60,6 @@ export function TourExpandedContent({
           {actionButtonText}
         </Button>
       </div>
-
-      <AuthDialog 
-        isOpen={showAuthDialog}
-        onClose={() => setShowAuthDialog(false)}
-        onSuccess={() => {
-          setShowAuthDialog(false);
-          onActionClick();
-        }}
-        requiredUserType="client"
-      />
-
-      <AccessDeniedMessage
-        userType="carrier"
-        isOpen={showAccessDeniedDialog}
-        onClose={() => setShowAccessDeniedDialog(false)}
-      />
-
-      <ApprovalRequestDialog
-        isOpen={showApprovalDialog}
-        onClose={() => setShowApprovalDialog(false)}
-        tourId={tour.id}
-        pickupCity={selectedPoint}
-      />
     </motion.div>
   );
 }

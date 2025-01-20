@@ -15,7 +15,7 @@ interface ClientTourCardProps {
 
 export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedPoint, setSelectedPoint] = useState<string>("");
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const { toast } = useToast();
 
@@ -31,8 +31,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     handleBookingButtonClick,
   } = useTourBooking(tour);
 
-  const handlePointSelect = (point: string) => {
-    setSelectedPoint(point);
+  const handlePickupCitySelect = (city: string) => {
+    setSelectedPickupCity(city);
   };
 
   const handleExpandClick = () => {
@@ -56,8 +56,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           
           <TourRoute 
             stops={tour.route} 
-            onPointSelect={handlePointSelect}
-            selectedPoint={selectedPoint}
+            onPointSelect={handlePickupCitySelect}
+            selectedPoint={selectedPickupCity}
           />
 
           <div className="flex justify-center">
@@ -73,10 +73,10 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           {isExpanded && (
             <TourExpandedContent 
               tour={tour}
-              selectedPoint={selectedPoint}
-              onPointSelect={handlePointSelect}
-              onActionClick={() => handleBookingButtonClick(selectedPoint)}
-              isActionEnabled={!!selectedPoint && !hasPendingRequest}
+              selectedPickupCity={selectedPickupCity}
+              onPickupCitySelect={handlePickupCitySelect}
+              onActionClick={() => handleBookingButtonClick(selectedPickupCity)}
+              isActionEnabled={!!selectedPickupCity && !hasPendingRequest}
               actionButtonText={tour.type === 'private' ? "Demander une approbation" : "Réserver cette tournée"}
               hasPendingRequest={hasPendingRequest}
             />
@@ -94,7 +94,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         showApprovalDialog={showApprovalDialog}
         setShowApprovalDialog={setShowApprovalDialog}
         tourId={tour.id}
-        pickupCity={selectedPoint}
+        pickupCity={selectedPickupCity}
         onApprovalSuccess={handleApprovalRequestSuccess}
       />
     </CardCustom>

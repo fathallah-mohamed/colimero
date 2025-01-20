@@ -58,7 +58,7 @@ export interface FetchedApprovalRequest {
   activation_token: string | null;
   activation_expires_at: string | null;
   pickup_city: string;
-  user: Client[];
+  user: Client;
   tour: {
     id: number;
     departure_country: string;

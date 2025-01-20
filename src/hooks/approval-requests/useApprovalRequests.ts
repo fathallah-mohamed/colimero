@@ -14,10 +14,9 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   const mapToApprovalRequest = (data: FetchedApprovalRequest[]): ApprovalRequest[] => {
     return data.map(item => ({
       ...item,
-      client: item.user[0],
+      client: item.user,
       tour: {
         ...item.tour,
-        route: Array.isArray(item.tour.route) ? item.tour.route : [],
         carriers: item.tour.carrier
       }
     }));
@@ -103,7 +102,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   };
 
   useEffect(() => {
-    console.log('useEffect triggered with userId:', userId, 'userType:', userType);
     if (userId) {
       fetchRequests();
     } else {
