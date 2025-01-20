@@ -44,7 +44,11 @@ export default function TourDetails() {
         bookings: data.bookings?.map(booking => ({
           ...booking,
           status: booking.status as BookingStatus,
-          special_items: booking.special_items || [],
+          special_items: Array.isArray(booking.special_items) 
+            ? booking.special_items 
+            : typeof booking.special_items === 'string'
+              ? JSON.parse(booking.special_items)
+              : [],
           content_types: booking.content_types || [],
           terms_accepted: Boolean(booking.terms_accepted),
           customs_declaration: Boolean(booking.customs_declaration)
