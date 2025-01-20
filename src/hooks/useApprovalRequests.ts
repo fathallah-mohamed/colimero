@@ -48,7 +48,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       if (userType === 'carrier') {
         console.log('Filtering for carrier:', userId);
         query = query.eq('tour.carrier_id', userId);
-      } else {
+      } else if (userType === 'client') {
         console.log('Filtering for client:', userId);
         query = query.eq('user_id', userId);
       }
