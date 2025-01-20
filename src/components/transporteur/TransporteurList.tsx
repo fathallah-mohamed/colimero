@@ -6,7 +6,6 @@ import { MapPin, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { TransporteurAvatar } from "./TransporteurAvatar";
 
 const countryNames: { [key: string]: string } = {
@@ -49,7 +48,6 @@ export function TransporteurList() {
         throw error;
       }
 
-      console.log("Carriers data:", data); // Debug log
       return data;
     },
   });
@@ -72,68 +70,66 @@ export function TransporteurList() {
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-400px)]">
-      <div className="grid gap-6">
-        {carriers?.map((carrier) => (
-          <motion.div
-            key={carrier.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Card className="bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="h-16 w-16">
-                    <TransporteurAvatar
-                      avatarUrl={carrier.avatar_url}
-                      companyName={carrier.company_name || `${carrier.first_name} ${carrier.last_name}`}
-                      size="md"
-                    />
+    <div className="grid gap-6">
+      {carriers?.map((carrier) => (
+        <motion.div
+          key={carrier.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className="bg-white hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="h-16 w-16">
+                  <TransporteurAvatar
+                    avatarUrl={carrier.avatar_url}
+                    companyName={carrier.company_name || `${carrier.first_name} ${carrier.last_name}`}
+                    size="md"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      {carrier.company_name}
+                    </h3>
                   </div>
 
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {carrier.company_name}
-                      </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-blue-500" />
+                      <span>
+                        {carrier.coverage_area?.map(code => countryNames[code] || code).join(" ↔ ")}
+                      </span>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-blue-500" />
+                      <span>{carrier.phone}</span>
+                    </div>
+                    {carrier.address && (
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-blue-500" />
-                        <span>
-                          {carrier.coverage_area?.map(code => countryNames[code] || code).join(" ↔ ")}
-                        </span>
+                        <span>{carrier.address}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-blue-500" />
-                        <span>{carrier.phone}</span>
-                      </div>
-                      {carrier.address && (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-blue-500" />
-                          <span>{carrier.address}</span>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
-
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate(`/transporteurs/${carrier.id}`)}
-                    className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                  >
-                    Voir le profil
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-    </ScrollArea>
+
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate(`/transporteurs/${carrier.id}`)}
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                >
+                  Voir le profil
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
   );
 }
