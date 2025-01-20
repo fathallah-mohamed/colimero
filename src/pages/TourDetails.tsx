@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TourCard } from "@/components/tour/TourCard";
-import type { Tour, RouteStop } from "@/types/tour";
+import type { Tour, RouteStop, TourStatus } from "@/types/tour";
 
 export default function TourDetails() {
   const { tourId } = useParams();
@@ -30,7 +30,18 @@ export default function TourDetails() {
       // Transform the route from Json to RouteStop[]
       const transformedTour: Tour = {
         ...data,
-        route: Array.isArray(data.route) ? data.route as RouteStop[] : []
+        route: Array.isArray(data.route) 
+          ? data.route.map((stop: any) => ({
+              name: stop.name || "",
+              location: stop.location || "",
+              time: stop.time || "",
+              type: stop.type || "pickup"
+            } as RouteStop))
+          : [],
+        status: data.status as TourStatus,
+        type: data.type || "public",
+        terms_accepted: data.terms_accepted || false,
+        customs_declaration: data.customs_declaration || false
       };
 
       return transformedTour;
