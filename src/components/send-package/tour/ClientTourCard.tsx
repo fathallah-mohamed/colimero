@@ -105,9 +105,27 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
         <div className="flex flex-col space-y-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-            <TourMainInfo tour={tour} />
-            <div className="flex gap-2 self-start">
+          <TourMainInfo tour={tour} />
+          
+          <TourRoute 
+            stops={tour.route}
+            selectedPoint={selectedPoint}
+            onPointSelect={setSelectedPoint}
+          />
+
+          {isExpanded && (
+            <TourExpandedContent
+              tour={tour}
+              selectedPoint={selectedPoint}
+              onPointSelect={setSelectedPoint}
+              onActionClick={handleBookingButtonClick}
+              isActionEnabled={!!selectedPoint}
+              actionButtonText="Réserver"
+            />
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center">
+            <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -127,26 +145,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
                 Partager
               </Button>
             </div>
-          </div>
-          
-          <TourRoute 
-            stops={tour.route}
-            selectedPoint={selectedPoint}
-            onPointSelect={setSelectedPoint}
-          />
 
-          {isExpanded && (
-            <TourExpandedContent
-              tour={tour}
-              selectedPoint={selectedPoint}
-              onPointSelect={setSelectedPoint}
-              onActionClick={handleBookingButtonClick}
-              isActionEnabled={!!selectedPoint}
-              actionButtonText="Réserver"
-            />
-          )}
-
-          <div className="flex justify-center">
             <Button
               variant="ghost"
               onClick={handleExpandClick}
