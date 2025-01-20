@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TourCard } from "@/components/tour/TourCard";
 import type { Tour, RouteStop, TourStatus } from "@/types/tour";
+import type { BookingStatus } from "@/types/booking";
 
 export default function TourDetails() {
   const { tourId } = useParams();
@@ -39,7 +40,15 @@ export default function TourDetails() {
         previous_status: data.previous_status as TourStatus | null,
         type: data.type,
         customs_declaration: Boolean(data.customs_declaration),
-        terms_accepted: Boolean(data.terms_accepted)
+        terms_accepted: Boolean(data.terms_accepted),
+        bookings: data.bookings?.map(booking => ({
+          ...booking,
+          status: booking.status as BookingStatus,
+          special_items: booking.special_items || [],
+          content_types: booking.content_types || [],
+          terms_accepted: Boolean(booking.terms_accepted),
+          customs_declaration: Boolean(booking.customs_declaration)
+        })) || []
       };
 
       return transformedTour;
