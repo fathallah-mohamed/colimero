@@ -8,15 +8,18 @@ import { Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourStatus, BookingStatus } from "@/types/tour";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { useState } from "react";
 
 export default function TourDetails() {
   const { tourId } = useParams();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const {
     showAuthDialog,
     setShowAuthDialog,
@@ -54,14 +57,14 @@ export default function TourDetails() {
           : typeof data.route === 'string' 
             ? JSON.parse(data.route) 
             : data.route,
-        status: data.status,
-        previous_status: data.previous_status,
+        status: data.status as TourStatus,
+        previous_status: data.previous_status as TourStatus | null,
         type: data.type,
         customs_declaration: Boolean(data.customs_declaration),
         terms_accepted: Boolean(data.terms_accepted),
         bookings: data.bookings?.map(booking => ({
           ...booking,
-          status: booking.status,
+          status: booking.status as BookingStatus,
           special_items: Array.isArray(booking.special_items) 
             ? booking.special_items 
             : typeof booking.special_items === 'string'
@@ -124,7 +127,13 @@ export default function TourDetails() {
   const handleBooking = async () => {
     if (!tour) return;
     const firstStop = tour.route[0];
-    await handleBookingClick(tour.id, firstStop.name);
+    setSelectedPickupCity(firstStop.name);
+
+    if (tour.type === 'private') {
+      setShowApprovalDialog(true);
+    } else {
+      await handleBookingClick(tour.id, firstStop.name);
+    }
   };
 
   return (
@@ -169,6 +178,13 @@ export default function TourDetails() {
         onClose={() => setShowAuthDialog(false)}
         onSuccess={handleAuthSuccess}
         requiredUserType="client"
+      />
+
+      <ApprovalRequestDialog
+        isOpen={showApprovalDialog}
+        onClose={() => setShowApprovalDialog(false)}
+        tourId={parseInt(tourId || "0")}
+        pickupCity={selectedPickupCity || ""}
       />
     </div>
   );
