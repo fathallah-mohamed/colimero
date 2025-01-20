@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Tour } from "@/types/tour";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
@@ -42,14 +41,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     <CardCustom className="bg-white hover:bg-gray-50 transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
       <div className="p-6">
         <div className="flex flex-col space-y-6">
-          <div className="flex items-center justify-between">
-            <TourMainInfo tour={tour} />
-            {tour.status === "Programmée" && (
-              <Badge className="bg-[#9b87f5]/10 text-[#9b87f5] hover:bg-[#9b87f5]/20 transition-colors">
-                Prochaine tournée
-              </Badge>
-            )}
-          </div>
+          <TourMainInfo tour={tour} />
           
           <TourRoute 
             stops={tour.route} 
