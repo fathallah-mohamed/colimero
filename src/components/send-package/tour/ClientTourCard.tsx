@@ -106,7 +106,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         }
       }
 
-      // Vérifier uniquement les réservations en attente
       const { data: pendingBooking, error } = await supabase
         .from('bookings')
         .select('id')
@@ -179,8 +178,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           {isExpanded && (
             <TourExpandedContent 
               tour={tour}
-              selectedPickupCity={selectedPoint}
-              onPickupCitySelect={handlePointSelect}
+              selectedPoint={selectedPoint}
+              onPointSelect={handlePointSelect}
               onActionClick={handleBookingButtonClick}
               isActionEnabled={!!selectedPoint && !hasPendingRequest}
               actionButtonText={tour.type === 'private' ? "Demander une approbation" : "Réserver cette tournée"}
