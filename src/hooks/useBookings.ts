@@ -17,7 +17,8 @@ export function useBookings() {
 
       console.log("Fetching bookings for user:", session.user.id);
 
-      const { data: bookingsData, error } = await supabase
+      // First fetch bookings
+      const { data: bookingsData, error: bookingsError } = await supabase
         .from("bookings")
         .select(`
           *,
@@ -28,32 +29,54 @@ export function useBookings() {
             destination_country,
             route,
             status,
-            carriers (
-              company_name,
-              avatar_url,
-              phone,
-              first_name,
-              last_name,
-              email
-            )
+            carrier_id
           )
         `)
         .eq("user_id", session.user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error("Error fetching bookings:", error);
-        throw error;
+      if (bookingsError) {
+        console.error("Error fetching bookings:", bookingsError);
+        throw bookingsError;
       }
 
-      console.log("Raw bookings data:", bookingsData);
+      // Then fetch carriers data for the tours
+      const bookingsWithCarriers = await Promise.all(
+        (bookingsData || []).map(async (booking) => {
+          if (booking.tours?.carrier_id) {
+            const { data: carrierData } = await supabase
+              .from("carriers")
+              .select(`
+                company_name,
+                avatar_url,
+                phone,
+                first_name,
+                last_name,
+                email
+              `)
+              .eq("id", booking.tours.carrier_id)
+              .single();
+
+            return {
+              ...booking,
+              tours: {
+                ...booking.tours,
+                carriers: carrierData
+              }
+            };
+          }
+          return booking;
+        })
+      );
+
+      console.log("Raw bookings data:", bookingsWithCarriers);
       
-      if (!bookingsData) {
+      if (!bookingsWithCarriers) {
         console.log("No bookings found");
         return [];
       }
 
-      const formattedBookings = bookingsData.map((booking: any) => {
+      const formattedBookings = bookingsWithCarriers.map((booking: any) => {
         let specialItems = [];
         try {
           if (typeof booking.special_items === 'string') {
@@ -85,6 +108,6 @@ export function useBookings() {
     enabled: true,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    staleTime: 0, // Les données sont considérées comme périmées immédiatement
+    staleTime: 0,
   });
 }
