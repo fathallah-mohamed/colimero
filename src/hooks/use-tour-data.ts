@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus, RouteStop } from "@/types/tour";
+import type { Tour, TourStatus } from "@/types/tour";
 
 interface UseTourDataProps {
   departureCountry: string;
@@ -8,6 +8,7 @@ interface UseTourDataProps {
   sortBy: string;
   status: TourStatus | "all";
   carrierOnly?: boolean;
+  tourType: "public" | "private";
 }
 
 export function useTourData({
@@ -16,13 +17,16 @@ export function useTourData({
   sortBy,
   status,
   carrierOnly = false,
+  tourType
 }: UseTourDataProps) {
   const [loading, setLoading] = useState(true);
   const [tours, setTours] = useState<Tour[]>([]);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchTours = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // Get the current user's ID first
       const { data: { user } } = await supabase.auth.getUser();
@@ -33,6 +37,7 @@ export function useTourData({
         sortBy, 
         status, 
         carrierOnly,
+        tourType,
         userId: user?.id 
       });
 
@@ -40,7 +45,6 @@ export function useTourData({
       if (carrierOnly && !user) {
         console.log('No authenticated user found for carrier mode');
         setTours([]);
-        setLoading(false);
         return;
       }
 
@@ -79,7 +83,8 @@ export function useTourData({
           )
         `)
         .eq('departure_country', departureCountry)
-        .eq('destination_country', destinationCountry);
+        .eq('destination_country', destinationCountry)
+        .eq('type', tourType);
 
       // Only apply carrier filter if we're in carrier mode and have a valid user
       if (carrierOnly && user) {
@@ -94,37 +99,25 @@ export function useTourData({
       const [sortField, sortDirection] = sortBy.split('_');
       query = query.order(sortField === 'created' ? 'created_at' : 'departure_date', { ascending: sortDirection === 'asc' });
 
-      const { data: toursData, error } = await query;
+      const { data: toursData, error: fetchError } = await query;
 
-      if (error) {
-        console.error('Error fetching tours:', error);
+      if (fetchError) {
+        console.error('Error fetching tours:', fetchError);
+        setError(fetchError);
         setTours([]);
         return;
       }
 
       console.log('Fetched tours:', toursData);
 
-      // Transform the data to match the Tour type
       const transformedTours = toursData?.map(tour => {
         const routeData = typeof tour.route === 'string' 
           ? JSON.parse(tour.route) 
           : tour.route;
 
-        const parsedRoute: RouteStop[] = Array.isArray(routeData) 
-          ? routeData.map(stop => ({
-              name: stop.name,
-              location: stop.location,
-              time: stop.time,
-              type: stop.type,
-              collection_date: stop.collection_date
-            }))
-          : [];
-
         return {
           ...tour,
-          route: parsedRoute,
-          status: tour.status as TourStatus,
-          type: tour.type,
+          route: routeData,
           carriers: tour.carriers ? {
             ...tour.carriers,
             carrier_capacities: Array.isArray(tour.carriers.carrier_capacities)
@@ -144,6 +137,7 @@ export function useTourData({
       setTours(transformedTours);
     } catch (error) {
       console.error('Error in fetchTours:', error);
+      setError(error as Error);
       setTours([]);
     } finally {
       setLoading(false);
@@ -152,11 +146,11 @@ export function useTourData({
 
   useEffect(() => {
     fetchTours();
-  }, [departureCountry, destinationCountry, sortBy, status, carrierOnly]);
+  }, [departureCountry, destinationCountry, sortBy, status, carrierOnly, tourType]);
 
   return {
     loading,
     tours,
-    fetchTours,
+    error
   };
 }

@@ -12,13 +12,13 @@ import type { TourStatus } from "@/types/tour";
 import { useSessionInitializer } from "@/components/navigation/SessionInitializer";
 
 export default function EnvoyerColis() {
-  useSessionInitializer(); // Initialize session
+  useSessionInitializer();
   const { toast } = useToast();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("all");
   const [tourType, setTourType] = useState<"public" | "private">("public");
   const [sortBy, setSortBy] = useState<string>("departure_asc");
-  
+
   const {
     loading,
     tours,
