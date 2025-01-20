@@ -3,23 +3,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApprovalActions } from "./useApprovalActions";
 import { useRequestManagement } from "./useRequestManagement";
 import { useToast } from "./use-toast";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
-  const [requests, setRequests] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
   const { handleCancelRequest, handleDeleteRequest } = useRequestManagement();
   const { toast } = useToast();
 
   const fetchRequests = async () => {
-    if (!userId) {
-      console.log('No user ID provided');
-      setLoading(false);
-      setRequests([]);
-      return;
-    }
-
     try {
+      setLoading(true);
+      setError(null);
+
+      if (!userId) {
+        console.log('No user ID provided');
+        setRequests([]);
+        return;
+      }
+
       console.log('Fetching requests for user:', userId, 'type:', userType);
       
       let query = supabase
@@ -57,22 +61,25 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         query = query.eq('user_id', userId);
       }
 
-      const { data: approvalData, error } = await query;
+      const { data, error: fetchError } = await query;
 
-      if (error) {
-        console.error('Error fetching approval requests:', error);
+      if (fetchError) {
+        console.error('Error fetching approval requests:', fetchError);
+        setError(fetchError.message);
         toast({
           variant: "destructive",
           title: "Erreur",
           description: "Impossible de charger vos demandes d'approbation"
         });
         setRequests([]);
-      } else {
-        console.log('Fetched approval requests:', approvalData);
-        setRequests(approvalData || []);
+        return;
       }
+
+      console.log('Fetched approval requests:', data);
+      setRequests(data || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
+      setError(error.message);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -90,31 +97,30 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       fetchRequests();
     } else {
       setLoading(false);
+      setRequests([]);
     }
   }, [userId, userType]);
+
+  const handleAction = async (actionFn: Function, request: any) => {
+    try {
+      const result = await actionFn(request);
+      if (result?.success) {
+        await fetchRequests();
+      }
+      return result;
+    } catch (error) {
+      console.error('Error handling action:', error);
+      return { success: false, error };
+    }
+  };
 
   return { 
     requests, 
     loading,
-    handleApproveRequest: async (request: any) => {
-      const success = await handleApproveRequest(request);
-      if (success) await fetchRequests();
-      return success;
-    },
-    handleRejectRequest: async (request: any) => {
-      const success = await handleRejectRequest(request);
-      if (success) await fetchRequests();
-      return success;
-    },
-    handleCancelRequest: async (requestId: string) => {
-      const success = await handleCancelRequest(requestId);
-      if (success) await fetchRequests();
-      return success;
-    },
-    handleDeleteRequest: async (requestId: string) => {
-      const success = await handleDeleteRequest(requestId);
-      if (success) await fetchRequests();
-      return success;
-    }
+    error,
+    handleApproveRequest: async (request: any) => handleAction(handleApproveRequest, request),
+    handleRejectRequest: async (request: any) => handleAction(handleRejectRequest, request),
+    handleCancelRequest: async (requestId: string) => handleAction(handleCancelRequest, requestId),
+    handleDeleteRequest: async (requestId: string) => handleAction(handleDeleteRequest, requestId)
   };
 }

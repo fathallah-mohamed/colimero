@@ -1,16 +1,17 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ApprovalRequestCard } from "./ApprovalRequestCard";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 interface ApprovalRequestTabsProps {
-  pendingRequests: any[];
-  approvedRequests: any[];
-  rejectedRequests: any[];
+  pendingRequests: ApprovalRequest[];
+  approvedRequests: ApprovalRequest[];
+  rejectedRequests: ApprovalRequest[];
   userType: string | undefined;
-  handleApproveRequest: (request: any) => void;
-  handleRejectRequest: (request: any) => void;
-  handleCancelRequest: (request: any) => void;
-  handleDeleteRequest: (request: any) => void;
+  handleApproveRequest: (request: ApprovalRequest) => void;
+  handleRejectRequest: (request: ApprovalRequest) => void;
+  handleCancelRequest: (request: string) => void;
+  handleDeleteRequest: (request: string) => void;
 }
 
 export function ApprovalRequestTabs({
@@ -23,7 +24,7 @@ export function ApprovalRequestTabs({
   handleCancelRequest,
   handleDeleteRequest
 }: ApprovalRequestTabsProps) {
-  const renderRequests = (requests: any[], showActions: boolean = false) => {
+  const renderRequests = (requests: ApprovalRequest[], showActions: boolean = false) => {
     if (!requests || requests.length === 0) {
       return (
         <div className="text-center py-8 text-gray-500">

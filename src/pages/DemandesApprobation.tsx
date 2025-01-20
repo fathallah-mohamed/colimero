@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
+import { ProfileLoading } from "@/components/profile/ProfileLoading";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function DemandesApprobation() {
 
   const { 
     requests, 
-    loading, 
+    loading: requestsLoading, 
     handleApproveRequest,
     handleRejectRequest,
     handleCancelRequest,
@@ -50,13 +51,11 @@ export default function DemandesApprobation() {
     getSession();
   }, [navigate]);
 
-  if (isLoading || loading) {
+  if (isLoading || requestsLoading) {
     return (
       <div className="min-h-screen">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <ProfileLoading />
       </div>
     );
   }
