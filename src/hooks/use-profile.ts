@@ -16,23 +16,13 @@ export function useProfile() {
 
   const checkUser = async () => {
     try {
-      console.log('Checking user session...');
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        throw sessionError;
-      }
-
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        console.log('No session found, redirecting to login');
         navigate('/connexion');
         return;
       }
       
       const currentUserType = session.user.user_metadata?.user_type;
-      console.log('Current user type:', currentUserType);
-      
       if (!currentUserType) {
         console.log('No user type found, setting default to admin');
         const { error: updateError } = await supabase.auth.updateUser({
@@ -50,27 +40,14 @@ export function useProfile() {
       }
     } catch (error) {
       console.error('Error checking user:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur de session",
-        description: "Une erreur est survenue lors de la vérification de votre session. Veuillez vous reconnecter.",
-      });
       navigate('/connexion');
     }
   };
 
   const fetchProfile = async () => {
     try {
-      console.log('Fetching profile...');
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        throw sessionError;
-      }
-
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        console.log('No user session found');
         setProfile(null);
         setLoading(false);
         return;
@@ -99,7 +76,7 @@ export function useProfile() {
       } else if (userType === 'carrier') {
         profileData = await fetchCarrierProfile(session.user.id, session.user.email);
       } else {
-        console.log('Fetching client profile...');
+        // Utilisation de maybeSingle() au lieu de single() pour les clients
         const { data: clientData, error } = await supabase
           .from('clients')
           .select('*')
@@ -125,6 +102,7 @@ export function useProfile() {
 
       if (profileData) {
         console.log('Profile data loaded:', profileData);
+        // Assurez-vous que l'email est défini
         if (!profileData.email && session.user.email) {
           profileData.email = session.user.email;
         }
@@ -137,9 +115,8 @@ export function useProfile() {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de charger votre profil. Veuillez vous reconnecter.",
+        description: "Impossible de charger votre profil",
       });
-      navigate('/connexion');
     } finally {
       setLoading(false);
     }
