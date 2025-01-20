@@ -5,13 +5,12 @@ import { TourDetailsHero } from "@/components/tour/TourDetailsHero";
 import { ClientTourTimeline } from "@/components/send-package/tour/ClientTourTimeline";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useBookingFlow } from "@/hooks/useBookingFlow";
-import type { Tour } from "@/types/tour";
+import { useBookingFlow } from "@/components/tour/useBookingFlow";
+import type { Tour, TourStatus, BookingStatus } from "@/types/tour";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { useState } from "react";
 
 export default function TourDetails() {
   const { tourId } = useParams();
@@ -39,15 +38,42 @@ export default function TourDetails() {
           carriers (
             *,
             carrier_capacities (*)
-          )
+          ),
+          bookings (*)
         `)
         .eq("id", parseInt(tourId))
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
-      if (!data) throw new Error("Tour not found");
 
-      return data as Tour;
+      // Transform the route data to match the RouteStop[] type
+      const transformedTour: Tour = {
+        ...data,
+        route: Array.isArray(data.route) 
+          ? data.route 
+          : typeof data.route === 'string' 
+            ? JSON.parse(data.route) 
+            : data.route,
+        status: data.status as TourStatus,
+        previous_status: data.previous_status as TourStatus | null,
+        type: data.type,
+        customs_declaration: Boolean(data.customs_declaration),
+        terms_accepted: Boolean(data.terms_accepted),
+        bookings: data.bookings?.map(booking => ({
+          ...booking,
+          status: booking.status as BookingStatus,
+          special_items: Array.isArray(booking.special_items) 
+            ? booking.special_items 
+            : typeof booking.special_items === 'string'
+              ? JSON.parse(booking.special_items)
+              : [],
+          content_types: booking.content_types || [],
+          terms_accepted: Boolean(booking.terms_accepted),
+          customs_declaration: Boolean(booking.customs_declaration)
+        })) || []
+      };
+
+      return transformedTour;
     }
   });
 
@@ -125,6 +151,11 @@ export default function TourDetails() {
 
             <ClientTourTimeline 
               tour={tour}
+              selectedPoint={selectedPoint}
+              onPointSelect={setSelectedPoint}
+              onActionClick={() => handleBookingClick(tour.id, selectedPoint)}
+              isActionEnabled={!!selectedPoint}
+              actionButtonText="Réserver"
             />
           </div>
         </div>
