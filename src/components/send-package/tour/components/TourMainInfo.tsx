@@ -1,6 +1,6 @@
 import { Tour } from "@/types/tour";
 import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar";
-import { Calendar, Clock, Truck, CreditCard } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -16,7 +16,6 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* Transporteur */}
       <div className="flex items-center gap-3">
         <TransporteurAvatar 
           avatarUrl={tour.carriers?.avatar_url}
@@ -28,7 +27,6 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
         </span>
       </div>
 
-      {/* Date de départ */}
       <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
         <Calendar className="h-5 w-5 text-blue-600" />
         <div className="flex flex-col">
@@ -39,7 +37,6 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
         </div>
       </div>
 
-      {/* Durée de la tournée */}
       <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg">
         <Clock className="h-5 w-5 text-purple-600" />
         <div className="flex flex-col">
@@ -50,7 +47,6 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
         </div>
       </div>
 
-      {/* Prix et capacité */}
       <div className="flex flex-col gap-2">
         <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary text-center">
           {pricePerKg} €/kg
