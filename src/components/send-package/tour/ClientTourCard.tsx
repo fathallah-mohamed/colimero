@@ -27,7 +27,7 @@ export function ClientTourCard({
   userType,
   isUpcoming = false
 }: ClientTourCardProps) {
-  const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -55,7 +55,7 @@ export function ClientTourCard({
       return;
     }
 
-    const userType = session.user.user_metadata?.user_type;
+    const userType = session.user.user_meta_data?.user_type;
     if (userType === 'carrier') {
       setShowAccessDeniedDialog(true);
       return;
@@ -124,8 +124,8 @@ export function ClientTourCard({
           {isExpanded && (
             <TourExpandedContent
               tour={tour}
-              selectedPickupCity={selectedPickupCity}
-              onPickupCitySelect={setSelectedPickupCity}
+              selectedPoint={selectedPickupCity || ''}
+              onPointSelect={setSelectedPickupCity}
               onActionClick={handleActionClick}
               isActionEnabled={isActionEnabled()}
               actionButtonText={getActionButtonText()}
@@ -146,7 +146,7 @@ export function ClientTourCard({
         isOpen={showApprovalDialog}
         onClose={() => setShowApprovalDialog(false)}
         tourId={tour.id}
-        pickupCity={selectedPickupCity}
+        pickupCity={selectedPickupCity || ''}
       />
     </div>
   );

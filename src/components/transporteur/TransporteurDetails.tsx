@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TransporteurHeader } from "./TransporteurHeader";
@@ -11,7 +11,6 @@ import { Json } from "@/integrations/supabase/types";
 
 export function TransporteurDetails() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const { data: carrier, isLoading: isLoadingCarrier } = useQuery({
     queryKey: ['carrier', id],
