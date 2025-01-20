@@ -13,6 +13,7 @@ import { PackageStep } from "./form/steps/PackageStep";
 import { ConfirmationStep } from "./form/steps/ConfirmationStep";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 export interface BookingFormProps {
   tourId: number;
@@ -87,6 +88,11 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       };
 
       await handleSubmit(formData);
+      toast({
+        title: "Réservation créée",
+        description: "Votre réservation a été créée avec succès.",
+      });
+      
       if (onSuccess) {
         onSuccess();
       } else {
@@ -94,6 +100,11 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       }
     } catch (error: any) {
       console.error("Error submitting booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la création de la réservation.",
+      });
     }
   };
 
