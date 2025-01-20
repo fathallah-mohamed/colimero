@@ -1,16 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface TourDialogsProps {
-  showExistingBookingDialog: boolean;
-  setShowExistingBookingDialog: (show: boolean) => void;
-  showPendingApprovalDialog: boolean;
-  setShowPendingApprovalDialog: (show: boolean) => void;
   showAccessDeniedDialog: boolean;
   setShowAccessDeniedDialog: (show: boolean) => void;
+  showAuthDialog: boolean;
+  setShowAuthDialog: (show: boolean) => void;
   showApprovalDialog: boolean;
   setShowApprovalDialog: (show: boolean) => void;
   tourId: number;
@@ -19,17 +17,15 @@ interface TourDialogsProps {
 }
 
 export function TourDialogs({
-  showExistingBookingDialog,
-  setShowExistingBookingDialog,
-  showPendingApprovalDialog,
-  setShowPendingApprovalDialog,
   showAccessDeniedDialog,
   setShowAccessDeniedDialog,
+  showAuthDialog,
+  setShowAuthDialog,
   showApprovalDialog,
   setShowApprovalDialog,
   tourId,
   pickupCity,
-  onApprovalSuccess,
+  onApprovalSuccess
 }: TourDialogsProps) {
   const navigate = useNavigate();
 
@@ -41,47 +37,28 @@ export function TourDialogs({
         onClose={() => setShowAccessDeniedDialog(false)}
       />
 
-      <Dialog open={showExistingBookingDialog} onOpenChange={setShowExistingBookingDialog}>
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Réservation existante</DialogTitle>
+            <DialogTitle>Connexion requise</DialogTitle>
             <DialogDescription>
-              Vous avez déjà une réservation en attente pour cette tournée.
+              Vous devez être connecté pour effectuer cette action.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-2">
             <Button 
               variant="outline" 
-              onClick={() => setShowExistingBookingDialog(false)}
+              onClick={() => setShowAuthDialog(false)}
             >
-              Fermer
+              Annuler
             </Button>
             <Button 
               onClick={() => {
-                setShowExistingBookingDialog(false);
-                navigate('/mes-reservations');
+                setShowAuthDialog(false);
+                navigate('/connexion');
               }}
             >
-              Voir mes réservations
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showPendingApprovalDialog} onOpenChange={setShowPendingApprovalDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Demande en attente</DialogTitle>
-            <DialogDescription>
-              Vous avez déjà une demande d'approbation en attente pour cette tournée. 
-              Veuillez attendre la réponse du transporteur avant d'effectuer une nouvelle demande.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button 
-              onClick={() => setShowPendingApprovalDialog(false)}
-            >
-              Compris
+              Se connecter
             </Button>
           </DialogFooter>
         </DialogContent>
