@@ -93,6 +93,20 @@ export type Database = {
             referencedRelation: "tours"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_approval_requests_client"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "client_consents"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "fk_approval_requests_client"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       booking_statuses: {

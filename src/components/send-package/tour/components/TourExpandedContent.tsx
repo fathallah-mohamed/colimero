@@ -1,39 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Tour, TourStatus } from "@/types/tour";
+import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
+import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Tour } from "@/types/tour";
-import { Button } from "@/components/ui/button";
-import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
-import { TourCapacityDisplay } from "@/components/transporteur/TourCapacityDisplay";
-import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
+import { useNavigate } from "react-router-dom";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
-import { motion } from "framer-motion";
 
 interface TourExpandedContentProps {
   tour: Tour;
-  selectedPoint: string;
-  onPointSelect: (point: string) => void;
+  selectedPickupCity: string | null;
+  onPickupCitySelect: (city: string) => void;
   onActionClick: () => void;
   isActionEnabled: boolean;
   actionButtonText: string;
   userType?: string;
-  onStatusChange?: (tourId: number, newStatus: string) => Promise<void>;
-  hasPendingRequest?: boolean;
+  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
 }
 
-export function TourExpandedContent({ 
-  tour, 
-  selectedPoint, 
-  onPointSelect,
-  onActionClick,
-  isActionEnabled,
-  actionButtonText,
+export function TourExpandedContent({
+  tour,
+  selectedPickupCity,
+  onPickupCitySelect,
   userType,
-  onStatusChange,
-  hasPendingRequest
+  onStatusChange
 }: TourExpandedContentProps) {
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,8 +67,36 @@ export function TourExpandedContent({
     checkApprovalStatus();
   }, [tour.id, tour.type]);
 
+  const getActionButtonText = () => {
+    if (!selectedPickupCity) {
+      return "Sélectionnez un point de collecte";
+    }
+    
+    if (tour.type === 'private') {
+      if (approvalStatus === 'pending') {
+        return "Demande d'approbation en attente";
+      } else if (approvalStatus === 'approved') {
+        return "Réserver maintenant";
+      } else if (approvalStatus === 'rejected') {
+        return "Demande rejetée";
+      }
+      return "Demander l'approbation";
+    }
+    
+    return "Réserver maintenant";
+  };
+
+  const isActionEnabled = () => {
+    if (!selectedPickupCity) return false;
+    if (tour.type === 'private') {
+      if (approvalStatus === 'pending') return false;
+      return approvalStatus === 'approved' || !approvalStatus;
+    }
+    return true;
+  };
+
   const handleActionClick = async () => {
-    if (!selectedPoint) {
+    if (!selectedPickupCity) {
       toast({
         variant: "destructive",
         title: "Point de collecte requis",
@@ -98,12 +120,17 @@ export function TourExpandedContent({
 
     if (tour.type === 'private') {
       if (approvalStatus === 'approved') {
-        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+      } else if (approvalStatus === 'pending') {
+        toast({
+          title: "Demande en attente",
+          description: "Vous avez déjà une demande d'approbation en attente pour cette tournée",
+        });
       } else {
         setShowApprovalDialog(true);
       }
     } else {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
   };
 
@@ -124,31 +151,28 @@ export function TourExpandedContent({
         tourId={tour.id}
       />
 
-      <TourCapacityDisplay 
-        totalCapacity={tour.total_capacity} 
-        remainingCapacity={tour.remaining_capacity} 
-      />
-      
       <div>
         <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
         <SelectableCollectionPointsList
           points={pickupPoints}
-          selectedPoint={selectedPoint}
-          onPointSelect={onPointSelect}
+          selectedPoint={selectedPickupCity || ''}
+          onPointSelect={onPickupCitySelect}
           isSelectionEnabled={tour.status === "Programmée"}
           tourDepartureDate={tour.departure_date}
         />
       </div>
 
-      <div>
-        <Button 
-          onClick={handleActionClick}
-          className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-          disabled={!isActionEnabled || isLoading || hasPendingRequest}
-        >
-          {hasPendingRequest ? "Vous avez déjà une demande sur cette tournée" : actionButtonText}
-        </Button>
-      </div>
+      {userType === 'client' && tour.status === "Programmée" && (
+        <div>
+          <Button 
+            onClick={handleActionClick}
+            className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
+            disabled={!isActionEnabled() || isLoading || approvalStatus === 'pending'}
+          >
+            {getActionButtonText()}
+          </Button>
+        </div>
+      )}
 
       <AuthDialog 
         isOpen={showAuthDialog}
@@ -170,7 +194,7 @@ export function TourExpandedContent({
         isOpen={showApprovalDialog}
         onClose={() => setShowApprovalDialog(false)}
         tourId={tour.id}
-        pickupCity={selectedPoint}
+        pickupCity={selectedPickupCity || ''}
       />
     </motion.div>
   );
