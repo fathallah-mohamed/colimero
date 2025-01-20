@@ -15,7 +15,24 @@ export const supabase = createClient<Database>(
       storage: localStorage,
       storageKey: 'supabase.auth.token',
       flowType: 'pkce',
-      debug: process.env.NODE_ENV === 'development'
+      debug: true // Activé pour le débogage
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'supabase-js-web'
+      }
     }
   }
 );
+
+// Add debug logging for initialization
+console.log('Supabase client initialized with URL:', SUPABASE_URL);
+
+// Add session check on init
+supabase.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    console.error('Error checking initial session:', error);
+  } else {
+    console.log('Initial session check:', data.session ? 'Session found' : 'No session');
+  }
+});
