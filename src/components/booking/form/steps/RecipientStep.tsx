@@ -29,47 +29,55 @@ export function RecipientStep({ form }: RecipientStepProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchRecipients();
-  }, []);
+    const fetchRecipients = async () => {
+      try {
+        setIsLoading(true);
+        
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          throw sessionError;
+        }
 
-  const fetchRecipients = async () => {
-    try {
-      setIsLoading(true);
-      
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        throw sessionError;
-      }
+        if (!session) {
+          console.log('No active session found');
+          toast({
+            variant: "destructive",
+            title: "Non authentifié",
+            description: "Vous devez être connecté pour accéder à vos destinataires.",
+          });
+          setIsLoading(false);
+          return;
+        }
 
-      if (!session) {
+        console.log('Fetching recipients for user:', session.user.id);
+        const { data: recipientsData, error } = await supabase
+          .from('recipients')
+          .select('*')
+          .eq('client_id', session.user.id);
+
+        if (error) {
+          console.error('Error fetching recipients:', error);
+          throw error;
+        }
+        
+        console.log('Recipients data:', recipientsData);
+        setRecipients(recipientsData || []);
+      } catch (error: any) {
+        console.error('Error in fetchRecipients:', error);
         toast({
           variant: "destructive",
-          title: "Non authentifié",
-          description: "Vous devez être connecté pour accéder à vos destinataires.",
+          title: "Erreur",
+          description: "Impossible de charger vos destinataires. Veuillez réessayer.",
         });
-        return;
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      const { data: recipientsData, error } = await supabase
-        .from('recipients')
-        .select('*')
-        .eq('client_id', session.user.id);
-
-      if (error) throw error;
-      
-      setRecipients(recipientsData || []);
-    } catch (error: any) {
-      console.error('Error fetching recipients:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de charger vos destinataires. Veuillez réessayer.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    fetchRecipients();
+  }, [toast]);
 
   const handleRecipientSelect = (recipient: Recipient) => {
     setSelectedRecipient(recipient);
