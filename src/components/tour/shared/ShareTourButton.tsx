@@ -15,12 +15,22 @@ export function ShareTourButton({ tourId, className }: ShareTourButtonProps) {
 
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: 'Partager la tournée',
-          text: 'Consultez cette tournée',
-          url: tourUrl,
-        });
+        try {
+          await navigator.share({
+            title: 'Partager la tournée',
+            text: 'Consultez cette tournée',
+            url: tourUrl,
+          });
+        } catch (shareError) {
+          // Si le partage natif échoue, on replie sur la copie du lien
+          await navigator.clipboard.writeText(tourUrl);
+          toast({
+            title: "Lien copié !",
+            description: "Le lien de la tournée a été copié dans votre presse-papiers",
+          });
+        }
       } else {
+        // Pas de partage natif disponible, on copie directement le lien
         await navigator.clipboard.writeText(tourUrl);
         toast({
           title: "Lien copié !",
@@ -28,14 +38,12 @@ export function ShareTourButton({ tourId, className }: ShareTourButtonProps) {
         });
       }
     } catch (error) {
-      if (error instanceof Error && error.name !== 'AbortError') {
-        console.error('Error sharing:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de partager la tournée",
-        });
-      }
+      console.error('Error sharing:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de partager la tournée",
+      });
     }
   };
 
