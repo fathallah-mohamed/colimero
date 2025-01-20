@@ -1,15 +1,13 @@
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export default function Register() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-6">Inscription</h1>
-        {/* Registration form will be added here */}
-      </main>
-      <Footer />
+      <div className="container mx-auto px-4 py-8">
+        <RegisterForm onLogin={() => {}} />
+      </div>
     </div>
   );
 }

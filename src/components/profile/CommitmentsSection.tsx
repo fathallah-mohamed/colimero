@@ -2,6 +2,7 @@ import { Shield, Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileData } from "@/types/profile";
+import { CarrierCommitment } from "@/types/commitments";
 
 interface CommitmentsSectionProps {
   profile: ProfileData;
@@ -10,17 +11,6 @@ interface CommitmentsSectionProps {
 interface CommitmentStatusProps {
   label: string;
   description: string;
-}
-
-interface CommitmentType {
-  id: string;
-  label: string;
-  description: string;
-}
-
-interface CarrierCommitment {
-  accepted: boolean;
-  commitment_type: CommitmentType;
 }
 
 function CommitmentStatus({ label, description }: CommitmentStatusProps) {
