@@ -1,8 +1,7 @@
 import { Tour } from "@/types/tour";
-import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
-import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface TourExpandedContentProps {
   tour: Tour;
@@ -23,43 +22,33 @@ export function TourExpandedContent({
   actionButtonText,
   hasPendingRequest
 }: TourExpandedContentProps) {
-  const pickupPoints = tour.route?.filter(stop => 
-    stop.type === 'pickup' || stop.type === 'ramassage'
-  ) || [];
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleBookingClick = () => {
+    if (!selectedPickupCity) {
+      toast({
+        variant: "destructive",
+        title: "Point de collecte requis",
+        description: "Veuillez sélectionner un point de collecte avant de réserver",
+      });
+      return;
+    }
+
+    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+  };
 
   return (
-    <motion.div 
-      initial={{ height: 0, opacity: 0 }}
-      animate={{ height: "auto", opacity: 1 }}
-      exit={{ height: 0, opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="pt-6 space-y-6"
-    >
-      <ClientTimeline 
-        status={tour.status} 
-        tourId={tour.id}
-      />
-
-      <div>
-        <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
-        <SelectableCollectionPointsList
-          points={pickupPoints}
-          selectedPoint={selectedPickupCity}
-          onPointSelect={onPickupCitySelect}
-          isSelectionEnabled={tour.status === "Programmée"}
-          tourDepartureDate={tour.departure_date}
-        />
-      </div>
-
-      <div>
-        <Button 
-          onClick={onActionClick}
-          className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-          disabled={!isActionEnabled || hasPendingRequest}
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <Button
+          onClick={handleBookingClick}
+          disabled={!selectedPickupCity}
+          className="bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
         >
-          {actionButtonText}
+          Réserver maintenant
         </Button>
       </div>
-    </motion.div>
+    </div>
   );
 }
