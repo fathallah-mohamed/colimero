@@ -5,6 +5,7 @@ import Profile from "@/pages/Profile";
 import Tours from "@/pages/Tours";
 import TourDetails from "@/pages/TourDetails";
 import MesDemandesApprobation from "@/pages/MesDemandesApprobation";
+import EnvoyerColis from "@/pages/EnvoyerColis";
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function AppRoutes() {
       <Route path="/tours" element={<Tours />} />
       <Route path="/tours/:id" element={<TourDetails />} />
       <Route path="/mes-demandes-approbation" element={<MesDemandesApprobation />} />
+      <Route path="/envoyer-colis" element={<EnvoyerColis />} />
     </Routes>
   );
 }
