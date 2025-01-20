@@ -13,126 +13,28 @@ import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface TourExpandedContentProps {
   tour: Tour;
-  selectedPickupCity: string | null;
-  onPickupCitySelect: (city: string) => void;
+  selectedPoint: string;
+  onPointSelect: (point: string) => void;
   onActionClick: () => void;
   isActionEnabled: boolean;
   actionButtonText: string;
-  userType?: string;
-  onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
+  hasPendingRequest: boolean;
 }
 
 export function TourExpandedContent({
   tour,
-  selectedPickupCity,
-  onPickupCitySelect,
-  userType,
-  onStatusChange
+  selectedPoint,
+  onPointSelect,
+  onActionClick,
+  isActionEnabled,
+  actionButtonText,
+  hasPendingRequest
 }: TourExpandedContentProps) {
-  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkApprovalStatus = async () => {
-      if (tour.type === 'private') {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          try {
-            const { data: approvalRequest, error } = await supabase
-              .from('approval_requests')
-              .select('status')
-              .eq('tour_id', tour.id)
-              .eq('user_id', session.user.id)
-              .maybeSingle();
-
-            if (error) {
-              console.error('Error checking approval status:', error);
-              return;
-            }
-
-            setApprovalStatus(approvalRequest?.status || null);
-          } catch (error) {
-            console.error('Error checking approval status:', error);
-          }
-        }
-      }
-      setIsLoading(false);
-    };
-
-    checkApprovalStatus();
-  }, [tour.id, tour.type]);
-
-  const getActionButtonText = () => {
-    if (!selectedPickupCity) {
-      return "Sélectionnez un point de collecte";
-    }
-    
-    if (tour.type === 'private') {
-      if (approvalStatus === 'pending') {
-        return "Demande d'approbation en attente";
-      } else if (approvalStatus === 'approved') {
-        return "Réserver maintenant";
-      } else if (approvalStatus === 'rejected') {
-        return "Demande rejetée";
-      }
-      return "Demander l'approbation";
-    }
-    
-    return "Réserver maintenant";
-  };
-
-  const isActionEnabled = () => {
-    if (!selectedPickupCity) return false;
-    if (tour.type === 'private') {
-      if (approvalStatus === 'pending') return false;
-      return approvalStatus === 'approved' || !approvalStatus;
-    }
-    return true;
-  };
-
-  const handleActionClick = async () => {
-    if (!selectedPickupCity) {
-      toast({
-        variant: "destructive",
-        title: "Point de collecte requis",
-        description: "Veuillez sélectionner un point de collecte",
-      });
-      return;
-    }
-
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      setShowAuthDialog(true);
-      return;
-    }
-
-    const userType = session.user.user_metadata?.user_type;
-    if (userType === 'carrier') {
-      setShowAccessDeniedDialog(true);
-      return;
-    }
-
-    if (tour.type === 'private') {
-      if (approvalStatus === 'approved') {
-        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-      } else if (approvalStatus === 'pending') {
-        toast({
-          title: "Demande en attente",
-          description: "Vous avez déjà une demande d'approbation en attente pour cette tournée",
-        });
-      } else {
-        setShowApprovalDialog(true);
-      }
-    } else {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-    }
-  };
 
   const pickupPoints = tour.route?.filter(stop => 
     stop.type === 'pickup' || stop.type === 'ramassage'
@@ -155,31 +57,29 @@ export function TourExpandedContent({
         <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
         <SelectableCollectionPointsList
           points={pickupPoints}
-          selectedPoint={selectedPickupCity || ''}
-          onPointSelect={onPickupCitySelect}
+          selectedPoint={selectedPoint}
+          onPointSelect={onPointSelect}
           isSelectionEnabled={tour.status === "Programmée"}
           tourDepartureDate={tour.departure_date}
         />
       </div>
 
-      {userType === 'client' && tour.status === "Programmée" && (
-        <div>
-          <Button 
-            onClick={handleActionClick}
-            className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-            disabled={!isActionEnabled() || isLoading || approvalStatus === 'pending'}
-          >
-            {getActionButtonText()}
-          </Button>
-        </div>
-      )}
+      <div>
+        <Button 
+          onClick={onActionClick}
+          className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
+          disabled={!isActionEnabled || hasPendingRequest}
+        >
+          {actionButtonText}
+        </Button>
+      </div>
 
       <AuthDialog 
         isOpen={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
         onSuccess={() => {
           setShowAuthDialog(false);
-          handleActionClick();
+          onActionClick();
         }}
         requiredUserType="client"
       />
@@ -194,7 +94,7 @@ export function TourExpandedContent({
         isOpen={showApprovalDialog}
         onClose={() => setShowApprovalDialog(false)}
         tourId={tour.id}
-        pickupCity={selectedPickupCity || ''}
+        pickupCity={selectedPoint}
       />
     </motion.div>
   );

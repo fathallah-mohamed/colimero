@@ -36,6 +36,12 @@ export function SelectableCollectionPointsList({
     }
   };
 
+  const handlePointSelect = (point: RouteStop) => {
+    if (isSelectionEnabled && onPointSelect) {
+      onPointSelect(point.name);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-4 text-sm text-gray-500 px-4 py-2">
@@ -47,7 +53,7 @@ export function SelectableCollectionPointsList({
       {points.map((point, index) => (
         <div
           key={index}
-          onClick={() => isSelectionEnabled && onPointSelect(point.name)}
+          onClick={() => handlePointSelect(point)}
           className={`grid grid-cols-4 items-center p-4 text-sm cursor-pointer 
             transform transition-all duration-200 ease-in-out
             hover:scale-[1.02] hover:shadow-md hover:bg-primary/5
