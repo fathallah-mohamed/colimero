@@ -29,6 +29,7 @@ export function ShareTourButton({ tourId, className }: ShareTourButtonProps) {
       }
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
+        console.error('Error sharing:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
