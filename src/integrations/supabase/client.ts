@@ -21,11 +21,10 @@ export const supabase = createClient<Database>(
       headers: {
         'X-Client-Info': 'supabase-js-web'
       },
-      fetch: (url, options = {}) => {
-        const defaultOptions = {
-          credentials: 'include',
-          mode: 'cors',
-          retries: 3,
+      fetch: (url: RequestInfo | URL, options: RequestInit = {}) => {
+        const defaultOptions: RequestInit = {
+          credentials: 'include' as RequestCredentials,
+          mode: 'cors' as RequestMode,
           ...options,
           headers: {
             ...options.headers,
