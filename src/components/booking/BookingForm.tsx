@@ -5,10 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, BookingFormData } from "./form/schema";
 import { useBookingSubmit } from "./form/useBookingSubmit";
-import { BookingFormFields } from "./form/BookingFormFields";
-import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
-import { BookingErrorDialog } from "./form/BookingErrorDialog";
 import { useState } from "react";
+import { StepIndicator } from "./form/steps/StepIndicator";
+import { SenderStep } from "./form/steps/SenderStep";
+import { RecipientStep } from "./form/steps/RecipientStep";
+import { PackageStep } from "./form/steps/PackageStep";
+import { ConfirmationStep } from "./form/steps/ConfirmationStep";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface BookingFormProps {
   tourId: number;
@@ -18,11 +21,8 @@ export interface BookingFormProps {
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const navigate = useNavigate();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [trackingNumber, setTrackingNumber] = useState("");
-  
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [weight, setWeight] = useState(5);
   const [contentTypes, setContentTypes] = useState<string[]>([]);
   const [specialItems, setSpecialItems] = useState<string[]>([]);
@@ -37,9 +37,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       recipient_name: "",
       recipient_phone: "",
       recipient_address: "",
-      recipient_city: "",
       item_type: "",
-      special_instructions: "",
+      package_description: "",
     },
   });
 
@@ -56,12 +55,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         photos
       };
 
-      const trackingNumber = await handleSubmit(formData);
-      setTrackingNumber(trackingNumber);
-      setShowConfirmDialog(true);
+      await handleSubmit(formData);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/mes-reservations');
+      }
     } catch (error: any) {
-      setErrorMessage(error.message);
-      setShowErrorDialog(true);
+      console.error("Error submitting booking:", error);
     }
   };
 
@@ -101,62 +102,110 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     }
   };
 
-  const handleConfirmClose = () => {
-    setShowConfirmDialog(false);
-    form.reset();
-    setWeight(5);
-    setContentTypes([]);
-    setSpecialItems([]);
-    setItemQuantities({});
-    setPhotos([]);
-    if (onSuccess) {
-      onSuccess();
-    } else {
-      navigate('/mes-reservations');
+  const validateStep = async () => {
+    const fields = {
+      1: ["sender_name", "sender_phone"],
+      2: ["recipient_name", "recipient_phone", "recipient_address"],
+      3: ["item_type"]
+    };
+
+    if (currentStep < 4) {
+      const currentFields = fields[currentStep as keyof typeof fields];
+      const result = await form.trigger(currentFields as any);
+      
+      if (result) {
+        if (!completedSteps.includes(currentStep)) {
+          setCompletedSteps(prev => [...prev, currentStep]);
+        }
+        setCurrentStep(prev => prev + 1);
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(1, prev - 1));
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <SenderStep form={form} />;
+      case 2:
+        return <RecipientStep form={form} />;
+      case 3:
+        return (
+          <PackageStep
+            form={form}
+            weight={weight}
+            onWeightChange={handleWeightChange}
+            contentTypes={contentTypes}
+            onContentTypeToggle={handleContentTypeToggle}
+            specialItems={specialItems}
+            onSpecialItemToggle={handleSpecialItemToggle}
+            itemQuantities={itemQuantities}
+            onQuantityChange={handleQuantityChange}
+            photos={photos}
+            onPhotoUpload={handlePhotoUpload}
+          />
+        );
+      case 4:
+        return (
+          <ConfirmationStep
+            form={form}
+            onEdit={setCurrentStep}
+            weight={weight}
+            specialItems={specialItems}
+            itemQuantities={itemQuantities}
+            pricePerKg={10}
+          />
+        );
+      default:
+        return null;
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <BookingFormFields
-          form={form}
-          weight={weight}
-          onWeightChange={handleWeightChange}
-          contentTypes={contentTypes}
-          onContentTypeToggle={handleContentTypeToggle}
-          specialItems={specialItems}
-          onSpecialItemToggle={handleSpecialItemToggle}
-          itemQuantities={itemQuantities}
-          onQuantityChange={handleQuantityChange}
-          photos={photos}
-          onPhotoUpload={handlePhotoUpload}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
+        <StepIndicator
+          currentStep={currentStep}
+          totalSteps={4}
+          completedSteps={completedSteps}
         />
 
-        <div className="flex justify-end gap-4">
+        {renderStep()}
+
+        <div className="flex justify-between pt-6">
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate(-1)}
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            className="flex items-center gap-2"
           >
-            Annuler
+            <ChevronLeft className="h-4 w-4" />
+            Précédent
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Création..." : "Créer la réservation"}
-          </Button>
+
+          {currentStep < 4 ? (
+            <Button
+              type="button"
+              onClick={validateStep}
+              className="flex items-center gap-2"
+            >
+              Suivant
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading ? "Création..." : "Créer la réservation"}
+            </Button>
+          )}
         </div>
-
-        <BookingConfirmDialog
-          open={showConfirmDialog}
-          onClose={handleConfirmClose}
-          trackingNumber={trackingNumber}
-        />
-
-        <BookingErrorDialog
-          open={showErrorDialog}
-          onClose={() => setShowErrorDialog(false)}
-          errorMessage={errorMessage}
-        />
       </form>
     </Form>
   );
