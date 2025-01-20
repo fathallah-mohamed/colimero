@@ -12,20 +12,10 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      storage: localStorage,
       storageKey: 'supabase.auth.token',
-      flowType: 'pkce'
-    },
-    global: {
-      headers: {
-        'X-Client-Info': 'supabase-js-web',
-        'Content-Type': 'application/json'
-      }
-    },
-    realtime: {
-      params: {
-        eventsPerSecond: 10
-      }
+      flowType: 'pkce',
+      debug: process.env.NODE_ENV === 'development'
     }
   }
 );

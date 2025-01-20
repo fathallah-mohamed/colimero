@@ -44,7 +44,7 @@ export default function ClientCTA() {
               Expédier maintenant
             </Button>
           </Link>
-          <Link to="/profile">
+          <Link to="/profil">
             <Button size="lg" variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
               Mon compte
             </Button>

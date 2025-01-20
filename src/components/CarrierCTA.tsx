@@ -44,11 +44,11 @@ export default function CarrierCTA() {
         </div>
         <div className="text-center space-y-4">
           <Button asChild size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-            <Link to="/planifier-tournee">Commencer maintenant</Link>
+            <Link to="/transporteur/tournees/creer">Commencer maintenant</Link>
           </Button>
           <div className="block sm:inline-block sm:ml-4">
             <Button asChild size="lg" variant="outline" className="w-full sm:w-auto border-blue-600 text-blue-600 hover:bg-blue-50">
-              <Link to="/profile">Mon compte</Link>
+              <Link to="/profil">Mon compte</Link>
             </Button>
           </div>
         </div>

@@ -27,19 +27,26 @@ export function useTours(carrierOnly: boolean = false) {
   const departureCountry = selectedRoute.split('_TO_')[0];
   const destinationCountry = selectedRoute.split('_TO_')[1];
 
-  const { loading, tours, error } = useTourData({
+  const { loading, tours, fetchTours } = useTourData({
     departureCountry,
     destinationCountry,
     sortBy,
     status: selectedStatus,
-    carrierOnly,
-    tourType
+    carrierOnly
+  });
+
+  console.log('useTours hook state:', {
+    departureCountry,
+    destinationCountry,
+    sortBy,
+    status: selectedStatus,
+    toursCount: tours.length,
+    carrierOnly
   });
 
   return {
     loading,
     tours,
-    error,
     selectedTour,
     isEditDialogOpen,
     selectedRoute,
