@@ -2,7 +2,8 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import AppRoutes from "./AppRoutes";
-import "./App.css";
+import { useSessionInitializer } from "@/components/navigation/SessionInitializer";
+import React from "react";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -15,13 +16,18 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  // Initialize session
+  useSessionInitializer();
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AppRoutes />
-        <Toaster />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AppRoutes />
+          <Toaster />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 }
 
