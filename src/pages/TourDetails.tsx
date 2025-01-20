@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TourCard } from "@/components/tour/TourCard";
-import type { Tour, RouteStop } from "@/types/tour";
+import type { Tour, RouteStop, TourStatus } from "@/types/tour";
 
 export default function TourDetails() {
   const { tourId } = useParams();
@@ -34,7 +34,11 @@ export default function TourDetails() {
           ? data.route 
           : typeof data.route === 'string' 
             ? JSON.parse(data.route) 
-            : data.route
+            : data.route,
+        status: data.status as TourStatus, // Cast the status to TourStatus type
+        type: data.type, // The type is already correctly typed via the database enum
+        customs_declaration: Boolean(data.customs_declaration),
+        terms_accepted: Boolean(data.terms_accepted)
       };
 
       return transformedTour;
