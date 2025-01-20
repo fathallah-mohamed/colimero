@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus, Check } from "lucide-react";
 import { BookingFormData } from "../schema";
+import { useToast } from "@/hooks/use-toast";
 
 interface RecipientStepProps {
   form: UseFormReturn<BookingFormData>;
@@ -24,6 +25,8 @@ interface Recipient {
 export function RecipientStep({ form }: RecipientStepProps) {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchRecipients();
@@ -31,14 +34,40 @@ export function RecipientStep({ form }: RecipientStepProps) {
 
   const fetchRecipients = async () => {
     try {
+      setIsLoading(true);
+      
+      // First check if we have an authenticated session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      if (!session) {
+        toast({
+          variant: "destructive",
+          title: "Non authentifié",
+          description: "Vous devez être connecté pour accéder à vos destinataires.",
+        });
+        return;
+      }
+
       const { data: recipientsData, error } = await supabase
         .from('recipients')
         .select('*');
 
       if (error) throw error;
+      
       setRecipients(recipientsData || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching recipients:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger vos destinataires. Veuillez réessayer.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -53,7 +82,12 @@ export function RecipientStep({ form }: RecipientStepProps) {
     <div className="space-y-6 animate-fade-in">
       <h2 className="text-2xl font-semibold">Informations du destinataire</h2>
 
-      {recipients.length > 0 && (
+      {isLoading ? (
+        <div className="text-center py-4">
+          <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-sm text-gray-500 mt-2">Chargement des destinataires...</p>
+        </div>
+      ) : recipients.length > 0 && (
         <div className="bg-gray-50 p-4 rounded-lg space-y-3">
           <h3 className="text-sm font-medium text-gray-700">Destinataires enregistrés</h3>
           <div className="grid gap-2">
