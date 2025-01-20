@@ -8,14 +8,17 @@ import { fr } from "date-fns/locale";
 import { TourRoute } from "@/components/send-package/tour/components/TourRoute";
 import { TourStatusBadge } from "@/components/tour/TourStatusBadge";
 import { Badge } from "@/components/ui/badge";
+import { TourMainInfo } from "@/components/send-package/tour/components/TourMainInfo";
+import { ClientTourDetails } from "@/components/send-package/tour/ClientTourDetails";
+import { ClientTourTimeline } from "@/components/send-package/tour/ClientTourTimeline";
 
 export default function TourDetails() {
-  const { tourId } = useParams();
+  const { id } = useParams();
 
   const { data: tour, isLoading } = useQuery({
-    queryKey: ["tour", tourId],
+    queryKey: ["tour", id],
     queryFn: async () => {
-      if (!tourId) throw new Error("Tour ID is required");
+      if (!id) throw new Error("Tour ID is required");
       
       const { data, error } = await supabase
         .from("tours")
@@ -27,24 +30,30 @@ export default function TourDetails() {
           ),
           bookings (*)
         `)
-        .eq("id", parseInt(tourId))
+        .eq("id", parseInt(id))
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching tour:", error);
+        throw error;
+      }
       if (!data) throw new Error("Tour not found");
 
       // Convert the JSON route to RouteStop[]
-      const tourData = {
-        ...data,
-        route: (data.route as any[]).map((stop: any): RouteStop => ({
-          name: stop.name,
-          location: stop.location,
-          time: stop.time,
-          type: stop.type
-        }))
-      } as Tour;
+      const routeData = typeof data.route === 'string' ? JSON.parse(data.route) : data.route;
+      const parsedRoute: RouteStop[] = Array.isArray(routeData) 
+        ? routeData.map(stop => ({
+            name: stop.name,
+            location: stop.location,
+            time: stop.time,
+            type: stop.type
+          }))
+        : [];
 
-      return tourData;
+      return {
+        ...data,
+        route: parsedRoute
+      } as Tour;
     }
   });
 
@@ -106,27 +115,20 @@ export default function TourDetails() {
 
       {/* Tour Details */}
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Points de collecte</h2>
-          <TourRoute 
-            stops={tour.route}
-            selectedPoint=""
-            onPointSelect={() => {}}
-          />
-          
-          <div className="mt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Informations transporteur</h3>
-            {tour.carriers && (
-              <div className="flex items-center">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{tour.carriers.company_name}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">Prix par kg</p>
-                  <p className="text-sm text-gray-500">{tour.carriers.carrier_capacities?.price_per_kg} €</p>
-                </div>
-              </div>
-            )}
+        <div className="space-y-8">
+          {/* Main Info Section */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <TourMainInfo tour={tour} />
+          </div>
+
+          {/* Tour Details Section */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <ClientTourDetails tour={tour} />
+          </div>
+
+          {/* Timeline Section */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <ClientTourTimeline tour={tour} />
           </div>
         </div>
       </div>
