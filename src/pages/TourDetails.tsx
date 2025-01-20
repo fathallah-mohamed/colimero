@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Tour } from "@/types/tour";
+import { Tour, RouteStop } from "@/types/tour";
 import { Loader2, Calendar, MapPin, Package2, Users } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -33,7 +33,18 @@ export default function TourDetails() {
       if (error) throw error;
       if (!data) throw new Error("Tour not found");
 
-      return data as Tour;
+      // Convert the JSON route to RouteStop[]
+      const tourData = {
+        ...data,
+        route: (data.route as any[]).map((stop: any): RouteStop => ({
+          name: stop.name,
+          location: stop.location,
+          time: stop.time,
+          type: stop.type
+        }))
+      } as Tour;
+
+      return tourData;
     }
   });
 
@@ -105,16 +116,17 @@ export default function TourDetails() {
           
           <div className="mt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Informations transporteur</h3>
-            <div className="flex items-center">
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">{tour.carriers?.company_name}</p>
-                <p className="text-sm text-gray-500">{tour.carriers?.phone}</p>
+            {tour.carriers && (
+              <div className="flex items-center">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">{tour.carriers.company_name}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">Prix par kg</p>
+                  <p className="text-sm text-gray-500">{tour.carriers.carrier_capacities?.price_per_kg} €</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">Prix par kg</p>
-                <p className="text-sm text-gray-500">{tour.carriers?.carrier_capacities?.price_per_kg} €</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
