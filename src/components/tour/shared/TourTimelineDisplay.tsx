@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Truck, Plane, Package, CheckCircle, XCircle } from "lucide-react";
 import { CancelTourDialog } from "../timeline/dialogs/CancelTourDialog";
 import { PendingBookingsDialog } from "../timeline/dialogs/PendingBookingsDialog";
+import { UncollectedBookingsDialog } from "../timeline/dialogs/UncollectedBookingsDialog";
 import { useTourStatusManagement } from "../timeline/hooks/useTourStatusManagement";
 
 interface TourTimelineDisplayProps {
@@ -29,6 +30,8 @@ export function TourTimelineDisplay({
     setShowCancelDialog,
     showPendingBookingsDialog,
     setShowPendingBookingsDialog,
+    showUncollectedBookingsDialog,
+    setShowUncollectedBookingsDialog,
     handleCancel,
     handleStartCollection,
     handleStartTransit,
@@ -117,6 +120,11 @@ export function TourTimelineDisplay({
       <PendingBookingsDialog 
         open={showPendingBookingsDialog}
         onOpenChange={setShowPendingBookingsDialog}
+      />
+
+      <UncollectedBookingsDialog 
+        open={showUncollectedBookingsDialog}
+        onOpenChange={setShowUncollectedBookingsDialog}
       />
     </div>
   );

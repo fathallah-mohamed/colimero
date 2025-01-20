@@ -93,6 +93,20 @@ export type Database = {
             referencedRelation: "tours"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_approval_requests_client"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "client_consents"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "fk_approval_requests_client"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
         ]
       }
       booking_statuses: {
@@ -659,6 +673,60 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      recipients: {
+        Row: {
+          address: string
+          city: string
+          client_id: string
+          country: string
+          created_at: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          city: string
+          client_id: string
+          country: string
+          created_at?: string
+          first_name: string
+          id?: string
+          last_name: string
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          client_id?: string
+          country?: string
+          created_at?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_consents"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "recipients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_templates: {
         Row: {

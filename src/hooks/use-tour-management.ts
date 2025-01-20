@@ -11,6 +11,8 @@ const getNextStatus = (currentStatus: TourStatus): TourStatus => {
     case "Ramassage en cours":
       return "En transit";
     case "En transit":
+      return "Livraison en cours";
+    case "Livraison en cours":
       return "Terminée";
     default:
       return currentStatus;
@@ -69,12 +71,55 @@ export function useTourManagement() {
 
   const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
-      const { error } = await supabase
+      // Si on passe de "En transit" à "Livraison en cours"
+      if (newStatus === "Livraison en cours") {
+        // Vérifier que toutes les réservations sont dans un état valide
+        const { data: bookings, error: bookingsError } = await supabase
+          .from('bookings')
+          .select('status')
+          .eq('tour_id', tourId)
+          .not('status', 'in', '(cancelled,reported,in_transit)');
+
+        if (bookingsError) {
+          console.error('Error checking bookings status:', bookingsError);
+          throw bookingsError;
+        }
+
+        if (bookings && bookings.length > 0) {
+          toast({
+            variant: "destructive",
+            title: "Action impossible",
+            description: "Toutes les réservations doivent être annulées, signalées ou en transit avant de démarrer la livraison",
+          });
+          return;
+        }
+      }
+
+      // Si on passe de "Ramassage en cours" à "En transit"
+      if (newStatus === "En transit") {
+        // Mettre à jour toutes les réservations non annulées en "collected"
+        const { error: bookingsError } = await supabase
+          .from('bookings')
+          .update({ 
+            status: 'collected',
+            delivery_status: 'collected' 
+          })
+          .eq('tour_id', tourId)
+          .neq('status', 'cancelled');
+
+        if (bookingsError) {
+          console.error('Error updating bookings status:', bookingsError);
+          throw bookingsError;
+        }
+      }
+
+      // Mettre à jour le statut de la tournée
+      const { error: tourError } = await supabase
         .from('tours')
         .update({ status: newStatus })
         .eq('id', tourId);
 
-      if (error) throw error;
+      if (tourError) throw tourError;
 
       toast({
         title: "Statut mis à jour",

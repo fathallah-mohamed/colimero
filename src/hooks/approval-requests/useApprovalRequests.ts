@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { useApprovalActions } from "./useApprovalActions";
-import { useRequestManagement } from "./useRequestManagement";
-import { useToast } from "./use-toast";
-import { ApprovalRequest, Client } from "@/components/admin/approval-requests/types";
+import { ApprovalRequest, FetchedApprovalRequest } from "./types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
-  const { handleCancelRequest, handleDeleteRequest } = useRequestManagement();
   const { toast } = useToast();
+
+  const mapToApprovalRequest = (data: FetchedApprovalRequest[]): ApprovalRequest[] => {
+    return data.map(item => ({
+      ...item,
+      client: item.user,
+      tour: {
+        ...item.tour,
+        carriers: item.tour.carrier
+      }
+    }));
+  };
 
   const fetchRequests = async () => {
     try {
@@ -77,19 +86,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       }
 
       console.log('Fetched approval requests:', data);
-
-      // Map the data to match our ApprovalRequest type
-      const mappedRequests: ApprovalRequest[] = (data || []).map(item => ({
-        ...item,
-        client: item.user[0] as Client, // Take first user since it's an array
-        tour: {
-          ...item.tour,
-          route: Array.isArray(item.tour.route) ? item.tour.route : [], // Ensure route is an array
-          carriers: item.tour.carrier // Map carrier to carriers
-        }
-      }));
-
-      setRequests(mappedRequests);
+      setRequests(mapToApprovalRequest(data as FetchedApprovalRequest[]));
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       setError(error.message);
@@ -105,7 +102,6 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   };
 
   useEffect(() => {
-    console.log('useEffect triggered with userId:', userId, 'userType:', userType);
     if (userId) {
       fetchRequests();
     } else {
@@ -114,7 +110,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     }
   }, [userId, userType]);
 
-  const handleAction = async (actionFn: Function, request: any) => {
+  const handleAction = async (actionFn: Function, request: ApprovalRequest) => {
     try {
       const result = await actionFn(request);
       if (result?.success) {
@@ -131,9 +127,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     requests, 
     loading,
     error,
-    handleApproveRequest: async (request: any) => handleAction(handleApproveRequest, request),
-    handleRejectRequest: async (request: any) => handleAction(handleRejectRequest, request),
-    handleCancelRequest: async (requestId: string) => handleAction(handleCancelRequest, requestId),
-    handleDeleteRequest: async (requestId: string) => handleAction(handleDeleteRequest, requestId)
+    handleApproveRequest: async (request: ApprovalRequest) => handleAction(handleApproveRequest, request),
+    handleRejectRequest: async (request: ApprovalRequest) => handleAction(handleRejectRequest, request)
   };
 }

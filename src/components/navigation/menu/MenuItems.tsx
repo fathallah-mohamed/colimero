@@ -5,7 +5,8 @@ import {
   Package, 
   ClipboardList, 
   UserCog,
-  Users
+  Users,
+  FileText
 } from "lucide-react";
 
 export function getMenuItems(userType: string | null) {
@@ -82,7 +83,7 @@ export function getMenuItems(userType: string | null) {
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="flex items-center gap-2 cursor-pointer">
           <Link to="/mes-demandes-approbation">
-            <ClipboardList className="w-4 h-4" />
+            <FileText className="w-4 h-4" />
             <span>Mes demandes</span>
           </Link>
         </DropdownMenuItem>

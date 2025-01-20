@@ -6,10 +6,11 @@ import { Loader2 } from "lucide-react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
+import { ProfileLoading } from "@/components/profile/ProfileLoading";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const userType = session?.user?.user_metadata?.user_type;
@@ -17,7 +18,7 @@ export default function DemandesApprobation() {
 
   const { 
     requests, 
-    loading, 
+    loading: requestsLoading, 
     handleApproveRequest,
     handleRejectRequest,
     handleCancelRequest,
@@ -26,7 +27,19 @@ export default function DemandesApprobation() {
 
   useEffect(() => {
     async function getSession() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de récupérer votre session"
+        });
+        navigate('/connexion');
+        return;
+      }
+
       setSession(session);
       setIsLoading(false);
 
@@ -38,13 +51,11 @@ export default function DemandesApprobation() {
     getSession();
   }, [navigate]);
 
-  if (isLoading || loading) {
+  if (isLoading || requestsLoading) {
     return (
       <div className="min-h-screen">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <ProfileLoading />
       </div>
     );
   }

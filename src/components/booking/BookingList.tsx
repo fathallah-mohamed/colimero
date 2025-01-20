@@ -50,11 +50,30 @@ export function BookingList() {
             try {
               console.log("Updating booking status:", { bookingId, newStatus });
               
+              // Map booking status to appropriate delivery status
+              let deliveryStatus: string;
+              switch (newStatus) {
+                case "collected":
+                  deliveryStatus = "collected";
+                  break;
+                case "cancelled":
+                  deliveryStatus = "cancelled";
+                  break;
+                case "confirmed":
+                  deliveryStatus = "confirmed";
+                  break;
+                case "reported":
+                  deliveryStatus = "in_transit"; // Use an allowed value for delivery_status
+                  break;
+                default:
+                  deliveryStatus = "pending";
+              }
+              
               const { error: updateError } = await supabase
                 .from('bookings')
                 .update({ 
                   status: newStatus,
-                  delivery_status: newStatus 
+                  delivery_status: deliveryStatus
                 })
                 .eq('id', bookingId);
 

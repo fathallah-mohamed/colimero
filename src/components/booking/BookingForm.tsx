@@ -5,10 +5,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, BookingFormData } from "./form/schema";
 import { useBookingSubmit } from "./form/useBookingSubmit";
-import { BookingFormFields } from "./form/BookingFormFields";
-import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
-import { BookingErrorDialog } from "./form/BookingErrorDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { StepIndicator } from "./form/steps/StepIndicator";
+import { SenderStep } from "./form/steps/SenderStep";
+import { RecipientStep } from "./form/steps/RecipientStep";
+import { PackageStep } from "./form/steps/PackageStep";
+import { ConfirmationStep } from "./form/steps/ConfirmationStep";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 export interface BookingFormProps {
   tourId: number;
@@ -18,16 +23,14 @@ export interface BookingFormProps {
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const navigate = useNavigate();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [trackingNumber, setTrackingNumber] = useState("");
-  
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [weight, setWeight] = useState(5);
   const [contentTypes, setContentTypes] = useState<string[]>([]);
   const [specialItems, setSpecialItems] = useState<string[]>([]);
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(formSchema),
@@ -37,33 +40,83 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       recipient_name: "",
       recipient_phone: "",
       recipient_address: "",
-      recipient_city: "",
       item_type: "",
-      special_instructions: "",
+      package_description: "",
     },
   });
 
-  const { isLoading, handleSubmit } = useBookingSubmit(tourId);
+  useEffect(() => {
+    const fetchClientProfile = async () => {
+      try {
+        console.log('Checking authentication status...');
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          toast({
+            variant: "destructive",
+            title: "Erreur d'authentification",
+            description: "Veuillez vous reconnecter.",
+          });
+          navigate('/connexion');
+          return;
+        }
 
-  const onSubmit = async (values: BookingFormData) => {
-    try {
-      const formData = {
-        ...values,
-        weight,
-        pickup_city: pickupCity,
-        special_items: specialItems,
-        content_types: contentTypes,
-        photos
-      };
+        if (!sessionData.session) {
+          console.log('No active session found');
+          navigate('/connexion');
+          return;
+        }
 
-      const trackingNumber = await handleSubmit(formData);
-      setTrackingNumber(trackingNumber);
-      setShowConfirmDialog(true);
-    } catch (error: any) {
-      setErrorMessage(error.message);
-      setShowErrorDialog(true);
-    }
-  };
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error('User fetch error:', userError);
+          toast({
+            variant: "destructive",
+            title: "Erreur d'authentification",
+            description: "Impossible de récupérer vos informations.",
+          });
+          return;
+        }
+
+        console.log('Fetching client data for user:', user.id);
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('first_name, last_name, phone')
+          .eq('id', user.id)
+          .single();
+
+        if (clientError) {
+          console.error('Error fetching client profile:', clientError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de récupérer votre profil.",
+          });
+          return;
+        }
+
+        if (clientData) {
+          console.log('Client data found:', clientData);
+          const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
+          form.setValue('sender_name', fullName);
+          form.setValue('sender_phone', clientData.phone || '');
+        }
+      } catch (error) {
+        console.error('Error in fetchClientProfile:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la récupération de votre profil.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchClientProfile();
+  }, [form, navigate]);
 
   const handleWeightChange = (increment: boolean) => {
     setWeight(prev => {
@@ -101,62 +154,162 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     }
   };
 
-  const handleConfirmClose = () => {
-    setShowConfirmDialog(false);
-    form.reset();
-    setWeight(5);
-    setContentTypes([]);
-    setSpecialItems([]);
-    setItemQuantities({});
-    setPhotos([]);
-    if (onSuccess) {
-      onSuccess();
-    } else {
-      navigate('/mes-reservations');
+  const { handleSubmit: submitBooking } = useBookingSubmit(tourId);
+
+  const onSubmit = async (values: BookingFormData) => {
+    try {
+      setIsLoading(true);
+      console.log('Submitting booking with values:', values);
+      const formData = {
+        ...values,
+        weight,
+        pickup_city: pickupCity,
+        special_items: specialItems,
+        content_types: contentTypes,
+        photos
+      };
+
+      await submitBooking(formData);
+      toast({
+        title: "Réservation créée",
+        description: "Votre réservation a été créée avec succès.",
+      });
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/mes-reservations');
+      }
+    } catch (error: any) {
+      console.error("Error submitting booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la création de la réservation.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const validateStep = async () => {
+    const fields = {
+      1: ["sender_name", "sender_phone"],
+      2: ["recipient_name", "recipient_phone", "recipient_address"],
+      3: ["item_type"]
+    };
+
+    if (currentStep < 4) {
+      const currentFields = fields[currentStep as keyof typeof fields];
+      const result = await form.trigger(currentFields as any);
+      
+      if (result) {
+        if (!completedSteps.includes(currentStep)) {
+          setCompletedSteps(prev => [...prev, currentStep]);
+        }
+        setCurrentStep(prev => prev + 1);
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(1, prev - 1));
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <SenderStep form={form} />;
+      case 2:
+        return <RecipientStep form={form} />;
+      case 3:
+        return (
+          <PackageStep
+            form={form}
+            weight={weight}
+            onWeightChange={handleWeightChange}
+            contentTypes={contentTypes}
+            onContentTypeToggle={handleContentTypeToggle}
+            specialItems={specialItems}
+            onSpecialItemToggle={handleSpecialItemToggle}
+            itemQuantities={itemQuantities}
+            onQuantityChange={handleQuantityChange}
+            photos={photos}
+            onPhotoUpload={handlePhotoUpload}
+          />
+        );
+      case 4:
+        return (
+          <ConfirmationStep
+            form={form}
+            onEdit={setCurrentStep}
+            weight={weight}
+            specialItems={specialItems}
+            itemQuantities={itemQuantities}
+            pricePerKg={10}
+          />
+        );
+      default:
+        return null;
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <BookingFormFields
-          form={form}
-          weight={weight}
-          onWeightChange={handleWeightChange}
-          contentTypes={contentTypes}
-          onContentTypeToggle={handleContentTypeToggle}
-          specialItems={specialItems}
-          onSpecialItemToggle={handleSpecialItemToggle}
-          itemQuantities={itemQuantities}
-          onQuantityChange={handleQuantityChange}
-          photos={photos}
-          onPhotoUpload={handlePhotoUpload}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
+        <StepIndicator
+          currentStep={currentStep}
+          totalSteps={4}
+          completedSteps={completedSteps}
         />
 
-        <div className="flex justify-end gap-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          renderStep()
+        )}
+
+        <div className="flex justify-between pt-6">
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate(-1)}
+            onClick={handlePrevious}
+            disabled={currentStep === 1 || isLoading}
+            className="flex items-center gap-2"
           >
-            Annuler
+            <ChevronLeft className="h-4 w-4" />
+            Précédent
           </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Création..." : "Créer la réservation"}
-          </Button>
+
+          {currentStep < 4 ? (
+            <Button
+              type="button"
+              onClick={validateStep}
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              Suivant
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Création...
+                </>
+              ) : (
+                "Créer la réservation"
+              )}
+            </Button>
+          )}
         </div>
-
-        <BookingConfirmDialog
-          open={showConfirmDialog}
-          onClose={handleConfirmClose}
-          trackingNumber={trackingNumber}
-        />
-
-        <BookingErrorDialog
-          open={showErrorDialog}
-          onClose={() => setShowErrorDialog(false)}
-          errorMessage={errorMessage}
-        />
       </form>
     </Form>
   );

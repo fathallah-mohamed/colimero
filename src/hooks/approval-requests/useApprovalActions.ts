@@ -1,12 +1,13 @@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { ApprovalRequest } from "./types";
 
 export function useApprovalActions() {
   const { toast } = useToast();
 
-  const handleApproveRequest = async (request: any) => {
+  const handleApproveRequest = async (request: ApprovalRequest) => {
     try {
-      const { error: updateError } = await supabase
+      const { error } = await supabase
         .from('approval_requests')
         .update({
           status: 'approved',
@@ -14,11 +15,11 @@ export function useApprovalActions() {
         })
         .eq('id', request.id);
 
-      if (updateError) throw updateError;
+      if (error) throw error;
 
       toast({
-        title: "Demande approuvée",
-        description: "La demande a été approuvée. Le client peut maintenant effectuer sa réservation.",
+        title: "Succès",
+        description: "La demande a été approuvée",
       });
 
       return { success: true };
@@ -27,13 +28,13 @@ export function useApprovalActions() {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'approbation",
+        description: error.message || "Une erreur est survenue",
       });
       return { success: false, error };
     }
   };
 
-  const handleRejectRequest = async (request: any) => {
+  const handleRejectRequest = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -46,8 +47,8 @@ export function useApprovalActions() {
       if (error) throw error;
 
       toast({
-        title: "Demande rejetée",
-        description: "La demande a été rejetée avec succès",
+        title: "Succès",
+        description: "La demande a été rejetée",
       });
 
       return { success: true };
@@ -56,7 +57,7 @@ export function useApprovalActions() {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors du rejet",
+        description: error.message || "Une erreur est survenue",
       });
       return { success: false, error };
     }
