@@ -15,6 +15,7 @@ interface ApprovalRequestDialogProps {
   onClose: () => void;
   tourId: number;
   pickupCity: string;
+  onSuccess?: () => void; // Ajout de la prop onSuccess comme optionnelle
 }
 
 export function ApprovalRequestDialog({
@@ -22,6 +23,7 @@ export function ApprovalRequestDialog({
   onClose,
   tourId,
   pickupCity,
+  onSuccess,
 }: ApprovalRequestDialogProps) {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +50,7 @@ export function ApprovalRequestDialog({
           tour_id: tourId,
           status: 'pending',
           message: message.trim() || null,
-          pickup_city: pickupCity // Add the pickup_city field
+          pickup_city: pickupCity
         });
 
       if (error) throw error;
@@ -58,6 +60,7 @@ export function ApprovalRequestDialog({
         description: "Le transporteur va analyser votre demande. Vous serez notifié par email de sa décision.",
       });
       
+      onSuccess?.(); // Appel de onSuccess s'il existe
       onClose();
     } catch (error) {
       console.error('Error submitting approval request:', error);
