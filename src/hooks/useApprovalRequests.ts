@@ -36,6 +36,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             destination_country,
             departure_date,
             collection_date,
+            route,
             total_capacity,
             remaining_capacity,
             type,
@@ -80,11 +81,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       // Map the data to match our ApprovalRequest type
       const mappedRequests: ApprovalRequest[] = (data || []).map(item => ({
         ...item,
-        client: item.user as Client, // Map user to client
-        user_id: item.user_id,
+        client: item.user[0] as Client, // Take first user since it's an array
         tour: {
           ...item.tour,
-          carriers: item.tour.carrier
+          route: item.tour.route || [], // Ensure route is always an array
+          carriers: item.tour.carrier // Map carrier to carriers
         }
       }));
 
