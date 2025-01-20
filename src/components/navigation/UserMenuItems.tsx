@@ -87,7 +87,7 @@ export function UserMenuItems({ userType }: UserMenuItemsProps) {
           Mes réservations
         </Link>
         <Link
-          to="/demandes-approbation"
+          to="/mes-demandes-approbation"
           className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900"
         >
           <FileText className="w-4 h-4 mr-2" />

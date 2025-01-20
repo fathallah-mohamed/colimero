@@ -6,7 +6,6 @@ import { useToast } from "./use-toast";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [requests, setRequests] = useState<any[]>([]);
   const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
   const { handleCancelRequest, handleDeleteRequest } = useRequestManagement();
@@ -42,9 +41,17 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               email,
               phone
             )
+          ),
+          user:clients (
+            id,
+            first_name,
+            last_name,
+            phone,
+            email
           )
         `);
 
+      // Ajout de la condition en fonction du type d'utilisateur
       if (userType === 'carrier') {
         console.log('Filtering for carrier:', userId);
         query = query.eq('tour.carrier_id', userId);
@@ -53,61 +60,22 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         query = query.eq('user_id', userId);
       }
 
-      const { data: approvalData, error: fetchError } = await query;
+      const { data: approvalData, error } = await query;
 
-      if (fetchError) {
-        console.error('Error fetching approval requests:', fetchError);
-        setError(fetchError);
+      if (error) {
+        console.error('Error fetching approval requests:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
           description: "Impossible de charger vos demandes d'approbation"
         });
-        setLoading(false);
-        return;
+        throw error;
       }
 
-      console.log('Approval data received:', approvalData);
-
-      if (approvalData) {
-        const requestsWithUserData = await Promise.all(
-          approvalData.map(async (request) => {
-            const { data: userData, error: userError } = await supabase
-              .from('clients')
-              .select('id, first_name, last_name, email, phone')
-              .eq('id', request.user_id)
-              .single();
-
-            if (userError) {
-              console.error('Error fetching user data:', userError);
-              return {
-                ...request,
-                user: {
-                  id: request.user_id,
-                  first_name: 'Utilisateur',
-                  last_name: 'Inconnu',
-                  email: '',
-                  phone: ''
-                }
-              };
-            }
-
-            return {
-              ...request,
-              user: userData
-            };
-          })
-        );
-
-        console.log('Fetched approval requests with user data:', requestsWithUserData);
-        setRequests(requestsWithUserData);
-        setError(null);
-      } else {
-        setRequests([]);
-      }
-    } catch (err: any) {
-      console.error('Error in fetchRequests:', err);
-      setError(err);
+      console.log('Fetched approval requests:', approvalData);
+      setRequests(approvalData || []);
+    } catch (error: any) {
+      console.error('Error in fetchRequests:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -122,15 +90,12 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     console.log('useEffect triggered with userId:', userId, 'userType:', userType);
     if (userId) {
       fetchRequests();
-    } else {
-      setLoading(false);
     }
   }, [userId, userType]);
 
   return { 
     requests, 
     loading,
-    error,
     handleApproveRequest: async (request: any) => {
       const { success } = await handleApproveRequest(request);
       if (success) await fetchRequests();
