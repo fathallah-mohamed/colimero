@@ -23,6 +23,7 @@ interface ClientTourCardProps {
 export function ClientTourCard({ tour, onBookingSuccess }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [selectedPoint, setSelectedPoint] = useState("");
   const navigate = useNavigate();
 
   const handleTourClick = () => {
@@ -55,17 +56,21 @@ export function ClientTourCard({ tour, onBookingSuccess }: ClientTourCardProps) 
             </div>
           </div>
           
-          <TourRoute
-            route={tour.route}
-            departureDate={tour.departure_date}
-            collectionDate={tour.collection_date}
+          <TourRoute 
+            stops={tour.route}
+            selectedPoint={selectedPoint}
+            onPointSelect={setSelectedPoint}
           />
         </div>
 
         {isExpanded && (
           <TourExpandedContent
             tour={tour}
-            onBookingClick={handleBookingClick}
+            selectedPoint={selectedPoint}
+            onPointSelect={setSelectedPoint}
+            onActionClick={handleBookingClick}
+            isActionEnabled={!!selectedPoint}
+            actionButtonText="Réserver"
             onBookingSuccess={onBookingSuccess}
           />
         )}
@@ -76,7 +81,11 @@ export function ClientTourCard({ tour, onBookingSuccess }: ClientTourCardProps) 
           <DialogHeader>
             <DialogTitle>Authentification requise</DialogTitle>
             <DialogDescription>
-              <AccessDeniedMessage />
+              <AccessDeniedMessage 
+                userType="carrier"
+                isOpen={showAuthDialog}
+                onClose={() => setShowAuthDialog(false)}
+              />
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
