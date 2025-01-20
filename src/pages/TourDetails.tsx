@@ -8,7 +8,7 @@ import { Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourStatus, BookingStatus } from "@/types/tour";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useState } from "react";
@@ -55,14 +55,14 @@ export default function TourDetails() {
           : typeof data.route === 'string' 
             ? JSON.parse(data.route) 
             : data.route,
-        status: data.status,
-        previous_status: data.previous_status,
+        status: data.status as TourStatus,
+        previous_status: data.previous_status as TourStatus | null,
         type: data.type,
         customs_declaration: Boolean(data.customs_declaration),
         terms_accepted: Boolean(data.terms_accepted),
         bookings: data.bookings?.map(booking => ({
           ...booking,
-          status: booking.status,
+          status: booking.status as BookingStatus,
           special_items: Array.isArray(booking.special_items) 
             ? booking.special_items 
             : typeof booking.special_items === 'string'
