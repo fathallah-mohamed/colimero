@@ -85,7 +85,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        const bookingPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`;
+        const bookingPath = `/envoyer-colis`;
         sessionStorage.setItem('returnPath', bookingPath);
         navigate('/connexion');
         return;
@@ -147,7 +147,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
   const handleApprovalRequestSuccess = () => {
     setShowApprovalDialog(false);
-    setHasPendingRequest(true); // Mettre à jour l'état immédiatement après l'envoi réussi
+    setHasPendingRequest(true);
     toast({
       title: "Demande envoyée",
       description: "Votre demande d'approbation a été envoyée avec succès",
@@ -179,8 +179,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           {isExpanded && (
             <TourExpandedContent 
               tour={tour}
-              selectedPoint={selectedPoint}
-              onPointSelect={handlePointSelect}
+              selectedPickupCity={selectedPoint}
+              onPickupCitySelect={handlePointSelect}
               onActionClick={handleBookingButtonClick}
               isActionEnabled={!!selectedPoint && !hasPendingRequest}
               actionButtonText={tour.type === 'private' ? "Demander une approbation" : "Réserver cette tournée"}
