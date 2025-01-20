@@ -47,24 +47,31 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   useEffect(() => {
     const fetchClientProfile = async () => {
       try {
+        console.log('Fetching client profile...');
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: clientData, error } = await supabase
-            .from('clients')
-            .select('first_name, last_name, phone')
-            .eq('id', user.id)
-            .single();
+        
+        if (!user) {
+          console.log('No authenticated user found');
+          return;
+        }
 
-          if (error) {
-            console.error('Error fetching client profile:', error);
-            return;
-          }
+        console.log('Fetching client data for user:', user.id);
+        const { data: clientData, error } = await supabase
+          .from('clients')
+          .select('first_name, last_name, phone')
+          .eq('id', user.id)
+          .single();
 
-          if (clientData) {
-            const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
-            form.setValue('sender_name', fullName);
-            form.setValue('sender_phone', clientData.phone || '');
-          }
+        if (error) {
+          console.error('Error fetching client profile:', error);
+          return;
+        }
+
+        if (clientData) {
+          console.log('Client data found:', clientData);
+          const fullName = `${clientData.first_name || ''} ${clientData.last_name || ''}`.trim();
+          form.setValue('sender_name', fullName);
+          form.setValue('sender_phone', clientData.phone || '');
         }
       } catch (error) {
         console.error('Error in fetchClientProfile:', error);
@@ -78,6 +85,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   const onSubmit = async (values: BookingFormData) => {
     try {
+      console.log('Submitting booking with values:', values);
       const formData = {
         ...values,
         weight,
