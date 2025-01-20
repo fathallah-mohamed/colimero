@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { 
   UserCircle2, 
   Package, 
