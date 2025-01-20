@@ -15,6 +15,8 @@ export default function NewRegistrationRequests() {
     queryKey: ["approval-requests"],
     queryFn: async () => {
       console.log("Fetching approval requests...");
+      
+      // First, fetch approval requests with tour data
       const { data: approvalRequests, error: approvalError } = await supabase
         .from("approval_requests")
         .select(`
@@ -44,7 +46,7 @@ export default function NewRegistrationRequests() {
         throw approvalError;
       }
 
-      // Fetch user data separately for each request
+      // Then fetch client data for each request
       const requestsWithUserData = await Promise.all(
         approvalRequests.map(async (request) => {
           const { data: userData, error: userError } = await supabase
