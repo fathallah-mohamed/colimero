@@ -18,33 +18,40 @@ export const supabase = createClient<Database>(
       debug: true
     },
     global: {
-      headers: {
-        'X-Client-Info': 'supabase-js-web',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      },
       fetch: (url: RequestInfo | URL, options: RequestInit = {}) => {
         const defaultOptions: RequestInit = {
-          credentials: 'include' as RequestCredentials,
-          mode: 'cors' as RequestMode,
+          credentials: 'include',
+          mode: 'cors',
           headers: {
-            ...options.headers,
             'Cache-Control': 'no-cache',
             'Pragma': 'no-cache'
           }
         };
 
-        return fetch(url, {
+        const mergedOptions = {
           ...defaultOptions,
           ...options,
           headers: {
             ...defaultOptions.headers,
             ...options.headers
           }
-        }).catch(error => {
-          console.error('Fetch error:', error);
-          throw error;
-        });
+        };
+
+        return fetch(url, mergedOptions)
+          .then(response => {
+            if (!response.ok) {
+              console.error('Fetch error:', {
+                status: response.status,
+                statusText: response.statusText,
+                url: response.url
+              });
+            }
+            return response;
+          })
+          .catch(error => {
+            console.error('Network error:', error);
+            throw error;
+          });
       }
     }
   }
@@ -60,4 +67,9 @@ supabase.auth.getSession().then(({ data, error }) => {
   } else {
     console.log('Initial session check:', data.session ? 'Session found' : 'No session');
   }
+});
+
+// Listen for auth state changes
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', event, session?.user?.id);
 });
