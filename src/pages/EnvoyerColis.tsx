@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
@@ -15,7 +14,6 @@ import { useSessionInitializer } from "@/components/navigation/SessionInitialize
 export default function EnvoyerColis() {
   useSessionInitializer(); // Initialize session
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("all");
   const [tourType, setTourType] = useState<"public" | "private">("public");
@@ -25,13 +23,7 @@ export default function EnvoyerColis() {
     loading,
     tours,
     error
-  } = useTours({
-    departureCountry: "FR",
-    destinationCountry: "TN",
-    sortBy,
-    status: selectedStatus,
-    tourType
-  });
+  } = useTours(false);
 
   const {
     showAuthDialog,
@@ -161,7 +153,12 @@ export default function EnvoyerColis() {
               <ClientTourCard
                 key={tour.id}
                 tour={tour}
-                onBookingClick={handleBookingClick}
+                onBookingSuccess={() => {
+                  toast({
+                    title: "Réservation effectuée",
+                    description: "Votre réservation a été effectuée avec succès.",
+                  });
+                }}
               />
             ))}
           </div>
