@@ -35,8 +35,9 @@ export default function TourDetails() {
           : typeof data.route === 'string' 
             ? JSON.parse(data.route) 
             : data.route,
-        status: data.status as TourStatus, // Cast the status to TourStatus type
-        type: data.type, // The type is already correctly typed via the database enum
+        status: data.status as TourStatus,
+        previous_status: data.previous_status as TourStatus | null,
+        type: data.type,
         customs_declaration: Boolean(data.customs_declaration),
         terms_accepted: Boolean(data.terms_accepted)
       };
