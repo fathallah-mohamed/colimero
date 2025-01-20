@@ -65,7 +65,9 @@ export function CommitmentsSection({ profile }: CommitmentsSectionProps) {
       }
       
       console.log("Fetched commitments:", commitments);
-      return commitments as CarrierCommitment[];
+      
+      // Type assertion to ensure the response matches CarrierCommitment[]
+      return (commitments as unknown) as CarrierCommitment[];
     },
   });
 
