@@ -6,6 +6,7 @@ import MobileMenu from "@/components/navigation/MobileMenu";
 import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { NavigationHeader } from "./navigation/NavigationHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
@@ -20,6 +21,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   const location = useLocation();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { toast } = useToast();
 
   // Initialize session and handle auth state changes
   useSessionInitializer();
@@ -55,21 +57,42 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   // Store return path for auth redirects and handle protected routes
   React.useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // If we're on a protected route and not authenticated
-      if (location.pathname === '/mes-reservations') {
-        if (!session) {
-          sessionStorage.setItem('returnPath', location.pathname);
-          navigate('/connexion');
-        } else if (session.user.user_metadata?.user_type !== 'client') {
-          navigate('/');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session error:", error);
+          toast({
+            variant: "destructive",
+            title: "Erreur de session",
+            description: "Une erreur est survenue lors de la vérification de votre session.",
+          });
+          return;
         }
+        
+        // If we're on a protected route and not authenticated
+        if (location.pathname === '/mes-reservations' || location.pathname === '/profile') {
+          if (!session) {
+            console.log("No session found, redirecting to login");
+            sessionStorage.setItem('returnPath', location.pathname);
+            navigate('/connexion');
+          } else if (session.user.user_metadata?.user_type !== 'client') {
+            console.log("User type not client, redirecting to home");
+            navigate('/');
+          }
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur d'authentification",
+          description: "Une erreur est survenue lors de la vérification de votre authentification.",
+        });
       }
     };
 
     checkAuth();
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, toast]);
 
   return (
     <nav className={cn(
