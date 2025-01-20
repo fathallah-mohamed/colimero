@@ -84,7 +84,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         client: item.user[0] as Client, // Take first user since it's an array
         tour: {
           ...item.tour,
-          route: item.tour.route || [], // Ensure route is always an array
+          route: Array.isArray(item.tour.route) ? item.tour.route : [], // Ensure route is an array
           carriers: item.tour.carrier // Map carrier to carriers
         }
       }));
