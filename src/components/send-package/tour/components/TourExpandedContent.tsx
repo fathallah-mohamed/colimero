@@ -21,6 +21,7 @@ interface TourExpandedContentProps {
   actionButtonText: string;
   userType?: string;
   onStatusChange?: (tourId: number, newStatus: string) => Promise<void>;
+  hasPendingRequest?: boolean;
 }
 
 export function TourExpandedContent({ 
@@ -31,7 +32,8 @@ export function TourExpandedContent({
   isActionEnabled,
   actionButtonText,
   userType,
-  onStatusChange
+  onStatusChange,
+  hasPendingRequest
 }: TourExpandedContentProps) {
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -142,9 +144,9 @@ export function TourExpandedContent({
         <Button 
           onClick={handleActionClick}
           className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-          disabled={!isActionEnabled || isLoading}
+          disabled={!isActionEnabled || isLoading || hasPendingRequest}
         >
-          {actionButtonText}
+          {hasPendingRequest ? "Vous avez déjà une demande sur cette tournée" : actionButtonText}
         </Button>
       </div>
 

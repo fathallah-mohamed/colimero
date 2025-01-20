@@ -184,6 +184,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               onActionClick={handleBookingButtonClick}
               isActionEnabled={!!selectedPoint && !hasPendingRequest}
               actionButtonText={tour.type === 'private' ? "Demander une approbation" : "Réserver cette tournée"}
+              hasPendingRequest={hasPendingRequest}
             />
           )}
         </div>
