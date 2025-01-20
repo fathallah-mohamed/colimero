@@ -76,6 +76,8 @@ export function TourDetails({ tour }: TourDetailsProps) {
             stops={tour.route}
             selectedPoint={selectedPoint}
             onPointSelect={handlePointSelect}
+            departureDate={tour.departure_date}
+            collectionDate={tour.collection_date}
           />
         </div>
       )}
