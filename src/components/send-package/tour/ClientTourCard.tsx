@@ -30,8 +30,21 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [showExistingBookingDialog, setShowExistingBookingDialog] = useState(false);
   const [showPendingApprovalDialog, setShowPendingApprovalDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkPendingRequest = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && tour.type === 'private') {
+        const pending = await checkExistingApprovalRequest(session.user.id);
+        setHasPendingRequest(pending);
+      }
+    };
+
+    checkPendingRequest();
+  }, [tour.id, tour.type]);
 
   const handlePointSelect = (point: string) => {
     setSelectedPoint(point);
@@ -160,7 +173,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               selectedPoint={selectedPoint}
               onPointSelect={handlePointSelect}
               onActionClick={handleBookingButtonClick}
-              isActionEnabled={!!selectedPoint}
+              isActionEnabled={!!selectedPoint && !hasPendingRequest}
               actionButtonText={tour.type === 'private' ? "Demander une approbation" : "Réserver cette tournée"}
             />
           )}
