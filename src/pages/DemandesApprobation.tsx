@@ -9,7 +9,7 @@ import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequ
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const userType = session?.user?.user_metadata?.user_type;
@@ -26,7 +26,19 @@ export default function DemandesApprobation() {
 
   useEffect(() => {
     async function getSession() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de récupérer votre session"
+        });
+        navigate('/connexion');
+        return;
+      }
+
       setSession(session);
       setIsLoading(false);
 

@@ -15,6 +15,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     if (!userId) {
       console.log('No user ID provided');
       setLoading(false);
+      setRequests([]);
       return;
     }
 

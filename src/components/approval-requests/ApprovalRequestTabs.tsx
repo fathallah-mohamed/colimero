@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ApprovalRequestList } from "./ApprovalRequestList";
+import { ApprovalRequestCard } from "./ApprovalRequestCard";
 
 interface ApprovalRequestTabsProps {
   pendingRequests: any[];
@@ -23,6 +23,33 @@ export function ApprovalRequestTabs({
   handleCancelRequest,
   handleDeleteRequest
 }: ApprovalRequestTabsProps) {
+  const renderRequests = (requests: any[], showActions: boolean = false) => {
+    if (!requests || requests.length === 0) {
+      return (
+        <div className="text-center py-8 text-gray-500">
+          Aucune demande
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {requests.map(request => (
+          <ApprovalRequestCard
+            key={request.id}
+            request={request}
+            userType={userType}
+            showActions={showActions}
+            onApprove={handleApproveRequest}
+            onReject={handleRejectRequest}
+            onCancel={handleCancelRequest}
+            onDelete={handleDeleteRequest}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Tabs defaultValue="pending" className="w-full">
       <TabsList className="mb-8">
@@ -39,35 +66,19 @@ export function ApprovalRequestTabs({
 
       <TabsContent value="pending">
         <ScrollArea className="h-[calc(100vh-300px)]">
-          <ApprovalRequestList
-            requests={pendingRequests}
-            userType={userType}
-            showActions={true}
-            onApprove={handleApproveRequest}
-            onReject={handleRejectRequest}
-            onCancel={handleCancelRequest}
-            onDelete={handleDeleteRequest}
-          />
+          {renderRequests(pendingRequests, true)}
         </ScrollArea>
       </TabsContent>
 
       <TabsContent value="approved">
         <ScrollArea className="h-[calc(100vh-300px)]">
-          <ApprovalRequestList
-            requests={approvedRequests}
-            userType={userType}
-            showActions={false}
-          />
+          {renderRequests(approvedRequests)}
         </ScrollArea>
       </TabsContent>
 
       <TabsContent value="rejected">
         <ScrollArea className="h-[calc(100vh-300px)]">
-          <ApprovalRequestList
-            requests={rejectedRequests}
-            userType={userType}
-            showActions={false}
-          />
+          {renderRequests(rejectedRequests)}
         </ScrollArea>
       </TabsContent>
     </Tabs>
