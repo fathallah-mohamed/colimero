@@ -29,7 +29,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   const [weight, setWeight] = useState(5);
   const [contentTypes, setContentTypes] = useState<string[]>([]);
   const [specialItems, setSpecialItems] = useState<string[]>([]);
-  const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [photos, setPhotos] = useState<File[]>([]);
   const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
 
@@ -44,7 +43,13 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       recipient_city: "",
       item_type: "",
       package_description: "",
-    },
+      pickup_city: pickupCity,
+      delivery_city: "",
+      weight: 5,
+      special_items: [],
+      content_types: [],
+      photos: []
+    }
   });
 
   const { validateStep } = useFormValidation(form);
@@ -93,53 +98,39 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   }, [form, navigate]);
 
   const handleWeightChange = (increment: boolean) => {
-    setWeight(prev => {
-      const newWeight = increment ? prev + 1 : prev - 1;
-      return Math.min(Math.max(newWeight, 5), 30);
-    });
+    const newWeight = increment ? weight + 1 : weight - 1;
+    const clampedWeight = Math.min(Math.max(newWeight, 5), 30);
+    setWeight(clampedWeight);
+    form.setValue('weight', clampedWeight);
   };
 
   const handleContentTypeToggle = (type: string) => {
-    setContentTypes(prev =>
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    );
+    const newTypes = contentTypes.includes(type)
+      ? contentTypes.filter(t => t !== type)
+      : [...contentTypes, type];
+    setContentTypes(newTypes);
+    form.setValue('content_types', newTypes);
   };
 
   const handleSpecialItemToggle = (item: string) => {
-    setSpecialItems(prev =>
-      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
-    );
-    if (!itemQuantities[item]) {
-      setItemQuantities(prev => ({ ...prev, [item]: 1 }));
-    }
-  };
-
-  const handleQuantityChange = (itemName: string, increment: boolean) => {
-    setItemQuantities(prev => ({
-      ...prev,
-      [itemName]: Math.max(1, prev[itemName] + (increment ? 1 : -1))
-    }));
+    const newItems = specialItems.includes(item)
+      ? specialItems.filter(i => i !== item)
+      : [...specialItems, item];
+    setSpecialItems(newItems);
+    form.setValue('special_items', newItems);
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       setPhotos(prev => [...prev, ...newFiles]);
+      form.setValue('photos', [...photos, ...newFiles]);
     }
   };
 
   const onSubmit = async (values: BookingFormData) => {
     try {
-      const bookingData = {
-        ...values,
-        weight,
-        pickup_city: pickupCity,
-        special_items: specialItems,
-        content_types: contentTypes,
-        itemQuantities,
-        photos: photos
-      };
-      await createBooking(bookingData);
+      await createBooking(values);
     } catch (error) {
       console.error("Error in form submission:", error);
     }
@@ -175,8 +166,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             onContentTypeToggle={handleContentTypeToggle}
             specialItems={specialItems}
             onSpecialItemToggle={handleSpecialItemToggle}
-            itemQuantities={itemQuantities}
-            onQuantityChange={handleQuantityChange}
             photos={photos}
             onPhotoUpload={handlePhotoUpload}
           />
@@ -188,7 +177,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             onEdit={setCurrentStep}
             weight={weight}
             specialItems={specialItems}
-            itemQuantities={itemQuantities}
             pricePerKg={10}
           />
         );

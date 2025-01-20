@@ -1,5 +1,3 @@
-import { Check } from "lucide-react";
-
 interface StepIndicatorProps {
   currentStep: number;
   totalSteps: number;
@@ -8,45 +6,36 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ currentStep, totalSteps, completedSteps }: StepIndicatorProps) {
   return (
-    <div className="w-full mb-8">
-      <div className="flex justify-between items-center">
-        {Array.from({ length: totalSteps }).map((_, index) => (
-          <div key={index} className="flex items-center">
-            <div
-              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 
-                ${
-                  completedSteps.includes(index + 1)
-                    ? "bg-primary border-primary text-white"
-                    : currentStep === index + 1
-                    ? "border-primary text-primary"
-                    : "border-gray-300 text-gray-300"
-                }`}
-            >
-              {completedSteps.includes(index + 1) ? (
-                <Check className="w-5 h-5" />
-              ) : (
-                <span>{index + 1}</span>
-              )}
-            </div>
-            {index < totalSteps - 1 && (
-              <div
-                className={`h-1 w-16 mx-2 
-                  ${
-                    completedSteps.includes(index + 2)
-                      ? "bg-primary"
-                      : "bg-gray-300"
-                  }`}
-              />
-            )}
+    <div className="flex justify-between mb-8">
+      {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
+        <div
+          key={step}
+          className={`flex items-center ${
+            step < totalSteps ? "flex-1" : ""
+          }`}
+        >
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+              step === currentStep
+                ? "border-blue-500 bg-blue-50 text-blue-500"
+                : completedSteps.includes(step)
+                ? "border-green-500 bg-green-50 text-green-500"
+                : "border-gray-300 text-gray-500"
+            }`}
+          >
+            {step}
           </div>
-        ))}
-      </div>
-      <div className="flex justify-between mt-2 text-sm text-gray-600">
-        <div>Expéditeur</div>
-        <div>Destinataire</div>
-        <div>Colis</div>
-        <div>Confirmation</div>
-      </div>
+          {step < totalSteps && (
+            <div
+              className={`flex-1 h-0.5 mx-2 ${
+                completedSteps.includes(step)
+                  ? "bg-green-500"
+                  : "bg-gray-300"
+              }`}
+            />
+          )}
+        </div>
+      ))}
     </div>
   );
 }
