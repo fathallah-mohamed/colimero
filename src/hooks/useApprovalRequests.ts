@@ -31,11 +31,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             destination_country,
             departure_date,
             collection_date,
-            route,
             total_capacity,
             remaining_capacity,
             type,
-            carriers (
+            carrier:carriers (
               id,
               company_name,
               email,
@@ -90,6 +89,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     console.log('useEffect triggered with userId:', userId, 'userType:', userType);
     if (userId) {
       fetchRequests();
+    } else {
+      setLoading(false);
     }
   }, [userId, userType]);
 
