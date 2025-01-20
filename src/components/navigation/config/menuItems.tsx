@@ -1,4 +1,4 @@
-import { Calendar, Package, Info, Mail, Truck, ClipboardList } from "lucide-react";
+import { Calendar, Package, Info, Mail, Truck } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 interface MenuItem {
@@ -27,12 +27,6 @@ export const menuItems: MenuItem[] = [
     name: "Transporteurs", 
     href: "/transporteurs", 
     icon: Truck,
-    hideTextOnMobile: true,
-  },
-  { 
-    name: "Mes demandes", 
-    href: "/mes-demandes-approbation", 
-    icon: ClipboardList,
     hideTextOnMobile: true,
   },
   { 
