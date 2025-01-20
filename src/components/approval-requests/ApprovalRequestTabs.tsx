@@ -56,7 +56,7 @@ export function ApprovalRequestTabs({
           <ApprovalRequestList
             requests={approvedRequests}
             userType={userType}
-            showActions={true}
+            showActions={false}
           />
         </ScrollArea>
       </TabsContent>
@@ -66,8 +66,7 @@ export function ApprovalRequestTabs({
           <ApprovalRequestList
             requests={rejectedRequests}
             userType={userType}
-            showActions={true}
-            onDelete={userType !== 'carrier' ? handleDeleteRequest : undefined}
+            showActions={false}
           />
         </ScrollArea>
       </TabsContent>

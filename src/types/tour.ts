@@ -64,7 +64,7 @@ export interface Tour {
   carriers?: {
     company_name: string;
     avatar_url: string;
-    carrier_capacities?: {
+    carrier_capacities: {
       price_per_kg: number;
     }
   };

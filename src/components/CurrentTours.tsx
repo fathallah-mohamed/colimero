@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { TourTimelineCard } from "@/components/transporteur/tour/TourTimelineCard";
@@ -16,7 +16,7 @@ export default function CurrentTours() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { data: nextTour, isLoading, error } = useNextTour();
+  const { data: nextTour, isLoading } = useNextTour();
   const {
     showAuthDialog,
     setShowAuthDialog,
@@ -35,6 +35,7 @@ export default function CurrentTours() {
 
       if (error) throw error;
 
+      // Invalider le cache pour forcer le rechargement des données
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
 
@@ -51,22 +52,6 @@ export default function CurrentTours() {
       });
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="py-8 px-4 text-center">
-        <p className="text-red-500">Une erreur est survenue lors du chargement des tournées.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="py-8 px-4">
