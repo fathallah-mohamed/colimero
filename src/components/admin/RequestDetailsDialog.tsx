@@ -21,6 +21,7 @@ interface RequestDetailsDialogProps {
   request: any;
   onClose: () => void;
   onApprove?: (request: any) => void;
+  onReject?: (request: any) => void;  // Ajout de onReject
   showApproveButton?: boolean;
 }
 

@@ -48,7 +48,7 @@ export function ApprovalRequestCard({
     'cancelled': 'Annulée'
   };
 
-  const statusVariants = {
+  const statusVariants: Record<string, "default" | "destructive" | "outline" | "secondary" | "success" | "warning"> = {
     'pending': 'outline',
     'approved': 'success',
     'rejected': 'destructive',
