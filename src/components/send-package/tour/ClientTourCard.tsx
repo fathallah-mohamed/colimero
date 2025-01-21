@@ -32,7 +32,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      // Stocker le chemin de retour et rediriger vers la page de connexion
       const returnPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`;
       sessionStorage.setItem('returnPath', returnPath);
       navigate('/connexion');
@@ -68,11 +67,12 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       {isExpanded && (
         <TourExpandedContent
           tour={tour}
-          selectedPickupCity={selectedPickupCity}
+          selectedPickupCity={selectedPickupCity || ''}
           onPickupCitySelect={setSelectedPickupCity}
           onActionClick={handleActionClick}
           isActionEnabled={isActionEnabled()}
           actionButtonText={getActionButtonText()}
+          hasPendingRequest={false}
         />
       )}
 

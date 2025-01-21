@@ -7,6 +7,8 @@ import { Progress } from "@/components/ui/progress";
 
 interface TourMainInfoProps {
   tour: Tour;
+  isExpanded?: boolean;
+  onExpandClick?: () => void;
 }
 
 export function TourMainInfo({ tour }: TourMainInfoProps) {
