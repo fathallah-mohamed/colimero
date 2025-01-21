@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 interface TourExpandedContentProps {
   tour: Tour;
-  selectedPickupCity: string | null;
+  selectedPickupCity: string;
   onPickupCitySelect: (city: string) => void;
   onActionClick: () => void;
   isActionEnabled: boolean;

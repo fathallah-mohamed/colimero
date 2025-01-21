@@ -1,48 +1,51 @@
 import { useState } from "react";
 import { Tour } from "@/types/tour";
+import { useToast } from "@/hooks/use-toast";
+import { CardCustom } from "@/components/ui/card-custom";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourRoute } from "./components/TourRoute";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { TourDialogs } from "./components/TourDialogs";
-import { useApprovalRequest } from "./hooks/useApprovalRequest";
-import { useTourActions } from "./hooks/useTourActions";
-import { CardCustom } from "@/components/ui/card-custom";
-import { useNavigate } from "react-router-dom";
+import { useTourBooking } from "./hooks/useTourBooking";
 
 interface ClientTourCardProps {
   tour: Tour;
 }
 
 export function ClientTourCard({ tour }: ClientTourCardProps) {
-  const navigate = useNavigate();
-  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  
-  const { existingRequest, checkExistingRequest } = useApprovalRequest(tour.id);
-  
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const { toast } = useToast();
+
   const {
-    showAuthDialog,
-    setShowAuthDialog,
-    showApprovalDialog,
-    setShowApprovalDialog,
     showAccessDeniedDialog,
     setShowAccessDeniedDialog,
-    handleActionClick,
-    getActionButtonText,
-    isActionEnabled
-  } = useTourActions(tour, selectedPickupCity, existingRequest);
+    showExistingBookingDialog,
+    setShowExistingBookingDialog,
+    showPendingApprovalDialog,
+    setShowPendingApprovalDialog,
+    showApprovalDialog,
+    setShowApprovalDialog,
+    handleBookingButtonClick,
+  } = useTourBooking(tour);
 
-  const handleApprovalSuccess = () => {
-    setShowApprovalDialog(false);
-    checkExistingRequest();
+  const handlePickupCitySelect = (city: string) => {
+    setSelectedPickupCity(city);
   };
 
-  const handleBookingClick = () => {
-    if (selectedPickupCity) {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-    }
+  const handleExpandClick = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleApprovalRequestSuccess = () => {
+    setShowApprovalDialog(false);
+    setHasPendingRequest(true);
+    toast({
+      title: "Demande envoyée",
+      description: "Votre demande d'approbation a été envoyée avec succès",
+    });
   };
 
   return (
@@ -53,44 +56,46 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           
           <TourRoute 
             stops={tour.route} 
-            onPointSelect={setSelectedPickupCity}
+            onPointSelect={handlePickupCitySelect}
             selectedPoint={selectedPickupCity}
           />
+
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              onClick={handleExpandClick}
+              className="text-gray-600 hover:bg-primary/10"
+            >
+              {isExpanded ? "Voir moins" : "Voir les détails de la tournée"}
+            </Button>
+          </div>
 
           {isExpanded && (
             <TourExpandedContent 
               tour={tour}
               selectedPickupCity={selectedPickupCity}
-              onPickupCitySelect={setSelectedPickupCity}
-              onActionClick={handleBookingClick}
-              isActionEnabled={isActionEnabled()}
-              actionButtonText={getActionButtonText()}
-              hasPendingRequest={existingRequest?.status === 'pending'}
+              onPickupCitySelect={handlePickupCitySelect}
+              onActionClick={() => handleBookingButtonClick(selectedPickupCity)}
+              isActionEnabled={!!selectedPickupCity && !hasPendingRequest}
+              actionButtonText={tour.type === 'private' ? "Demander une approbation" : "Réserver cette tournée"}
+              hasPendingRequest={hasPendingRequest}
             />
           )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-[#0FA0CE] hover:text-[#0FA0CE] hover:bg-[#0FA0CE]/10"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            {isExpanded ? "Masquer les détails" : "Afficher les détails"}
-          </Button>
         </div>
       </div>
 
       <TourDialogs
         showAccessDeniedDialog={showAccessDeniedDialog}
         setShowAccessDeniedDialog={setShowAccessDeniedDialog}
-        showAuthDialog={showAuthDialog}
-        setShowAuthDialog={setShowAuthDialog}
+        showExistingBookingDialog={showExistingBookingDialog}
+        setShowExistingBookingDialog={setShowExistingBookingDialog}
+        showPendingApprovalDialog={showPendingApprovalDialog}
+        setShowPendingApprovalDialog={setShowPendingApprovalDialog}
         showApprovalDialog={showApprovalDialog}
         setShowApprovalDialog={setShowApprovalDialog}
         tourId={tour.id}
-        pickupCity={selectedPickupCity || ''}
-        onApprovalSuccess={handleApprovalSuccess}
+        pickupCity={selectedPickupCity}
+        onApprovalSuccess={handleApprovalRequestSuccess}
       />
     </CardCustom>
   );

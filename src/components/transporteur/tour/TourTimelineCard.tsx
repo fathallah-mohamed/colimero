@@ -57,7 +57,6 @@ export function TourTimelineCard({
       return;
     }
 
-    console.log('Existing request:', request);
     setExistingRequest(request);
   };
 
@@ -87,7 +86,6 @@ export function TourTimelineCard({
     if (tour.type === 'private') {
       if (existingRequest) {
         if (existingRequest.status === 'approved') {
-          // Si la demande est approuvée, rediriger vers le formulaire de réservation
           navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
         } else if (existingRequest.status === 'pending') {
           toast({

@@ -136,14 +136,12 @@ export type Database = {
       bookings: {
         Row: {
           approval_request_id: string | null
-          booking_number: string | null
           content_types: string[] | null
           created_at: string
           customs_declaration: boolean | null
           delivery_city: string
           delivery_notes: string | null
           delivery_status: string | null
-          estimated_delivery_date: string | null
           id: string
           item_type: string
           package_description: string | null
@@ -153,8 +151,8 @@ export type Database = {
           recipient_id: string | null
           recipient_name: string
           recipient_phone: string
-          sender_name: string
-          sender_phone: string
+          sender_name: string | null
+          sender_phone: string | null
           special_items: Json | null
           status: string
           terms_accepted: boolean | null
@@ -166,14 +164,12 @@ export type Database = {
         }
         Insert: {
           approval_request_id?: string | null
-          booking_number?: string | null
           content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
           delivery_city: string
           delivery_notes?: string | null
           delivery_status?: string | null
-          estimated_delivery_date?: string | null
           id?: string
           item_type: string
           package_description?: string | null
@@ -183,8 +179,8 @@ export type Database = {
           recipient_id?: string | null
           recipient_name: string
           recipient_phone: string
-          sender_name: string
-          sender_phone: string
+          sender_name?: string | null
+          sender_phone?: string | null
           special_items?: Json | null
           status?: string
           terms_accepted?: boolean | null
@@ -196,14 +192,12 @@ export type Database = {
         }
         Update: {
           approval_request_id?: string | null
-          booking_number?: string | null
           content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
           delivery_city?: string
           delivery_notes?: string | null
           delivery_status?: string | null
-          estimated_delivery_date?: string | null
           id?: string
           item_type?: string
           package_description?: string | null
@@ -213,8 +207,8 @@ export type Database = {
           recipient_id?: string | null
           recipient_name?: string
           recipient_phone?: string
-          sender_name?: string
-          sender_phone?: string
+          sender_name?: string | null
+          sender_phone?: string | null
           special_items?: Json | null
           status?: string
           terms_accepted?: boolean | null
@@ -679,60 +673,6 @@ export type Database = {
           name?: string
         }
         Relationships: []
-      }
-      recipients: {
-        Row: {
-          address: string
-          city: string
-          client_id: string
-          country: string
-          created_at: string
-          first_name: string
-          id: string
-          last_name: string
-          phone: string
-          updated_at: string
-        }
-        Insert: {
-          address: string
-          city: string
-          client_id: string
-          country: string
-          created_at?: string
-          first_name: string
-          id?: string
-          last_name: string
-          phone: string
-          updated_at?: string
-        }
-        Update: {
-          address?: string
-          city?: string
-          client_id?: string
-          country?: string
-          created_at?: string
-          first_name?: string
-          id?: string
-          last_name?: string
-          phone?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "recipients_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "client_consents"
-            referencedColumns: ["client_id"]
-          },
-          {
-            foreignKeyName: "recipients_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       service_templates: {
         Row: {
