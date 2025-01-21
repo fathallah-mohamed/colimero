@@ -3,6 +3,7 @@ import { TransporteurAvatar } from "@/components/transporteur/TransporteurAvatar
 import { Calendar, Clock } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Progress } from "@/components/ui/progress";
 
 interface TourMainInfoProps {
   tour: Tour;
@@ -13,6 +14,10 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
   const firstCollectionDate = new Date(tour.collection_date);
   const departureDate = new Date(tour.departure_date);
   const tourDuration = differenceInDays(departureDate, firstCollectionDate);
+  
+  // Calculer le pourcentage de capacité utilisée
+  const usedCapacity = tour.total_capacity - tour.remaining_capacity;
+  const capacityPercentage = (usedCapacity / tour.total_capacity) * 100;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -51,9 +56,16 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
         <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary text-center">
           {pricePerKg} €/kg
         </span>
-        <span className="text-green-600 dark:text-green-400 font-medium text-base text-center px-4 py-2 bg-green-50 rounded-lg">
-          {tour.remaining_capacity} kg disponibles
-        </span>
+        <div className="space-y-2 bg-green-50 p-3 rounded-lg">
+          <div className="flex justify-between text-sm text-green-700">
+            <span>Capacité utilisée</span>
+            <span>{Math.round(capacityPercentage)}%</span>
+          </div>
+          <Progress value={capacityPercentage} className="h-2" />
+          <div className="text-sm text-green-700 text-center">
+            {tour.remaining_capacity} kg disponibles sur {tour.total_capacity} kg
+          </div>
+        </div>
       </div>
     </div>
   );
