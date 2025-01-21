@@ -109,7 +109,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         special_items: formattedSpecialItems,
         content_types: contentTypes,
         photos: photoUrls
-      };
+      } as BookingFormData;
 
       await createBooking(bookingData);
     } catch (error) {
