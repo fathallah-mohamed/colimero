@@ -56,12 +56,24 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       const bookingData = {
         ...values,
         weight,
+        pickup_city: pickupCity,
         special_items: formattedSpecialItems,
         content_types: contentTypes,
-        photos: photoUrls
+        photos: photoUrls,
+        terms_accepted: true,
+        customs_declaration: true
       } as BookingFormData;
 
       await createBooking(bookingData);
+      
+      toast({
+        title: "Réservation créée",
+        description: "Votre réservation a été créée avec succès.",
+      });
+      
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error("Error in form submission:", error);
       toast({

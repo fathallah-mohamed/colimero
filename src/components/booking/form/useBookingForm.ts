@@ -25,7 +25,9 @@ export function useBookingForm(tourId: number, pickupCity: string) {
       special_items: [],
       content_types: [],
       photos: [],
-      package_description: ""
+      package_description: "",
+      terms_accepted: true,
+      customs_declaration: true
     }
   });
 
