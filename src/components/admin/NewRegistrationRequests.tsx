@@ -21,6 +21,8 @@ export default function NewRegistrationRequests() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
+      console.log("Current user ID:", session.user.id);
+
       const { data: approvalRequests, error: approvalError } = await supabase
         .from("approval_requests")
         .select(`
@@ -41,47 +43,24 @@ export default function NewRegistrationRequests() {
               email,
               phone
             )
+          ),
+          client:clients(
+            id,
+            first_name,
+            last_name,
+            email,
+            phone
           )
         `)
-        .eq("tour.carrier_id", session.user.id)
-        .order("created_at", { ascending: false });
+        .eq("tour.carriers.id", session.user.id);
 
       if (approvalError) {
         console.error("Error fetching approval requests:", approvalError);
         throw approvalError;
       }
 
-      const requestsWithUserData = await Promise.all(
-        approvalRequests.map(async (request) => {
-          const { data: userData, error: userError } = await supabase
-            .from("clients")
-            .select("id, first_name, last_name, email, phone")
-            .eq("id", request.user_id)
-            .single();
-
-          if (userError) {
-            console.error("Error fetching user data:", userError);
-            return {
-              ...request,
-              client: {
-                id: request.user_id,
-                first_name: "Unknown",
-                last_name: "User",
-                email: "",
-                phone: ""
-              }
-            };
-          }
-
-          return {
-            ...request,
-            client: userData
-          };
-        })
-      );
-      
-      console.log("Fetched approval requests:", requestsWithUserData);
-      return requestsWithUserData as ApprovalRequest[];
+      console.log("Fetched approval requests:", approvalRequests);
+      return approvalRequests as ApprovalRequest[];
     },
   });
 
@@ -142,6 +121,8 @@ export default function NewRegistrationRequests() {
       </div>
     );
   }
+
+  console.log("Rendering requests:", requests);
 
   return (
     <div className="space-y-6">
