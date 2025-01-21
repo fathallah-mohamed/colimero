@@ -59,14 +59,14 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
           {pricePerKg} €/kg
         </span>
         
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Capacité utilisée</span>
-            <span>{Math.round(capacityPercentage)}%</span>
+        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div className="flex justify-between items-center text-sm text-gray-600">
+            <span>Capacité disponible :</span>
+            <span>{tour.remaining_capacity} kg sur {tour.total_capacity} kg</span>
           </div>
-          <Progress value={capacityPercentage} className="h-2" />
-          <div className="text-sm text-gray-600 text-center">
-            {tour.remaining_capacity} kg disponibles sur {tour.total_capacity} kg
+          <Progress value={capacityPercentage} className="h-3 w-full" />
+          <div className="text-sm text-gray-600 text-right">
+            {Math.round(capacityPercentage)}% utilisé
           </div>
         </div>
       </div>
