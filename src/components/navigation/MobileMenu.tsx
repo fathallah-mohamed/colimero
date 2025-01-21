@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { MenuItems } from "./MenuItems";
+import MenuItems from "./MenuItems";
 import { Button } from "../ui/button";
 import { UserCircle2 } from "lucide-react";
 import { useUserData } from "./menu/useUserData";
@@ -13,7 +13,7 @@ interface MobileMenuProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export function MobileMenu({
+export default function MobileMenu({
   isOpen,
   user,
   userType,
@@ -33,7 +33,7 @@ export function MobileMenu({
       className={cn(
         "fixed inset-y-0 right-0 w-[80%] bg-white border-l shadow-lg h-[calc(100vh-65px)] top-[65px] overflow-y-auto",
         "transform transition-transform duration-300 ease-in-out lg:hidden",
-        isOpen ? "translate-x-0" : "translate-x-full"
+        "translate-x-0"
       )}
     >
       <div className="flex flex-col space-y-1 px-4 pt-2 pb-3">

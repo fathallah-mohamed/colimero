@@ -1,19 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MenuItems } from "./MenuItems";
+import MenuItems from "./MenuItems";
 import { AuthSection } from "./AuthSection";
 import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
-import { User } from "@supabase/supabase-js";
 
 interface NavigationHeaderProps {
   isScrolled: boolean;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  user: User | null;
+  user: any;
   userType: string | null;
   handleLogout: () => void;
-  showAuthDialog: boolean;
-  setShowAuthDialog: (show: boolean) => void;
+  mobileButtonRef: React.RefObject<HTMLButtonElement>;
 }
 
 export function NavigationHeader({
@@ -23,44 +21,49 @@ export function NavigationHeader({
   user,
   userType,
   handleLogout,
-  showAuthDialog,
-  setShowAuthDialog
+  mobileButtonRef,
 }: NavigationHeaderProps) {
   const navigate = useNavigate();
 
+  const handleLoginClick = () => {
+    navigate('/connexion');
+  };
+
   return (
-    <motion.header
-      className={`fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 transition-shadow duration-200 ${
-        isScrolled ? "shadow-md" : ""
-      }`}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="text-2xl font-bold text-[#00B0F0]">
-            Logo
-          </Link>
+    <div className="flex justify-between items-center">
+      <motion.div 
+        className="flex items-center"
+        initial={false}
+        animate={{ scale: isScrolled ? 0.95 : 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Link 
+          to="/" 
+          className="text-2xl lg:text-3xl font-bold text-primary hover:opacity-90 transition-opacity"
+        >
+          Colimero
+        </Link>
+      </motion.div>
 
-          <MenuItems isAuthenticated={!!user} userType={userType} />
-        </div>
+      <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
+        <MenuItems />
+      </div>
 
-        <div className="flex items-center gap-4">
-          <AuthSection
-            user={user}
-            userType={userType}
-            handleLogout={handleLogout}
-            setShowAuthDialog={() => setShowAuthDialog(true)}
-          />
-
-          <MobileMenuButton
-            isOpen={isOpen}
-            onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden"
-          />
-        </div>
-      </nav>
-    </motion.header>
+      <div className="flex items-center space-x-6 lg:space-x-8">
+        <AuthSection
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setShowAuthDialog={handleLoginClick}
+        />
+        
+        <MobileMenuButton 
+          ref={mobileButtonRef}
+          isOpen={isOpen}
+          onClick={() => setIsOpen(!isOpen)}
+          className="block lg:hidden"
+        />
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { menuItems } from "./config/menuItems";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -8,15 +9,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { menuItems } from "./config/menuItems";
 
-interface MenuItemsProps {
-  isAuthenticated?: boolean;
-  userType?: string | null;
-  currentPath?: string;
-}
-
-export function MenuItems({ isAuthenticated, userType, currentPath }: MenuItemsProps) {
+export default function MenuItems() {
   const location = useLocation();
   const isMobile = useIsMobile();
 
