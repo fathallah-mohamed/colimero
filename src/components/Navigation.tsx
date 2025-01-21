@@ -73,15 +73,19 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
         }
         
         // Si nous sommes sur une route protégée et non authentifié
-        const protectedRoutes = ['/mes-reservations', '/profile'];
+        const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
         if (protectedRoutes.includes(location.pathname)) {
           if (!session) {
             console.log("No session found, redirecting to login");
             sessionStorage.setItem('returnPath', location.pathname);
             navigate('/connexion');
-          } else if (session.user.user_metadata?.user_type !== 'client') {
-            console.log("User type not client, redirecting to home");
-            navigate('/');
+          } else {
+            const userType = session.user.user_metadata?.user_type;
+            // Vérifier si l'utilisateur est un transporteur pour la page demandes-approbation
+            if (location.pathname === '/demandes-approbation' && userType !== 'carrier') {
+              console.log("User not carrier, redirecting to home");
+              navigate('/');
+            }
           }
         }
       } catch (error) {

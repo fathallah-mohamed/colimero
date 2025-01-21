@@ -28,6 +28,20 @@ export function ApprovalRequestCard({
     return null;
   }
 
+  const statusLabels = {
+    'pending': 'En attente',
+    'approved': 'Approuvée',
+    'rejected': 'Refusée',
+    'cancelled': 'Annulée'
+  };
+
+  const statusVariants = {
+    'pending': 'outline',
+    'approved': 'success',
+    'rejected': 'destructive',
+    'cancelled': 'destructive'
+  };
+
   return (
     <Card className="p-6">
       <div className="space-y-6">
@@ -54,9 +68,8 @@ export function ApprovalRequestCard({
             </div>
           </div>
           <div className="text-right">
-            <Badge variant={request.status === 'pending' ? 'outline' : request.status === 'approved' ? 'success' : 'destructive'}>
-              {request.status === 'pending' ? 'En attente' : 
-               request.status === 'approved' ? 'Approuvée' : 'Refusée'}
+            <Badge variant={statusVariants[request.status as keyof typeof statusVariants] || 'outline'}>
+              {statusLabels[request.status as keyof typeof statusLabels] || request.status}
             </Badge>
             <p className="text-sm text-gray-500 mt-2">
               Demande du {format(new Date(request.created_at), "dd MMMM yyyy", {
