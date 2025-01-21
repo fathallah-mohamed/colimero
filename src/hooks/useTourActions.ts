@@ -89,20 +89,21 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
         }
       } else {
         setShowApprovalDialog(true);
-      }
-    } else {
-      // Pour les tournées publiques
-      const existingBooking = await checkExistingBooking(session.user.id);
-      if (existingBooking) {
-        toast({
-          variant: "destructive",
-          title: "Réservation impossible",
-          description: "Vous avez déjà une réservation en attente pour cette tournée",
-        });
         return;
       }
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
+
+    // Pour les tournées publiques
+    const existingBooking = await checkExistingBooking(session.user.id);
+    if (existingBooking) {
+      toast({
+        variant: "destructive",
+        title: "Réservation impossible",
+        description: "Vous avez déjà une réservation en attente pour cette tournée",
+      });
+      return;
+    }
+    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
   };
 
   const getActionButtonText = () => {
