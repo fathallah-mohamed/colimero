@@ -58,7 +58,6 @@ export default function RejectedRequests() {
   };
 
   const handleReject = async (request: any) => {
-    // This is just a placeholder since we don't need reject functionality in rejected requests
     return Promise.resolve();
   };
 
@@ -100,6 +99,7 @@ export default function RejectedRequests() {
               onViewDetails={setSelectedRequest}
               showApproveButton={true}
               onApprove={handleApprove}
+              onReject={handleReject}
             />
           </ScrollArea>
         </div>

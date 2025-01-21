@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ApprovalRequest } from "./approval-requests/types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<any[]>([]);
+  const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const { toast } = useToast();
 
   const fetchRequests = async () => {
@@ -26,15 +27,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         .select(`
           *,
           tour:tours (
-            id,
-            departure_country,
-            destination_country,
-            departure_date,
-            collection_date,
-            route,
-            total_capacity,
-            remaining_capacity,
-            type,
+            *,
             carrier:carriers (
               id,
               company_name,
@@ -42,7 +35,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               phone
             )
           ),
-          client:clients!approval_requests_user_id_fkey (
+          client:clients (
             id,
             first_name,
             last_name,
@@ -52,10 +45,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         `);
 
       if (userType === 'carrier') {
-        // Pour un transporteur, on filtre par les tournées dont il est responsable
-        query = query.eq('tour.carrier.id', userId);
+        query = query.eq('tour.carrier_id', userId);
       } else {
-        // Pour un client, on filtre par ses propres demandes
         query = query.eq('user_id', userId);
       }
 
@@ -98,7 +89,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     }
   }, [userId, userType]);
 
-  const handleApproveRequest = async (request: any) => {
+  const handleApproveRequest = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -128,7 +119,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     }
   };
 
-  const handleRejectRequest = async (request: any) => {
+  const handleRejectRequest = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -158,71 +149,11 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     }
   };
 
-  const handleCancelRequest = async (requestId: string) => {
-    try {
-      const { error } = await supabase
-        .from('approval_requests')
-        .update({
-          status: 'cancelled',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', requestId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Demande annulée",
-        description: "La demande a été annulée avec succès",
-      });
-
-      await fetchRequests();
-      return { success: true };
-    } catch (error: any) {
-      console.error('Error cancelling request:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'annulation de la demande",
-      });
-      return { success: false, error };
-    }
-  };
-
-  const handleDeleteRequest = async (requestId: string) => {
-    try {
-      const { error } = await supabase
-        .from('approval_requests')
-        .delete()
-        .eq('id', requestId)
-        .eq('status', 'cancelled');
-
-      if (error) throw error;
-
-      toast({
-        title: "Demande supprimée",
-        description: "La demande a été supprimée avec succès",
-      });
-
-      await fetchRequests();
-      return { success: true };
-    } catch (error: any) {
-      console.error('Error deleting request:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la suppression de la demande",
-      });
-      return { success: false, error };
-    }
-  };
-
   return { 
     requests, 
     loading,
     error,
     handleApproveRequest,
-    handleRejectRequest,
-    handleCancelRequest,
-    handleDeleteRequest
+    handleRejectRequest
   };
 }
