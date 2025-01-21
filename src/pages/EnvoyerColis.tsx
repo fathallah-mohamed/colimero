@@ -1,20 +1,29 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
+import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
+import { useTours } from "@/hooks/use-tours";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import { useBookingFlow } from "@/hooks/useBookingFlow";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { Package2, ShieldCheck, Clock4 } from "lucide-react";
+import { Package2, ShieldCheck, Clock4, Loader2 } from "lucide-react";
 import type { TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("all");
   const [tourType, setTourType] = useState<"public" | "private">("public");
   const [sortBy, setSortBy] = useState<string>("departure_asc");
   
+  const {
+    loading,
+    tours,
+  } = useTours();
+
   const {
     showAuthDialog,
     setShowAuthDialog,
@@ -23,6 +32,29 @@ export default function EnvoyerColis() {
     handleBookingClick,
     handleAuthSuccess
   } = useBookingFlow();
+
+  // Filtrer les tournées selon le type (public/privé) et le statut
+  const filteredTours = tours?.filter(tour => {
+    const typeMatch = tour.type === tourType;
+    const statusMatch = selectedStatus === "all" || tour.status === selectedStatus;
+    return typeMatch && statusMatch;
+  });
+
+  // Tri des tournées
+  const sortedTours = [...(filteredTours || [])].sort((a, b) => {
+    switch (sortBy) {
+      case "departure_asc":
+        return new Date(a.departure_date).getTime() - new Date(b.departure_date).getTime();
+      case "departure_desc":
+        return new Date(b.departure_date).getTime() - new Date(a.departure_date).getTime();
+      case "price_asc":
+        return (a.carriers?.carrier_capacities?.price_per_kg || 0) - (b.carriers?.carrier_capacities?.price_per_kg || 0);
+      case "price_desc":
+        return (b.carriers?.carrier_capacities?.price_per_kg || 0) - (a.carriers?.carrier_capacities?.price_per_kg || 0);
+      default:
+        return 0;
+    }
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -93,6 +125,30 @@ export default function EnvoyerColis() {
           sortBy={sortBy}
           setSortBy={setSortBy}
         />
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : sortedTours?.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Aucune tournée disponible
+            </h3>
+            <p className="text-gray-500">
+              Aucune tournée ne correspond à vos critères de recherche pour le moment.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-8 space-y-4">
+            {sortedTours?.map((tour) => (
+              <ClientTourCard
+                key={tour.id}
+                tour={tour}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <AuthDialog 
