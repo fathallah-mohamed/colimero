@@ -20,6 +20,7 @@ export default function EnvoyerColis() {
     setShowAuthDialog,
     showAccessDeniedDialog,
     setShowAccessDeniedDialog,
+    handleBookingClick,
     handleAuthSuccess
   } = useBookingFlow();
 
