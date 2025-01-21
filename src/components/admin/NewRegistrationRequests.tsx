@@ -7,80 +7,116 @@ import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { ApprovalRequest } from "./approval-requests/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: requests = [], isLoading, refetch } = useQuery({
     queryKey: ["approval-requests"],
     queryFn: async () => {
-      console.log("Fetching approval requests...");
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("No session");
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          toast({
+            variant: "destructive",
+            title: "Erreur d'authentification",
+            description: "Veuillez vous reconnecter",
+          });
+          navigate("/connexion");
+          return [];
+        }
 
-      console.log("Current user ID:", session.user.id);
+        if (!session) {
+          console.log("No session found");
+          navigate("/connexion");
+          return [];
+        }
 
-      // D'abord, récupérer les tournées du transporteur
-      const { data: tours, error: toursError } = await supabase
-        .from("tours")
-        .select("id")
-        .eq("carrier_id", session.user.id);
+        console.log("Current user ID:", session.user.id);
 
-      if (toursError) {
-        console.error("Error fetching tours:", toursError);
-        throw toursError;
-      }
+        // Récupérer les tournées du transporteur
+        const { data: tours, error: toursError } = await supabase
+          .from("tours")
+          .select("id")
+          .eq("carrier_id", session.user.id);
 
-      console.log("Carrier tours:", tours);
+        if (toursError) {
+          console.error("Error fetching tours:", toursError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de récupérer vos tournées",
+          });
+          return [];
+        }
 
-      if (!tours || tours.length === 0) {
-        console.log("No tours found for carrier");
-        return [];
-      }
+        console.log("Carrier tours:", tours);
 
-      // Ensuite, récupérer les demandes d'approbation pour ces tournées
-      const tourIds = tours.map(tour => tour.id);
-      const { data: approvalRequests, error: approvalError } = await supabase
-        .from("approval_requests")
-        .select(`
-          *,
-          tour:tours(
-            id,
-            departure_country,
-            destination_country,
-            departure_date,
-            collection_date,
-            route,
-            total_capacity,
-            remaining_capacity,
-            type,
-            carriers(
+        if (!tours || tours.length === 0) {
+          console.log("No tours found for carrier");
+          return [];
+        }
+
+        // Récupérer les demandes d'approbation pour ces tournées
+        const tourIds = tours.map(tour => tour.id);
+        const { data: approvalRequests, error: approvalError } = await supabase
+          .from("approval_requests")
+          .select(`
+            *,
+            tour:tours(
               id,
-              company_name,
+              departure_country,
+              destination_country,
+              departure_date,
+              collection_date,
+              route,
+              total_capacity,
+              remaining_capacity,
+              type,
+              carriers(
+                id,
+                company_name,
+                email,
+                phone
+              )
+            ),
+            client:clients(
+              id,
+              first_name,
+              last_name,
               email,
               phone
             )
-          ),
-          client:clients(
-            id,
-            first_name,
-            last_name,
-            email,
-            phone
-          )
-        `)
-        .in("tour_id", tourIds);
+          `)
+          .in("tour_id", tourIds);
 
-      if (approvalError) {
-        console.error("Error fetching approval requests:", approvalError);
-        throw approvalError;
+        if (approvalError) {
+          console.error("Error fetching approval requests:", approvalError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de récupérer les demandes d'approbation",
+          });
+          return [];
+        }
+
+        console.log("Fetched approval requests:", approvalRequests);
+        return approvalRequests as ApprovalRequest[];
+      } catch (error: any) {
+        console.error("Complete error:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la récupération des données",
+        });
+        return [];
       }
-
-      console.log("Fetched approval requests:", approvalRequests);
-      return approvalRequests as ApprovalRequest[];
     },
   });
 
@@ -147,8 +183,6 @@ export default function NewRegistrationRequests() {
       </div>
     );
   }
-
-  console.log("Rendering requests:", requests);
 
   return (
     <div className="space-y-6">
