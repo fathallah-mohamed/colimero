@@ -22,8 +22,8 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       first_name: initialData.first_name || "",
       last_name: initialData.last_name || "",
       phone: initialData.phone || "",
-      birth_date: initialData.birth_date ? new Date(initialData.birth_date).toISOString().split('T')[0] : "",
       address: initialData.address || "",
+      phone_secondary: initialData.phone_secondary || "",
     },
   });
 
@@ -46,8 +46,8 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
           first_name: values.first_name,
           last_name: values.last_name,
           phone: values.phone,
-          birth_date: values.birth_date || null,
           address: values.address || null,
+          phone_secondary: values.phone_secondary || null,
         })
         .eq('id', session.user.id);
 
