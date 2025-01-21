@@ -41,6 +41,8 @@ export default function Reserver() {
 
       if (error) throw error;
 
+      if (!data) throw new Error("Tour not found");
+
       const transformedTour: Tour = {
         ...data,
         id: parseInt(data.id.toString(), 10),
@@ -56,11 +58,12 @@ export default function Reserver() {
       };
 
       return transformedTour;
-    }
+    },
+    enabled: !!tourId
   });
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndApproval = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -70,33 +73,30 @@ export default function Reserver() {
         return;
       }
 
-      // Check if user is a carrier
       const userType = session.user.user_metadata?.user_type;
       if (userType === 'carrier') {
         setShowCarrierDialog(true);
         return;
       }
 
-      // Check if tour is private and needs approval
       if (tour?.type === 'private') {
         const { data: existingRequest } = await supabase
           .from('approval_requests')
           .select('*')
-          .eq('tour_id', tourId)
+          .eq('tour_id', parseInt(tourId!, 10))
           .eq('user_id', session.user.id)
           .maybeSingle();
 
         if (!existingRequest || existingRequest.status !== 'approved') {
           setShowApprovalDialog(true);
-          return;
         }
       }
     };
 
     if (tour) {
-      checkAuth();
+      checkAuthAndApproval();
     }
-  }, [tourId, pickupCity, navigate, tour]);
+  }, [tour, tourId, pickupCity, navigate]);
 
   const handleDialogClose = () => {
     setShowCarrierDialog(false);
@@ -116,7 +116,7 @@ export default function Reserver() {
     return <CarrierAuthDialog isOpen={true} onClose={handleDialogClose} />;
   }
 
-  if (showApprovalDialog) {
+  if (showApprovalDialog && tourId) {
     return (
       <ApprovalRequestDialog
         isOpen={true}
@@ -124,7 +124,7 @@ export default function Reserver() {
           setShowApprovalDialog(false);
           navigate('/');
         }}
-        tourId={parseInt(tourId!, 10)}
+        tourId={parseInt(tourId, 10)}
         pickupCity={pickupCity || ''}
         onSuccess={handleApprovalSuccess}
       />
