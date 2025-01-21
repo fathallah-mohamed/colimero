@@ -55,44 +55,6 @@ export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Téléphone principal <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="+33 6 XX XX XX XX" 
-                  {...field}
-                  onBlur={(e) => {
-                    field.onBlur();
-                    form.trigger("phone");
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phone_secondary"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="+33 6 XX XX XX XX" 
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
       </div>
     </div>
   );
