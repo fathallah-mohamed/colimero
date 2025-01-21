@@ -63,7 +63,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         pickup_city: pickupCity,
         special_items: formattedSpecialItems,
         content_types: contentTypes,
-        photos: photos,
+        photos: photoUrls,
         terms_accepted: true,
         customs_declaration: true
       };
