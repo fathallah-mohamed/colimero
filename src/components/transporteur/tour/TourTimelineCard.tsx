@@ -57,8 +57,23 @@ export function TourTimelineCard({
       return;
     }
 
-    console.log('Existing request:', request);
     setExistingRequest(request);
+  };
+
+  const checkExistingBooking = async (userId: string) => {
+    const { data: pendingBooking, error } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing bookings:', error);
+      return null;
+    }
+
+    return pendingBooking;
   };
 
   const handleActionClick = async () => {
@@ -84,27 +99,45 @@ export function TourTimelineCard({
       return;
     }
 
-    if (tour.type === 'private') {
-      if (existingRequest) {
-        if (existingRequest.status === 'approved') {
-          // Si la demande est approuvée, rediriger vers le formulaire de réservation
-          navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-        } else if (existingRequest.status === 'pending') {
-          toast({
-            title: "Demande en attente",
-            description: "Votre demande d'approbation est en cours de traitement",
-          });
-        } else if (existingRequest.status === 'rejected') {
-          toast({
-            title: "Demande rejetée",
-            description: "Votre demande d'approbation a été rejetée",
-          });
-        }
+    // Vérifier les réservations en attente pour les tournées publiques
+    if (tour.type === 'public') {
+      const existingBooking = await checkExistingBooking(session.user.id);
+      if (existingBooking) {
+        toast({
+          variant: "destructive",
+          title: "Réservation impossible",
+          description: "Vous avez déjà une réservation en attente. Veuillez attendre que votre réservation soit traitée avant d'en effectuer une nouvelle.",
+        });
         return;
       }
-      setShowApprovalDialog(true);
-    } else {
       navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+      return;
+    }
+
+    // Logique pour les tournées privées
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            toast({
+              variant: "destructive",
+              title: "Demande en attente",
+              description: "Votre demande d'approbation est en cours de traitement",
+            });
+            return;
+          case 'approved':
+            navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+            return;
+          case 'rejected':
+            toast({
+              variant: "destructive",
+              title: "Demande rejetée",
+              description: "Votre demande d'approbation a été rejetée pour cette tournée",
+            });
+            return;
+        }
+      }
+      setShowApprovalDialog(true);
     }
   };
 
