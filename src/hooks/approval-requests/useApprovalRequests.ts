@@ -1,26 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useApprovalActions } from "./useApprovalActions";
-import { ApprovalRequest, FetchedApprovalRequest } from "./types";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
-  const { handleApproveRequest, handleRejectRequest } = useApprovalActions();
   const { toast } = useToast();
-
-  const mapToApprovalRequest = (data: FetchedApprovalRequest[]): ApprovalRequest[] => {
-    return data.map(item => ({
-      ...item,
-      client: item.user,
-      tour: {
-        ...item.tour,
-        carriers: item.tour.carrier
-      }
-    }));
-  };
 
   const fetchRequests = async () => {
     try {
@@ -40,15 +27,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         .select(`
           *,
           tour:tours (
-            id,
-            departure_country,
-            destination_country,
-            departure_date,
-            collection_date,
-            route,
-            total_capacity,
-            remaining_capacity,
-            type,
+            *,
             carrier:carriers (
               id,
               company_name,
@@ -56,12 +35,12 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               phone
             )
           ),
-          user:clients (
+          client:clients (
             id,
             first_name,
             last_name,
-            phone,
-            email
+            email,
+            phone
           )
         `);
 
@@ -79,21 +58,29 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Impossible de charger vos demandes d'approbation"
+          description: "Impossible de charger les demandes d'approbation"
         });
         setRequests([]);
         return;
       }
 
-      console.log('Fetched approval requests:', data);
-      setRequests(mapToApprovalRequest(data as FetchedApprovalRequest[]));
+      const mappedRequests = data?.map(request => ({
+        ...request,
+        tour: {
+          ...request.tour,
+          carrier: request.tour.carrier,
+          carriers: request.tour.carrier // For backward compatibility
+        }
+      })) as ApprovalRequest[];
+
+      setRequests(mappedRequests);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       setError(error.message);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors du chargement de vos demandes"
+        description: "Une erreur est survenue lors du chargement des demandes"
       });
       setRequests([]);
     } finally {
@@ -110,15 +97,62 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     }
   }, [userId, userType]);
 
-  const handleAction = async (actionFn: Function, request: ApprovalRequest) => {
+  const handleApproveRequest = async (request: ApprovalRequest) => {
     try {
-      const result = await actionFn(request);
-      if (result?.success) {
-        await fetchRequests();
-      }
-      return result;
-    } catch (error) {
-      console.error('Error handling action:', error);
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'approved',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande approuvée",
+        description: "La demande a été approuvée avec succès",
+      });
+
+      await fetchRequests();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error approving request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'approbation de la demande",
+      });
+      return { success: false, error };
+    }
+  };
+
+  const handleRejectRequest = async (request: ApprovalRequest) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'rejected',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande rejetée",
+        description: "La demande a été rejetée avec succès",
+      });
+
+      await fetchRequests();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error rejecting request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors du rejet de la demande",
+      });
       return { success: false, error };
     }
   };
@@ -127,7 +161,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     requests, 
     loading,
     error,
-    handleApproveRequest: async (request: ApprovalRequest) => handleAction(handleApproveRequest, request),
-    handleRejectRequest: async (request: ApprovalRequest) => handleAction(handleRejectRequest, request)
+    handleApproveRequest,
+    handleRejectRequest
   };
 }

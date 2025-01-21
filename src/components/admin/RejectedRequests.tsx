@@ -58,7 +58,34 @@ export default function RejectedRequests() {
   };
 
   const handleReject = async (request: any) => {
-    return Promise.resolve();
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'rejected',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande rejetée",
+        description: "La demande a été rejetée avec succès",
+      });
+
+      refetch();
+      setSelectedRequest(null);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error rejecting request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors du rejet de la demande",
+      });
+      return { success: false, error };
+    }
   };
 
   const filteredRequests = requests?.filter(

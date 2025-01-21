@@ -17,6 +17,7 @@ export interface Carrier {
 
 export interface Tour {
   id: number;
+  carrier_id: string;
   departure_country: string;
   destination_country: string;
   departure_date: string;
@@ -25,7 +26,8 @@ export interface Tour {
   total_capacity: number;
   remaining_capacity: number;
   type: "public" | "private";
-  carriers: Carrier;
+  carrier: Carrier;
+  carriers?: Carrier; // For backward compatibility
 }
 
 export interface ApprovalRequest {
