@@ -6,6 +6,7 @@ import { TourExpandedContent } from "./components/TourExpandedContent";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientTourCardProps {
   tour: Tour;
