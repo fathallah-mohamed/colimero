@@ -33,7 +33,7 @@ export function BookingCard({
   };
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="space-y-4">
         <BookingHeaderSection booking={booking} />
         
@@ -45,13 +45,13 @@ export function BookingCard({
             onStatusChange={onStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
-            userType="carrier"
+            userType="client"
           />
         </div>
 
         <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="w-full flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="w-full flex items-center gap-2 text-gray-600 hover:text-gray-900">
               <Info className="h-4 w-4" />
               {isExpanded ? "Masquer les détails" : "Voir les détails"}
             </Button>

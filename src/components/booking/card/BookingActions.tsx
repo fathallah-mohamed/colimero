@@ -1,9 +1,7 @@
 import { BookingStatus } from "@/types/booking";
-import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { CarrierActions } from "./actions/CarrierActions";
-import { ClientActions } from "./actions/ClientActions";
+import { Button } from "@/components/ui/button";
+import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
+import { CancelConfirmDialog } from "../actions/CancelConfirmDialog";
 
 interface BookingActionsProps {
   bookingId: string;
@@ -12,69 +10,108 @@ interface BookingActionsProps {
   onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
   onUpdate: () => Promise<void>;
   onEdit: () => void;
-  userType?: string | null;
+  userType: string;
 }
 
-export function BookingActions({
+export function BookingActions({ 
   bookingId,
-  status,
+  status, 
   tourStatus,
-  onStatusChange,
+  onStatusChange, 
   onUpdate,
   onEdit,
   userType
 }: BookingActionsProps) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const handleStatusChange = async (newStatus: BookingStatus) => {
-    try {
-      console.log("Changing booking status:", { bookingId, newStatus });
-      
-      const { error } = await supabase
-        .from('bookings')
-        .update({ 
-          status: newStatus,
-          delivery_status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', bookingId);
-
-      if (error) throw error;
-
-      // Invalider immédiatement le cache
-      await queryClient.invalidateQueries({ queryKey: ['bookings'] });
-      await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
-      await queryClient.invalidateQueries({ queryKey: ['tours'] });
-
-      await onStatusChange(bookingId, newStatus);
-      await onUpdate();
-    } catch (error) {
-      console.error('Error updating booking status:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la réservation",
-      });
-    }
+  const handleStatusChange = (newStatus: BookingStatus) => {
+    console.log('Changing status to:', newStatus);
+    onStatusChange(bookingId, newStatus);
   };
+
+  // N'afficher les actions que si la tournée est programmée ou en cours de ramassage
+  if (!['Programmée', 'Ramassage en cours'].includes(tourStatus)) {
+    return null;
+  }
 
   return (
     <div className="flex items-center gap-2">
-      {userType === "carrier" ? (
-        <CarrierActions
-          status={status}
-          tourStatus={tourStatus}
-          onStatusChange={handleStatusChange}
-          onEdit={onEdit}
-        />
-      ) : (
-        <ClientActions
-          status={status}
-          tourStatus={tourStatus}
-          onStatusChange={handleStatusChange}
-          onEdit={onEdit}
-        />
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onEdit}
+        className="gap-2"
+      >
+        <Edit2 className="h-4 w-4" />
+        Modifier
+      </Button>
+
+      {status === "cancelled" && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-blue-500 hover:text-blue-600 gap-2"
+          onClick={() => handleStatusChange("pending")}
+        >
+          <RotateCcw className="h-4 w-4" />
+          Remettre en attente
+        </Button>
+      )}
+
+      {status === "pending" && (
+        <>
+          {tourStatus === "Programmée" && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-red-500 hover:text-red-600 gap-2"
+                onClick={() => handleStatusChange("cancelled")}
+              >
+                <XCircle className="h-4 w-4" />
+                Annuler
+              </Button>
+              {userType === "carrier" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-green-500 hover:text-green-600 gap-2"
+                  onClick={() => handleStatusChange("confirmed")}
+                >
+                  <CheckSquare className="h-4 w-4" />
+                  Confirmer
+                </Button>
+              )}
+            </>
+          )}
+          {tourStatus === "Ramassage en cours" && userType === "carrier" && (
+            <>
+              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-500 hover:text-green-600 gap-2"
+                onClick={() => handleStatusChange("collected")}
+              >
+                <CheckSquare className="h-4 w-4" />
+                Marquer comme collectée
+              </Button>
+            </>
+          )}
+        </>
+      )}
+
+      {status === "confirmed" && tourStatus === "Ramassage en cours" && userType === "carrier" && (
+        <>
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-green-500 hover:text-green-600 gap-2"
+            onClick={() => handleStatusChange("collected")}
+          >
+            <CheckSquare className="h-4 w-4" />
+            Marquer comme collectée
+          </Button>
+        </>
       )}
     </div>
   );
