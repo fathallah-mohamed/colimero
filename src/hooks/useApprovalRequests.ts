@@ -42,7 +42,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
               phone
             )
           ),
-          client:clients (
+          client:clients!approval_requests_user_id_fkey (
             id,
             first_name,
             last_name,
@@ -52,8 +52,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         `);
 
       if (userType === 'carrier') {
-        query = query.eq('tour.carrier_id', userId);
+        // Pour un transporteur, on filtre par les tournées dont il est responsable
+        query = query.eq('tour.carrier.id', userId);
       } else {
+        // Pour un client, on filtre par ses propres demandes
         query = query.eq('user_id', userId);
       }
 
