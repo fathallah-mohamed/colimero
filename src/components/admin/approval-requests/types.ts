@@ -1,16 +1,9 @@
 export interface Client {
   id: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
   email: string;
-  phone: string;
-}
-
-export interface Carrier {
-  id: string;
-  company_name: string;
-  email: string;
-  phone: string;
+  phone: string | null;
 }
 
 export interface Tour {
@@ -23,7 +16,12 @@ export interface Tour {
   total_capacity: number;
   remaining_capacity: number;
   type: string;
-  carriers: Carrier;
+  carriers: {
+    id: string;
+    company_name: string;
+    email: string;
+    phone: string;
+  };
 }
 
 export interface ApprovalRequest {
@@ -41,7 +39,6 @@ export interface ApprovalRequest {
   pickup_city: string;
   tour_id: number;
   user_id: string;
-  // Additional fields from carrier registration
   email?: string;
   company_name?: string;
   siret?: string;
