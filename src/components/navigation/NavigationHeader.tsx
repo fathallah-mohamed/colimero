@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import MenuItems from "./MenuItems";
 import { AuthSection } from "./AuthSection";
 import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
-import { cn } from "@/lib/utils";
 
 interface NavigationHeaderProps {
   isScrolled: boolean;
@@ -13,8 +12,6 @@ interface NavigationHeaderProps {
   userType: string | null;
   handleLogout: () => void;
   mobileButtonRef: React.RefObject<HTMLButtonElement>;
-  showAuthDialog?: boolean;
-  setShowAuthDialog: (show: boolean) => void;
 }
 
 export function NavigationHeader({
@@ -25,44 +22,46 @@ export function NavigationHeader({
   userType,
   handleLogout,
   mobileButtonRef,
-  showAuthDialog,
-  setShowAuthDialog
 }: NavigationHeaderProps) {
   const navigate = useNavigate();
 
+  const handleLoginClick = () => {
+    navigate('/connexion');
+  };
+
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center">
-        <Link to="/" className="flex items-center">
-          <motion.img
-            src="/logo.png"
-            alt="Logo"
-            className={cn(
-              "transition-all duration-300",
-              isScrolled ? "h-8 w-auto" : "h-12 w-auto"
-            )}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          />
+    <div className="flex justify-between items-center">
+      <motion.div 
+        className="flex items-center"
+        initial={false}
+        animate={{ scale: isScrolled ? 0.95 : 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Link 
+          to="/" 
+          className="text-2xl lg:text-3xl font-bold text-primary hover:opacity-90 transition-opacity"
+        >
+          Colimero
         </Link>
-        <div className="hidden lg:flex lg:ml-10">
-          <MenuItems />
-        </div>
+      </motion.div>
+
+      <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
+        <MenuItems />
       </div>
 
-      <div className="flex items-center">
+      <div className="flex items-center space-x-6 lg:space-x-8">
         <AuthSection
           user={user}
           userType={userType}
           handleLogout={handleLogout}
-          setShowAuthDialog={() => setShowAuthDialog(true)}
+          setShowAuthDialog={handleLoginClick}
         />
-        <MobileMenuButton
+        
+        <MobileMenuButton 
           ref={mobileButtonRef}
           isOpen={isOpen}
           onClick={() => setIsOpen(!isOpen)}
-          className="lg:hidden"
+          className="block lg:hidden"
         />
       </div>
     </div>

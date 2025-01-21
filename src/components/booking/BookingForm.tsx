@@ -4,13 +4,14 @@ import { toast } from "@/components/ui/use-toast";
 import { useBookingCreation } from "@/hooks/useBookingCreation";
 import { useBookingValidation } from "@/hooks/useBookingValidation";
 import { useBookingFormState } from "@/hooks/useBookingFormState";
+import { BookingFormSteps } from "./form/BookingFormSteps";
+import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { StepIndicator } from "./form/steps/StepIndicator";
 import { BookingFormActions } from "./form/BookingFormActions";
 import { useBookingForm } from "./form/useBookingForm";
 import { BookingFormData } from "./form/schema";
 import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { useState } from "react";
-import { StepManager } from "./form/steps/StepManager";
 
 export interface BookingFormProps {
   tourId: number;
@@ -20,6 +21,7 @@ export interface BookingFormProps {
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
+  const { uploadPhotos, isUploading } = usePhotoUpload();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
   
@@ -48,23 +50,33 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   const onSubmit = async (values: BookingFormData) => {
     try {
-      const result = await createBooking({
+      const photoUrls = await uploadPhotos(photos);
+      
+      const formattedSpecialItems = specialItems.map(item => ({
+        name: item,
+        quantity: itemQuantities[item] || 1
+      }));
+
+      const bookingData: BookingFormData = {
         ...values,
         weight,
         pickup_city: pickupCity,
-        special_items: specialItems.map(item => ({
-          name: item,
-          quantity: itemQuantities[item] || 1
-        })),
+        special_items: formattedSpecialItems,
         content_types: contentTypes,
-        photos,
+        photos: photoUrls,
         terms_accepted: true,
         customs_declaration: true
-      });
+      };
+
+      const result = await createBooking(bookingData);
 
       if (result?.tracking_number) {
         setTrackingNumber(result.tracking_number);
         setShowConfirmation(true);
+      }
+      
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error) {
       console.error("Error in form submission:", error);
@@ -106,12 +118,12 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           completedSteps={completedSteps}
         />
 
-        {isLoading ? (
+        {(isLoading || isUploading) ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <StepManager
+          <BookingFormSteps
             currentStep={currentStep}
             form={form}
             weight={weight}
@@ -124,13 +136,14 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
             onQuantityChange={handleQuantityChange}
             photos={photos}
             onPhotoUpload={handlePhotoUpload}
+            onEdit={setCurrentStep}
           />
         )}
 
         <BookingFormActions
           currentStep={currentStep}
           isLoading={isLoading}
-          isUploading={false}
+          isUploading={isUploading}
           onPrevious={handlePrevious}
           onNext={handleNextStep}
         />

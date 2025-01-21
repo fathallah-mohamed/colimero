@@ -13,10 +13,7 @@ interface NavigationProps {
   setShowAuthDialog?: (show: boolean) => void;
 }
 
-export default function Navigation({ 
-  showAuthDialog: externalShowAuthDialog, 
-  setShowAuthDialog: externalSetShowAuthDialog 
-}: NavigationProps = {}) {
+export default function Navigation({ showAuthDialog: externalShowAuthDialog, setShowAuthDialog: externalSetShowAuthDialog }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -26,11 +23,6 @@ export default function Navigation({
   const [isScrolled, setIsScrolled] = useState(false);
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [internalShowAuthDialog, setInternalShowAuthDialog] = useState(false);
-
-  // Use either external or internal state
-  const showAuthDialog = externalShowAuthDialog ?? internalShowAuthDialog;
-  const setShowAuthDialog = externalSetShowAuthDialog ?? setInternalShowAuthDialog;
 
   // Initialize session and handle auth state changes
   useSessionInitializer();
@@ -126,8 +118,6 @@ export default function Navigation({
           userType={userType}
           handleLogout={handleLogout}
           mobileButtonRef={mobileButtonRef}
-          showAuthDialog={showAuthDialog}
-          setShowAuthDialog={setShowAuthDialog}
         />
       </div>
 
