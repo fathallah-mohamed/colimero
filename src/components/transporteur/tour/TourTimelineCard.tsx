@@ -61,11 +61,12 @@ export function TourTimelineCard({
   };
 
   const checkExistingBooking = async (userId: string) => {
-    const { data: pendingBooking, error } = await supabase
+    // Vérifier s'il existe une réservation en attente pour cette tournée
+    const { data: existingBooking, error } = await supabase
       .from('bookings')
-      .select('id')
+      .select('id, status')
       .eq('user_id', userId)
-      .eq('status', 'pending')
+      .eq('tour_id', tour.id)
       .maybeSingle();
 
     if (error) {
@@ -73,7 +74,7 @@ export function TourTimelineCard({
       return null;
     }
 
-    return pendingBooking;
+    return existingBooking;
   };
 
   const handleActionClick = async () => {
@@ -99,19 +100,17 @@ export function TourTimelineCard({
       return;
     }
 
-    // Vérifier les réservations en attente pour les tournées publiques
-    if (tour.type === 'public') {
-      const existingBooking = await checkExistingBooking(session.user.id);
-      if (existingBooking) {
+    // Vérifier les réservations existantes pour cette tournée
+    const existingBooking = await checkExistingBooking(session.user.id);
+    if (existingBooking) {
+      if (existingBooking.status === 'pending') {
         toast({
           variant: "destructive",
           title: "Réservation impossible",
-          description: "Vous avez déjà une réservation en attente. Veuillez attendre que votre réservation soit traitée avant d'en effectuer une nouvelle.",
+          description: "Vous avez déjà une réservation en attente pour cette tournée.",
         });
         return;
       }
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-      return;
     }
 
     // Logique pour les tournées privées
@@ -138,6 +137,8 @@ export function TourTimelineCard({
         }
       }
       setShowApprovalDialog(true);
+    } else {
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
   };
 
