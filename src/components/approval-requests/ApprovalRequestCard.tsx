@@ -3,7 +3,16 @@ import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { User, Mail, Phone, MapPin, Check, X } from "lucide-react";
+import { User, Mail, Phone, MapPin, Check, X, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ApprovalRequestCardProps {
   request: any;
@@ -24,7 +33,11 @@ export function ApprovalRequestCard({
   onCancel,
   onDelete
 }: ApprovalRequestCardProps) {
-  if (!request || !request.tour || !request.user) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const { toast } = useToast();
+
+  if (!request || !request.tour || !request.client) {
     return null;
   }
 
@@ -42,6 +55,20 @@ export function ApprovalRequestCard({
     'cancelled': 'destructive'
   };
 
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel(request);
+      setShowCancelDialog(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(request);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
     <Card className="p-6">
       <div className="space-y-6">
@@ -51,16 +78,16 @@ export function ApprovalRequestCard({
             <div className="flex items-center gap-2">
               <User className="h-5 w-5 text-gray-500" />
               <h3 className="text-lg font-semibold">
-                {request.user.first_name} {request.user.last_name}
+                {request.client.first_name} {request.client.last_name}
               </h3>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <Mail className="h-4 w-4" />
-              <p>{request.user.email}</p>
+              <p>{request.client.email}</p>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <Phone className="h-4 w-4" />
-              <p>{request.user.phone || "Non renseigné"}</p>
+              <p>{request.client.phone || "Non renseigné"}</p>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <MapPin className="h-4 w-4" />
@@ -153,7 +180,7 @@ export function ApprovalRequestCard({
             {request.status === 'pending' && userType !== 'carrier' && (
               <Button
                 variant="destructive"
-                onClick={() => onCancel?.(request.id)}
+                onClick={() => setShowCancelDialog(true)}
                 className="flex items-center gap-2"
               >
                 <X className="h-4 w-4" />
@@ -163,16 +190,56 @@ export function ApprovalRequestCard({
             {request.status === 'cancelled' && (
               <Button
                 variant="destructive"
-                onClick={() => onDelete?.(request.id)}
+                onClick={() => setShowDeleteDialog(true)}
                 className="flex items-center gap-2"
               >
-                <X className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
                 Supprimer
               </Button>
             )}
           </div>
         )}
       </div>
+
+      {/* Dialog de confirmation de suppression */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer cette demande ? Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Annuler
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Supprimer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de confirmation d'annulation */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer l'annulation</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir annuler cette demande d'approbation ?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowCancelDialog(false)}>
+              Retour
+            </Button>
+            <Button variant="destructive" onClick={handleCancel}>
+              Annuler la demande
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

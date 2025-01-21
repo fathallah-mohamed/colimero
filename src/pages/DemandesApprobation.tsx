@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
-import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
