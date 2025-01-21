@@ -6,6 +6,7 @@ import { Tour, RouteStop, TourStatus } from "@/types/tour";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 export default function Reserver() {
   const { tourId } = useParams();
@@ -14,28 +15,7 @@ export default function Reserver() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showCarrierDialog, setShowCarrierDialog] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        const currentPath = `/reserver/${tourId}${pickupCity ? `?pickupCity=${pickupCity}` : ''}`;
-        sessionStorage.setItem('returnPath', currentPath);
-        navigate('/connexion');
-        return;
-      }
-
-      // Check if user is a carrier
-      const userType = session.user.user_metadata?.user_type;
-      if (userType === 'carrier') {
-        setShowCarrierDialog(true);
-        return;
-      }
-    };
-
-    checkAuth();
-  }, [tourId, pickupCity, navigate]);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
 
   const { data: tour, isLoading } = useQuery({
     queryKey: ["tour", tourId],
@@ -57,7 +37,7 @@ export default function Reserver() {
           )
         `)
         .eq("id", parseInt(tourId, 10))
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
@@ -79,13 +59,76 @@ export default function Reserver() {
     }
   });
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        const currentPath = `/reserver/${tourId}${pickupCity ? `?pickupCity=${pickupCity}` : ''}`;
+        sessionStorage.setItem('returnPath', currentPath);
+        navigate('/connexion');
+        return;
+      }
+
+      // Check if user is a carrier
+      const userType = session.user.user_metadata?.user_type;
+      if (userType === 'carrier') {
+        setShowCarrierDialog(true);
+        return;
+      }
+
+      // Check if tour is private and needs approval
+      if (tour?.type === 'private') {
+        const { data: existingRequest } = await supabase
+          .from('approval_requests')
+          .select('*')
+          .eq('tour_id', tourId)
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (!existingRequest || existingRequest.status !== 'approved') {
+          setShowApprovalDialog(true);
+          return;
+        }
+      }
+    };
+
+    if (tour) {
+      checkAuth();
+    }
+  }, [tourId, pickupCity, navigate, tour]);
+
   const handleDialogClose = () => {
     setShowCarrierDialog(false);
     navigate('/');
   };
 
+  const handleApprovalSuccess = () => {
+    setShowApprovalDialog(false);
+    toast({
+      title: "Demande envoyée",
+      description: "Votre demande d'approbation a été envoyée avec succès",
+    });
+    navigate('/mes-reservations');
+  };
+
   if (showCarrierDialog) {
     return <CarrierAuthDialog isOpen={true} onClose={handleDialogClose} />;
+  }
+
+  if (showApprovalDialog) {
+    return (
+      <ApprovalRequestDialog
+        isOpen={true}
+        onClose={() => {
+          setShowApprovalDialog(false);
+          navigate('/');
+        }}
+        tourId={parseInt(tourId!, 10)}
+        pickupCity={pickupCity || ''}
+        onSuccess={handleApprovalSuccess}
+      />
+    );
   }
 
   if (isLoading) {
