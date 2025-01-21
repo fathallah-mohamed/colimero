@@ -22,6 +22,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       first_name: initialData.first_name || "",
       last_name: initialData.last_name || "",
       phone: initialData.phone || "",
+      phone_secondary: initialData.phone_secondary || "",
       address: initialData.address || "",
     },
   });
@@ -61,6 +62,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
           first_name: values.first_name,
           last_name: values.last_name,
           phone: values.phone,
+          phone_secondary: values.phone_secondary,
           address: values.address,
         })
         .eq('id', session.user.id);
@@ -73,7 +75,8 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       console.log("Profile update successful");
       toast({
         title: "Succès",
-        description: "Profil mis à jour avec succès",
+        description: "Votre profil a été mis à jour avec succès",
+        duration: 3000,
       });
       
       onClose();
