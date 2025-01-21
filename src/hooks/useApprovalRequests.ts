@@ -65,7 +65,14 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       }
 
       console.log('Fetched approval requests:', data);
-      setRequests(data || []);
+      const mappedRequests = data?.map(request => ({
+        ...request,
+        tour: {
+          ...request.tour,
+          carrier: request.tour.carrier
+        }
+      })) || [];
+      setRequests(mappedRequests);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       setError(error.message);
@@ -149,11 +156,71 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
     }
   };
 
+  const handleCancelRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande annulée",
+        description: "La demande a été annulée avec succès",
+      });
+
+      await fetchRequests();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error cancelling request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'annulation de la demande",
+      });
+      return { success: false, error };
+    }
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .delete()
+        .eq('id', requestId)
+        .eq('status', 'cancelled');
+
+      if (error) throw error;
+
+      toast({
+        title: "Demande supprimée",
+        description: "La demande a été supprimée avec succès",
+      });
+
+      await fetchRequests();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error deleting request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression de la demande",
+      });
+      return { success: false, error };
+    }
+  };
+
   return { 
     requests, 
     loading,
     error,
     handleApproveRequest,
-    handleRejectRequest
+    handleRejectRequest,
+    handleCancelRequest,
+    handleDeleteRequest
   };
 }

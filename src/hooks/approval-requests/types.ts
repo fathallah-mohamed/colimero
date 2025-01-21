@@ -25,7 +25,8 @@ export interface Tour {
   total_capacity: number;
   remaining_capacity: number;
   type: "public" | "private";
-  carriers: Carrier;
+  carrier_id: string;
+  carrier: Carrier;
 }
 
 export interface ApprovalRequest {
@@ -43,37 +44,4 @@ export interface ApprovalRequest {
   pickup_city: string;
   tour_id: number;
   user_id: string;
-}
-
-export interface FetchedApprovalRequest {
-  id: string;
-  user_id: string;
-  tour_id: number;
-  status: string;
-  message: string | null;
-  created_at: string;
-  updated_at: string;
-  reason: string | null;
-  email_sent: boolean | null;
-  activation_token: string | null;
-  activation_expires_at: string | null;
-  pickup_city: string;
-  user: Client;
-  tour: {
-    id: number;
-    departure_country: string;
-    destination_country: string;
-    departure_date: string;
-    collection_date: string;
-    route: any[];
-    total_capacity: number;
-    remaining_capacity: number;
-    type: "public" | "private";
-    carrier: {
-      id: string;
-      company_name: string;
-      email: string;
-      phone: string;
-    };
-  };
 }
