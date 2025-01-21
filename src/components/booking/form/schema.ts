@@ -15,10 +15,14 @@ export const formSchema = z.object({
     quantity: z.number().min(1)
   })).default([]),
   content_types: z.array(z.string()).default([]),
-  photos: z.array(z.string()).default([]),
+  photos: z.array(z.instanceof(File)).default([]),
   package_description: z.string().optional(),
-  terms_accepted: z.boolean(),
-  customs_declaration: z.boolean()
+  terms_accepted: z.boolean().refine((val) => val === true, {
+    message: "Vous devez accepter les conditions générales"
+  }),
+  customs_declaration: z.boolean().refine((val) => val === true, {
+    message: "Vous devez accepter la déclaration douanière"
+  })
 });
 
 export type BookingFormData = z.infer<typeof formSchema>;

@@ -57,6 +57,18 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
     fetchUserInfo();
   }, []);
 
+  const handleSubmit = async (formData: BookingFormData) => {
+    try {
+      const result = await createBooking(formData);
+      if (result?.tracking_number) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      throw error;
+    }
+  };
+
   return (
     <BookingFormContext.Provider 
       value={{
@@ -64,7 +76,7 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
         setState,
         pricePerKg,
         isLoading,
-        handleSubmit: createBooking,
+        handleSubmit,
       }}
     >
       {children}

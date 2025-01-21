@@ -10,7 +10,7 @@ export function usePhotoUpload() {
     
     setIsUploading(true);
     try {
-      const uploadPromises = photos.map(async (photo) => {
+      const uploadPromises = photos.map(async (photo: File) => {
         const fileExt = photo.name.split('.').pop();
         const filePath = `${crypto.randomUUID()}.${fileExt}`;
         
