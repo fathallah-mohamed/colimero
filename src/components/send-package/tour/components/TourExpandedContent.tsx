@@ -1,8 +1,9 @@
 import { Tour, TourStatus } from "@/types/tour";
 import { ClientTimeline } from "@/components/tour/timeline/client/ClientTimeline";
 import { SelectableCollectionPointsList } from "@/components/tour/SelectableCollectionPointsList";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { TourButton } from "./TourButton";
+import { ApprovalRequest } from "@/hooks/approval-requests/types";
 
 interface TourExpandedContentProps {
   tour: Tour;
@@ -10,9 +11,7 @@ interface TourExpandedContentProps {
   onPickupCitySelect: (city: string) => void;
   onActionClick: () => void;
   isActionEnabled: boolean;
-  actionButtonText: string;
-  userType?: string;
-  hasPendingRequest?: boolean;
+  existingRequest: ApprovalRequest | null;
   onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
 }
 
@@ -22,23 +21,9 @@ export function TourExpandedContent({
   onPickupCitySelect,
   onActionClick,
   isActionEnabled,
-  actionButtonText,
-  userType,
-  hasPendingRequest,
+  existingRequest,
   onStatusChange
 }: TourExpandedContentProps) {
-  const getButtonStyle = () => {
-    if (!isActionEnabled || hasPendingRequest) {
-      if (actionButtonText === "Demande rejetée") {
-        return "bg-red-500 hover:bg-red-500 cursor-not-allowed opacity-50";
-      }
-      if (actionButtonText === "Demande en attente d'approbation") {
-        return "bg-yellow-500 hover:bg-yellow-500 cursor-not-allowed opacity-50";
-      }
-    }
-    return "bg-[#0FA0CE] hover:bg-[#0FA0CE]/90";
-  };
-
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
@@ -65,17 +50,14 @@ export function TourExpandedContent({
           />
         </div>
 
-        {tour.status === "Programmée" && (
-          <div>
-            <Button 
-              onClick={onActionClick}
-              className={`w-full text-white ${getButtonStyle()}`}
-              disabled={!isActionEnabled || hasPendingRequest}
-            >
-              {actionButtonText}
-            </Button>
-          </div>
-        )}
+        <div>
+          <TourButton
+            tour={tour}
+            existingRequest={existingRequest}
+            isActionEnabled={isActionEnabled}
+            onActionClick={onActionClick}
+          />
+        </div>
       </div>
     </motion.div>
   );

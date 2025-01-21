@@ -19,7 +19,6 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
-  const [showPendingDialog, setShowPendingDialog] = useState(false);
   const [showCarrierErrorDialog, setShowCarrierErrorDialog] = useState(false);
   const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
@@ -73,16 +72,25 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       return;
     }
 
+    // Pour les tournées privées
     if (tour.type === 'private') {
       if (existingRequest) {
         switch (existingRequest.status) {
           case 'pending':
-            setShowPendingDialog(true);
+            toast({
+              title: "Demande en attente",
+              description: "Votre demande d'approbation est en cours de traitement",
+            });
             return;
           case 'approved':
             navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
             return;
           case 'rejected':
+            toast({
+              variant: "destructive",
+              title: "Demande rejetée",
+              description: "Votre demande d'approbation a été rejetée pour cette tournée",
+            });
             return;
           default:
             setShowApprovalDialog(true);
@@ -91,44 +99,21 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         setShowApprovalDialog(true);
       }
     } else {
+      // Pour les tournées publiques, redirection directe vers le formulaire
       navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
-  };
-
-  const getActionButtonText = () => {
-    if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    if (tour.type === 'private') {
-      if (existingRequest) {
-        switch (existingRequest.status) {
-          case 'pending':
-            return "Demande en attente d'approbation";
-          case 'approved':
-            return "Réserver maintenant";
-          case 'rejected':
-            return "Demande rejetée";
-          default:
-            return "Demander l'approbation";
-        }
-      }
-      return "Demander l'approbation";
-    }
-    return "Réserver maintenant";
   };
 
   const isActionEnabled = () => {
     if (!selectedPickupCity) return false;
     if (tour.type === 'private') {
       if (existingRequest) {
-        if (existingRequest.status === 'rejected') return false;
-        if (existingRequest.status === 'pending') return false;
         return existingRequest.status === 'approved';
       }
       return true;
     }
     return true;
   };
-
-  const hasPendingRequest = existingRequest?.status === 'pending';
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -146,47 +131,24 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             onPickupCitySelect={setSelectedPickupCity}
             onActionClick={handleActionClick}
             isActionEnabled={isActionEnabled()}
-            actionButtonText={getActionButtonText()}
-            hasPendingRequest={hasPendingRequest}
+            existingRequest={existingRequest}
           />
         )}
 
-        {showApprovalDialog && (
-          <ApprovalRequestDialog
-            isOpen={showApprovalDialog}
-            onClose={() => setShowApprovalDialog(false)}
-            tourId={tour.id}
-            pickupCity={selectedPickupCity}
-            onSuccess={() => {
-              checkExistingRequest();
-              setShowApprovalDialog(false);
-              toast({
-                title: "Demande envoyée",
-                description: "Votre demande d'approbation a été envoyée avec succès",
-              });
-            }}
-          />
-        )}
-
-        <Dialog open={showPendingDialog} onOpenChange={setShowPendingDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-amber-600">
-                <AlertCircle className="h-5 w-5" />
-                Demande en attente
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                Vous avez déjà une demande d'approbation en attente pour cette tournée. 
-                Veuillez attendre la réponse du transporteur avant de faire une nouvelle demande.
-              </p>
-              <Button onClick={() => setShowPendingDialog(false)} className="w-full">
-                Compris
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ApprovalRequestDialog
+          isOpen={showApprovalDialog}
+          onClose={() => setShowApprovalDialog(false)}
+          tourId={tour.id}
+          pickupCity={selectedPickupCity}
+          onSuccess={() => {
+            checkExistingRequest();
+            setShowApprovalDialog(false);
+            toast({
+              title: "Demande envoyée",
+              description: "Votre demande d'approbation a été envoyée avec succès",
+            });
+          }}
+        />
 
         <Dialog open={showCarrierErrorDialog} onOpenChange={setShowCarrierErrorDialog}>
           <DialogContent>
