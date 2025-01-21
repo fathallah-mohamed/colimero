@@ -15,7 +15,21 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
         name="phone"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Téléphone</FormLabel>
+            <FormLabel>Téléphone principal <span className="text-red-500">*</span></FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="+33 6 XX XX XX XX" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="phone_secondary"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Téléphone secondaire (optionnel)</FormLabel>
             <FormControl>
               <Input {...field} placeholder="+33 6 XX XX XX XX" />
             </FormControl>
