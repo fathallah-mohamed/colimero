@@ -4,7 +4,7 @@ import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, BookingFormData } from "./form/schema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StepIndicator } from "./form/steps/StepIndicator";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
@@ -14,7 +14,6 @@ import { useBookingFormState } from "@/hooks/useBookingFormState";
 import { BookingFormSteps } from "./form/BookingFormSteps";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 
 export interface BookingFormProps {
   tourId: number;
@@ -62,7 +61,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     }
   });
 
-  // Fetch and set user data when component mounts
   useEffect(() => {
     const fetchUserData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
