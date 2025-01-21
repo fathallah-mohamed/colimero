@@ -23,6 +23,26 @@ export default function NewRegistrationRequests() {
 
       console.log("Current user ID:", session.user.id);
 
+      // D'abord, récupérer les tournées du transporteur
+      const { data: tours, error: toursError } = await supabase
+        .from("tours")
+        .select("id")
+        .eq("carrier_id", session.user.id);
+
+      if (toursError) {
+        console.error("Error fetching tours:", toursError);
+        throw toursError;
+      }
+
+      console.log("Carrier tours:", tours);
+
+      if (!tours || tours.length === 0) {
+        console.log("No tours found for carrier");
+        return [];
+      }
+
+      // Ensuite, récupérer les demandes d'approbation pour ces tournées
+      const tourIds = tours.map(tour => tour.id);
       const { data: approvalRequests, error: approvalError } = await supabase
         .from("approval_requests")
         .select(`
@@ -52,7 +72,7 @@ export default function NewRegistrationRequests() {
             phone
           )
         `)
-        .eq("tour.carriers.id", session.user.id);
+        .in("tour_id", tourIds);
 
       if (approvalError) {
         console.error("Error fetching approval requests:", approvalError);
@@ -68,7 +88,10 @@ export default function NewRegistrationRequests() {
     try {
       const { error } = await supabase
         .from("approval_requests")
-        .update({ status: "approved" })
+        .update({ 
+          status: "approved",
+          updated_at: new Date().toISOString()
+        })
         .eq("id", request.id);
 
       if (error) throw error;
@@ -93,7 +116,10 @@ export default function NewRegistrationRequests() {
     try {
       const { error } = await supabase
         .from("approval_requests")
-        .update({ status: "rejected" })
+        .update({ 
+          status: "rejected",
+          updated_at: new Date().toISOString()
+        })
         .eq("id", request.id);
 
       if (error) throw error;
