@@ -4,9 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export function useFetchRequests(userType: string | null, userId: string | null) {
+  const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const { toast } = useToast();
 
   const fetchRequests = async () => {
@@ -46,7 +46,7 @@ export function useFetchRequests(userType: string | null, userId: string | null)
 
       if (userType === 'carrier') {
         query = query.eq('tour.carrier_id', userId);
-      } else if (userType === 'client') {
+      } else {
         query = query.eq('user_id', userId);
       }
 
@@ -64,8 +64,15 @@ export function useFetchRequests(userType: string | null, userId: string | null)
         return;
       }
 
-      console.log('Fetched approval requests:', data);
-      setRequests(data || []);
+      const mappedRequests = data?.map(request => ({
+        ...request,
+        tour: {
+          ...request.tour,
+          carrier: request.tour?.carrier
+        }
+      })) as ApprovalRequest[];
+
+      setRequests(mappedRequests || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       setError(error.message);
@@ -89,5 +96,5 @@ export function useFetchRequests(userType: string | null, userId: string | null)
     }
   }, [userId, userType]);
 
-  return { requests, loading, error, fetchRequests };
+  return { requests, loading, error, refetchRequests: fetchRequests };
 }

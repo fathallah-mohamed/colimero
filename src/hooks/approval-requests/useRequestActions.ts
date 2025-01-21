@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequest } from "@/components/admin/approval-requests/types";
@@ -5,7 +6,7 @@ import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 export function useRequestActions() {
   const { toast } = useToast();
 
-  const handleApproveRequest = async (request: ApprovalRequest) => {
+  const handleApproveRequest = useCallback(async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -32,9 +33,9 @@ export function useRequestActions() {
       });
       return { success: false, error };
     }
-  };
+  }, [toast]);
 
-  const handleRejectRequest = async (request: ApprovalRequest) => {
+  const handleRejectRequest = useCallback(async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -61,9 +62,9 @@ export function useRequestActions() {
       });
       return { success: false, error };
     }
-  };
+  }, [toast]);
 
-  const handleCancelRequest = async (requestId: string) => {
+  const handleCancelRequest = useCallback(async (requestId: string) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -90,9 +91,9 @@ export function useRequestActions() {
       });
       return { success: false, error };
     }
-  };
+  }, [toast]);
 
-  const handleDeleteRequest = async (requestId: string) => {
+  const handleDeleteRequest = useCallback(async (requestId: string) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -117,7 +118,7 @@ export function useRequestActions() {
       });
       return { success: false, error };
     }
-  };
+  }, [toast]);
 
   return {
     handleApproveRequest,

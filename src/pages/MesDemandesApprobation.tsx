@@ -18,9 +18,11 @@ export default function MesDemandesApprobation() {
   const userType = user?.user_metadata?.user_type;
   const userId = user?.id;
 
-  const { 
-    requests, 
-    loading, 
+  const {
+    requests,
+    loading,
+    handleApproveRequest,
+    handleRejectRequest,
     handleCancelRequest,
     handleDeleteRequest
   } = useApprovalRequests(userType, userId);
@@ -45,10 +47,6 @@ export default function MesDemandesApprobation() {
   const pendingRequests = requests?.filter(req => req.status === 'pending') || [];
   const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
   const rejectedRequests = requests?.filter(req => req.status === 'rejected' || req.status === 'cancelled') || [];
-
-  // Placeholder functions for required props
-  const handleApprove = () => Promise.resolve();
-  const handleReject = () => Promise.resolve();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,8 +78,8 @@ export default function MesDemandesApprobation() {
                     request={request}
                     userType={userType}
                     showActions={true}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
+                    onApprove={handleApproveRequest}
+                    onReject={handleRejectRequest}
                     onCancel={handleCancelRequest}
                     onDelete={handleDeleteRequest}
                   />
@@ -102,8 +100,8 @@ export default function MesDemandesApprobation() {
                     key={request.id}
                     request={request}
                     userType={userType}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
+                    onApprove={handleApproveRequest}
+                    onReject={handleRejectRequest}
                     onCancel={handleCancelRequest}
                     onDelete={handleDeleteRequest}
                   />
@@ -125,8 +123,8 @@ export default function MesDemandesApprobation() {
                     request={request}
                     userType={userType}
                     showActions={true}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
+                    onApprove={handleApproveRequest}
+                    onReject={handleRejectRequest}
                     onCancel={handleCancelRequest}
                     onDelete={handleDeleteRequest}
                   />
