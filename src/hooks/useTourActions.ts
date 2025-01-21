@@ -108,7 +108,6 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
 
   const getActionButtonText = () => {
     if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    
     if (tour.type === 'private') {
       if (existingRequest) {
         switch (existingRequest.status) {
