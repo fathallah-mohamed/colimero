@@ -16,12 +16,13 @@ import { RequestActions } from "./request-details/RequestActions";
 import { approveCarrierRequest } from "@/services/carrier-approval";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { ApprovalRequest } from "./approval-requests/types";
 
 interface RequestDetailsDialogProps {
-  request: any;
+  request: ApprovalRequest | null;
   onClose: () => void;
-  onApprove?: (request: any) => void;
-  onReject?: (request: any) => void;  // Ajout de onReject
+  onApprove?: (request: ApprovalRequest) => void;
+  onReject?: (request: ApprovalRequest) => void;
   showApproveButton?: boolean;
 }
 
@@ -29,6 +30,7 @@ export const RequestDetailsDialog = ({
   request, 
   onClose,
   onApprove,
+  onReject,
   showApproveButton = false,
 }: RequestDetailsDialogProps) => {
   const [rejectionReason, setRejectionReason] = useState("");
