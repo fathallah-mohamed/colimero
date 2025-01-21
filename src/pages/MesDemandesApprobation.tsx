@@ -18,19 +18,12 @@ export default function MesDemandesApprobation() {
   const userType = user?.user_metadata?.user_type;
   const userId = user?.id;
 
-  console.log('Current user:', user);
-  console.log('User type:', userType);
-  console.log('User ID:', userId);
-
   const { 
     requests, 
     loading, 
     handleCancelRequest,
     handleDeleteRequest
   } = useApprovalRequests(userType, userId);
-
-  console.log('Requests:', requests);
-  console.log('Loading state:', loading);
 
   useEffect(() => {
     if (!isSessionLoading && !session) {
@@ -52,6 +45,10 @@ export default function MesDemandesApprobation() {
   const pendingRequests = requests?.filter(req => req.status === 'pending') || [];
   const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
   const rejectedRequests = requests?.filter(req => req.status === 'rejected' || req.status === 'cancelled') || [];
+
+  // Placeholder functions for required props
+  const handleApprove = () => Promise.resolve();
+  const handleReject = () => Promise.resolve();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,7 +80,10 @@ export default function MesDemandesApprobation() {
                     request={request}
                     userType={userType}
                     showActions={true}
-                    onCancel={() => handleCancelRequest(request.id)}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onCancel={handleCancelRequest}
+                    onDelete={handleDeleteRequest}
                   />
                 ))
               ) : (
@@ -102,6 +102,10 @@ export default function MesDemandesApprobation() {
                     key={request.id}
                     request={request}
                     userType={userType}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onCancel={handleCancelRequest}
+                    onDelete={handleDeleteRequest}
                   />
                 ))
               ) : (
@@ -121,7 +125,10 @@ export default function MesDemandesApprobation() {
                     request={request}
                     userType={userType}
                     showActions={true}
-                    onDelete={() => handleDeleteRequest(request.id)}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onCancel={handleCancelRequest}
+                    onDelete={handleDeleteRequest}
                   />
                 ))
               ) : (

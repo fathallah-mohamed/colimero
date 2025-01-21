@@ -50,22 +50,22 @@ export function ApprovalRequestHeader({ request, userType }: ApprovalRequestHead
         </Badge>
       </div>
       
-      {request.tours && (
+      {request.tour && (
         <div className="text-sm text-gray-600">
           <p>
-            {request.tours.departure_country} → {request.tours.destination_country}
+            {request.tour.departure_country} → {request.tour.destination_country}
           </p>
           <p>
-            Transporteur : {request.tours.carriers?.company_name}
+            Transporteur : {request.tour.carrier.company_name}
           </p>
-          {userType === 'carrier' && request.clients && (
+          {userType === 'carrier' && request.client && (
             <>
               <p>
-                Client : {request.clients.first_name} {request.clients.last_name}
+                Client : {request.client.first_name} {request.client.last_name}
               </p>
-              {request.clients.phone && (
+              {request.client.phone && (
                 <p>
-                  Téléphone : {request.clients.phone}
+                  Téléphone : {request.client.phone}
                 </p>
               )}
             </>
