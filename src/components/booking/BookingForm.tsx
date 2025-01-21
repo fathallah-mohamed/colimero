@@ -63,7 +63,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       }));
       console.log("Formatted special items:", formattedSpecialItems);
 
-      const bookingData = {
+      const bookingData: BookingFormData = {
         ...values,
         weight,
         pickup_city: pickupCity,
