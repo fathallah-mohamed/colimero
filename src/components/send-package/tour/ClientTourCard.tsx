@@ -20,6 +20,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showPendingDialog, setShowPendingDialog] = useState(false);
+  const [showCarrierErrorDialog, setShowCarrierErrorDialog] = useState(false);
   const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -68,11 +69,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
     const userType = session.user.user_metadata?.user_type;
     if (userType === 'carrier') {
-      toast({
-        variant: "destructive",
-        title: "Accès refusé",
-        description: "Les transporteurs ne peuvent pas effectuer de réservations",
-      });
+      setShowCarrierErrorDialog(true);
       return;
     }
 
@@ -183,6 +180,25 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
               </p>
               <Button onClick={() => setShowPendingDialog(false)} className="w-full">
                 Compris
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showCarrierErrorDialog} onOpenChange={setShowCarrierErrorDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertCircle className="h-5 w-5" />
+                Accès refusé
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Les transporteurs ne peuvent pas effectuer de réservations. Seuls les clients peuvent réserver des tournées.
+              </p>
+              <Button onClick={() => setShowCarrierErrorDialog(false)} className="w-full">
+                J'ai compris
               </Button>
             </div>
           </DialogContent>
