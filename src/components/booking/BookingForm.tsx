@@ -10,9 +10,7 @@ import { StepIndicator } from "./form/steps/StepIndicator";
 import { BookingFormActions } from "./form/BookingFormActions";
 import { useBookingForm } from "./form/useBookingForm";
 import { BookingFormData } from "./form/schema";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { CheckCircle2 } from "lucide-react";
+import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { useState } from "react";
 
 export interface BookingFormProps {
@@ -52,16 +50,12 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   const onSubmit = async (values: BookingFormData) => {
     try {
-      console.log("Starting form submission with values:", values);
-      
       const photoUrls = await uploadPhotos(photos);
-      console.log("Photos uploaded:", photoUrls);
       
       const formattedSpecialItems = specialItems.map(item => ({
         name: item,
         quantity: itemQuantities[item] || 1
       }));
-      console.log("Formatted special items:", formattedSpecialItems);
 
       const bookingData: BookingFormData = {
         ...values,
@@ -74,10 +68,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         customs_declaration: true
       };
 
-      console.log("Submitting booking data:", bookingData);
-
       const result = await createBooking(bookingData);
-      console.log("Booking creation result:", result);
 
       if (result?.tracking_number) {
         setTrackingNumber(result.tracking_number);
@@ -157,27 +148,11 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           onNext={handleNextStep}
         />
 
-        <Dialog open={showConfirmation} onOpenChange={handleCloseConfirmation}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-6 w-6 text-green-500" />
-                Réservation confirmée
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p>
-                Votre réservation a été confirmée avec succès. Voici votre numéro de suivi :
-              </p>
-              <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="font-mono text-lg font-bold">{trackingNumber}</p>
-              </div>
-              <Button onClick={handleCloseConfirmation} className="w-full">
-                Compris
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <BookingConfirmDialog
+          open={showConfirmation}
+          trackingNumber={trackingNumber}
+          onClose={handleCloseConfirmation}
+        />
       </form>
     </Form>
   );

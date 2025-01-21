@@ -4,11 +4,11 @@ import { CheckCircle2 } from "lucide-react";
 
 interface BookingConfirmDialogProps {
   open: boolean;
-  onClose: () => void;
   trackingNumber: string;
+  onClose: () => void;
 }
 
-export function BookingConfirmDialog({ open, onClose, trackingNumber }: BookingConfirmDialogProps) {
+export function BookingConfirmDialog({ open, trackingNumber, onClose }: BookingConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
