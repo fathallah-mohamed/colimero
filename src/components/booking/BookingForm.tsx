@@ -5,6 +5,7 @@ import { useBookingCreation } from "@/hooks/useBookingCreation";
 import { useBookingValidation } from "@/hooks/useBookingValidation";
 import { useBookingFormState } from "@/hooks/useBookingFormState";
 import { BookingFormSteps } from "./form/BookingFormSteps";
+import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { StepIndicator } from "./form/steps/StepIndicator";
 import { BookingFormActions } from "./form/BookingFormActions";
 import { useBookingForm } from "./form/useBookingForm";
@@ -58,7 +59,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         special_items: formattedSpecialItems,
         content_types: contentTypes,
         photos: photoUrls
-      };
+      } as BookingFormData;
 
       await createBooking(bookingData);
     } catch (error) {
