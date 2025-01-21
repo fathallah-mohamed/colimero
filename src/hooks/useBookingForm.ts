@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { formSchema, BookingFormData } from "@/components/booking/form/schema";
+import { formSchema, BookingFormData } from "../components/booking/form/schema";
 
 export function useBookingForm(tourId: number, pickupCity: string) {
   const [currentStep, setCurrentStep] = useState(1);
