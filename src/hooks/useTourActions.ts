@@ -53,22 +53,10 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
 
     // Pour les tournées privées
     if (tour.type === 'private') {
-      // Vérifier s'il y a une réservation en attente
-      const existingBooking = await checkExistingBooking(session.user.id);
-      if (existingBooking) {
-        toast({
-          variant: "destructive",
-          title: "Réservation impossible",
-          description: "Vous avez déjà une réservation en attente pour cette tournée",
-        });
-        return;
-      }
-
       if (existingRequest) {
         switch (existingRequest.status) {
           case 'pending':
             toast({
-              variant: "destructive",
               title: "Demande en attente",
               description: "Votre demande d'approbation est en cours de traitement",
             });
@@ -83,14 +71,11 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
               description: "Votre demande d'approbation a été rejetée pour cette tournée",
             });
             return;
-          default:
-            setShowApprovalDialog(true);
-            return;
         }
-      } else {
-        setShowApprovalDialog(true);
-        return;
       }
+      // Ouvrir directement la popup de demande d'approbation
+      setShowApprovalDialog(true);
+      return;
     }
 
     // Pour les tournées publiques
