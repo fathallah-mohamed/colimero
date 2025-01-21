@@ -1,6 +1,5 @@
 import * as z from "zod";
 
-// Validation schemas for each step
 export const senderSchema = z.object({
   sender_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   sender_phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
