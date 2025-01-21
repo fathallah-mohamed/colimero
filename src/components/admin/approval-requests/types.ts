@@ -22,12 +22,11 @@ export interface Tour {
   destination_country: string;
   departure_date: string;
   collection_date: string;
-  route: any[];
+  route: Json;
   total_capacity: number;
   remaining_capacity: number;
   type: "public" | "private";
   carrier: Carrier;
-  carriers?: Carrier; // For backward compatibility
 }
 
 export interface ApprovalRequest {

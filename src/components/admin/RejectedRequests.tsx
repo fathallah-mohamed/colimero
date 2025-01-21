@@ -10,28 +10,55 @@ import Navigation from "@/components/Navigation";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
+import { ApprovalRequest } from "./approval-requests/types";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
 
-  const { data: requests, isLoading, refetch } = useQuery({
+  const { data: requests = [], isLoading, refetch } = useQuery({
     queryKey: ["carrier-requests", "rejected"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("carrier_registration_requests")
-        .select("*")
+        .select(`
+          *,
+          tour:tours(
+            id,
+            departure_country,
+            destination_country,
+            departure_date,
+            collection_date,
+            route,
+            total_capacity,
+            remaining_capacity,
+            type,
+            carrier:carriers(
+              id,
+              company_name,
+              email,
+              phone
+            )
+          ),
+          client:clients(
+            id,
+            first_name,
+            last_name,
+            email,
+            phone
+          )
+        `)
         .eq("status", "rejected")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as ApprovalRequest[];
     },
   });
 
-  const handleApprove = async (request: any) => {
+  const handleApprove = async (request: ApprovalRequest): Promise<void> => {
     if (isApproving) return;
     
     setIsApproving(true);
@@ -57,7 +84,7 @@ export default function RejectedRequests() {
     }
   };
 
-  const handleReject = async (request: any) => {
+  const handleReject = async (request: ApprovalRequest): Promise<void> => {
     try {
       const { error } = await supabase
         .from('approval_requests')
@@ -76,7 +103,6 @@ export default function RejectedRequests() {
 
       refetch();
       setSelectedRequest(null);
-      return { success: true };
     } catch (error: any) {
       console.error('Error rejecting request:', error);
       toast({
@@ -84,14 +110,13 @@ export default function RejectedRequests() {
         title: "Erreur",
         description: "Une erreur est survenue lors du rejet de la demande",
       });
-      return { success: false, error };
     }
   };
 
   const filteredRequests = requests?.filter(
     (request) =>
-      request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email.toLowerCase().includes(searchTerm.toLowerCase())
+      request.tour?.carrier?.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.client?.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
