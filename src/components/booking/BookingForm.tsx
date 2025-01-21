@@ -52,9 +52,11 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     try {
       const photoUrls = await uploadPhotos(photos);
       
+      // Formatage des objets spéciaux avec leurs quantités
       const formattedSpecialItems = specialItems.map(item => ({
         name: item,
-        quantity: itemQuantities[item] || 1
+        quantity: itemQuantities[item] || 1,
+        price: 0 // Prix par défaut, à ajuster selon vos besoins
       }));
 
       const bookingData: BookingFormData = {
@@ -67,6 +69,8 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         terms_accepted: true,
         customs_declaration: true
       };
+
+      console.log('Submitting booking with data:', bookingData);
 
       const result = await createBooking(bookingData);
 

@@ -17,6 +17,7 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
       .select('id, status')
       .eq('user_id', userId)
       .eq('tour_id', tour.id)
+      .eq('status', 'cancelled')
       .maybeSingle();
 
     if (error) {
@@ -93,6 +94,24 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
   const getActionButtonText = () => {
     if (!selectedPickupCity) return "Sélectionnez un point de collecte";
     if (tour.type === 'private') {
+      // Vérifier d'abord s'il y a une réservation annulée
+      const checkCancelledBooking = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const cancelledBooking = await checkExistingBooking(session.user.id);
+          if (cancelledBooking) {
+            return "Demander l'approbation";
+          }
+        }
+        return null;
+      };
+
+      // Si une réservation a été annulée, on demande une nouvelle approbation
+      const cancelledStatus = checkCancelledBooking();
+      if (cancelledStatus) {
+        return "Demander l'approbation";
+      }
+
       if (existingRequest) {
         switch (existingRequest.status) {
           case 'pending':
