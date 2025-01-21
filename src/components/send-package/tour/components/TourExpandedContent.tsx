@@ -28,7 +28,7 @@ export function TourExpandedContent({
   onStatusChange
 }: TourExpandedContentProps) {
   const getButtonStyle = () => {
-    if (!isActionEnabled) {
+    if (!isActionEnabled || hasPendingRequest) {
       if (actionButtonText === "Demande rejetée") {
         return "bg-red-500 hover:bg-red-500 cursor-not-allowed opacity-50";
       }

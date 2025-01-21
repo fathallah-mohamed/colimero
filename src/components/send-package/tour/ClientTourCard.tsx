@@ -83,8 +83,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
             return;
           case 'rejected':
-            setShowApprovalDialog(true);
-            return;
+            return; // Le bouton sera désactivé
           default:
             setShowApprovalDialog(true);
         }
@@ -106,7 +105,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
           case 'approved':
             return "Réserver maintenant";
           case 'rejected':
-            return "Demander l'approbation";
+            return "Demande rejetée";
           default:
             return "Demander l'approbation";
         }
@@ -120,12 +119,16 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     if (!selectedPickupCity) return false;
     if (tour.type === 'private') {
       if (existingRequest) {
-        return existingRequest.status !== 'pending';
+        if (existingRequest.status === 'rejected') return false;
+        if (existingRequest.status === 'pending') return false;
+        return existingRequest.status === 'approved';
       }
       return true;
     }
     return true;
   };
+
+  const hasPendingRequest = existingRequest?.status === 'pending';
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
@@ -144,7 +147,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             onActionClick={handleActionClick}
             isActionEnabled={isActionEnabled()}
             actionButtonText={getActionButtonText()}
-            hasPendingRequest={existingRequest?.status === 'pending'}
+            hasPendingRequest={hasPendingRequest}
           />
         )}
 
