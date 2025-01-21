@@ -21,7 +21,7 @@ export interface Tour {
   destination_country: string;
   departure_date: string;
   collection_date: string;
-  route: any[];
+  route: Json;
   total_capacity: number;
   remaining_capacity: number;
   type: "public" | "private";
