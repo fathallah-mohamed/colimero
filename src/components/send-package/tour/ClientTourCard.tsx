@@ -10,6 +10,8 @@ import { useApprovalRequest } from "./hooks/useApprovalRequest";
 import { useTourActions } from "./hooks/useTourActions";
 import { CardCustom } from "@/components/ui/card-custom";
 import { useNavigate } from "react-router-dom";
+import { BookingErrorDialog } from "@/components/booking/form/BookingErrorDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -19,6 +21,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const navigate = useNavigate();
   const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showBookingError, setShowBookingError] = useState(false);
+  const [bookingErrorMessage, setBookingErrorMessage] = useState("");
   
   const { existingRequest, checkExistingRequest } = useApprovalRequest(tour.id);
   
@@ -39,10 +43,47 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     checkExistingRequest();
   };
 
-  const handleBookingClick = () => {
-    if (selectedPickupCity) {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+  const checkExistingBooking = async (userId: string) => {
+    const { data: existingBooking, error } = await supabase
+      .from('bookings')
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('tour_id', tour.id)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing bookings:', error);
+      return null;
     }
+
+    return existingBooking;
+  };
+
+  const handleBookingClick = async () => {
+    if (!selectedPickupCity) return;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setShowAuthDialog(true);
+      return;
+    }
+
+    const userType = session.user.user_metadata?.user_type;
+    if (userType === 'carrier') {
+      setShowAccessDeniedDialog(true);
+      return;
+    }
+
+    // Vérifier s'il existe une réservation en attente
+    const existingBooking = await checkExistingBooking(session.user.id);
+    if (existingBooking) {
+      setBookingErrorMessage("Vous avez déjà une réservation en attente pour cette tournée.");
+      setShowBookingError(true);
+      return;
+    }
+
+    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
   };
 
   return (
@@ -91,6 +132,12 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
         tourId={tour.id}
         pickupCity={selectedPickupCity || ''}
         onApprovalSuccess={handleApprovalSuccess}
+      />
+
+      <BookingErrorDialog
+        open={showBookingError}
+        onClose={() => setShowBookingError(false)}
+        errorMessage={bookingErrorMessage}
       />
     </CardCustom>
   );
