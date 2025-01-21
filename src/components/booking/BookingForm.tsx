@@ -59,7 +59,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: [],
       content_types: [],
       photos: []
-    } satisfies Partial<BookingFormData> as BookingFormData
+    } as BookingFormData
   });
 
   // Fetch and set user data when component mounts
