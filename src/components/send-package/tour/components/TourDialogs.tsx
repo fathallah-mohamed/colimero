@@ -1,13 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
-import AuthDialog from "@/components/auth/AuthDialog";
 
 interface TourDialogsProps {
   showAccessDeniedDialog: boolean;
   setShowAccessDeniedDialog: (show: boolean) => void;
-  showAuthDialog: boolean;
-  setShowAuthDialog: (show: boolean) => void;
   showApprovalDialog: boolean;
   setShowApprovalDialog: (show: boolean) => void;
   tourId: number;
@@ -18,8 +15,6 @@ interface TourDialogsProps {
 export function TourDialogs({
   showAccessDeniedDialog,
   setShowAccessDeniedDialog,
-  showAuthDialog,
-  setShowAuthDialog,
   showApprovalDialog,
   setShowApprovalDialog,
   tourId,
@@ -34,18 +29,6 @@ export function TourDialogs({
         userType="carrier"
         isOpen={showAccessDeniedDialog}
         onClose={() => setShowAccessDeniedDialog(false)}
-      />
-
-      <AuthDialog 
-        isOpen={showAuthDialog} 
-        onClose={() => setShowAuthDialog(false)}
-        onSuccess={() => {
-          setShowAuthDialog(false);
-          if (pickupCity) {
-            setShowApprovalDialog(true);
-          }
-        }}
-        requiredUserType="client"
       />
 
       <ApprovalRequestDialog

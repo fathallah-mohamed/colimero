@@ -5,8 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Tour } from "@/types/tour";
 
 export function useTourActions(tour: Tour, selectedPickupCity: string | null, existingRequest: any) {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -41,7 +39,9 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      setShowAuthDialog(true);
+      const returnPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`;
+      sessionStorage.setItem('returnPath', returnPath);
+      navigate('/connexion');
       return;
     }
 
@@ -141,10 +141,6 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
   };
 
   return {
-    showAuthDialog,
-    setShowAuthDialog,
-    showApprovalDialog,
-    setShowApprovalDialog,
     showAccessDeniedDialog,
     setShowAccessDeniedDialog,
     handleActionClick,
