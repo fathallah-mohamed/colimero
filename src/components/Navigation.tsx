@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useNavigation } from "@/hooks/use-navigation";
 import { NavigationHeader } from "./navigation/NavigationHeader";
 import { MenuItems } from "./navigation/MenuItems";
-import { MobileMenu } from "./navigation/MobileMenu";
-import { SessionInitializer } from "./navigation/SessionInitializer";
+import MobileMenu from "./navigation/MobileMenu";
+import { useSessionInitializer } from "./navigation/SessionInitializer";
 
 export default function Navigation() {
   const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const location = useLocation();
-  const { isAuthenticated, userType, handleLogout } = useNavigation();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { isOpen, setIsOpen, user, userType, handleLogout } = useNavigation();
 
   useEffect(() => {
     setIsMounted(true);
@@ -19,11 +19,21 @@ export default function Navigation() {
       setIsLoading(false);
     }, 100);
 
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+
     return () => {
       clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
       setIsMounted(false);
     };
   }, []);
+
+  useSessionInitializer();
 
   if (!isMounted) {
     return null;
@@ -34,16 +44,24 @@ export default function Navigation() {
       <nav className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <NavigationHeader />
+            <NavigationHeader 
+              isScrolled={isScrolled}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              user={user}
+              userType={userType}
+              handleLogout={handleLogout}
+              mobileButtonRef={null}
+            />
             
             <div className="hidden md:flex items-center space-x-4">
               <MenuItems 
-                isAuthenticated={isAuthenticated}
+                isAuthenticated={!!user}
                 userType={userType}
                 currentPath={location.pathname}
               />
 
-              {isAuthenticated ? (
+              {user ? (
                 <Button
                   variant="ghost"
                   onClick={handleLogout}
@@ -64,16 +82,15 @@ export default function Navigation() {
             </div>
 
             <MobileMenu
-              isAuthenticated={isAuthenticated}
+              isOpen={isOpen}
+              user={user}
               userType={userType}
-              currentPath={location.pathname}
-              onLogout={handleLogout}
+              handleLogout={handleLogout}
+              setIsOpen={setIsOpen}
             />
           </div>
         </div>
       </nav>
-
-      <SessionInitializer />
     </div>
   );
 }

@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export default function MenuItems() {
+interface MenuItemsProps {
+  isAuthenticated?: boolean;
+  userType?: string | null;
+  currentPath?: string;
+}
+
+export function MenuItems({ isAuthenticated, userType, currentPath }: MenuItemsProps) {
   const location = useLocation();
   const isMobile = useIsMobile();
 

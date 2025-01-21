@@ -40,7 +40,6 @@ export function useSessionInitializer() {
 
         const session = await getSessionWithRetry();
         
-        // Configurer l'écouteur avec gestion d'erreur
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
           if (!mounted) return;
 
