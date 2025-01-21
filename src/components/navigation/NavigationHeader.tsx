@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import MenuItems from "./MenuItems";
+import { MenuItems } from "./MenuItems";
 import { AuthSection } from "./AuthSection";
 import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
 
@@ -12,6 +12,8 @@ interface NavigationHeaderProps {
   userType: string | null;
   handleLogout: () => void;
   mobileButtonRef: React.RefObject<HTMLButtonElement>;
+  showAuthDialog?: boolean;
+  setShowAuthDialog?: (show: boolean) => void;
 }
 
 export function NavigationHeader({
@@ -22,11 +24,17 @@ export function NavigationHeader({
   userType,
   handleLogout,
   mobileButtonRef,
+  showAuthDialog,
+  setShowAuthDialog
 }: NavigationHeaderProps) {
   const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    navigate('/connexion');
+    if (setShowAuthDialog) {
+      setShowAuthDialog(true);
+    } else {
+      navigate('/connexion');
+    }
   };
 
   return (
