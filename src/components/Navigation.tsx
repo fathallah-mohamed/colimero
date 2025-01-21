@@ -22,6 +22,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Initialize session and handle auth state changes
   useSessionInitializer();
@@ -57,6 +58,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   // Store return path for auth redirects and handle protected routes
   React.useEffect(() => {
     const checkAuth = async () => {
+      setIsLoading(true);
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -70,8 +72,9 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           return;
         }
         
-        // If we're on a protected route and not authenticated
-        if (location.pathname === '/mes-reservations' || location.pathname === '/profile') {
+        // Si nous sommes sur une route protégée et non authentifié
+        const protectedRoutes = ['/mes-reservations', '/profile'];
+        if (protectedRoutes.includes(location.pathname)) {
           if (!session) {
             console.log("No session found, redirecting to login");
             sessionStorage.setItem('returnPath', location.pathname);
@@ -88,11 +91,18 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           title: "Erreur d'authentification",
           description: "Une erreur est survenue lors de la vérification de votre authentification.",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkAuth();
   }, [location.pathname, navigate, toast]);
+
+  // Si en cours de chargement, ne rien afficher pour éviter le flash
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <nav className={cn(
