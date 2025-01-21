@@ -59,7 +59,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: [],
       content_types: [],
       photos: []
-    } as BookingFormData
+    }
   });
 
   // Fetch and set user data when component mounts
@@ -78,7 +78,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           form.setValue('sender_phone', clientData.phone || '');
         }
       } else {
-        // If no session, redirect to login
         navigate('/login', { 
           state: { 
             returnTo: window.location.pathname,
