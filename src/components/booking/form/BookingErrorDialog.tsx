@@ -15,7 +15,7 @@ export function BookingErrorDialog({ open, onClose, errorMessage }: BookingError
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertCircle className="h-6 w-6" />
-            Erreur
+            Réservation impossible
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">

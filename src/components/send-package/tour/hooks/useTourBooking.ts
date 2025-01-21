@@ -29,6 +29,23 @@ export function useTourBooking(tour: Tour) {
     return approvalRequest !== null;
   };
 
+  const checkExistingBooking = async (userId: string) => {
+    const { data: existingBooking, error } = await supabase
+      .from('bookings')
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('tour_id', tour.id)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing bookings:', error);
+      return null;
+    }
+
+    return existingBooking;
+  };
+
   const handleBookingButtonClick = async (selectedPoint: string) => {
     if (!selectedPoint) {
       toast({
@@ -56,38 +73,19 @@ export function useTourBooking(tour: Tour) {
         return;
       }
 
+      // Vérifier d'abord s'il existe une réservation en attente pour cette tournée
+      const existingBooking = await checkExistingBooking(session.user.id);
+      if (existingBooking) {
+        setShowExistingBookingDialog(true);
+        return;
+      }
+
       if (tour.type === 'private') {
         const hasPendingRequest = await checkExistingApprovalRequest(session.user.id);
         if (hasPendingRequest) {
           setShowPendingApprovalDialog(true);
           return;
         }
-      }
-
-      const { data: pendingBooking, error } = await supabase
-        .from('bookings')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('tour_id', tour.id)
-        .eq('status', 'pending')
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking existing bookings:', error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de la vérification de vos réservations",
-        });
-        return;
-      }
-
-      if (pendingBooking) {
-        setShowExistingBookingDialog(true);
-        return;
-      }
-
-      if (tour.type === 'private') {
         setShowApprovalDialog(true);
       } else {
         navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
