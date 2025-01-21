@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ApprovalRequest } from "./approval-requests/types";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
@@ -44,9 +44,10 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
           )
         `);
 
+      // Adjust query based on user type
       if (userType === 'carrier') {
         query = query.eq('tour.carrier_id', userId);
-      } else {
+      } else if (userType === 'client') {
         query = query.eq('user_id', userId);
       }
 
@@ -65,14 +66,7 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
       }
 
       console.log('Fetched approval requests:', data);
-      const mappedRequests = data?.map(request => ({
-        ...request,
-        tour: {
-          ...request.tour,
-          carrier: request.tour.carrier
-        }
-      })) || [];
-      setRequests(mappedRequests);
+      setRequests(data || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       setError(error.message);
