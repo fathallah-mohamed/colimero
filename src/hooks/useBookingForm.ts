@@ -25,7 +25,7 @@ export function useBookingForm(tourId: number, pickupCity: string) {
       package_description: "",
       terms_accepted: false,
       customs_declaration: false
-    } as BookingFormData
+    }
   });
 
   return {
