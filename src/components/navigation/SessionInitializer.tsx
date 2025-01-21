@@ -10,9 +10,11 @@ export function useSessionInitializer() {
 
   useEffect(() => {
     let mounted = true;
+    let authSubscription: any = null;
 
     const initSession = async () => {
       try {
+        // Récupérer la session initiale
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -20,23 +22,19 @@ export function useSessionInitializer() {
           return;
         }
 
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+        // Configurer l'écouteur de changements d'état d'authentification
+        authSubscription = supabase.auth.onAuthStateChange(async (event, newSession) => {
           if (!mounted) return;
+
+          console.log("Auth state change:", event);
 
           if (event === 'SIGNED_IN') {
             if (newSession?.user?.user_metadata?.user_type === 'client') {
-              const { data: client, error: clientError } = await supabase
+              const { data: client } = await supabase
                 .from('clients')
                 .select('email_verified')
                 .eq('id', newSession.user.id)
                 .maybeSingle();
-
-              if (clientError && clientError.code !== 'PGRST116') {
-                console.error("Error fetching client:", clientError);
-                return;
-              }
 
               if (client && !client?.email_verified) {
                 toast({
@@ -49,10 +47,10 @@ export function useSessionInitializer() {
               }
             }
 
-            if (sessionStorage.getItem('returnPath')) {
-              const returnPath = sessionStorage.getItem('returnPath');
+            const returnPath = sessionStorage.getItem('returnPath');
+            if (returnPath) {
               sessionStorage.removeItem('returnPath');
-              navigate(returnPath || '/');
+              navigate(returnPath);
             }
           } else if (event === 'SIGNED_OUT') {
             if (location.pathname.includes('/reserver/')) {
@@ -61,19 +59,14 @@ export function useSessionInitializer() {
           }
         });
 
+        // Si pas de session, essayer de rafraîchir
         if (!session) {
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          
+          const { error: refreshError } = await supabase.auth.refreshSession();
           if (refreshError && refreshError.message !== 'Auth session missing!') {
             console.error("Session refresh error:", refreshError);
-          } else if (refreshData.session) {
-            console.log('Session refreshed successfully');
           }
         }
 
-        return () => {
-          subscription.unsubscribe();
-        };
       } catch (error: any) {
         if (error.message !== 'Auth session missing!' && error.code !== 'PGRST116') {
           console.error("Session initialization error:", error);
@@ -85,6 +78,9 @@ export function useSessionInitializer() {
 
     return () => {
       mounted = false;
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
   }, [location.pathname, navigate, toast]);
 }
