@@ -71,7 +71,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
         }
         
         // If we're on a protected route and not authenticated
-        if (location.pathname === '/mes-reservations' || location.pathname === '/profile') {
+        if (location.pathname === '/mes-reservations') {
           if (!session) {
             console.log("No session found, redirecting to login");
             sessionStorage.setItem('returnPath', location.pathname);
