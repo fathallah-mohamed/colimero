@@ -21,7 +21,10 @@ export default function Index() {
 
   return (
     <div className="min-h-screen">
-      <Navigation showAuthDialog={showAuthDialog} setShowAuthDialog={setShowAuthDialog} />
+      <Navigation 
+        showAuthDialog={showAuthDialog} 
+        setShowAuthDialog={setShowAuthDialog} 
+      />
       <Hero />
       <HowItWorks />
       <CurrentTours />

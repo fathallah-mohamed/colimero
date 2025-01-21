@@ -13,7 +13,7 @@ interface MobileMenuProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export default function MobileMenu({
+export function MobileMenu({
   isOpen,
   user,
   userType,

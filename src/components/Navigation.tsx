@@ -6,7 +6,7 @@ import { MenuItems } from "./navigation/MenuItems";
 import { MobileMenu } from "./navigation/MobileMenu";
 import { useSessionInitializer } from "./navigation/SessionInitializer";
 
-interface NavigationProps {
+export interface NavigationProps {
   showAuthDialog: boolean;
   setShowAuthDialog: (show: boolean) => void;
 }
