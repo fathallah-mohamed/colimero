@@ -28,7 +28,8 @@ export function useBookingForm(tourId: number, pickupCity: string) {
       package_description: "",
       terms_accepted: false,
       customs_declaration: false
-    }
+    },
+    mode: "onChange"
   });
 
   useEffect(() => {
@@ -40,11 +41,13 @@ export function useBookingForm(tourId: number, pickupCity: string) {
           return;
         }
 
+        console.log("Loading user data for:", user.id);
+
         const { data: clientData, error } = await supabase
           .from('clients')
           .select('first_name, last_name, phone')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching client data:', error);
@@ -57,6 +60,7 @@ export function useBookingForm(tourId: number, pickupCity: string) {
         }
 
         if (clientData) {
+          console.log("Client data loaded:", clientData);
           form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
           form.setValue('sender_phone', clientData.phone || "");
         }
@@ -70,26 +74,12 @@ export function useBookingForm(tourId: number, pickupCity: string) {
     loadUserData();
   }, [form]);
 
-  const goToNextStep = async () => {
-    const isValid = await form.trigger();
-    if (isValid) {
-      setCurrentStep(prev => Math.min(prev + 1, 4));
-      setCompletedSteps(prev => [...new Set([...prev, currentStep])]);
-    }
-  };
-
-  const goToPreviousStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
   return {
     form,
     currentStep,
     setCurrentStep,
     completedSteps,
     setCompletedSteps,
-    isLoading,
-    goToNextStep,
-    goToPreviousStep
+    isLoading
   };
 }
