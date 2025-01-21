@@ -58,7 +58,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: [],
       content_types: [],
       photos: []
-    }
+    } as BookingFormData
   });
 
   useEffect(() => {
