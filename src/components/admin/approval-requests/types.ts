@@ -41,4 +41,23 @@ export interface ApprovalRequest {
   pickup_city: string;
   tour_id: number;
   user_id: string;
+  // Additional fields from carrier registration
+  email?: string;
+  company_name?: string;
+  siret?: string;
+  address?: string;
+  total_capacity?: number;
+  price_per_kg?: number;
+  coverage_area?: string[];
+  services?: string[];
+  user?: {
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    phone?: string;
+    phone_secondary?: string;
+    address?: string;
+    email_verified?: boolean;
+    created_at?: string;
+  };
 }
