@@ -4,14 +4,15 @@ import { toast } from "@/components/ui/use-toast";
 import { useBookingCreation } from "@/hooks/useBookingCreation";
 import { useBookingValidation } from "@/hooks/useBookingValidation";
 import { useBookingFormState } from "@/hooks/useBookingFormState";
-import { BookingFormSteps } from "./form/BookingFormSteps";
-import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { StepIndicator } from "./form/steps/StepIndicator";
 import { BookingFormActions } from "./form/BookingFormActions";
 import { useBookingForm } from "./form/useBookingForm";
 import { BookingFormData } from "./form/schema";
 import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { useState } from "react";
+import { SenderDetailsStep } from "./form/steps/SenderDetailsStep";
+import { RecipientDetailsStep } from "./form/steps/RecipientDetailsStep";
+import { PackageDetailsStep } from "./form/steps/PackageDetailsStep";
 
 export interface BookingFormProps {
   tourId: number;
@@ -21,7 +22,6 @@ export interface BookingFormProps {
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
   const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
-  const { uploadPhotos, isUploading } = usePhotoUpload();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
   
@@ -48,35 +48,52 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   const { validateStep } = useBookingValidation(form);
 
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <SenderDetailsStep form={form} />;
+      case 2:
+        return <RecipientDetailsStep form={form} />;
+      case 3:
+        return (
+          <PackageDetailsStep
+            form={form}
+            weight={weight}
+            onWeightChange={handleWeightChange}
+            contentTypes={contentTypes}
+            onContentTypeToggle={handleContentTypeToggle}
+            specialItems={specialItems}
+            onSpecialItemToggle={handleSpecialItemToggle}
+            itemQuantities={itemQuantities}
+            onQuantityChange={handleQuantityChange}
+            photos={photos}
+            onPhotoUpload={handlePhotoUpload}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   const onSubmit = async (values: BookingFormData) => {
     try {
-      const photoUrls = await uploadPhotos(photos);
-      
-      const formattedSpecialItems = specialItems.map(item => ({
-        name: item,
-        quantity: itemQuantities[item] || 1
-      }));
-
-      const bookingData: BookingFormData = {
+      const result = await createBooking({
         ...values,
         weight,
         pickup_city: pickupCity,
-        special_items: formattedSpecialItems,
+        special_items: specialItems.map(item => ({
+          name: item,
+          quantity: itemQuantities[item] || 1
+        })),
         content_types: contentTypes,
-        photos: photoUrls,
+        photos,
         terms_accepted: true,
         customs_declaration: true
-      };
-
-      const result = await createBooking(bookingData);
+      });
 
       if (result?.tracking_number) {
         setTrackingNumber(result.tracking_number);
         setShowConfirmation(true);
-      }
-      
-      if (onSuccess) {
-        onSuccess();
       }
     } catch (error) {
       console.error("Error in form submission:", error);
@@ -118,32 +135,18 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           completedSteps={completedSteps}
         />
 
-        {(isLoading || isUploading) ? (
+        {(isLoading) ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <BookingFormSteps
-            currentStep={currentStep}
-            form={form}
-            weight={weight}
-            onWeightChange={handleWeightChange}
-            contentTypes={contentTypes}
-            onContentTypeToggle={handleContentTypeToggle}
-            specialItems={specialItems}
-            onSpecialItemToggle={handleSpecialItemToggle}
-            itemQuantities={itemQuantities}
-            onQuantityChange={handleQuantityChange}
-            photos={photos}
-            onPhotoUpload={handlePhotoUpload}
-            onEdit={setCurrentStep}
-          />
+          renderCurrentStep()
         )}
 
         <BookingFormActions
           currentStep={currentStep}
           isLoading={isLoading}
-          isUploading={isUploading}
+          isUploading={false}
           onPrevious={handlePrevious}
           onNext={handleNextStep}
         />
