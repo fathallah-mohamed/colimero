@@ -64,6 +64,14 @@ export function PackageStep({
     return total + (specialItem?.price || 0) * (itemQuantities[item] || 1);
   }, 0);
 
+  const handleContentTypeChange = (type: string, checked: boolean) => {
+    onContentTypeToggle(type);
+  };
+
+  const handleSpecialItemChange = (item: string, checked: boolean) => {
+    onSpecialItemToggle(item);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <h2 className="text-2xl font-semibold">Informations du colis</h2>
@@ -98,14 +106,14 @@ export function PackageStep({
                   ? "bg-blue-50 border-blue-200" 
                   : "hover:bg-gray-50"
               }`}
-              onClick={() => onContentTypeToggle(type)}
             >
               <div className="flex items-center gap-2">
                 <Checkbox 
+                  id={`content-type-${type}`}
                   checked={contentTypes.includes(type)}
-                  onCheckedChange={() => onContentTypeToggle(type)}
+                  onCheckedChange={(checked) => handleContentTypeChange(type, checked as boolean)}
                 />
-                <Label className="cursor-pointer">{type}</Label>
+                <Label htmlFor={`content-type-${type}`} className="cursor-pointer">{type}</Label>
               </div>
             </Card>
           ))}
@@ -127,10 +135,11 @@ export function PackageStep({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Checkbox 
+                    id={`special-item-${item.name}`}
                     checked={specialItems.includes(item.name)}
-                    onCheckedChange={() => onSpecialItemToggle(item.name)}
+                    onCheckedChange={(checked) => handleSpecialItemChange(item.name, checked as boolean)}
                   />
-                  <Label className="cursor-pointer">{item.name}</Label>
+                  <Label htmlFor={`special-item-${item.name}`} className="cursor-pointer">{item.name}</Label>
                 </div>
                 <div className="text-sm font-medium text-gray-500">
                   {item.price}€
