@@ -39,7 +39,7 @@ export function PackageSection({
 }: PackageSectionProps) {
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-medium">Informations du colis</h3>
+      <h2 className="text-2xl font-semibold">Informations du colis</h2>
       
       <FormField
         control={form.control}
@@ -78,10 +78,10 @@ export function PackageSection({
         name="package_description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description détaillée du colis</FormLabel>
+            <FormLabel>Description du colis</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder="Décrivez le contenu de votre colis en détail..." 
+                placeholder="Décrivez votre colis..." 
                 className="min-h-[100px]"
                 {...field}
               />

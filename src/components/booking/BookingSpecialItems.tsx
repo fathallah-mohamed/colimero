@@ -6,7 +6,6 @@ interface SpecialItem {
   name: string;
   price: number;
   icon: string;
-  quantity?: number;
 }
 
 interface BookingSpecialItemsProps {

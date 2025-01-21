@@ -3,11 +3,7 @@ export const availableContentTypes = [
   "Vêtements",
   "Électronique", 
   "Nourriture",
-  "Médicaments",
-  "Cosmétiques",
-  "Accessoires",
-  "Livres",
-  "Autres"
+  "Médicaments"
 ] as const;
 
 export type ContentType = typeof availableContentTypes[number];

@@ -10,11 +10,11 @@ export function BookingContentTypes({ selectedTypes, onTypeToggle, contentTypes 
   return (
     <div className="space-y-2">
       <Label>Contenu (choix multiples)</Label>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {contentTypes.map((type) => (
           <div
             key={type}
-            className={`p-2 border rounded-lg cursor-pointer text-center ${
+            className={`p-4 border rounded-lg cursor-pointer text-center ${
               selectedTypes.includes(type)
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-200 hover:border-blue-200"
