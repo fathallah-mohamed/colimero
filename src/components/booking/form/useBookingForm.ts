@@ -23,7 +23,7 @@ export function useBookingForm(tourId: number, pickupCity: string) {
       content_types: [],
       photos: [],
       package_description: ""
-    } as BookingFormData
+    }
   });
 
   return {
