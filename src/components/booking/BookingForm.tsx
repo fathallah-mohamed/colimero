@@ -9,6 +9,7 @@ import { StepIndicator } from "./form/steps/StepIndicator";
 import { BookingFormActions } from "./form/BookingFormActions";
 import { useBookingForm } from "./form/useBookingForm";
 import { BookingFormData } from "./form/schema";
+import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 
 export interface BookingFormProps {
   tourId: number;
