@@ -1,19 +1,19 @@
 import { Tour } from "../approval-requests/types";
 
 interface RequestHeaderProps {
-  tour: Tour;
+  tour?: Tour | null;
 }
 
 export function RequestHeader({ tour }: RequestHeaderProps) {
+  if (!tour) return null;
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <span className="font-medium">{tour.departure_country}</span>
-        <span>→</span>
-        <span className="font-medium">{tour.destination_country}</span>
-      </div>
+    <div>
+      <h2 className="text-lg font-semibold">
+        {tour.departure_country} → {tour.destination_country}
+      </h2>
       <p className="text-gray-600">
-        Transporteur : {tour.carriers?.company_name}
+        Transporteur : {tour.carrier.company_name}
       </p>
     </div>
   );
