@@ -9,7 +9,7 @@ export const formSchema = z.object({
   delivery_city: z.string().min(2, "La ville doit contenir au moins 2 caractères"),
   pickup_city: z.string().min(2, "La ville doit contenir au moins 2 caractères"),
   item_type: z.string().min(2, "Le type d'objet doit contenir au moins 2 caractères"),
-  weight: z.number().min(0.1, "Le poids doit être supérieur à 0"),
+  weight: z.number().min(5, "Le poids minimum est de 5kg").max(30, "Le poids maximum est de 30kg"),
   special_items: z.array(z.object({
     name: z.string(),
     quantity: z.number().min(1)
@@ -17,12 +17,8 @@ export const formSchema = z.object({
   content_types: z.array(z.string()).default([]),
   photos: z.array(z.instanceof(File)).default([]),
   package_description: z.string().optional(),
-  terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions générales"
-  }),
-  customs_declaration: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter la déclaration douanière"
-  })
+  terms_accepted: z.boolean(),
+  customs_declaration: z.boolean()
 });
 
 export type BookingFormData = z.infer<typeof formSchema>;

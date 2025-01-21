@@ -3,6 +3,7 @@ import { BookingFormContext } from './BookingFormContext';
 import { BookingFormState } from '@/types/booking';
 import { useBookingCreation } from '@/hooks/useBookingCreation';
 import { supabase } from '@/integrations/supabase/client';
+import { BookingFormData } from '../form/schema';
 
 interface BookingFormProviderProps {
   children: ReactNode;
