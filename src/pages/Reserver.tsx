@@ -1,11 +1,11 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { Tour, RouteStop, TourStatus } from "@/types/tour";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
 
 export default function Reserver() {
   const { tourId } = useParams();
@@ -13,6 +13,7 @@ export default function Reserver() {
   const pickupCity = searchParams.get('pickupCity');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showCarrierDialog, setShowCarrierDialog] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -22,6 +23,14 @@ export default function Reserver() {
         const currentPath = `/reserver/${tourId}${pickupCity ? `?pickupCity=${pickupCity}` : ''}`;
         sessionStorage.setItem('returnPath', currentPath);
         navigate('/connexion');
+        return;
+      }
+
+      // Check if user is a carrier
+      const userType = session.user.user_metadata?.user_type;
+      if (userType === 'carrier') {
+        setShowCarrierDialog(true);
+        return;
       }
     };
 
@@ -69,6 +78,15 @@ export default function Reserver() {
       return transformedTour;
     }
   });
+
+  const handleDialogClose = () => {
+    setShowCarrierDialog(false);
+    navigate('/');
+  };
+
+  if (showCarrierDialog) {
+    return <CarrierAuthDialog isOpen={true} onClose={handleDialogClose} />;
+  }
 
   if (isLoading) {
     return <div>Loading...</div>;
