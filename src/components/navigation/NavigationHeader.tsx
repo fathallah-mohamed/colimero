@@ -56,7 +56,7 @@ export function NavigationHeader({
           user={user}
           userType={userType}
           handleLogout={handleLogout}
-          setShowAuthDialog={setShowAuthDialog}
+          setShowAuthDialog={() => setShowAuthDialog(true)}
         />
         <MobileMenuButton
           ref={mobileButtonRef}
