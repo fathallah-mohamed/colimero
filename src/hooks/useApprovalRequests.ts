@@ -9,14 +9,37 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
   const { requests, loading, error, refetchRequests } = useFetchRequests(userType, userId);
   const { handleApproveRequest, handleRejectRequest, handleCancelRequest, handleDeleteRequest } = useRequestActions();
 
+  const handleRequestAction = async (actionType: string, request: ApprovalRequest) => {
+    let success = false;
+    
+    switch (actionType) {
+      case 'approve':
+        success = (await handleApproveRequest(request)).success;
+        break;
+      case 'reject':
+        success = (await handleRejectRequest(request)).success;
+        break;
+      case 'cancel':
+        success = (await handleCancelRequest(request.id)).success;
+        break;
+      case 'delete':
+        success = (await handleDeleteRequest(request.id)).success;
+        break;
+    }
+
+    if (success) {
+      await refetchRequests();
+    }
+  };
+
   return {
     requests,
     loading,
     error,
-    handleApproveRequest,
-    handleRejectRequest,
-    handleCancelRequest,
-    handleDeleteRequest,
+    handleApproveRequest: (request: ApprovalRequest) => handleRequestAction('approve', request),
+    handleRejectRequest: (request: ApprovalRequest) => handleRequestAction('reject', request),
+    handleCancelRequest: (requestId: string) => handleRequestAction('cancel', { id: requestId } as ApprovalRequest),
+    handleDeleteRequest: (requestId: string) => handleRequestAction('delete', { id: requestId } as ApprovalRequest),
     refetchRequests
   };
 }

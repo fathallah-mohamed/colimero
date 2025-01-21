@@ -40,7 +40,11 @@ export function ApprovalRequestTabs({
             key={request.id}
             request={request}
             userType={userType}
-            showActions={showActions}
+            showActions={showActions && (
+              (userType === 'carrier' && request.status === 'pending') ||
+              (userType === 'client' && request.status === 'pending') ||
+              (userType === 'client' && request.status === 'rejected')
+            )}
             onApprove={handleApproveRequest}
             onReject={handleRejectRequest}
             onCancel={handleCancelRequest}
@@ -79,7 +83,7 @@ export function ApprovalRequestTabs({
 
       <TabsContent value="rejected">
         <ScrollArea className="h-[calc(100vh-300px)]">
-          {renderRequests(rejectedRequests)}
+          {renderRequests(rejectedRequests, true)}
         </ScrollArea>
       </TabsContent>
     </Tabs>

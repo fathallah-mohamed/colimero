@@ -44,9 +44,11 @@ export function useFetchRequests(userType: string | null, userId: string | null)
           )
         `);
 
+      // Si c'est un transporteur, on filtre par carrier_id
       if (userType === 'carrier') {
         query = query.eq('tour.carrier_id', userId);
       } else {
+        // Si c'est un client, on filtre par user_id
         query = query.eq('user_id', userId);
       }
 
@@ -72,6 +74,7 @@ export function useFetchRequests(userType: string | null, userId: string | null)
         }
       })) as ApprovalRequest[];
 
+      console.log('Fetched requests:', mappedRequests);
       setRequests(mappedRequests || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
