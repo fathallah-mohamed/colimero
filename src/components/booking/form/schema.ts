@@ -17,12 +17,8 @@ export const formSchema = z.object({
   content_types: z.array(z.string()).default([]),
   photos: z.array(z.string()).default([]),
   package_description: z.string().optional(),
-  terms_accepted: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter les conditions générales"
-  }),
-  customs_declaration: z.boolean().refine((val) => val === true, {
-    message: "Vous devez accepter la déclaration douanière"
-  })
+  terms_accepted: z.boolean(),
+  customs_declaration: z.boolean()
 });
 
 export type BookingFormData = z.infer<typeof formSchema>;

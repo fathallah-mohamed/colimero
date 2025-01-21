@@ -10,13 +10,13 @@ export function usePhotoUpload() {
     
     setIsUploading(true);
     try {
-      const uploadPromises = photos.map(async (file) => {
-        const fileExt = file.name.split('.').pop();
+      const uploadPromises = photos.map(async (photo) => {
+        const fileExt = photo.name.split('.').pop();
         const filePath = `${crypto.randomUUID()}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from('bookings')
-          .upload(filePath, file);
+          .upload(filePath, photo);
 
         if (uploadError) {
           throw uploadError;

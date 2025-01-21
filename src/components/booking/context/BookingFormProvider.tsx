@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { BookingFormContext } from './BookingFormContext';
-import { BookingFormState, BookingFormData } from '@/types/booking';
-import { useBookingForm } from '@/hooks/useBookingForm';
+import { BookingFormState } from '@/types/booking';
+import { useBookingCreation } from '@/hooks/useBookingCreation';
 import { supabase } from '@/integrations/supabase/client';
 
 interface BookingFormProviderProps {
@@ -29,7 +29,7 @@ const initialState: BookingFormState = {
 export function BookingFormProvider({ children, tourId, onSuccess }: BookingFormProviderProps) {
   const [state, setState] = useState<BookingFormState>(initialState);
   const [pricePerKg] = useState(10);
-  const { createBooking, isLoading } = useBookingForm(tourId, onSuccess);
+  const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -57,16 +57,6 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
     fetchUserInfo();
   }, []);
 
-  const handleSubmit = async (values: BookingFormData) => {
-    try {
-      await createBooking(values);
-      onSuccess();
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      throw error;
-    }
-  };
-
   return (
     <BookingFormContext.Provider 
       value={{
@@ -74,7 +64,7 @@ export function BookingFormProvider({ children, tourId, onSuccess }: BookingForm
         setState,
         pricePerKg,
         isLoading,
-        handleSubmit,
+        handleSubmit: createBooking,
       }}
     >
       {children}
