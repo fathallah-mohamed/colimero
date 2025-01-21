@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useApprovalActions } from "./useApprovalActions";
 import { useRequestManagement } from "./useRequestManagement";
 import { useToast } from "./use-toast";
-import { ApprovalRequest, Client } from "@/components/admin/approval-requests/types";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export function useApprovalRequests(userType: string | null, userId: string | null) {
   const [loading, setLoading] = useState(true);
@@ -51,8 +51,8 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
             id,
             first_name,
             last_name,
-            phone,
-            email
+            email,
+            phone
           )
         `);
 
@@ -70,33 +70,21 @@ export function useApprovalRequests(userType: string | null, userId: string | nu
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Impossible de charger vos demandes d'approbation"
+          description: "Impossible de charger les demandes d'approbation"
         });
         setRequests([]);
         return;
       }
 
       console.log('Fetched approval requests:', data);
-
-      // Map the data to match our ApprovalRequest type
-      const mappedRequests: ApprovalRequest[] = (data || []).map(item => ({
-        ...item,
-        client: item.user[0] as Client, // Take first user since it's an array
-        tour: {
-          ...item.tour,
-          route: Array.isArray(item.tour.route) ? item.tour.route : [], // Ensure route is an array
-          carriers: item.tour.carrier // Map carrier to carriers
-        }
-      }));
-
-      setRequests(mappedRequests);
+      setRequests(data || []);
     } catch (error: any) {
       console.error('Error in fetchRequests:', error);
       setError(error.message);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors du chargement de vos demandes"
+        description: "Une erreur est survenue lors du chargement des demandes"
       });
       setRequests([]);
     } finally {

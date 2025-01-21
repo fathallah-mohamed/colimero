@@ -37,16 +37,16 @@ export function ApprovalRequestCard({
             <div className="flex items-center gap-2">
               <User className="h-5 w-5 text-gray-500" />
               <h3 className="text-lg font-semibold">
-                {request.user?.first_name} {request.user?.last_name}
+                {request.user.first_name} {request.user.last_name}
               </h3>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <Mail className="h-4 w-4" />
-              <p>{request.user?.email}</p>
+              <p>{request.user.email}</p>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <Phone className="h-4 w-4" />
-              <p>{request.user?.phone || "Non renseigné"}</p>
+              <p>{request.user.phone || "Non renseigné"}</p>
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <MapPin className="h-4 w-4" />
@@ -73,17 +73,17 @@ export function ApprovalRequestCard({
             <div className="space-y-2">
               <p>
                 <span className="text-gray-500">Trajet:</span>{" "}
-                {request.tour?.departure_country} → {request.tour?.destination_country}
+                {request.tour.departure_country} → {request.tour.destination_country}
               </p>
               <p>
                 <span className="text-gray-500">Date de départ:</span>{" "}
-                {format(new Date(request.tour?.departure_date), "dd MMMM yyyy", {
+                {format(new Date(request.tour.departure_date), "dd MMMM yyyy", {
                   locale: fr,
                 })}
               </p>
               <p>
                 <span className="text-gray-500">Date de collecte:</span>{" "}
-                {format(new Date(request.tour?.collection_date), "dd MMMM yyyy", {
+                {format(new Date(request.tour.collection_date), "dd MMMM yyyy", {
                   locale: fr,
                 })}
               </p>
@@ -94,11 +94,11 @@ export function ApprovalRequestCard({
             <div className="space-y-2">
               <p>
                 <span className="text-gray-500">Capacité totale:</span>{" "}
-                {request.tour?.total_capacity} kg
+                {request.tour.total_capacity} kg
               </p>
               <p>
                 <span className="text-gray-500">Capacité restante:</span>{" "}
-                {request.tour?.remaining_capacity} kg
+                {request.tour.remaining_capacity} kg
               </p>
             </div>
           </div>

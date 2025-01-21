@@ -1,24 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navigation from "@/components/Navigation";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { useToast } from "@/hooks/use-toast";
+import Navigation from "@/components/Navigation";
 import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
-import { ProfileLoading } from "@/components/profile/ProfileLoading";
+import { useApprovalRequests } from "@/hooks/useApprovalRequests";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export default function DemandesApprobation() {
   const navigate = useNavigate();
-  const [session, setSession] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const userType = session?.user?.user_metadata?.user_type;
-  const userId = session?.user?.id;
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
 
-  const { 
-    requests, 
-    loading: requestsLoading, 
+  const {
+    requests,
+    loading,
+    error,
     handleApproveRequest,
     handleRejectRequest,
     handleCancelRequest,
@@ -26,51 +24,75 @@ export default function DemandesApprobation() {
   } = useApprovalRequests(userType, userId);
 
   useEffect(() => {
-    async function getSession() {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         toast({
           variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de récupérer votre session"
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour accéder à cette page.",
         });
-        navigate('/connexion');
+        navigate("/connexion");
         return;
       }
 
-      setSession(session);
-      setIsLoading(false);
-
-      if (!session) {
-        navigate('/connexion');
+      const userType = session.user.user_metadata?.user_type;
+      if (userType !== 'carrier') {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Cette page est réservée aux transporteurs.",
+        });
+        navigate("/");
+        return;
       }
-    }
 
-    getSession();
-  }, [navigate]);
+      setUserId(session.user.id);
+      setUserType(userType);
+    };
 
-  if (isLoading || requestsLoading) {
+    checkAuth();
+  }, [navigate, toast]);
+
+  const pendingRequests = requests.filter(request => request.status === 'pending');
+  const approvedRequests = requests.filter(request => request.status === 'approved');
+  const rejectedRequests = requests.filter(request => request.status === 'rejected');
+
+  if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <ProfileLoading />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-gray-500">Chargement des demandes...</div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const pendingRequests = requests?.filter(req => req.status === 'pending') || [];
-  const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
-  const rejectedRequests = requests?.filter(req => req.status === 'rejected') || [];
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-red-500">Une erreur est survenue lors du chargement des demandes.</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <h1 className="text-3xl font-bold mb-8">
-          {userType === 'carrier' ? 'Demandes d\'approbation reçues' : 'Mes demandes d\'approbation'}
-        </h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Demandes d'approbation
+          </h1>
+        </div>
 
         <ApprovalRequestTabs
           pendingRequests={pendingRequests}
