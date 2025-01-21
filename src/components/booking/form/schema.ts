@@ -7,7 +7,7 @@ export const formSchema = z.object({
   recipient_phone: z.string().min(1, "Le téléphone du destinataire est requis"),
   recipient_address: z.string().min(1, "L'adresse de livraison est requise"),
   delivery_city: z.string().min(1, "La ville de livraison est requise"),
-  pickup_city: z.string().min(1, "La ville de ramassage est requise"),
+  pickup_city: z.string(),
   item_type: z.string().min(1, "Le type de colis est requis"),
   weight: z.number().min(5, "Le poids minimum est de 5kg").max(30, "Le poids maximum est de 30kg"),
   special_items: z.array(z.object({
