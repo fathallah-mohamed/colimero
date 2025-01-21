@@ -1,12 +1,12 @@
 import { UseFormReturn } from "react-hook-form";
-import { BookingFormData } from "@/types/booking";
+import { BookingFormData } from "@/components/booking/form/schema";
 import { toast } from "@/components/ui/use-toast";
 
 export function useBookingValidation(form: UseFormReturn<BookingFormData>) {
   const validateStep = async (step: number): Promise<boolean> => {
     const fields = {
       1: ["sender_name", "sender_phone"],
-      2: ["recipient_name", "recipient_phone", "recipient_address", "recipient_city"],
+      2: ["recipient_name", "recipient_phone", "recipient_address", "delivery_city"],
       3: ["item_type", "weight", "content_types"]
     };
 
