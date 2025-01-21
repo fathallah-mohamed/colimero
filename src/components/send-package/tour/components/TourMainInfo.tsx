@@ -20,49 +20,52 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
   const capacityPercentage = (usedCapacity / tour.total_capacity) * 100;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="flex items-center gap-3">
-        <TransporteurAvatar 
-          avatarUrl={tour.carriers?.avatar_url}
-          companyName={tour.carriers?.company_name || ""}
-          size="md"
-        />
-        <span className="text-base font-medium text-gray-900">
-          {tour.carriers?.company_name}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
-        <Calendar className="h-5 w-5 text-blue-600" />
-        <div className="flex flex-col">
-          <span className="text-sm text-blue-600 font-medium">Date de départ</span>
-          <span className="text-base font-semibold text-blue-700">
-            {format(departureDate, "d MMM yyyy", { locale: fr })}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex items-center gap-3">
+          <TransporteurAvatar 
+            avatarUrl={tour.carriers?.avatar_url}
+            companyName={tour.carriers?.company_name || ""}
+            size="md"
+          />
+          <span className="text-base font-medium text-gray-900">
+            {tour.carriers?.company_name}
           </span>
+        </div>
+
+        <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
+          <Calendar className="h-5 w-5 text-blue-600" />
+          <div className="flex flex-col">
+            <span className="text-sm text-blue-600 font-medium">Date de départ</span>
+            <span className="text-base font-semibold text-blue-700">
+              {format(departureDate, "d MMM yyyy", { locale: fr })}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg">
+          <Clock className="h-5 w-5 text-purple-600" />
+          <div className="flex flex-col">
+            <span className="text-sm text-purple-600 font-medium">Durée de la tournée</span>
+            <span className="text-base font-semibold text-purple-700">
+              {tourDuration} jours
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-lg">
-        <Clock className="h-5 w-5 text-purple-600" />
-        <div className="flex flex-col">
-          <span className="text-sm text-purple-600 font-medium">Durée de la tournée</span>
-          <span className="text-base font-semibold text-purple-700">
-            {tourDuration} jours
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary text-center">
+      <div className="space-y-4">
+        <span className="bg-primary/10 px-4 py-2 rounded-full text-base font-medium text-primary text-center block w-fit">
           {pricePerKg} €/kg
         </span>
-        <div className="space-y-2 bg-green-50 p-3 rounded-lg">
-          <div className="flex justify-between text-sm text-green-700">
+        
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm text-gray-600">
             <span>Capacité utilisée</span>
             <span>{Math.round(capacityPercentage)}%</span>
           </div>
           <Progress value={capacityPercentage} className="h-2" />
-          <div className="text-sm text-green-700 text-center">
+          <div className="text-sm text-gray-600 text-center">
             {tour.remaining_capacity} kg disponibles sur {tour.total_capacity} kg
           </div>
         </div>
