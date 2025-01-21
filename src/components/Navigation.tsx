@@ -58,18 +58,21 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
 
   // Store return path for auth redirects and handle protected routes
   React.useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
-      setIsLoading(true);
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Session error:", error);
-          toast({
-            variant: "destructive",
-            title: "Erreur de session",
-            description: "Une erreur est survenue lors de la vérification de votre session.",
-          });
+          if (isMounted) {
+            toast({
+              variant: "destructive",
+              title: "Erreur de session",
+              description: "Une erreur est survenue lors de la vérification de votre session.",
+            });
+          }
           return;
         }
         
@@ -87,17 +90,25 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
         }
       } catch (error) {
         console.error("Auth check error:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur d'authentification",
-          description: "Une erreur est survenue lors de la vérification de votre authentification.",
-        });
+        if (isMounted) {
+          toast({
+            variant: "destructive",
+            title: "Erreur d'authentification",
+            description: "Une erreur est survenue lors de la vérification de votre authentification.",
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [location.pathname, navigate, toast]);
 
   if (isLoading) {
@@ -109,9 +120,13 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <Skeleton className="h-8 w-32" />
-            <div className="flex space-x-4">
+            <div className="hidden lg:flex space-x-4">
               <Skeleton className="h-8 w-24" />
               <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+            <div className="lg:hidden">
+              <Skeleton className="h-8 w-8" />
             </div>
           </div>
         </div>
