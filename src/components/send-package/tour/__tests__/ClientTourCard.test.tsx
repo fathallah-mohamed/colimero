@@ -1,8 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ClientTourCard } from '../ClientTourCard';
 import { BrowserRouter } from 'react-router-dom';
-import { vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { supabase } from "@/integrations/supabase/client";
+import type { Tour } from "@/types/tour";
 
 // Mock Supabase
 vi.mock("@/integrations/supabase/client", () => ({
@@ -20,7 +21,7 @@ vi.mock("@/hooks/use-toast", () => ({
   })
 }));
 
-const mockTour = {
+const mockTour: Tour = {
   id: 1,
   carrier_id: "123",
   type: "public",
@@ -31,6 +32,10 @@ const mockTour = {
   destination_country: "TN",
   total_capacity: 1000,
   remaining_capacity: 800,
+  created_at: "2024-03-01",
+  updated_at: "2024-03-01",
+  terms_accepted: true,
+  customs_declaration: true,
   route: [
     {
       name: "Paris",
@@ -92,7 +97,7 @@ describe('ClientTourCard', () => {
 
   it('requires pickup city selection before booking', async () => {
     // Mock session
-    (supabase.auth.getSession as jest.Mock).mockResolvedValue({
+    (supabase.auth.getSession as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { session: { user: { user_metadata: { user_type: 'client' } } } }
     });
 
@@ -108,10 +113,10 @@ describe('ClientTourCard', () => {
   });
 
   it('handles private tour approval request correctly', async () => {
-    const privateTour = { ...mockTour, type: 'private' };
+    const privateTour: Tour = { ...mockTour, type: "private" };
     
     // Mock authenticated session
-    (supabase.auth.getSession as jest.Mock).mockResolvedValue({
+    (supabase.auth.getSession as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: { session: { user: { user_metadata: { user_type: 'client' } } } }
     });
 
