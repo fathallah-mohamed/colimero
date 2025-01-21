@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tour } from "@/types/tour";
 import { TourMainInfo } from "./components/TourMainInfo";
@@ -7,6 +7,9 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -16,8 +19,33 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [showPendingDialog, setShowPendingDialog] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    checkExistingRequest();
+  }, [tour.id]);
+
+  const checkExistingRequest = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: request, error } = await supabase
+      .from('approval_requests')
+      .select('*')
+      .eq('tour_id', tour.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing request:', error);
+      return;
+    }
+
+    setExistingRequest(request);
+  };
 
   const handleActionClick = async () => {
     if (!selectedPickupCity) {
@@ -49,7 +77,23 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
     }
 
     if (tour.type === 'private') {
-      setShowApprovalDialog(true);
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            setShowPendingDialog(true);
+            return;
+          case 'approved':
+            navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+            return;
+          case 'rejected':
+            setShowApprovalDialog(true);
+            return;
+          default:
+            setShowApprovalDialog(true);
+        }
+      } else {
+        setShowApprovalDialog(true);
+      }
     } else {
       navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
@@ -57,11 +101,33 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
   const getActionButtonText = () => {
     if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    return tour.type === 'private' ? "Demander l'approbation" : "Réserver maintenant";
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            return "Demande en attente d'approbation";
+          case 'approved':
+            return "Réserver maintenant";
+          case 'rejected':
+            return "Demander l'approbation";
+          default:
+            return "Demander l'approbation";
+        }
+      }
+      return "Demander l'approbation";
+    }
+    return "Réserver maintenant";
   };
 
   const isActionEnabled = () => {
-    return !!selectedPickupCity;
+    if (!selectedPickupCity) return false;
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        return existingRequest.status !== 'pending';
+      }
+      return true;
+    }
+    return true;
   };
 
   return (
@@ -81,7 +147,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             onActionClick={handleActionClick}
             isActionEnabled={isActionEnabled()}
             actionButtonText={getActionButtonText()}
-            hasPendingRequest={false}
+            hasPendingRequest={existingRequest?.status === 'pending'}
           />
         )}
 
@@ -92,6 +158,8 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             tourId={tour.id}
             pickupCity={selectedPickupCity}
             onSuccess={() => {
+              checkExistingRequest();
+              setShowApprovalDialog(false);
               toast({
                 title: "Demande envoyée",
                 description: "Votre demande d'approbation a été envoyée avec succès",
@@ -99,6 +167,26 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             }}
           />
         )}
+
+        <Dialog open={showPendingDialog} onOpenChange={setShowPendingDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertCircle className="h-5 w-5" />
+                Demande en attente
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Vous avez déjà une demande d'approbation en attente pour cette tournée. 
+                Veuillez attendre la réponse du transporteur avant de faire une nouvelle demande.
+              </p>
+              <Button onClick={() => setShowPendingDialog(false)} className="w-full">
+                Compris
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </Card>
   );
