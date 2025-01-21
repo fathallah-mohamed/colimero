@@ -156,8 +156,10 @@ export type Database = {
           sender_name: string
           sender_phone: string
           special_items: Json | null
+          special_items_price: number | null
           status: string
           terms_accepted: boolean | null
+          total_price: number | null
           tour_id: number
           tracking_number: string
           updated_at: string | null
@@ -186,8 +188,10 @@ export type Database = {
           sender_name: string
           sender_phone: string
           special_items?: Json | null
+          special_items_price?: number | null
           status?: string
           terms_accepted?: boolean | null
+          total_price?: number | null
           tour_id: number
           tracking_number: string
           updated_at?: string | null
@@ -216,8 +220,10 @@ export type Database = {
           sender_name?: string
           sender_phone?: string
           special_items?: Json | null
+          special_items_price?: number | null
           status?: string
           terms_accepted?: boolean | null
+          total_price?: number | null
           tour_id?: number
           tracking_number?: string
           updated_at?: string | null

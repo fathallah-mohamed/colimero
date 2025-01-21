@@ -1,4 +1,4 @@
-import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
@@ -7,6 +7,8 @@ import { BookingWeightSelector } from "../../BookingWeightSelector";
 import { BookingContentTypes } from "../../BookingContentTypes";
 import { BookingSpecialItems } from "../../BookingSpecialItems";
 import { BookingPhotoUpload } from "../../BookingPhotoUpload";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface PackageStepProps {
   form: UseFormReturn<BookingFormData>;
@@ -35,6 +37,11 @@ export function PackageStep({
   photos,
   onPhotoUpload
 }: PackageStepProps) {
+  const totalPrice = weight * 10 + specialItems.reduce((total, item) => {
+    const basePrice = 10; // Prix de base par objet spécial
+    return total + (basePrice * (itemQuantities[item] || 1));
+  }, 0);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <h2 className="text-2xl font-semibold">Informations du colis</h2>
@@ -48,6 +55,7 @@ export function PackageStep({
             <FormControl>
               <Input placeholder="Ex: Carton, valise..." {...field} />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -88,6 +96,7 @@ export function PackageStep({
                 {...field}
               />
             </FormControl>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -96,6 +105,15 @@ export function PackageStep({
         photos={photos}
         onPhotoUpload={onPhotoUpload}
       />
+
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Prix total estimé: {totalPrice.toFixed(2)}€
+          <br />
+          (Transport: {(weight * 10).toFixed(2)}€ + Services spéciaux: {(totalPrice - weight * 10).toFixed(2)}€)
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }

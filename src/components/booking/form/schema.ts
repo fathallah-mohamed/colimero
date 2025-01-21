@@ -19,7 +19,8 @@ export const packageSchema = z.object({
   weight: z.number().min(5, "Le poids minimum est de 5kg").max(30, "Le poids maximum est de 30kg"),
   special_items: z.array(z.object({
     name: z.string(),
-    quantity: z.number().min(1)
+    quantity: z.number().min(1),
+    price: z.number().optional()
   })),
   content_types: z.array(z.string()),
   photos: z.array(z.union([z.string(), z.instanceof(File)])),

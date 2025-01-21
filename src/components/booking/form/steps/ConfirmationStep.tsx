@@ -3,6 +3,8 @@ import { BookingFormData } from "../schema";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 
 interface ConfirmationStepProps {
   form: UseFormReturn<BookingFormData>;
@@ -59,7 +61,12 @@ export function ConfirmationStep({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <h2 className="text-2xl font-semibold">Confirmation de la réservation</h2>
+      <Alert className="bg-green-50 border-green-200">
+        <CheckCircle2 className="h-4 w-4 text-green-500" />
+        <AlertDescription className="text-green-700">
+          Veuillez vérifier les informations ci-dessous avant de confirmer votre réservation
+        </AlertDescription>
+      </Alert>
       
       <div className="space-y-4">
         <Section
@@ -76,7 +83,9 @@ export function ConfirmationStep({
           data={{
             "Nom": formValues.recipient_name,
             "Téléphone": formValues.recipient_phone,
-            "Adresse": formValues.recipient_address
+            "Email": formValues.recipient_email || "-",
+            "Adresse": formValues.recipient_address,
+            "Ville": formValues.delivery_city
           }}
           step={2}
         />
@@ -86,7 +95,11 @@ export function ConfirmationStep({
           data={{
             "Type": formValues.item_type,
             "Poids": `${weight} kg`,
-            "Description": formValues.package_description
+            "Description": formValues.package_description || "-",
+            "Types de contenu": formValues.content_types.join(", ") || "-",
+            "Objets spéciaux": specialItems.length ? specialItems.map(item => 
+              `${item} (×${itemQuantities[item] || 1})`
+            ).join(", ") : "-"
           }}
           step={3}
         />
