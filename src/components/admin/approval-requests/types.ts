@@ -39,6 +39,7 @@ export interface ApprovalRequest {
   pickup_city: string;
   tour_id: number;
   user_id: string;
+  // Add missing properties
   email?: string;
   company_name?: string;
   siret?: string;
