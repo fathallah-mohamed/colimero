@@ -126,5 +126,5 @@ export function ApprovalRequestCard({
   );
 }
 
-// Make sure we have a named export
+// Export both the component and its type
 export type { ApprovalRequestCardProps };
