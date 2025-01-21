@@ -109,8 +109,8 @@ export const RequestDetailsDialog = ({
 
       const { data, error } = await supabase.functions.invoke("send-rejection-email", {
         body: JSON.stringify({
-          email: request.email,
-          company_name: request.company_name,
+          email: request.client.email,
+          company_name: request.tour.carrier.company_name,
           reason: rejectionReason,
         }),
       });
@@ -151,31 +151,31 @@ export const RequestDetailsDialog = ({
           Examinez les détails de la demande avant de l'approuver ou la rejeter.
         </DialogDescription>
         
-        <RequestHeader companyName={request.company_name} />
+        <RequestHeader companyName={request.tour.carrier.company_name} />
 
         <div className="grid grid-cols-2 gap-4 py-4">
           <PersonalInfo
-            firstName={request.user?.first_name}
-            lastName={request.user?.last_name}
-            email={request.user?.email}
-            phone={request.user?.phone}
-            phoneSecondary={request.user?.phone_secondary}
-            address={request.user?.address}
-            emailVerified={request.user?.email_verified}
-            createdAt={request.user?.created_at}
+            firstName={request.client.first_name}
+            lastName={request.client.last_name}
+            email={request.client.email}
+            phone={request.client.phone}
+            phoneSecondary={request.client.phone_secondary}
+            address={request.client.address}
+            emailVerified={request.client.email_verified}
+            createdAt={request.client.created_at}
           />
 
           <CompanyInfo
-            companyName={request.company_name}
-            siret={request.siret}
-            address={request.address}
+            companyName={request.tour.carrier.company_name}
+            siret={request.tour.carrier.siret}
+            address={request.tour.carrier.address}
           />
 
           <CapacityInfo
-            totalCapacity={request.total_capacity}
-            pricePerKg={request.price_per_kg}
-            coverageArea={request.coverage_area}
-            services={request.services}
+            totalCapacity={request.tour.total_capacity}
+            pricePerKg={request.tour.carrier.price_per_kg}
+            coverageArea={request.tour.carrier.coverage_area}
+            services={request.tour.carrier.services}
           />
 
           {request.status === "pending" && (
