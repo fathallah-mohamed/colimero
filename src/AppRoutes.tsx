@@ -7,7 +7,6 @@ import EnvoyerColis from "@/pages/EnvoyerColis";
 import PlanifierTournee from "@/pages/PlanifierTournee";
 import Profile from "@/pages/Profile";
 import ResetPassword from "@/pages/ResetPassword";
-import Tours from "@/pages/Tours";
 import TransporteurDetails from "@/pages/TransporteurDetails";
 import Transporteurs from "@/pages/Transporteurs";
 import MesReservations from "@/pages/MesReservations";
@@ -35,7 +34,6 @@ export default function AppRoutes() {
       <Route path="/planifier-tournee" element={<PlanifierTournee />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/tours" element={<Tours />} />
       <Route path="/transporteurs/:id" element={<TransporteurDetails />} />
       <Route path="/transporteurs" element={<Transporteurs />} />
       <Route path="/mes-reservations" element={<MesReservations />} />
