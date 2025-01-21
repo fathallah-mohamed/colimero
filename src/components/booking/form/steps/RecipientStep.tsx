@@ -24,6 +24,7 @@ export function RecipientStep({ form }: RecipientStepProps) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="recipient_phone"
@@ -36,6 +37,20 @@ export function RecipientStep({ form }: RecipientStepProps) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="recipient_email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email (optionnel)</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="email@exemple.com" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="recipient_address"
@@ -44,6 +59,19 @@ export function RecipientStep({ form }: RecipientStepProps) {
               <FormLabel>Adresse complète</FormLabel>
               <FormControl>
                 <Input placeholder="Adresse de livraison" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="delivery_city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ville de livraison</FormLabel>
+              <FormControl>
+                <Input placeholder="Ville de livraison" {...field} />
               </FormControl>
             </FormItem>
           )}

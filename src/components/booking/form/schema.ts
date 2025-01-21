@@ -8,6 +8,7 @@ export const senderSchema = z.object({
 export const recipientSchema = z.object({
   recipient_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   recipient_phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
+  recipient_email: z.string().email("L'email n'est pas valide").optional(),
   recipient_address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
   delivery_city: z.string().min(2, "La ville doit contenir au moins 2 caractères"),
 });
