@@ -5,9 +5,11 @@ interface RequestListProps {
   requests: ApprovalRequest[];
   onSelect: (request: ApprovalRequest) => void;
   searchTerm: string;
+  onApprove: (request: ApprovalRequest) => void;
+  onReject: (request: ApprovalRequest) => void;
 }
 
-export function RequestList({ requests, onSelect, searchTerm }: RequestListProps) {
+export function RequestList({ requests, onSelect, searchTerm, onApprove, onReject }: RequestListProps) {
   const filteredRequests = requests.filter(request =>
     request.client.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     request.client.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -29,6 +31,8 @@ export function RequestList({ requests, onSelect, searchTerm }: RequestListProps
           key={request.id}
           request={request}
           onClick={() => onSelect(request)}
+          onApprove={() => onApprove(request)}
+          onReject={() => onReject(request)}
         />
       ))}
     </div>
