@@ -1,12 +1,5 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -15,7 +8,7 @@ interface ApprovalRequestDialogProps {
   onClose: () => void;
   tourId: number;
   pickupCity: string;
-  onSuccess?: () => void; // Ajout de la prop onSuccess comme optionnelle
+  onSuccess?: () => void;
 }
 
 export function ApprovalRequestDialog({
@@ -23,17 +16,13 @@ export function ApprovalRequestDialog({
   onClose,
   tourId,
   pickupCity,
-  onSuccess,
+  onSuccess
 }: ApprovalRequestDialogProps) {
-  const [message, setMessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async () => {
     try {
-      setIsSubmitting(true);
       const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user) {
         toast({
           variant: "destructive",
@@ -43,24 +32,46 @@ export function ApprovalRequestDialog({
         return;
       }
 
+      // Vérifier s'il existe déjà une demande en attente
+      const { data: existingRequest } = await supabase
+        .from('approval_requests')
+        .select('*')
+        .eq('tour_id', tourId)
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existingRequest) {
+        toast({
+          variant: "destructive",
+          title: "Demande existante",
+          description: "Vous avez déjà une demande en attente pour cette tournée",
+        });
+        onClose();
+        return;
+      }
+
       const { error } = await supabase
         .from('approval_requests')
-        .insert({
-          user_id: user.id,
-          tour_id: tourId,
-          status: 'pending',
-          message: message.trim() || null,
-          pickup_city: pickupCity
-        });
+        .insert([
+          {
+            tour_id: tourId,
+            user_id: user.id,
+            status: 'pending',
+            pickup_city: pickupCity
+          }
+        ]);
 
       if (error) throw error;
 
       toast({
         title: "Demande envoyée",
-        description: "Le transporteur va analyser votre demande. Vous serez notifié par email de sa décision.",
+        description: "Votre demande d'approbation a été envoyée avec succès",
       });
-      
-      onSuccess?.(); // Appel de onSuccess s'il existe
+
+      if (onSuccess) {
+        onSuccess();
+      }
       onClose();
     } catch (error) {
       console.error('Error submitting approval request:', error);
@@ -69,57 +80,28 @@ export function ApprovalRequestDialog({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'envoi de la demande",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
-            Demande d'approbation
-          </DialogTitle>
-          <p className="text-gray-600">
-            Cette tournée nécessite l'approbation du transporteur. Envoyez une demande pour pouvoir réserver.
-          </p>
+          <DialogTitle>Demande d'approbation</DialogTitle>
         </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          <div>
-            <p className="font-medium mb-1">Point de collecte sélectionné</p>
-            <p className="text-gray-600">{pickupCity}</p>
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Cette tournée nécessite l'approbation du transporteur. 
+            Souhaitez-vous envoyer une demande d'approbation ?
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button onClick={handleSubmit}>
+              Envoyer la demande
+            </Button>
           </div>
-
-          <div className="space-y-2">
-            <label htmlFor="message" className="font-medium">
-              Message au transporteur (optionnel)
-            </label>
-            <Textarea
-              id="message"
-              placeholder="Ajoutez un message personnalisé..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
-            Annuler
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Envoi en cours..." : "Envoyer la demande"}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

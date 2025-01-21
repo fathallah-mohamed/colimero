@@ -1,114 +1,131 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Tour } from "@/types/tour";
 
 export function useTourBooking(tour: Tour) {
-  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
-  const [showExistingBookingDialog, setShowExistingBookingDialog] = useState(false);
-  const [showPendingApprovalDialog, setShowPendingApprovalDialog] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
+  const [showPendingApprovalDialog, setShowPendingApprovalDialog] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const checkExistingApprovalRequest = async (userId: string) => {
-    const { data: approvalRequest, error } = await supabase
+  useEffect(() => {
+    checkExistingRequest();
+  }, [tour.id]);
+
+  const checkExistingRequest = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: request, error } = await supabase
       .from('approval_requests')
-      .select('status')
+      .select('*')
       .eq('tour_id', tour.id)
-      .eq('user_id', userId)
-      .eq('status', 'pending')
+      .eq('user_id', user.id)
       .maybeSingle();
 
     if (error) {
-      console.error('Error checking approval request:', error);
-      return false;
+      console.error('Error checking existing request:', error);
+      return;
     }
 
-    return approvalRequest !== null;
+    setExistingRequest(request);
   };
 
-  const checkExistingBooking = async (userId: string) => {
-    const { data: existingBooking, error } = await supabase
-      .from('bookings')
-      .select('id, status')
-      .eq('user_id', userId)
-      .eq('tour_id', tour.id)
-      .eq('status', 'pending')
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error checking existing bookings:', error);
-      return null;
-    }
-
-    return existingBooking;
-  };
-
-  const handleBookingButtonClick = async (selectedPoint: string) => {
+  const handleBookingClick = async (selectedPoint: string) => {
     if (!selectedPoint) {
       toast({
         variant: "destructive",
         title: "Point de collecte requis",
-        description: "Veuillez sélectionner un point de collecte avant de réserver",
+        description: "Veuillez sélectionner un point de collecte",
       });
       return;
     }
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        const bookingPath = `/envoyer-colis`;
-        sessionStorage.setItem('returnPath', bookingPath);
-        navigate('/connexion');
-        return;
-      }
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      const returnPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`;
+      sessionStorage.setItem('returnPath', returnPath);
+      setShowAuthDialog(true);
+      return;
+    }
 
-      const userType = session.user.user_metadata?.user_type;
-      
-      if (userType === 'carrier') {
-        setShowAccessDeniedDialog(true);
-        return;
-      }
+    const userType = session.user.user_metadata?.user_type;
+    if (userType === 'carrier') {
+      setShowAccessDeniedDialog(true);
+      return;
+    }
 
-      // Vérifier d'abord s'il existe une réservation en attente pour cette tournée
-      const existingBooking = await checkExistingBooking(session.user.id);
-      if (existingBooking) {
-        setShowExistingBookingDialog(true);
-        return;
-      }
-
-      if (tour.type === 'private') {
-        const hasPendingRequest = await checkExistingApprovalRequest(session.user.id);
-        if (hasPendingRequest) {
-          setShowPendingApprovalDialog(true);
-          return;
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            setShowPendingApprovalDialog(true);
+            return;
+          case 'approved':
+            navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+            return;
+          case 'rejected':
+            toast({
+              variant: "destructive",
+              title: "Demande rejetée",
+              description: "Votre demande d'approbation a été rejetée pour cette tournée",
+            });
+            return;
         }
-        setShowApprovalDialog(true);
-      } else {
-        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
       }
-    } catch (error) {
-      console.error("Error in handleBookingButtonClick:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la réservation",
-      });
+      setShowApprovalDialog(true);
+    } else {
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
     }
   };
 
+  const getActionButtonText = () => {
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            return "Demande en attente d'approbation";
+          case 'approved':
+            return "Réserver maintenant";
+          case 'rejected':
+            return "Demande rejetée";
+          default:
+            return "Demander l'approbation";
+        }
+      }
+      return "Demander l'approbation";
+    }
+    return "Réserver maintenant";
+  };
+
+  const isActionEnabled = () => {
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        return existingRequest.status === 'approved';
+      }
+      return true;
+    }
+    return true;
+  };
+
   return {
-    showAccessDeniedDialog,
-    setShowAccessDeniedDialog,
-    showExistingBookingDialog,
-    setShowExistingBookingDialog,
-    showPendingApprovalDialog,
-    setShowPendingApprovalDialog,
+    showAuthDialog,
+    setShowAuthDialog,
     showApprovalDialog,
     setShowApprovalDialog,
-    handleBookingButtonClick,
+    showAccessDeniedDialog,
+    setShowAccessDeniedDialog,
+    showPendingApprovalDialog,
+    setShowPendingApprovalDialog,
+    existingRequest,
+    handleBookingClick,
+    getActionButtonText,
+    isActionEnabled
   };
 }
