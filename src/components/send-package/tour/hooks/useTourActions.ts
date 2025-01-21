@@ -11,6 +11,22 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const checkExistingBooking = async (userId: string) => {
+    const { data: existingBooking, error } = await supabase
+      .from('bookings')
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('tour_id', tour.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing bookings:', error);
+      return null;
+    }
+
+    return existingBooking;
+  };
+
   const handleActionClick = async () => {
     if (!selectedPickupCity) {
       toast({
@@ -34,20 +50,37 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
       return;
     }
 
+    // Pour les tournées privées
     if (tour.type === 'private') {
+      // Vérifier s'il y a eu une réservation annulée
+      const existingBooking = await checkExistingBooking(session.user.id);
+      if (existingBooking?.status === 'cancelled') {
+        // Si la réservation a été annulée, forcer une nouvelle demande d'approbation
+        setShowApprovalDialog(true);
+        return;
+      }
+
       if (existingRequest) {
-        if (existingRequest.status === 'approved') {
-          navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
-        } else if (existingRequest.status === 'pending') {
-          toast({
-            title: "Demande en attente",
-            description: "Votre demande d'approbation est en cours de traitement",
-          });
-        } else if (existingRequest.status === 'rejected') {
-          toast({
-            title: "Demande rejetée",
-            description: "Votre demande d'approbation a été rejetée",
-          });
+        switch (existingRequest.status) {
+          case 'pending':
+            toast({
+              title: "Demande en attente",
+              description: "Votre demande d'approbation est en cours de traitement",
+            });
+            return;
+          case 'approved':
+            navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+            return;
+          case 'rejected':
+            toast({
+              variant: "destructive",
+              title: "Demande rejetée",
+              description: "Votre demande d'approbation a été rejetée pour cette tournée",
+            });
+            return;
+          default:
+            setShowApprovalDialog(true);
+            return;
         }
       } else {
         setShowApprovalDialog(true);
