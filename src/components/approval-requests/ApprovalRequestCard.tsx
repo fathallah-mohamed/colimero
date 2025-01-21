@@ -125,3 +125,6 @@ export function ApprovalRequestCard({
     </Card>
   );
 }
+
+// Make sure we have a named export
+export type { ApprovalRequestCardProps };
