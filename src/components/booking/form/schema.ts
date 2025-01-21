@@ -17,8 +17,8 @@ export const formSchema = z.object({
   content_types: z.array(z.string()).default([]),
   photos: z.array(z.union([z.string(), z.instanceof(File)])).default([]),
   package_description: z.string().optional(),
-  terms_accepted: z.boolean(),
-  customs_declaration: z.boolean()
+  terms_accepted: z.boolean().default(false),
+  customs_declaration: z.boolean().default(false)
 });
 
 export type BookingFormData = z.infer<typeof formSchema>;
