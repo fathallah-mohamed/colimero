@@ -56,6 +56,7 @@ export function TourExpandedContent({
             existingRequest={existingRequest}
             isActionEnabled={isActionEnabled}
             onActionClick={onActionClick}
+            selectedPickupCity={selectedPickupCity}
           />
         </div>
       </div>

@@ -1,20 +1,35 @@
 import { Button } from "@/components/ui/button";
 import { Tour } from "@/types/tour";
 import { ApprovalRequest } from "@/hooks/approval-requests/types";
+import { useNavigate } from "react-router-dom";
 
 interface TourButtonProps {
   tour: Tour;
   existingRequest: ApprovalRequest | null;
   isActionEnabled: boolean;
   onActionClick: () => void;
+  selectedPickupCity: string | null;
 }
 
 export function TourButton({ 
   tour,
   existingRequest,
   isActionEnabled,
-  onActionClick
+  onActionClick,
+  selectedPickupCity
 }: TourButtonProps) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (existingRequest?.status === 'approved') {
+      // Si la demande est approuvée, rediriger directement vers le formulaire de réservation
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity || '')}`);
+    } else {
+      // Sinon, utiliser le comportement normal (demande d'approbation, etc.)
+      onActionClick();
+    }
+  };
+
   const getButtonStyle = () => {
     if (!isActionEnabled) {
       if (existingRequest?.status === "rejected") {
@@ -52,7 +67,7 @@ export function TourButton({
 
   return (
     <Button 
-      onClick={onActionClick}
+      onClick={handleClick}
       className={`w-full text-white ${getButtonStyle()}`}
       disabled={!isActionEnabled || (existingRequest?.status === "pending")}
     >
