@@ -4,6 +4,22 @@ export interface Client {
   last_name: string | null;
   email: string;
   phone: string | null;
+  phone_secondary?: string | null;
+  address?: string | null;
+  email_verified?: boolean;
+  created_at?: string;
+}
+
+export interface Carrier {
+  id: string;
+  company_name: string;
+  email: string;
+  phone: string;
+  siret?: string | null;
+  address?: string | null;
+  price_per_kg?: number;
+  coverage_area?: string[];
+  services?: string[];
 }
 
 export interface Tour {
@@ -15,13 +31,8 @@ export interface Tour {
   route: any[];
   total_capacity: number;
   remaining_capacity: number;
-  type: string;
-  carrier: {
-    id: string;
-    company_name: string;
-    email: string;
-    phone: string;
-  };
+  type: "public" | "private";
+  carrier: Carrier;
 }
 
 export interface ApprovalRequest {

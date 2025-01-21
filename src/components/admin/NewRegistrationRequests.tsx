@@ -40,31 +40,6 @@ export default function NewRegistrationRequests() {
 
         console.log("Current user ID:", session.user.id);
 
-        // Récupérer les tournées du transporteur
-        const { data: tours, error: toursError } = await supabase
-          .from("tours")
-          .select("id")
-          .eq("carrier_id", session.user.id);
-
-        if (toursError) {
-          console.error("Error fetching tours:", toursError);
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible de récupérer vos tournées",
-          });
-          return [];
-        }
-
-        console.log("Carrier tours:", tours);
-
-        if (!tours || tours.length === 0) {
-          console.log("No tours found for carrier");
-          return [];
-        }
-
-        // Récupérer les demandes d'approbation pour ces tournées
-        const tourIds = tours.map(tour => tour.id);
         const { data: approvalRequests, error: approvalError } = await supabase
           .from("approval_requests")
           .select(`
@@ -83,7 +58,12 @@ export default function NewRegistrationRequests() {
                 id,
                 company_name,
                 email,
-                phone
+                phone,
+                siret,
+                address,
+                price_per_kg,
+                coverage_area,
+                services
               )
             ),
             client:clients!fk_approval_requests_clients(
@@ -91,10 +71,13 @@ export default function NewRegistrationRequests() {
               first_name,
               last_name,
               email,
-              phone
+              phone,
+              phone_secondary,
+              address,
+              email_verified,
+              created_at
             )
-          `)
-          .in("tour_id", tourIds);
+          `);
 
         if (approvalError) {
           console.error("Error fetching approval requests:", approvalError);

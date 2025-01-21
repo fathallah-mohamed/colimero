@@ -13,9 +13,6 @@ import { PersonalInfo } from "./request-details/PersonalInfo";
 import { CompanyInfo } from "./request-details/CompanyInfo";
 import { CapacityInfo } from "./request-details/CapacityInfo";
 import { RequestActions } from "./request-details/RequestActions";
-import { approveCarrierRequest } from "@/services/carrier-approval";
-import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import { ApprovalRequest } from "./approval-requests/types";
 
 interface RequestDetailsDialogProps {
@@ -36,56 +33,10 @@ export const RequestDetailsDialog = ({
   const [rejectionReason, setRejectionReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const handleApprove = async () => {
-    if (onApprove) {
-      onApprove(request);
-      return;
-    }
-
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    try {
-      await approveCarrierRequest(request.id);
-
-      // Supprimer la demande d'inscription après approbation
-      const { error: deleteError } = await supabase
-        .from('carrier_registration_requests')
-        .delete()
-        .eq('id', request.id);
-
-      if (deleteError) throw deleteError;
-
-      toast({
-        title: "Demande approuvée",
-        description: "Le transporteur a été approuvé avec succès et peut maintenant se connecter.",
-        duration: 5000,
-      });
-
-      // Invalider les requêtes pour forcer un rafraîchissement des données
-      await queryClient.invalidateQueries({ queryKey: ["carrier-requests"] });
-      
-      onClose();
-      
-      // Rediriger vers l'onglet des transporteurs validés
-      navigate('/admin/dashboard?tab=approved');
-      
-    } catch (error: any) {
-      console.error("Error approving request:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'approbation de la demande.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleReject = async () => {
+    if (!request) return;
+    
     if (!rejectionReason.trim()) {
       toast({
         variant: "destructive",
@@ -98,16 +49,17 @@ export const RequestDetailsDialog = ({
     setIsSubmitting(true);
     try {
       const { error: updateError } = await supabase
-        .from("carrier_registration_requests")
+        .from("approval_requests")
         .update({
           status: "rejected",
           reason: rejectionReason,
+          updated_at: new Date().toISOString()
         })
         .eq("id", request.id);
 
       if (updateError) throw updateError;
 
-      const { data, error } = await supabase.functions.invoke("send-rejection-email", {
+      const { error } = await supabase.functions.invoke("send-rejection-email", {
         body: JSON.stringify({
           email: request.client.email,
           company_name: request.tour.carrier.company_name,
@@ -119,17 +71,14 @@ export const RequestDetailsDialog = ({
 
       toast({
         title: "Demande rejetée",
-        description: "Un email a été envoyé au transporteur.",
+        description: "Un email a été envoyé au client.",
       });
       
-      // Invalider les requêtes pour forcer un rafraîchissement des données
-      await queryClient.invalidateQueries({ queryKey: ["carrier-requests"] });
+      if (onReject) {
+        onReject(request);
+      }
       
       onClose();
-      
-      // Rediriger vers l'onglet des demandes rejetées
-      navigate('/admin/dashboard?tab=rejected');
-      
     } catch (error: any) {
       console.error("Error rejecting request:", error);
       toast({
@@ -194,7 +143,7 @@ export const RequestDetailsDialog = ({
         <DialogFooter>
           {(request.status === "pending" || showApproveButton) && (
             <RequestActions
-              onApprove={handleApprove}
+              onApprove={() => onApprove?.(request)}
               onReject={handleReject}
               isSubmitting={isSubmitting}
               showRejectButton={request.status === "pending"}
