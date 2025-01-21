@@ -1,19 +1,30 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ApprovalRequest } from "./types";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
-interface RequestCardProps {
+interface ApprovalRequestCardProps {
   request: ApprovalRequest;
-  onClick: () => void;
-  onApprove: () => void;
-  onReject: () => void;
+  userType?: string;
+  showActions?: boolean;
+  onApprove?: (request: ApprovalRequest) => void;
+  onReject?: (request: ApprovalRequest) => void;
+  onCancel?: (requestId: string) => void;
+  onDelete?: (requestId: string) => void;
 }
 
-export function RequestCard({ request, onClick, onApprove, onReject }: RequestCardProps) {
+export function ApprovalRequestCard({ 
+  request, 
+  userType,
+  showActions = false,
+  onApprove,
+  onReject,
+  onCancel,
+  onDelete 
+}: ApprovalRequestCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -30,7 +41,6 @@ export function RequestCard({ request, onClick, onApprove, onReject }: RequestCa
   return (
     <Card 
       className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-      onClick={onClick}
     >
       <div className="flex justify-between items-start">
         <div>
@@ -49,14 +59,14 @@ export function RequestCard({ request, onClick, onApprove, onReject }: RequestCa
              request.status === "rejected" ? "Rejetée" : request.status}
           </Badge>
           
-          {request.status === "pending" && (
+          {showActions && request.status === "pending" && (
             <div className="flex gap-2 mt-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onReject();
+                  if (onReject) onReject(request);
                 }}
                 className="text-red-600 hover:text-red-700 flex items-center gap-1"
               >
@@ -67,7 +77,7 @@ export function RequestCard({ request, onClick, onApprove, onReject }: RequestCa
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onApprove();
+                  if (onApprove) onApprove(request);
                 }}
                 className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
               >
@@ -75,6 +85,34 @@ export function RequestCard({ request, onClick, onApprove, onReject }: RequestCa
                 Approuver
               </Button>
             </div>
+          )}
+          
+          {showActions && request.status === "cancelled" && onDelete && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(request.id);
+              }}
+              className="text-red-600 hover:text-red-700"
+            >
+              Supprimer
+            </Button>
+          )}
+          
+          {showActions && request.status === "pending" && onCancel && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCancel(request.id);
+              }}
+              className="text-gray-600 hover:text-gray-700"
+            >
+              Annuler
+            </Button>
           )}
         </div>
       </div>
