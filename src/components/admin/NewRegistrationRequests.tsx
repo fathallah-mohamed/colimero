@@ -79,14 +79,14 @@ export default function NewRegistrationRequests() {
               total_capacity,
               remaining_capacity,
               type,
-              carriers(
+              carrier:carriers(
                 id,
                 company_name,
                 email,
                 phone
               )
             ),
-            client:clients(
+            client:clients!fk_approval_requests_clients(
               id,
               first_name,
               last_name,

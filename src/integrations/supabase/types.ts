@@ -94,14 +94,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_approval_requests_client"
+            foreignKeyName: "fk_approval_requests_clients"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "client_consents"
             referencedColumns: ["client_id"]
           },
           {
-            foreignKeyName: "fk_approval_requests_client"
+            foreignKeyName: "fk_approval_requests_clients"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "clients"
