@@ -6,25 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
-interface ApprovalRequestCardProps {
+interface RequestCardProps {
   request: ApprovalRequest;
-  userType?: string;
-  showActions?: boolean;
-  onApprove?: (request: ApprovalRequest) => void;
-  onReject?: (request: ApprovalRequest) => void;
-  onCancel?: (requestId: string) => void;
-  onDelete?: (requestId: string) => void;
+  onClick: () => void;
+  onApprove: () => void;
+  onReject: () => void;
 }
 
-export const ApprovalRequestCard = ({ 
-  request, 
-  userType,
-  showActions = false,
-  onApprove,
-  onReject,
-  onCancel,
-  onDelete 
-}: ApprovalRequestCardProps) => {
+export function RequestCard({ request, onClick, onApprove, onReject }: RequestCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -38,16 +27,22 @@ export const ApprovalRequestCard = ({
     }
   };
 
+  // Early return if client data is missing
+  if (!request.client) {
+    console.error("Missing client data for request:", request.id);
+    return null;
+  }
+
   return (
     <Card 
       className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
     >
       <div className="flex justify-between items-start">
-        <div>
+        <div onClick={onClick}>
           <h3 className="font-medium">
-            {request.client.first_name} {request.client.last_name}
+            {request.client.first_name || 'N/A'} {request.client.last_name || 'N/A'}
           </h3>
-          <p className="text-sm text-gray-600">{request.client.email}</p>
+          <p className="text-sm text-gray-600">{request.client.email || 'Email non disponible'}</p>
           <p className="text-sm text-gray-500 mt-2">
             {format(new Date(request.created_at), "d MMMM yyyy", { locale: fr })}
           </p>
@@ -59,14 +54,14 @@ export const ApprovalRequestCard = ({
              request.status === "rejected" ? "Rejetée" : request.status}
           </Badge>
           
-          {showActions && request.status === "pending" && (
+          {request.status === "pending" && (
             <div className="flex gap-2 mt-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (onReject) onReject(request);
+                  onReject();
                 }}
                 className="text-red-600 hover:text-red-700 flex items-center gap-1"
               >
@@ -77,7 +72,7 @@ export const ApprovalRequestCard = ({
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (onApprove) onApprove(request);
+                  onApprove();
                 }}
                 className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
               >
@@ -86,36 +81,8 @@ export const ApprovalRequestCard = ({
               </Button>
             </div>
           )}
-          
-          {showActions && request.status === "cancelled" && onDelete && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(request.id);
-              }}
-              className="text-red-600 hover:text-red-700"
-            >
-              Supprimer
-            </Button>
-          )}
-          
-          {showActions && request.status === "pending" && onCancel && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCancel(request.id);
-              }}
-              className="text-gray-600 hover:text-gray-700"
-            >
-              Annuler
-            </Button>
-          )}
         </div>
       </div>
     </Card>
   );
-};
+}
