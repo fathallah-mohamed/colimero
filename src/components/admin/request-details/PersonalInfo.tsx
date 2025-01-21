@@ -1,40 +1,24 @@
+import { Client } from "../approval-requests/types";
+
 interface PersonalInfoProps {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  phoneSecondary?: string;
-  address?: string;
-  emailVerified?: boolean;
-  createdAt?: string;
+  client: Client;
 }
 
-export function PersonalInfo({ 
-  firstName, 
-  lastName, 
-  email, 
-  phone, 
-  phoneSecondary,
-  address,
-  emailVerified,
-  createdAt
-}: PersonalInfoProps) {
+export function PersonalInfo({ client }: PersonalInfoProps) {
   return (
-    <div>
-      <h3 className="font-semibold mb-2">Informations personnelles</h3>
+    <div className="space-y-4">
+      <h3 className="font-medium">Informations personnelles</h3>
       <div className="space-y-2">
-        <p>Prénom : {firstName}</p>
-        <p>Nom : {lastName}</p>
-        <p>Email : {email}</p>
-        <p>Téléphone : {phone || "Non renseigné"}</p>
-        {phoneSecondary && (
-          <p>Téléphone secondaire : {phoneSecondary}</p>
-        )}
-        <p>Adresse : {address || "Non renseignée"}</p>
-        <p>Email vérifié : {emailVerified ? "Oui" : "Non"}</p>
-        {createdAt && (
-          <p>Client depuis : {new Date(createdAt).toLocaleDateString('fr-FR')}</p>
-        )}
+        <p>
+          <span className="text-gray-500">Nom complet :</span>{" "}
+          {client.first_name} {client.last_name}
+        </p>
+        <p>
+          <span className="text-gray-500">Email :</span> {client.email}
+        </p>
+        <p>
+          <span className="text-gray-500">Téléphone :</span> {client.phone}
+        </p>
       </div>
     </div>
   );

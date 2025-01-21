@@ -57,6 +57,11 @@ export default function RejectedRequests() {
     }
   };
 
+  const handleReject = async (request: any) => {
+    // This is just a placeholder since we don't need reject functionality in rejected requests
+    return Promise.resolve();
+  };
+
   const filteredRequests = requests?.filter(
     (request) =>
       request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,6 +120,7 @@ export default function RejectedRequests() {
           request={selectedRequest}
           onClose={() => setSelectedRequest(null)}
           onApprove={handleApprove}
+          onReject={handleReject}
           showApproveButton={true}
         />
       </div>

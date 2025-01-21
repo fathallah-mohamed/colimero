@@ -1,16 +1,25 @@
+import { Tour } from "../approval-requests/types";
+
 interface CompanyInfoProps {
-  companyName: string;
-  siret: string;
-  address: string;
+  tour: Tour;
 }
 
-export function CompanyInfo({ companyName, siret, address }: CompanyInfoProps) {
+export function CompanyInfo({ tour }: CompanyInfoProps) {
   return (
-    <div>
-      <h3 className="font-semibold mb-2">Informations entreprise</h3>
-      <p>Nom : {companyName}</p>
-      <p>SIRET : {siret}</p>
-      <p>Adresse : {address}</p>
+    <div className="space-y-4">
+      <h3 className="font-medium">Informations de l'entreprise</h3>
+      <div className="space-y-2">
+        <p>
+          <span className="text-gray-500">Nom de l'entreprise :</span>{" "}
+          {tour.carriers?.company_name}
+        </p>
+        <p>
+          <span className="text-gray-500">Email :</span> {tour.carriers?.email}
+        </p>
+        <p>
+          <span className="text-gray-500">Téléphone :</span> {tour.carriers?.phone}
+        </p>
+      </div>
     </div>
   );
 }

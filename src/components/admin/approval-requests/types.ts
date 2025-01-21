@@ -1,13 +1,11 @@
+import { Json } from "@/integrations/supabase/types";
+
 export interface Client {
   id: string;
   first_name: string | null;
   last_name: string | null;
   email: string;
   phone: string | null;
-  phone_secondary?: string | null;
-  address?: string | null;
-  email_verified?: boolean;
-  created_at?: string;
 }
 
 export interface Carrier {
@@ -15,11 +13,6 @@ export interface Carrier {
   company_name: string;
   email: string;
   phone: string;
-  siret?: string | null;
-  address?: string | null;
-  price_per_kg?: number;
-  coverage_area?: string[];
-  services?: string[];
 }
 
 export interface Tour {
@@ -32,7 +25,7 @@ export interface Tour {
   total_capacity: number;
   remaining_capacity: number;
   type: "public" | "private";
-  carrier: Carrier;
+  carriers: Carrier;
 }
 
 export interface ApprovalRequest {

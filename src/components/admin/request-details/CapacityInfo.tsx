@@ -1,18 +1,23 @@
+import { Tour } from "../approval-requests/types";
+
 interface CapacityInfoProps {
-  totalCapacity: number;
-  pricePerKg: number;
-  coverageArea: string[];
-  services?: string[];
+  tour: Tour;
 }
 
-export function CapacityInfo({ totalCapacity, pricePerKg, coverageArea, services }: CapacityInfoProps) {
+export function CapacityInfo({ tour }: CapacityInfoProps) {
   return (
-    <div className="col-span-2">
-      <h3 className="font-semibold mb-2">Capacités</h3>
-      <p>Capacité totale : {totalCapacity} kg</p>
-      <p>Prix par kg : {pricePerKg} €</p>
-      <p>Zone de couverture : {coverageArea?.join(", ")}</p>
-      <p>Services : {services?.join(", ")}</p>
+    <div className="space-y-4">
+      <h3 className="font-medium">Capacités</h3>
+      <div className="space-y-2">
+        <p>
+          <span className="text-gray-500">Capacité totale :</span>{" "}
+          {tour.total_capacity} kg
+        </p>
+        <p>
+          <span className="text-gray-500">Capacité restante :</span>{" "}
+          {tour.remaining_capacity} kg
+        </p>
+      </div>
     </div>
   );
 }

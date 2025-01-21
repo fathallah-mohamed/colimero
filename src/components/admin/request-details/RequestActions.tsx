@@ -1,40 +1,49 @@
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface RequestActionsProps {
   onApprove: () => Promise<void>;
   onReject: () => Promise<void>;
   isSubmitting: boolean;
-  showRejectButton?: boolean;
+  showRejectButton: boolean;
+  rejectReason: string;
+  onRejectReasonChange: (value: string) => void;
 }
 
-export function RequestActions({ 
-  onApprove, 
-  onReject, 
+export function RequestActions({
+  onApprove,
+  onReject,
   isSubmitting,
-  showRejectButton = true
+  showRejectButton,
+  rejectReason,
+  onRejectReasonChange,
 }: RequestActionsProps) {
   return (
-    <>
+    <div className="space-y-4">
       {showRejectButton && (
-        <Button
-          variant="destructive"
-          onClick={onReject}
-          disabled={isSubmitting}
-          className="flex items-center gap-2"
-        >
-          <X className="h-4 w-4" />
-          Rejeter
-        </Button>
+        <div className="space-y-2">
+          <Textarea
+            placeholder="Raison du rejet..."
+            value={rejectReason}
+            onChange={(e) => onRejectReasonChange(e.target.value)}
+          />
+          <Button
+            variant="destructive"
+            onClick={onReject}
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            Rejeter
+          </Button>
+        </div>
       )}
       <Button
         onClick={onApprove}
         disabled={isSubmitting}
-        className="flex items-center gap-2"
+        className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
       >
-        <Check className="h-4 w-4" />
         Approuver
       </Button>
-    </>
+    </div>
   );
 }

@@ -58,14 +58,14 @@ export function RequestDetailsDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          <RequestHeader request={request} />
+          <RequestHeader tour={request.tour} />
           
           <div className="grid gap-6 md:grid-cols-2">
-            <PersonalInfo request={request} />
-            <CompanyInfo request={request} />
+            <PersonalInfo client={request.client} />
+            <CompanyInfo tour={request.tour} />
           </div>
 
-          <CapacityInfo request={request} />
+          <CapacityInfo tour={request.tour} />
         </div>
 
         <DialogFooter>
