@@ -1,16 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { UserCircle2 } from "lucide-react";
-import { MobileMenuButton } from "../ui/mobile-menu-button";
-import { AuthSection } from "./AuthSection";
+import { motion } from "framer-motion";
 import MenuItems from "./MenuItems";
-import { User } from "@supabase/supabase-js";
+import { AuthSection } from "./AuthSection";
+import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
 
 interface NavigationHeaderProps {
   isScrolled: boolean;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  user: User | null;
+  user: any;
   userType: string | null;
   handleLogout: () => void;
   mobileButtonRef: React.RefObject<HTMLButtonElement>;
@@ -32,51 +30,39 @@ export function NavigationHeader({
   };
 
   return (
-    <div className="relative flex items-center justify-between">
-      <div className="flex items-center gap-8">
-        <Link to="/" className="flex-shrink-0">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className={`transition-all duration-300 ${
-              isScrolled ? "h-8 w-auto" : "h-10 w-auto"
-            }`}
-          />
+    <div className="flex justify-between items-center">
+      <motion.div 
+        className="flex items-center"
+        initial={false}
+        animate={{ scale: isScrolled ? 0.95 : 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Link 
+          to="/" 
+          className="text-2xl lg:text-3xl font-bold text-primary hover:opacity-90 transition-opacity"
+        >
+          Colimero
         </Link>
+      </motion.div>
 
-        <div className="hidden lg:flex items-center gap-2">
-          <MenuItems />
-        </div>
+      <div className="hidden lg:flex lg:items-center lg:space-x-6 xl:space-x-8">
+        <MenuItems />
       </div>
 
-      <div className="flex items-center gap-4">
-        {!user ? (
-          <div className="hidden lg:block">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleLoginClick}
-              className="border-2 border-[#00B0F0] text-[#00B0F0] hover:bg-[#00B0F0] hover:text-white transition-colors duration-200"
-            >
-              <UserCircle2 className="w-4 h-4 mr-2" />
-              Se connecter
-            </Button>
-          </div>
-        ) : (
-          <AuthSection 
-            user={user}
-            userType={userType}
-            handleLogout={handleLogout}
-          />
-        )}
-
-        <div className="lg:hidden">
-          <MobileMenuButton
-            ref={mobileButtonRef}
-            isOpen={isOpen}
-            onClick={() => setIsOpen(!isOpen)}
-          />
-        </div>
+      <div className="flex items-center space-x-6 lg:space-x-8">
+        <AuthSection
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setShowAuthDialog={handleLoginClick}
+        />
+        
+        <MobileMenuButton 
+          ref={mobileButtonRef}
+          isOpen={isOpen}
+          onClick={() => setIsOpen(!isOpen)}
+          className="block lg:hidden"
+        />
       </div>
     </div>
   );

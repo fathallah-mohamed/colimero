@@ -13,7 +13,7 @@ interface NavigationProps {
   setShowAuthDialog?: (show: boolean) => void;
 }
 
-export default function Navigation() {
+export default function Navigation({ showAuthDialog: externalShowAuthDialog, setShowAuthDialog: externalSetShowAuthDialog }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -73,8 +73,8 @@ export default function Navigation() {
         }
         
         // Si nous sommes sur une route protégée et non authentifié
-        const protectedRoutes = ['/mes-reservations', '/profile', '/reserver', '/envoyer-colis'];
-        if (protectedRoutes.includes(location.pathname) || location.pathname.startsWith('/reserver/')) {
+        const protectedRoutes = ['/mes-reservations', '/profile'];
+        if (protectedRoutes.includes(location.pathname)) {
           if (!session) {
             console.log("No session found, redirecting to login");
             sessionStorage.setItem('returnPath', location.pathname);
