@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Tour } from "@/types/tour";
 import { TourMainInfo } from "./components/TourMainInfo";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 
 interface ClientTourCardProps {
   tour: Tour;
@@ -14,6 +14,7 @@ interface ClientTourCardProps {
 export function ClientTourCard({ tour }: ClientTourCardProps) {
   const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -46,12 +47,16 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
       return;
     }
 
-    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+    if (tour.type === 'private') {
+      setShowApprovalDialog(true);
+    } else {
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+    }
   };
 
   const getActionButtonText = () => {
     if (!selectedPickupCity) return "Sélectionnez un point de collecte";
-    return "Réserver maintenant";
+    return tour.type === 'private' ? "Demander l'approbation" : "Réserver maintenant";
   };
 
   const isActionEnabled = () => {
@@ -76,6 +81,21 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             isActionEnabled={isActionEnabled()}
             actionButtonText={getActionButtonText()}
             hasPendingRequest={false}
+          />
+        )}
+
+        {showApprovalDialog && (
+          <ApprovalRequestDialog
+            isOpen={showApprovalDialog}
+            onClose={() => setShowApprovalDialog(false)}
+            tourId={tour.id}
+            pickupCity={selectedPickupCity}
+            onSuccess={() => {
+              toast({
+                title: "Demande envoyée",
+                description: "Votre demande d'approbation a été envoyée avec succès",
+              });
+            }}
           />
         )}
       </div>
