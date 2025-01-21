@@ -1,11 +1,32 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { Tour, RouteStop, TourStatus } from "@/types/tour";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Reserver() {
   const { tourId } = useParams();
+  const [searchParams] = useSearchParams();
+  const pickupCity = searchParams.get('pickupCity');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        const currentPath = `/reserver/${tourId}${pickupCity ? `?pickupCity=${pickupCity}` : ''}`;
+        sessionStorage.setItem('returnPath', currentPath);
+        navigate('/connexion');
+      }
+    };
+
+    checkAuth();
+  }, [tourId, pickupCity, navigate]);
 
   const { data: tour, isLoading } = useQuery({
     queryKey: ["tour", tourId],
@@ -31,7 +52,6 @@ export default function Reserver() {
 
       if (error) throw error;
 
-      // Transform the JSON route data into RouteStop array
       const transformedTour: Tour = {
         ...data,
         id: parseInt(data.id.toString(), 10),
@@ -62,9 +82,13 @@ export default function Reserver() {
     <div className="container mx-auto py-8">
       <BookingForm 
         tourId={tour.id}
-        pickupCity={tour.route[0].name}
+        pickupCity={pickupCity || tour.route[0].name}
         onSuccess={() => {
-          // Handle success
+          toast({
+            title: "Réservation créée",
+            description: "Votre réservation a été créée avec succès",
+          });
+          navigate('/mes-reservations');
         }}
       />
     </div>
