@@ -136,12 +136,14 @@ export type Database = {
       bookings: {
         Row: {
           approval_request_id: string | null
+          booking_number: string | null
           content_types: string[] | null
           created_at: string
           customs_declaration: boolean | null
           delivery_city: string
           delivery_notes: string | null
           delivery_status: string | null
+          estimated_delivery_date: string | null
           id: string
           item_type: string
           package_description: string | null
@@ -151,8 +153,8 @@ export type Database = {
           recipient_id: string | null
           recipient_name: string
           recipient_phone: string
-          sender_name: string | null
-          sender_phone: string | null
+          sender_name: string
+          sender_phone: string
           special_items: Json | null
           status: string
           terms_accepted: boolean | null
@@ -164,12 +166,14 @@ export type Database = {
         }
         Insert: {
           approval_request_id?: string | null
+          booking_number?: string | null
           content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
           delivery_city: string
           delivery_notes?: string | null
           delivery_status?: string | null
+          estimated_delivery_date?: string | null
           id?: string
           item_type: string
           package_description?: string | null
@@ -179,8 +183,8 @@ export type Database = {
           recipient_id?: string | null
           recipient_name: string
           recipient_phone: string
-          sender_name?: string | null
-          sender_phone?: string | null
+          sender_name: string
+          sender_phone: string
           special_items?: Json | null
           status?: string
           terms_accepted?: boolean | null
@@ -192,12 +196,14 @@ export type Database = {
         }
         Update: {
           approval_request_id?: string | null
+          booking_number?: string | null
           content_types?: string[] | null
           created_at?: string
           customs_declaration?: boolean | null
           delivery_city?: string
           delivery_notes?: string | null
           delivery_status?: string | null
+          estimated_delivery_date?: string | null
           id?: string
           item_type?: string
           package_description?: string | null
@@ -207,8 +213,8 @@ export type Database = {
           recipient_id?: string | null
           recipient_name?: string
           recipient_phone?: string
-          sender_name?: string | null
-          sender_phone?: string | null
+          sender_name?: string
+          sender_phone?: string
           special_items?: Json | null
           status?: string
           terms_accepted?: boolean | null
