@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { menuItems } from "./config/menuItems";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {

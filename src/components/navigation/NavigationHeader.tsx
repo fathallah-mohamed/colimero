@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import MenuItems from "./MenuItems";
+import { MenuItems } from "./MenuItems";
 import { AuthSection } from "./AuthSection";
 import { MobileMenuButton } from "@/components/ui/mobile-menu-button";
 
