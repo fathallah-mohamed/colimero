@@ -4,6 +4,9 @@ export const availableContentTypes = [
   "Électronique", 
   "Nourriture",
   "Médicaments",
+  "Cosmétiques",
+  "Accessoires",
+  "Livres",
   "Autres"
 ] as const;
 

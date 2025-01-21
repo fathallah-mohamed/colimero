@@ -78,10 +78,10 @@ export function PackageSection({
         name="package_description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Description du colis</FormLabel>
+            <FormLabel>Description détaillée du colis</FormLabel>
             <FormControl>
               <Textarea 
-                placeholder="Décrivez votre colis..." 
+                placeholder="Décrivez le contenu de votre colis en détail..." 
                 className="min-h-[100px]"
                 {...field}
               />
