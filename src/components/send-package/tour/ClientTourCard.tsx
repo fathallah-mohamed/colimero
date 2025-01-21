@@ -83,7 +83,7 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
             navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
             return;
           case 'rejected':
-            return; // Le bouton sera désactivé
+            return;
           default:
             setShowApprovalDialog(true);
         }

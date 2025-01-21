@@ -65,15 +65,17 @@ export function TourExpandedContent({
           />
         </div>
 
-        <div>
-          <Button 
-            onClick={onActionClick}
-            className={`w-full text-white ${getButtonStyle()}`}
-            disabled={!isActionEnabled || hasPendingRequest}
-          >
-            {actionButtonText}
-          </Button>
-        </div>
+        {tour.status === "Programmée" && (
+          <div>
+            <Button 
+              onClick={onActionClick}
+              className={`w-full text-white ${getButtonStyle()}`}
+              disabled={!isActionEnabled || hasPendingRequest}
+            >
+              {actionButtonText}
+            </Button>
+          </div>
+        )}
       </div>
     </motion.div>
   );
