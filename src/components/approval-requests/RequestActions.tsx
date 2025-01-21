@@ -17,6 +17,7 @@ export function RequestActions({
   onCancel,
   onDelete
 }: RequestActionsProps) {
+  // Pour les demandes annulées, montrer uniquement le bouton de suppression
   if (status === 'cancelled' && onDelete) {
     return (
       <Button
@@ -29,8 +30,10 @@ export function RequestActions({
     );
   }
 
+  // Ne pas afficher d'actions pour les demandes qui ne sont pas en attente
   if (status !== 'pending') return null;
 
+  // Afficher les actions appropriées selon le type d'utilisateur
   return (
     <div className="flex gap-2">
       {userType === 'carrier' ? (

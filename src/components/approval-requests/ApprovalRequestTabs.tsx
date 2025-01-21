@@ -43,7 +43,7 @@ export function ApprovalRequestTabs({
             showActions={showActions && (
               (userType === 'carrier' && request.status === 'pending') ||
               (userType === 'client' && request.status === 'pending') ||
-              (userType === 'client' && request.status === 'rejected')
+              (userType === 'client' && request.status === 'cancelled')
             )}
             onApprove={handleApproveRequest}
             onReject={handleRejectRequest}
