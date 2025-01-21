@@ -45,7 +45,7 @@ export function useBookingForm(tourId: number, pickupCity: string) {
 
         const { data: clientData, error } = await supabase
           .from('clients')
-          .select('first_name, last_name, phone')
+          .select('first_name, last_name, phone, email')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -60,7 +60,7 @@ export function useBookingForm(tourId: number, pickupCity: string) {
         }
 
         if (clientData) {
-          console.log("Client data loaded:", clientData);
+          console.log("Client profile data:", clientData);
           form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
           form.setValue('sender_phone', clientData.phone || "");
         }
@@ -72,7 +72,7 @@ export function useBookingForm(tourId: number, pickupCity: string) {
     };
 
     loadUserData();
-  }, [form]);
+  }, [form, pickupCity]);
 
   return {
     form,

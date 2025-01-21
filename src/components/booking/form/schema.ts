@@ -30,7 +30,6 @@ export const termsSchema = z.object({
   customs_declaration: z.boolean(),
 });
 
-// Complete form schema combining all steps
 export const formSchema = senderSchema
   .merge(recipientSchema)
   .merge(packageSchema)

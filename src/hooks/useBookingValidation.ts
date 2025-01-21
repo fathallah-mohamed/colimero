@@ -4,8 +4,6 @@ import { toast } from "@/components/ui/use-toast";
 
 export function useBookingValidation(form: UseFormReturn<BookingFormData>) {
   const validateStep = async (currentStep: number) => {
-    console.log(`Validating step ${currentStep} with form values:`, form.getValues());
-    
     const fields = {
       1: ["sender_name", "sender_phone"],
       2: ["recipient_name", "recipient_phone", "recipient_address", "delivery_city"],
@@ -16,6 +14,7 @@ export function useBookingValidation(form: UseFormReturn<BookingFormData>) {
     if (currentStep < 5) {
       const currentFields = fields[currentStep as keyof typeof fields];
       console.log(`Validating fields for step ${currentStep}:`, currentFields);
+      console.log('Current form values:', form.getValues());
       
       const isValid = await form.trigger(currentFields as Array<keyof BookingFormData>);
       
@@ -24,7 +23,7 @@ export function useBookingValidation(form: UseFormReturn<BookingFormData>) {
         toast({
           variant: "destructive",
           title: "Erreur de validation",
-          description: "Veuillez remplir tous les champs obligatoires.",
+          description: "Veuillez remplir tous les champs obligatoires correctement.",
         });
       }
       
