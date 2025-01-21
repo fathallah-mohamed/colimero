@@ -66,7 +66,7 @@ export default function NewRegistrationRequests() {
                 services
               )
             ),
-            client:clients!fk_approval_requests_clients(
+            client:clients(
               id,
               first_name,
               last_name,
@@ -90,7 +90,7 @@ export default function NewRegistrationRequests() {
         }
 
         console.log("Fetched approval requests:", approvalRequests);
-        return approvalRequests as ApprovalRequest[];
+        return approvalRequests as unknown as ApprovalRequest[];
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
