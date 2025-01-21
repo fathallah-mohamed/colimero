@@ -14,6 +14,8 @@ const formSchema = z.object({
   address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 interface ClientProfileFormProps {
   initialData: any;
   onClose: () => void;
@@ -22,7 +24,7 @@ interface ClientProfileFormProps {
 export function ClientProfileForm({ initialData, onClose }: ClientProfileFormProps) {
   const { toast } = useToast();
 
-  const form = useForm({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       first_name: initialData.first_name || "",
@@ -32,7 +34,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -45,7 +47,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
         return;
       }
 
-      // Update auth metadata
+      // Mettre à jour les métadonnées de l'utilisateur
       const { error: metadataError } = await supabase.auth.updateUser({
         data: {
           first_name: values.first_name,
@@ -55,7 +57,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
 
       if (metadataError) throw metadataError;
 
-      // Update client profile
+      // Mettre à jour le profil client
       const { error: profileError } = await supabase
         .from('clients')
         .update({
@@ -74,11 +76,13 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       });
       
       onClose();
+      window.location.reload();
     } catch (error: any) {
+      console.error('Error updating profile:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: error.message || "Une erreur est survenue lors de la mise à jour du profil",
       });
     }
   }
