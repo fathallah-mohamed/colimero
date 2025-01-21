@@ -4,20 +4,21 @@ import { Calendar, Clock } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 
 interface TourMainInfoProps {
   tour: Tour;
-  isExpanded?: boolean;
-  onExpandClick?: () => void;
+  isExpanded: boolean;
+  onExpandClick: () => void;
 }
 
-export function TourMainInfo({ tour }: TourMainInfoProps) {
+export function TourMainInfo({ tour, isExpanded, onExpandClick }: TourMainInfoProps) {
   const pricePerKg = tour.carriers?.carrier_capacities?.price_per_kg || 0;
   const firstCollectionDate = new Date(tour.collection_date);
   const departureDate = new Date(tour.departure_date);
   const tourDuration = differenceInDays(departureDate, firstCollectionDate);
   
-  // Calculer le pourcentage de capacité utilisée
   const usedCapacity = tour.total_capacity - tour.remaining_capacity;
   const capacityPercentage = (usedCapacity / tour.total_capacity) * 100;
 
@@ -71,6 +72,16 @@ export function TourMainInfo({ tour }: TourMainInfoProps) {
             {Math.round(capacityPercentage)}% utilisé
           </div>
         </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full text-[#0FA0CE] hover:text-[#0FA0CE] hover:bg-[#0FA0CE]/10"
+          onClick={onExpandClick}
+        >
+          <Eye className="w-4 h-4 mr-2" />
+          {isExpanded ? "Masquer les détails" : "Afficher les détails"}
+        </Button>
       </div>
     </div>
   );

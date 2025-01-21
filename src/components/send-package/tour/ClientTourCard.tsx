@@ -6,16 +6,14 @@ import { TourMainInfo } from "./components/TourMainInfo";
 import { TourExpandedContent } from "./components/TourExpandedContent";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 
 interface ClientTourCardProps {
   tour: Tour;
 }
 
 export function ClientTourCard({ tour }: ClientTourCardProps) {
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedPickupCity, setSelectedPickupCity] = useState<string | null>(null);
-  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -40,7 +38,11 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
     const userType = session.user.user_metadata?.user_type;
     if (userType === 'carrier') {
-      setShowAccessDeniedDialog(true);
+      toast({
+        variant: "destructive",
+        title: "Accès refusé",
+        description: "Les transporteurs ne peuvent pas effectuer de réservations",
+      });
       return;
     }
 
@@ -58,29 +60,25 @@ export function ClientTourCard({ tour }: ClientTourCardProps) {
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
-      <TourMainInfo
-        tour={tour}
-        isExpanded={isExpanded}
-        onExpandClick={() => setIsExpanded(!isExpanded)}
-      />
-
-      {isExpanded && (
-        <TourExpandedContent
-          tour={tour}
-          selectedPickupCity={selectedPickupCity || ''}
-          onPickupCitySelect={setSelectedPickupCity}
-          onActionClick={handleActionClick}
-          isActionEnabled={isActionEnabled()}
-          actionButtonText={getActionButtonText()}
-          hasPendingRequest={false}
+      <div className="p-6">
+        <TourMainInfo 
+          tour={tour} 
+          isExpanded={isExpanded}
+          onExpandClick={() => setIsExpanded(!isExpanded)}
         />
-      )}
 
-      <AccessDeniedMessage
-        userType="carrier"
-        isOpen={showAccessDeniedDialog}
-        onClose={() => setShowAccessDeniedDialog(false)}
-      />
+        {isExpanded && (
+          <TourExpandedContent
+            tour={tour}
+            selectedPickupCity={selectedPickupCity}
+            onPickupCitySelect={setSelectedPickupCity}
+            onActionClick={handleActionClick}
+            isActionEnabled={isActionEnabled()}
+            actionButtonText={getActionButtonText()}
+            hasPendingRequest={false}
+          />
+        )}
+      </div>
     </Card>
   );
 }
