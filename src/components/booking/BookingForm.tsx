@@ -13,6 +13,8 @@ import { useBookingValidation } from "@/hooks/useBookingValidation";
 import { useBookingFormState } from "@/hooks/useBookingFormState";
 import { BookingFormSteps } from "./form/BookingFormSteps";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 export interface BookingFormProps {
   tourId: number;
@@ -59,6 +61,36 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       photos: []
     }
   });
+
+  // Fetch and set user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('first_name, last_name, phone')
+          .eq('id', session.user.id)
+          .single();
+
+        if (clientData) {
+          form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
+          form.setValue('sender_phone', clientData.phone || '');
+        }
+      } else {
+        // If no session, redirect to login
+        navigate('/login', { 
+          state: { 
+            returnTo: window.location.pathname,
+            tourId,
+            pickupCity 
+          }
+        });
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const { validateStep } = useBookingValidation(form);
 
