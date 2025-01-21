@@ -12,6 +12,7 @@ interface TourExpandedContentProps {
   isActionEnabled: boolean;
   actionButtonText: string;
   userType?: string;
+  hasPendingRequest?: boolean;
   onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
 }
 
@@ -23,6 +24,7 @@ export function TourExpandedContent({
   isActionEnabled,
   actionButtonText,
   userType,
+  hasPendingRequest,
   onStatusChange
 }: TourExpandedContentProps) {
   const getButtonStyle = () => {
@@ -68,7 +70,7 @@ export function TourExpandedContent({
             <Button 
               onClick={onActionClick}
               className={`w-full text-white ${getButtonStyle()}`}
-              disabled={!isActionEnabled}
+              disabled={!isActionEnabled || hasPendingRequest}
             >
               {actionButtonText}
             </Button>
