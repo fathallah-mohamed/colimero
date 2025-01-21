@@ -1,7 +1,7 @@
-import { Tour } from "../approval-requests/types";
+import { ApprovalRequest } from "../approval-requests/types";
 
 interface CapacityInfoProps {
-  tour: Tour;
+  tour: ApprovalRequest['tour'];
 }
 
 export function CapacityInfo({ tour }: CapacityInfoProps) {

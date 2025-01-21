@@ -1,7 +1,7 @@
-import { Client } from "../approval-requests/types";
+import { ApprovalRequest } from "../approval-requests/types";
 
 interface PersonalInfoProps {
-  client: Client;
+  client: ApprovalRequest['client'];
 }
 
 export function PersonalInfo({ client }: PersonalInfoProps) {

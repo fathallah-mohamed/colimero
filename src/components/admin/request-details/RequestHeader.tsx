@@ -1,7 +1,7 @@
-import { Tour } from "../approval-requests/types";
+import { ApprovalRequest } from "../approval-requests/types";
 
 interface RequestHeaderProps {
-  tour?: Tour | null;
+  tour?: ApprovalRequest['tour'] | null;
 }
 
 export function RequestHeader({ tour }: RequestHeaderProps) {

@@ -1,8 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Tour } from "../approval-requests/types";
+import { ApprovalRequest } from "../approval-requests/types";
 
 interface CompanyInfoProps {
-  tour?: Tour | null;
+  tour?: ApprovalRequest['tour'] | null;
 }
 
 export function CompanyInfo({ tour }: CompanyInfoProps) {
