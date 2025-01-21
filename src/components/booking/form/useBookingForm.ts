@@ -18,15 +18,14 @@ export function useBookingForm(tourId: number, pickupCity: string) {
       recipient_name: "",
       recipient_phone: "",
       recipient_address: "",
-      recipient_city: "",
-      item_type: "",
-      package_description: "",
-      pickup_city: pickupCity,
       delivery_city: "",
+      pickup_city: pickupCity,
+      item_type: "",
       weight: 5,
       special_items: [],
       content_types: [],
-      photos: []
+      photos: [],
+      package_description: ""
     }
   });
 
