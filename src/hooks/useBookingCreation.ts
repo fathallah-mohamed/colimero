@@ -26,7 +26,6 @@ export function useBookingCreation(tourId: number, onSuccess?: () => void) {
         return;
       }
 
-      // Upload photos if they exist and get their URLs
       let photoUrls: string[] = [];
       if (formData.photos && formData.photos.length > 0) {
         const uploadPromises = formData.photos.map(async (file: File) => {
@@ -51,11 +50,6 @@ export function useBookingCreation(tourId: number, onSuccess?: () => void) {
         photoUrls = await Promise.all(uploadPromises);
       }
 
-      const specialItemsData = formData.special_items.map(item => ({
-        name: item,
-        quantity: 1
-      }));
-
       const { data, error } = await supabase.rpc(
         'create_booking_with_capacity_update',
         {
@@ -70,7 +64,7 @@ export function useBookingCreation(tourId: number, onSuccess?: () => void) {
           p_sender_name: formData.sender_name,
           p_sender_phone: formData.sender_phone,
           p_item_type: formData.item_type,
-          p_special_items: specialItemsData,
+          p_special_items: formData.special_items,
           p_content_types: formData.content_types,
           p_photos: photoUrls
         }
@@ -94,19 +88,20 @@ export function useBookingCreation(tourId: number, onSuccess?: () => void) {
         throw error;
       }
 
-      console.log('Booking created successfully:', data);
-      toast({
-        title: "Réservation créée",
-        description: "Votre réservation a été créée avec succès.",
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        navigate('/mes-reservations');
+      // Récupérer les détails de la réservation créée
+      const { data: bookingDetails, error: bookingError } = await supabase
+        .from('bookings')
+        .select('tracking_number')
+        .eq('id', data)
+        .single();
+
+      if (bookingError) {
+        throw bookingError;
       }
 
-      return data;
+      console.log('Booking created successfully:', bookingDetails);
+      return bookingDetails;
+
     } catch (error: any) {
       console.error("Error in createBooking:", error);
       toast({
