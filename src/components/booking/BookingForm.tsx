@@ -1,19 +1,15 @@
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { formSchema, BookingFormData } from "./form/schema";
-import { useState, useEffect } from "react";
-import { StepIndicator } from "./form/steps/StepIndicator";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useBookingCreation } from "@/hooks/useBookingCreation";
 import { useBookingValidation } from "@/hooks/useBookingValidation";
 import { useBookingFormState } from "@/hooks/useBookingFormState";
 import { BookingFormSteps } from "./form/BookingFormSteps";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
-import { supabase } from "@/integrations/supabase/client";
+import { StepIndicator } from "./form/steps/StepIndicator";
+import { BookingFormActions } from "./form/BookingFormActions";
+import { useBookingForm } from "./form/useBookingForm";
+import { BookingFormData } from "./form/schema";
 
 export interface BookingFormProps {
   tourId: number;
@@ -22,9 +18,6 @@ export interface BookingFormProps {
 }
 
 export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps) {
-  const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const { createBooking, isLoading } = useBookingCreation(tourId, onSuccess);
   const { uploadPhotos, isUploading } = usePhotoUpload();
   
@@ -41,53 +34,13 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
     handlePhotoUpload
   } = useBookingFormState();
 
-  const form = useForm<BookingFormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      sender_name: "",
-      sender_phone: "",
-      recipient_name: "",
-      recipient_phone: "",
-      recipient_address: "",
-      recipient_city: "",
-      item_type: "",
-      package_description: "",
-      pickup_city: pickupCity,
-      delivery_city: "",
-      weight: 5,
-      special_items: [],
-      content_types: [],
-      photos: []
-    } as BookingFormData
-  });
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: clientData } = await supabase
-          .from('clients')
-          .select('first_name, last_name, phone')
-          .eq('id', session.user.id)
-          .single();
-
-        if (clientData) {
-          form.setValue('sender_name', `${clientData.first_name} ${clientData.last_name}`.trim());
-          form.setValue('sender_phone', clientData.phone || '');
-        }
-      } else {
-        navigate('/login', { 
-          state: { 
-            returnTo: window.location.pathname,
-            tourId,
-            pickupCity 
-          }
-        });
-      }
-    };
-
-    fetchUserData();
-  }, []);
+  const {
+    form,
+    currentStep,
+    setCurrentStep,
+    completedSteps,
+    setCompletedSteps
+  } = useBookingForm(tourId, pickupCity);
 
   const { validateStep } = useBookingValidation(form);
 
@@ -164,45 +117,13 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           />
         )}
 
-        <div className="flex justify-between pt-6">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 1 || isLoading || isUploading}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Précédent
-          </Button>
-
-          {currentStep < 4 ? (
-            <Button
-              type="button"
-              onClick={handleNextStep}
-              disabled={isLoading || isUploading}
-              className="flex items-center gap-2"
-            >
-              Suivant
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              disabled={isLoading || isUploading}
-              className="flex items-center gap-2"
-            >
-              {isLoading || isUploading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Création...
-                </>
-              ) : (
-                "Créer la réservation"
-              )}
-            </Button>
-          )}
-        </div>
+        <BookingFormActions
+          currentStep={currentStep}
+          isLoading={isLoading}
+          isUploading={isUploading}
+          onPrevious={handlePrevious}
+          onNext={handleNextStep}
+        />
       </form>
     </Form>
   );
