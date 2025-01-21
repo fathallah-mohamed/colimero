@@ -5,6 +5,7 @@ import Blog from "@/pages/Blog";
 import Contact from "@/pages/Contact";
 import EnvoyerColis from "@/pages/EnvoyerColis";
 import PlanifierTournee from "@/pages/PlanifierTournee";
+import Profile from "@/pages/Profile";
 import ResetPassword from "@/pages/ResetPassword";
 import TransporteurDetails from "@/pages/TransporteurDetails";
 import Transporteurs from "@/pages/Transporteurs";
@@ -31,6 +32,7 @@ export default function AppRoutes() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/envoyer-colis" element={<EnvoyerColis />} />
       <Route path="/planifier-tournee" element={<PlanifierTournee />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/transporteurs/:id" element={<TransporteurDetails />} />
       <Route path="/transporteurs" element={<Transporteurs />} />
