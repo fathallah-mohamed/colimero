@@ -542,6 +542,7 @@ export type Database = {
           id: string
           last_name: string | null
           phone: string | null
+          phone_secondary: string | null
         }
         Insert: {
           activation_expires_at?: string | null
@@ -554,6 +555,7 @@ export type Database = {
           id: string
           last_name?: string | null
           phone?: string | null
+          phone_secondary?: string | null
         }
         Update: {
           activation_expires_at?: string | null
@@ -566,6 +568,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           phone?: string | null
+          phone_secondary?: string | null
         }
         Relationships: []
       }
