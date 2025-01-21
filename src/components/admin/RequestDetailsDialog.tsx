@@ -91,6 +91,11 @@ export const RequestDetailsDialog = ({
     }
   };
 
+  const handleApprove = async () => {
+    if (!request || !onApprove) return Promise.resolve();
+    return Promise.resolve(onApprove(request));
+  };
+
   if (!request) return null;
 
   return (
@@ -143,7 +148,7 @@ export const RequestDetailsDialog = ({
         <DialogFooter>
           {(request.status === "pending" || showApproveButton) && (
             <RequestActions
-              onApprove={() => onApprove?.(request)}
+              onApprove={handleApprove}
               onReject={handleReject}
               isSubmitting={isSubmitting}
               showRejectButton={request.status === "pending"}
