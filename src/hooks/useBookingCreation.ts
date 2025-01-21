@@ -50,6 +50,7 @@ export function useBookingCreation(tourId: number, onSuccess?: () => void) {
         photoUrls = await Promise.all(uploadPromises);
       }
 
+      // Utiliser la fonction RPC pour créer la réservation
       const { data, error } = await supabase.rpc(
         'create_booking_with_capacity_update',
         {
@@ -100,6 +101,16 @@ export function useBookingCreation(tourId: number, onSuccess?: () => void) {
       }
 
       console.log('Booking created successfully:', bookingDetails);
+      
+      toast({
+        title: "Réservation créée",
+        description: "Votre réservation a été créée avec succès. Numéro de suivi : " + bookingDetails.tracking_number,
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
       return bookingDetails;
 
     } catch (error: any) {
