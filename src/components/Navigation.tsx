@@ -7,6 +7,7 @@ import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { NavigationHeader } from "./navigation/NavigationHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
@@ -99,9 +100,23 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
     checkAuth();
   }, [location.pathname, navigate, toast]);
 
-  // Si en cours de chargement, ne rien afficher pour éviter le flash
   if (isLoading) {
-    return null;
+    return (
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 bg-white z-50 transition-all duration-300",
+        isScrolled ? "shadow-lg py-2" : "shadow-sm py-4"
+      )}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center">
+            <Skeleton className="h-8 w-32" />
+            <div className="flex space-x-4">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
   }
 
   return (
