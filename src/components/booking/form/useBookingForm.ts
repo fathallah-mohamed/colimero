@@ -23,8 +23,8 @@ export function useBookingForm(tourId: number, pickupCity: string) {
       content_types: [],
       photos: [],
       package_description: "",
-      terms_accepted: true,
-      customs_declaration: true
+      terms_accepted: false,
+      customs_declaration: false
     }
   });
 

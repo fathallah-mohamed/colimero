@@ -52,14 +52,18 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
 
   const onSubmit = async (values: BookingFormData) => {
     try {
+      console.log("Starting form submission with values:", values);
+      
       const photoUrls = await uploadPhotos(photos);
+      console.log("Photos uploaded:", photoUrls);
       
       const formattedSpecialItems = specialItems.map(item => ({
         name: item,
         quantity: itemQuantities[item] || 1
       }));
+      console.log("Formatted special items:", formattedSpecialItems);
 
-      const bookingData = {
+      const bookingData: BookingFormData = {
         ...values,
         weight,
         pickup_city: pickupCity,
@@ -68,9 +72,13 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
         photos: photoUrls,
         terms_accepted: true,
         customs_declaration: true
-      } as BookingFormData;
+      };
+
+      console.log("Submitting booking data:", bookingData);
 
       const result = await createBooking(bookingData);
+      console.log("Booking creation result:", result);
+
       if (result?.tracking_number) {
         setTrackingNumber(result.tracking_number);
         setShowConfirmation(true);
