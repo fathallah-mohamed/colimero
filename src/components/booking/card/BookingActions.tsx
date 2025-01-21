@@ -22,9 +22,10 @@ export function BookingActions({
   onEdit,
   userType
 }: BookingActionsProps) {
-  const handleStatusChange = (newStatus: BookingStatus) => {
+  const handleStatusChange = async (newStatus: BookingStatus) => {
     console.log('Changing status to:', newStatus);
-    onStatusChange(bookingId, newStatus);
+    await onStatusChange(bookingId, newStatus);
+    await onUpdate();
   };
 
   // N'afficher les actions que si la tournée est programmée ou en cours de ramassage
@@ -58,25 +59,35 @@ export function BookingActions({
 
       {status === "pending" && (
         <>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-red-500 hover:text-red-600 gap-2"
-            onClick={() => handleStatusChange("cancelled")}
-          >
-            <XCircle className="h-4 w-4" />
-            Annuler
-          </Button>
-          {userType === "carrier" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-green-500 hover:text-green-600 gap-2"
-              onClick={() => handleStatusChange("confirmed")}
-            >
-              <CheckSquare className="h-4 w-4" />
-              Confirmer
-            </Button>
+          {tourStatus === "Programmée" && (
+            <>
+              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+              {userType === "carrier" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-green-500 hover:text-green-600 gap-2"
+                  onClick={() => handleStatusChange("confirmed")}
+                >
+                  <CheckSquare className="h-4 w-4" />
+                  Confirmer
+                </Button>
+              )}
+            </>
+          )}
+          {tourStatus === "Ramassage en cours" && userType === "carrier" && (
+            <>
+              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-500 hover:text-green-600 gap-2"
+                onClick={() => handleStatusChange("collected")}
+              >
+                <CheckSquare className="h-4 w-4" />
+                Marquer comme collectée
+              </Button>
+            </>
           )}
         </>
       )}
