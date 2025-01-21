@@ -16,7 +16,7 @@ interface ApprovalRequestCardProps {
   onDelete?: (requestId: string) => void;
 }
 
-export function ApprovalRequestCard({ 
+export const ApprovalRequestCard = ({ 
   request, 
   userType,
   showActions = false,
@@ -24,7 +24,7 @@ export function ApprovalRequestCard({
   onReject,
   onCancel,
   onDelete 
-}: ApprovalRequestCardProps) {
+}: ApprovalRequestCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -118,4 +118,4 @@ export function ApprovalRequestCard({
       </div>
     </Card>
   );
-}
+};
