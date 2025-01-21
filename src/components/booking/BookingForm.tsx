@@ -10,9 +10,7 @@ import { useBookingForm } from "./form/useBookingForm";
 import { BookingFormData } from "./form/schema";
 import { BookingConfirmDialog } from "./form/BookingConfirmDialog";
 import { useState } from "react";
-import { SenderDetailsStep } from "./form/steps/SenderDetailsStep";
-import { RecipientDetailsStep } from "./form/steps/RecipientDetailsStep";
-import { PackageDetailsStep } from "./form/steps/PackageDetailsStep";
+import { StepManager } from "./form/steps/StepManager";
 
 export interface BookingFormProps {
   tourId: number;
@@ -47,33 +45,6 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
   } = useBookingForm(tourId, pickupCity);
 
   const { validateStep } = useBookingValidation(form);
-
-  const renderCurrentStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <SenderDetailsStep form={form} />;
-      case 2:
-        return <RecipientDetailsStep form={form} />;
-      case 3:
-        return (
-          <PackageDetailsStep
-            form={form}
-            weight={weight}
-            onWeightChange={handleWeightChange}
-            contentTypes={contentTypes}
-            onContentTypeToggle={handleContentTypeToggle}
-            specialItems={specialItems}
-            onSpecialItemToggle={handleSpecialItemToggle}
-            itemQuantities={itemQuantities}
-            onQuantityChange={handleQuantityChange}
-            photos={photos}
-            onPhotoUpload={handlePhotoUpload}
-          />
-        );
-      default:
-        return null;
-    }
-  };
 
   const onSubmit = async (values: BookingFormData) => {
     try {
@@ -135,12 +106,25 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
           completedSteps={completedSteps}
         />
 
-        {(isLoading) ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          renderCurrentStep()
+          <StepManager
+            currentStep={currentStep}
+            form={form}
+            weight={weight}
+            onWeightChange={handleWeightChange}
+            contentTypes={contentTypes}
+            onContentTypeToggle={handleContentTypeToggle}
+            specialItems={specialItems}
+            onSpecialItemToggle={handleSpecialItemToggle}
+            itemQuantities={itemQuantities}
+            onQuantityChange={handleQuantityChange}
+            photos={photos}
+            onPhotoUpload={handlePhotoUpload}
+          />
         )}
 
         <BookingFormActions

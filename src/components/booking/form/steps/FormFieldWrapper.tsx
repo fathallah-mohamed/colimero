@@ -7,7 +7,7 @@ interface FormFieldWrapperProps {
   form: UseFormReturn<BookingFormData>;
   name: keyof BookingFormData;
   label: string;
-  children: ReactNode;
+  children: ReactNode | ((field: any) => ReactNode);
 }
 
 export function FormFieldWrapper({ form, name, label, children }: FormFieldWrapperProps) {
