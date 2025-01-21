@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { SendPackageHero } from "@/components/send-package/SendPackageHero";
 import { SendPackageFilters } from "@/components/send-package/SendPackageFilters";
 import { ClientTourCard } from "@/components/send-package/tour/ClientTourCard";
@@ -13,7 +12,6 @@ import type { TourStatus } from "@/types/tour";
 
 export default function EnvoyerColis() {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [selectedRoute, setSelectedRoute] = useState<string>("FR_TO_TN");
   const [selectedStatus, setSelectedStatus] = useState<TourStatus | "all">("all");
   const [tourType, setTourType] = useState<"public" | "private">("public");
@@ -63,7 +61,7 @@ export default function EnvoyerColis() {
       
       {/* Bloc de présentation */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/20 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Expédiez vos colis en toute simplicité
@@ -114,7 +112,7 @@ export default function EnvoyerColis() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <SendPackageFilters
           selectedRoute={selectedRoute}
           setSelectedRoute={setSelectedRoute}
