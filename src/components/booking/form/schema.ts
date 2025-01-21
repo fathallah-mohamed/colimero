@@ -13,9 +13,9 @@ export const formSchema = z.object({
   special_items: z.array(z.object({
     name: z.string(),
     quantity: z.number().min(1)
-  })),
-  content_types: z.array(z.string()),
-  photos: z.array(z.any()),
+  })).default([]),
+  content_types: z.array(z.string()).default([]),
+  photos: z.array(z.any()).default([]),
   package_description: z.string().optional(),
   terms_accepted: z.boolean().refine((val) => val === true, {
     message: "Vous devez accepter les conditions générales"
