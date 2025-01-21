@@ -59,7 +59,7 @@ export function BookingForm({ tourId, pickupCity, onSuccess }: BookingFormProps)
       special_items: [],
       content_types: [],
       photos: []
-    } as BookingFormData // Type assertion to ensure all required fields are present
+    } satisfies BookingFormData
   });
 
   // Fetch and set user data when component mounts
