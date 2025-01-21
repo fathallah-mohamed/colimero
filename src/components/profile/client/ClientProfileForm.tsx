@@ -5,16 +5,8 @@ import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonalInfoFields } from "../form/PersonalInfoFields";
-import * as z from "zod";
-
-const formSchema = z.object({
-  first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  phone: z.string().min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres"),
-  address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { ContactInfoFields } from "../form/ContactInfoFields";
+import { formSchema, type FormValues } from "../form/formSchema";
 
 interface ClientProfileFormProps {
   initialData: any;
@@ -36,6 +28,8 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
 
   async function onSubmit(values: FormValues) {
     try {
+      console.log("Starting profile update with values:", values);
+      
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -47,7 +41,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
         return;
       }
 
-      // Mettre à jour les métadonnées de l'utilisateur
+      console.log("Updating auth user metadata...");
       const { error: metadataError } = await supabase.auth.updateUser({
         data: {
           first_name: values.first_name,
@@ -55,9 +49,12 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
         }
       });
 
-      if (metadataError) throw metadataError;
+      if (metadataError) {
+        console.error("Error updating user metadata:", metadataError);
+        throw metadataError;
+      }
 
-      // Mettre à jour le profil client
+      console.log("Updating client profile...");
       const { error: profileError } = await supabase
         .from('clients')
         .update({
@@ -68,8 +65,12 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
         })
         .eq('id', session.user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Error updating client profile:", profileError);
+        throw profileError;
+      }
 
+      console.log("Profile update successful");
       toast({
         title: "Succès",
         description: "Profil mis à jour avec succès",
@@ -78,7 +79,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
       onClose();
       window.location.reload();
     } catch (error: any) {
-      console.error('Error updating profile:', error);
+      console.error('Error in profile update:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -91,6 +92,7 @@ export function ClientProfileForm({ initialData, onClose }: ClientProfileFormPro
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <PersonalInfoFields form={form} />
+        <ContactInfoFields form={form} />
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>

@@ -5,6 +5,8 @@ export interface UserData {
   first_name: string;
   last_name: string;
   email: string;
+  phone?: string;
+  address?: string;
 }
 
 export function useUserData(userType: string | null) {
@@ -13,43 +15,19 @@ export function useUserData(userType: string | null) {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        console.log("Fetching user data for type:", userType);
         const { data: { user } } = await supabase.auth.getUser();
+        
         if (!user) {
           console.log('No authenticated user found');
           return;
         }
 
         let profileData;
-        if (userType === 'admin') {
-          const { data, error } = await supabase
-            .from('administrators')
-            .select('first_name, last_name, email')
-            .eq('id', user.id)
-            .maybeSingle();
-            
-          if (error) {
-            console.error('Error fetching admin profile:', error);
-            return;
-          }
-          profileData = data;
-          
-        } else if (userType === 'carrier') {
-          const { data, error } = await supabase
-            .from('carriers')
-            .select('first_name, last_name, email')
-            .eq('id', user.id)
-            .maybeSingle();
-            
-          if (error) {
-            console.error('Error fetching carrier profile:', error);
-            return;
-          }
-          profileData = data;
-          
-        } else {
+        if (userType === 'client') {
           const { data, error } = await supabase
             .from('clients')
-            .select('first_name, last_name, email')
+            .select('first_name, last_name, email, phone, address')
             .eq('id', user.id)
             .maybeSingle();
             
@@ -57,7 +35,9 @@ export function useUserData(userType: string | null) {
             console.error('Error fetching client profile:', error);
             return;
           }
+          
           profileData = data;
+          console.log("Client profile data:", profileData);
         }
 
         if (profileData) {
