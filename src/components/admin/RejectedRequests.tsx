@@ -10,7 +10,7 @@ import Navigation from "@/components/Navigation";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
-import { ApprovalRequest, CarrierRegistrationRequest } from "./approval-requests/types";
+import { ApprovalRequest, CarrierRegistrationRequest, Tour, Client } from "./approval-requests/types";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");

@@ -69,6 +69,28 @@ export default function NewRegistrationRequests() {
     },
   });
 
+  const transformRequestToApprovalRequest = (request: CarrierRegistrationRequest): ApprovalRequest => ({
+    id: request.id,
+    user_id: request.id,
+    tour_id: 0,
+    status: request.status,
+    message: request.reason,
+    created_at: request.created_at,
+    updated_at: request.updated_at,
+    reason: request.reason,
+    email_sent: false,
+    activation_token: null,
+    activation_expires_at: null,
+    pickup_city: "",
+    tour: {} as Tour,
+    client: {} as Client,
+    company_name: request.company_name,
+    email: request.email,
+    first_name: request.first_name,
+    last_name: request.last_name,
+    phone: request.phone
+  });
+
   const handleApprove = async (request: CarrierRegistrationRequest) => {
     try {
       const { error } = await supabase
@@ -132,28 +154,6 @@ export default function NewRegistrationRequests() {
       </div>
     );
   }
-
-  const transformRequestToApprovalRequest = (request: CarrierRegistrationRequest): ApprovalRequest => ({
-    id: request.id,
-    user_id: request.id,
-    tour_id: 0,
-    status: request.status,
-    message: request.reason,
-    created_at: request.created_at,
-    updated_at: request.updated_at,
-    reason: request.reason,
-    email_sent: false,
-    activation_token: null,
-    activation_expires_at: null,
-    pickup_city: "",
-    tour: {} as Tour,
-    client: {} as Client,
-    company_name: request.company_name,
-    email: request.email,
-    first_name: request.first_name,
-    last_name: request.last_name,
-    phone: request.phone
-  });
 
   const transformedRequests = requests.map(transformRequestToApprovalRequest);
 
