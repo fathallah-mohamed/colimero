@@ -8,6 +8,7 @@ import { Carrier } from "@/types/carrier";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { approveCarrierRequest, rejectCarrierRequest } from "@/services/carrier-approval";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,11 +70,16 @@ export default function NewRegistrationRequests() {
 
   const handleApprove = async (carrier: Carrier) => {
     try {
-      await approveCarrierRequest(carrier.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      await approveCarrierRequest(carrier.id, session.user.id);
+      
       toast({
         title: "Demande approuvée",
         description: "Le transporteur a été approuvé avec succès.",
       });
+      
       refetch();
     } catch (error: any) {
       console.error("Error approving carrier:", error);
@@ -90,13 +96,7 @@ export default function NewRegistrationRequests() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      const { error } = await supabase.rpc('reject_carrier', {
-        carrier_id: carrier.id,
-        admin_id: session.user.id,
-        rejection_reason: reason
-      });
-
-      if (error) throw error;
+      await rejectCarrierRequest(carrier.id, session.user.id, reason);
 
       toast({
         title: "Demande rejetée",
