@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { FormSections } from "./FormSections";
 import { useEffect } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 export interface CarrierSignupFormProps {
   onSuccess: () => void;
@@ -57,9 +58,11 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
   const onSubmit = async (values: FormValues) => {
     try {
+      const carrierId = uuidv4();
       const { error: registrationError } = await supabase
         .from("carriers")
         .insert({
+          id: carrierId,
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
@@ -69,9 +72,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           phone_secondary: values.phone_secondary,
           address: values.address,
           coverage_area: values.coverage_area,
-          total_capacity: values.total_capacity,
-          price_per_kg: values.price_per_kg,
-          avatar_url: values.avatar_url,
+          avatar_url: values.avatar_url || "",
           password: values.password,
           status: 'pending',
           company_details: {},
@@ -82,6 +83,17 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
         });
 
       if (registrationError) throw registrationError;
+
+      // Create carrier capacities
+      const { error: capacityError } = await supabase
+        .from("carrier_capacities")
+        .insert({
+          carrier_id: carrierId,
+          total_capacity: values.total_capacity,
+          price_per_kg: values.price_per_kg
+        });
+
+      if (capacityError) throw capacityError;
 
       toast({
         title: "Demande envoyée avec succès",

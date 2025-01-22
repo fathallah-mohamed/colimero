@@ -10,55 +10,37 @@ import Navigation from "@/components/Navigation";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
-import { ApprovalRequest, CarrierRegistrationRequest, Tour, Client } from "./approval-requests/types";
+import { Carrier } from "@/types/carrier";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<Carrier | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
 
   const { data: requests = [], isLoading, refetch } = useQuery({
-    queryKey: ["carrier-requests", "rejected"],
+    queryKey: ["carriers", "rejected"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("carrier_registration_requests")
+        .from("carriers")
         .select("*")
         .eq("status", "rejected")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
-      // Transform CarrierRegistrationRequest to ApprovalRequest
-      const transformedData: ApprovalRequest[] = (data as CarrierRegistrationRequest[]).map(request => ({
-        id: request.id,
-        user_id: request.id, // Using request.id as user_id since it's required
-        tour_id: 0, // Default value since it's required
-        status: request.status,
-        message: request.reason,
-        created_at: request.created_at,
-        updated_at: request.updated_at,
-        reason: request.reason,
-        email_sent: false,
-        activation_token: null,
-        activation_expires_at: null,
-        pickup_city: "",
-        tour: {} as Tour,
-        client: {} as Client,
-        company_name: request.company_name,
-        email: request.email
-      }));
-
-      return transformedData;
+      return data as Carrier[];
     },
   });
 
-  const handleApprove = async (request: ApprovalRequest) => {
+  const handleApprove = async (carrier: Carrier) => {
     if (isApproving) return;
     
     setIsApproving(true);
     try {
-      await approveCarrierRequest(request.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      await approveCarrierRequest(carrier.id, session.user.id);
 
       toast({
         title: "Demande approuvée",
@@ -79,15 +61,16 @@ export default function RejectedRequests() {
     }
   };
 
-  const handleReject = async (request: ApprovalRequest) => {
+  const handleReject = async (carrier: Carrier, reason: string) => {
     try {
       const { error } = await supabase
-        .from('carrier_registration_requests')
+        .from('carriers')
         .update({
           status: 'rejected',
+          reason: reason,
           updated_at: new Date().toISOString()
         })
-        .eq('id', request.id);
+        .eq('id', carrier.id);
 
       if (error) throw error;
 
