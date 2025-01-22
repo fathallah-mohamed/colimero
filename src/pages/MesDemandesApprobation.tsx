@@ -1,39 +1,85 @@
-import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
-import AuthDialog from "@/components/auth/AuthDialog";
-import { ProfileLoading } from "@/components/profile/ProfileLoading";
-import { ClientApprovalRequests } from "@/components/approval-requests/ClientApprovalRequests";
-import { useClientApprovalRequests } from "@/hooks/approval-requests/useClientApprovalRequests";
+import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
+import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 
 export default function MesDemandesApprobation() {
-  const { isLoading: isSessionLoading, session } = useSessionContext();
-  const user = useUser();
-  
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
+
   const {
     requests,
     loading,
+    error,
+    handleApproveRequest,
+    handleRejectRequest,
     handleCancelRequest,
     handleDeleteRequest
-  } = useClientApprovalRequests(user?.id);
+  } = useApprovalRequests(userType, userId);
 
-  // Show auth dialog if not authenticated
-  if (!isSessionLoading && !session) {
-    return (
-      <AuthDialog 
-        isOpen={true}
-        onClose={() => {}}
-        requiredUserType="client"
-      />
-    );
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé",
+          description: "Vous devez être connecté pour accéder à cette page.",
+        });
+        navigate("/connexion");
+        return;
+      }
 
-  // Show loading state
-  if (isSessionLoading || loading) {
+      const userType = session.user.user_metadata?.user_type;
+      if (userType !== 'client') {
+        toast({
+          variant: "destructive",
+          title: "Accès refusé", 
+          description: "Cette page est réservée aux clients.",
+        });
+        navigate("/");
+        return;
+      }
+
+      setUserId(session.user.id);
+      setUserType(userType);
+    };
+
+    checkAuth();
+  }, [navigate, toast]);
+
+  const pendingRequests = requests.filter(request => request.status === 'pending');
+  const approvedRequests = requests.filter(request => request.status === 'approved');
+  const rejectedRequests = requests.filter(request => 
+    request.status === 'rejected' || request.status === 'cancelled'
+  );
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <ProfileLoading />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-gray-500">Chargement des demandes...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-red-500">Une erreur est survenue lors du chargement des demandes.</div>
+          </div>
         </div>
       </div>
     );
@@ -42,15 +88,23 @@ export default function MesDemandesApprobation() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold mb-8">Mes demandes d'approbation</h1>
-        {user && (
-          <ClientApprovalRequests
-            requests={requests}
-            handleCancelRequest={handleCancelRequest}
-            handleDeleteRequest={handleDeleteRequest}
-          />
-        )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Mes demandes d'approbation
+          </h1>
+        </div>
+
+        <ApprovalRequestTabs
+          pendingRequests={pendingRequests}
+          approvedRequests={approvedRequests}
+          rejectedRequests={rejectedRequests}
+          userType={userType}
+          handleApproveRequest={handleApproveRequest}
+          handleRejectRequest={handleRejectRequest}
+          handleCancelRequest={handleCancelRequest}
+          handleDeleteRequest={handleDeleteRequest}
+        />
       </div>
     </div>
   );
