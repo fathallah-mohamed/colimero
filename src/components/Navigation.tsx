@@ -58,7 +58,6 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   // Store return path for auth redirects and handle protected routes
   React.useEffect(() => {
     const checkAuth = async () => {
-      setIsLoading(true);
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -69,6 +68,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
             title: "Erreur de session",
             description: "Une erreur est survenue lors de la vérification de votre session.",
           });
+          setIsLoading(false);
           return;
         }
         
@@ -88,6 +88,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
             }
           }
         }
+        setIsLoading(false);
       } catch (error) {
         console.error("Auth check error:", error);
         toast({
@@ -95,7 +96,6 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           title: "Erreur d'authentification",
           description: "Une erreur est survenue lors de la vérification de votre authentification.",
         });
-      } finally {
         setIsLoading(false);
       }
     };
@@ -103,9 +103,20 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
     checkAuth();
   }, [location.pathname, navigate, toast]);
 
-  // Si en cours de chargement, ne rien afficher pour éviter le flash
+  // Si en cours de chargement, afficher un état de chargement minimal
   if (isLoading) {
-    return null;
+    return (
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 bg-white z-50 transition-all duration-300",
+        isScrolled ? "shadow-lg py-2" : "shadow-sm py-4"
+      )}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center h-16">
+            <div className="text-gray-500">Chargement...</div>
+          </div>
+        </div>
+      </nav>
+    );
   }
 
   return (
