@@ -131,7 +131,7 @@ export function LoginView({ onForgotPassword, onRegister, onSuccess, hideRegiste
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {statusMessage && (
-        <Alert variant={statusMessage.type === 'error' ? 'destructive' : 'warning'}>
+        <Alert variant={statusMessage.type === 'error' ? 'destructive' : 'default'}>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>
             {statusMessage.type === 'error' ? 'Erreur' : 'Attention'}
