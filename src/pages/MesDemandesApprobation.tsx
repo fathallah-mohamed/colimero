@@ -3,12 +3,24 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
-import { ClientApprovalRequests } from "@/components/approval-requests/ClientApprovalRequests";
+import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
+import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
+
+  const {
+    requests,
+    loading,
+    error,
+    handleApproveRequest,
+    handleRejectRequest,
+    handleCancelRequest,
+    handleDeleteRequest
+  } = useApprovalRequests(userType, userId);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -34,11 +46,44 @@ export default function MesDemandesApprobation() {
         return;
       }
 
+      setUserId(session.user.id);
       setUserType(userType);
     };
 
     checkAuth();
   }, [navigate, toast]);
+
+  const pendingRequests = requests.filter(request => request.status === 'pending');
+  const approvedRequests = requests.filter(request => request.status === 'approved');
+  const rejectedRequests = requests.filter(request => 
+    request.status === 'rejected' || request.status === 'cancelled'
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-gray-500">Chargement des demandes...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-red-500">Une erreur est survenue lors du chargement des demandes.</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,7 +95,16 @@ export default function MesDemandesApprobation() {
           </h1>
         </div>
 
-        <ClientApprovalRequests />
+        <ApprovalRequestTabs
+          pendingRequests={pendingRequests}
+          approvedRequests={approvedRequests}
+          rejectedRequests={rejectedRequests}
+          userType={userType}
+          handleApproveRequest={handleApproveRequest}
+          handleRejectRequest={handleRejectRequest}
+          handleCancelRequest={handleCancelRequest}
+          handleDeleteRequest={handleDeleteRequest}
+        />
       </div>
     </div>
   );
