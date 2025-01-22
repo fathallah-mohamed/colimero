@@ -1,3 +1,5 @@
+import { Json } from "@/types/database/tables";
+
 export interface Carrier {
   id: string;
   email: string;
@@ -11,8 +13,8 @@ export interface Carrier {
   coverage_area: string[];
   avatar_url: string | null;
   email_verified: boolean;
-  company_details: any;
-  authorized_routes: any;
+  company_details: Json;
+  authorized_routes: Json;
   total_deliveries: number;
   cities_covered: number;
   status: 'pending' | 'active' | 'rejected';

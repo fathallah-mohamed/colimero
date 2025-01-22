@@ -70,12 +70,16 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           phone_secondary: values.phone_secondary,
           address: values.address,
           coverage_area: values.coverage_area,
-          services: values.services,
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg,
           avatar_url: values.avatar_url,
           password: values.password,
-          status: 'pending'
+          status: 'pending',
+          company_details: {},
+          authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
+          total_deliveries: 0,
+          cities_covered: 30,
+          email_verified: false
         });
 
       if (registrationError) throw registrationError;
