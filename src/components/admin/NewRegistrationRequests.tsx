@@ -41,42 +41,31 @@ export default function NewRegistrationRequests() {
         console.log("Current user ID:", session.user.id);
 
         const { data: approvalRequests, error: approvalError } = await supabase
-          .from("approval_requests")
+          .from("carrier_registration_requests")
           .select(`
             *,
-            tour:tours(
-              id,
-              departure_country,
-              destination_country,
-              departure_date,
-              collection_date,
-              route,
-              total_capacity,
-              remaining_capacity,
-              type,
-              carrier:carriers(
-                id,
-                company_name,
-                email,
-                phone,
-                siret,
-                address,
-                price_per_kg,
-                coverage_area,
-                services
-              )
-            ),
-            client:clients(
-              id,
-              first_name,
-              last_name,
-              email,
-              phone,
-              phone_secondary,
-              address,
-              email_verified,
-              created_at
-            )
+            email,
+            first_name,
+            last_name,
+            company_name,
+            siret,
+            phone,
+            phone_secondary,
+            address,
+            coverage_area,
+            total_capacity,
+            price_per_kg,
+            services,
+            status,
+            created_at,
+            updated_at,
+            reason,
+            avatar_url,
+            email_verified,
+            company_details,
+            authorized_routes,
+            total_deliveries,
+            cities_covered
           `);
 
         if (approvalError) {
@@ -106,7 +95,7 @@ export default function NewRegistrationRequests() {
   const handleApprove = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
-        .from("approval_requests")
+        .from("carrier_registration_requests")
         .update({ 
           status: "approved",
           updated_at: new Date().toISOString()
@@ -134,7 +123,7 @@ export default function NewRegistrationRequests() {
   const handleReject = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
-        .from("approval_requests")
+        .from("carrier_registration_requests")
         .update({ 
           status: "rejected",
           updated_at: new Date().toISOString()
