@@ -1,31 +1,29 @@
 import { Json } from "@/types/database/tables";
 
-export interface Carrier {
-  id: string;
-  company_name: string;
-  email: string;
-  phone: string;
-}
-
 export interface Tour {
   id: number;
-  carrier: Carrier;
-  departure_country: string;
-  destination_country: string;
-  departure_date: string;
-  collection_date: string;
+  carrier_id: string;
   route: Json;
   total_capacity: number;
   remaining_capacity: number;
-  type: 'public' | 'private';
-  status: string | null;
-  previous_status: string | null;
-  terms_accepted: boolean | null;
-  customs_declaration: boolean | null;
-  tour_number: string | null;
-  carrier_id: string;
+  departure_date: string;
+  collection_date: string;
   created_at: string;
   updated_at: string;
+  departure_country: string;
+  destination_country: string;
+  status: string;
+  type: "public" | "private";
+  previous_status: string | null;
+  terms_accepted: boolean;
+  customs_declaration: boolean;
+  tour_number: string | null;
+  carrier: {
+    id: string;
+    company_name: string;
+    email: string;
+    phone: string;
+  };
 }
 
 export interface Client {
@@ -47,19 +45,19 @@ export interface CarrierRegistrationRequest {
   phone_secondary: string | null;
   address: string;
   coverage_area: string[];
-  total_capacity: number;
-  price_per_kg: number;
-  services: string[];
+  total_capacity: number | null;
+  price_per_kg: number | null;
+  services: string[] | null;
   status: string;
   reason: string | null;
   created_at: string;
   updated_at: string;
   avatar_url: string | null;
-  email_verified: boolean;
-  company_details: Json;
-  authorized_routes: Json;
-  total_deliveries: number;
-  cities_covered: number;
+  email_verified: boolean | null;
+  company_details: Json | null;
+  authorized_routes: Json | null;
+  total_deliveries: number | null;
+  cities_covered: number | null;
 }
 
 export interface ApprovalRequest {

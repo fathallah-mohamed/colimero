@@ -155,16 +155,18 @@ export default function NewRegistrationRequests() {
     phone: request.phone
   });
 
+  const transformedRequests = requests.map(transformRequestToApprovalRequest);
+
   return (
     <div className="space-y-6">
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={requests.map(transformRequestToApprovalRequest)}
+        requests={transformedRequests}
         searchTerm={searchTerm}
         onSelect={(request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
-          setSelectedRequest(originalRequest || null);
+          if (originalRequest) setSelectedRequest(originalRequest);
         }}
         onApprove={async (request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);

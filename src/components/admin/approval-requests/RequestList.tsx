@@ -1,12 +1,12 @@
-import { CarrierRegistrationRequest } from "./types";
+import { ApprovalRequest } from "./types";
 import { RequestCard } from "./RequestCard";
 
 interface RequestListProps {
-  requests: CarrierRegistrationRequest[];
-  onSelect: (request: CarrierRegistrationRequest) => void;
+  requests: ApprovalRequest[];
+  onSelect: (request: ApprovalRequest) => void;
   searchTerm: string;
-  onApprove: (request: CarrierRegistrationRequest) => Promise<void>;
-  onReject: (request: CarrierRegistrationRequest) => Promise<void>;
+  onApprove: (request: ApprovalRequest) => Promise<void>;
+  onReject: (request: ApprovalRequest) => Promise<void>;
 }
 
 export function RequestList({ requests, onSelect, searchTerm, onApprove, onReject }: RequestListProps) {
