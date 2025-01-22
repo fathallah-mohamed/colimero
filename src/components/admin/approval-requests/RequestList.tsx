@@ -11,9 +11,9 @@ interface RequestListProps {
 
 export function RequestList({ requests, onSelect, searchTerm, onApprove, onReject }: RequestListProps) {
   const filteredRequests = requests.filter(request =>
-    request.client?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.client?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.client?.email?.toLowerCase().includes(searchTerm.toLowerCase()) || ''
+    request.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.email?.toLowerCase().includes(searchTerm.toLowerCase()) || ''
   );
 
   if (filteredRequests.length === 0) {

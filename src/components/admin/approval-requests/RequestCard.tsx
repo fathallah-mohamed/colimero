@@ -34,9 +34,9 @@ export function RequestCard({ request, onClick, onApprove, onReject }: RequestCa
       <div className="flex justify-between items-start">
         <div onClick={onClick}>
           <h3 className="font-medium">
-            {request.client?.first_name || 'N/A'} {request.client?.last_name || ''}
+            {request.first_name || 'N/A'} {request.last_name || ''}
           </h3>
-          <p className="text-sm text-gray-600">{request.client?.email || 'Email non disponible'}</p>
+          <p className="text-sm text-gray-600">{request.email || 'Email non disponible'}</p>
           <p className="text-sm text-gray-500 mt-2">
             {format(new Date(request.created_at), "d MMMM yyyy", { locale: fr })}
           </p>
