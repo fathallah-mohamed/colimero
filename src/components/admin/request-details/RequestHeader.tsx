@@ -1,19 +1,17 @@
 import { ApprovalRequest } from "../approval-requests/types";
 
 interface RequestHeaderProps {
-  tour?: ApprovalRequest['tour'] | null;
+  request: ApprovalRequest;
 }
 
-export function RequestHeader({ tour }: RequestHeaderProps) {
-  if (!tour) return null;
-
+export function RequestHeader({ request }: RequestHeaderProps) {
   return (
     <div>
       <h2 className="text-lg font-semibold">
-        {tour.departure_country} → {tour.destination_country}
+        {request.company_name}
       </h2>
       <p className="text-gray-600">
-        Transporteur : {tour.carrier.company_name}
+        {request.first_name} {request.last_name}
       </p>
     </div>
   );

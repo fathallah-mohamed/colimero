@@ -1,21 +1,21 @@
 import { ApprovalRequest } from "../approval-requests/types";
 
 interface CapacityInfoProps {
-  tour: ApprovalRequest['tour'];
+  request: ApprovalRequest;
 }
 
-export function CapacityInfo({ tour }: CapacityInfoProps) {
+export function CapacityInfo({ request }: CapacityInfoProps) {
   return (
     <div className="space-y-4">
       <h3 className="font-medium">Capacités</h3>
       <div className="space-y-2">
         <p>
           <span className="text-gray-500">Capacité totale :</span>{" "}
-          {tour.total_capacity} kg
+          {request.total_capacity || 0} kg
         </p>
         <p>
-          <span className="text-gray-500">Capacité restante :</span>{" "}
-          {tour.remaining_capacity} kg
+          <span className="text-gray-500">Prix par kg :</span>{" "}
+          {request.price_per_kg || 0} €
         </p>
       </div>
     </div>
