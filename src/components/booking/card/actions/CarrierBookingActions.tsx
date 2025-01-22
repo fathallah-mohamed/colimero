@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BookingStatus } from "@/types/booking";
-import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
+import { Edit2, RotateCcw, CheckSquare } from "lucide-react";
 import { CancelConfirmDialog } from "./CancelConfirmDialog";
 
 interface CarrierBookingActionsProps {
@@ -21,13 +21,18 @@ export function CarrierBookingActions({
     onStatusChange(newStatus);
   };
 
+  // Ne montrer les actions que pour les tournées programmées ou en cours de ramassage
+  if (!['Programmée', 'Ramassage en cours'].includes(tourStatus)) {
+    return null;
+  }
+
   return (
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
         size="sm"
         onClick={onEdit}
-        className="gap-2"
+        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
       >
         <Edit2 className="h-4 w-4" />
         Modifier

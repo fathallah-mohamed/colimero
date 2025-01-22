@@ -9,6 +9,7 @@ import { BookingHeaderSection } from "./header/BookingHeaderSection";
 import { BookingDetailsContent } from "./details/BookingDetailsContent";
 import type { Booking, BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/use-profile";
 
 interface BookingCardProps {
   booking: Booking;
@@ -28,9 +29,11 @@ export function BookingCard({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
+  const { userType } = useProfile();
 
   console.log("BookingCard - Booking status:", booking.status);
   console.log("BookingCard - Tour status:", tourStatus);
+  console.log("BookingCard - User type:", userType);
 
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", booking.id);
@@ -69,7 +72,7 @@ export function BookingCard({
             onStatusChange={handleStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
-            userType="carrier"
+            userType={userType || 'client'}
           />
         </div>
 

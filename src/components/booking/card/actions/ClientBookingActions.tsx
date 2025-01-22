@@ -27,7 +27,7 @@ export function ClientBookingActions({
         variant="outline"
         size="sm"
         onClick={onEdit}
-        className="gap-2"
+        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
       >
         <Edit2 className="h-4 w-4" />
         Modifier
