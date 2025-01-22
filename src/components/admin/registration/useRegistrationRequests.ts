@@ -31,7 +31,6 @@ export function useRegistrationRequests() {
           return [];
         }
 
-        // Modifié pour sélectionner directement depuis la table carriers
         const { data: pendingCarriers, error: requestsError } = await supabase
           .from("carriers")
           .select(`
@@ -39,6 +38,7 @@ export function useRegistrationRequests() {
             company_name,
             email,
             phone,
+            phone_secondary,
             first_name,
             last_name,
             siret,
@@ -48,7 +48,10 @@ export function useRegistrationRequests() {
             company_details,
             authorized_routes,
             created_at,
-            status
+            status,
+            email_verified,
+            total_deliveries,
+            cities_covered
           `)
           .eq("status", "pending")
           .order("created_at", { ascending: false });
@@ -114,6 +117,7 @@ export function useRegistrationRequests() {
             company_name: carrier.company_name,
             email: carrier.email,
             phone: carrier.phone,
+            phone_secondary: carrier.phone_secondary || "",
             first_name: carrier.first_name,
             last_name: carrier.last_name,
             siret: carrier.siret,
@@ -121,7 +125,11 @@ export function useRegistrationRequests() {
             coverage_area: carrier.coverage_area,
             avatar_url: carrier.avatar_url,
             company_details: carrier.company_details,
-            authorized_routes: carrier.authorized_routes
+            authorized_routes: carrier.authorized_routes,
+            email_verified: carrier.email_verified || false,
+            total_deliveries: carrier.total_deliveries || 0,
+            cities_covered: carrier.cities_covered || 30,
+            status: carrier.status
           }
         }));
 
