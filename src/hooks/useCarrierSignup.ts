@@ -2,7 +2,6 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from 'uuid';
 
 export function useCarrierSignup() {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,12 +11,28 @@ export function useCarrierSignup() {
   const handleSubmit = async (values: any) => {
     setIsLoading(true);
     try {
-      const carrierId = uuidv4();
+      // First, create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            user_type: 'carrier',
+            first_name: values.first_name,
+            last_name: values.last_name,
+            company_name: values.company_name
+          }
+        }
+      });
 
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("No user data returned");
+
+      // Then create the carrier profile using the auth user's ID
       const { error: carrierError } = await supabase
         .from("carriers")
         .insert({
-          id: carrierId,
+          id: authData.user.id,
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
@@ -33,30 +48,29 @@ export function useCarrierSignup() {
           authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
           total_deliveries: 0,
           cities_covered: 30,
-          status: 'pending',
-          password: values.password
+          status: 'pending'
         });
 
       if (carrierError) throw carrierError;
 
-      // Créer les capacités du transporteur
+      // Create carrier capacities
       const { error: capacitiesError } = await supabase
         .from('carrier_capacities')
         .insert({
-          carrier_id: carrierId,
+          carrier_id: authData.user.id,
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg
         });
 
       if (capacitiesError) throw capacitiesError;
 
-      // Créer les services du transporteur
+      // Create carrier services if provided
       if (values.services?.length > 0) {
         const { error: servicesError } = await supabase
           .from('carrier_services')
           .insert(
             values.services.map((service: string) => ({
-              carrier_id: carrierId,
+              carrier_id: authData.user.id,
               service_type: service,
               icon: 'package'
             }))
