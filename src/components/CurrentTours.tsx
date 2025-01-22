@@ -11,6 +11,7 @@ import { TourStatus } from "@/types/tour";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { BookingStatus } from "@/types/booking";
 
 export default function CurrentTours() {
   const navigate = useNavigate();
@@ -53,6 +54,33 @@ export default function CurrentTours() {
     }
   };
 
+  const handleBookingStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    try {
+      console.log("Updating booking status:", bookingId, newStatus);
+      
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+      if (error) {
+        console.error("Database error:", error);
+        throw error;
+      }
+
+      // Invalider le cache pour forcer le rechargement des données
+      await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
+      await queryClient.invalidateQueries({ queryKey: ['tours'] });
+      
+      console.log("Booking status updated successfully");
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error in handleBookingStatusChange:", error);
+      throw error;
+    }
+  };
+
   return (
     <div className="py-8 px-4">
       <NextTourSection isLoading={isLoading} nextTour={nextTour} />
@@ -62,6 +90,7 @@ export default function CurrentTours() {
           tour={nextTour}
           onBookingClick={handleBookingClick}
           onStatusChange={handleStatusChange}
+          onBookingStatusChange={handleBookingStatusChange}
           hideAvatar={false}
         />
       )}
