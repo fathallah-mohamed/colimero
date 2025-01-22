@@ -64,54 +64,73 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
         return;
       }
 
-      // If no carrier found or status is not active, show appropriate message
-      if (!carrierData) {
-        setStatusMessage({
-          type: 'destructive',
-          message: "Aucun compte transporteur trouvé avec cet email."
-        });
-        return;
-      }
-
-      if (carrierData.status === 'pending') {
-        setStatusMessage({
-          type: 'default',
-          message: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé."
-        });
-        return;
-      }
-
-      if (carrierData.status === 'rejected') {
-        setStatusMessage({
-          type: 'destructive',
-          message: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas créer de tournées."
-        });
-        return;
-      }
-
-      // Only proceed with login if status is 'active'
-      if (carrierData.status === 'active') {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: values.email,
-          password: values.password,
-        });
-
-        if (signInError) {
-          console.error("Login error:", signInError);
+      // If carrier exists, check their status before allowing login
+      if (carrierData) {
+        if (carrierData.status === 'pending') {
           setStatusMessage({
-            type: 'destructive',
-            message: signInError.message === "Invalid login credentials"
-              ? "Email ou mot de passe incorrect"
-              : "Une erreur est survenue lors de la connexion"
+            type: 'default',
+            message: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé."
           });
           return;
         }
 
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          navigate('/');
+        if (carrierData.status === 'rejected') {
+          setStatusMessage({
+            type: 'destructive',
+            message: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter."
+          });
+          return;
         }
+      }
+
+      // Proceed with login attempt
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (signInError) {
+        console.error("Login error:", signInError);
+        setStatusMessage({
+          type: 'destructive',
+          message: signInError.message === "Invalid login credentials"
+            ? "Email ou mot de passe incorrect"
+            : "Une erreur est survenue lors de la connexion"
+        });
+        return;
+      }
+
+      // After successful login, double-check carrier status
+      const { data: finalCheck, error: finalCheckError } = await supabase
+        .from('carriers')
+        .select('status')
+        .eq('email', values.email)
+        .single();
+
+      if (finalCheckError) {
+        console.error("Final check error:", finalCheckError);
+        // Si ce n'est pas un transporteur, déconnectez-le
+        await supabase.auth.signOut();
+        setStatusMessage({
+          type: 'destructive',
+          message: "Vous n'avez pas les autorisations nécessaires pour vous connecter en tant que transporteur."
+        });
+        return;
+      }
+
+      if (finalCheck?.status !== 'active') {
+        await supabase.auth.signOut();
+        setStatusMessage({
+          type: 'destructive',
+          message: "Votre compte n'est pas actif. Veuillez attendre la validation de votre compte."
+        });
+        return;
+      }
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/');
       }
     } catch (error: any) {
       console.error("Login error:", error);
