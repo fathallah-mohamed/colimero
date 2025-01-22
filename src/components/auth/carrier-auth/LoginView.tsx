@@ -33,7 +33,7 @@ interface LoginViewProps {
 export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: LoginViewProps) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'error' | 'warning'; message: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'error' | 'default'; message: string } | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -51,11 +51,11 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
       // First, check if there's a carrier with this email and get their status
       const { data: carrierData, error: carrierError } = await supabase
         .from('carriers')
-        .select('status')
+        .select('status, email')
         .eq('email', values.email)
         .single();
 
-      if (carrierError) {
+      if (carrierError && carrierError.code !== 'PGRST116') {
         console.error("Error checking carrier status:", carrierError);
         setStatusMessage({
           type: 'error',
@@ -64,52 +64,60 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
         return;
       }
 
-      if (carrierData) {
-        // Check carrier status
-        if (carrierData.status === 'pending') {
-          setStatusMessage({
-            type: 'warning',
-            message: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé."
-          });
-          return;
-        }
-
-        if (carrierData.status === 'rejected') {
-          setStatusMessage({
-            type: 'error',
-            message: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas créer de tournées."
-          });
-          return;
-        }
-
-        // Only proceed with login if status is 'active'
-        if (carrierData.status === 'active') {
-          const { error: signInError } = await supabase.auth.signInWithPassword({
-            email: values.email,
-            password: values.password,
-          });
-
-          if (signInError) throw signInError;
-
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            navigate('/');
-          }
-        }
-      } else {
+      // If no carrier found or status is not active, show appropriate message
+      if (!carrierData) {
         setStatusMessage({
           type: 'error',
           message: "Aucun compte transporteur trouvé avec cet email."
         });
+        return;
+      }
+
+      if (carrierData.status === 'pending') {
+        setStatusMessage({
+          type: 'default',
+          message: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé."
+        });
+        return;
+      }
+
+      if (carrierData.status === 'rejected') {
+        setStatusMessage({
+          type: 'error',
+          message: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas créer de tournées."
+        });
+        return;
+      }
+
+      // Only proceed with login if status is 'active'
+      if (carrierData.status === 'active') {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (signInError) {
+          console.error("Login error:", signInError);
+          setStatusMessage({
+            type: 'error',
+            message: signInError.message === "Invalid login credentials"
+              ? "Email ou mot de passe incorrect"
+              : "Une erreur est survenue lors de la connexion"
+          });
+          return;
+        }
+
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate('/');
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);
       setStatusMessage({
         type: 'error',
-        message: error.message === "Invalid login credentials"
-          ? "Email ou mot de passe incorrect"
-          : "Une erreur est survenue lors de la connexion"
+        message: "Une erreur est survenue lors de la connexion"
       });
     } finally {
       setIsLoading(false);
@@ -119,7 +127,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
       {statusMessage && (
-        <Alert variant={statusMessage.type === 'error' ? 'destructive' : 'default'}>
+        <Alert variant={statusMessage.type}>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>
             {statusMessage.type === 'error' ? 'Erreur' : 'Attention'}
