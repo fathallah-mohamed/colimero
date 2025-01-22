@@ -41,7 +41,6 @@ export function ApprovalRequestTabs({
             request={request}
             userType={userType}
             showActions={showActions && (
-              (userType === 'carrier' && request.status === 'pending') ||
               (userType === 'client' && request.status === 'pending') ||
               (userType === 'client' && request.status === 'cancelled')
             )}
@@ -57,7 +56,7 @@ export function ApprovalRequestTabs({
 
   return (
     <Tabs defaultValue="pending" className="w-full">
-      <TabsList className="mb-8">
+      <TabsList className="mb-8 grid w-full grid-cols-3">
         <TabsTrigger value="pending">
           En attente ({pendingRequests.length})
         </TabsTrigger>

@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ApprovalRequestTabs } from "./ApprovalRequestTabs";
 import { useClientApprovalRequests } from "@/hooks/approval-requests/useClientApprovalRequests";
+import { ProfileLoading } from "@/components/profile/ProfileLoading";
 
 export function ClientApprovalRequests() {
   const navigate = useNavigate();
@@ -24,19 +25,23 @@ export function ClientApprovalRequests() {
     checkAuth();
   }, [navigate]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Chargement des demandes...</div>
-      </div>
-    );
-  }
+  const pendingRequests = useMemo(() => 
+    requests.filter(req => req.status === 'pending') || [], [requests]
+  );
+  
+  const approvedRequests = useMemo(() => 
+    requests.filter(req => req.status === 'approved') || [], [requests]
+  );
+  
+  const rejectedRequests = useMemo(() => 
+    requests.filter(req => 
+      req.status === 'rejected' || req.status === 'cancelled'
+    ) || [], [requests]
+  );
 
-  const pendingRequests = requests.filter(req => req.status === 'pending') || [];
-  const approvedRequests = requests.filter(req => req.status === 'approved') || [];
-  const rejectedRequests = requests.filter(req => 
-    req.status === 'rejected' || req.status === 'cancelled'
-  ) || [];
+  if (loading) {
+    return <ProfileLoading />;
+  }
 
   return (
     <ApprovalRequestTabs
