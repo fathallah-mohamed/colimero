@@ -78,9 +78,9 @@ export default function NewRegistrationRequests() {
           first_name: request.first_name,
           last_name: request.last_name,
           phone: request.phone
-        }));
+        } as ApprovalRequest));
 
-        return transformedRequests;
+        return registrationRequests as CarrierRegistrationRequest[];
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
@@ -162,7 +162,7 @@ export default function NewRegistrationRequests() {
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={requests}
+        requests={requests as unknown as ApprovalRequest[]}
         searchTerm={searchTerm}
         onSelect={(request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
