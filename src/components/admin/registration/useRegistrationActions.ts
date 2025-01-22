@@ -2,8 +2,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { approveCarrierRequest, rejectCarrierRequest } from "@/services/carrier-approval";
 import { ApprovalRequest } from "../approval-requests/types";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
-export function useRegistrationActions(refetch: () => Promise<void>) {
+// Update the type of the refetch parameter to match what react-query provides
+export function useRegistrationActions(
+  refetch: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<ApprovalRequest[], Error>>
+) {
   const { toast } = useToast();
 
   const handleApprove = async (request: ApprovalRequest) => {
@@ -18,7 +22,7 @@ export function useRegistrationActions(refetch: () => Promise<void>) {
         description: "Le transporteur a été approuvé avec succès.",
       });
       
-      refetch();
+      await refetch();
     } catch (error: any) {
       console.error("Error approving carrier:", error);
       toast({
@@ -41,7 +45,7 @@ export function useRegistrationActions(refetch: () => Promise<void>) {
         description: "La demande a été rejetée avec succès.",
       });
 
-      refetch();
+      await refetch();
     } catch (error: any) {
       console.error("Error rejecting carrier:", error);
       toast({
