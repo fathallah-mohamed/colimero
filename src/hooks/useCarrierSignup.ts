@@ -18,9 +18,9 @@ export function useCarrierSignup() {
         options: {
           data: {
             user_type: 'carrier',
-            first_name: values.first_name,
-            last_name: values.last_name,
-            company_name: values.company_name
+            first_name: values.firstName,
+            last_name: values.lastName,
+            company_name: values.companyName
           }
         }
       });
@@ -34,21 +34,20 @@ export function useCarrierSignup() {
         .insert({
           id: authData.user.id,
           email: values.email,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          company_name: values.company_name,
-          siret: values.siret || null,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          company_name: values.companyName,
+          siret: values.siret,
           phone: values.phone,
-          phone_secondary: values.phone_secondary || "",
+          phone_secondary: values.phoneSecondary || "",
           address: values.address,
-          coverage_area: values.coverage_area,
+          coverage_area: values.coverageArea,
           avatar_url: "",
-          email_verified: false,
           company_details: {},
           authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
           total_deliveries: 0,
           cities_covered: 30,
-          status: 'pending'
+          status: "pending"
         });
 
       if (carrierError) throw carrierError;
@@ -58,8 +57,8 @@ export function useCarrierSignup() {
         .from('carrier_capacities')
         .insert({
           carrier_id: authData.user.id,
-          total_capacity: values.total_capacity,
-          price_per_kg: values.price_per_kg
+          total_capacity: values.totalCapacity,
+          price_per_kg: values.pricePerKg
         });
 
       if (capacitiesError) throw capacitiesError;
@@ -72,7 +71,7 @@ export function useCarrierSignup() {
             values.services.map((service: string) => ({
               carrier_id: authData.user.id,
               service_type: service,
-              icon: 'package'
+              icon: "package"
             }))
           );
 
