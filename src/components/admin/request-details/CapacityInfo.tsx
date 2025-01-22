@@ -11,11 +11,11 @@ export function CapacityInfo({ request }: CapacityInfoProps) {
       <div className="space-y-2">
         <p>
           <span className="text-gray-500">Capacité totale :</span>{" "}
-          {request.total_capacity || 0} kg
+          {request.tour.total_capacity} kg
         </p>
         <p>
-          <span className="text-gray-500">Prix par kg :</span>{" "}
-          {request.price_per_kg || 0} €
+          <span className="text-gray-500">Capacité restante :</span>{" "}
+          {request.tour.remaining_capacity} kg
         </p>
       </div>
     </div>

@@ -8,10 +8,10 @@ export function RequestHeader({ request }: RequestHeaderProps) {
   return (
     <div>
       <h2 className="text-lg font-semibold">
-        {request.company_name}
+        {request.tour.carrier.company_name}
       </h2>
       <p className="text-gray-600">
-        {request.first_name} {request.last_name}
+        {request.client.first_name} {request.client.last_name}
       </p>
     </div>
   );
