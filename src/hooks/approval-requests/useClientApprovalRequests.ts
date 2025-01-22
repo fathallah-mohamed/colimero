@@ -3,68 +3,72 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
-export function useClientApprovalRequests(userId: string | undefined) {
+export function useClientApprovalRequests(userId: Promise<string | undefined>) {
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (userId) {
-      fetchRequests();
-    }
-  }, [userId]);
+    const fetchRequests = async () => {
+      try {
+        const resolvedUserId = await userId;
+        if (!resolvedUserId) {
+          console.error('No user ID available');
+          return;
+        }
 
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      console.log('Fetching requests for user:', userId);
-      
-      const { data, error } = await supabase
-        .from('approval_requests')
-        .select(`
-          *,
-          tour:tours (
+        setLoading(true);
+        console.log('Fetching requests for user:', resolvedUserId);
+        
+        const { data, error } = await supabase
+          .from('approval_requests')
+          .select(`
             *,
-            carrier:carriers (
+            tour:tours (
+              *,
+              carrier:carriers (
+                id,
+                company_name,
+                email,
+                phone
+              )
+            ),
+            client:clients (
               id,
-              company_name,
+              first_name,
+              last_name,
               email,
               phone
             )
-          ),
-          client:clients (
-            id,
-            first_name,
-            last_name,
-            email,
-            phone
-          )
-        `)
-        .eq('user_id', userId);
+          `)
+          .eq('user_id', resolvedUserId);
 
-      if (error) {
-        console.error('Error fetching requests:', error);
+        if (error) {
+          console.error('Error fetching requests:', error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de charger les demandes d'approbation"
+          });
+          return;
+        }
+
+        console.log('Fetched requests:', data);
+        setRequests(data || []);
+      } catch (error: any) {
+        console.error('Error in fetchRequests:', error);
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Impossible de charger les demandes d'approbation"
+          description: "Une erreur est survenue lors du chargement des demandes"
         });
-        return;
+      } finally {
+        setLoading(false);
       }
+    };
 
-      console.log('Fetched requests:', data);
-      setRequests(data || []);
-    } catch (error: any) {
-      console.error('Error in fetchRequests:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors du chargement des demandes"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchRequests();
+  }, [userId, toast]);
 
   const handleCancelRequest = async (requestId: string) => {
     try {
@@ -74,8 +78,7 @@ export function useClientApprovalRequests(userId: string | undefined) {
           status: 'cancelled',
           updated_at: new Date().toISOString()
         })
-        .eq('id', requestId)
-        .eq('user_id', userId);
+        .eq('id', requestId);
 
       if (error) throw error;
 
@@ -83,7 +86,35 @@ export function useClientApprovalRequests(userId: string | undefined) {
         title: "Succès",
         description: "La demande a été annulée"
       });
-      fetchRequests();
+      
+      // Refresh requests
+      const resolvedUserId = await userId;
+      if (resolvedUserId) {
+        const { data } = await supabase
+          .from('approval_requests')
+          .select(`
+            *,
+            tour:tours (
+              *,
+              carrier:carriers (
+                id,
+                company_name,
+                email,
+                phone
+              )
+            ),
+            client:clients (
+              id,
+              first_name,
+              last_name,
+              email,
+              phone
+            )
+          `)
+          .eq('user_id', resolvedUserId);
+        
+        setRequests(data || []);
+      }
     } catch (error: any) {
       console.error('Error cancelling request:', error);
       toast({
@@ -100,7 +131,6 @@ export function useClientApprovalRequests(userId: string | undefined) {
         .from('approval_requests')
         .delete()
         .eq('id', requestId)
-        .eq('user_id', userId)
         .eq('status', 'cancelled');
 
       if (error) throw error;
@@ -109,7 +139,35 @@ export function useClientApprovalRequests(userId: string | undefined) {
         title: "Succès",
         description: "La demande a été supprimée"
       });
-      fetchRequests();
+      
+      // Refresh requests
+      const resolvedUserId = await userId;
+      if (resolvedUserId) {
+        const { data } = await supabase
+          .from('approval_requests')
+          .select(`
+            *,
+            tour:tours (
+              *,
+              carrier:carriers (
+                id,
+                company_name,
+                email,
+                phone
+              )
+            ),
+            client:clients (
+              id,
+              first_name,
+              last_name,
+              email,
+              phone
+            )
+          `)
+          .eq('user_id', resolvedUserId);
+        
+        setRequests(data || []);
+      }
     } catch (error: any) {
       console.error('Error deleting request:', error);
       toast({
@@ -124,7 +182,6 @@ export function useClientApprovalRequests(userId: string | undefined) {
     requests,
     loading,
     handleCancelRequest,
-    handleDeleteRequest,
-    refetchRequests: fetchRequests
+    handleDeleteRequest
   };
 }

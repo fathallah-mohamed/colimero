@@ -1,14 +1,28 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { ApprovalRequestTabs } from "./ApprovalRequestTabs";
-import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 import { useClientApprovalRequests } from "@/hooks/approval-requests/useClientApprovalRequests";
 
 export function ClientApprovalRequests() {
+  const navigate = useNavigate();
   const {
     requests,
     loading,
     handleCancelRequest,
     handleDeleteRequest
-  } = useClientApprovalRequests();
+  } = useClientApprovalRequests(supabase.auth.getUser().then(({ data }) => data.user?.id));
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/connexion");
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   if (loading) {
     return (
