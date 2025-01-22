@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { RequestList } from "./approval-requests/RequestList";
 import { SearchBar } from "./approval-requests/SearchBar";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { Carrier } from "@/types/carrier";
@@ -9,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { approveCarrierRequest, rejectCarrierRequest } from "@/services/carrier-approval";
+import { RequestList } from "./carrier-requests/RequestList";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
