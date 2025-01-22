@@ -31,27 +31,27 @@ export function useRegistrationRequests() {
           return [];
         }
 
-        const { data: pendingRequests, error: requestsError } = await supabase
-          .from("approval_requests")
+        // Modifié pour sélectionner directement depuis la table carriers
+        const { data: pendingCarriers, error: requestsError } = await supabase
+          .from("carriers")
           .select(`
-            *,
-            carrier:carriers (
-              id,
-              company_name,
-              email,
-              phone,
-              first_name,
-              last_name,
-              siret,
-              address,
-              coverage_area,
-              avatar_url,
-              company_details,
-              authorized_routes
-            )
+            id,
+            company_name,
+            email,
+            phone,
+            first_name,
+            last_name,
+            siret,
+            address,
+            coverage_area,
+            avatar_url,
+            company_details,
+            authorized_routes,
+            created_at,
+            status
           `)
           .eq("status", "pending")
-          .returns<ApprovalRequest[]>();
+          .order("created_at", { ascending: false });
 
         if (requestsError) {
           console.error("Error fetching requests:", requestsError);
@@ -63,7 +63,28 @@ export function useRegistrationRequests() {
           return [];
         }
 
-        return pendingRequests || [];
+        // Transformer les données pour correspondre au format ApprovalRequest
+        const transformedRequests: ApprovalRequest[] = pendingCarriers.map(carrier => ({
+          id: carrier.id,
+          status: carrier.status,
+          created_at: carrier.created_at,
+          carrier: {
+            id: carrier.id,
+            company_name: carrier.company_name,
+            email: carrier.email,
+            phone: carrier.phone,
+            first_name: carrier.first_name,
+            last_name: carrier.last_name,
+            siret: carrier.siret,
+            address: carrier.address,
+            coverage_area: carrier.coverage_area,
+            avatar_url: carrier.avatar_url,
+            company_details: carrier.company_details,
+            authorized_routes: carrier.authorized_routes
+          }
+        }));
+
+        return transformedRequests;
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
