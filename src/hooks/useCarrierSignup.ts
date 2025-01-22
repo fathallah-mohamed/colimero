@@ -12,28 +12,13 @@ export function useCarrierSignup() {
   const handleSubmit = async (values: any) => {
     setIsLoading(true);
     try {
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            user_type: 'carrier',
-            first_name: values.first_name,
-            last_name: values.last_name,
-            company_name: values.company_name
-          }
-        }
-      });
+      const carrierId = uuidv4();
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("No user data returned");
-
-      // Then create the carrier record using the auth user's ID
+      // Create the carrier registration request
       const { error: carrierError } = await supabase
-        .from("carriers")
+        .from("carrier_registration_requests")
         .insert({
-          id: authData.user.id,
+          id: carrierId,
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
@@ -43,6 +28,9 @@ export function useCarrierSignup() {
           phone_secondary: values.phone_secondary || "",
           address: values.address,
           coverage_area: values.coverage_area,
+          total_capacity: values.total_capacity,
+          price_per_kg: values.price_per_kg,
+          services: values.services,
           avatar_url: "",
           company_details: {},
           authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
