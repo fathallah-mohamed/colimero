@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Info } from "lucide-react";
+import { Info, FileDown } from "lucide-react";
 import { EditBookingDialog } from "./EditBookingDialog";
 import { BookingActions } from "./card/BookingActions";
 import { BookingHeaderSection } from "./header/BookingHeaderSection";
@@ -10,6 +10,7 @@ import { BookingDetailsContent } from "./details/BookingDetailsContent";
 import type { Booking, BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
+import { generateDeliverySlip } from "@/utils/generateDeliverySlip";
 
 interface BookingCardProps {
   booking: Booking;
@@ -59,12 +60,39 @@ export function BookingCard({
     }
   };
 
+  const handleDownloadDeliverySlip = () => {
+    try {
+      generateDeliverySlip(booking);
+      toast({
+        title: "Bon de livraison généré",
+        description: "Le bon de livraison a été téléchargé avec succès.",
+      });
+    } catch (error) {
+      console.error("Error generating delivery slip:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de générer le bon de livraison.",
+      });
+    }
+  };
+
   return (
     <Card className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="space-y-4">
         <BookingHeaderSection booking={booking} />
         
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownloadDeliverySlip}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          >
+            <FileDown className="h-4 w-4" />
+            Télécharger le bon de livraison
+          </Button>
+
           <BookingActions
             bookingId={booking.id}
             status={booking.status}
