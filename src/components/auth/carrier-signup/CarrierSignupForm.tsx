@@ -58,6 +58,9 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
 
   const onSubmit = async (values: FormValues) => {
     try {
+      // Transform empty SIRET string to null
+      const siretValue = values.siret.trim() === "" ? null : values.siret;
+      
       const { error: registrationError } = await supabase
         .from("carrier_registration_requests")
         .insert({
@@ -65,7 +68,7 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
           first_name: values.first_name,
           last_name: values.last_name,
           company_name: values.company_name,
-          siret: values.siret,
+          siret: siretValue, // Use transformed value
           phone: values.phone,
           phone_secondary: values.phone_secondary,
           address: values.address,
