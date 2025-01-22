@@ -4,7 +4,7 @@ import type { BookingStatus } from "@/types/booking";
 interface BookingsListProps {
   bookings: any[];
   isCollecting: boolean;
-  onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
+  onStatusChange: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
   onUpdate: () => Promise<void>;
   tourStatus?: string;
 }
