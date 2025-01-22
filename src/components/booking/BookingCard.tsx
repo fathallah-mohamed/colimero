@@ -27,9 +27,17 @@ export function BookingCard({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  console.log("BookingCard - Booking status:", booking.status);
+  console.log("BookingCard - Tour status:", tourStatus);
+
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", booking.id);
     setShowEditDialog(true);
+  };
+
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    console.log("Changing booking status to:", newStatus);
+    await onStatusChange(booking.id, newStatus);
   };
 
   return (
@@ -45,7 +53,7 @@ export function BookingCard({
             onStatusChange={onStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
-            userType="client"
+            userType="carrier"
           />
         </div>
 
