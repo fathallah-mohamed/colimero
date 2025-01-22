@@ -10,30 +10,46 @@ import Navigation from "@/components/Navigation";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
-import { Carrier } from "@/types/carrier";
+import { ApprovalRequest } from "./approval-requests/types";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
 
-  const { data: carriers = [], isLoading, refetch } = useQuery({
-    queryKey: ["carriers", "rejected"],
+  const { data: requests = [], isLoading, refetch } = useQuery({
+    queryKey: ["approval-requests", "rejected"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("carriers")
-        .select("*")
+        .from("approval_requests")
+        .select(`
+          *,
+          carrier:carriers (
+            id,
+            company_name,
+            email,
+            phone,
+            first_name,
+            last_name,
+            siret,
+            address,
+            coverage_area,
+            avatar_url,
+            company_details,
+            authorized_routes
+          )
+        `)
         .eq("status", "rejected")
         .order("created_at", { ascending: false })
-        .returns<Carrier[]>();
+        .returns<ApprovalRequest[]>();
 
       if (error) throw error;
       return data;
     },
   });
 
-  const handleApprove = async (carrier: Carrier) => {
+  const handleApprove = async (request: ApprovalRequest) => {
     if (isApproving) return;
     
     setIsApproving(true);
@@ -41,7 +57,7 @@ export default function RejectedRequests() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      await approveCarrierRequest(carrier.id, session.user.id);
+      await approveCarrierRequest(request.carrier.id, session.user.id);
 
       toast({
         title: "Demande approuvée",
@@ -49,7 +65,7 @@ export default function RejectedRequests() {
       });
 
       refetch();
-      setSelectedCarrier(null);
+      setSelectedRequest(null);
     } catch (error: any) {
       console.error("Error approving request:", error);
       toast({
@@ -62,16 +78,16 @@ export default function RejectedRequests() {
     }
   };
 
-  const handleReject = async (carrier: Carrier, reason: string) => {
+  const handleReject = async (request: ApprovalRequest, reason: string) => {
     try {
       const { error } = await supabase
-        .from('carriers')
+        .from('approval_requests')
         .update({
           status: 'rejected',
           reason: reason,
           updated_at: new Date().toISOString()
         })
-        .eq('id', carrier.id);
+        .eq('id', request.id);
 
       if (error) throw error;
 
@@ -81,7 +97,7 @@ export default function RejectedRequests() {
       });
 
       refetch();
-      setSelectedCarrier(null);
+      setSelectedRequest(null);
     } catch (error: any) {
       console.error('Error rejecting request:', error);
       toast({
@@ -92,10 +108,10 @@ export default function RejectedRequests() {
     }
   };
 
-  const filteredCarriers = carriers?.filter(
-    (carrier) =>
-      carrier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      carrier.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRequests = requests?.filter(
+    (request) =>
+      request.carrier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.carrier.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
@@ -126,8 +142,8 @@ export default function RejectedRequests() {
         <div className="hidden md:block">
           <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
             <NewRequestsTable
-              requests={filteredCarriers}
-              onViewDetails={setSelectedCarrier}
+              requests={filteredRequests}
+              onViewDetails={setSelectedRequest}
               showApproveButton={true}
               onApprove={handleApprove}
               onReject={handleReject}
@@ -136,20 +152,20 @@ export default function RejectedRequests() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:hidden">
-          {filteredCarriers?.map((carrier) => (
+          {filteredRequests?.map((request) => (
             <NewRequestCard
-              key={carrier.id}
-              request={carrier}
-              onViewDetails={() => setSelectedCarrier(carrier)}
+              key={request.id}
+              request={request}
+              onViewDetails={() => setSelectedRequest(request)}
               showApproveButton={true}
-              onApprove={() => handleApprove(carrier)}
+              onApprove={() => handleApprove(request)}
             />
           ))}
         </div>
 
         <RequestDetailsDialog
-          request={selectedCarrier}
-          onClose={() => setSelectedCarrier(null)}
+          request={selectedRequest}
+          onClose={() => setSelectedRequest(null)}
           onApprove={handleApprove}
           onReject={handleReject}
           showApproveButton={true}
