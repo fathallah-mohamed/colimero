@@ -48,7 +48,6 @@ export function useRegistrationRequests() {
             company_details,
             authorized_routes,
             created_at,
-            updated_at,
             status,
             email_verified,
             total_deliveries,
@@ -72,10 +71,10 @@ export function useRegistrationRequests() {
           id: carrier.id,
           user_id: carrier.id,
           tour_id: 0,
-          status: carrier.status,
+          status: carrier.status || "pending",
           message: null,
           created_at: carrier.created_at,
-          updated_at: carrier.updated_at,
+          updated_at: carrier.created_at, // Use created_at as fallback since updated_at doesn't exist
           reason: null,
           email_sent: false,
           activation_token: null,
@@ -90,7 +89,7 @@ export function useRegistrationRequests() {
             departure_date: new Date().toISOString(),
             collection_date: new Date().toISOString(),
             created_at: carrier.created_at,
-            updated_at: carrier.updated_at,
+            updated_at: carrier.created_at, // Use created_at as fallback
             departure_country: "FR",
             destination_country: "TN",
             status: "pending",
@@ -130,9 +129,9 @@ export function useRegistrationRequests() {
             email_verified: carrier.email_verified || false,
             total_deliveries: carrier.total_deliveries || 0,
             cities_covered: carrier.cities_covered || 30,
-            status: carrier.status,
+            status: carrier.status || "pending",
             created_at: carrier.created_at,
-            updated_at: carrier.updated_at
+            updated_at: carrier.created_at // Use created_at as fallback
           }
         }));
 
