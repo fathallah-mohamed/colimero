@@ -6,8 +6,12 @@ import { formSchema, type FormValues } from "./FormSchema";
 import { FormSections } from "./FormSections";
 import { useCarrierRegistration } from "@/hooks/useCarrierRegistration";
 
-export default function CarrierSignupForm() {
-  const { isLoading, handleRegistration } = useCarrierRegistration();
+interface CarrierSignupFormProps {
+  onSuccess?: () => void;
+}
+
+export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
+  const { isLoading, handleRegistration } = useCarrierRegistration(onSuccess);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

@@ -2,73 +2,76 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import type { FormValues } from "@/components/auth/carrier-signup/FormSchema";
 
-export function useCarrierRegistration() {
+export function useCarrierRegistration(onSuccess?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleRegistration = async (values: FormValues) => {
+  const handleRegistration = async (values: any) => {
     setIsLoading(true);
     try {
-      // Créer l'utilisateur auth
+      // First, create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
           data: {
             user_type: 'carrier',
-            first_name: values.first_name,
-            last_name: values.last_name,
-            company_name: values.company_name
+            first_name: values.firstName,
+            last_name: values.lastName,
+            company_name: values.companyName
           }
         }
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error("Aucune donnée utilisateur retournée");
+      if (!authData.user) throw new Error("No user data returned");
 
-      // Attendre que l'utilisateur soit créé
+      // Add a delay to ensure auth user is fully created
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Créer le profil transporteur
+      // Then create the carrier profile using the auth user's ID
       const { error: carrierError } = await supabase
         .from("carriers")
         .insert({
           id: authData.user.id,
           email: values.email,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          company_name: values.company_name,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          company_name: values.companyName,
           siret: values.siret,
           phone: values.phone,
-          phone_secondary: values.phone_secondary || "",
+          phone_secondary: values.phoneSecondary || "",
           address: values.address,
-          coverage_area: values.coverage_area,
-          avatar_url: values.avatar_url || "",
+          coverage_area: values.coverageArea,
+          avatar_url: "",
+          company_details: {},
+          authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
+          total_deliveries: 0,
+          cities_covered: 30,
           status: "pending"
         });
 
       if (carrierError) throw carrierError;
 
-      // Créer les capacités du transporteur
+      // Create carrier capacities
       const { error: capacitiesError } = await supabase
         .from('carrier_capacities')
         .insert({
           carrier_id: authData.user.id,
-          total_capacity: values.total_capacity || 1000,
-          price_per_kg: values.price_per_kg || 12
+          total_capacity: values.totalCapacity,
+          price_per_kg: values.pricePerKg
         });
 
       if (capacitiesError) throw capacitiesError;
 
-      // Créer les services du transporteur si fournis
+      // Create carrier services if provided
       if (values.services?.length > 0) {
         const { error: servicesError } = await supabase
           .from('carrier_services')
           .insert(
-            values.services.map(service => ({
+            values.services.map((service: string) => ({
               carrier_id: authData.user.id,
               service_type: service,
               icon: "package"
@@ -78,28 +81,22 @@ export function useCarrierRegistration() {
         if (servicesError) throw servicesError;
       }
 
-      // Envoyer l'email de notification à l'admin
-      await supabase.functions.invoke('send-registration-email', {
-        body: { 
-          email: values.email,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          company_name: values.company_name
-        }
-      });
-
       toast({
-        title: "Demande envoyée avec succès",
-        description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
+        title: "Inscription réussie",
+        description: "Votre demande d'inscription a été envoyée avec succès.",
       });
 
-      navigate("/");
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate("/connexion");
+      }
     } catch (error: any) {
-      console.error("Erreur lors de l'inscription:", error);
+      console.error("Error in carrier signup:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'envoi de votre demande",
+        description: error.message || "Une erreur est survenue lors de l'inscription.",
       });
     } finally {
       setIsLoading(false);
@@ -108,6 +105,6 @@ export function useCarrierRegistration() {
 
   return {
     isLoading,
-    handleRegistration
+    handleRegistration,
   };
 }
