@@ -12,21 +12,37 @@ export function useCarrierSignup() {
   const handleSubmit = async (values: any) => {
     setIsLoading(true);
     try {
-      const carrierId = uuidv4();
-      
-      const { error } = await supabase
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            user_type: 'carrier',
+            first_name: values.first_name,
+            last_name: values.last_name,
+            company_name: values.company_name
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("No user data returned");
+
+      // Then create the carrier record using the auth user's ID
+      const { error: carrierError } = await supabase
         .from("carriers")
         .insert({
-          id: carrierId,
+          id: authData.user.id,
           email: values.email,
-          first_name: values.firstName,
-          last_name: values.lastName,
-          company_name: values.companyName,
-          siret: values.siret,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          company_name: values.company_name,
+          siret: values.siret || null,
           phone: values.phone,
-          phone_secondary: values.phoneSecondary || "",
+          phone_secondary: values.phone_secondary || "",
           address: values.address,
-          coverage_area: values.coverageArea,
+          coverage_area: values.coverage_area,
           avatar_url: "",
           company_details: {},
           authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
@@ -36,7 +52,7 @@ export function useCarrierSignup() {
           password: values.password
         });
 
-      if (error) throw error;
+      if (carrierError) throw carrierError;
 
       toast({
         title: "Inscription réussie",
