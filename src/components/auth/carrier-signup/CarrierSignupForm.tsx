@@ -75,6 +75,9 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
       if (authError) throw authError;
       if (!authData.user) throw new Error("No user data returned");
 
+      // Add a delay to ensure auth user is created
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       // Then create the carrier profile using the auth user's ID
       const { error: registrationError } = await supabase
         .from("carriers")
