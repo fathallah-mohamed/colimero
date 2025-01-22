@@ -7,118 +7,77 @@ export function generateDeliverySlip(booking: Booking) {
   const doc = new jsPDF();
   let yPos = 20;
 
-  // En-tête avec le numéro de suivi
-  doc.setFontSize(24);
-  doc.setFont(undefined, 'bold');
-  doc.text("BON DE LIVRAISON", 105, yPos, { align: "center" });
-  yPos += 15;
+  // Add title
+  doc.setFontSize(20);
+  doc.text("Bon de livraison", 105, yPos, { align: "center" });
+  yPos += 20;
 
+  // Add tracking number
   doc.setFontSize(16);
-  doc.text(`N° de suivi: ${booking.tracking_number}`, 105, yPos, { align: "center" });
+  doc.text(`N° de suivi: ${booking.tracking_number}`, 20, yPos);
+  yPos += 20;
+
+  // Add sender information
+  doc.setFontSize(14);
+  doc.text("Expéditeur", 20, yPos);
+  yPos += 10;
+  doc.setFontSize(12);
+  doc.text([
+    `Nom: ${booking.sender_name}`,
+    `Téléphone: ${booking.sender_phone}`,
+    `Ville: ${booking.pickup_city}`
+  ], 30, yPos);
   yPos += 25;
 
-  // Configuration du style du tableau
-  const tableStartX = 20;
-  const colWidth = 170;
-  const rowHeight = 30;
-  const fontSize = 12;
-  const headerFontSize = 14;
-  const recipientFontSize = 18; // Police plus grande pour le destinataire
-
-  // Fonction pour dessiner une ligne de tableau
-  const drawTableRow = (title: string, content: string, y: number, isHeader = false, isRecipient = false) => {
-    // Dessiner le fond
-    doc.setFillColor(isHeader ? 240 : 255, isHeader ? 240 : 255, isHeader ? 240 : 255);
-    doc.rect(tableStartX, y, colWidth, rowHeight, 'F');
-    
-    // Dessiner les bordures
-    doc.setDrawColor(200, 200, 200);
-    doc.rect(tableStartX, y, colWidth, rowHeight);
-
-    // Ajouter le texte
-    doc.setFontSize(isHeader ? headerFontSize : fontSize);
-    doc.setFont(undefined, isHeader ? 'bold' : 'normal');
-    doc.text(title, tableStartX + 5, y + 10);
-    
-    // Texte du contenu plus grand pour le destinataire
-    doc.setFont(undefined, isRecipient ? 'bold' : 'normal');
-    doc.setFontSize(isRecipient ? recipientFontSize : (isHeader ? headerFontSize : fontSize));
-    doc.text(content, tableStartX + 5, y + 22);
-  };
-
-  // Informations de la tournée
-  doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
-  doc.text("INFORMATIONS TOURNÉE", tableStartX, yPos);
+  // Add recipient information
+  doc.setFontSize(14);
+  doc.text("Destinataire", 20, yPos);
   yPos += 10;
+  doc.setFontSize(12);
+  doc.text([
+    `Nom: ${booking.recipient_name}`,
+    `Téléphone: ${booking.recipient_phone}`,
+    `Adresse: ${booking.recipient_address}`,
+    `Ville: ${booking.delivery_city}`
+  ], 30, yPos);
+  yPos += 35;
 
-  drawTableRow("Trajet", `${booking.tours?.departure_country} → ${booking.tours?.destination_country}`, yPos);
-  yPos += rowHeight;
-  drawTableRow("Date de départ", format(new Date(booking.tours?.departure_date || ''), "d MMMM yyyy", { locale: fr }), yPos);
-  yPos += rowHeight;
-  drawTableRow("Transporteur", booking.tours?.carriers?.company_name || '', yPos);
-  yPos += rowHeight + 15;
-
-  // Section Destinataire (en plus grand)
-  doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
-  doc.text("DESTINATAIRE", tableStartX, yPos);
+  // Add package information
+  doc.setFontSize(14);
+  doc.text("Informations du colis", 20, yPos);
   yPos += 10;
+  doc.setFontSize(12);
+  doc.text([
+    `Type: ${booking.item_type}`,
+    `Poids: ${booking.weight} kg`,
+    `Description: ${booking.package_description || "Aucune description"}`
+  ], 30, yPos);
+  yPos += 25;
 
-  drawTableRow("Nom complet", booking.recipient_name, yPos, false, true);
-  yPos += rowHeight;
-  drawTableRow("Téléphone", booking.recipient_phone, yPos, false, true);
-  yPos += rowHeight;
-  drawTableRow("Adresse complète", booking.recipient_address, yPos, false, true);
-  yPos += rowHeight;
-  drawTableRow("Ville", booking.delivery_city, yPos, false, true);
-  yPos += rowHeight + 15;
-
-  // Section Expéditeur
-  doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
-  doc.text("EXPÉDITEUR", tableStartX, yPos);
-  yPos += 10;
-
-  drawTableRow("Nom complet", booking.sender_name, yPos);
-  yPos += rowHeight;
-  drawTableRow("Téléphone", booking.sender_phone, yPos);
-  yPos += rowHeight;
-  drawTableRow("Ville", booking.pickup_city, yPos);
-  yPos += rowHeight + 15;
-
-  // Section Colis
-  doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
-  doc.text("INFORMATIONS COLIS", tableStartX, yPos);
-  yPos += 10;
-
-  drawTableRow("Type de colis", booking.item_type, yPos);
-  yPos += rowHeight;
-  drawTableRow("Poids", `${booking.weight} kg`, yPos);
-  yPos += rowHeight;
-
+  // Add special items if any
   if (booking.special_items && booking.special_items.length > 0) {
+    doc.setFontSize(14);
+    doc.text("Objets spéciaux", 20, yPos);
+    yPos += 10;
+    doc.setFontSize(12);
     const specialItems = booking.special_items.map((item: any) => 
       `${item.name}${item.quantity ? ` (${item.quantity})` : ''}`
-    ).join(", ");
-    drawTableRow("Objets spéciaux", specialItems, yPos);
-    yPos += rowHeight;
+    );
+    doc.text(specialItems, 30, yPos);
+    yPos += 15;
   }
 
+  // Add content types if any
   if (booking.content_types && booking.content_types.length > 0) {
-    drawTableRow("Types de contenu", booking.content_types.join(", "), yPos);
-    yPos += rowHeight;
+    doc.setFontSize(14);
+    doc.text("Types de contenu", 20, yPos);
+    yPos += 10;
+    doc.setFontSize(12);
+    doc.text(booking.content_types.join(", "), 30, yPos);
   }
 
-  if (booking.package_description) {
-    drawTableRow("Description", booking.package_description, yPos);
-    yPos += rowHeight;
-  }
-
-  // Date de génération en bas de page
+  // Add date
   doc.setFontSize(10);
-  doc.setFont(undefined, 'normal');
   doc.text(
     `Généré le ${format(new Date(), "d MMMM yyyy à HH:mm", { locale: fr })}`,
     20,
