@@ -1,4 +1,5 @@
 import { Json } from "@/types/database/tables";
+import { Carrier } from "@/types/carrier";
 
 export interface Tour {
   id: number;
@@ -34,32 +35,6 @@ export interface Client {
   phone: string | null;
 }
 
-export interface CarrierRegistrationRequest {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  company_name: string;
-  siret: string | null;
-  phone: string;
-  phone_secondary: string | null;
-  address: string;
-  coverage_area: string[];
-  total_capacity: number | null;
-  price_per_kg: number | null;
-  services: string[] | null;
-  status: string;
-  reason: string | null;
-  created_at: string;
-  updated_at: string;
-  avatar_url: string | null;
-  email_verified: boolean | null;
-  company_details: Json | null;
-  authorized_routes: Json | null;
-  total_deliveries: number | null;
-  cities_covered: number | null;
-}
-
 export interface ApprovalRequest {
   id: string;
   user_id: string;
@@ -75,9 +50,5 @@ export interface ApprovalRequest {
   pickup_city: string;
   tour: Tour;
   client: Client;
-  company_name?: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
+  carrier: Carrier;
 }

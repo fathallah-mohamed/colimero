@@ -3,20 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchBar } from "./approval-requests/SearchBar";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
-import { Carrier } from "@/types/carrier";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { approveCarrierRequest, rejectCarrierRequest } from "@/services/carrier-approval";
 import { RequestList } from "./carrier-requests/RequestList";
+import { ApprovalRequest } from "./approval-requests/types";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const { data: carriers = [], isLoading, refetch } = useQuery({
+  const { data: requests = [], isLoading, refetch } = useQuery({
     queryKey: ["carriers", "pending"],
     queryFn: async () => {
       try {
@@ -39,14 +39,30 @@ export default function NewRegistrationRequests() {
           return [];
         }
 
-        const { data: pendingCarriers, error: carriersError } = await supabase
-          .from("carriers")
-          .select("*")
+        const { data: pendingRequests, error: requestsError } = await supabase
+          .from("approval_requests")
+          .select(`
+            *,
+            carrier:carriers (
+              id,
+              company_name,
+              email,
+              phone,
+              first_name,
+              last_name,
+              siret,
+              address,
+              coverage_area,
+              avatar_url,
+              company_details,
+              authorized_routes
+            )
+          `)
           .eq("status", "pending")
-          .returns<Carrier[]>();
+          .returns<ApprovalRequest[]>();
 
-        if (carriersError) {
-          console.error("Error fetching carriers:", carriersError);
+        if (requestsError) {
+          console.error("Error fetching requests:", requestsError);
           toast({
             variant: "destructive",
             title: "Erreur",
@@ -55,7 +71,7 @@ export default function NewRegistrationRequests() {
           return [];
         }
 
-        return pendingCarriers;
+        return pendingRequests;
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
@@ -68,12 +84,12 @@ export default function NewRegistrationRequests() {
     },
   });
 
-  const handleApprove = async (carrier: Carrier) => {
+  const handleApprove = async (request: ApprovalRequest) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      await approveCarrierRequest(carrier.id, session.user.id);
+      await approveCarrierRequest(request.carrier.id, session.user.id);
       
       toast({
         title: "Demande approuvée",
@@ -91,12 +107,12 @@ export default function NewRegistrationRequests() {
     }
   };
 
-  const handleReject = async (carrier: Carrier, reason: string) => {
+  const handleReject = async (request: ApprovalRequest, reason: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      await rejectCarrierRequest(carrier.id, session.user.id, reason);
+      await rejectCarrierRequest(request.carrier.id, session.user.id, reason);
 
       toast({
         title: "Demande rejetée",
@@ -127,16 +143,16 @@ export default function NewRegistrationRequests() {
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={carriers}
+        requests={requests}
         searchTerm={searchTerm}
-        onSelect={setSelectedCarrier}
+        onSelect={setSelectedRequest}
         onApprove={handleApprove}
         onReject={handleReject}
       />
 
       <RequestDetailsDialog
-        request={selectedCarrier}
-        onClose={() => setSelectedCarrier(null)}
+        request={selectedRequest}
+        onClose={() => setSelectedRequest(null)}
         onApprove={handleApprove}
         onReject={handleReject}
       />
