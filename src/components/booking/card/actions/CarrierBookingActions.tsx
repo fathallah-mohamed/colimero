@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Edit2, RotateCcw, CheckSquare } from "lucide-react";
+import { BookingStatus } from "@/types/booking";
+import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
 import { CancelConfirmDialog } from "./CancelConfirmDialog";
-import type { BookingStatus } from "@/types/booking";
-import { useToast } from "@/hooks/use-toast";
 
 interface CarrierBookingActionsProps {
   status: BookingStatus;
   tourStatus: string;
-  onStatusChange: (status: BookingStatus) => Promise<void>;
+  onStatusChange: (newStatus: BookingStatus) => void;
   onEdit: () => void;
 }
 
@@ -15,30 +14,11 @@ export function CarrierBookingActions({
   status,
   tourStatus,
   onStatusChange,
-  onEdit,
+  onEdit
 }: CarrierBookingActionsProps) {
-  const { toast } = useToast();
-
-  if (!['Programmée', 'Ramassage en cours'].includes(tourStatus)) {
-    return null;
-  }
-
-  const handleConfirm = async () => {
-    try {
-      console.log("CarrierBookingActions - Confirming booking...");
-      await onStatusChange("confirmed");
-      toast({
-        title: "Réservation confirmée",
-        description: "La réservation a été confirmée avec succès.",
-      });
-    } catch (error) {
-      console.error("CarrierBookingActions - Error confirming booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de confirmer la réservation.",
-      });
-    }
+  const handleStatusChange = (newStatus: BookingStatus) => {
+    console.log('CarrierBookingActions - Changing status to:', newStatus);
+    onStatusChange(newStatus);
   };
 
   return (
@@ -53,31 +33,46 @@ export function CarrierBookingActions({
         Modifier
       </Button>
 
-      {status === "pending" && (
-        <>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-green-500 hover:text-green-600 gap-2"
-            onClick={handleConfirm}
-          >
-            <CheckSquare className="h-4 w-4" />
-            Confirmer
-          </Button>
-          <CancelConfirmDialog onConfirm={() => onStatusChange("cancelled")} />
-        </>
-      )}
-
       {status === "cancelled" && (
         <Button
           variant="outline"
           size="sm"
           className="text-blue-500 hover:text-blue-600 gap-2"
-          onClick={() => onStatusChange("pending")}
+          onClick={() => handleStatusChange("pending")}
         >
           <RotateCcw className="h-4 w-4" />
           Remettre en attente
         </Button>
+      )}
+
+      {status === "pending" && tourStatus === "Programmée" && (
+        <>
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-green-500 hover:text-green-600 gap-2"
+            onClick={() => handleStatusChange("confirmed")}
+          >
+            <CheckSquare className="h-4 w-4" />
+            Confirmer
+          </Button>
+        </>
+      )}
+
+      {status === "confirmed" && tourStatus === "Ramassage en cours" && (
+        <>
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-green-500 hover:text-green-600 gap-2"
+            onClick={() => handleStatusChange("collected")}
+          >
+            <CheckSquare className="h-4 w-4" />
+            Marquer comme collectée
+          </Button>
+        </>
       )}
     </div>
   );
