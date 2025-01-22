@@ -12,7 +12,7 @@ import type { Booking, BookingStatus } from "@/types/booking";
 interface BookingCardProps {
   booking: Booking;
   isCollecting: boolean;
-  onStatusChange: (bookingId: string, status: BookingStatus) => void;
+  onStatusChange: (bookingId: string, status: BookingStatus) => Promise<void>;
   onUpdate: () => Promise<void>;
   tourStatus?: string;
 }
