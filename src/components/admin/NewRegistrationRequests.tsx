@@ -107,12 +107,12 @@ export default function NewRegistrationRequests() {
     }
   };
 
-  const handleReject = async (request: ApprovalRequest, reason: string) => {
+  const handleReject = async (request: ApprovalRequest) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      await rejectCarrierRequest(request.carrier?.id || '', session.user.id, reason);
+      await rejectCarrierRequest(request.carrier?.id || '', session.user.id, request.reason || '');
 
       toast({
         title: "Demande rejetée",
