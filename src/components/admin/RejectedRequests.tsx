@@ -78,13 +78,13 @@ export default function RejectedRequests() {
     }
   };
 
-  const handleReject = async (request: ApprovalRequest, reason: string) => {
+  const handleReject = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
         .update({
           status: 'rejected',
-          reason: reason,
+          reason: request.reason,
           updated_at: new Date().toISOString()
         })
         .eq('id', request.id);

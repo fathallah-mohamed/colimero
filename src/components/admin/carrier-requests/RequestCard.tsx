@@ -1,58 +1,60 @@
-import { Button } from "@/components/ui/button";
+import { ApprovalRequest } from "../approval-requests/types";
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Carrier } from "@/types/carrier";
-import { Building2, Mail, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Check, X } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface RequestCardProps {
-  request: Carrier;
-  onSelect: () => void;
+  request: ApprovalRequest;
+  onClick: () => void;
   onApprove: () => void;
-  onReject: (reason: string) => void;
+  onReject: () => void;
 }
 
 export function RequestCard({
   request,
-  onSelect,
+  onClick,
   onApprove,
   onReject,
 }: RequestCardProps) {
   return (
-    <Card className="p-6">
-      <div className="space-y-4">
-        <div className="flex justify-between items-start">
-          <div className="space-y-1">
-            <h3 className="text-lg font-semibold">{request.company_name}</h3>
-            <div className="flex items-center gap-2 text-gray-500">
-              <Building2 className="h-4 w-4" />
-              <span>{request.siret}</span>
-            </div>
-          </div>
-          <Button variant="outline" onClick={onSelect}>
-            Voir détails
-          </Button>
+    <Card className="p-4">
+      <div className="flex justify-between items-start">
+        <div onClick={onClick} className="cursor-pointer">
+          <h3 className="font-medium">
+            {request.carrier?.company_name || 'N/A'}
+          </h3>
+          <p className="text-sm text-gray-600">{request.carrier?.email || 'Email non disponible'}</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {format(new Date(request.created_at), "d MMMM yyyy", { locale: fr })}
+          </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-2 text-gray-500">
-            <Mail className="h-4 w-4" />
-            <span>{request.email}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-500">
-            <Phone className="h-4 w-4" />
-            <span>{request.phone}</span>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onReject("Demande rejetée")}
-            className="text-red-500 hover:text-red-600"
-          >
-            Rejeter
-          </Button>
-          <Button onClick={onApprove}>Approuver</Button>
-        </div>
+        <Badge variant={request.status === 'rejected' ? 'destructive' : 'default'}>
+          {request.status}
+        </Badge>
+      </div>
+      
+      <div className="flex gap-2 mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onApprove}
+          className="flex items-center gap-2"
+        >
+          <Check className="h-4 w-4" />
+          Approuver
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onReject}
+          className="flex items-center gap-2 text-destructive hover:text-destructive"
+        >
+          <X className="h-4 w-4" />
+          Rejeter
+        </Button>
       </div>
     </Card>
   );

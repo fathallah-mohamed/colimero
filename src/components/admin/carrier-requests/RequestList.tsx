@@ -6,7 +6,7 @@ interface RequestListProps {
   searchTerm: string;
   onSelect: (request: ApprovalRequest) => void;
   onApprove: (request: ApprovalRequest) => Promise<void>;
-  onReject: (request: ApprovalRequest, reason: string) => Promise<void>;
+  onReject: (request: ApprovalRequest) => void;
 }
 
 export function RequestList({
@@ -30,7 +30,7 @@ export function RequestList({
           request={request}
           onClick={() => onSelect(request)}
           onApprove={() => onApprove(request)}
-          onReject={() => onReject(request, "")}
+          onReject={() => onReject(request)}
         />
       ))}
     </div>
