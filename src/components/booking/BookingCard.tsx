@@ -8,6 +8,7 @@ import { BookingActions } from "./card/BookingActions";
 import { BookingHeaderSection } from "./header/BookingHeaderSection";
 import { BookingDetailsContent } from "./details/BookingDetailsContent";
 import type { Booking, BookingStatus } from "@/types/booking";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookingCardProps {
   booking: Booking;
@@ -26,6 +27,7 @@ export function BookingCard({
 }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const { toast } = useToast();
 
   console.log("BookingCard - Booking status:", booking.status);
   console.log("BookingCard - Tour status:", tourStatus);
@@ -36,8 +38,22 @@ export function BookingCard({
   };
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
-    console.log("Changing booking status to:", newStatus);
-    await onStatusChange(booking.id, newStatus);
+    try {
+      console.log("Changing booking status to:", newStatus);
+      await onStatusChange(booking.id, newStatus);
+      await onUpdate();
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut de la réservation a été mis à jour avec succès.",
+      });
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la réservation.",
+      });
+    }
   };
 
   return (
@@ -50,7 +66,7 @@ export function BookingCard({
             bookingId={booking.id}
             status={booking.status}
             tourStatus={tourStatus || ''}
-            onStatusChange={onStatusChange}
+            onStatusChange={handleStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
             userType="carrier"

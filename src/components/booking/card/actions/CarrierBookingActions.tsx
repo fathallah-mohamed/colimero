@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Edit2, RotateCcw, CheckSquare } from "lucide-react";
 import { CancelConfirmDialog } from "./CancelConfirmDialog";
 import type { BookingStatus } from "@/types/booking";
+import { useToast } from "@/hooks/use-toast";
 
 interface CarrierBookingActionsProps {
   status: BookingStatus;
@@ -16,6 +17,8 @@ export function CarrierBookingActions({
   onStatusChange,
   onEdit,
 }: CarrierBookingActionsProps) {
+  const { toast } = useToast();
+
   if (!['Programmée', 'Ramassage en cours'].includes(tourStatus)) {
     return null;
   }
@@ -24,8 +27,17 @@ export function CarrierBookingActions({
     try {
       console.log("CarrierBookingActions - Confirming booking...");
       await onStatusChange("confirmed");
+      toast({
+        title: "Réservation confirmée",
+        description: "La réservation a été confirmée avec succès.",
+      });
     } catch (error) {
       console.error("CarrierBookingActions - Error confirming booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de confirmer la réservation.",
+      });
     }
   };
 

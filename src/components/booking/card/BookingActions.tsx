@@ -28,7 +28,7 @@ export function BookingActions({
       await onUpdate();
     } catch (error) {
       console.error('BookingActions - Error changing status:', error);
-      throw error; // Propager l'erreur pour la gestion en amont
+      throw error;
     }
   };
 
