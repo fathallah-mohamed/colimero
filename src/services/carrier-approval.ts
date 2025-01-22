@@ -2,6 +2,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function approveCarrierRequest(carrierId: string) {
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("No session");
+
     const { data: carrier, error: carrierError } = await supabase
       .from("carriers")
       .select("*")
@@ -14,7 +17,8 @@ export async function approveCarrierRequest(carrierId: string) {
     console.log("Found carrier:", carrier);
 
     const { error } = await supabase.rpc('approve_carrier', {
-      carrier_id: carrierId
+      carrier_id: carrierId,
+      admin_id: session.user.id
     });
 
     if (error) throw error;

@@ -1,70 +1,82 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { formSchema, type FormValues } from "./FormSchema";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
-export function useCarrierSignup(onSuccess: () => void) {
+export function useCarrierSignup() {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      phone: "",
-      first_name: "",
-      last_name: "",
-      company_name: "",
-      siret: "",
-      address: "",
-      phone_secondary: "",
-      coverage_area: [],
-      services: [],
-      total_capacity: 0,
-      price_per_kg: 0,
-      avatar_url: null,
-      consents: {},
-    },
-  });
+  const navigate = useNavigate();
 
-  const onSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: any) => {
+    setIsLoading(true);
     try {
-      const { error: registrationError } = await supabase
-        .from("carrier_registration_requests")
+      const { data, error } = await supabase
+        .from("carriers")
         .insert({
           email: values.email,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          company_name: values.company_name,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          company_name: values.companyName,
           siret: values.siret,
           phone: values.phone,
-          phone_secondary: values.phone_secondary,
+          phone_secondary: values.phoneSecondary || "",
           address: values.address,
-          coverage_area: values.coverage_area,
-          services: values.services,
-        });
+          coverage_area: values.coverageArea,
+          avatar_url: "",
+          company_details: {},
+          status: "pending",
+          password: values.password
+        })
+        .select()
+        .single();
 
-      if (registrationError) throw registrationError;
+      if (error) throw error;
+
+      if (data) {
+        // Create carrier capacities
+        await supabase
+          .from("carrier_capacities")
+          .insert({
+            carrier_id: data.id,
+            total_capacity: values.totalCapacity,
+            price_per_kg: values.pricePerKg
+          });
+
+        // Create carrier services
+        if (values.services?.length > 0) {
+          await supabase
+            .from("carrier_services")
+            .insert(
+              values.services.map((service: string) => ({
+                carrier_id: data.id,
+                service_type: service,
+                icon: "package"
+              }))
+            );
+        }
+      }
 
       toast({
         title: "Inscription réussie",
-        description: "Votre demande d'inscription a été envoyée avec succès",
+        description: "Votre demande d'inscription a été envoyée avec succès.",
       });
 
-      onSuccess();
-    } catch (error) {
-      console.error("Error during signup:", error);
+      navigate("/connexion");
+    } catch (error: any) {
+      console.error("Error in carrier signup:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'inscription",
+        description: error.message || "Une erreur est survenue lors de l'inscription.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
-    form,
-    onSubmit,
+    isLoading,
+    handleSubmit,
   };
 }

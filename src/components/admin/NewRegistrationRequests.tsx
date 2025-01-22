@@ -69,28 +69,18 @@ export default function NewRegistrationRequests() {
 
   const handleApprove = async (carrier: Carrier) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("No session");
-
-      const { error } = await supabase.rpc('approve_carrier', {
-        carrier_id: carrier.id,
-        admin_id: session.user.id
-      });
-
-      if (error) throw error;
-
+      await approveCarrierRequest(carrier.id);
       toast({
         title: "Demande approuvée",
         description: "Le transporteur a été approuvé avec succès.",
       });
-
       refetch();
     } catch (error: any) {
       console.error("Error approving carrier:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'approbation de la demande.",
+        description: error.message || "Une erreur est survenue lors de l'approbation.",
       });
     }
   };
@@ -119,7 +109,7 @@ export default function NewRegistrationRequests() {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors du rejet de la demande.",
+        description: error.message || "Une erreur est survenue lors du rejet.",
       });
     }
   };
