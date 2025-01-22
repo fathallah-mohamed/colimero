@@ -1,67 +1,63 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
 
-export const useCarrierSignup = () => {
+export function useCarrierSignup() {
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSignup = async (formData: any) => {
+  const handleSubmit = async (values: any) => {
     setIsLoading(true);
     try {
       const carrierId = uuidv4();
       
       const { error } = await supabase
-        .from('carriers')
+        .from("carriers")
         .insert({
           id: carrierId,
-          email: formData.email,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          company_name: formData.company_name,
-          siret: formData.siret,
-          phone: formData.phone,
-          phone_secondary: formData.phone_secondary || '',
-          address: formData.address,
-          coverage_area: formData.coverage_area,
-          avatar_url: formData.avatar_url || '',
-          company_details: formData.company_details || {},
-          authorized_routes: ['FR_TO_TN', 'TN_TO_FR'],
-          status: 'pending',
-          password: formData.password
+          email: values.email,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          company_name: values.companyName,
+          siret: values.siret,
+          phone: values.phone,
+          phone_secondary: values.phoneSecondary || "",
+          address: values.address,
+          coverage_area: values.coverageArea,
+          avatar_url: "",
+          company_details: {},
+          authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
+          total_deliveries: 0,
+          cities_covered: 30,
+          status: "pending",
+          password: values.password
         });
 
       if (error) throw error;
 
-      // Create carrier capacity
-      await supabase
-        .from('carrier_capacities')
-        .insert({
-          carrier_id: carrierId,
-          total_capacity: 1000,
-          price_per_kg: 12
-        });
+      toast({
+        title: "Inscription réussie",
+        description: "Votre demande d'inscription a été envoyée avec succès.",
+      });
 
-      // Create carrier services
-      if (formData.services?.length > 0) {
-        const serviceInserts = formData.services.map((service: string) => ({
-          carrier_id: carrierId,
-          service_type: service,
-          icon: 'package'
-        }));
-
-        await supabase
-          .from('carrier_services')
-          .insert(serviceInserts);
-      }
-
-      return { success: true };
+      navigate("/connexion");
     } catch (error: any) {
-      console.error('Error in carrier signup:', error);
-      return { success: false, error: error.message };
+      console.error("Error in carrier signup:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'inscription.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  return { handleSignup, isLoading };
-};
+  return {
+    isLoading,
+    handleSubmit,
+  };
+}
