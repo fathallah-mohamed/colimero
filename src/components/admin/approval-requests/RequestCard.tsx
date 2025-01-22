@@ -1,13 +1,13 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CarrierRegistrationRequest } from "./types";
+import { ApprovalRequest } from "./types";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 
 interface RequestCardProps {
-  request: CarrierRegistrationRequest;
+  request: ApprovalRequest;
   onClick: () => void;
   onApprove: () => void;
   onReject: () => void;
@@ -34,9 +34,9 @@ export function RequestCard({ request, onClick, onApprove, onReject }: RequestCa
       <div className="flex justify-between items-start">
         <div onClick={onClick}>
           <h3 className="font-medium">
-            {request.first_name || 'N/A'} {request.last_name || ''}
+            {request.carrier?.first_name || 'N/A'} {request.carrier?.last_name || ''}
           </h3>
-          <p className="text-sm text-gray-600">{request.email || 'Email non disponible'}</p>
+          <p className="text-sm text-gray-600">{request.carrier?.email || 'Email non disponible'}</p>
           <p className="text-sm text-gray-500 mt-2">
             {format(new Date(request.created_at), "d MMMM yyyy", { locale: fr })}
           </p>

@@ -1,12 +1,12 @@
-import { Carrier } from "@/types/carrier";
+import { ApprovalRequest } from "../approval-requests/types";
 import { RequestCard } from "./RequestCard";
 
 interface RequestListProps {
-  requests: Carrier[];
+  requests: ApprovalRequest[];
   searchTerm: string;
-  onSelect: (carrier: Carrier) => void;
-  onApprove: (carrier: Carrier) => void;
-  onReject: (carrier: Carrier, reason: string) => void;
+  onSelect: (request: ApprovalRequest) => void;
+  onApprove: (request: ApprovalRequest) => Promise<void>;
+  onReject: (request: ApprovalRequest, reason: string) => Promise<void>;
 }
 
 export function RequestList({
@@ -18,17 +18,9 @@ export function RequestList({
 }: RequestListProps) {
   const filteredRequests = requests.filter(
     (request) =>
-      request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email.toLowerCase().includes(searchTerm.toLowerCase())
+      request.carrier?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.carrier?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (filteredRequests.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        Aucune demande d'inscription en attente
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -36,9 +28,9 @@ export function RequestList({
         <RequestCard
           key={request.id}
           request={request}
-          onSelect={() => onSelect(request)}
+          onClick={() => onSelect(request)}
           onApprove={() => onApprove(request)}
-          onReject={(reason) => onReject(request, reason)}
+          onReject={() => onReject(request, "")}
         />
       ))}
     </div>
