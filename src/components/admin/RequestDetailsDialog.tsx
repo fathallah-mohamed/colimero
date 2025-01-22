@@ -6,13 +6,13 @@ import { PersonalInfo } from "./request-details/PersonalInfo";
 import { CompanyInfo } from "./request-details/CompanyInfo";
 import { CapacityInfo } from "./request-details/CapacityInfo";
 import { useApprovalAction } from "@/hooks/approval-requests/useApprovalAction";
-import { ApprovalRequest } from "./approval-requests/types";
+import { CarrierRegistrationRequest } from "./approval-requests/types";
 
 interface RequestDetailsDialogProps {
-  request: ApprovalRequest | null;
+  request: CarrierRegistrationRequest | null;
   onClose: () => void;
-  onApprove: (request: ApprovalRequest) => Promise<void>;
-  onReject: (request: ApprovalRequest) => Promise<void>;
+  onApprove: (request: CarrierRegistrationRequest) => Promise<void>;
+  onReject: (request: CarrierRegistrationRequest) => Promise<void>;
   showApproveButton?: boolean;
 }
 

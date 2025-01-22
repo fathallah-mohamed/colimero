@@ -10,11 +10,11 @@ import Navigation from "@/components/Navigation";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
-import { ApprovalRequest } from "./approval-requests/types";
+import { CarrierRegistrationRequest } from "./approval-requests/types";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<CarrierRegistrationRequest | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
 
@@ -23,42 +23,16 @@ export default function RejectedRequests() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("carrier_registration_requests")
-        .select(`
-          *,
-          tour:tours(
-            id,
-            departure_country,
-            destination_country,
-            departure_date,
-            collection_date,
-            route,
-            total_capacity,
-            remaining_capacity,
-            type,
-            carrier:carriers(
-              id,
-              company_name,
-              email,
-              phone
-            )
-          ),
-          client:clients(
-            id,
-            first_name,
-            last_name,
-            email,
-            phone
-          )
-        `)
+        .select("*")
         .eq("status", "rejected")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as unknown as ApprovalRequest[];
+      return data as CarrierRegistrationRequest[];
     },
   });
 
-  const handleApprove = async (request: ApprovalRequest) => {
+  const handleApprove = async (request: CarrierRegistrationRequest) => {
     if (isApproving) return;
     
     setIsApproving(true);
@@ -84,10 +58,10 @@ export default function RejectedRequests() {
     }
   };
 
-  const handleReject = async (request: ApprovalRequest) => {
+  const handleReject = async (request: CarrierRegistrationRequest) => {
     try {
       const { error } = await supabase
-        .from('approval_requests')
+        .from('carrier_registration_requests')
         .update({
           status: 'rejected',
           updated_at: new Date().toISOString()
@@ -115,8 +89,8 @@ export default function RejectedRequests() {
 
   const filteredRequests = requests?.filter(
     (request) =>
-      request.tour?.carrier?.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.client?.email.toLowerCase().includes(searchTerm.toLowerCase())
+      request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
