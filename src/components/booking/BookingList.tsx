@@ -39,6 +39,39 @@ export function BookingList() {
     return <EmptyBookingList />;
   }
 
+  const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
+    try {
+      console.log("Updating booking status:", { bookingId, newStatus });
+      
+      const { error: updateError } = await supabase
+        .from('bookings')
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus
+        })
+        .eq('id', bookingId);
+
+      if (updateError) {
+        console.error("Error updating booking status:", updateError);
+        throw updateError;
+      }
+
+      await refetch();
+
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut de la réservation a été mis à jour avec succès.",
+      });
+    } catch (err) {
+      console.error("Error updating booking status:", err);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du statut.",
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       {bookings.map((booking) => (
@@ -46,38 +79,7 @@ export function BookingList() {
           key={booking.id} 
           booking={booking} 
           isCollecting={booking.tours?.status === "Ramassage en cours"}
-          onStatusChange={async (bookingId: string, newStatus: BookingStatus) => {
-            try {
-              console.log("Updating booking status:", { bookingId, newStatus });
-              
-              const { error: updateError } = await supabase
-                .from('bookings')
-                .update({ 
-                  status: newStatus,
-                  delivery_status: newStatus
-                })
-                .eq('id', bookingId);
-
-              if (updateError) {
-                console.error("Error updating booking status:", updateError);
-                throw updateError;
-              }
-
-              await refetch();
-
-              toast({
-                title: "Statut mis à jour",
-                description: "Le statut de la réservation a été mis à jour avec succès.",
-              });
-            } catch (err) {
-              console.error("Error updating booking status:", err);
-              toast({
-                variant: "destructive",
-                title: "Erreur",
-                description: "Une erreur est survenue lors de la mise à jour du statut.",
-              });
-            }
-          }}
+          onStatusChange={handleStatusChange}
           onUpdate={async () => { await refetch(); }}
           tourStatus={booking.tours?.status}
         />

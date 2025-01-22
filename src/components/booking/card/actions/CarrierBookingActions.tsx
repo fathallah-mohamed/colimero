@@ -24,6 +24,11 @@ export function CarrierBookingActions({
     return null;
   }
 
+  const handleConfirm = () => {
+    console.log("Confirming booking...");
+    onStatusChange("confirmed");
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -42,7 +47,7 @@ export function CarrierBookingActions({
             variant="outline"
             size="sm"
             className="text-green-500 hover:text-green-600 gap-2"
-            onClick={() => onStatusChange("confirmed")}
+            onClick={handleConfirm}
           >
             <CheckSquare className="h-4 w-4" />
             Confirmer
