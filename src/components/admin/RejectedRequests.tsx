@@ -14,21 +14,22 @@ import { Carrier } from "@/types/carrier";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<Carrier | null>(null);
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
 
-  const { data: requests = [], isLoading, refetch } = useQuery({
+  const { data: carriers = [], isLoading, refetch } = useQuery({
     queryKey: ["carriers", "rejected"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("carriers")
         .select("*")
         .eq("status", "rejected")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .returns<Carrier[]>();
 
       if (error) throw error;
-      return data as Carrier[];
+      return data;
     },
   });
 
@@ -48,7 +49,7 @@ export default function RejectedRequests() {
       });
 
       refetch();
-      setSelectedRequest(null);
+      setSelectedCarrier(null);
     } catch (error: any) {
       console.error("Error approving request:", error);
       toast({
@@ -80,7 +81,7 @@ export default function RejectedRequests() {
       });
 
       refetch();
-      setSelectedRequest(null);
+      setSelectedCarrier(null);
     } catch (error: any) {
       console.error('Error rejecting request:', error);
       toast({
@@ -91,10 +92,10 @@ export default function RejectedRequests() {
     }
   };
 
-  const filteredRequests = requests?.filter(
-    (request) =>
-      request.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCarriers = carriers?.filter(
+    (carrier) =>
+      carrier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      carrier.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
@@ -125,8 +126,8 @@ export default function RejectedRequests() {
         <div className="hidden md:block">
           <ScrollArea className="rounded-lg border h-[calc(100vh-300px)]">
             <NewRequestsTable
-              requests={filteredRequests}
-              onViewDetails={setSelectedRequest}
+              requests={filteredCarriers}
+              onViewDetails={setSelectedCarrier}
               showApproveButton={true}
               onApprove={handleApprove}
               onReject={handleReject}
@@ -135,20 +136,20 @@ export default function RejectedRequests() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:hidden">
-          {filteredRequests?.map((request) => (
+          {filteredCarriers?.map((carrier) => (
             <NewRequestCard
-              key={request.id}
-              request={request}
-              onViewDetails={() => setSelectedRequest(request)}
+              key={carrier.id}
+              request={carrier}
+              onViewDetails={() => setSelectedCarrier(carrier)}
               showApproveButton={true}
-              onApprove={() => handleApprove(request)}
+              onApprove={() => handleApprove(carrier)}
             />
           ))}
         </div>
 
         <RequestDetailsDialog
-          request={selectedRequest}
-          onClose={() => setSelectedRequest(null)}
+          request={selectedCarrier}
+          onClose={() => setSelectedCarrier(null)}
           onApprove={handleApprove}
           onReject={handleReject}
           showApproveButton={true}
