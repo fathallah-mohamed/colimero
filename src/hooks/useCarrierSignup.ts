@@ -14,7 +14,7 @@ export function useCarrierSignup() {
     try {
       const carrierId = uuidv4();
 
-      // Create carrier record directly in carriers table
+      // Créer directement le transporteur dans la table carriers
       const { error: carrierError } = await supabase
         .from("carriers")
         .insert({
@@ -40,7 +40,7 @@ export function useCarrierSignup() {
 
       if (carrierError) throw carrierError;
 
-      // Create carrier capacities
+      // Créer les capacités du transporteur
       const { error: capacitiesError } = await supabase
         .from('carrier_capacities')
         .insert({
@@ -51,7 +51,7 @@ export function useCarrierSignup() {
 
       if (capacitiesError) throw capacitiesError;
 
-      // Create carrier services
+      // Créer les services du transporteur
       if (values.services?.length > 0) {
         const { error: servicesError } = await supabase
           .from('carrier_services')
