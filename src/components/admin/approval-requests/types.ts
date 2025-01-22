@@ -1,5 +1,3 @@
-import { Json } from "@/types/database/tables";
-
 export interface Carrier {
   id: string;
   company_name: string;
@@ -36,23 +34,6 @@ export interface Client {
   phone: string | null;
 }
 
-export interface ApprovalRequest {
-  id: string;
-  user_id: string;
-  tour_id: number;
-  status: string;
-  message: string | null;
-  created_at: string;
-  updated_at: string;
-  reason: string | null;
-  email_sent: boolean | null;
-  activation_token: string | null;
-  activation_expires_at: string | null;
-  pickup_city: string;
-  tour: Tour;
-  client: Client;
-}
-
 export interface CarrierRegistrationRequest {
   id: string;
   email: string;
@@ -78,3 +59,11 @@ export interface CarrierRegistrationRequest {
   total_deliveries: number;
   cities_covered: number;
 }
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]

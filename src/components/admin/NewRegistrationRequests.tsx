@@ -4,19 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { RequestList } from "./approval-requests/RequestList";
 import { SearchBar } from "./approval-requests/SearchBar";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
-import { ApprovalRequest } from "./approval-requests/types";
+import { CarrierRegistrationRequest } from "./approval-requests/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<CarrierRegistrationRequest | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const { data: requests = [], isLoading, refetch } = useQuery({
-    queryKey: ["approval-requests"],
+    queryKey: ["carrier-registration-requests"],
     queryFn: async () => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -40,46 +40,23 @@ export default function NewRegistrationRequests() {
 
         console.log("Current user ID:", session.user.id);
 
-        const { data: approvalRequests, error: approvalError } = await supabase
+        const { data: registrationRequests, error: requestsError } = await supabase
           .from("carrier_registration_requests")
-          .select(`
-            *,
-            email,
-            first_name,
-            last_name,
-            company_name,
-            siret,
-            phone,
-            phone_secondary,
-            address,
-            coverage_area,
-            total_capacity,
-            price_per_kg,
-            services,
-            status,
-            created_at,
-            updated_at,
-            reason,
-            avatar_url,
-            email_verified,
-            company_details,
-            authorized_routes,
-            total_deliveries,
-            cities_covered
-          `);
+          .select("*")
+          .eq("status", "pending");
 
-        if (approvalError) {
-          console.error("Error fetching approval requests:", approvalError);
+        if (requestsError) {
+          console.error("Error fetching registration requests:", requestsError);
           toast({
             variant: "destructive",
             title: "Erreur",
-            description: "Impossible de récupérer les demandes d'approbation",
+            description: "Impossible de récupérer les demandes d'inscription",
           });
           return [];
         }
 
-        console.log("Fetched approval requests:", approvalRequests);
-        return approvalRequests as unknown as ApprovalRequest[];
+        console.log("Fetched registration requests:", registrationRequests);
+        return registrationRequests as CarrierRegistrationRequest[];
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
@@ -92,7 +69,7 @@ export default function NewRegistrationRequests() {
     },
   });
 
-  const handleApprove = async (request: ApprovalRequest) => {
+  const handleApprove = async (request: CarrierRegistrationRequest) => {
     try {
       const { error } = await supabase
         .from("carrier_registration_requests")
@@ -120,7 +97,7 @@ export default function NewRegistrationRequests() {
     }
   };
 
-  const handleReject = async (request: ApprovalRequest) => {
+  const handleReject = async (request: CarrierRegistrationRequest) => {
     try {
       const { error } = await supabase
         .from("carrier_registration_requests")

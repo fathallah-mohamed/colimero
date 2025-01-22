@@ -1,13 +1,13 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ApprovalRequest } from "./types";
+import { CarrierRegistrationRequest } from "./types";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 
 interface RequestCardProps {
-  request: ApprovalRequest;
+  request: CarrierRegistrationRequest;
   onClick: () => void;
   onApprove: () => void;
   onReject: () => void;
