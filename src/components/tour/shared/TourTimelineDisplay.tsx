@@ -42,7 +42,7 @@ export function TourTimelineDisplay({
     handleComplete
   } = useTourStatusManagement({ 
     tourId, 
-    onStatusChange: (newStatus) => onStatusChange?.(tourId, newStatus),
+    onStatusChange,
     onBookingStatusChange
   });
 

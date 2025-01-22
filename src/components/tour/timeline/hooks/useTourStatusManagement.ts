@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { TourStatus } from "@/types/tour";
 import { supabase } from "@/integrations/supabase/client";
+import type { BookingStatus } from "@/types/booking";
 
 interface UseTourStatusManagementProps {
   tourId: number;
   onStatusChange?: (newStatus: TourStatus) => void;
+  onBookingStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
 }
 
-export function useTourStatusManagement({ tourId, onStatusChange }: UseTourStatusManagementProps) {
+export function useTourStatusManagement({ tourId, onStatusChange, onBookingStatusChange }: UseTourStatusManagementProps) {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showPendingBookingsDialog, setShowPendingBookingsDialog] = useState(false);
   const [showUncollectedBookingsDialog, setShowUncollectedBookingsDialog] = useState(false);
