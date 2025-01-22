@@ -6,13 +6,13 @@ import { PersonalInfo } from "./request-details/PersonalInfo";
 import { CompanyInfo } from "./request-details/CompanyInfo";
 import { CapacityInfo } from "./request-details/CapacityInfo";
 import { useApprovalAction } from "@/hooks/approval-requests/useApprovalAction";
-import { ApprovalRequest } from "./approval-requests/types";
+import { Carrier } from "@/types/carrier";
 
 interface RequestDetailsDialogProps {
-  request: ApprovalRequest | null;
+  request: Carrier | null;
   onClose: () => void;
-  onApprove: (request: ApprovalRequest) => Promise<void>;
-  onReject: (request: ApprovalRequest) => Promise<void>;
+  onApprove: (request: Carrier) => Promise<void>;
+  onReject: (request: Carrier, reason: string) => Promise<void>;
   showApproveButton?: boolean;
 }
 
@@ -41,7 +41,7 @@ export function RequestDetailsDialog({
     if (!request) return;
     try {
       await handleReject(request, rejectReason);
-      await onReject(request);
+      await onReject(request, rejectReason);
       onClose();
     } catch (error) {
       console.error("Error in handleRejectClick:", error);
