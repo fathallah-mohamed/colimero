@@ -19,6 +19,7 @@ export function ApprovalRequestActions({
   onCancel,
   onDelete,
 }: ApprovalRequestActionsProps) {
+  // Actions pour les transporteurs
   if (userType === 'carrier') {
     return (
       <div className="flex gap-2">
@@ -48,6 +49,7 @@ export function ApprovalRequestActions({
     );
   }
 
+  // Actions pour les clients
   return (
     <div className="flex gap-2">
       {request.status === 'pending' && (
@@ -61,7 +63,7 @@ export function ApprovalRequestActions({
           Annuler
         </Button>
       )}
-      {request.status === 'cancelled' && (
+      {request.status === 'rejected' && (
         <Button
           variant="outline"
           size="sm"
