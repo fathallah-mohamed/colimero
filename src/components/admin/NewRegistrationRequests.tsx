@@ -56,30 +56,6 @@ export default function NewRegistrationRequests() {
         }
 
         console.log("Fetched registration requests:", registrationRequests);
-        
-        // Transform CarrierRegistrationRequest to ApprovalRequest
-        const transformedRequests = (registrationRequests as CarrierRegistrationRequest[]).map(request => ({
-          id: request.id,
-          user_id: request.id,
-          tour_id: 0,
-          status: request.status,
-          message: request.reason,
-          created_at: request.created_at,
-          updated_at: request.updated_at,
-          reason: request.reason,
-          email_sent: false,
-          activation_token: null,
-          activation_expires_at: null,
-          pickup_city: "",
-          tour: {} as Tour,
-          client: {} as Client,
-          company_name: request.company_name,
-          email: request.email,
-          first_name: request.first_name,
-          last_name: request.last_name,
-          phone: request.phone
-        } as ApprovalRequest));
-
         return registrationRequests as CarrierRegistrationRequest[];
       } catch (error: any) {
         console.error("Complete error:", error);
@@ -157,46 +133,57 @@ export default function NewRegistrationRequests() {
     );
   }
 
+  const transformRequestToApprovalRequest = (request: CarrierRegistrationRequest): ApprovalRequest => ({
+    id: request.id,
+    user_id: request.id,
+    tour_id: 0,
+    status: request.status,
+    message: request.reason,
+    created_at: request.created_at,
+    updated_at: request.updated_at,
+    reason: request.reason,
+    email_sent: false,
+    activation_token: null,
+    activation_expires_at: null,
+    pickup_city: "",
+    tour: {} as Tour,
+    client: {} as Client,
+    company_name: request.company_name,
+    email: request.email,
+    first_name: request.first_name,
+    last_name: request.last_name,
+    phone: request.phone
+  });
+
   return (
     <div className="space-y-6">
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={requests as unknown as ApprovalRequest[]}
+        requests={requests.map(transformRequestToApprovalRequest)}
         searchTerm={searchTerm}
         onSelect={(request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
-          setSelectedRequest(originalRequest as unknown as CarrierRegistrationRequest);
+          setSelectedRequest(originalRequest || null);
         }}
         onApprove={async (request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
-          await handleApprove(originalRequest as unknown as CarrierRegistrationRequest);
+          if (originalRequest) await handleApprove(originalRequest);
         }}
         onReject={async (request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
-          await handleReject(originalRequest as unknown as CarrierRegistrationRequest);
+          if (originalRequest) await handleReject(originalRequest);
         }}
       />
 
       <RequestDetailsDialog
-        request={selectedRequest ? {
-          ...selectedRequest,
-          user_id: selectedRequest.id,
-          tour_id: 0,
-          message: selectedRequest.reason,
-          email_sent: false,
-          activation_token: null,
-          activation_expires_at: null,
-          pickup_city: "",
-          tour: {} as Tour,
-          client: {} as Client,
-        } as ApprovalRequest : null}
+        request={selectedRequest ? transformRequestToApprovalRequest(selectedRequest) : null}
         onClose={() => setSelectedRequest(null)}
         onApprove={async (request: ApprovalRequest) => {
-          await handleApprove(selectedRequest as CarrierRegistrationRequest);
+          if (selectedRequest) await handleApprove(selectedRequest);
         }}
         onReject={async (request: ApprovalRequest) => {
-          await handleReject(selectedRequest as CarrierRegistrationRequest);
+          if (selectedRequest) await handleReject(selectedRequest);
         }}
       />
     </div>
