@@ -409,6 +409,8 @@ export type Database = {
           phone: string
           phone_secondary: string
           reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           siret: string | null
           status: string | null
           total_deliveries: number
@@ -432,6 +434,8 @@ export type Database = {
           phone: string
           phone_secondary?: string
           reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           siret?: string | null
           status?: string | null
           total_deliveries?: number
@@ -455,11 +459,21 @@ export type Database = {
           phone?: string
           phone_secondary?: string
           reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           siret?: string | null
           status?: string | null
           total_deliveries?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "carriers_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "administrators"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clients: {
         Row: {
