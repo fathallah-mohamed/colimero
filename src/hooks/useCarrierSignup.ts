@@ -14,9 +14,9 @@ export function useCarrierSignup() {
     try {
       const carrierId = uuidv4();
 
-      // Create the carrier registration request
+      // Create carrier record directly in carriers table
       const { error: carrierError } = await supabase
-        .from("carrier_registration_requests")
+        .from("carriers")
         .insert({
           id: carrierId,
           email: values.email,
@@ -28,19 +28,43 @@ export function useCarrierSignup() {
           phone_secondary: values.phone_secondary || "",
           address: values.address,
           coverage_area: values.coverage_area,
-          total_capacity: values.total_capacity,
-          price_per_kg: values.price_per_kg,
-          services: values.services,
           avatar_url: "",
+          email_verified: false,
           company_details: {},
           authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
           total_deliveries: 0,
           cities_covered: 30,
-          status: "pending",
+          status: 'pending',
           password: values.password
         });
 
       if (carrierError) throw carrierError;
+
+      // Create carrier capacities
+      const { error: capacitiesError } = await supabase
+        .from('carrier_capacities')
+        .insert({
+          carrier_id: carrierId,
+          total_capacity: values.total_capacity,
+          price_per_kg: values.price_per_kg
+        });
+
+      if (capacitiesError) throw capacitiesError;
+
+      // Create carrier services
+      if (values.services?.length > 0) {
+        const { error: servicesError } = await supabase
+          .from('carrier_services')
+          .insert(
+            values.services.map((service: string) => ({
+              carrier_id: carrierId,
+              service_type: service,
+              icon: 'package'
+            }))
+          );
+
+        if (servicesError) throw servicesError;
+      }
 
       toast({
         title: "Inscription réussie",
