@@ -41,6 +41,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
         ...acc,
         [consent.code]: false
       }), {}) || {},
+      services: []
     },
   });
 
@@ -95,6 +96,20 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
       if (capacityError) throw capacityError;
 
+      // Send notification email to admin
+      const { error: emailError } = await supabase.functions.invoke('send-registration-email', {
+        body: { 
+          email: values.email,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          company_name: values.company_name
+        }
+      });
+
+      if (emailError) {
+        console.error("Error sending notification email:", emailError);
+      }
+
       toast({
         title: "Demande envoyée avec succès",
         description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
@@ -102,7 +117,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
       onSuccess();
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during registration:", error);
       toast({
         variant: "destructive",
