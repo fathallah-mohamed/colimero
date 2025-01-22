@@ -4,7 +4,7 @@ import { CarrierProfileForm } from "./CarrierProfileForm";
 import { ProfileHeader } from "../ProfileHeader";
 import { Profile } from "@/types/profile";
 import { Mail, Phone, MapPin, Building2, FileText } from "lucide-react";
-import { ServicesSection } from "../services/ServicesList";
+import { ServicesList } from "../services/ServicesList";
 import { PasswordChangeSection } from "../PasswordChangeSection";
 
 interface CarrierProfileViewProps {
@@ -61,6 +61,13 @@ export function CarrierProfileView({ profile }: CarrierProfileViewProps) {
           />
         </div>
       </div>
+
+      {profile.carrier_services && (
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium mb-4">Services proposés</h2>
+          <ServicesList services={profile.carrier_services} />
+        </div>
+      )}
 
       <div className="bg-white shadow rounded-lg p-6">
         <PasswordChangeSection />
