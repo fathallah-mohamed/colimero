@@ -66,8 +66,49 @@ export function useRegistrationRequests() {
         // Transformer les données pour correspondre au format ApprovalRequest
         const transformedRequests: ApprovalRequest[] = pendingCarriers.map(carrier => ({
           id: carrier.id,
+          user_id: carrier.id, // Le carrier.id est aussi l'user_id
+          tour_id: 0, // Valeur par défaut car non applicable pour les inscriptions
           status: carrier.status,
+          message: null,
           created_at: carrier.created_at,
+          updated_at: carrier.created_at,
+          reason: null,
+          email_sent: false,
+          activation_token: null,
+          activation_expires_at: null,
+          pickup_city: "", // Non applicable pour les inscriptions
+          tour: {
+            id: 0,
+            carrier_id: carrier.id,
+            route: [],
+            total_capacity: 0,
+            remaining_capacity: 0,
+            departure_date: new Date().toISOString(),
+            collection_date: new Date().toISOString(),
+            created_at: carrier.created_at,
+            updated_at: carrier.created_at,
+            departure_country: "FR",
+            destination_country: "TN",
+            status: "pending",
+            type: "public",
+            previous_status: null,
+            terms_accepted: false,
+            customs_declaration: false,
+            tour_number: null,
+            carrier: {
+              id: carrier.id,
+              company_name: carrier.company_name,
+              email: carrier.email,
+              phone: carrier.phone
+            }
+          },
+          client: {
+            id: carrier.id,
+            first_name: carrier.first_name,
+            last_name: carrier.last_name,
+            email: carrier.email,
+            phone: carrier.phone
+          },
           carrier: {
             id: carrier.id,
             company_name: carrier.company_name,
