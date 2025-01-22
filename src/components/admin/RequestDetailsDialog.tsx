@@ -11,8 +11,8 @@ import { Carrier } from "@/types/carrier";
 interface RequestDetailsDialogProps {
   request: Carrier | null;
   onClose: () => void;
-  onApprove: (request: Carrier) => Promise<void>;
-  onReject: (request: Carrier, reason: string) => Promise<void>;
+  onApprove: (carrier: Carrier) => Promise<void>;
+  onReject: (carrier: Carrier, reason: string) => Promise<void>;
   showApproveButton?: boolean;
 }
 
