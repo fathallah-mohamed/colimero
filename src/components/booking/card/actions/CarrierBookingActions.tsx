@@ -35,7 +35,6 @@ export function CarrierBookingActions({
 
       {status === "pending" && (
         <>
-          <CancelConfirmDialog onConfirm={() => onStatusChange("cancelled")} />
           <Button
             variant="outline"
             size="sm"
@@ -45,6 +44,7 @@ export function CarrierBookingActions({
             <CheckSquare className="h-4 w-4" />
             Confirmer
           </Button>
+          <CancelConfirmDialog onConfirm={() => onStatusChange("cancelled")} />
         </>
       )}
 
