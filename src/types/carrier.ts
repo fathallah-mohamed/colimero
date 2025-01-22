@@ -1,4 +1,4 @@
-import { Json } from "@/types/database/tables";
+import { Json } from "./database/tables";
 
 export interface Carrier {
   id: string;
