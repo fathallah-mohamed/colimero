@@ -11,10 +11,6 @@ export function BookingList() {
   const { data: bookings = [], isLoading, error, refetch } = useBookings();
   const { toast } = useToast();
 
-  console.log("BookingList - Loading state:", isLoading);
-  console.log("BookingList - Error state:", error);
-  console.log("BookingList - Bookings data:", bookings);
-
   if (isLoading) {
     return <BookingListLoading />;
   }
@@ -35,7 +31,6 @@ export function BookingList() {
   }
 
   if (!bookings || bookings.length === 0) {
-    console.log("No bookings found");
     return <EmptyBookingList />;
   }
 
@@ -70,6 +65,7 @@ export function BookingList() {
         title: "Erreur",
         description: "Une erreur est survenue lors de la mise à jour du statut.",
       });
+      throw err;
     }
   };
 

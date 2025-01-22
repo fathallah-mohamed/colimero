@@ -6,7 +6,7 @@ interface BookingActionsProps {
   bookingId: string;
   status: BookingStatus;
   tourStatus: string;
-  onStatusChange: (bookingId: string, newStatus: BookingStatus) => void;
+  onStatusChange: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
   onUpdate: () => Promise<void>;
   onEdit: () => void;
   userType: string;
@@ -28,6 +28,7 @@ export function BookingActions({
       await onUpdate();
     } catch (error) {
       console.error('BookingActions - Error changing status:', error);
+      throw error; // Propager l'erreur pour la gestion en amont
     }
   };
 

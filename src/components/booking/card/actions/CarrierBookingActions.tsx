@@ -6,7 +6,7 @@ import type { BookingStatus } from "@/types/booking";
 interface CarrierBookingActionsProps {
   status: BookingStatus;
   tourStatus: string;
-  onStatusChange: (status: BookingStatus) => void;
+  onStatusChange: (status: BookingStatus) => Promise<void>;
   onEdit: () => void;
 }
 
@@ -16,17 +16,17 @@ export function CarrierBookingActions({
   onStatusChange,
   onEdit,
 }: CarrierBookingActionsProps) {
-  console.log("CarrierBookingActions - Current status:", status);
-  console.log("CarrierBookingActions - Tour status:", tourStatus);
-
-  // N'afficher les actions que si la tournée est programmée ou en cours de ramassage
   if (!['Programmée', 'Ramassage en cours'].includes(tourStatus)) {
     return null;
   }
 
-  const handleConfirm = () => {
-    console.log("CarrierBookingActions - Confirming booking...");
-    onStatusChange("confirmed");
+  const handleConfirm = async () => {
+    try {
+      console.log("CarrierBookingActions - Confirming booking...");
+      await onStatusChange("confirmed");
+    } catch (error) {
+      console.error("CarrierBookingActions - Error confirming booking:", error);
+    }
   };
 
   return (
