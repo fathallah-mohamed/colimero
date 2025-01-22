@@ -33,7 +33,7 @@ interface LoginViewProps {
 export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: LoginViewProps) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'error' | 'default'; message: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'default' | 'destructive'; message: string } | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,7 +58,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
       if (carrierError && carrierError.code !== 'PGRST116') {
         console.error("Error checking carrier status:", carrierError);
         setStatusMessage({
-          type: 'error',
+          type: 'destructive',
           message: "Une erreur est survenue lors de la vérification de votre compte."
         });
         return;
@@ -67,7 +67,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
       // If no carrier found or status is not active, show appropriate message
       if (!carrierData) {
         setStatusMessage({
-          type: 'error',
+          type: 'destructive',
           message: "Aucun compte transporteur trouvé avec cet email."
         });
         return;
@@ -83,7 +83,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
 
       if (carrierData.status === 'rejected') {
         setStatusMessage({
-          type: 'error',
+          type: 'destructive',
           message: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas créer de tournées."
         });
         return;
@@ -99,7 +99,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
         if (signInError) {
           console.error("Login error:", signInError);
           setStatusMessage({
-            type: 'error',
+            type: 'destructive',
             message: signInError.message === "Invalid login credentials"
               ? "Email ou mot de passe incorrect"
               : "Une erreur est survenue lors de la connexion"
@@ -116,7 +116,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
     } catch (error: any) {
       console.error("Login error:", error);
       setStatusMessage({
-        type: 'error',
+        type: 'destructive',
         message: "Une erreur est survenue lors de la connexion"
       });
     } finally {
@@ -130,7 +130,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
         <Alert variant={statusMessage.type}>
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>
-            {statusMessage.type === 'error' ? 'Erreur' : 'Attention'}
+            {statusMessage.type === 'destructive' ? 'Erreur' : 'Attention'}
           </AlertTitle>
           {statusMessage.message}
         </Alert>
