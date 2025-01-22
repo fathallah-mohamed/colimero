@@ -8,7 +8,7 @@ export const formSchema = z.object({
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
   last_name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   company_name: z.string().min(2, "Le nom de l'entreprise doit contenir au moins 2 caractères"),
-  siret: z.string().optional(),
+  siret: z.string().nullable(),
   address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères"),
   coverage_area: z.array(z.string()).min(1, "Sélectionnez au moins une zone de couverture"),
   services: z.array(z.string()).min(1, "Sélectionnez au moins un service"),
