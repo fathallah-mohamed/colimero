@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
@@ -10,14 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export default function MesDemandesApprobation() {
-  const navigate = useNavigate();
   const { isLoading: isSessionLoading, session } = useSessionContext();
   const user = useUser();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const { toast } = useToast();
-  const userType = user?.user_metadata?.user_type;
 
   useEffect(() => {
     if (!isSessionLoading && !session) {
@@ -26,14 +23,16 @@ export default function MesDemandesApprobation() {
   }, [session, isSessionLoading]);
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchRequests();
     }
-  }, [user]);
+  }, [user?.id]);
 
   const fetchRequests = async () => {
     try {
       setLoading(true);
+      console.log('Fetching requests for user:', user?.id);
+      
       const { data, error } = await supabase
         .from('approval_requests')
         .select(`
@@ -57,16 +56,24 @@ export default function MesDemandesApprobation() {
         `)
         .eq('user_id', user?.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching requests:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible de charger les demandes d'approbation"
+        });
+        return;
+      }
 
       console.log('Fetched requests:', data);
       setRequests(data || []);
     } catch (error: any) {
-      console.error('Error fetching requests:', error);
+      console.error('Error in fetchRequests:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de charger les demandes d'approbation"
+        description: "Une erreur est survenue lors du chargement des demandes"
       });
     } finally {
       setLoading(false);
@@ -208,7 +215,7 @@ export default function MesDemandesApprobation() {
             pendingRequests={pendingRequests}
             approvedRequests={approvedRequests}
             rejectedRequests={rejectedRequests}
-            userType={userType}
+            userType="client"
             handleApproveRequest={handleApproveRequest}
             handleRejectRequest={handleRejectRequest}
             handleCancelRequest={handleCancelRequest}
