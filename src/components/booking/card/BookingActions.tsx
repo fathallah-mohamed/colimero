@@ -22,9 +22,13 @@ export function BookingActions({
   userType
 }: BookingActionsProps) {
   const handleStatusChange = async (newStatus: BookingStatus) => {
-    console.log('Changing status to:', newStatus);
-    await onStatusChange(bookingId, newStatus);
-    await onUpdate();
+    try {
+      console.log('BookingActions - Changing status to:', newStatus);
+      await onStatusChange(bookingId, newStatus);
+      await onUpdate();
+    } catch (error) {
+      console.error('BookingActions - Error changing status:', error);
+    }
   };
 
   if (userType === "carrier") {

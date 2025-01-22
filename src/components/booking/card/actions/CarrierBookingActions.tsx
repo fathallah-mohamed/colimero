@@ -25,7 +25,7 @@ export function CarrierBookingActions({
   }
 
   const handleConfirm = () => {
-    console.log("Confirming booking...");
+    console.log("CarrierBookingActions - Confirming booking...");
     onStatusChange("confirmed");
   };
 

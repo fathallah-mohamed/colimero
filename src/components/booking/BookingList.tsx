@@ -41,7 +41,7 @@ export function BookingList() {
 
   const handleStatusChange = async (bookingId: string, newStatus: BookingStatus) => {
     try {
-      console.log("Updating booking status:", { bookingId, newStatus });
+      console.log("BookingList - Updating booking status:", { bookingId, newStatus });
       
       const { error: updateError } = await supabase
         .from('bookings')
