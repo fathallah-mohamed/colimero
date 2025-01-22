@@ -57,12 +57,12 @@ export function BookingList() {
         throw updateError;
       }
 
-      await refetch();
-
       toast({
         title: "Statut mis à jour",
         description: "Le statut de la réservation a été mis à jour avec succès.",
       });
+
+      await refetch();
     } catch (err) {
       console.error("Error updating booking status:", err);
       toast({
