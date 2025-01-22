@@ -24,5 +24,4 @@ export interface Carrier {
   password?: string | null;
   total_capacity?: number;
   price_per_kg?: number;
-  services?: string[];
 }
