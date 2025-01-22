@@ -1,37 +1,185 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import Navigation from "@/components/Navigation";
 import AuthDialog from "@/components/auth/AuthDialog";
-import { useState } from "react";
-import { useApprovalRequests } from "@/hooks/useApprovalRequests";
-import { ProfileLoading } from "@/components/profile/ProfileLoading";
 import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
+import { ProfileLoading } from "@/components/profile/ProfileLoading";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
   const { isLoading: isSessionLoading, session } = useSessionContext();
   const user = useUser();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const userType = user?.user_metadata?.user_type;
-  const userId = user?.id;
+  const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = useState<ApprovalRequest[]>([]);
   const { toast } = useToast();
-
-  const {
-    requests,
-    loading,
-    handleApproveRequest,
-    handleRejectRequest,
-    handleCancelRequest,
-    handleDeleteRequest
-  } = useApprovalRequests(userType, userId);
+  const userType = user?.user_metadata?.user_type;
 
   useEffect(() => {
     if (!isSessionLoading && !session) {
       setShowAuthDialog(true);
     }
   }, [session, isSessionLoading]);
+
+  useEffect(() => {
+    if (user) {
+      fetchRequests();
+    }
+  }, [user]);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('approval_requests')
+        .select(`
+          *,
+          tour:tours (
+            *,
+            carrier:carriers (
+              id,
+              company_name,
+              email,
+              phone
+            )
+          ),
+          client:clients (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone
+          )
+        `)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      console.log('Fetched requests:', data);
+      setRequests(data || []);
+    } catch (error: any) {
+      console.error('Error fetching requests:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger les demandes d'approbation"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApproveRequest = async (request: ApprovalRequest) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'approved',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "La demande a été approuvée"
+      });
+      fetchRequests();
+    } catch (error: any) {
+      console.error('Error approving request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'approbation"
+      });
+    }
+  };
+
+  const handleRejectRequest = async (request: ApprovalRequest) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'rejected',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', request.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "La demande a été rejetée"
+      });
+      fetchRequests();
+    } catch (error: any) {
+      console.error('Error rejecting request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors du rejet"
+      });
+    }
+  };
+
+  const handleCancelRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "La demande a été annulée"
+      });
+      fetchRequests();
+    } catch (error: any) {
+      console.error('Error cancelling request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'annulation"
+      });
+    }
+  };
+
+  const handleDeleteRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('approval_requests')
+        .delete()
+        .eq('id', requestId)
+        .eq('user_id', user?.id)
+        .eq('status', 'cancelled');
+
+      if (error) throw error;
+
+      toast({
+        title: "Succès",
+        description: "La demande a été supprimée"
+      });
+      fetchRequests();
+    } catch (error: any) {
+      console.error('Error deleting request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la suppression"
+      });
+    }
+  };
 
   if (isSessionLoading || loading) {
     return (
@@ -44,9 +192,9 @@ export default function MesDemandesApprobation() {
     );
   }
 
-  const pendingRequests = requests?.filter(req => req.status === 'pending') || [];
-  const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
-  const rejectedRequests = requests?.filter(req => 
+  const pendingRequests = requests.filter(req => req.status === 'pending') || [];
+  const approvedRequests = requests.filter(req => req.status === 'approved') || [];
+  const rejectedRequests = requests.filter(req => 
     req.status === 'rejected' || req.status === 'cancelled'
   ) || [];
 
