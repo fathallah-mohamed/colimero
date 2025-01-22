@@ -5,10 +5,12 @@ import { CancelTourDialog } from "../timeline/dialogs/CancelTourDialog";
 import { PendingBookingsDialog } from "../timeline/dialogs/PendingBookingsDialog";
 import { UncollectedBookingsDialog } from "../timeline/dialogs/UncollectedBookingsDialog";
 import { useTourStatusManagement } from "../timeline/hooks/useTourStatusManagement";
+import type { BookingStatus } from "@/types/booking";
 
 interface TourTimelineDisplayProps {
   status: TourStatus;
   onStatusChange?: (tourId: number, newStatus: TourStatus) => Promise<void>;
+  onBookingStatusChange?: (bookingId: string, newStatus: BookingStatus) => Promise<void>;
   tourId: number;
   userType?: string;
   canEdit?: boolean;
@@ -19,6 +21,7 @@ interface TourTimelineDisplayProps {
 export function TourTimelineDisplay({ 
   status, 
   onStatusChange, 
+  onBookingStatusChange,
   tourId,
   userType,
   canEdit = false,
@@ -39,7 +42,8 @@ export function TourTimelineDisplay({
     handleComplete
   } = useTourStatusManagement({ 
     tourId, 
-    onStatusChange: (newStatus) => onStatusChange?.(tourId, newStatus)
+    onStatusChange: (newStatus) => onStatusChange?.(tourId, newStatus),
+    onBookingStatusChange
   });
 
   // If the tour is cancelled, show cancelled message
