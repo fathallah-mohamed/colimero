@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RequestList } from "./approval-requests/RequestList";
 import { SearchBar } from "./approval-requests/SearchBar";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
-import { CarrierRegistrationRequest, ApprovalRequest } from "./approval-requests/types";
+import { CarrierRegistrationRequest, ApprovalRequest, Tour, Client } from "./approval-requests/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -166,15 +166,15 @@ export default function NewRegistrationRequests() {
         searchTerm={searchTerm}
         onSelect={(request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
-          setSelectedRequest(originalRequest as CarrierRegistrationRequest);
+          setSelectedRequest(originalRequest as unknown as CarrierRegistrationRequest);
         }}
         onApprove={async (request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
-          await handleApprove(originalRequest as CarrierRegistrationRequest);
+          await handleApprove(originalRequest as unknown as CarrierRegistrationRequest);
         }}
         onReject={async (request: ApprovalRequest) => {
           const originalRequest = requests.find(r => r.id === request.id);
-          await handleReject(originalRequest as CarrierRegistrationRequest);
+          await handleReject(originalRequest as unknown as CarrierRegistrationRequest);
         }}
       />
 
