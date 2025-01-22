@@ -50,5 +50,5 @@ export interface ApprovalRequest {
   pickup_city: string;
   tour: Tour;
   client: Client;
-  carrier: Carrier;
+  carrier?: Carrier; // Made optional since it's not always present
 }

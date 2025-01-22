@@ -57,7 +57,7 @@ export default function RejectedRequests() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      await approveCarrierRequest(request.carrier.id, session.user.id);
+      await approveCarrierRequest(request.carrier?.id || '', session.user.id);
 
       toast({
         title: "Demande approuvée",
@@ -110,8 +110,8 @@ export default function RejectedRequests() {
 
   const filteredRequests = requests?.filter(
     (request) =>
-      request.carrier.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.carrier.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      request.carrier?.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.carrier?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {

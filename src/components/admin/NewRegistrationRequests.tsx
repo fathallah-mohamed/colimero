@@ -71,7 +71,7 @@ export default function NewRegistrationRequests() {
           return [];
         }
 
-        return pendingRequests;
+        return pendingRequests || [];
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
@@ -89,7 +89,7 @@ export default function NewRegistrationRequests() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      await approveCarrierRequest(request.carrier.id, session.user.id);
+      await approveCarrierRequest(request.carrier?.id || '', session.user.id);
       
       toast({
         title: "Demande approuvée",
@@ -112,7 +112,7 @@ export default function NewRegistrationRequests() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session");
 
-      await rejectCarrierRequest(request.carrier.id, session.user.id, reason);
+      await rejectCarrierRequest(request.carrier?.id || '', session.user.id, reason);
 
       toast({
         title: "Demande rejetée",
