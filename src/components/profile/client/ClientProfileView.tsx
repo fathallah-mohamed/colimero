@@ -4,6 +4,7 @@ import { ClientProfileForm } from "./ClientProfileForm";
 import { ProfileHeader } from "../ProfileHeader";
 import { Profile } from "@/types/profile";
 import { Mail, Phone, MapPin, User } from "lucide-react";
+import { PasswordChangeSection } from "../PasswordChangeSection";
 
 interface ClientProfileViewProps {
   profile: Profile;
@@ -53,6 +54,10 @@ export function ClientProfileView({ profile }: ClientProfileViewProps) {
             value={profile.address} 
           />
         </div>
+      </div>
+
+      <div className="bg-white shadow rounded-lg p-6">
+        <PasswordChangeSection />
       </div>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
