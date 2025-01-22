@@ -33,7 +33,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
       address: "",
       phone_secondary: "",
       coverage_area: ["FR"],
-      services: [],
       total_capacity: 0,
       price_per_kg: 0,
       avatar_url: null,

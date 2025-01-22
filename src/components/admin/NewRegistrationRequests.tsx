@@ -41,7 +41,8 @@ export default function NewRegistrationRequests() {
         const { data: pendingCarriers, error: carriersError } = await supabase
           .from("carriers")
           .select("*")
-          .eq("status", "pending");
+          .eq("status", "pending")
+          .returns<Carrier[]>();
 
         if (carriersError) {
           console.error("Error fetching carriers:", carriersError);
@@ -53,7 +54,7 @@ export default function NewRegistrationRequests() {
           return [];
         }
 
-        return pendingCarriers as Carrier[];
+        return pendingCarriers;
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({

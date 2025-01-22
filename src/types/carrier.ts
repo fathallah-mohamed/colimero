@@ -8,10 +8,10 @@ export interface Carrier {
   company_name: string;
   siret: string | null;
   phone: string;
-  phone_secondary: string | null;
+  phone_secondary: string;
   address: string;
   coverage_area: string[];
-  avatar_url: string | null;
+  avatar_url: string;
   email_verified: boolean;
   company_details: Json;
   authorized_routes: Json;
