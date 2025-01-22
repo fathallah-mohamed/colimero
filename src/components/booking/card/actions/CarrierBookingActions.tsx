@@ -33,7 +33,7 @@ export function CarrierBookingActions({
         Modifier
       </Button>
 
-      {status === "pending" && tourStatus === "Programmée" && (
+      {status === "pending" && (
         <>
           <CancelConfirmDialog onConfirm={() => onStatusChange("cancelled")} />
           <Button
