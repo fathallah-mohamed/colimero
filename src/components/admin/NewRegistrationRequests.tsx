@@ -56,7 +56,31 @@ export default function NewRegistrationRequests() {
         }
 
         console.log("Fetched registration requests:", registrationRequests);
-        return registrationRequests as CarrierRegistrationRequest[];
+        
+        // Transform CarrierRegistrationRequest to ApprovalRequest
+        const transformedRequests = (registrationRequests as CarrierRegistrationRequest[]).map(request => ({
+          id: request.id,
+          user_id: request.id,
+          tour_id: 0,
+          status: request.status,
+          message: request.reason,
+          created_at: request.created_at,
+          updated_at: request.updated_at,
+          reason: request.reason,
+          email_sent: false,
+          activation_token: null,
+          activation_expires_at: null,
+          pickup_city: "",
+          tour: {} as Tour,
+          client: {} as Client,
+          company_name: request.company_name,
+          email: request.email,
+          first_name: request.first_name,
+          last_name: request.last_name,
+          phone: request.phone
+        }));
+
+        return transformedRequests;
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
@@ -138,18 +162,42 @@ export default function NewRegistrationRequests() {
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={requests as unknown as ApprovalRequest[]}
+        requests={requests}
         searchTerm={searchTerm}
-        onSelect={setSelectedRequest as (request: ApprovalRequest) => void}
-        onApprove={handleApprove as (request: ApprovalRequest) => Promise<void>}
-        onReject={handleReject as (request: ApprovalRequest) => Promise<void>}
+        onSelect={(request: ApprovalRequest) => {
+          const originalRequest = requests.find(r => r.id === request.id);
+          setSelectedRequest(originalRequest as CarrierRegistrationRequest);
+        }}
+        onApprove={async (request: ApprovalRequest) => {
+          const originalRequest = requests.find(r => r.id === request.id);
+          await handleApprove(originalRequest as CarrierRegistrationRequest);
+        }}
+        onReject={async (request: ApprovalRequest) => {
+          const originalRequest = requests.find(r => r.id === request.id);
+          await handleReject(originalRequest as CarrierRegistrationRequest);
+        }}
       />
 
       <RequestDetailsDialog
-        request={selectedRequest as unknown as ApprovalRequest}
+        request={selectedRequest ? {
+          ...selectedRequest,
+          user_id: selectedRequest.id,
+          tour_id: 0,
+          message: selectedRequest.reason,
+          email_sent: false,
+          activation_token: null,
+          activation_expires_at: null,
+          pickup_city: "",
+          tour: {} as Tour,
+          client: {} as Client,
+        } as ApprovalRequest : null}
         onClose={() => setSelectedRequest(null)}
-        onApprove={handleApprove as (request: ApprovalRequest) => Promise<void>}
-        onReject={handleReject as (request: ApprovalRequest) => Promise<void>}
+        onApprove={async (request: ApprovalRequest) => {
+          await handleApprove(selectedRequest as CarrierRegistrationRequest);
+        }}
+        onReject={async (request: ApprovalRequest) => {
+          await handleReject(selectedRequest as CarrierRegistrationRequest);
+        }}
       />
     </div>
   );
