@@ -1,28 +1,28 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export async function approveCarrierRequest(requestId: string) {
+export async function approveCarrierRequest(carrierId: string) {
   try {
-    // First, verify the request exists and get its data
-    const { data: request, error: requestError } = await supabase
-      .from("carrier_registration_requests")
+    // First, verify the carrier exists and get its data
+    const { data: carrier, error: carrierError } = await supabase
+      .from("carriers")
       .select("*")
-      .eq("id", requestId)
+      .eq("id", carrierId)
       .maybeSingle();
 
-    if (requestError) throw requestError;
-    if (!request) throw new Error("Request not found");
+    if (carrierError) throw carrierError;
+    if (!carrier) throw new Error("Carrier not found");
 
-    console.log("Found carrier request:", request);
+    console.log("Found carrier:", carrier);
 
     // Call the edge function to handle the approval process
     const { data, error } = await supabase.functions.invoke("approve-carrier", {
-      body: { requestId }
+      body: { carrierId }
     });
 
     if (error) throw error;
     if (!data.success) throw new Error(data.error || "Failed to approve carrier");
 
-    console.log("Carrier created successfully:", data.carrier);
+    console.log("Carrier approved successfully:", data.carrier);
     return data.carrier;
   } catch (error: any) {
     console.error("Error in approveCarrierRequest:", error);

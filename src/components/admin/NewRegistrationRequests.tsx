@@ -16,7 +16,7 @@ export default function NewRegistrationRequests() {
   const navigate = useNavigate();
 
   const { data: requests = [], isLoading, refetch } = useQuery({
-    queryKey: ["carrier-requests", "pending"],
+    queryKey: ["carriers", "pending"],
     queryFn: async () => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();

@@ -20,4 +20,7 @@ export interface Carrier {
   updated_at: string;
   reason?: string | null;
   password?: string | null;
+  total_capacity?: number;
+  price_per_kg?: number;
+  services?: string[];
 }

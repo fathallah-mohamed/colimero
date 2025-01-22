@@ -14,7 +14,7 @@ export interface CarrierSignupFormProps {
   onSuccess: () => void;
 }
 
-const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
+export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { data: consentTypes } = useCarrierConsents();
@@ -58,17 +58,14 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Transform empty SIRET string to null
-      const siretValue = values.siret?.trim() === "" ? null : values.siret;
-      
       const { error: registrationError } = await supabase
-        .from("carrier_registration_requests")
+        .from("carriers")
         .insert({
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
           company_name: values.company_name,
-          siret: siretValue,
+          siret: values.siret || null,
           phone: values.phone,
           phone_secondary: values.phone_secondary,
           address: values.address,
@@ -77,6 +74,8 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg,
           avatar_url: values.avatar_url,
+          password: values.password,
+          status: 'pending'
         });
 
       if (registrationError) throw registrationError;
@@ -118,6 +117,4 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
       </form>
     </Form>
   );
-};
-
-export default CarrierSignupForm;
+}
