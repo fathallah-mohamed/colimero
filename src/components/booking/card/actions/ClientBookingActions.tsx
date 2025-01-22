@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { BookingStatus } from "@/types/booking";
 import { Edit2, RotateCcw } from "lucide-react";
-import { CancelConfirmDialog } from "../../../actions/CancelConfirmDialog";
+import { CancelConfirmDialog } from "./CancelConfirmDialog";
 
 interface ClientBookingActionsProps {
   status: BookingStatus;
