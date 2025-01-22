@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useApprovalRequests } from "@/hooks/useApprovalRequests";
 import { ProfileLoading } from "@/components/profile/ProfileLoading";
 import { ApprovalRequestTabs } from "@/components/approval-requests/ApprovalRequestTabs";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MesDemandesApprobation() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function MesDemandesApprobation() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const userType = user?.user_metadata?.user_type;
   const userId = user?.id;
+  const { toast } = useToast();
 
   const {
     requests,
@@ -44,7 +46,9 @@ export default function MesDemandesApprobation() {
 
   const pendingRequests = requests?.filter(req => req.status === 'pending') || [];
   const approvedRequests = requests?.filter(req => req.status === 'approved') || [];
-  const rejectedRequests = requests?.filter(req => req.status === 'rejected' || req.status === 'cancelled') || [];
+  const rejectedRequests = requests?.filter(req => 
+    req.status === 'rejected' || req.status === 'cancelled'
+  ) || [];
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Badge } from "@/components/ui/badge";
 import type { ApprovalRequest } from "@/components/admin/approval-requests/types";
 
 interface ApprovalRequestHeaderProps {
@@ -9,71 +8,50 @@ interface ApprovalRequestHeaderProps {
 }
 
 export function ApprovalRequestHeader({ request, userType }: ApprovalRequestHeaderProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
-      case "approved":
-        return "bg-green-100 text-green-800 hover:bg-green-100";
-      case "rejected":
-        return "bg-red-100 text-red-800 hover:bg-red-100";
-      case "cancelled":
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "En attente";
-      case "approved":
-        return "Approuvée";
-      case "rejected":
-        return "Rejetée";
-      case "cancelled":
-        return "Annulée";
-      default:
-        return status;
-    }
-  };
-
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          Demande du {format(new Date(request.created_at), "d MMMM yyyy", { locale: fr })}
-        </h3>
-        <Badge className={getStatusColor(request.status)}>
-          {getStatusLabel(request.status)}
-        </Badge>
-      </div>
-      
-      {request.tour && (
-        <div className="text-sm text-gray-600">
-          <p>
-            {request.tour.departure_country} → {request.tour.destination_country}
+      <h2 className="text-lg font-semibold">
+        {request.tour.departure_country} → {request.tour.destination_country}
+      </h2>
+      <p className="text-gray-600">
+        Transporteur : {request.tour.carrier.company_name}
+      </p>
+      {userType === 'carrier' && request.client && (
+        <>
+          <p className="text-gray-600">
+            Client : {request.client.first_name} {request.client.last_name}
           </p>
-          <p>
-            Transporteur : {request.tour.carrier.company_name}
-          </p>
-          {userType === 'carrier' && request.client && (
-            <>
-              <p>
-                Client : {request.client.first_name} {request.client.last_name}
-              </p>
-              {request.client.phone && (
-                <p>
-                  Téléphone : {request.client.phone}
-                </p>
-              )}
-            </>
+          {request.client.phone && (
+            <p className="text-gray-600">
+              Téléphone : {request.client.phone}
+            </p>
           )}
-          <p>
-            Point de collecte : {request.pickup_city}
-          </p>
-        </div>
+        </>
+      )}
+      <p className="text-gray-600">
+        Ville de ramassage : {request.pickup_city}
+      </p>
+      <p className="text-gray-600">
+        Date de départ : {request.tour.departure_date ? 
+          format(new Date(request.tour.departure_date), "EEEE d MMMM yyyy", { locale: fr }) : 
+          'Non spécifiée'}
+      </p>
+      <p className="text-gray-600">
+        Statut : <span className={`font-medium ${
+          request.status === 'pending' ? 'text-yellow-600' :
+          request.status === 'approved' ? 'text-green-600' :
+          'text-red-600'
+        }`}>
+          {request.status === 'pending' ? 'En attente' :
+           request.status === 'approved' ? 'Approuvée' :
+           request.status === 'cancelled' ? 'Annulée' :
+           'Rejetée'}
+        </span>
+      </p>
+      {request.message && (
+        <p className="text-gray-600">
+          Message : {request.message}
+        </p>
       )}
     </div>
   );
