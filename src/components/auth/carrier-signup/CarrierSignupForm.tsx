@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { FormSections } from "./FormSections";
 import { useEffect } from "react";
-import { v4 as uuidv4 } from 'uuid';
 
 export interface CarrierSignupFormProps {
   onSuccess: () => void;
@@ -59,11 +58,28 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const carrierId = uuidv4();
+      // First, create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            user_type: 'carrier',
+            first_name: values.first_name,
+            last_name: values.last_name,
+            company_name: values.company_name
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("No user data returned");
+
+      // Then create the carrier profile using the auth user's ID
       const { error: registrationError } = await supabase
         .from("carriers")
         .insert({
-          id: carrierId,
+          id: authData.user.id,
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
@@ -74,7 +90,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           address: values.address,
           coverage_area: values.coverage_area,
           avatar_url: values.avatar_url || "",
-          password: values.password,
           status: 'pending',
           company_details: {},
           authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
@@ -89,7 +104,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
       const { error: capacityError } = await supabase
         .from("carrier_capacities")
         .insert({
-          carrier_id: carrierId,
+          carrier_id: authData.user.id,
           total_capacity: values.total_capacity,
           price_per_kg: values.price_per_kg
         });
@@ -122,7 +137,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de votre demande",
+        description: error.message || "Une erreur est survenue lors de l'envoi de votre demande",
       });
     }
   };
