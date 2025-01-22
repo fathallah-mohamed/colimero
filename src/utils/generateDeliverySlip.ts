@@ -7,7 +7,7 @@ export function generateDeliverySlip(booking: Booking) {
   const doc = new jsPDF();
   let yPos = 20;
 
-  // Add title and tracking number
+  // En-tête avec le numéro de suivi
   doc.setFontSize(24);
   doc.setFont(undefined, 'bold');
   doc.text("BON DE LIVRAISON", 105, yPos, { align: "center" });
@@ -23,9 +23,10 @@ export function generateDeliverySlip(booking: Booking) {
   const rowHeight = 30;
   const fontSize = 12;
   const headerFontSize = 14;
+  const recipientFontSize = 18; // Police plus grande pour le destinataire
 
   // Fonction pour dessiner une ligne de tableau
-  const drawTableRow = (title: string, content: string, y: number, isHeader = false) => {
+  const drawTableRow = (title: string, content: string, y: number, isHeader = false, isRecipient = false) => {
     // Dessiner le fond
     doc.setFillColor(isHeader ? 240 : 255, isHeader ? 240 : 255, isHeader ? 240 : 255);
     doc.rect(tableStartX, y, colWidth, rowHeight, 'F');
@@ -38,10 +39,40 @@ export function generateDeliverySlip(booking: Booking) {
     doc.setFontSize(isHeader ? headerFontSize : fontSize);
     doc.setFont(undefined, isHeader ? 'bold' : 'normal');
     doc.text(title, tableStartX + 5, y + 10);
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(isHeader ? headerFontSize : 16);
+    
+    // Texte du contenu plus grand pour le destinataire
+    doc.setFont(undefined, isRecipient ? 'bold' : 'normal');
+    doc.setFontSize(isRecipient ? recipientFontSize : (isHeader ? headerFontSize : fontSize));
     doc.text(content, tableStartX + 5, y + 22);
   };
+
+  // Informations de la tournée
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.text("INFORMATIONS TOURNÉE", tableStartX, yPos);
+  yPos += 10;
+
+  drawTableRow("Trajet", `${booking.tours?.departure_country} → ${booking.tours?.destination_country}`, yPos);
+  yPos += rowHeight;
+  drawTableRow("Date de départ", format(new Date(booking.tours?.departure_date || ''), "d MMMM yyyy", { locale: fr }), yPos);
+  yPos += rowHeight;
+  drawTableRow("Transporteur", booking.tours?.carriers?.company_name || '', yPos);
+  yPos += rowHeight + 15;
+
+  // Section Destinataire (en plus grand)
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.text("DESTINATAIRE", tableStartX, yPos);
+  yPos += 10;
+
+  drawTableRow("Nom complet", booking.recipient_name, yPos, false, true);
+  yPos += rowHeight;
+  drawTableRow("Téléphone", booking.recipient_phone, yPos, false, true);
+  yPos += rowHeight;
+  drawTableRow("Adresse complète", booking.recipient_address, yPos, false, true);
+  yPos += rowHeight;
+  drawTableRow("Ville", booking.delivery_city, yPos, false, true);
+  yPos += rowHeight + 15;
 
   // Section Expéditeur
   doc.setFontSize(16);
@@ -54,21 +85,6 @@ export function generateDeliverySlip(booking: Booking) {
   drawTableRow("Téléphone", booking.sender_phone, yPos);
   yPos += rowHeight;
   drawTableRow("Ville", booking.pickup_city, yPos);
-  yPos += rowHeight + 15;
-
-  // Section Destinataire
-  doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
-  doc.text("DESTINATAIRE", tableStartX, yPos);
-  yPos += 10;
-
-  drawTableRow("Nom complet", booking.recipient_name, yPos);
-  yPos += rowHeight;
-  drawTableRow("Téléphone", booking.recipient_phone, yPos);
-  yPos += rowHeight;
-  drawTableRow("Adresse complète", booking.recipient_address, yPos);
-  yPos += rowHeight;
-  drawTableRow("Ville", booking.delivery_city, yPos);
   yPos += rowHeight + 15;
 
   // Section Colis
@@ -100,7 +116,7 @@ export function generateDeliverySlip(booking: Booking) {
     yPos += rowHeight;
   }
 
-  // Add date at the bottom
+  // Date de génération en bas de page
   doc.setFontSize(10);
   doc.setFont(undefined, 'normal');
   doc.text(
