@@ -67,14 +67,14 @@ export function useRegistrationRequests() {
         }
 
         // Transform the data to match ApprovalRequest type
-        const transformedRequests: ApprovalRequest[] = pendingCarriers.map(carrier => ({
+        const transformedRequests: ApprovalRequest[] = (pendingCarriers || []).map(carrier => ({
           id: carrier.id,
           user_id: carrier.id,
           tour_id: 0,
           status: carrier.status as "pending" | "active" | "rejected",
           message: null,
           created_at: carrier.created_at,
-          updated_at: carrier.created_at, // Use created_at since updated_at doesn't exist
+          updated_at: carrier.created_at,
           reason: null,
           email_sent: false,
           activation_token: null,
@@ -131,7 +131,7 @@ export function useRegistrationRequests() {
             cities_covered: carrier.cities_covered || 30,
             status: carrier.status as "pending" | "active" | "rejected",
             created_at: carrier.created_at,
-            updated_at: carrier.created_at // Use created_at since updated_at doesn't exist
+            updated_at: carrier.created_at
           }
         }));
 
