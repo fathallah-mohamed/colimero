@@ -55,10 +55,8 @@ export default function CarrierSignup() {
         </div>
 
         {/* Formulaire d'inscription */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-          <div className="p-8">
-            <CarrierSignupForm onSuccess={() => navigate("/")} />
-          </div>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+          <CarrierSignupForm onSuccess={() => navigate("/")} />
         </div>
       </div>
     </div>

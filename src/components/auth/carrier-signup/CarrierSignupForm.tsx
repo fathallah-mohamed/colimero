@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formSchema, type FormValues } from "./FormSchema";
 import { useNavigate } from "react-router-dom";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { FormSections } from "./FormSections";
 import { useEffect } from "react";
@@ -99,22 +98,20 @@ const CarrierSignupForm = ({ onSuccess }: CarrierSignupFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <ScrollArea className="h-[calc(100vh-300px)] pr-4">
-          <FormSections form={form} />
+        <FormSections form={form} />
 
-          <div className="mt-8 text-center">
-            <Button 
-              type="submit" 
-              className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
-              disabled={!isValid || !allConsentsAccepted}
-            >
-              Envoyer ma demande d'inscription
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              Une fois votre demande envoyée, nous vous contacterons pour finaliser votre inscription.
-            </p>
-          </div>
-        </ScrollArea>
+        <div className="mt-8 text-center">
+          <Button 
+            type="submit" 
+            className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
+            disabled={!isValid || !allConsentsAccepted}
+          >
+            Envoyer ma demande d'inscription
+          </Button>
+          <p className="text-sm text-muted-foreground mt-4">
+            Une fois votre demande envoyée, nous vous contacterons pour finaliser votre inscription.
+          </p>
+        </div>
       </form>
     </Form>
   );
