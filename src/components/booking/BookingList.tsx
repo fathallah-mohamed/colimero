@@ -47,7 +47,8 @@ export function BookingList() {
         .from('bookings')
         .update({ 
           status: newStatus,
-          delivery_status: newStatus
+          delivery_status: newStatus,
+          updated_at: new Date().toISOString()
         })
         .eq('id', bookingId);
 
