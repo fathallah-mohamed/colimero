@@ -48,6 +48,7 @@ export function useRegistrationRequests() {
             company_details,
             authorized_routes,
             created_at,
+            updated_at,
             status,
             email_verified,
             total_deliveries,
@@ -66,20 +67,20 @@ export function useRegistrationRequests() {
           return [];
         }
 
-        // Transformer les données pour correspondre au format ApprovalRequest
+        // Transform the data to match ApprovalRequest type
         const transformedRequests: ApprovalRequest[] = pendingCarriers.map(carrier => ({
           id: carrier.id,
-          user_id: carrier.id, // Le carrier.id est aussi l'user_id
-          tour_id: 0, // Valeur par défaut car non applicable pour les inscriptions
+          user_id: carrier.id,
+          tour_id: 0,
           status: carrier.status,
           message: null,
           created_at: carrier.created_at,
-          updated_at: carrier.created_at,
+          updated_at: carrier.updated_at,
           reason: null,
           email_sent: false,
           activation_token: null,
           activation_expires_at: null,
-          pickup_city: "", // Non applicable pour les inscriptions
+          pickup_city: "",
           tour: {
             id: 0,
             carrier_id: carrier.id,
@@ -89,7 +90,7 @@ export function useRegistrationRequests() {
             departure_date: new Date().toISOString(),
             collection_date: new Date().toISOString(),
             created_at: carrier.created_at,
-            updated_at: carrier.created_at,
+            updated_at: carrier.updated_at,
             departure_country: "FR",
             destination_country: "TN",
             status: "pending",
@@ -129,7 +130,9 @@ export function useRegistrationRequests() {
             email_verified: carrier.email_verified || false,
             total_deliveries: carrier.total_deliveries || 0,
             cities_covered: carrier.cities_covered || 30,
-            status: carrier.status
+            status: carrier.status,
+            created_at: carrier.created_at,
+            updated_at: carrier.updated_at
           }
         }));
 
