@@ -30,15 +30,41 @@ export function NewRequestsTable({
       <tbody>
         {requests.map((request) => (
           <tr key={request.id}>
-            <td>{request.client.first_name} {request.client.last_name}</td>
-            <td>{request.message}</td>
+            <td>
+              {request.client ? (
+                `${request.client.first_name || ''} ${request.client.last_name || ''}`
+              ) : (
+                'Client non disponible'
+              )}
+            </td>
+            <td>{request.message || '-'}</td>
             <td>{request.status}</td>
             <td>
-              <Button onClick={() => onViewDetails(request)}>View</Button>
-              {showApproveButton && (
-                <Button onClick={() => onApprove(request)}>Approve</Button>
-              )}
-              <Button onClick={() => onReject(request)}>Reject</Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onViewDetails(request)}
+                >
+                  View
+                </Button>
+                {showApproveButton && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => onApprove(request)}
+                  >
+                    Approve
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onReject(request)}
+                >
+                  Reject
+                </Button>
+              </div>
             </td>
           </tr>
         ))}
