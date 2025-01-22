@@ -10,11 +10,11 @@ import Navigation from "@/components/Navigation";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
-import { CarrierRegistrationRequest } from "./approval-requests/types";
+import { ApprovalRequest } from "./approval-requests/types";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<CarrierRegistrationRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const { toast } = useToast();
 
@@ -28,11 +28,11 @@ export default function RejectedRequests() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as CarrierRegistrationRequest[];
+      return data as ApprovalRequest[];
     },
   });
 
-  const handleApprove = async (request: CarrierRegistrationRequest) => {
+  const handleApprove = async (request: ApprovalRequest) => {
     if (isApproving) return;
     
     setIsApproving(true);
@@ -58,7 +58,7 @@ export default function RejectedRequests() {
     }
   };
 
-  const handleReject = async (request: CarrierRegistrationRequest) => {
+  const handleReject = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('carrier_registration_requests')
@@ -89,8 +89,8 @@ export default function RejectedRequests() {
 
   const filteredRequests = requests?.filter(
     (request) =>
-      request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.email.toLowerCase().includes(searchTerm.toLowerCase())
+      request.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
