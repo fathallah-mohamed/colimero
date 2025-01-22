@@ -1,92 +1,67 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
-export function useCarrierSignup() {
+export const useCarrierSignup = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const handleSubmit = async (values: any) => {
+  const handleSignup = async (formData: any) => {
     setIsLoading(true);
     try {
       const carrierId = uuidv4();
-
-      // Create carrier profile
-      const { error: carrierError } = await supabase
-        .from("carriers")
+      
+      const { error } = await supabase
+        .from('carriers')
         .insert({
           id: carrierId,
-          email: values.email,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          company_name: values.company_name,
-          siret: values.siret,
-          phone: values.phone,
-          phone_secondary: values.phone_secondary || "",
-          address: values.address,
-          coverage_area: values.coverage_area,
-          avatar_url: "",
-          company_details: {},
-          status: "pending",
-          password: values.password,
-          authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
-          total_deliveries: 0,
-          cities_covered: 30,
-          email_verified: false
+          email: formData.email,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          company_name: formData.company_name,
+          siret: formData.siret,
+          phone: formData.phone,
+          phone_secondary: formData.phone_secondary || '',
+          address: formData.address,
+          coverage_area: formData.coverage_area,
+          avatar_url: formData.avatar_url || '',
+          company_details: formData.company_details || {},
+          authorized_routes: ['FR_TO_TN', 'TN_TO_FR'],
+          status: 'pending',
+          password: formData.password
         });
 
-      if (carrierError) throw carrierError;
+      if (error) throw error;
 
-      // Create carrier capacities
-      const { error: capacityError } = await supabase
-        .from("carrier_capacities")
+      // Create carrier capacity
+      await supabase
+        .from('carrier_capacities')
         .insert({
           carrier_id: carrierId,
-          total_capacity: values.total_capacity,
-          price_per_kg: values.price_per_kg,
-          offers_home_delivery: false
+          total_capacity: 1000,
+          price_per_kg: 12
         });
 
-      if (capacityError) throw capacityError;
-
       // Create carrier services
-      if (values.services?.length > 0) {
-        const { error: servicesError } = await supabase
-          .from("carrier_services")
-          .insert(
-            values.services.map((service: string) => ({
-              carrier_id: carrierId,
-              service_type: service,
-              icon: "package"
-            }))
-          );
+      if (formData.services?.length > 0) {
+        const serviceInserts = formData.services.map((service: string) => ({
+          carrier_id: carrierId,
+          service_type: service,
+          icon: 'package'
+        }));
 
-        if (servicesError) throw servicesError;
+        await supabase
+          .from('carrier_services')
+          .insert(serviceInserts);
       }
 
-      toast({
-        title: "Inscription réussie",
-        description: "Votre demande d'inscription a été envoyée avec succès.",
-      });
-
-      navigate("/connexion");
+      return { success: true };
     } catch (error: any) {
-      console.error("Error in carrier signup:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription.",
-      });
+      console.error('Error in carrier signup:', error);
+      return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
     }
   };
 
-  return {
-    isLoading,
-    handleSubmit,
-  };
-}
+  return { handleSignup, isLoading };
+};

@@ -4,9 +4,9 @@ import { RequestCard } from "./RequestCard";
 interface RequestListProps {
   requests: Carrier[];
   searchTerm: string;
-  onSelect: (request: Carrier) => void;
-  onApprove: (request: Carrier) => void;
-  onReject: (request: Carrier, reason: string) => void;
+  onSelect: (carrier: Carrier) => void;
+  onApprove: (carrier: Carrier) => void;
+  onReject: (carrier: Carrier, reason: string) => void;
 }
 
 export function RequestList({

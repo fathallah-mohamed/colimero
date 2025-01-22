@@ -12,11 +12,11 @@ import { approveCarrierRequest, rejectCarrierRequest } from "@/services/carrier-
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<Carrier | null>(null);
+  const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const { data: requests = [], isLoading, refetch } = useQuery({
+  const { data: carriers = [], isLoading, refetch } = useQuery({
     queryKey: ["carriers", "pending"],
     queryFn: async () => {
       try {
@@ -127,16 +127,16 @@ export default function NewRegistrationRequests() {
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={requests}
+        requests={carriers}
         searchTerm={searchTerm}
-        onSelect={setSelectedRequest}
+        onSelect={setSelectedCarrier}
         onApprove={handleApprove}
         onReject={handleReject}
       />
 
       <RequestDetailsDialog
-        request={selectedRequest}
-        onClose={() => setSelectedRequest(null)}
+        request={selectedCarrier}
+        onClose={() => setSelectedCarrier(null)}
         onApprove={handleApprove}
         onReject={handleReject}
       />
