@@ -10,7 +10,7 @@ import Navigation from "@/components/Navigation";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { approveCarrierRequest } from "@/services/carrier-approval";
-import { ApprovalRequest } from "./approval-requests/types";
+import { ApprovalRequest, CarrierRegistrationRequest } from "./approval-requests/types";
 
 export default function RejectedRequests() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,7 +28,28 @@ export default function RejectedRequests() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as ApprovalRequest[];
+      
+      // Transform CarrierRegistrationRequest to ApprovalRequest
+      const transformedData: ApprovalRequest[] = (data as CarrierRegistrationRequest[]).map(request => ({
+        id: request.id,
+        user_id: request.id, // Using request.id as user_id since it's required
+        tour_id: 0, // Default value since it's required
+        status: request.status,
+        message: request.reason,
+        created_at: request.created_at,
+        updated_at: request.updated_at,
+        reason: request.reason,
+        email_sent: false,
+        activation_token: null,
+        activation_expires_at: null,
+        pickup_city: "",
+        tour: {} as Tour,
+        client: {} as Client,
+        company_name: request.company_name,
+        email: request.email
+      }));
+
+      return transformedData;
     },
   });
 

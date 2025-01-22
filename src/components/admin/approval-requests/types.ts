@@ -75,6 +75,8 @@ export interface ApprovalRequest {
   activation_token: string | null;
   activation_expires_at: string | null;
   pickup_city: string;
-  tour?: Tour;
-  client?: Client;
+  tour: Tour;
+  client: Client;
+  company_name?: string;
+  email?: string;
 }

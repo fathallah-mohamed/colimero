@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RequestList } from "./approval-requests/RequestList";
 import { SearchBar } from "./approval-requests/SearchBar";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
-import { CarrierRegistrationRequest } from "./approval-requests/types";
+import { CarrierRegistrationRequest, ApprovalRequest } from "./approval-requests/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -138,18 +138,18 @@ export default function NewRegistrationRequests() {
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={requests}
+        requests={requests as unknown as ApprovalRequest[]}
         searchTerm={searchTerm}
-        onSelect={setSelectedRequest}
-        onApprove={handleApprove}
-        onReject={handleReject}
+        onSelect={setSelectedRequest as (request: ApprovalRequest) => void}
+        onApprove={handleApprove as (request: ApprovalRequest) => Promise<void>}
+        onReject={handleReject as (request: ApprovalRequest) => Promise<void>}
       />
 
       <RequestDetailsDialog
-        request={selectedRequest}
+        request={selectedRequest as unknown as ApprovalRequest}
         onClose={() => setSelectedRequest(null)}
-        onApprove={handleApprove}
-        onReject={handleReject}
+        onApprove={handleApprove as (request: ApprovalRequest) => Promise<void>}
+        onReject={handleReject as (request: ApprovalRequest) => Promise<void>}
       />
     </div>
   );
