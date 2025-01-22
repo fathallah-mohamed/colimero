@@ -2,22 +2,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { formSchema, type FormValues } from "./FormSchema";
-import { useNavigate } from "react-router-dom";
-import { useCarrierConsents } from "@/hooks/useCarrierConsents";
 import { FormSections } from "./FormSections";
-import { useEffect } from "react";
+import { useCarrierRegistration } from "@/hooks/useCarrierRegistration";
 
-export interface CarrierSignupFormProps {
-  onSuccess: () => void;
-}
-
-export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { data: consentTypes } = useCarrierConsents();
+export default function CarrierSignupForm() {
+  const { isLoading, handleRegistration } = useCarrierRegistration();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -36,127 +26,25 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
       total_capacity: 0,
       price_per_kg: 0,
       avatar_url: null,
-      consents: consentTypes?.reduce((acc, consent) => ({
-        ...acc,
-        [consent.code]: false
-      }), {}) || {},
       services: []
     },
   });
 
   const formValues = form.watch();
   const isValid = form.formState.isValid;
-  const allConsentsAccepted = formValues.consents ? 
-    Object.values(formValues.consents).every(value => value === true) : false;
-
-  useEffect(() => {
-    console.log("Form values:", formValues);
-    console.log("Form is valid:", isValid);
-    console.log("All consents accepted:", allConsentsAccepted);
-    console.log("Form errors:", form.formState.errors);
-  }, [formValues, isValid, allConsentsAccepted, form.formState.errors]);
-
-  const onSubmit = async (values: FormValues) => {
-    try {
-      // First, create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            user_type: 'carrier',
-            first_name: values.first_name,
-            last_name: values.last_name,
-            company_name: values.company_name
-          }
-        }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("No user data returned");
-
-      // Add a delay to ensure auth user is created
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Then create the carrier profile using the auth user's ID
-      const { error: registrationError } = await supabase
-        .from("carriers")
-        .insert({
-          id: authData.user.id,
-          email: values.email,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          company_name: values.company_name,
-          siret: values.siret || null,
-          phone: values.phone,
-          phone_secondary: values.phone_secondary,
-          address: values.address,
-          coverage_area: values.coverage_area,
-          avatar_url: values.avatar_url || "",
-          status: 'pending',
-          company_details: {},
-          authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
-          total_deliveries: 0,
-          cities_covered: 30,
-          email_verified: false
-        });
-
-      if (registrationError) throw registrationError;
-
-      // Create carrier capacities
-      const { error: capacityError } = await supabase
-        .from("carrier_capacities")
-        .insert({
-          carrier_id: authData.user.id,
-          total_capacity: values.total_capacity,
-          price_per_kg: values.price_per_kg
-        });
-
-      if (capacityError) throw capacityError;
-
-      // Send notification email to admin
-      const { error: emailError } = await supabase.functions.invoke('send-registration-email', {
-        body: { 
-          email: values.email,
-          first_name: values.first_name,
-          last_name: values.last_name,
-          company_name: values.company_name
-        }
-      });
-
-      if (emailError) {
-        console.error("Error sending notification email:", emailError);
-      }
-
-      toast({
-        title: "Demande envoyée avec succès",
-        description: "Nous examinerons votre demande dans les plus brefs délais. Vous recevrez un email de confirmation.",
-      });
-
-      onSuccess();
-      navigate("/");
-    } catch (error: any) {
-      console.error("Error during registration:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'envoi de votre demande",
-      });
-    }
-  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-8">
         <FormSections form={form} />
 
         <div className="mt-8 text-center">
           <Button 
             type="submit" 
             className="w-full max-w-md button-gradient text-white py-6 text-lg font-semibold"
-            disabled={!isValid || !allConsentsAccepted}
+            disabled={!isValid || isLoading}
           >
-            Envoyer ma demande d'inscription
+            {isLoading ? "Envoi en cours..." : "Envoyer ma demande d'inscription"}
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
             Une fois votre demande envoyée, nous vous contacterons pour finaliser votre inscription.
