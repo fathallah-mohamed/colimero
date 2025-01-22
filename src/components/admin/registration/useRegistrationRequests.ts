@@ -131,7 +131,7 @@ export function useRegistrationRequests() {
             cities_covered: carrier.cities_covered || 30,
             status: carrier.status as "pending" | "active" | "rejected",
             created_at: carrier.created_at,
-            updated_at: carrier.created_at
+            updated_at: carrier.created_at // Use created_at since updated_at doesn't exist
           }
         }));
 
