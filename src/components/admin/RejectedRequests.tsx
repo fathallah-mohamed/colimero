@@ -58,7 +58,7 @@ export default function RejectedRequests() {
     },
   });
 
-  const handleApprove = async (request: ApprovalRequest): Promise<void> => {
+  const handleApprove = async (request: ApprovalRequest) => {
     if (isApproving) return;
     
     setIsApproving(true);
@@ -84,7 +84,7 @@ export default function RejectedRequests() {
     }
   };
 
-  const handleReject = async (request: ApprovalRequest): Promise<void> => {
+  const handleReject = async (request: ApprovalRequest) => {
     try {
       const { error } = await supabase
         .from('approval_requests')
