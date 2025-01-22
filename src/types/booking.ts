@@ -67,6 +67,7 @@ export interface Booking {
   tours?: {
     collection_date: string;
     departure_date: string;
+    departure_country: string;
     destination_country: string;
     route: any;
     status: string;
