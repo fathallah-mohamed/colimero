@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RequestList } from "./approval-requests/RequestList";
 import { SearchBar } from "./approval-requests/SearchBar";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
-import { CarrierRegistrationRequest, ApprovalRequest, Tour, Client } from "./approval-requests/types";
+import { CarrierRegistrationRequest, ApprovalRequest } from "./approval-requests/types";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
