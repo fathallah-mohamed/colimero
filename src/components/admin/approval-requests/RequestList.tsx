@@ -1,25 +1,31 @@
-import { ApprovalRequest } from "./types";
+import { Carrier } from "@/types/carrier";
 import { RequestCard } from "./RequestCard";
 
 interface RequestListProps {
-  requests: ApprovalRequest[];
-  onSelect: (request: ApprovalRequest) => void;
+  requests: Carrier[];
   searchTerm: string;
-  onApprove: (request: ApprovalRequest) => Promise<void>;
-  onReject: (request: ApprovalRequest) => Promise<void>;
+  onSelect: (request: Carrier) => void;
+  onApprove: (request: Carrier) => void;
+  onReject: (request: Carrier, reason: string) => void;
 }
 
-export function RequestList({ requests, onSelect, searchTerm, onApprove, onReject }: RequestListProps) {
-  const filteredRequests = requests.filter(request =>
-    request.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    request.email?.toLowerCase().includes(searchTerm.toLowerCase()) || ''
+export function RequestList({
+  requests,
+  searchTerm,
+  onSelect,
+  onApprove,
+  onReject,
+}: RequestListProps) {
+  const filteredRequests = requests.filter(
+    (request) =>
+      request.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (filteredRequests.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Aucune demande trouvée</p>
+      <div className="text-center py-8 text-gray-500">
+        Aucune demande d'inscription en attente
       </div>
     );
   }
@@ -30,9 +36,9 @@ export function RequestList({ requests, onSelect, searchTerm, onApprove, onRejec
         <RequestCard
           key={request.id}
           request={request}
-          onClick={() => onSelect(request)}
+          onSelect={() => onSelect(request)}
           onApprove={() => onApprove(request)}
-          onReject={() => onReject(request)}
+          onReject={(reason) => onReject(request, reason)}
         />
       ))}
     </div>

@@ -4,19 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { RequestList } from "./approval-requests/RequestList";
 import { SearchBar } from "./approval-requests/SearchBar";
 import { RequestDetailsDialog } from "./RequestDetailsDialog";
-import { CarrierRegistrationRequest, ApprovalRequest } from "./approval-requests/types";
+import { Carrier } from "@/types/carrier";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function NewRegistrationRequests() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState<CarrierRegistrationRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<Carrier | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const { data: requests = [], isLoading, refetch } = useQuery({
-    queryKey: ["carrier-registration-requests"],
+    queryKey: ["carrier-requests", "pending"],
     queryFn: async () => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -38,15 +38,13 @@ export default function NewRegistrationRequests() {
           return [];
         }
 
-        console.log("Current user ID:", session.user.id);
-
-        const { data: registrationRequests, error: requestsError } = await supabase
-          .from("carrier_registration_requests")
+        const { data: pendingCarriers, error: carriersError } = await supabase
+          .from("carriers")
           .select("*")
           .eq("status", "pending");
 
-        if (requestsError) {
-          console.error("Error fetching registration requests:", requestsError);
+        if (carriersError) {
+          console.error("Error fetching carriers:", carriersError);
           toast({
             variant: "destructive",
             title: "Erreur",
@@ -55,8 +53,7 @@ export default function NewRegistrationRequests() {
           return [];
         }
 
-        console.log("Fetched registration requests:", registrationRequests);
-        return registrationRequests as CarrierRegistrationRequest[];
+        return pendingCarriers as Carrier[];
       } catch (error: any) {
         console.error("Complete error:", error);
         toast({
@@ -69,48 +66,26 @@ export default function NewRegistrationRequests() {
     },
   });
 
-  const transformRequestToApprovalRequest = (request: CarrierRegistrationRequest): ApprovalRequest => ({
-    id: request.id,
-    user_id: request.id,
-    tour_id: 0,
-    status: request.status,
-    message: request.reason,
-    created_at: request.created_at,
-    updated_at: request.updated_at,
-    reason: request.reason,
-    email_sent: false,
-    activation_token: null,
-    activation_expires_at: null,
-    pickup_city: "",
-    tour: {} as Tour,
-    client: {} as Client,
-    company_name: request.company_name,
-    email: request.email,
-    first_name: request.first_name,
-    last_name: request.last_name,
-    phone: request.phone
-  });
-
-  const handleApprove = async (request: CarrierRegistrationRequest) => {
+  const handleApprove = async (carrier: Carrier) => {
     try {
-      const { error } = await supabase
-        .from("carrier_registration_requests")
-        .update({ 
-          status: "approved",
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", request.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      const { error } = await supabase.rpc('approve_carrier', {
+        carrier_id: carrier.id,
+        admin_id: session.user.id
+      });
 
       if (error) throw error;
 
       toast({
         title: "Demande approuvée",
-        description: "La demande a été approuvée avec succès.",
+        description: "Le transporteur a été approuvé avec succès.",
       });
 
       refetch();
     } catch (error: any) {
-      console.error("Error approving request:", error);
+      console.error("Error approving carrier:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -119,15 +94,16 @@ export default function NewRegistrationRequests() {
     }
   };
 
-  const handleReject = async (request: CarrierRegistrationRequest) => {
+  const handleReject = async (carrier: Carrier, reason: string) => {
     try {
-      const { error } = await supabase
-        .from("carrier_registration_requests")
-        .update({ 
-          status: "rejected",
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", request.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No session");
+
+      const { error } = await supabase.rpc('reject_carrier', {
+        carrier_id: carrier.id,
+        admin_id: session.user.id,
+        rejection_reason: reason
+      });
 
       if (error) throw error;
 
@@ -138,7 +114,7 @@ export default function NewRegistrationRequests() {
 
       refetch();
     } catch (error: any) {
-      console.error("Error rejecting request:", error);
+      console.error("Error rejecting carrier:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -155,38 +131,23 @@ export default function NewRegistrationRequests() {
     );
   }
 
-  const transformedRequests = requests.map(transformRequestToApprovalRequest);
-
   return (
     <div className="space-y-6">
       <SearchBar value={searchTerm} onChange={setSearchTerm} />
       
       <RequestList
-        requests={transformedRequests}
+        requests={requests}
         searchTerm={searchTerm}
-        onSelect={(request: ApprovalRequest) => {
-          const originalRequest = requests.find(r => r.id === request.id);
-          if (originalRequest) setSelectedRequest(originalRequest);
-        }}
-        onApprove={async (request: ApprovalRequest) => {
-          const originalRequest = requests.find(r => r.id === request.id);
-          if (originalRequest) await handleApprove(originalRequest);
-        }}
-        onReject={async (request: ApprovalRequest) => {
-          const originalRequest = requests.find(r => r.id === request.id);
-          if (originalRequest) await handleReject(originalRequest);
-        }}
+        onSelect={setSelectedRequest}
+        onApprove={handleApprove}
+        onReject={handleReject}
       />
 
       <RequestDetailsDialog
-        request={selectedRequest ? transformRequestToApprovalRequest(selectedRequest) : null}
+        request={selectedRequest}
         onClose={() => setSelectedRequest(null)}
-        onApprove={async (request: ApprovalRequest) => {
-          if (selectedRequest) await handleApprove(selectedRequest);
-        }}
-        onReject={async (request: ApprovalRequest) => {
-          if (selectedRequest) await handleReject(selectedRequest);
-        }}
+        onApprove={handleApprove}
+        onReject={handleReject}
       />
     </div>
   );

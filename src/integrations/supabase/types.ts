@@ -351,87 +351,6 @@ export type Database = {
           },
         ]
       }
-      carrier_registration_requests: {
-        Row: {
-          address: string
-          authorized_routes: Json | null
-          avatar_url: string | null
-          cities_covered: number | null
-          company_details: Json | null
-          company_name: string
-          coverage_area: string[]
-          created_at: string
-          email: string
-          email_verified: boolean | null
-          first_name: string
-          id: string
-          last_name: string
-          password: string | null
-          phone: string
-          phone_secondary: string | null
-          price_per_kg: number | null
-          reason: string | null
-          services: string[] | null
-          siret: string | null
-          status: string
-          total_capacity: number | null
-          total_deliveries: number | null
-          updated_at: string
-        }
-        Insert: {
-          address: string
-          authorized_routes?: Json | null
-          avatar_url?: string | null
-          cities_covered?: number | null
-          company_details?: Json | null
-          company_name: string
-          coverage_area?: string[]
-          created_at?: string
-          email: string
-          email_verified?: boolean | null
-          first_name: string
-          id?: string
-          last_name: string
-          password?: string | null
-          phone: string
-          phone_secondary?: string | null
-          price_per_kg?: number | null
-          reason?: string | null
-          services?: string[] | null
-          siret?: string | null
-          status?: string
-          total_capacity?: number | null
-          total_deliveries?: number | null
-          updated_at?: string
-        }
-        Update: {
-          address?: string
-          authorized_routes?: Json | null
-          avatar_url?: string | null
-          cities_covered?: number | null
-          company_details?: Json | null
-          company_name?: string
-          coverage_area?: string[]
-          created_at?: string
-          email?: string
-          email_verified?: boolean | null
-          first_name?: string
-          id?: string
-          last_name?: string
-          password?: string | null
-          phone?: string
-          phone_secondary?: string | null
-          price_per_kg?: number | null
-          reason?: string | null
-          services?: string[] | null
-          siret?: string | null
-          status?: string
-          total_capacity?: number | null
-          total_deliveries?: number | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       carrier_services: {
         Row: {
           carrier_id: string
@@ -486,10 +405,12 @@ export type Database = {
           id: string
           id_document: string | null
           last_name: string
+          password: string | null
           phone: string
           phone_secondary: string
+          reason: string | null
           siret: string | null
-          status: string
+          status: string | null
           total_deliveries: number
         }
         Insert: {
@@ -507,10 +428,12 @@ export type Database = {
           id: string
           id_document?: string | null
           last_name: string
+          password?: string | null
           phone: string
           phone_secondary?: string
+          reason?: string | null
           siret?: string | null
-          status?: string
+          status?: string | null
           total_deliveries?: number
         }
         Update: {
@@ -528,10 +451,12 @@ export type Database = {
           id?: string
           id_document?: string | null
           last_name?: string
+          password?: string | null
           phone?: string
           phone_secondary?: string
+          reason?: string | null
           siret?: string | null
-          status?: string
+          status?: string | null
           total_deliveries?: number
         }
         Relationships: []
@@ -953,6 +878,13 @@ export type Database = {
       }
     }
     Functions: {
+      approve_carrier: {
+        Args: {
+          carrier_id: string
+          admin_id: string
+        }
+        Returns: undefined
+      }
       cancel_booking_and_update_capacity: {
         Args: {
           booking_id: string
@@ -1044,6 +976,14 @@ export type Database = {
       random_last_city: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      reject_carrier: {
+        Args: {
+          carrier_id: string
+          admin_id: string
+          rejection_reason: string
+        }
+        Returns: undefined
       }
       renew_activation_token: {
         Args: {
