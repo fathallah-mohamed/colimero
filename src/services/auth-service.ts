@@ -13,12 +13,11 @@ export const authService = {
     try {
       console.log("Starting authentication process for:", email.trim());
       
-      // 1. ALWAYS check email verification status first
+      // 1. Vérifier d'abord le statut de vérification
       const verificationStatus = await emailVerificationService.checkEmailVerification(email);
       console.log("Verification status:", verificationStatus);
       
       if (!verificationStatus.isVerified) {
-        console.log('Account not verified:', email);
         return {
           success: false,
           needsVerification: true,
@@ -26,7 +25,7 @@ export const authService = {
         };
       }
 
-      // 2. Only attempt login if email is verified
+      // 2. Tenter la connexion uniquement si l'email est vérifié
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -47,15 +46,57 @@ export const authService = {
         };
       }
 
-      return {
-        success: true
-      };
+      return { success: true };
 
     } catch (error: any) {
       console.error("Complete error:", error);
       return {
         success: false,
         error: "Une erreur inattendue s'est produite"
+      };
+    }
+  },
+
+  async signUp(email: string, password: string, userData: any): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password.trim(),
+        options: {
+          data: {
+            ...userData,
+            user_type: 'client'
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          return {
+            success: false,
+            error: "Un compte existe déjà avec cet email"
+          };
+        }
+        throw error;
+      }
+
+      if (!data.user) {
+        return {
+          success: false,
+          error: "Erreur lors de la création du compte"
+        };
+      }
+
+      return {
+        success: true,
+        email: email
+      };
+
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      return {
+        success: false,
+        error: error.message || "Une erreur est survenue lors de l'inscription"
       };
     }
   }

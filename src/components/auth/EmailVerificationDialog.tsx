@@ -1,32 +1,24 @@
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 import { Mail } from "lucide-react";
 
 export interface EmailVerificationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   email: string;
+  isResending: boolean;
+  onResendEmail: () => void;
 }
 
 export function EmailVerificationDialog({ 
   isOpen, 
   onClose, 
-  email 
+  email,
+  isResending,
+  onResendEmail
 }: EmailVerificationDialogProps) {
-  const { isResending, resendActivationEmail } = useEmailVerification();
-
-  const handleResendEmail = async () => {
-    const success = await resendActivationEmail(email);
-    if (success) {
-      console.log('Activation email resent successfully');
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
-      // Ne rien faire quand l'utilisateur clique en dehors
-      // La fermeture ne se fait que par le bouton
       if (!open) {
         return;
       }
@@ -50,7 +42,7 @@ export function EmailVerificationDialog({
 
         <div className="space-y-4">
           <Button 
-            onClick={handleResendEmail} 
+            onClick={onResendEmail} 
             variant="outline" 
             className="w-full"
             disabled={isResending}
