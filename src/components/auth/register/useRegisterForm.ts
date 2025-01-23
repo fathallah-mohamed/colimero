@@ -31,7 +31,8 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         phone,
         phone_secondary,
         address,
-        password
+        password,
+        confirmPassword
       });
 
       if (error) {
