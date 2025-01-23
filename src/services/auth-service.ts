@@ -111,31 +111,6 @@ export const authService = {
         };
       }
 
-      // Double check carrier status after successful login
-      if (carrierData) {
-        const { data: finalCheck, error: finalCheckError } = await supabase
-          .from('carriers')
-          .select('status')
-          .eq('email', email.trim())
-          .single();
-
-        if (finalCheckError || !finalCheck) {
-          await supabase.auth.signOut();
-          return {
-            success: false,
-            error: "Vous n'avez pas les autorisations nécessaires pour vous connecter en tant que transporteur."
-          };
-        }
-
-        if (finalCheck.status !== 'active') {
-          await supabase.auth.signOut();
-          return {
-            success: false,
-            error: "Votre compte n'est pas actif. Veuillez attendre la validation de votre compte."
-          };
-        }
-      }
-
       return {
         success: true
       };

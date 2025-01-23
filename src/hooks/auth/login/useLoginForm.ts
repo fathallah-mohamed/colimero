@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "@/services/auth-service";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -20,6 +21,7 @@ export function useLoginForm({
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +31,12 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
+      console.log("Attempting login with:", { email: email.trim() });
       const response = await authService.signIn(email, password);
+      console.log("Login response:", response);
 
       if (response.needsVerification) {
+        console.log("Email verification needed");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         } else {
@@ -43,8 +48,14 @@ export function useLoginForm({
       }
 
       if (!response.success) {
+        console.log("Login failed:", response.error);
         if (response.error) {
           setError(response.error);
+          toast({
+            variant: "destructive",
+            title: "Erreur de connexion",
+            description: response.error,
+          });
           setShowErrorDialog(true);
         }
         setPassword("");
@@ -52,7 +63,12 @@ export function useLoginForm({
         return;
       }
 
-      // Si la connexion est réussie
+      console.log("Login successful");
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -65,9 +81,17 @@ export function useLoginForm({
         }
       }
     } catch (error: any) {
-      console.error("Complete error:", error);
-      const errorMessage = "Une erreur inattendue s'est produite";
+      console.error("Login error:", error);
+      const errorMessage = error instanceof Error 
+        ? "Email ou mot de passe incorrect"
+        : "Une erreur inattendue s'est produite";
+      
       setError(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: errorMessage,
+      });
       setShowErrorDialog(true);
       setPassword("");
     } finally {
