@@ -1,36 +1,21 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
-import { ErrorDialog } from "@/components/ui/error-dialog";
-import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 interface LoginFormFieldsProps {
   email: string;
   password: string;
   isLoading: boolean;
-  error: string | null;
-  showVerificationDialog: boolean;
-  showErrorDialog: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
-  onVerificationDialogClose: () => void;
-  onErrorDialogClose: () => void;
 }
 
 export function LoginFormFields({
   email,
   password,
   isLoading,
-  error,
-  showVerificationDialog,
-  showErrorDialog,
   onEmailChange,
   onPasswordChange,
-  onVerificationDialogClose,
-  onErrorDialogClose,
 }: LoginFormFieldsProps) {
-  const { isResending, resendActivationEmail } = useEmailVerification();
-
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -38,10 +23,10 @@ export function LoginFormFields({
         <Input
           id="email"
           type="email"
+          placeholder="exemple@email.com"
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
           disabled={isLoading}
-          placeholder="exemple@email.com"
           required
         />
       </div>
@@ -57,25 +42,6 @@ export function LoginFormFields({
           required
         />
       </div>
-
-      {showVerificationDialog && (
-        <EmailVerificationDialog
-          isOpen={showVerificationDialog}
-          onClose={onVerificationDialogClose}
-          email={email}
-          isResending={isResending}
-          onResendEmail={() => resendActivationEmail(email)}
-        />
-      )}
-
-      {showErrorDialog && error && (
-        <ErrorDialog
-          isOpen={showErrorDialog}
-          onClose={onErrorDialogClose}
-          title="Erreur de connexion"
-          description={error}
-        />
-      )}
     </div>
   );
 }
