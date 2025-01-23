@@ -50,7 +50,7 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
 
         // Vérifier si le token a expiré
         if (new Date(client.activation_expires_at) < new Date()) {
-          throw new Error('Le token d'activation a expiré');
+          throw new Error('Le token d\'activation a expiré');
         }
 
         // 2. Vérifier si le compte est déjà activé
