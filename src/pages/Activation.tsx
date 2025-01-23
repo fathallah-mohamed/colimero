@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
+import { ActivationStatus } from "@/components/auth/activation/ActivationStatus";
 
-interface ActivationProps {
-  onShowAuthDialog?: () => void;
-}
-
-export default function Activation({ onShowAuthDialog }: ActivationProps) {
+export default function Activation() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'expired'>('loading');
   const [email, setEmail] = useState<string | null>(null);
@@ -50,7 +44,7 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
             .eq('activation_token', token)
             .single();
             
-          if (clientData?.email) {
+          if (clientData?.email && mounted) {
             setEmail(clientData.email);
           }
           
@@ -80,17 +74,13 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
         // 3. Vérifier si le compte est déjà activé
         if (client.email_verified) {
           console.log('Account already verified');
-          setStatus('success');
-          toast({
-            title: "Compte déjà activé",
-            description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
-          });
-          setTimeout(() => {
-            if (mounted) {
-              navigate('/');
-              if (onShowAuthDialog) onShowAuthDialog();
-            }
-          }, 2000);
+          if (mounted) {
+            setStatus('success');
+            toast({
+              title: "Compte déjà activé",
+              description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
+            });
+          }
           return;
         }
 
@@ -119,12 +109,6 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
             title: "Compte activé",
             description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
           });
-          setTimeout(() => {
-            if (mounted) {
-              navigate('/');
-              if (onShowAuthDialog) onShowAuthDialog();
-            }
-          }, 2000);
         }
 
       } catch (error: any) {
@@ -145,7 +129,7 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
     return () => {
       mounted = false;
     };
-  }, [token, navigate, toast, onShowAuthDialog]);
+  }, [token, toast]);
 
   const handleResendEmail = async () => {
     if (!email) return;
@@ -166,69 +150,11 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-          {status === 'loading' && (
-            <div className="space-y-4">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-              <h2 className="text-xl font-semibold">Activation en cours...</h2>
-              <p className="text-gray-500">Veuillez patienter pendant que nous activons votre compte.</p>
-            </div>
-          )}
-
-          {status === 'success' && (
-            <div className="space-y-4">
-              <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
-              <h2 className="text-xl font-semibold text-green-600">Compte activé !</h2>
-              <p className="text-gray-500">
-                Votre compte a été activé avec succès. Vous allez être redirigé...
-              </p>
-            </div>
-          )}
-
-          {status === 'expired' && (
-            <div className="space-y-4">
-              <XCircle className="h-12 w-12 text-amber-500 mx-auto" />
-              <h2 className="text-xl font-semibold text-amber-600">Lien expiré</h2>
-              <p className="text-gray-500">
-                Le lien d'activation a expiré. Vous pouvez demander un nouveau lien d'activation.
-              </p>
-              <Button 
-                onClick={handleResendEmail}
-                disabled={isResending}
-                className="w-full"
-              >
-                {isResending ? "Envoi en cours..." : "Renvoyer le lien d'activation"}
-              </Button>
-              <Button 
-                onClick={() => navigate('/')}
-                variant="outline"
-                className="w-full mt-2"
-              >
-                Retourner à l'accueil
-              </Button>
-            </div>
-          )}
-
-          {status === 'error' && (
-            <div className="space-y-4">
-              <XCircle className="h-12 w-12 text-red-500 mx-auto" />
-              <h2 className="text-xl font-semibold text-red-600">Erreur d'activation</h2>
-              <p className="text-gray-500">
-                Le lien d'activation est invalide. Veuillez réessayer ou contacter le support.
-              </p>
-              <Button 
-                onClick={() => navigate('/')}
-                variant="outline"
-                className="w-full"
-              >
-                Retourner à l'accueil
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    <ActivationStatus 
+      status={status}
+      email={email}
+      onResendEmail={handleResendEmail}
+      isResending={isResending}
+    />
   );
 }
