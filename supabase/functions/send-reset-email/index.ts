@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,20 +6,14 @@ const corsHeaders = {
 }
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const { email, resetLink } = await req.json()
-
-    console.log('Sending reset email to:', email)
-    console.log('Reset link:', resetLink)
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -29,32 +22,37 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
+        from: 'Colimero <no-reply@colimero.com>',
         to: email,
         subject: 'Réinitialisation de votre mot de passe',
         html: `
-          <h2>Réinitialisation de votre mot de passe</h2>
-          <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
-          <p>Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :</p>
-          <p><a href="${resetLink}">Réinitialiser mon mot de passe</a></p>
-          <p>Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #00B0F0;">Réinitialisation de votre mot de passe</h2>
+            <p>Bonjour,</p>
+            <p>Vous avez demandé la réinitialisation de votre mot de passe sur Colimero.</p>
+            <p>Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :</p>
+            <p style="margin: 20px 0;">
+              <a href="${resetLink}" 
+                 style="background-color: #00B0F0; 
+                        color: white; 
+                        padding: 12px 24px; 
+                        text-decoration: none; 
+                        border-radius: 4px;
+                        display: inline-block;">
+                Réinitialiser mon mot de passe
+              </a>
+            </p>
+            <p>Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
+            <p>Ce lien est valable pendant 24 heures.</p>
+            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+              L'équipe Colimero
+            </p>
+          </div>
         `
       }),
     })
 
     const data = await res.json()
-    console.log('Resend API response:', data)
-
-    // Log the email attempt in the database
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!)
-    await supabase.from('email_logs').insert([
-      {
-        email: email,
-        status: res.ok ? 'success' : 'error',
-        email_type: 'password_reset',
-        error_message: res.ok ? null : JSON.stringify(data)
-      }
-    ])
 
     return new Response(
       JSON.stringify(data),
@@ -67,7 +65,6 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error in send-reset-email function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
