@@ -2,6 +2,7 @@ import { useState } from "react";
 import { registerClient } from "./useClientRegistration";
 import { RegisterFormState } from "./types";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [firstName, setFirstName] = useState("");
@@ -52,6 +53,9 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         });
         return;
       }
+
+      // Déconnexion immédiate après l'inscription
+      await supabase.auth.signOut();
 
       setShowEmailSentDialog(true);
 

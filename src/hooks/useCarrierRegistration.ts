@@ -1,102 +1,49 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 export function useCarrierRegistration(onSuccess?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleRegistration = async (values: any) => {
-    setIsLoading(true);
     try {
-      // First, create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      setIsLoading(true);
+      console.log("Starting registration process...");
+
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
           data: {
             user_type: 'carrier',
-            first_name: values.firstName,
-            last_name: values.lastName,
-            company_name: values.companyName
+            first_name: values.first_name,
+            last_name: values.last_name,
+            company_name: values.company_name
           }
         }
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("No user data returned");
+      if (error) throw error;
 
-      // Add a delay to ensure auth user is fully created
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Then create the carrier profile using the auth user's ID
-      const { error: carrierError } = await supabase
-        .from("carriers")
-        .insert({
-          id: authData.user.id,
-          email: values.email,
-          first_name: values.firstName,
-          last_name: values.lastName,
-          company_name: values.companyName,
-          siret: values.siret,
-          phone: values.phone,
-          phone_secondary: values.phoneSecondary || "",
-          address: values.address,
-          coverage_area: values.coverageArea,
-          avatar_url: "",
-          company_details: {},
-          authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
-          total_deliveries: 0,
-          cities_covered: 30,
-          status: "pending"
-        });
-
-      if (carrierError) throw carrierError;
-
-      // Create carrier capacities
-      const { error: capacitiesError } = await supabase
-        .from('carrier_capacities')
-        .insert({
-          carrier_id: authData.user.id,
-          total_capacity: values.totalCapacity,
-          price_per_kg: values.pricePerKg
-        });
-
-      if (capacitiesError) throw capacitiesError;
-
-      // Create carrier services if provided
-      if (values.services?.length > 0) {
-        const { error: servicesError } = await supabase
-          .from('carrier_services')
-          .insert(
-            values.services.map((service: string) => ({
-              carrier_id: authData.user.id,
-              service_type: service,
-              icon: "package"
-            }))
-          );
-
-        if (servicesError) throw servicesError;
-      }
+      // Déconnexion immédiate après l'inscription
+      await supabase.auth.signOut();
 
       toast({
         title: "Inscription réussie",
-        description: "Votre demande d'inscription a été envoyée avec succès.",
+        description: "Veuillez vérifier votre email pour activer votre compte.",
       });
 
       if (onSuccess) {
         onSuccess();
-      } else {
-        navigate("/connexion");
       }
+
     } catch (error: any) {
-      console.error("Error in carrier signup:", error);
+      console.error("Registration error:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription.",
+        description: error.message || "Une erreur est survenue lors de l'inscription",
       });
     } finally {
       setIsLoading(false);
@@ -105,6 +52,6 @@ export function useCarrierRegistration(onSuccess?: () => void) {
 
   return {
     isLoading,
-    handleRegistration,
+    handleRegistration
   };
 }
