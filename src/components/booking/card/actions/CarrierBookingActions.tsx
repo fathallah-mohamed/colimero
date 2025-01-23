@@ -33,7 +33,7 @@ export function CarrierBookingActions({
           delivery_status: newStatus,
           updated_at: new Date().toISOString()
         })
-        .eq('id', bookingId); // Utiliser l'ID spécifique de la réservation
+        .eq('id', bookingId);
 
       if (error) throw error;
 
@@ -109,7 +109,8 @@ export function CarrierBookingActions({
         </>
       )}
 
-      {status === "confirmed" && tourStatus === "Ramassage en cours" && (
+      {/* Permettre l'annulation pour les réservations confirmées */}
+      {status === "confirmed" && ['Programmée', 'Ramassage en cours'].includes(tourStatus) && (
         <>
           <Button
             variant="outline"
@@ -120,15 +121,17 @@ export function CarrierBookingActions({
             <XCircle className="h-4 w-4" />
             Annuler
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-green-500 hover:text-green-600 gap-2"
-            onClick={() => handleStatusChange("collected")}
-          >
-            <CheckSquare className="h-4 w-4" />
-            Marquer comme collectée
-          </Button>
+          {tourStatus === "Ramassage en cours" && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-green-500 hover:text-green-600 gap-2"
+              onClick={() => handleStatusChange("collected")}
+            >
+              <CheckSquare className="h-4 w-4" />
+              Marquer comme collectée
+            </Button>
+          )}
         </>
       )}
     </div>
