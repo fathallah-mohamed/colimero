@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { emailVerificationService } from "./email-verification-service";
-import { carrierAuthService } from "./carrier-auth-service";
 
 export interface AuthResponse {
   success: boolean;
@@ -14,11 +13,12 @@ export const authService = {
     try {
       console.log("Starting authentication process for:", email.trim());
       
-      // 1. Vérifier le statut de vérification de l'email pour les clients
+      // 1. ALWAYS check email verification status first
       const verificationStatus = await emailVerificationService.checkEmailVerification(email);
+      console.log("Verification status:", verificationStatus);
       
       if (!verificationStatus.isVerified) {
-        console.log('Client account not verified:', email);
+        console.log('Account not verified:', email);
         return {
           success: false,
           needsVerification: true,
@@ -26,16 +26,7 @@ export const authService = {
         };
       }
 
-      // 2. Vérifier le statut du transporteur
-      const carrierStatus = await carrierAuthService.checkCarrierStatus(email);
-      if (!carrierStatus.isActive && carrierStatus.error) {
-        return {
-          success: false,
-          error: carrierStatus.error
-        };
-      }
-
-      // 3. Tenter la connexion
+      // 2. Only attempt login if email is verified
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),

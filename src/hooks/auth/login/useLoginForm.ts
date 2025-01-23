@@ -29,9 +29,12 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
+      console.log("Attempting login for:", email);
       const response = await authService.signIn(email, password);
+      console.log("Login response:", response);
 
       if (response.needsVerification) {
+        console.log("Email verification needed");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
@@ -41,11 +44,14 @@ export function useLoginForm({
       }
 
       if (!response.success) {
+        console.log("Login failed:", response.error);
         setError(response.error || "Une erreur est survenue");
         setShowErrorDialog(true);
         setPassword("");
         return;
       }
+
+      console.log("Login successful");
 
       if (onSuccess) {
         onSuccess();

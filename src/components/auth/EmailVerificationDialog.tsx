@@ -9,7 +9,11 @@ export interface EmailVerificationDialogProps {
   email: string;
 }
 
-export function EmailVerificationDialog({ isOpen, onClose, email }: EmailVerificationDialogProps) {
+export function EmailVerificationDialog({ 
+  isOpen, 
+  onClose, 
+  email 
+}: EmailVerificationDialogProps) {
   const { isResending, resendActivationEmail } = useEmailVerification();
 
   const handleResendEmail = async () => {
@@ -20,7 +24,13 @@ export function EmailVerificationDialog({ isOpen, onClose, email }: EmailVerific
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      // Ne rien faire quand l'utilisateur clique en dehors
+      // La fermeture ne se fait que par le bouton
+      if (!open) {
+        return;
+      }
+    }}>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-center">
           <div className="bg-blue-50 p-3 rounded-full">
@@ -31,18 +41,21 @@ export function EmailVerificationDialog({ isOpen, onClose, email }: EmailVerific
         <div className="text-center space-y-2">
           <h2 className="text-lg font-semibold">Compte non activé</h2>
           <p className="text-gray-600">
-            Veuillez activer votre compte via le lien envoyé par email à <span className="font-medium">{email}</span> avant de vous connecter.
+            Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail à l'adresse <span className="font-medium">{email}</span> et cliquer sur le lien d'activation.
+          </p>
+          <p className="text-sm text-gray-500">
+            Si vous n'avez pas reçu l'email, vérifiez vos spams ou cliquez sur le bouton ci-dessous pour recevoir un nouveau lien.
           </p>
         </div>
 
-        <div className="space-y-4 pt-4">
+        <div className="space-y-4">
           <Button 
             onClick={handleResendEmail} 
             variant="outline" 
             className="w-full"
             disabled={isResending}
           >
-            {isResending ? "Envoi en cours..." : "Renvoyer l'email"}
+            {isResending ? "Envoi en cours..." : "Renvoyer l'email d'activation"}
           </Button>
           
           <Button onClick={onClose} className="w-full">
