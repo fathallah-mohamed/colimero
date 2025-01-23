@@ -21,7 +21,10 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     setIsLoading(true);
 
     try {
+      // Construire l'URL de réinitialisation avec l'origine actuel
       const resetLink = `${window.location.origin}/reset-password`;
+      
+      // Appeler l'API Supabase pour envoyer l'email de réinitialisation
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: resetLink,
       });
@@ -41,7 +44,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de l'email",
+        description: error.message || "Une erreur est survenue lors de l'envoi de l'email",
       });
     } finally {
       setIsLoading(false);
@@ -50,6 +53,13 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
 
   return (
     <div className="space-y-4">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-semibold">Mot de passe oublié ?</h2>
+        <p className="text-sm text-gray-600 mt-2">
+          Entrez votre adresse email pour recevoir un lien de réinitialisation
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>

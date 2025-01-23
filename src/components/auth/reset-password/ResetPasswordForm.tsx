@@ -16,6 +16,14 @@ export function ResetPasswordForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const validatePassword = (password: string): boolean => {
+    if (password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -25,8 +33,7 @@ export function ResetPasswordForm() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères");
+    if (!validatePassword(password)) {
       return;
     }
 
@@ -44,67 +51,76 @@ export function ResetPasswordForm() {
         description: "Votre mot de passe a été mis à jour avec succès",
       });
 
-      // Rediriger vers la page de connexion après un court délai
+      // Rediriger vers la page de connexion
       setTimeout(() => {
         navigate("/connexion");
-      }, 2000);
+      }, 1500);
 
     } catch (error: any) {
       console.error("Error resetting password:", error);
-      setError("Une erreur est survenue lors de la réinitialisation du mot de passe");
+      setError(error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="password">Nouveau mot de passe</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            placeholder="Entrez votre nouveau mot de passe"
-            className="h-12"
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            minLength={6}
-            placeholder="Confirmez votre nouveau mot de passe"
-            className="h-12"
-          />
-        </div>
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-semibold">Réinitialisation du mot de passe</h2>
+        <p className="text-sm text-gray-600 mt-2">
+          Choisissez votre nouveau mot de passe
+        </p>
       </div>
 
-      <Button type="submit" className="w-full h-12" disabled={loading}>
-        {loading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Réinitialisation...
-          </>
-        ) : (
-          "Réinitialiser le mot de passe"
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
-      </Button>
-    </form>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="password">Nouveau mot de passe</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              placeholder="Entrez votre nouveau mot de passe"
+              className="h-12"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={6}
+              placeholder="Confirmez votre nouveau mot de passe"
+              className="h-12"
+            />
+          </div>
+        </div>
+
+        <Button type="submit" className="w-full h-12" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Réinitialisation...
+            </>
+          ) : (
+            "Réinitialiser le mot de passe"
+          )}
+        </Button>
+      </form>
+    </div>
   );
 }
