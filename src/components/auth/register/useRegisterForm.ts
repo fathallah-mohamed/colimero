@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { registerClient } from "./useClientRegistration";
 import { RegisterFormState } from "./types";
 import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [firstName, setFirstName] = useState("");
@@ -16,7 +14,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailSentDialog, setShowEmailSentDialog] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,28 +53,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         return;
       }
 
-      // Connexion automatique après l'inscription
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        console.error('Error signing in after registration:', signInError);
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: "Inscription réussie mais erreur lors de la connexion automatique. Veuillez vous connecter manuellement."
-        });
-        onSuccess('new');
-        return;
-      }
-
-      toast({
-        title: "Inscription réussie",
-        description: "Votre compte a été créé et vous êtes maintenant connecté"
-      });
-      navigate('/');
+      setShowEmailSentDialog(true);
 
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -103,6 +79,11 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     );
   };
 
+  const handleEmailSentDialogClose = () => {
+    setShowEmailSentDialog(false);
+    onSuccess('new');
+  };
+
   return {
     firstName,
     lastName,
@@ -123,7 +104,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     handleSubmit,
     isLoading,
     showEmailSentDialog,
-    setShowEmailSentDialog,
+    handleEmailSentDialogClose,
     areRequiredFieldsFilled
   };
 }
