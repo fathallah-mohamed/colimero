@@ -14,15 +14,16 @@ interface DialogHeaderProps {
 }
 
 const DialogHeader = ({ title, onClose }: DialogHeaderProps) => (
-  <BaseDialogHeader className="relative">
+  <BaseDialogHeader className="relative pb-2">
     <DialogTitle>{title}</DialogTitle>
     <Button
       variant="ghost"
       size="icon"
-      className="absolute right-0 top-0"
+      className="absolute right-0 top-0 h-10 w-10 transition-transform hover:scale-110 hover:text-primary"
       onClick={onClose}
+      aria-label="Fermer"
     >
-      <X className="h-4 w-4" />
+      <X className="h-6 w-6" />
     </Button>
   </BaseDialogHeader>
 );
@@ -67,12 +68,10 @@ export function CustomDialog({
             return child;
           }
 
-          // Type guard to ensure child.type exists
           if (!child.type) {
             return child;
           }
 
-          // Check if the component can accept refs
           const isRefableComponent = 
             typeof child.type === 'string' || 
             (typeof child.type === 'function' && ('render' in child.type || (child.type as any).prototype?.render)) ||
