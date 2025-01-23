@@ -47,6 +47,9 @@ export async function registerClient(formData: RegisterFormState) {
 
     console.log("Auth successful, user created:", authData.user.id);
 
+    // We don't need to create the client profile here anymore
+    // It will be created by the database trigger
+
     return { data: authData, error: null };
   } catch (error: any) {
     console.error("Complete registration error:", error);
