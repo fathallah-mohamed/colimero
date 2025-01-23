@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 interface ActivationProps {
   onShowAuthDialog?: () => void;
@@ -13,15 +14,17 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'expired'>('loading');
+  const [email, setEmail] = useState<string | null>(null);
   const token = searchParams.get('token');
+  const { isResending, resendActivationEmail } = useEmailVerification();
 
   useEffect(() => {
     let mounted = true;
     
     const activateAccount = async () => {
       if (!token) {
-        console.log('No activation token found in URL');
+        console.error("No activation token found in URL");
         setStatus('error');
         toast({
           variant: "destructive",
@@ -34,14 +37,38 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
       try {
         console.log('Starting account activation with token:', token);
 
-        // 1. Vérifier si le token est valide et n'a pas expiré
+        // 1. Vérifier si le token est expiré
+        const { data: isExpired } = await supabase
+          .rpc('is_activation_token_expired', { token });
+
+        if (isExpired) {
+          console.log('Token expired');
+          // Récupérer l'email associé au token pour permettre le renvoi
+          const { data: clientData } = await supabase
+            .from('clients')
+            .select('email')
+            .eq('activation_token', token)
+            .single();
+            
+          if (clientData?.email) {
+            setEmail(clientData.email);
+          }
+          
+          setStatus('expired');
+          toast({
+            variant: "destructive",
+            title: "Token expiré",
+            description: "Le lien d'activation a expiré. Veuillez demander un nouveau lien.",
+          });
+          return;
+        }
+
+        // 2. Récupérer les informations du client
         const { data: client, error: clientError } = await supabase
           .from('clients')
-          .select('id, email, email_verified, activation_expires_at')
+          .select('id, email, email_verified')
           .eq('activation_token', token)
           .single();
-
-        console.log('Client query result:', { client, clientError });
 
         if (clientError || !client) {
           console.error('Error fetching client:', clientError);
@@ -50,13 +77,7 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
 
         console.log('Client found:', client);
 
-        // Vérifier si le token a expiré
-        if (client.activation_expires_at && new Date(client.activation_expires_at) < new Date()) {
-          console.error('Token expired:', client.activation_expires_at);
-          throw new Error("Le token d'activation a expiré");
-        }
-
-        // 2. Vérifier si le compte est déjà activé
+        // 3. Vérifier si le compte est déjà activé
         if (client.email_verified) {
           console.log('Account already verified');
           setStatus('success');
@@ -73,7 +94,7 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
           return;
         }
 
-        // 3. Mettre à jour le statut de vérification du client
+        // 4. Activer le compte
         const { error: updateError } = await supabase
           .from('clients')
           .update({
@@ -83,24 +104,14 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
           })
           .eq('id', client.id);
 
-        if (updateError) {
-          console.error('Error updating client verification status:', updateError);
-          throw updateError;
-        }
+        if (updateError) throw updateError;
 
-        console.log('Client verification status updated successfully');
-
-        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users
+        // 5. Mettre à jour les métadonnées de l'utilisateur
         const { error: userUpdateError } = await supabase.auth.updateUser({
           data: { email_verified: true }
         });
 
-        if (userUpdateError) {
-          console.error('Error updating auth user metadata:', userUpdateError);
-          throw userUpdateError;
-        }
-
-        console.log('Auth user metadata updated successfully');
+        if (userUpdateError) throw userUpdateError;
 
         if (mounted) {
           setStatus('success');
@@ -136,6 +147,24 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
     };
   }, [token, navigate, toast, onShowAuthDialog]);
 
+  const handleResendEmail = async () => {
+    if (!email) return;
+    
+    const success = await resendActivationEmail(email);
+    if (success) {
+      toast({
+        title: "Email envoyé",
+        description: "Un nouveau lien d'activation vous a été envoyé par email.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'envoyer le lien d'activation. Veuillez réessayer plus tard.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -158,19 +187,43 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
             </div>
           )}
 
+          {status === 'expired' && (
+            <div className="space-y-4">
+              <XCircle className="h-12 w-12 text-amber-500 mx-auto" />
+              <h2 className="text-xl font-semibold text-amber-600">Lien expiré</h2>
+              <p className="text-gray-500">
+                Le lien d'activation a expiré. Vous pouvez demander un nouveau lien d'activation.
+              </p>
+              <Button 
+                onClick={handleResendEmail}
+                disabled={isResending}
+                className="w-full"
+              >
+                {isResending ? "Envoi en cours..." : "Renvoyer le lien d'activation"}
+              </Button>
+              <Button 
+                onClick={() => navigate('/')}
+                variant="outline"
+                className="w-full mt-2"
+              >
+                Retourner à l'accueil
+              </Button>
+            </div>
+          )}
+
           {status === 'error' && (
             <div className="space-y-4">
               <XCircle className="h-12 w-12 text-red-500 mx-auto" />
               <h2 className="text-xl font-semibold text-red-600">Erreur d'activation</h2>
               <p className="text-gray-500">
-                Le lien d'activation est invalide ou a expiré. Veuillez réessayer ou contacter le support.
+                Le lien d'activation est invalide. Veuillez réessayer ou contacter le support.
               </p>
               <Button 
                 onClick={() => navigate('/')}
                 variant="outline"
                 className="w-full"
               >
-                Retourner à la page d'accueil
+                Retourner à l'accueil
               </Button>
             </div>
           )}
