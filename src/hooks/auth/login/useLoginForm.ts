@@ -37,9 +37,8 @@ export function useLoginForm({
         console.log("Email verification needed");
         if (onVerificationNeeded) {
           onVerificationNeeded();
-        } else {
-          setShowVerificationDialog(true);
         }
+        setShowVerificationDialog(true);
         setPassword("");
         setIsLoading(false);
         return;
@@ -49,7 +48,9 @@ export function useLoginForm({
         console.log("Login failed:", response.error);
         if (response.error) {
           setError(response.error);
-          setShowErrorDialog(true);
+          if (!response.needsVerification) {
+            setShowErrorDialog(true);
+          }
         }
         setPassword("");
         setIsLoading(false);
@@ -76,7 +77,9 @@ export function useLoginForm({
         : "Une erreur inattendue s'est produite";
       
       setError(errorMessage);
-      setShowErrorDialog(true);
+      if (!showVerificationDialog) {
+        setShowErrorDialog(true);
+      }
       setPassword("");
     } finally {
       setIsLoading(false);

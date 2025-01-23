@@ -1,4 +1,3 @@
-import { AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AuthResponse {
