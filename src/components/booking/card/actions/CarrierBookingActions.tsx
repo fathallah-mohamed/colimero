@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { BookingStatus } from "@/types/booking";
 import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CarrierBookingActionsProps {
   status: BookingStatus;
@@ -13,13 +15,51 @@ interface CarrierBookingActionsProps {
 }
 
 export function CarrierBookingActions({
-  status,
+  status: initialStatus,
   tourStatus,
   onStatusChange,
   onEdit,
   bookingId
 }: CarrierBookingActionsProps) {
+  const [status, setStatus] = useState<BookingStatus>(initialStatus);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setStatus(initialStatus);
+  }, [initialStatus]);
+
+  useEffect(() => {
+    console.log("Setting up realtime subscription for booking:", bookingId);
+    
+    const channel = supabase
+      .channel(`booking_status_${bookingId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `id=eq.${bookingId}`
+        },
+        (payload) => {
+          console.log('Booking status updated:', payload);
+          const newStatus = payload.new.status as BookingStatus;
+          setStatus(newStatus);
+          
+          // Invalider le cache pour forcer le rechargement
+          queryClient.invalidateQueries({ queryKey: ['bookings'] });
+          queryClient.invalidateQueries({ queryKey: ['next-tour'] });
+          queryClient.invalidateQueries({ queryKey: ['tours'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log("Cleaning up realtime subscription");
+      supabase.removeChannel(channel);
+    };
+  }, [bookingId, queryClient]);
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
@@ -86,6 +126,7 @@ export function CarrierBookingActions({
         </Button>
       )}
 
+      {/* Permettre l'annulation pour les réservations en attente */}
       {status === "pending" && tourStatus === "Programmée" && (
         <>
           <Button
