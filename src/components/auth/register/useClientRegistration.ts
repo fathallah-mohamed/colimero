@@ -33,21 +33,46 @@ export async function registerClient(formData: RegisterFormState) {
     if (signUpError) throw signUpError;
     if (!authData.user) throw new Error("Aucune donnée utilisateur reçue");
 
-    // Créer le profil client
-    const { error: clientError } = await supabase
+    // Vérifier si le client existe déjà avec cet ID
+    const { data: existingClient } = await supabase
       .from('clients')
-      .insert({
-        id: authData.user.id,
-        email: formData.email.trim(),
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.phone,
-        phone_secondary: formData.phone_secondary || '',
-        address: formData.address || '',
-        email_verified: false
-      });
+      .select('id')
+      .eq('id', authData.user.id)
+      .maybeSingle();
 
-    if (clientError) throw clientError;
+    if (existingClient) {
+      // Mettre à jour le client existant
+      const { error: updateError } = await supabase
+        .from('clients')
+        .update({
+          email: formData.email.trim(),
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          phone_secondary: formData.phone_secondary || '',
+          address: formData.address || '',
+          email_verified: false
+        })
+        .eq('id', authData.user.id);
+
+      if (updateError) throw updateError;
+    } else {
+      // Créer le profil client
+      const { error: clientError } = await supabase
+        .from('clients')
+        .insert({
+          id: authData.user.id,
+          email: formData.email.trim(),
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          phone_secondary: formData.phone_secondary || '',
+          address: formData.address || '',
+          email_verified: false
+        });
+
+      if (clientError) throw clientError;
+    }
 
     return {
       success: true,
