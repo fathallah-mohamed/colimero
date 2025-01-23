@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthError } from "@supabase/supabase-js";
-import { authService } from "@/services/auth-service";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from "@/services/auth/auth-service";
+import { clientVerificationService } from "@/services/auth/client-verification";
+import { useAuthState } from "./useAuthState";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -10,15 +10,27 @@ interface UseLoginFormProps {
   onVerificationNeeded?: () => void;
 }
 
-export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded }: UseLoginFormProps = {}) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
+export function useLoginForm({ 
+  onSuccess, 
+  requiredUserType,
+  onVerificationNeeded 
+}: UseLoginFormProps = {}) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+    showVerificationDialog,
+    setShowVerificationDialog,
+    showErrorDialog,
+    setShowErrorDialog,
+  } = useAuthState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,40 +40,46 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
     setShowErrorDialog(false);
 
     try {
-      console.log("Attempting login with:", { email: email.trim() });
-      const response = await authService.signIn(email, password);
-      console.log("Login response:", response);
+      // Check client verification status
+      const clientData = await clientVerificationService.checkVerificationStatus(email);
 
-      if (response.needsVerification) {
-        console.log("Email verification needed");
+      // Attempt login
+      const loginResponse = await authService.signIn(email, password);
+      
+      if (!loginResponse.success) {
+        setError(loginResponse.error);
+        setShowErrorDialog(true);
+        setPassword("");
+        return;
+      }
+
+      // Validate user type if required
+      const validationResponse = await authService.validateUserType(
+        loginResponse.user,
+        requiredUserType
+      );
+
+      if (!validationResponse.success) {
+        setError(validationResponse.error);
+        setShowErrorDialog(true);
+        return;
+      }
+
+      // Check client verification status
+      const userType = loginResponse.user.user_metadata?.user_type;
+      if (userType === 'client' && clientData && !clientData.email_verified) {
         if (onVerificationNeeded) {
           onVerificationNeeded();
-        } else {
-          setShowVerificationDialog(true);
         }
-        setIsLoading(false);
+        setShowVerificationDialog(true);
+        await supabase.auth.signOut();
         return;
       }
 
-      if (!response.success) {
-        console.log("Login failed:", response.error);
-        if (response.error) {
-          setError(response.error);
-          toast({
-            variant: "destructive",
-            title: "Erreur de connexion",
-            description: response.error,
-          });
-          setShowErrorDialog(true);
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      console.log("Login successful");
+      // Success
       toast({
         title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté",
+        description: "Vous êtes maintenant connecté"
       });
 
       if (onSuccess) {
@@ -75,19 +93,12 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
           navigate("/");
         }
       }
+
     } catch (error: any) {
       console.error("Login error:", error);
-      const errorMessage = error instanceof AuthError 
-        ? "Email ou mot de passe incorrect"
-        : "Une erreur inattendue s'est produite";
-      
-      setError(errorMessage);
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: errorMessage,
-      });
+      setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
