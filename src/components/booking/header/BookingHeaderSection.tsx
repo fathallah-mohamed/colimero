@@ -1,4 +1,4 @@
-import { BookingStatusSection } from "../status/BookingStatusSection";
+import { BookingStatusSection } from "../card/BookingStatusSection";
 import type { Booking } from "@/types/booking";
 
 interface BookingHeaderSectionProps {
