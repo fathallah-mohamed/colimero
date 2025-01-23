@@ -21,7 +21,8 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     setIsLoading(true);
 
     try {
-      const resetLink = `${window.location.origin}/reset-password`;
+      // Construct the reset password URL with the email parameter
+      const resetLink = `${window.location.origin}/reset-password?email=${encodeURIComponent(email.trim())}`;
       
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: resetLink,
