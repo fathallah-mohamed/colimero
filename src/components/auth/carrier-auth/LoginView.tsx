@@ -48,10 +48,10 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
       setIsLoading(true);
       setStatusMessage(null);
 
-      // First, check if there's a carrier with this email and get their status
+      // First, check carrier status before attempting login
       const { data: carrierData, error: carrierError } = await supabase
         .from('carriers')
-        .select('status, email')
+        .select('status')
         .eq('email', values.email)
         .single();
 
@@ -64,7 +64,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
         return;
       }
 
-      // If carrier exists, check their status before allowing login
+      // If carrier exists, verify status
       if (carrierData) {
         if (carrierData.status === 'pending') {
           setStatusMessage({
@@ -81,10 +81,18 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
           });
           return;
         }
+
+        if (carrierData.status !== 'active') {
+          setStatusMessage({
+            type: 'destructive',
+            message: "Votre compte n'est pas actif. Veuillez contacter l'administrateur."
+          });
+          return;
+        }
       }
 
-      // Proceed with login attempt
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // Only proceed with login if carrier is active
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
@@ -100,16 +108,15 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
         return;
       }
 
-      // After successful login, double-check carrier status
+      // Double check carrier status after successful login
       const { data: finalCheck, error: finalCheckError } = await supabase
         .from('carriers')
         .select('status')
         .eq('email', values.email)
         .single();
 
-      if (finalCheckError) {
+      if (finalCheckError || !finalCheck) {
         console.error("Final check error:", finalCheckError);
-        // Si ce n'est pas un transporteur, déconnectez-le
         await supabase.auth.signOut();
         setStatusMessage({
           type: 'destructive',
@@ -118,7 +125,7 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
         return;
       }
 
-      if (finalCheck?.status !== 'active') {
+      if (finalCheck.status !== 'active') {
         await supabase.auth.signOut();
         setStatusMessage({
           type: 'destructive',
