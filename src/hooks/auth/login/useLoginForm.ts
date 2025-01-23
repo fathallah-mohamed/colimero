@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "@/services/auth-service";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -20,6 +21,7 @@ export function useLoginForm({
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,30 +31,61 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
-      console.log("Attempting login for:", email);
-      const response = await authService.signIn(email, password);
-      console.log("Login response:", response);
+      // 1. Vérifier d'abord si le compte existe et s'il est activé
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified')
+        .eq('email', email.trim())
+        .maybeSingle();
 
-      if (response.needsVerification) {
-        console.log("Email verification needed");
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
-        }
-        setShowVerificationDialog(true);
-        setPassword("");
-        return;
-      }
-
-      if (!response.success) {
-        console.log("Login failed:", response.error);
-        setError(response.error || "Une erreur est survenue");
+      if (clientError) {
+        console.error("Error checking client:", clientError);
+        setError("Une erreur est survenue lors de la vérification du compte");
         setShowErrorDialog(true);
-        setPassword("");
         return;
       }
 
-      console.log("Login successful");
+      // 2. Tenter la connexion
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
 
+      if (signInError) {
+        console.error("Sign in error:", signInError);
+        
+        // Si le compte existe mais n'est pas activé
+        if (clientData && !clientData.email_verified) {
+          console.log("Account exists but not verified");
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          setShowVerificationDialog(true);
+          return;
+        }
+
+        // Pour toute autre erreur d'authentification
+        setError("Email ou mot de passe incorrect");
+        setShowErrorDialog(true);
+        return;
+      }
+
+      if (!data.user) {
+        setError("Aucune donnée utilisateur reçue");
+        setShowErrorDialog(true);
+        return;
+      }
+
+      // Vérifier le type d'utilisateur si requis
+      const userType = data.user.user_metadata?.user_type;
+      if (requiredUserType && userType !== requiredUserType) {
+        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+        setShowErrorDialog(true);
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // Succès de la connexion
       if (onSuccess) {
         onSuccess();
       } else {
@@ -64,11 +97,11 @@ export function useLoginForm({
           navigate("/");
         }
       }
+
     } catch (error: any) {
       console.error("Login error:", error);
       setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
-      setPassword("");
     } finally {
       setIsLoading(false);
     }
