@@ -24,20 +24,40 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Wait a bit to ensure the client record is created
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     // Récupérer les détails du client et générer un nouveau token si nécessaire
     const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select('first_name, activation_token')
+      .select('first_name, activation_token, email_verified')
       .eq('email', email)
       .single()
 
-    if (clientError || !client) {
+    console.log('Client lookup result:', { client, error: clientError })
+
+    if (clientError) {
       console.error('Error fetching client:', clientError)
+      throw new Error(`Client not found: ${clientError.message}`)
+    }
+
+    if (!client) {
+      console.error('No client found for email:', email)
       throw new Error('Client not found')
     }
 
+    if (client.email_verified) {
+      console.log('Client already verified:', email)
+      return new Response(
+        JSON.stringify({ message: 'Email already verified' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Si pas de token d'activation, en générer un nouveau
-    if (!client.activation_token) {
+    let activationToken = client.activation_token
+    if (!activationToken) {
+      console.log('Generating new activation token for:', email)
       const { data: updateData, error: updateError } = await supabase
         .from('clients')
         .update({
@@ -53,17 +73,17 @@ serve(async (req) => {
         throw new Error('Failed to generate activation token')
       }
 
-      client.activation_token = updateData.activation_token
+      activationToken = updateData.activation_token
     }
 
-    console.log('Client details:', client)
+    console.log('Client details:', { ...client, activationToken })
 
     const baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
       throw new Error('SITE_URL environment variable is not set')
     }
 
-    const activationLink = `${baseUrl.replace(/\/+$/, '')}/activation?token=${client.activation_token}`
+    const activationLink = `${baseUrl.replace(/\/+$/, '')}/activation?token=${activationToken}`
     console.log('Generated activation link:', activationLink)
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
