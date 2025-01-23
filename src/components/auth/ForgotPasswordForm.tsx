@@ -32,10 +32,6 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
       if (error) throw error;
 
       setShowSuccessDialog(true);
-      
-      if (onSuccess) {
-        onSuccess();
-      }
     } catch (error: any) {
       console.error("Erreur lors de la réinitialisation:", error);
       toast({
@@ -48,11 +44,10 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     }
   };
 
-  const handleDialogClose = (open: boolean) => {
-    // Ne rien faire quand l'utilisateur clique en dehors
-    // La fermeture ne se fait que par le bouton
-    if (!open) {
-      return;
+  const handleSuccessClose = () => {
+    setShowSuccessDialog(false);
+    if (onSuccess) {
+      onSuccess();
     }
   };
 
@@ -102,7 +97,10 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
         </form>
       </div>
 
-      <Dialog open={showSuccessDialog} onOpenChange={handleDialogClose}>
+      <Dialog 
+        open={showSuccessDialog} 
+        onOpenChange={() => {}} // Empêche la fermeture en cliquant à l'extérieur
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Email envoyé</DialogTitle>
@@ -115,10 +113,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
               Pensez à vérifier vos spams si vous ne trouvez pas l'email dans votre boîte de réception.
             </p>
             <Button 
-              onClick={() => {
-                setShowSuccessDialog(false);
-                if (onSuccess) onSuccess();
-              }} 
+              onClick={handleSuccessClose}
               className="w-full"
             >
               J'ai compris
