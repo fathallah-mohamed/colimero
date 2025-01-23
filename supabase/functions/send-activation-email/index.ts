@@ -29,7 +29,7 @@ serve(async (req) => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log('⏳ Waited for client record creation')
 
-    // Récupérer les détails du client et générer un nouveau token si nécessaire
+    // Récupérer les détails du client
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('first_name, activation_token, email_verified')
@@ -52,36 +52,26 @@ serve(async (req) => {
       throw new Error('No client found with this email address')
     }
 
-    if (client.email_verified) {
-      console.log('✅ Client already verified:', email)
-      return new Response(
-        JSON.stringify({ message: 'Email already verified' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    // Permettre l'envoi même si déjà vérifié
+    // Générer un nouveau token d'activation
+    console.log('🔑 Generating new activation token for:', email)
+    const { data: updateData, error: updateError } = await supabase
+      .from('clients')
+      .update({
+        activation_token: crypto.randomUUID(),
+        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+      })
+      .eq('email', email)
+      .select('activation_token')
+      .single()
+
+    if (updateError || !updateData) {
+      console.error('❌ Error updating activation token:', updateError)
+      throw new Error('Failed to generate activation token')
     }
 
-    // Si pas de token d'activation, en générer un nouveau
-    let activationToken = client.activation_token
-    if (!activationToken) {
-      console.log('🔑 Generating new activation token for:', email)
-      const { data: updateData, error: updateError } = await supabase
-        .from('clients')
-        .update({
-          activation_token: crypto.randomUUID(),
-          activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-        })
-        .eq('email', email)
-        .select('activation_token')
-        .single()
-
-      if (updateError || !updateData) {
-        console.error('❌ Error updating activation token:', updateError)
-        throw new Error('Failed to generate activation token')
-      }
-
-      activationToken = updateData.activation_token
-      console.log('✨ New activation token generated')
-    }
+    const activationToken = updateData.activation_token
+    console.log('✨ New activation token generated')
 
     const baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
@@ -160,7 +150,7 @@ serve(async (req) => {
           </html>
         `,
       }),
-    })
+    });
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json()

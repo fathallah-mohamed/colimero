@@ -14,7 +14,7 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
     // 1. Vérifier si l'utilisateur existe déjà
     const { data: existingUser } = await supabase
       .from('clients')
-      .select('email')
+      .select('email, email_verified')
       .eq('email', formData.email.trim())
       .maybeSingle();
 
@@ -62,7 +62,7 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
         phone: formData.phone,
         phone_secondary: formData.phone_secondary || '',
         address: formData.address || '',
-        email_verified: false
+        email_verified: false // Forcer email_verified à false à la création
       }, {
         onConflict: 'id',
         ignoreDuplicates: false
@@ -96,8 +96,7 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
     console.error("Error in registerClient:", error);
     return {
       success: false,
-      error: error.message,
-      type: 'error'
+      error: error.message
     };
   }
 }
