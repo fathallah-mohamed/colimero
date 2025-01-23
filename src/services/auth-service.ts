@@ -13,7 +13,46 @@ export const authService = {
     try {
       console.log("Attempting to sign in with email:", email.trim());
       
-      // First check if the user exists and if email is verified
+      // First check if this is a carrier and verify their status
+      const { data: carrierData, error: carrierError } = await supabase
+        .from('carriers')
+        .select('status')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (carrierError && carrierError.code !== 'PGRST116') {
+        console.error("Error checking carrier status:", carrierError);
+        return {
+          success: false,
+          error: "Une erreur est survenue lors de la vérification de votre compte."
+        };
+      }
+
+      // If this is a carrier, verify their status before allowing login
+      if (carrierData) {
+        if (carrierData.status === 'pending') {
+          return {
+            success: false,
+            error: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé."
+          };
+        }
+
+        if (carrierData.status === 'rejected') {
+          return {
+            success: false,
+            error: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter."
+          };
+        }
+
+        if (carrierData.status !== 'active') {
+          return {
+            success: false,
+            error: "Votre compte n'est pas actif. Veuillez contacter l'administrateur."
+          };
+        }
+      }
+
+      // Check if this is a client that needs verification
       const { data: clientData } = await supabase
         .from('clients')
         .select('email_verified')
@@ -62,8 +101,30 @@ export const authService = {
         };
       }
 
-      const userType = data.user.user_metadata?.user_type;
-      console.log("Type d'utilisateur:", userType);
+      // Double check carrier status after successful login
+      if (carrierData) {
+        const { data: finalCheck, error: finalCheckError } = await supabase
+          .from('carriers')
+          .select('status')
+          .eq('email', email.trim())
+          .single();
+
+        if (finalCheckError || !finalCheck) {
+          await supabase.auth.signOut();
+          return {
+            success: false,
+            error: "Vous n'avez pas les autorisations nécessaires pour vous connecter en tant que transporteur."
+          };
+        }
+
+        if (finalCheck.status !== 'active') {
+          await supabase.auth.signOut();
+          return {
+            success: false,
+            error: "Votre compte n'est pas actif. Veuillez attendre la validation de votre compte."
+          };
+        }
+      }
 
       return {
         success: true
