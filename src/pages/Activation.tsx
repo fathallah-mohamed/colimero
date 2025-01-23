@@ -34,10 +34,10 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
       try {
         console.log('Starting account activation with token:', token);
 
-        // 1. Récupérer le client avec le token d'activation
+        // 1. Vérifier si le token est valide et n'a pas expiré
         const { data: client, error: clientError } = await supabase
           .from('clients')
-          .select('id, email, email_verified')
+          .select('id, email, email_verified, activation_expires_at')
           .eq('activation_token', token)
           .single();
 
@@ -47,6 +47,11 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
         }
 
         console.log('Client found:', client);
+
+        // Vérifier si le token a expiré
+        if (new Date(client.activation_expires_at) < new Date()) {
+          throw new Error('Le token d'activation a expiré');
+        }
 
         // 2. Vérifier si le compte est déjà activé
         if (client.email_verified) {
@@ -82,17 +87,14 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
 
         console.log('Client verification status updated successfully');
 
-        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users via la fonction Edge
-        const { error: syncError } = await supabase.functions.invoke('sync-user-verification', {
-          body: { 
-            user_id: client.id,
-            is_verified: true
-          }
+        // 4. Mettre à jour les métadonnées de l'utilisateur dans auth.users
+        const { error: userUpdateError } = await supabase.auth.updateUser({
+          data: { email_verified: true }
         });
 
-        if (syncError) {
-          console.error('Error updating auth user metadata:', syncError);
-          throw syncError;
+        if (userUpdateError) {
+          console.error('Error updating auth user metadata:', userUpdateError);
+          throw userUpdateError;
         }
 
         console.log('Auth user metadata updated successfully');

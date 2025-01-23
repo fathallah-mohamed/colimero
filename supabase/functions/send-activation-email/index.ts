@@ -24,7 +24,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get client details and activation token
+    // Récupérer les détails du client et générer un nouveau token si nécessaire
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('first_name, activation_token')
@@ -36,7 +36,27 @@ serve(async (req) => {
       throw new Error('Client not found')
     }
 
-    console.log('Found client:', client)
+    // Si pas de token d'activation, en générer un nouveau
+    if (!client.activation_token) {
+      const { data: updateData, error: updateError } = await supabase
+        .from('clients')
+        .update({
+          activation_token: crypto.randomUUID(),
+          activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+        })
+        .eq('email', email)
+        .select('activation_token')
+        .single()
+
+      if (updateError || !updateData) {
+        console.error('Error updating activation token:', updateError)
+        throw new Error('Failed to generate activation token')
+      }
+
+      client.activation_token = updateData.activation_token
+    }
+
+    console.log('Client details:', client)
 
     const baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
@@ -123,7 +143,7 @@ serve(async (req) => {
 
     console.log('Email sent successfully')
 
-    // Log the email sending
+    // Enregistrer l'envoi de l'email
     await supabase
       .from('email_logs')
       .insert({
