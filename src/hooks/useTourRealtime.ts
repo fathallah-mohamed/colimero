@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tour } from "@/types/tour";
+import type { Tour, TourStatus, TourType } from "@/types/tour";
 import { parseRouteData } from "@/utils/tour/routeParser";
 import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 interface RealtimePayload {
   new: {
     route: any;
-    status: Tour['status'];
-    type: Tour['type'];
-    previous_status: Tour['status'] | null;
+    status: TourStatus;
+    type: TourType;
+    previous_status: TourStatus | null;
     [key: string]: any;
   };
 }
