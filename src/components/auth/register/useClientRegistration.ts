@@ -45,10 +45,10 @@ export async function registerClient(formData: RegisterFormState) {
 
     console.log('Auth signup successful for:', formData.email);
 
-    // 3. Créer le profil client
+    // 3. Créer le profil client avec upsert pour éviter les doublons
     const { error: clientError } = await supabase
       .from('clients')
-      .insert({
+      .upsert({
         id: authData.user.id,
         email: formData.email.trim(),
         first_name: formData.firstName,
@@ -57,6 +57,9 @@ export async function registerClient(formData: RegisterFormState) {
         phone_secondary: formData.phone_secondary || '',
         address: formData.address || '',
         email_verified: false
+      }, {
+        onConflict: 'id',
+        ignoreDuplicates: false
       });
 
     if (clientError) {
