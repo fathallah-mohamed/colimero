@@ -37,7 +37,12 @@ export function BookingCard({
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // S'abonner aux changements en temps réel pour cette réservation
+    setLocalBooking(booking);
+  }, [booking]);
+
+  useEffect(() => {
+    console.log("Setting up realtime subscription for booking:", booking.id);
+    
     const channel = supabase
       .channel(`booking_${booking.id}`)
       .on(
@@ -54,6 +59,7 @@ export function BookingCard({
           // Invalider le cache pour forcer le rechargement des données
           queryClient.invalidateQueries({ queryKey: ['bookings'] });
           queryClient.invalidateQueries({ queryKey: ['tours'] });
+          queryClient.invalidateQueries({ queryKey: ['next-tour'] });
         }
       )
       .subscribe((status) => {
@@ -61,6 +67,7 @@ export function BookingCard({
       });
 
     return () => {
+      console.log("Cleaning up realtime subscription");
       supabase.removeChannel(channel);
     };
   }, [booking.id, queryClient]);
