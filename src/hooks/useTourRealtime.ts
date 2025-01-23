@@ -56,7 +56,9 @@ const parseRouteData = (routeData: Json): RouteStop[] => {
       };
     }
 
-    const stopData = stop as RouteStopJson;
+    // First cast to unknown, then to RouteStopJson to satisfy TypeScript
+    const stopData = stop as unknown as RouteStopJson;
+    
     return {
       name: String(stopData.name || ''),
       location: String(stopData.location || ''),
