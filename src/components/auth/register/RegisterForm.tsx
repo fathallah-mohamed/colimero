@@ -1,6 +1,6 @@
 import { useRegisterForm } from "./useRegisterForm";
 import { RegisterFormFields } from "./RegisterFormFields";
-import { ActivationEmailSentDialog } from "../EmailVerificationDialog";
+import { EmailVerificationDialog } from "../EmailVerificationDialog";
 
 interface RegisterFormProps {
   onSuccess: (type: 'new' | 'existing') => void;
@@ -84,9 +84,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         </form>
       </div>
 
-      <ActivationEmailSentDialog
-        open={showEmailSentDialog}
+      <EmailVerificationDialog
+        isOpen={showEmailSentDialog}
         onClose={handleEmailSentDialogClose}
+        email={email}
       />
     </div>
   );
