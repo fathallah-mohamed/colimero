@@ -4,14 +4,16 @@ import type { Tour, TourStatus, TourType } from "@/types/tour";
 import { parseRouteData } from "@/utils/tour/routeParser";
 import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
+interface TourPayload {
+  route: any;
+  status: TourStatus;
+  type: TourType;
+  previous_status: TourStatus | null;
+  [key: string]: any;
+}
+
 interface RealtimePayload {
-  new: {
-    route: any;
-    status: TourStatus;
-    type: TourType;
-    previous_status: TourStatus | null;
-    [key: string]: any;
-  };
+  new: TourPayload;
 }
 
 export function useTourRealtime(tourId: number) {
