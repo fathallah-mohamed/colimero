@@ -2,6 +2,8 @@ import { useState } from "react";
 import { registerClient } from "./useClientRegistration";
 import { RegisterFormState } from "./types";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [formState, setFormState] = useState<RegisterFormState>({
