@@ -35,6 +35,11 @@ export function ForgotPasswordForm({ onCancel }: ForgotPasswordFormProps) {
     }
   };
 
+  const handleConfirmationClose = () => {
+    setShowConfirmation(false);
+    if (onCancel) onCancel();
+  };
+
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -77,10 +82,7 @@ export function ForgotPasswordForm({ onCancel }: ForgotPasswordFormProps) {
 
       <ConfirmationDialog
         isOpen={showConfirmation}
-        onClose={() => {
-          setShowConfirmation(false);
-          if (onCancel) onCancel();
-        }}
+        onClose={handleConfirmationClose}
         title="Email envoyé"
         message={`Si un compte existe avec l'adresse ${email}, vous recevrez un email contenant les instructions pour réinitialiser votre mot de passe. Pensez à vérifier vos spams si vous ne trouvez pas l'email dans votre boîte de réception.`}
       />
