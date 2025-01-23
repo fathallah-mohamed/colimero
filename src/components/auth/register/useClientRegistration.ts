@@ -1,7 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import { RegisterFormState } from "./types";
 
-export async function registerClient(formData: RegisterFormState) {
+interface RegistrationResponse {
+  success: boolean;
+  error?: string;
+  type?: 'new' | 'existing';
+}
+
+export async function registerClient(formData: RegisterFormState): Promise<RegistrationResponse> {
   try {
     console.log('Starting client registration for:', formData.email);
     
