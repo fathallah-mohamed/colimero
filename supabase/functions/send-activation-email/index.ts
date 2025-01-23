@@ -52,7 +52,6 @@ serve(async (req) => {
       throw new Error('No client found with this email address')
     }
 
-    // Permettre l'envoi même si déjà vérifié
     // Générer un nouveau token d'activation
     console.log('🔑 Generating new activation token for:', email)
     const { data: updateData, error: updateError } = await supabase
@@ -79,8 +78,10 @@ serve(async (req) => {
       throw new Error('SITE_URL environment variable is not set')
     }
 
-    const activationLink = `${baseUrl.replace(/\/+$/, '')}/activation?token=${activationToken}`
-    console.log('🔗 Generated activation link')
+    // Supprimer www. et tout slash final de l'URL de base
+    const cleanBaseUrl = baseUrl.replace(/^(https?:\/\/)?(www\.)?/, 'https://').replace(/\/$/, '')
+    const activationLink = `${cleanBaseUrl}/activation?token=${activationToken}`
+    console.log('🔗 Generated activation link:', activationLink)
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
