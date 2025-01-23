@@ -46,14 +46,11 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
       if (!response.success) {
         console.log("Login failed:", response.error);
         if (response.error) {
-          const errorMessage = response.error === "Invalid login credentials" 
-            ? "Email ou mot de passe incorrect"
-            : response.error;
-          setError(errorMessage);
+          setError(response.error);
           toast({
             variant: "destructive",
             title: "Erreur de connexion",
-            description: errorMessage,
+            description: response.error,
           });
           setShowErrorDialog(true);
         }

@@ -13,12 +13,14 @@ export const authService = {
     try {
       console.log("Attempting to sign in with email:", email.trim());
       
-      // First check if this is a carrier and verify their status
+      // Vérifier d'abord si c'est un transporteur
       const { data: carrierData, error: carrierError } = await supabase
         .from('carriers')
-        .select('status')
+        .select('status, email')
         .eq('email', email.trim())
         .maybeSingle();
+
+      console.log("Carrier check result:", { carrierData, carrierError });
 
       if (carrierError && carrierError.code !== 'PGRST116') {
         console.error("Error checking carrier status:", carrierError);
@@ -28,31 +30,25 @@ export const authService = {
         };
       }
 
-      // If this is a carrier, verify their status before allowing login
+      // Si c'est un transporteur, vérifier son statut avant d'autoriser la connexion
       if (carrierData) {
-        if (carrierData.status === 'pending') {
-          return {
-            success: false,
-            error: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé."
-          };
-        }
-
-        if (carrierData.status === 'rejected') {
-          return {
-            success: false,
-            error: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter."
-          };
-        }
-
+        console.log("Found carrier with status:", carrierData.status);
+        
         if (carrierData.status !== 'active') {
+          const errorMessages = {
+            pending: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé.",
+            rejected: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter.",
+            default: "Votre compte n'est pas actif. Veuillez contacter l'administrateur."
+          };
+
           return {
             success: false,
-            error: "Votre compte n'est pas actif. Veuillez contacter l'administrateur."
+            error: errorMessages[carrierData.status as keyof typeof errorMessages] || errorMessages.default
           };
         }
       }
 
-      // Check if this is a client that needs verification
+      // Vérifier si c'est un client qui a besoin de vérification
       const { data: clientData } = await supabase
         .from('clients')
         .select('email_verified')
@@ -68,7 +64,7 @@ export const authService = {
         };
       }
 
-      // Attempt login
+      // Tentative de connexion
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -82,10 +78,6 @@ export const authService = {
           errorMessage = "Email ou mot de passe incorrect";
         } else if (signInError.message === "Email not confirmed") {
           errorMessage = "Veuillez confirmer votre email avant de vous connecter";
-        } else if (signInError.message.includes("Invalid email")) {
-          errorMessage = "Format d'email invalide";
-        } else if (signInError.message.includes("Password")) {
-          errorMessage = "Le mot de passe est incorrect";
         }
 
         return {
@@ -101,7 +93,7 @@ export const authService = {
         };
       }
 
-      // Double check carrier status after successful login
+      // Double vérification du statut du transporteur après la connexion réussie
       if (carrierData) {
         const { data: finalCheck, error: finalCheckError } = await supabase
           .from('carriers')
