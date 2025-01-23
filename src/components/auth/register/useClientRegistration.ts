@@ -54,7 +54,7 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
     // 3. Créer le profil client avec upsert pour éviter les doublons
     const { error: clientError } = await supabase
       .from('clients')
-      .upsert({
+      .insert({
         id: authData.user.id,
         email: formData.email.trim(),
         first_name: formData.firstName,
@@ -62,10 +62,9 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
         phone: formData.phone,
         phone_secondary: formData.phone_secondary || '',
         address: formData.address || '',
-        email_verified: false // Forcer email_verified à false à la création
-      }, {
-        onConflict: 'id',
-        ignoreDuplicates: false
+        email_verified: false, // Forcer explicitement à false
+        activation_token: crypto.randomUUID(),
+        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
       });
 
     if (clientError) {
@@ -73,7 +72,7 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
       throw clientError;
     }
 
-    console.log('Client profile created successfully');
+    console.log('Client profile created successfully with email_verified=false');
 
     // 4. Envoyer l'email d'activation
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {

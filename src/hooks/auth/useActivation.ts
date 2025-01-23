@@ -46,11 +46,6 @@ export function useActivation(token: string | null) {
           }
           
           setStatus('expired');
-          toast({
-            variant: "destructive",
-            title: "Token expiré",
-            description: "Le lien d'activation a expiré. Veuillez demander un nouveau lien.",
-          });
           return;
         }
 
@@ -95,13 +90,6 @@ export function useActivation(token: string | null) {
           .eq('id', client.id);
 
         if (updateError) throw updateError;
-
-        // 5. Mettre à jour les métadonnées de l'utilisateur
-        const { error: userUpdateError } = await supabase.auth.updateUser({
-          data: { email_verified: true }
-        });
-
-        if (userUpdateError) throw userUpdateError;
 
         if (mounted) {
           setStatus('success');
