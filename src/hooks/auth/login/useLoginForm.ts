@@ -48,9 +48,7 @@ export function useLoginForm({
         console.log("Login failed:", response.error);
         if (response.error) {
           setError(response.error);
-          if (!response.needsVerification) {
-            setShowErrorDialog(true);
-          }
+          setShowErrorDialog(true);
         }
         setPassword("");
         setIsLoading(false);
@@ -72,14 +70,10 @@ export function useLoginForm({
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      const errorMessage = error instanceof Error 
-        ? "Email ou mot de passe incorrect"
-        : "Une erreur inattendue s'est produite";
+      const errorMessage = "Une erreur inattendue s'est produite";
       
       setError(errorMessage);
-      if (!showVerificationDialog) {
-        setShowErrorDialog(true);
-      }
+      setShowErrorDialog(true);
       setPassword("");
     } finally {
       setIsLoading(false);

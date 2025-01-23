@@ -10,7 +10,7 @@ interface AuthResponse {
 export const authService = {
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
-      console.log("Attempting to sign in with email:", email.trim());
+      console.log("Checking email verification status for:", email.trim());
       
       // Vérifier d'abord si le client existe et son statut de vérification
       const { data: clientData, error: clientError } = await supabase
@@ -27,16 +27,14 @@ export const authService = {
         };
       }
 
-      // Si c'est un client et que l'email n'est pas vérifié, bloquer la connexion
-      if (clientData) {
-        if (!clientData.email_verified) {
-          console.log('Client account not verified:', email);
-          return {
-            success: false,
-            needsVerification: true,
-            email: email
-          };
-        }
+      // Si c'est un client et que l'email n'est pas vérifié, bloquer immédiatement
+      if (clientData && !clientData.email_verified) {
+        console.log('Client account not verified:', email);
+        return {
+          success: false,
+          needsVerification: true,
+          email: email
+        };
       }
 
       // Vérifier le statut du transporteur si applicable
@@ -72,8 +70,7 @@ export const authService = {
         }
       }
 
-      // Tentative de connexion uniquement si l'email est vérifié pour les clients
-      // ou si c'est un transporteur actif
+      // Si l'email est vérifié ou si c'est un transporteur actif, tenter la connexion
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -81,17 +78,9 @@ export const authService = {
 
       if (signInError) {
         console.error("Sign in error:", signInError);
-        
-        if (signInError.message === "Invalid login credentials") {
-          return {
-            success: false,
-            error: "Email ou mot de passe incorrect"
-          };
-        }
-
         return {
           success: false,
-          error: "Une erreur est survenue lors de la connexion"
+          error: "Email ou mot de passe incorrect"
         };
       }
 
