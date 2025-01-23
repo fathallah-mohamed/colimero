@@ -28,14 +28,16 @@ export const authService = {
         };
       }
 
-      // Si le client existe et n'est pas vérifié, bloquer la connexion
-      if (clientData && clientData.email_verified === false) {
-        console.log('Account not verified:', email);
-        return {
-          success: false,
-          needsVerification: true,
-          email: email
-        };
+      // Si c'est un client et que l'email n'est pas vérifié, bloquer la connexion
+      if (clientData) {
+        if (!clientData.email_verified) {
+          console.log('Client account not verified:', email);
+          return {
+            success: false,
+            needsVerification: true,
+            email: email
+          };
+        }
       }
 
       // Vérifier le statut du transporteur si applicable
@@ -71,7 +73,8 @@ export const authService = {
         }
       }
 
-      // Tentative de connexion uniquement si l'email est vérifié ou si ce n'est pas un client
+      // Tentative de connexion uniquement si l'email est vérifié pour les clients
+      // ou si c'est un transporteur actif
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -84,14 +87,6 @@ export const authService = {
           return {
             success: false,
             error: "Email ou mot de passe incorrect"
-          };
-        }
-        
-        if (signInError.message === "Email not confirmed") {
-          return {
-            success: false,
-            needsVerification: true,
-            email: email
           };
         }
 
