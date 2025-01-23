@@ -83,11 +83,6 @@ serve(async (req) => {
       console.log('✨ New activation token generated')
     }
 
-    console.log('📋 Client details:', { 
-      firstName: client.first_name,
-      hasToken: !!activationToken 
-    })
-
     const baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
       console.error('❌ SITE_URL environment variable is not set')
@@ -188,22 +183,14 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ message: 'Activation email sent successfully' }),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
     console.error('❌ Function error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }
 })

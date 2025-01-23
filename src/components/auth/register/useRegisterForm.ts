@@ -2,6 +2,7 @@ import { useState } from "react";
 import { registerClient } from "./useClientRegistration";
 import { RegisterFormState } from "./types";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [firstName, setFirstName] = useState("");
@@ -14,6 +15,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailSentDialog, setShowEmailSentDialog] = useState(false);
+  const { toast } = useToast();
 
   const areRequiredFieldsFilled = () => {
     return (
@@ -51,31 +53,26 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       }
 
       if (type === 'existing') {
+        toast({
+          title: "Compte existant",
+          description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
+        });
         onSuccess('existing');
         return;
       }
 
       // Déconnexion immédiate après l'inscription
       await supabase.auth.signOut();
-
-      console.log('Sending activation email to:', email);
       
-      // Appeler l'edge function pour envoyer l'email d'activation et attendre la réponse
-      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-activation-email', {
-        body: { email }
-      });
-
-      if (emailError) {
-        console.error('Error sending activation email:', emailError);
-        throw new Error("Erreur lors de l'envoi de l'email d'activation");
-      }
-
-      console.log('Activation email sent successfully:', emailData);
       setShowEmailSentDialog(true);
 
     } catch (error: any) {
       console.error("Registration error:", error);
-      throw error;
+      toast({
+        variant: "destructive",
+        title: "Erreur d'inscription",
+        description: error.message || "Une erreur est survenue lors de l'inscription",
+      });
     } finally {
       setIsLoading(false);
     }
