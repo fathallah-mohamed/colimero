@@ -4,102 +4,80 @@ import { RegisterFormState } from "./types";
 import { useToast } from "@/hooks/use-toast";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [phone_secondary, setPhoneSecondary] = useState("");
-  const [address, setAddress] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formState, setFormState] = useState<RegisterFormState>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    phone_secondary: '',
+    address: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailSentDialog, setShowEmailSentDialog] = useState(false);
   const { toast } = useToast();
 
-  const areRequiredFieldsFilled = () => {
-    return (
-      firstName.trim() !== "" &&
-      lastName.trim() !== "" &&
-      email.trim() !== "" &&
-      phone.trim() !== "" &&
-      password.trim() !== "" &&
-      confirmPassword.trim() !== "" &&
-      password === confirmPassword
-    );
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!areRequiredFieldsFilled()) return;
-
     setIsLoading(true);
+
     try {
-      const formData: RegisterFormState = {
-        firstName,
-        lastName,
-        email,
-        phone,
-        phone_secondary,
-        address,
-        password,
-        confirmPassword,
-      };
+      const result = await registerClient(formState);
 
-      const { success, error, type } = await registerClient(formData);
-
-      if (!success) {
-        throw new Error(error || "Une erreur est survenue lors de l'inscription");
+      if (!result.success) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: result.error || "Une erreur est survenue lors de l'inscription"
+        });
+        return;
       }
 
-      if (type === 'existing') {
+      if (result.type === 'existing') {
         toast({
           title: "Compte existant",
-          description: "Un compte existe déjà avec cet email. Veuillez vous connecter.",
+          description: "Un compte existe déjà avec cet email"
         });
         onSuccess('existing');
         return;
       }
       
       setShowEmailSentDialog(true);
+      onSuccess('new');
 
     } catch (error: any) {
-      console.error("Registration error:", error);
+      console.error('Registration error:', error);
       toast({
         variant: "destructive",
-        title: "Erreur d'inscription",
-        description: error.message || "Une erreur est survenue lors de l'inscription",
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'inscription"
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEmailSentDialogClose = () => {
-    setShowEmailSentDialog(false);
-    onSuccess('new');
+  const areRequiredFieldsFilled = () => {
+    return (
+      formState.firstName.trim() !== '' &&
+      formState.lastName.trim() !== '' &&
+      formState.email.trim() !== '' &&
+      formState.phone.trim() !== '' &&
+      formState.address.trim() !== '' &&
+      formState.password.trim() !== '' &&
+      formState.confirmPassword.trim() !== '' &&
+      formState.password === formState.confirmPassword
+    );
   };
 
   return {
-    firstName,
-    lastName,
-    email,
-    phone,
-    phone_secondary,
-    address,
-    password,
-    confirmPassword,
-    setFirstName,
-    setLastName,
-    setEmail,
-    setPhone,
-    setPhoneSecondary,
-    setAddress,
-    setPassword,
-    setConfirmPassword,
-    handleSubmit,
+    formState,
+    setFormState,
     isLoading,
     showEmailSentDialog,
-    handleEmailSentDialogClose,
-    areRequiredFieldsFilled
+    setShowEmailSentDialog,
+    handleSubmit,
+    areRequiredFieldsFilled,
   };
 }

@@ -1,17 +1,21 @@
 import { supabase } from "@/integrations/supabase/client";
-import { RegisterFormState } from "./types";
+import crypto from 'crypto';
 
-interface RegistrationResponse {
-  success: boolean;
-  error?: string;
-  type?: 'new' | 'existing';
+interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  phone_secondary?: string;
+  address: string;
+  password: string;
 }
 
-export async function registerClient(formData: RegisterFormState): Promise<RegistrationResponse> {
+export async function registerClient(formData: RegisterFormData) {
   try {
     console.log('Starting client registration for:', formData.email);
     
-    // 1. Vérifier si l'utilisateur existe déjà
+    // 1. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
       .select('email, email_verified')
@@ -21,15 +25,15 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
     if (existingClient) {
       console.log('Client already exists:', formData.email);
       return { 
-        success: true, 
-        type: 'existing' 
+        success: false, 
+        error: "Un compte existe déjà avec cet email"
       };
     }
 
-    // 2. Créer l'utilisateur dans auth
+    // 2. Create auth user first
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
-      password: formData.password,
+      password: formData.password.trim(),
       options: {
         data: {
           first_name: formData.firstName,
@@ -42,19 +46,16 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
     });
 
     if (signUpError) {
-      console.error('Error in auth signup:', signUpError);
+      console.error('Error creating auth user:', signUpError);
       throw signUpError;
     }
-    
+
     if (!authData.user) {
-      console.error('No user data received from auth signup');
-      throw new Error("Aucune donnée utilisateur reçue");
+      throw new Error("Échec de la création du compte");
     }
 
-    console.log('Auth signup successful for:', formData.email);
-
-    // 3. Créer le profil client avec upsert pour éviter les doublons
-    const { error: clientError } = await supabase
+    // 3. Create client profile
+    const { error: insertError } = await supabase
       .from('clients')
       .insert({
         id: authData.user.id,
@@ -69,16 +70,19 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
         activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
       });
 
-    if (clientError) {
-      console.error('Error creating client profile:', clientError);
-      throw clientError;
+    if (insertError) {
+      console.error('Error creating client profile:', insertError);
+      // Clean up auth user if profile creation fails
+      await supabase.auth.signOut();
+      throw insertError;
     }
 
-    console.log('Client profile created successfully with email_verified=false');
-
-    // 4. Envoyer l'email d'activation
+    // 4. Send activation email
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
-      body: { email: formData.email.trim() }
+      body: {
+        email: formData.email,
+        firstName: formData.firstName
+      }
     });
 
     if (emailError) {
@@ -88,7 +92,7 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
 
     console.log('Activation email sent successfully');
 
-    // 5. Déconnexion immédiate pour forcer la vérification email
+    // 5. Force sign out to ensure email verification
     await supabase.auth.signOut();
 
     return {
@@ -99,7 +103,7 @@ export async function registerClient(formData: RegisterFormState): Promise<Regis
   } catch (error: any) {
     console.error("Error in registerClient:", error);
     
-    // Gérer spécifiquement l'erreur de clé dupliquée
+    // Handle specific errors
     if (error.message?.includes('duplicate key value violates unique constraint')) {
       return {
         success: false,
