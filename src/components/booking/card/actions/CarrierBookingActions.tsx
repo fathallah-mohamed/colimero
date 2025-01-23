@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BookingStatus } from "@/types/booking";
 import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
-import { CancelConfirmDialog } from "./CancelConfirmDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,13 +9,15 @@ interface CarrierBookingActionsProps {
   tourStatus: string;
   onStatusChange: (newStatus: BookingStatus) => void;
   onEdit: () => void;
+  bookingId: string;
 }
 
 export function CarrierBookingActions({
   status,
   tourStatus,
   onStatusChange,
-  onEdit
+  onEdit,
+  bookingId
 }: CarrierBookingActionsProps) {
   const { toast } = useToast();
 
@@ -32,7 +33,7 @@ export function CarrierBookingActions({
           delivery_status: newStatus,
           updated_at: new Date().toISOString()
         })
-        .eq('status', status);
+        .eq('id', bookingId); // Utiliser l'ID spécifique de la réservation
 
       if (error) throw error;
 
@@ -87,7 +88,15 @@ export function CarrierBookingActions({
 
       {status === "pending" && tourStatus === "Programmée" && (
         <>
-          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-red-500 hover:text-red-600 gap-2"
+            onClick={() => handleStatusChange("cancelled")}
+          >
+            <XCircle className="h-4 w-4" />
+            Annuler
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -102,7 +111,15 @@ export function CarrierBookingActions({
 
       {status === "confirmed" && tourStatus === "Ramassage en cours" && (
         <>
-          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-red-500 hover:text-red-600 gap-2"
+            onClick={() => handleStatusChange("cancelled")}
+          >
+            <XCircle className="h-4 w-4" />
+            Annuler
+          </Button>
           <Button
             variant="outline"
             size="sm"
