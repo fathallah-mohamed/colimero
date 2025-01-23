@@ -13,7 +13,10 @@ export function EmailVerificationDialog({ isOpen, onClose, email }: EmailVerific
   const { isResending, resendActivationEmail } = useEmailVerification();
 
   const handleResendEmail = async () => {
-    await resendActivationEmail(email);
+    const success = await resendActivationEmail(email);
+    if (success) {
+      console.log('Activation email resent successfully');
+    }
   };
 
   return (
