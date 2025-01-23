@@ -32,7 +32,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
       if (error) throw error;
 
       setShowSuccessDialog(true);
-
+      
       if (onSuccess) {
         onSuccess();
       }
@@ -45,6 +45,14 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    // Ne rien faire quand l'utilisateur clique en dehors
+    // La fermeture ne se fait que par le bouton
+    if (!open) {
+      return;
     }
   };
 
@@ -94,7 +102,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
         </form>
       </div>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      <Dialog open={showSuccessDialog} onOpenChange={handleDialogClose}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Email envoyé</DialogTitle>
