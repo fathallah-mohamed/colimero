@@ -1,6 +1,7 @@
 import { useRegisterForm } from "./useRegisterForm";
 import { RegisterFormFields } from "./RegisterFormFields";
 import { EmailVerificationDialog } from "../EmailVerificationDialog";
+import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 interface RegisterFormProps {
   onSuccess: (type: 'new' | 'existing') => void;
@@ -30,6 +31,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     handleEmailSentDialogClose,
     areRequiredFieldsFilled
   } = useRegisterForm(onSuccess);
+
+  const { isResending, resendActivationEmail } = useEmailVerification();
 
   return (
     <div className="flex flex-col h-full max-h-[80vh]">
@@ -88,6 +91,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         isOpen={showEmailSentDialog}
         onClose={handleEmailSentDialogClose}
         email={email}
+        isResending={isResending}
+        onResendEmail={() => resendActivationEmail(email)}
       />
     </div>
   );

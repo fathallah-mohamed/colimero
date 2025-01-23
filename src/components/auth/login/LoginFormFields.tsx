@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
 import { ErrorDialog } from "@/components/ui/error-dialog";
+import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 
 interface LoginFormFieldsProps {
   email: string;
@@ -28,6 +29,8 @@ export function LoginFormFields({
   onVerificationDialogClose,
   onErrorDialogClose,
 }: LoginFormFieldsProps) {
+  const { isResending, resendActivationEmail } = useEmailVerification();
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -60,6 +63,8 @@ export function LoginFormFields({
           isOpen={showVerificationDialog}
           onClose={onVerificationDialogClose}
           email={email}
+          isResending={isResending}
+          onResendEmail={() => resendActivationEmail(email)}
         />
       )}
 
