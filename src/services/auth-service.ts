@@ -13,7 +13,18 @@ export const authService = {
     try {
       console.log("Attempting to sign in with email:", email.trim());
       
-      // Vérifier d'abord si c'est un transporteur et son statut
+      // First check if the user exists in auth.users
+      const { data: { user: existingUser }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError && userError.message !== 'Invalid JWT') {
+        console.error("Error checking user:", userError);
+        return {
+          success: false,
+          error: "Une erreur est survenue lors de la vérification de votre compte."
+        };
+      }
+
+      // Check carrier status if applicable
       const { data: carrierData, error: carrierError } = await supabase
         .from('carriers')
         .select('status, email')
@@ -30,7 +41,7 @@ export const authService = {
         };
       }
 
-      // Si c'est un transporteur, vérifier son statut avant d'autoriser la connexion
+      // If it's a carrier, verify status before allowing login
       if (carrierData) {
         console.log("Found carrier with status:", carrierData.status);
         
@@ -48,7 +59,7 @@ export const authService = {
         }
       }
 
-      // Vérifier si c'est un client qui a besoin de vérification
+      // Check if client needs verification
       const { data: clientData } = await supabase
         .from('clients')
         .select('email_verified')
@@ -64,7 +75,7 @@ export const authService = {
         };
       }
 
-      // Tentative de connexion
+      // Attempt login
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -72,17 +83,24 @@ export const authService = {
 
       if (signInError) {
         console.error("Sign in error:", signInError);
-        let errorMessage = "Une erreur est survenue lors de la connexion";
         
         if (signInError.message === "Invalid login credentials") {
-          errorMessage = "Email ou mot de passe incorrect";
-        } else if (signInError.message === "Email not confirmed") {
-          errorMessage = "Veuillez confirmer votre email avant de vous connecter";
+          return {
+            success: false,
+            error: "Email ou mot de passe incorrect"
+          };
+        }
+        
+        if (signInError.message === "Email not confirmed") {
+          return {
+            success: false,
+            error: "Veuillez confirmer votre email avant de vous connecter"
+          };
         }
 
         return {
           success: false,
-          error: errorMessage
+          error: "Une erreur est survenue lors de la connexion"
         };
       }
 
@@ -93,7 +111,7 @@ export const authService = {
         };
       }
 
-      // Double vérification du statut du transporteur après la connexion réussie
+      // Double check carrier status after successful login
       if (carrierData) {
         const { data: finalCheck, error: finalCheckError } = await supabase
           .from('carriers')
