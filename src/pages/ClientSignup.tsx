@@ -23,9 +23,7 @@ export default function ClientSignup() {
         </div>
       </div>
       <div className="max-w-2xl mx-auto -mt-8 px-4 pb-12">
-        <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
-          <RegisterForm onLogin={handleLogin} />
-        </div>
+        <RegisterForm onLogin={handleLogin} />
       </div>
     </div>
   );
