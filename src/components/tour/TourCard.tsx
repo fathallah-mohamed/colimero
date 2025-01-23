@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown, ChevronDown, ChevronUp, Hash, ArrowRight } from "lucide-react";
@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tour, TourStatus } from "@/types/tour";
 import type { BookingStatus } from "@/types/booking";
 import { TourEditDialog } from "./TourEditDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TourCardProps {
   tour: Tour;
@@ -45,12 +46,42 @@ export function TourCard({
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showBookings, setShowBookings] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [localTour, setLocalTour] = useState(tour);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // S'abonner aux changements en temps réel pour cette tournée
+    const channel = supabase
+      .channel(`tour_${tour.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'tours',
+          filter: `id=eq.${tour.id}`
+        },
+        (payload) => {
+          console.log('Tour updated:', payload);
+          setLocalTour(payload.new as Tour);
+          // Invalider le cache pour forcer le rechargement des données
+          queryClient.invalidateQueries({ queryKey: ['tours'] });
+        }
+      )
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tour.id, queryClient]);
 
   const handleDownloadPDF = async () => {
     setIsGeneratingPDF(true);
     try {
-      const success = await generateTourPDF(tour);
+      const success = await generateTourPDF(localTour);
       if (success) {
         toast({
           title: "PDF généré avec succès",
@@ -108,7 +139,7 @@ export function TourCard({
     });
   };
 
-  const hasBookings = tour.bookings && tour.bookings.length > 0;
+  const hasBookings = localTour.bookings && localTour.bookings.length > 0;
 
   return (
     <Card className={cn(
@@ -119,31 +150,31 @@ export function TourCard({
       <div className="flex justify-between items-start mb-6">
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">
-            Tournée du {new Date(tour.departure_date).toLocaleDateString()}
+            Tournée du {new Date(localTour.departure_date).toLocaleDateString()}
           </h3>
           <p className="text-sm text-gray-500 flex items-center gap-2">
             <span className="flex items-center">
-              <span className="text-xl mr-1">{countryFlags[tour.departure_country]}</span>
-              {countryNames[tour.departure_country]}
+              <span className="text-xl mr-1">{countryFlags[localTour.departure_country]}</span>
+              {countryNames[localTour.departure_country]}
             </span>
             <ArrowRight className="h-5 w-5 text-primary mx-1 stroke-2" />
             <span className="flex items-center">
-              <span className="text-xl mr-1">{countryFlags[tour.destination_country]}</span>
-              {countryNames[tour.destination_country]}
+              <span className="text-xl mr-1">{countryFlags[localTour.destination_country]}</span>
+              {countryNames[localTour.destination_country]}
             </span>
           </p>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 text-gray-600">
               <Hash className="h-4 w-4 text-primary shrink-0" />
               <span className="text-sm font-medium text-primary">
-                {tour.tour_number || "Numéro non défini"}
+                {localTour.tour_number || "Numéro non défini"}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <TourStatusBadge status={tour.status} />
-            <Badge variant={tour.type === "public" ? "default" : "secondary"}>
-              {tour.type === "public" ? "Publique" : "Privée"}
+            <TourStatusBadge status={localTour.status} />
+            <Badge variant={localTour.type === "public" ? "default" : "secondary"}>
+              {localTour.type === "public" ? "Publique" : "Privée"}
             </Badge>
           </div>
         </div>
@@ -163,17 +194,17 @@ export function TourCard({
       </div>
 
       <TourTimelineDisplay
-        status={tour.status}
-        tourId={tour.id}
+        status={localTour.status}
+        tourId={localTour.id}
         onStatusChange={handleTourStatusChange}
         canEdit={true}
         onEdit={() => setIsEditDialogOpen(true)}
       />
 
       <TourCapacityInfo
-        totalCapacity={tour.total_capacity}
-        remainingCapacity={tour.remaining_capacity}
-        bookingsCount={tour.bookings?.length || 0}
+        totalCapacity={localTour.total_capacity}
+        remainingCapacity={localTour.remaining_capacity}
+        bookingsCount={localTour.bookings?.length || 0}
       />
 
       {hasBookings && (
@@ -191,7 +222,7 @@ export function TourCard({
             ) : (
               <>
                 <ChevronDown className="h-4 w-4" />
-                Afficher les réservations ({tour.bookings.length})
+                Afficher les réservations ({localTour.bookings.length})
               </>
             )}
           </Button>
@@ -200,14 +231,14 @@ export function TourCard({
 
       {showBookings && hasBookings && (
         <div className="mt-6 space-y-4">
-          {tour.bookings?.map((booking: any) => (
+          {localTour.bookings?.map((booking: any) => (
             <BookingCard
               key={booking.id}
               booking={booking}
-              isCollecting={tour.status === "Ramassage en cours"}
+              isCollecting={localTour.status === "Ramassage en cours"}
               onStatusChange={onStatusChange || (() => Promise.resolve())}
               onUpdate={onUpdate || (() => Promise.resolve())}
-              tourStatus={tour.status}
+              tourStatus={localTour.status}
             />
           ))}
         </div>
@@ -216,7 +247,7 @@ export function TourCard({
       <TourEditDialog 
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
-        tour={tour}
+        tour={localTour}
         onComplete={handleEditComplete}
       />
     </Card>

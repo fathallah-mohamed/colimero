@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -11,6 +11,8 @@ import type { Booking, BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { generateDeliverySlip } from "@/utils/generateDeliverySlip";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface BookingCardProps {
   booking: Booking;
@@ -29,22 +31,53 @@ export function BookingCard({
 }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [localBooking, setLocalBooking] = useState(booking);
   const { toast } = useToast();
   const { userType } = useProfile();
+  const queryClient = useQueryClient();
 
-  console.log("BookingCard - Booking status:", booking.status);
+  useEffect(() => {
+    // S'abonner aux changements en temps réel pour cette réservation
+    const channel = supabase
+      .channel(`booking_${booking.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `id=eq.${booking.id}`
+        },
+        (payload) => {
+          console.log('Booking updated:', payload);
+          setLocalBooking(payload.new as Booking);
+          // Invalider le cache pour forcer le rechargement des données
+          queryClient.invalidateQueries({ queryKey: ['bookings'] });
+          queryClient.invalidateQueries({ queryKey: ['tours'] });
+        }
+      )
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [booking.id, queryClient]);
+
+  console.log("BookingCard - Booking status:", localBooking.status);
   console.log("BookingCard - Tour status:", tourStatus);
   console.log("BookingCard - User type:", userType);
 
   const handleEdit = () => {
-    console.log("Opening edit dialog for booking:", booking.id);
+    console.log("Opening edit dialog for booking:", localBooking.id);
     setShowEditDialog(true);
   };
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
       console.log("Changing booking status to:", newStatus);
-      await onStatusChange(booking.id, newStatus);
+      await onStatusChange(localBooking.id, newStatus);
       await onUpdate();
       toast({
         title: "Statut mis à jour",
@@ -62,7 +95,7 @@ export function BookingCard({
 
   const handleDownloadDeliverySlip = () => {
     try {
-      generateDeliverySlip(booking);
+      generateDeliverySlip(localBooking);
       toast({
         title: "Bon de livraison généré",
         description: "Le bon de livraison a été téléchargé avec succès.",
@@ -80,7 +113,7 @@ export function BookingCard({
   return (
     <Card className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="space-y-4">
-        <BookingHeaderSection booking={booking} />
+        <BookingHeaderSection booking={localBooking} />
         
         <div className="flex justify-between items-center">
           <Button
@@ -94,8 +127,8 @@ export function BookingCard({
           </Button>
 
           <BookingActions
-            bookingId={booking.id}
-            status={booking.status}
+            bookingId={localBooking.id}
+            status={localBooking.status}
             tourStatus={tourStatus || ''}
             onStatusChange={handleStatusChange}
             onUpdate={onUpdate}
@@ -112,12 +145,12 @@ export function BookingCard({
             </Button>
           </CollapsibleTrigger>
 
-          <BookingDetailsContent booking={booking} isExpanded={isExpanded} />
+          <BookingDetailsContent booking={localBooking} isExpanded={isExpanded} />
         </Collapsible>
       </div>
 
       <EditBookingDialog
-        booking={booking}
+        booking={localBooking}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         onSuccess={onUpdate}
