@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tour } from "@/types/tour";
 import { parseRouteData } from "@/utils/tour/routeParser";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 interface RealtimePayload {
   new: {
@@ -19,9 +20,11 @@ export function useTourRealtime(tourId: number) {
   useEffect(() => {
     if (!tourId) return;
 
+    console.log("Setting up realtime subscription for tour:", tourId);
+
     const channel = supabase
       .channel('tour-updates')
-      .on(
+      .on<RealtimePayload>(
         'postgres_changes',
         {
           event: '*',
@@ -29,7 +32,7 @@ export function useTourRealtime(tourId: number) {
           table: 'tours',
           filter: `id=eq.${tourId}`
         },
-        (payload: RealtimePayload) => {
+        (payload: RealtimePostgresChangesPayload<RealtimePayload>) => {
           if (!payload.new) return;
 
           const updatedTour = {
@@ -40,12 +43,14 @@ export function useTourRealtime(tourId: number) {
             previous_status: payload.new.previous_status as Tour['status'] | null,
           } as Tour;
 
+          console.log("Received realtime update for tour:", updatedTour);
           setTour(updatedTour);
         }
       )
       .subscribe();
 
     return () => {
+      console.log("Cleaning up realtime subscription for tour:", tourId);
       supabase.removeChannel(channel);
     };
   }, [tourId]);
