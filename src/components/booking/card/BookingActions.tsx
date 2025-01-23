@@ -35,6 +35,7 @@ export function BookingActions({
   if (userType === "carrier") {
     return (
       <CarrierBookingActions
+        bookingId={bookingId}
         status={status}
         tourStatus={tourStatus}
         onStatusChange={handleStatusChange}
