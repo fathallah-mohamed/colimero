@@ -1,37 +1,51 @@
 import { Button } from "@/components/ui/button";
-import { RegisterFormFields } from "./register/RegisterFormFields";
-import { useRegisterForm } from "./register/useRegisterForm";
-import { EmailVerificationDialog } from "./EmailVerificationDialog";
+import { RegisterFormFields } from "./RegisterFormFields";
 
 interface RegisterFormProps {
   onLogin: () => void;
+  isLoading: boolean;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  phone_secondary?: string;
+  address: string;
+  password: string;
+  confirmPassword: string;
+  setFirstName: (value: string) => void;
+  setLastName: (value: string) => void;
+  setEmail: (value: string) => void;
+  setPhone: (value: string) => void;
+  setPhoneSecondary: (value: string) => void;
+  setAddress: (value: string) => void;
+  setPassword: (value: string) => void;
+  setConfirmPassword: (value: string) => void;
+  areRequiredFieldsFilled: () => boolean;
+  handleSubmit: (e: React.FormEvent) => void;
 }
 
-export function RegisterForm({ onLogin }: RegisterFormProps) {
-  const {
-    firstName,
-    lastName,
-    email,
-    phone,
-    phone_secondary,
-    address,
-    password,
-    confirmPassword,
-    setFirstName,
-    setLastName,
-    setEmail,
-    setPhone,
-    setPhoneSecondary,
-    setAddress,
-    setPassword,
-    setConfirmPassword,
-    handleSubmit,
-    isLoading,
-    showEmailSentDialog,
-    handleEmailSentDialogClose,
-    areRequiredFieldsFilled
-  } = useRegisterForm(onLogin);
-
+export function RegisterForm({
+  onLogin,
+  isLoading,
+  firstName,
+  lastName,
+  email,
+  phone,
+  phone_secondary,
+  address,
+  password,
+  confirmPassword,
+  setFirstName,
+  setLastName,
+  setEmail,
+  setPhone,
+  setPhoneSecondary,
+  setAddress,
+  setPassword,
+  setConfirmPassword,
+  areRequiredFieldsFilled,
+  handleSubmit,
+}: RegisterFormProps) {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
       <div className="mb-6">
@@ -82,12 +96,6 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
           </div>
         </div>
       </form>
-
-      <EmailVerificationDialog
-        isOpen={showEmailSentDialog}
-        onClose={handleEmailSentDialogClose}
-        email={email}
-      />
     </div>
   );
 }
