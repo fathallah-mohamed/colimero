@@ -58,6 +58,10 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     }
   };
 
+  const handleEmailSentDialogClose = () => {
+    setShowEmailSentDialog(false);
+  };
+
   const areRequiredFieldsFilled = () => {
     return (
       formState.firstName.trim() !== '' &&
@@ -72,11 +76,25 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   };
 
   return {
-    formState,
-    setFormState,
+    firstName: formState.firstName,
+    lastName: formState.lastName,
+    email: formState.email,
+    phone: formState.phone,
+    phone_secondary: formState.phone_secondary,
+    address: formState.address,
+    password: formState.password,
+    confirmPassword: formState.confirmPassword,
+    setFirstName: (value: string) => setFormState(prev => ({ ...prev, firstName: value })),
+    setLastName: (value: string) => setFormState(prev => ({ ...prev, lastName: value })),
+    setEmail: (value: string) => setFormState(prev => ({ ...prev, email: value })),
+    setPhone: (value: string) => setFormState(prev => ({ ...prev, phone: value })),
+    setPhoneSecondary: (value: string) => setFormState(prev => ({ ...prev, phone_secondary: value })),
+    setAddress: (value: string) => setFormState(prev => ({ ...prev, address: value })),
+    setPassword: (value: string) => setFormState(prev => ({ ...prev, password: value })),
+    setConfirmPassword: (value: string) => setFormState(prev => ({ ...prev, confirmPassword: value })),
     isLoading,
     showEmailSentDialog,
-    setShowEmailSentDialog,
+    handleEmailSentDialogClose,
     handleSubmit,
     areRequiredFieldsFilled,
   };
