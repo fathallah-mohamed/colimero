@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { RegisterFormFields } from "./RegisterFormFields";
+import { RegisterFormFields } from "./register/RegisterFormFields";
 
 interface RegisterFormProps {
   onLogin: () => void;
