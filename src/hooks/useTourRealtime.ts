@@ -1,32 +1,143 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tour, TourStatus, TourType } from "@/types/tour";
-import { parseRouteData } from "@/utils/tour/routeParser";
-import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { Tour, TourStatus, RouteStop } from '@/types/tour';
+import type { Json } from '@/types/database/tables';
 
-interface TourPayload {
-  route: any;
-  status: TourStatus;
-  type: TourType;
-  previous_status: TourStatus | null;
-  [key: string]: any;
+interface RawTourData {
+  id: number;
+  carrier_id: string;
+  route: Json;
+  total_capacity: number;
+  remaining_capacity: number;
+  departure_date: string;
+  collection_date: string;
+  created_at: string;
+  updated_at: string;
+  departure_country: string;
+  destination_country: string;
+  status: string;
+  type: Tour['type'];
+  previous_status: string | null;
+  bookings?: any[];
+  terms_accepted: boolean;
+  customs_declaration: boolean;
+  tour_number?: string;
+  carriers?: {
+    company_name: string;
+    avatar_url: string;
+    carrier_capacities: {
+      price_per_kg: number;
+    }
+  };
 }
 
-interface RealtimePayload {
-  new: TourPayload;
+interface RouteStopJson {
+  name: string;
+  location: string;
+  time: string;
+  type: 'pickup' | 'dropoff' | 'ramassage' | 'livraison';
+  collection_date?: string;
 }
+
+const parseRouteData = (routeData: Json): RouteStop[] => {
+  if (!Array.isArray(routeData)) {
+    console.error('Route data is not an array:', routeData);
+    return [];
+  }
+
+  return routeData.map(stop => {
+    if (typeof stop !== 'object' || stop === null) {
+      console.error('Invalid stop data:', stop);
+      return {
+        name: 'Unknown',
+        location: 'Unknown',
+        time: '00:00',
+        type: 'pickup'
+      };
+    }
+
+    // First cast to unknown, then to RouteStopJson to satisfy TypeScript
+    const stopData = stop as unknown as RouteStopJson;
+    
+    return {
+      name: String(stopData.name || ''),
+      location: String(stopData.location || ''),
+      time: String(stopData.time || ''),
+      type: (stopData.type as 'pickup' | 'dropoff' | 'ramassage' | 'livraison') || 'pickup',
+      collection_date: stopData.collection_date ? String(stopData.collection_date) : undefined
+    };
+  });
+};
+
+const transformTourData = (rawData: RawTourData): Tour => {
+  return {
+    ...rawData,
+    route: parseRouteData(rawData.route),
+    status: rawData.status as TourStatus,
+    previous_status: rawData.previous_status as TourStatus | null,
+    bookings: rawData.bookings || [],
+    terms_accepted: Boolean(rawData.terms_accepted),
+    customs_declaration: Boolean(rawData.customs_declaration),
+    carriers: rawData.carriers
+  };
+};
 
 export function useTourRealtime(tourId: number) {
   const [tour, setTour] = useState<Tour | null>(null);
 
   useEffect(() => {
-    if (!tourId) return;
+    // Initial fetch
+    const fetchTour = async () => {
+      const { data, error } = await supabase
+        .from('tours')
+        .select(`
+          *,
+          carriers (
+            company_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          ),
+          bookings (
+            id,
+            user_id,
+            tour_id,
+            pickup_city,
+            delivery_city,
+            weight,
+            tracking_number,
+            status,
+            recipient_name,
+            recipient_phone,
+            recipient_address,
+            item_type,
+            sender_name,
+            sender_phone,
+            special_items,
+            content_types,
+            package_description
+          )
+        `)
+        .eq('id', tourId)
+        .single();
 
-    console.log("Setting up realtime subscription for tour:", tourId);
+      if (error) {
+        console.error('Error fetching tour:', error);
+        return;
+      }
 
+      if (data) {
+        setTour(transformTourData(data as RawTourData));
+      }
+    };
+
+    fetchTour();
+
+    // Subscribe to realtime changes
     const channel = supabase
-      .channel('tour-updates')
-      .on<RealtimePayload>(
+      .channel(`tour_${tourId}`)
+      .on(
         'postgres_changes',
         {
           event: '*',
@@ -34,26 +145,59 @@ export function useTourRealtime(tourId: number) {
           table: 'tours',
           filter: `id=eq.${tourId}`
         },
-        (payload: RealtimePostgresChangesPayload<RealtimePayload>) => {
-          if (!payload.new || typeof payload.new !== 'object') return;
+        async (payload) => {
+          console.log('Received realtime update:', payload);
+          if (payload.new) {
+            // Fetch the complete tour data with relations
+            const { data, error } = await supabase
+              .from('tours')
+              .select(`
+                *,
+                carriers (
+                  company_name,
+                  avatar_url,
+                  carrier_capacities (
+                    price_per_kg
+                  )
+                ),
+                bookings (
+                  id,
+                  user_id,
+                  tour_id,
+                  pickup_city,
+                  delivery_city,
+                  weight,
+                  tracking_number,
+                  status,
+                  recipient_name,
+                  recipient_phone,
+                  recipient_address,
+                  item_type,
+                  sender_name,
+                  sender_phone,
+                  special_items,
+                  content_types,
+                  package_description
+                )
+              `)
+              .eq('id', tourId)
+              .single();
 
-          const updatedTour = {
-            ...payload.new,
-            route: parseRouteData(payload.new.route),
-            status: payload.new.status as Tour['status'],
-            type: payload.new.type as Tour['type'],
-            previous_status: payload.new.previous_status as Tour['status'] | null,
-          } as Tour;
+            if (error) {
+              console.error('Error fetching updated tour:', error);
+              return;
+            }
 
-          console.log("Received realtime update for tour:", updatedTour);
-          setTour(updatedTour);
+            if (data) {
+              setTour(transformTourData(data as RawTourData));
+            }
+          }
         }
       )
       .subscribe();
 
     return () => {
-      console.log("Cleaning up realtime subscription for tour:", tourId);
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [tourId]);
 
