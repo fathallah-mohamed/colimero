@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 
-interface ErrorDialogProps {
+export interface ErrorDialogProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;

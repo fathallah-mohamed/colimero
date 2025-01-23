@@ -67,7 +67,7 @@ export function LoginFormFields({
 
       {showErrorDialog && error && (
         <ErrorDialog
-          open={showErrorDialog}
+          isOpen={showErrorDialog}
           onClose={onErrorDialogClose}
           title="Erreur"
           description={error}
