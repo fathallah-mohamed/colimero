@@ -29,10 +29,9 @@ export function EmailVerificationDialog({ isOpen, onClose, email }: EmailVerific
         </div>
         
         <div className="text-center space-y-2">
-          <h2 className="text-lg font-semibold">Vérification de l'email requise</h2>
+          <h2 className="text-lg font-semibold">Compte non activé</h2>
           <p className="text-gray-600">
-            Un email de vérification a été envoyé à <span className="font-medium">{email}</span>.
-            Veuillez vérifier votre boîte de réception et cliquer sur le lien pour activer votre compte.
+            Veuillez activer votre compte via le lien envoyé par email à <span className="font-medium">{email}</span> avant de vous connecter.
           </p>
         </div>
 
