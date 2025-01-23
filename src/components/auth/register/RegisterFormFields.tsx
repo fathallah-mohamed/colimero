@@ -7,12 +7,16 @@ export function RegisterFormFields({
   lastName,
   email,
   phone,
+  phone_secondary,
+  address,
   password,
   confirmPassword,
   onFirstNameChange,
   onLastNameChange,
   onEmailChange,
   onPhoneChange,
+  onPhoneSecondaryChange,
+  onAddressChange,
   onPasswordChange,
   onConfirmPasswordChange,
   isLoading
@@ -70,6 +74,31 @@ export function RegisterFormFields({
           value={phone}
           onChange={(e) => onPhoneChange(e.target.value)}
           required
+          disabled={isLoading}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="phone_secondary">
+          Téléphone secondaire
+        </Label>
+        <Input
+          id="phone_secondary"
+          type="tel"
+          value={phone_secondary}
+          onChange={(e) => onPhoneSecondaryChange(e.target.value)}
+          disabled={isLoading}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="address">
+          Adresse
+        </Label>
+        <Input
+          id="address"
+          value={address}
+          onChange={(e) => onAddressChange(e.target.value)}
           disabled={isLoading}
         />
       </div>

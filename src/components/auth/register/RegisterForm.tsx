@@ -1,6 +1,6 @@
-import { RegisterFormFields } from "./RegisterFormFields";
 import { useRegisterForm } from "./useRegisterForm";
-import { ActivationEmailSentDialog } from "./ActivationEmailSentDialog";
+import { RegisterFormFields } from "./RegisterFormFields";
+import { ActivationEmailSentDialog } from "../EmailVerificationDialog";
 
 interface RegisterFormProps {
   onSuccess: (type: 'new' | 'existing') => void;
@@ -12,12 +12,16 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     lastName,
     email,
     phone,
+    phone_secondary,
+    address,
     password,
     confirmPassword,
     setFirstName,
     setLastName,
     setEmail,
     setPhone,
+    setPhoneSecondary,
+    setAddress,
     setPassword,
     setConfirmPassword,
     handleSubmit,
@@ -43,12 +47,16 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             lastName={lastName}
             email={email}
             phone={phone}
+            phone_secondary={phone_secondary}
+            address={address}
             password={password}
             confirmPassword={confirmPassword}
             onFirstNameChange={setFirstName}
             onLastNameChange={setLastName}
             onEmailChange={setEmail}
             onPhoneChange={setPhone}
+            onPhoneSecondaryChange={setPhoneSecondary}
+            onAddressChange={setAddress}
             onPasswordChange={setPassword}
             onConfirmPasswordChange={setConfirmPassword}
             isLoading={isLoading}
