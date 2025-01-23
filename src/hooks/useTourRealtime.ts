@@ -33,7 +33,7 @@ export function useTourRealtime(tourId: number) {
           filter: `id=eq.${tourId}`
         },
         (payload: RealtimePostgresChangesPayload<RealtimePayload>) => {
-          if (!payload.new) return;
+          if (!payload.new || typeof payload.new !== 'object') return;
 
           const updatedTour = {
             ...payload.new,
