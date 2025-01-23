@@ -2,13 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { RegisterFormState } from "./types";
 
 export async function registerClient(formData: RegisterFormState) {
-  console.log("Registering client with data:", {
-    ...formData,
-    password: "***hidden***"
-  });
-
   try {
-    // First check if user exists
+    // Vérifier si l'utilisateur existe déjà
     const { data: existingUser } = await supabase
       .from('clients')
       .select('email')
@@ -17,13 +12,13 @@ export async function registerClient(formData: RegisterFormState) {
 
     if (existingUser) {
       return { 
-        data: null, 
-        error: new Error("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.") 
+        success: true, 
+        type: 'existing' 
       };
     }
 
-    // Create auth user with proper metadata
-    const signUpData = {
+    // Créer l'utilisateur dans auth
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password,
       options: {
@@ -31,47 +26,40 @@ export async function registerClient(formData: RegisterFormState) {
           first_name: formData.firstName,
           last_name: formData.lastName,
           user_type: 'client',
-        },
-      },
-    };
+        }
+      }
+    });
 
-    console.log("Signing up user with auth service...");
-    const { data: authData, error: authError } = await supabase.auth.signUp(signUpData);
+    if (signUpError) throw signUpError;
+    if (!authData.user) throw new Error("Aucune donnée utilisateur reçue");
 
-    if (authError) {
-      console.error("Auth error during signup:", {
-        message: authError.message,
-        status: authError.status,
-        name: authError.name
+    // Créer le profil client
+    const { error: clientError } = await supabase
+      .from('clients')
+      .insert({
+        id: authData.user.id,
+        email: formData.email.trim(),
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        phone_secondary: formData.phone_secondary || '',
+        address: formData.address || '',
+        email_verified: false
       });
 
-      // Handle specific error cases
-      if (authError.message === "User already registered") {
-        return { 
-          data: null, 
-          error: new Error("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.") 
-        };
-      }
+    if (clientError) throw clientError;
 
-      return { data: null, error: authError };
-    }
-
-    if (!authData.user) {
-      console.error("No user data received from auth service");
-      return {
-        data: null,
-        error: new Error("Une erreur est survenue lors de la création du compte")
-      };
-    }
-
-    console.log("Auth signup successful, user created");
-    return { data: authData, error: null };
+    return {
+      success: true,
+      type: 'new'
+    };
 
   } catch (error: any) {
-    console.error("Unexpected error during registration:", error);
+    console.error("Error in registerClient:", error);
     return {
-      data: null,
-      error: new Error(error.message || "Une erreur inattendue s'est produite")
+      success: false,
+      error: error.message,
+      type: 'error'
     };
   }
 }

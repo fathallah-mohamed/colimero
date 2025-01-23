@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { registerClient } from "./useClientRegistration";
 import { RegisterFormState } from "./types";
-import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
@@ -16,61 +15,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailSentDialog, setShowEmailSentDialog] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!areRequiredFieldsFilled()) return;
-
-    try {
-      setIsLoading(true);
-      console.log("Starting registration process...");
-
-      const { data, error } = await registerClient({
-        firstName,
-        lastName,
-        email,
-        phone,
-        phone_secondary,
-        address,
-        password,
-        confirmPassword
-      });
-
-      if (error) {
-        if (error.message.includes("User already registered")) {
-          toast({
-            variant: "destructive",
-            title: "Compte existant",
-            description: "Un compte existe déjà avec cette adresse email. Veuillez vous connecter."
-          });
-          onSuccess('existing');
-          return;
-        }
-
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: error.message || "Une erreur est survenue lors de l'inscription"
-        });
-        return;
-      }
-
-      // Déconnexion immédiate après l'inscription
-      await supabase.auth.signOut();
-
-      setShowEmailSentDialog(true);
-
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur inattendue s'est produite"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const areRequiredFieldsFilled = () => {
     return (
       firstName.trim() !== "" &&
@@ -81,6 +25,57 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       confirmPassword.trim() !== "" &&
       password === confirmPassword
     );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!areRequiredFieldsFilled()) return;
+
+    setIsLoading(true);
+    try {
+      const formData: RegisterFormState = {
+        firstName,
+        lastName,
+        email,
+        phone,
+        phone_secondary,
+        address,
+        password,
+        confirmPassword,
+      };
+
+      const { success, error, type } = await registerClient(formData);
+
+      if (!success) {
+        throw new Error(error || "Une erreur est survenue lors de l'inscription");
+      }
+
+      if (type === 'existing') {
+        onSuccess('existing');
+        return;
+      }
+
+      // Déconnexion immédiate après l'inscription
+      await supabase.auth.signOut();
+
+      // Appeler l'edge function pour envoyer l'email d'activation
+      const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
+        body: { email }
+      });
+
+      if (emailError) {
+        console.error('Error sending activation email:', emailError);
+        throw new Error("Erreur lors de l'envoi de l'email d'activation");
+      }
+
+      setShowEmailSentDialog(true);
+
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEmailSentDialogClose = () => {
