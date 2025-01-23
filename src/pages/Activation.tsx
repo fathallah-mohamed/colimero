@@ -43,14 +43,14 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
 
         if (clientError || !client) {
           console.error('Error fetching client:', clientError);
-          throw new Error('Token invalide ou compte introuvable');
+          throw new Error("Token invalide ou compte introuvable");
         }
 
         console.log('Client found:', client);
 
         // Vérifier si le token a expiré
         if (new Date(client.activation_expires_at) < new Date()) {
-          throw new Error('Le token d\'activation a expiré');
+          throw new Error("Le token d'activation a expiré");
         }
 
         // 2. Vérifier si le compte est déjà activé
