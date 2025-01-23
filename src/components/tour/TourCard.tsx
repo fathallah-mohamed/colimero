@@ -12,6 +12,7 @@ import type { BookingStatus } from "@/types/booking";
 import { TourEditDialog } from "./TourEditDialog";
 import { TourStatusDisplay } from "./TourStatusDisplay";
 import { TourActions } from "./TourActions";
+import { useTourRealtime } from "@/hooks/useTourRealtime";
 
 interface TourCardProps {
   tour: Tour;
@@ -43,8 +44,12 @@ export function TourCard({
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [showBookings, setShowBookings] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const updatedTour = useTourRealtime(tour.id);
+  const currentTour = updatedTour || tour;
 
-  const hasBookings = tour.bookings && tour.bookings.length > 0;
+  const hasBookings = currentTour.bookings && currentTour.bookings.length > 0;
+
+  console.log("TourCard - Rendering with tour:", currentTour.id, "Status:", currentTour.status);
 
   return (
     <Card className={cn(
@@ -55,37 +60,37 @@ export function TourCard({
       <div className="flex justify-between items-start mb-6">
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">
-            Tournée du {new Date(tour.departure_date).toLocaleDateString()}
+            Tournée du {new Date(currentTour.departure_date).toLocaleDateString()}
           </h3>
           <p className="text-sm text-gray-500 flex items-center gap-2">
             <span className="flex items-center">
-              <span className="text-xl mr-1">{countryFlags[tour.departure_country]}</span>
-              {countryNames[tour.departure_country]}
+              <span className="text-xl mr-1">{countryFlags[currentTour.departure_country]}</span>
+              {countryNames[currentTour.departure_country]}
             </span>
             <ArrowRight className="h-5 w-5 text-primary mx-1 stroke-2" />
             <span className="flex items-center">
-              <span className="text-xl mr-1">{countryFlags[tour.destination_country]}</span>
-              {countryNames[tour.destination_country]}
+              <span className="text-xl mr-1">{countryFlags[currentTour.destination_country]}</span>
+              {countryNames[currentTour.destination_country]}
             </span>
           </p>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 text-gray-600">
               <Hash className="h-4 w-4 text-primary shrink-0" />
               <span className="text-sm font-medium text-primary">
-                {tour.tour_number || "Numéro non défini"}
+                {currentTour.tour_number || "Numéro non défini"}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <TourStatusDisplay tour={tour} />
-            <Badge variant={tour.type === "public" ? "default" : "secondary"}>
-              {tour.type === "public" ? "Publique" : "Privée"}
+            <TourStatusDisplay tour={currentTour} />
+            <Badge variant={currentTour.type === "public" ? "default" : "secondary"}>
+              {currentTour.type === "public" ? "Publique" : "Privée"}
             </Badge>
           </div>
         </div>
         
         <TourActions 
-          tour={tour}
+          tour={currentTour}
           hasBookings={hasBookings}
           isGeneratingPDF={isGeneratingPDF}
           setIsGeneratingPDF={setIsGeneratingPDF}
@@ -93,16 +98,16 @@ export function TourCard({
       </div>
 
       <TourTimelineDisplay
-        status={tour.status}
-        tourId={tour.id}
+        status={currentTour.status}
+        tourId={currentTour.id}
         canEdit={true}
         onEdit={() => setIsEditDialogOpen(true)}
       />
 
       <TourCapacityInfo
-        totalCapacity={tour.total_capacity}
-        remainingCapacity={tour.remaining_capacity}
-        bookingsCount={tour.bookings?.length || 0}
+        totalCapacity={currentTour.total_capacity}
+        remainingCapacity={currentTour.remaining_capacity}
+        bookingsCount={currentTour.bookings?.length || 0}
       />
 
       {hasBookings && (
@@ -120,7 +125,7 @@ export function TourCard({
             ) : (
               <>
                 <ChevronDown className="h-4 w-4" />
-                Afficher les réservations ({tour.bookings.length})
+                Afficher les réservations ({currentTour.bookings.length})
               </>
             )}
           </Button>
@@ -129,14 +134,14 @@ export function TourCard({
 
       {showBookings && hasBookings && (
         <div className="mt-6 space-y-4">
-          {tour.bookings?.map((booking: any) => (
+          {currentTour.bookings?.map((booking: any) => (
             <BookingCard
               key={booking.id}
               booking={booking}
-              isCollecting={tour.status === "Ramassage en cours"}
+              isCollecting={currentTour.status === "Ramassage en cours"}
               onStatusChange={onStatusChange || (() => Promise.resolve())}
               onUpdate={onUpdate || (() => Promise.resolve())}
-              tourStatus={tour.status}
+              tourStatus={currentTour.status}
             />
           ))}
         </div>
@@ -145,7 +150,7 @@ export function TourCard({
       <TourEditDialog 
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
-        tour={tour}
+        tour={currentTour}
         onComplete={() => {
           setIsEditDialogOpen(false);
           if (onUpdate) onUpdate();

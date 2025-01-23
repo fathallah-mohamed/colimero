@@ -15,7 +15,7 @@ export function useTourRealtime(tourId: number) {
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'tours',
           filter: `id=eq.${tourId}`
@@ -36,6 +36,21 @@ export function useTourRealtime(tourId: number) {
       .subscribe((status) => {
         console.log("Tour subscription status:", status);
       });
+
+    // Récupérer l'état initial de la tournée
+    const fetchInitialTourState = async () => {
+      const { data, error } = await supabase
+        .from('tours')
+        .select('*')
+        .eq('id', tourId)
+        .single();
+        
+      if (!error && data) {
+        setLocalTour(data as Tour);
+      }
+    };
+
+    fetchInitialTourState();
 
     return () => {
       console.log("Cleaning up tour realtime subscription");
