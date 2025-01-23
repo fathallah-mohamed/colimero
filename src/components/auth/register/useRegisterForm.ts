@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { RegisterFormState } from "./types";
+import { useNavigate } from "react-router-dom";
 import { registerClient } from "./useClientRegistration";
+import { RegisterFormState } from "./types";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [firstName, setFirstName] = useState("");
@@ -15,6 +16,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailSentDialog, setShowEmailSentDialog] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,11 +38,11 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       });
 
       if (error) {
-        if (error.message.includes("Un compte existe déjà")) {
+        if (error.message.includes("User already registered")) {
           toast({
             variant: "destructive",
             title: "Compte existant",
-            description: error.message
+            description: "Un compte existe déjà avec cette adresse email. Veuillez vous connecter."
           });
           onSuccess('existing');
           return;
@@ -54,13 +56,35 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         return;
       }
 
-      setShowEmailSentDialog(true);
+      // Connexion automatique après l'inscription
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        console.error('Error signing in after registration:', signInError);
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: "Inscription réussie mais erreur lors de la connexion automatique. Veuillez vous connecter manuellement."
+        });
+        onSuccess('new');
+        return;
+      }
+
+      toast({
+        title: "Inscription réussie",
+        description: "Votre compte a été créé et vous êtes maintenant connecté"
+      });
+      navigate('/');
+
     } catch (error: any) {
       console.error('Registration error:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription"
+        description: error.message || "Une erreur inattendue s'est produite"
       });
     } finally {
       setIsLoading(false);
@@ -77,11 +101,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       confirmPassword.trim() !== "" &&
       password === confirmPassword
     );
-  };
-
-  const handleEmailSentDialogClose = () => {
-    setShowEmailSentDialog(false);
-    onSuccess('new');
   };
 
   return {
@@ -104,7 +123,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     handleSubmit,
     isLoading,
     showEmailSentDialog,
-    handleEmailSentDialogClose,
+    setShowEmailSentDialog,
     areRequiredFieldsFilled
   };
 }
