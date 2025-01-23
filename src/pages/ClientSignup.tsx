@@ -6,25 +6,12 @@ import { useRegisterForm } from "@/components/auth/register/useRegisterForm";
 export default function ClientSignup() {
   const navigate = useNavigate();
   const {
-    firstName,
-    lastName,
-    email,
-    phone,
-    phone_secondary,
-    address,
-    password,
-    confirmPassword,
-    setFirstName,
-    setLastName,
-    setEmail,
-    setPhone,
-    setPhoneSecondary,
-    setAddress,
-    setPassword,
-    setConfirmPassword,
-    handleSubmit,
+    formState,
     isLoading,
-    areRequiredFieldsFilled
+    showSuccessDialog,
+    handleFieldChange,
+    handleSubmit,
+    handleCloseSuccessDialog
   } = useRegisterForm(() => navigate("/connexion"));
 
   const handleLogin = () => {
@@ -48,24 +35,11 @@ export default function ClientSignup() {
         <RegisterForm 
           onLogin={handleLogin}
           isLoading={isLoading}
-          firstName={firstName}
-          lastName={lastName}
-          email={email}
-          phone={phone}
-          phone_secondary={phone_secondary}
-          address={address}
-          password={password}
-          confirmPassword={confirmPassword}
-          setFirstName={setFirstName}
-          setLastName={setLastName}
-          setEmail={setEmail}
-          setPhone={setPhone}
-          setPhoneSecondary={setPhoneSecondary}
-          setAddress={setAddress}
-          setPassword={setPassword}
-          setConfirmPassword={setConfirmPassword}
-          areRequiredFieldsFilled={areRequiredFieldsFilled}
+          formState={formState}
+          showSuccessDialog={showSuccessDialog}
+          handleFieldChange={handleFieldChange}
           handleSubmit={handleSubmit}
+          handleCloseSuccessDialog={handleCloseSuccessDialog}
         />
       </div>
     </div>

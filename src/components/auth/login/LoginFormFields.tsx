@@ -1,20 +1,32 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EmailVerificationDialog } from "../EmailVerificationDialog";
+import { ErrorDialog } from "@/components/ui/error-dialog";
 
-interface LoginFormFieldsProps {
+export interface LoginFormFieldsProps {
   email: string;
   password: string;
   isLoading: boolean;
+  error?: string | null;
+  showVerificationDialog: boolean;
+  showErrorDialog: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  onVerificationDialogClose: () => void;
+  onErrorDialogClose: () => void;
 }
 
 export function LoginFormFields({
   email,
   password,
   isLoading,
+  error,
+  showVerificationDialog,
+  showErrorDialog,
   onEmailChange,
   onPasswordChange,
+  onVerificationDialogClose,
+  onErrorDialogClose,
 }: LoginFormFieldsProps) {
   return (
     <div className="space-y-4">
@@ -42,6 +54,25 @@ export function LoginFormFields({
           required
         />
       </div>
+
+      {showVerificationDialog && (
+        <EmailVerificationDialog
+          isOpen={showVerificationDialog}
+          onClose={onVerificationDialogClose}
+          email={email}
+          isResending={false}
+          onResendEmail={() => {}}
+        />
+      )}
+
+      {showErrorDialog && error && (
+        <ErrorDialog
+          open={showErrorDialog}
+          onClose={onErrorDialogClose}
+          title="Erreur"
+          description={error}
+        />
+      )}
     </div>
   );
 }

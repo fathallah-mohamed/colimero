@@ -1,50 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./register/RegisterFormFields";
+import { RegisterFormState } from "./register/types";
 
 interface RegisterFormProps {
   onLogin: () => void;
   isLoading: boolean;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  phone_secondary?: string;
-  address: string;
-  password: string;
-  confirmPassword: string;
-  setFirstName: (value: string) => void;
-  setLastName: (value: string) => void;
-  setEmail: (value: string) => void;
-  setPhone: (value: string) => void;
-  setPhoneSecondary: (value: string) => void;
-  setAddress: (value: string) => void;
-  setPassword: (value: string) => void;
-  setConfirmPassword: (value: string) => void;
-  areRequiredFieldsFilled: () => boolean;
+  formState: RegisterFormState;
+  showSuccessDialog: boolean;
+  handleFieldChange: (field: keyof RegisterFormState, value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
+  handleCloseSuccessDialog: () => void;
 }
 
 export function RegisterForm({
   onLogin,
   isLoading,
-  firstName,
-  lastName,
-  email,
-  phone,
-  phone_secondary,
-  address,
-  password,
-  confirmPassword,
-  setFirstName,
-  setLastName,
-  setEmail,
-  setPhone,
-  setPhoneSecondary,
-  setAddress,
-  setPassword,
-  setConfirmPassword,
-  areRequiredFieldsFilled,
+  formState,
+  showSuccessDialog,
+  handleFieldChange,
   handleSubmit,
+  handleCloseSuccessDialog,
 }: RegisterFormProps) {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
@@ -57,30 +32,18 @@ export function RegisterForm({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <RegisterFormFields
-          firstName={firstName}
-          lastName={lastName}
-          email={email}
-          phone={phone}
-          phone_secondary={phone_secondary}
-          address={address}
-          password={password}
-          confirmPassword={confirmPassword}
-          onFirstNameChange={setFirstName}
-          onLastNameChange={setLastName}
-          onEmailChange={setEmail}
-          onPhoneChange={setPhone}
-          onPhoneSecondaryChange={setPhoneSecondary}
-          onAddressChange={setAddress}
-          onPasswordChange={setPassword}
-          onConfirmPasswordChange={setConfirmPassword}
+          formState={formState}
           isLoading={isLoading}
+          showSuccessDialog={showSuccessDialog}
+          onFieldChange={handleFieldChange}
+          onCloseSuccessDialog={handleCloseSuccessDialog}
         />
 
         <div className="pt-4 space-y-4">
           <Button
             type="submit"
             className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
-            disabled={isLoading || !areRequiredFieldsFilled()}
+            disabled={isLoading}
           >
             {isLoading ? "Création en cours..." : "Créer mon compte"}
           </Button>
