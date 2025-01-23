@@ -32,18 +32,18 @@ serve(async (req) => {
       .from('clients')
       .select('first_name, activation_token, email_verified')
       .eq('email', email)
-      .single()
+      .maybeSingle()
 
     console.log('Client lookup result:', { client, error: clientError })
 
     if (clientError) {
       console.error('Error fetching client:', clientError)
-      throw new Error(`Client not found: ${clientError.message}`)
+      throw new Error(`Database error: ${clientError.message}`)
     }
 
     if (!client) {
       console.error('No client found for email:', email)
-      throw new Error('Client not found')
+      throw new Error('No client found with this email address')
     }
 
     if (client.email_verified) {
