@@ -33,7 +33,14 @@ export function useLoginForm({
     try {
       console.log("Attempting login with:", { email: email.trim() });
       
-      // 1. Attempt login first
+      // First check if the user exists and is a client
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('email_verified')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      // Attempt login
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -43,7 +50,7 @@ export function useLoginForm({
       if (signInError) {
         console.error("Sign in error:", signInError);
         
-        // Handle invalid credentials specifically
+        // If invalid credentials, show error dialog
         if (signInError.message.includes("Invalid login credentials")) {
           setError("Email ou mot de passe incorrect");
           setShowErrorDialog(true);
@@ -51,49 +58,21 @@ export function useLoginForm({
           return;
         }
 
-        // Handle other auth errors
+        // For any other error
         setError("Une erreur est survenue lors de la connexion");
         setShowErrorDialog(true);
         setPassword("");
         return;
       }
 
-      // Check if we got user data back
+      // If login successful but no user data
       if (!data.user) {
         setError("Aucune donnée utilisateur reçue");
         setShowErrorDialog(true);
         return;
       }
 
-      // 2. For clients, verify email status
-      if (data.user.user_metadata?.user_type === 'client') {
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('email_verified')
-          .eq('id', data.user.id)
-          .maybeSingle();
-
-        if (clientError) {
-          console.error("Error checking client:", clientError);
-          setError("Une erreur est survenue lors de la vérification du compte");
-          setShowErrorDialog(true);
-          await supabase.auth.signOut();
-          return;
-        }
-
-        // Show verification dialog if account exists but isn't verified
-        if (clientData && !clientData.email_verified) {
-          console.log("Account exists but not verified");
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setShowVerificationDialog(true);
-          await supabase.auth.signOut();
-          return;
-        }
-      }
-
-      // 3. Check required user type if specified
+      // Check user type if required
       const userType = data.user.user_metadata?.user_type;
       if (requiredUserType && userType !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
@@ -102,7 +81,18 @@ export function useLoginForm({
         return;
       }
 
-      // 4. Success - show toast and handle navigation
+      // For clients, check verification status
+      if (userType === 'client' && clientData && !clientData.email_verified) {
+        console.log("Account exists but not verified");
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        }
+        setShowVerificationDialog(true);
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // Success - show toast and handle navigation
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"
