@@ -34,7 +34,7 @@ export function ActivationStatus({
             <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
             <h2 className="text-xl font-semibold text-green-600">Compte activé !</h2>
             <p className="text-gray-500">
-              Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.
+              Votre compte a été activé avec succès. Vous allez être redirigé vers la page de connexion.
             </p>
             <Button asChild className="w-full">
               <Link to="/connexion">Se connecter</Link>

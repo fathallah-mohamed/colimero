@@ -12,6 +12,7 @@ export default function Activation() {
   const [email, setEmail] = useState<string | null>(null);
   const token = searchParams.get('token');
   const { isResending, resendActivationEmail } = useEmailVerification();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -42,7 +43,7 @@ export default function Activation() {
             .from('clients')
             .select('email')
             .eq('activation_token', token)
-            .single();
+            .maybeSingle();
             
           if (clientData?.email && mounted) {
             setEmail(clientData.email);
@@ -62,7 +63,7 @@ export default function Activation() {
           .from('clients')
           .select('id, email, email_verified')
           .eq('activation_token', token)
-          .single();
+          .maybeSingle();
 
         if (clientError || !client) {
           console.error('Error fetching client:', clientError);
@@ -80,6 +81,9 @@ export default function Activation() {
               title: "Compte déjà activé",
               description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
             });
+            setTimeout(() => {
+              navigate('/connexion');
+            }, 2000);
           }
           return;
         }
@@ -109,6 +113,10 @@ export default function Activation() {
             title: "Compte activé",
             description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
           });
+          // Redirection vers la page de connexion après 2 secondes
+          setTimeout(() => {
+            navigate('/connexion');
+          }, 2000);
         }
 
       } catch (error: any) {
@@ -129,7 +137,7 @@ export default function Activation() {
     return () => {
       mounted = false;
     };
-  }, [token, toast]);
+  }, [token, toast, navigate]);
 
   const handleResendEmail = async () => {
     if (!email) return;
