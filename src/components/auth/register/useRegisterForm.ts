@@ -58,8 +58,10 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       // Déconnexion immédiate après l'inscription
       await supabase.auth.signOut();
 
-      // Appeler l'edge function pour envoyer l'email d'activation
-      const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
+      console.log('Sending activation email to:', email);
+      
+      // Appeler l'edge function pour envoyer l'email d'activation et attendre la réponse
+      const { data: emailData, error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { email }
       });
 
@@ -68,6 +70,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         throw new Error("Erreur lors de l'envoi de l'email d'activation");
       }
 
+      console.log('Activation email sent successfully:', emailData);
       setShowEmailSentDialog(true);
 
     } catch (error: any) {
