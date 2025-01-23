@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./register/RegisterFormFields";
 import { useRegisterForm } from "./register/useRegisterForm";
-import { ActivationEmailSentDialog } from "./register/ActivationEmailSentDialog";
+import { EmailVerificationDialog } from "./EmailVerificationDialog";
 
 interface RegisterFormProps {
   onLogin: () => void;
@@ -13,12 +13,16 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
     lastName,
     email,
     phone,
+    phone_secondary,
+    address,
     password,
     confirmPassword,
     setFirstName,
     setLastName,
     setEmail,
     setPhone,
+    setPhoneSecondary,
+    setAddress,
     setPassword,
     setConfirmPassword,
     handleSubmit,
@@ -44,12 +48,16 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
             lastName={lastName}
             email={email}
             phone={phone}
+            phone_secondary={phone_secondary}
+            address={address}
             password={password}
             confirmPassword={confirmPassword}
             onFirstNameChange={setFirstName}
             onLastNameChange={setLastName}
             onEmailChange={setEmail}
             onPhoneChange={setPhone}
+            onPhoneSecondaryChange={setPhoneSecondary}
+            onAddressChange={setAddress}
             onPasswordChange={setPassword}
             onConfirmPasswordChange={setConfirmPassword}
             isLoading={isLoading}
@@ -77,7 +85,7 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
         </form>
       </div>
 
-      <ActivationEmailSentDialog
+      <EmailVerificationDialog
         open={showEmailSentDialog}
         onClose={handleEmailSentDialogClose}
       />
