@@ -86,8 +86,9 @@ export function RegisterForm({ onLogin }: RegisterFormProps) {
       </div>
 
       <EmailVerificationDialog
-        open={showEmailSentDialog}
+        isOpen={showEmailSentDialog}
         onClose={handleEmailSentDialogClose}
+        email={email}
       />
     </div>
   );

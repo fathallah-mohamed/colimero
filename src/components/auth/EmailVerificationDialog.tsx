@@ -12,7 +12,7 @@ import { useEmailVerification } from "@/hooks/auth/useEmailVerification";
 interface EmailVerificationDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  email: string;
+  email?: string;
 }
 
 export function EmailVerificationDialog({
@@ -23,6 +23,7 @@ export function EmailVerificationDialog({
   const { isResending, resendActivationEmail } = useEmailVerification();
 
   const handleResendEmail = async () => {
+    if (!email) return;
     const success = await resendActivationEmail(email);
     if (success) {
       onClose();
