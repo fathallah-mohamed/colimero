@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RegisterFormState, RegisterFormData } from "./types";
+import { RegisterFormState } from "./types";
+import { registerClient } from "./useClientRegistration";
+import { toast } from "@/components/ui/use-toast";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [firstName, setFirstName] = useState("");
@@ -22,45 +24,43 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       setIsLoading(true);
       console.log("Starting registration process...");
 
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      const { data, error } = await registerClient({
+        firstName,
+        lastName,
         email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            user_type: 'client',
-          },
-        },
+        phone,
+        phone_secondary,
+        address,
+        password
       });
 
-      if (signUpError) throw signUpError;
-      console.log("Auth signup successful:", signUpData);
+      if (error) {
+        if (error.message.includes("Un compte existe déjà")) {
+          toast({
+            variant: "destructive",
+            title: "Compte existant",
+            description: error.message
+          });
+          onSuccess('existing');
+          return;
+        }
 
-      if (!signUpData.user) {
-        throw new Error("No user data received");
-      }
-
-      const { error: insertError } = await supabase
-        .from('clients')
-        .insert({
-          id: signUpData.user.id,
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          phone,
-          phone_secondary,
-          address,
-          email_verified: false,
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: error.message || "Une erreur est survenue lors de l'inscription"
         });
-
-      if (insertError) throw insertError;
-      console.log("Client profile created successfully");
+        return;
+      }
 
       setShowEmailSentDialog(true);
     } catch (error: any) {
       console.error('Registration error:', error);
-      throw error;
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'inscription"
+      });
     } finally {
       setIsLoading(false);
     }

@@ -8,6 +8,20 @@ export async function registerClient(formData: RegisterFormState) {
   });
 
   try {
+    // First check if user exists
+    const { data: existingUser } = await supabase
+      .from('clients')
+      .select('email')
+      .eq('email', formData.email.trim())
+      .maybeSingle();
+
+    if (existingUser) {
+      return { 
+        data: null, 
+        error: new Error("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.") 
+      };
+    }
+
     // Create auth user with proper metadata
     const signUpData = {
       email: formData.email.trim(),
@@ -38,6 +52,15 @@ export async function registerClient(formData: RegisterFormState) {
         status: authError.status,
         name: authError.name
       });
+
+      // Handle specific error cases
+      if (authError.message === "User already registered") {
+        return { 
+          data: null, 
+          error: new Error("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.") 
+        };
+      }
+
       return { data: null, error: authError };
     }
 
