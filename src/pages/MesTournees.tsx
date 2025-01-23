@@ -29,10 +29,12 @@ export default function MesTournees() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <TourHeader />
-        <div className="mt-8">
-          <TourContent carrierOnly={true} />
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto">
+          <TourHeader />
+          <div className="mt-8">
+            <TourContent carrierOnly={true} />
+          </div>
         </div>
       </div>
     </div>

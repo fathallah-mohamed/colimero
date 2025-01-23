@@ -3,7 +3,6 @@ import { TourFilters } from "./TourFilters";
 import { ToursList } from "./ToursList";
 import { TourEditDialog } from "./TourEditDialog";
 import { useTours } from "@/hooks/use-tours";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { BookingStatus } from "@/types/booking";
 
 interface TourContentProps {
@@ -49,37 +48,35 @@ export function TourContent({ carrierOnly = false }: TourContentProps) {
   const [departureCountry, destinationCountry] = selectedRoute.split('_TO_');
 
   return (
-    <ScrollArea className="h-[calc(100vh-12rem)]">
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <TourFilters
-            departureCountry={departureCountry}
-            destinationCountry={destinationCountry}
-            sortBy={sortBy}
-            status={selectedStatus}
-            onDepartureCountryChange={(country) => setSelectedRoute(`${country}_TO_${destinationCountry}`)}
-            onDestinationCountryChange={(country) => setSelectedRoute(`${departureCountry}_TO_${country}`)}
-            onSortByChange={setSortBy}
-            onStatusChange={setSelectedStatus}
-          />
-        </div>
-
-        <ToursList
-          tours={toursList}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onStatusChange={handleBookingStatusChange}
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <TourFilters
+          departureCountry={departureCountry}
+          destinationCountry={destinationCountry}
+          sortBy={sortBy}
+          status={selectedStatus}
+          onDepartureCountryChange={(country) => setSelectedRoute(`${country}_TO_${destinationCountry}`)}
+          onDestinationCountryChange={(country) => setSelectedRoute(`${departureCountry}_TO_${country}`)}
+          onSortByChange={setSortBy}
+          onStatusChange={setSelectedStatus}
         />
-
-        {selectedTour && (
-          <TourEditDialog
-            isOpen={isEditDialogOpen}
-            onClose={() => setIsEditDialogOpen(false)}
-            tour={selectedTour}
-            onComplete={onEditComplete}
-          />
-        )}
       </div>
-    </ScrollArea>
+
+      <ToursList
+        tours={toursList}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onStatusChange={handleBookingStatusChange}
+      />
+
+      {selectedTour && (
+        <TourEditDialog
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          tour={selectedTour}
+          onComplete={onEditComplete}
+        />
+      )}
+    </div>
   );
 }
