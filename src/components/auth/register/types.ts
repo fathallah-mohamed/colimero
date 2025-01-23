@@ -8,15 +8,26 @@ export interface RegisterFormState {
   address?: string;
 }
 
-export interface UseRegisterFormReturn extends RegisterFormState {
-  isLoading: boolean;
-  setFirstName: (value: string) => void;
-  setLastName: (value: string) => void;
-  setEmail: (value: string) => void;
-  setPhone: (value: string) => void;
-  setPassword: (value: string) => void;
-  setConfirmPassword: (value: string) => void;
-  setAddress: (value: string) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  areRequiredFieldsFilled: () => boolean;
+export interface RegisterFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+}
+
+export interface RegisterFormFieldsProps {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  onFirstNameChange: (value: string) => void;
+  onLastNameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onPhoneChange: (value: string) => void;
+  onPasswordChange: (value: string) => void;
+  onConfirmPasswordChange: (value: string) => void;
+  isLoading?: boolean;
 }

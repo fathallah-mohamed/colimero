@@ -1,20 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-interface RegisterFormFieldsProps {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  password: string;
-  confirmPassword: string;
-  onFirstNameChange: (value: string) => void;
-  onLastNameChange: (value: string) => void;
-  onEmailChange: (value: string) => void;
-  onPhoneChange: (value: string) => void;
-  onPasswordChange: (value: string) => void;
-  onConfirmPasswordChange: (value: string) => void;
-}
+import { RegisterFormFieldsProps } from "./types";
 
 export function RegisterFormFields({
   firstName,
@@ -29,6 +15,7 @@ export function RegisterFormFields({
   onPhoneChange,
   onPasswordChange,
   onConfirmPasswordChange,
+  isLoading
 }: RegisterFormFieldsProps) {
   return (
     <div className="space-y-4">
@@ -42,6 +29,7 @@ export function RegisterFormFields({
             value={firstName}
             onChange={(e) => onFirstNameChange(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
         <div className="space-y-2">
@@ -53,6 +41,7 @@ export function RegisterFormFields({
             value={lastName}
             onChange={(e) => onLastNameChange(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -67,6 +56,7 @@ export function RegisterFormFields({
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -80,6 +70,7 @@ export function RegisterFormFields({
           value={phone}
           onChange={(e) => onPhoneChange(e.target.value)}
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -93,6 +84,7 @@ export function RegisterFormFields({
           value={password}
           onChange={(e) => onPasswordChange(e.target.value)}
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -106,6 +98,7 @@ export function RegisterFormFields({
           value={confirmPassword}
           onChange={(e) => onConfirmPasswordChange(e.target.value)}
           required
+          disabled={isLoading}
         />
       </div>
     </div>

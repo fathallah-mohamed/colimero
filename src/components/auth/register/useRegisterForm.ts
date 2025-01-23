@@ -1,16 +1,33 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { RegisterFormData } from "./types";
+import { RegisterFormState, RegisterFormData } from "./types";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showEmailSentDialog, setShowEmailSentDialog] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = async (data: RegisterFormData) => {
+  const areRequiredFieldsFilled = () => {
+    return (
+      firstName.trim() !== "" &&
+      lastName.trim() !== "" &&
+      email.trim() !== "" &&
+      phone.trim() !== "" &&
+      password.trim() !== "" &&
+      confirmPassword.trim() !== "" &&
+      password === confirmPassword
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!areRequiredFieldsFilled()) return;
+
     try {
       setIsLoading(true);
 
@@ -18,7 +35,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       const { data: existingUser, error: existingUserError } = await supabase
         .from('clients')
         .select('id')
-        .eq('email', data.email)
+        .eq('email', email)
         .single();
 
       if (existingUserError && existingUserError.code !== 'PGRST116') {
@@ -32,62 +49,38 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
       // Créer le compte utilisateur
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
+        email,
+        password,
         options: {
           data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
+            first_name: firstName,
+            last_name: lastName,
             user_type: 'client',
           },
         },
       });
 
-      if (signUpError) {
-        console.error("Erreur inscription:", signUpError);
-        throw signUpError;
-      }
+      if (signUpError) throw signUpError;
 
       // Insertion dans la table clients
       const { error: insertError } = await supabase
         .from('clients')
         .insert({
-          id: authData.user.id,
-          email: data.email,
-          first_name: data.firstName,
-          last_name: data.lastName,
+          id: authData.user?.id,
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          phone,
           email_verified: false,
-          activation_token: authData.user.id, // Example token
-          activation_expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour expiration
         });
 
-      if (insertError) {
-        console.error("Erreur insertion client:", insertError);
-        throw insertError;
-      }
+      if (insertError) throw insertError;
 
-      // Envoyer l'email d'activation
-      const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
-        body: { email: data.email, token: authData.user.id },
-      });
-
-      if (emailError) {
-        console.error("Erreur envoi email:", emailError);
-        throw emailError;
-      }
-
-      // Afficher la popin de confirmation
       setShowEmailSentDialog(true);
-
-      await supabase.auth.signOut();
       onSuccess('new');
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur lors de l'inscription",
-        description: error.message || "Une erreur est survenue lors de l'inscription",
-      });
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -95,13 +88,25 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
   const handleEmailSentDialogClose = () => {
     setShowEmailSentDialog(false);
-    navigate('/');
   };
 
   return {
+    firstName,
+    lastName,
+    email,
+    phone,
+    password,
+    confirmPassword,
+    setFirstName,
+    setLastName,
+    setEmail,
+    setPhone,
+    setPassword,
+    setConfirmPassword,
     handleSubmit,
     isLoading,
     showEmailSentDialog,
     handleEmailSentDialogClose,
+    areRequiredFieldsFilled
   };
 }
