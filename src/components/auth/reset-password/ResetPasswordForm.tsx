@@ -4,59 +4,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import { ConfirmationDialog } from "../common/ConfirmationDialog";
 
 export function ResetPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  // Get the email from the URL parameters
   const email = searchParams.get("email");
 
   useEffect(() => {
-    // Verify that we have an email in the URL
     if (!email) {
       setError("Email manquant dans l'URL. Veuillez réessayer le processus de réinitialisation.");
-      return;
     }
-
-    // Verify that the token exists
-    const accessToken = searchParams.get("token");
-    if (!accessToken) {
-      setError("Token de réinitialisation manquant. Veuillez réessayer le processus de réinitialisation.");
-      return;
-    }
-
-    // Set the access token in Supabase
-    const setAccessToken = async () => {
-      const { error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: accessToken,
-      });
-
-      if (error) {
-        console.error("Error setting session:", error);
-        setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez réessayer.");
-      }
-    };
-
-    setAccessToken();
-  }, [email, searchParams]);
-
-  const validatePassword = (password: string): boolean => {
-    if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères");
-      return false;
-    }
-    return true;
-  };
+  }, [email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +39,8 @@ export function ResetPasswordForm() {
       return;
     }
 
-    if (!validatePassword(password)) {
+    if (password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères");
       return;
     }
 
@@ -80,22 +48,12 @@ export function ResetPasswordForm() {
 
     try {
       const { error } = await supabase.auth.updateUser({ 
-        password: password,
-        email: email // Include the email to ensure we're updating the correct user
+        password,
+        email
       });
 
       if (error) throw error;
-
-      toast({
-        title: "Succès",
-        description: "Votre mot de passe a été mis à jour avec succès",
-      });
-
-      // Rediriger vers la page de connexion
-      setTimeout(() => {
-        navigate("/connexion");
-      }, 1500);
-
+      setShowSuccess(true);
     } catch (error: any) {
       console.error("Error resetting password:", error);
       setError(error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe");
@@ -177,6 +135,16 @@ export function ResetPasswordForm() {
           )}
         </Button>
       </form>
+
+      <ConfirmationDialog
+        isOpen={showSuccess}
+        onClose={() => {
+          setShowSuccess(false);
+          navigate("/connexion");
+        }}
+        title="Mot de passe mis à jour"
+        message="Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+      />
     </div>
   );
 }

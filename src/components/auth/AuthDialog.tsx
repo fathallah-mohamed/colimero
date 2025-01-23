@@ -1,7 +1,6 @@
 import { LoginForm } from "./LoginForm";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { useState } from "react";
-import { Button } from "../ui/button";
 import { CustomDialog } from "../ui/custom-dialog";
 
 interface AuthDialogProps {
@@ -23,11 +22,6 @@ export default function AuthDialog({
 }: AuthDialogProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  const handleForgotPasswordSuccess = () => {
-    setShowForgotPassword(false);
-    onClose();
-  };
-
   return (
     <CustomDialog 
       open={isOpen} 
@@ -39,7 +33,6 @@ export default function AuthDialog({
         {showForgotPassword ? (
           <div className="space-y-4">
             <ForgotPasswordForm 
-              onSuccess={handleForgotPasswordSuccess}
               onCancel={() => setShowForgotPassword(false)}
             />
           </div>

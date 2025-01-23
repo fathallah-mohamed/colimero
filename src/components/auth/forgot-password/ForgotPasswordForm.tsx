@@ -1,74 +1,89 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { ConfirmationDialog } from "../common/ConfirmationDialog";
 
 interface ForgotPasswordFormProps {
-  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm({ onCancel }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const resetLink = `${window.location.origin}/reset-password?email=${encodeURIComponent(email.trim())}`;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: resetLink,
       });
 
       if (error) throw error;
-
-      toast({
-        title: "Email envoyé",
-        description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe",
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      }
+      setShowConfirmation(true);
     } catch (error: any) {
-      console.error("Erreur complète:", error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de l'email",
-        variant: "destructive",
-      });
+      console.error("Erreur lors de la réinitialisation:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <p className="text-sm text-gray-600">
-          Entrez votre adresse email. Vous recevrez un lien pour réinitialiser votre mot de passe.
-        </p>
-        <Input
-          type="email"
-          placeholder="Votre adresse email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Envoi en cours...
-          </>
-        ) : (
-          "Envoyer le lien de réinitialisation"
-        )}
-      </Button>
-    </form>
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="exemple@email.com"
+            className="h-12"
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <Button type="submit" className="w-full h-12" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Envoi en cours...
+              </>
+            ) : (
+              "Envoyer le lien"
+            )}
+          </Button>
+          {onCancel && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="h-12" 
+              onClick={onCancel}
+            >
+              Annuler
+            </Button>
+          )}
+        </div>
+      </form>
+
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          if (onCancel) onCancel();
+        }}
+        title="Email envoyé"
+        message={`Si un compte existe avec l'adresse ${email}, vous recevrez un email contenant les instructions pour réinitialiser votre mot de passe. Pensez à vérifier vos spams si vous ne trouvez pas l'email dans votre boîte de réception.`}
+      />
+    </>
   );
 }
