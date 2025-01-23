@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { registerClient } from "./useClientRegistration";
 import { RegisterFormState } from "./types";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
@@ -60,9 +59,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         onSuccess('existing');
         return;
       }
-
-      // Déconnexion immédiate après l'inscription
-      await supabase.auth.signOut();
       
       setShowEmailSentDialog(true);
 
