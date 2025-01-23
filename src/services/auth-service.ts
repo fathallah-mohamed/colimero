@@ -13,25 +13,37 @@ export const authService = {
     try {
       console.log("Attempting to sign in with email:", email.trim());
       
-      // First check if the user exists in auth.users
-      const { data: { user: existingUser }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError && userError.message !== 'Invalid JWT') {
-        console.error("Error checking user:", userError);
+      // Vérifier d'abord si le client existe et son statut de vérification
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (clientError) {
+        console.error("Error checking client status:", clientError);
         return {
           success: false,
           error: "Une erreur est survenue lors de la vérification de votre compte."
         };
       }
 
-      // Check carrier status if applicable
+      // Si le client existe et n'est pas vérifié
+      if (clientData && clientData.email_verified === false) {
+        console.log('Account not verified:', email);
+        return {
+          success: false,
+          needsVerification: true,
+          email: email
+        };
+      }
+
+      // Vérifier le statut du transporteur si applicable
       const { data: carrierData, error: carrierError } = await supabase
         .from('carriers')
         .select('status, email')
         .eq('email', email.trim())
         .maybeSingle();
-
-      console.log("Carrier check result:", { carrierData, carrierError });
 
       if (carrierError && carrierError.code !== 'PGRST116') {
         console.error("Error checking carrier status:", carrierError);
@@ -41,7 +53,7 @@ export const authService = {
         };
       }
 
-      // If it's a carrier, verify status before allowing login
+      // Si c'est un transporteur, vérifier le statut avant d'autoriser la connexion
       if (carrierData) {
         console.log("Found carrier with status:", carrierData.status);
         
@@ -59,23 +71,7 @@ export const authService = {
         }
       }
 
-      // Check if client needs verification
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('email_verified')
-        .eq('email', email.trim())
-        .maybeSingle();
-
-      if (clientData && clientData.email_verified === false) {
-        console.log('Account not verified:', email);
-        return {
-          success: false,
-          needsVerification: true,
-          email: email
-        };
-      }
-
-      // Attempt login
+      // Tentative de connexion
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -94,7 +90,8 @@ export const authService = {
         if (signInError.message === "Email not confirmed") {
           return {
             success: false,
-            error: "Veuillez confirmer votre email avant de vous connecter"
+            needsVerification: true,
+            email: email
           };
         }
 
