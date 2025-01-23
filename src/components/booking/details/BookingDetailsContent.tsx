@@ -1,7 +1,5 @@
-import { Booking } from "@/types/booking";
-import { Button } from "@/components/ui/button";
-import { Info } from "lucide-react";
 import { CollapsibleContent } from "@/components/ui/collapsible";
+import type { Booking } from "@/types/booking";
 
 interface BookingDetailsContentProps {
   booking: Booking;
@@ -9,7 +7,7 @@ interface BookingDetailsContentProps {
 }
 
 export function BookingDetailsContent({ booking, isExpanded }: BookingDetailsContentProps) {
-  const specialItems = booking.special_items || [];
+  if (!isExpanded) return null;
 
   return (
     <CollapsibleContent className="space-y-4 mt-4">
@@ -46,11 +44,11 @@ export function BookingDetailsContent({ booking, isExpanded }: BookingDetailsCon
         </div>
       </div>
 
-      {specialItems.length > 0 && (
+      {booking.special_items?.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium">Objets spéciaux:</p>
           <div className="flex flex-wrap gap-2">
-            {specialItems.map((item: any, index: number) => (
+            {booking.special_items.map((item: any, index: number) => (
               <span key={index} className="px-2 py-1 bg-gray-100 rounded text-sm">
                 {item.name}
               </span>

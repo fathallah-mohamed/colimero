@@ -7,7 +7,7 @@ interface BookingHeaderSectionProps {
 
 export function BookingHeaderSection({ booking }: BookingHeaderSectionProps) {
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-start">
       <div>
         <h3 className="text-lg font-medium">{booking.delivery_city}</h3>
         <div className="text-sm text-gray-600">

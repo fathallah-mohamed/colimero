@@ -56,7 +56,6 @@ export function BookingCard({
         (payload) => {
           console.log('Booking updated:', payload);
           setLocalBooking(payload.new as Booking);
-          // Invalider le cache pour forcer le rechargement des données
           queryClient.invalidateQueries({ queryKey: ['bookings'] });
           queryClient.invalidateQueries({ queryKey: ['tours'] });
           queryClient.invalidateQueries({ queryKey: ['next-tour'] });
@@ -72,10 +71,6 @@ export function BookingCard({
     };
   }, [booking.id, queryClient]);
 
-  console.log("BookingCard - Booking status:", localBooking.status);
-  console.log("BookingCard - Tour status:", tourStatus);
-  console.log("BookingCard - User type:", userType);
-
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", localBooking.id);
     setShowEditDialog(true);
@@ -83,7 +78,6 @@ export function BookingCard({
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
-      console.log("Changing booking status to:", newStatus);
       await onStatusChange(localBooking.id, newStatus);
       await onUpdate();
       toast({
