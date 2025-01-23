@@ -31,6 +31,14 @@ interface RawTourData {
   };
 }
 
+interface RouteStopJson {
+  name: string;
+  location: string;
+  time: string;
+  type: 'pickup' | 'dropoff' | 'ramassage' | 'livraison';
+  collection_date?: string;
+}
+
 const parseRouteData = (routeData: Json): RouteStop[] => {
   if (!Array.isArray(routeData)) {
     console.error('Route data is not an array:', routeData);
@@ -48,12 +56,13 @@ const parseRouteData = (routeData: Json): RouteStop[] => {
       };
     }
 
+    const stopData = stop as RouteStopJson;
     return {
-      name: String(stop.name || ''),
-      location: String(stop.location || ''),
-      time: String(stop.time || ''),
-      type: (stop.type as 'pickup' | 'dropoff') || 'pickup',
-      collection_date: stop.collection_date ? String(stop.collection_date) : undefined
+      name: String(stopData.name || ''),
+      location: String(stopData.location || ''),
+      time: String(stopData.time || ''),
+      type: (stopData.type as 'pickup' | 'dropoff' | 'ramassage' | 'livraison') || 'pickup',
+      collection_date: stopData.collection_date ? String(stopData.collection_date) : undefined
     };
   });
 };
