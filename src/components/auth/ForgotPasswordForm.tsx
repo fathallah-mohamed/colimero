@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface ForgotPasswordFormProps {
   onSuccess?: () => void;
-  onCancel?: () => void;
 }
 
-export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -20,26 +20,12 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     setIsLoading(true);
 
     try {
-      const trimmedEmail = email.trim();
       const resetLink = `${window.location.origin}/reset-password`;
-
-      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: resetLink,
       });
 
-      if (error) {
-        console.error("Erreur de réinitialisation:", error);
-        throw error;
-      }
-
-      // Log success
-      await supabase.from('email_logs').insert([
-        {
-          email: trimmedEmail,
-          status: 'success',
-          email_type: 'password_reset'
-        }
-      ]);
+      if (error) throw error;
 
       toast({
         title: "Email envoyé",
@@ -50,22 +36,11 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
         onSuccess();
       }
     } catch (error: any) {
-      console.error("Erreur complète:", error);
-      
-      // Log the error
-      await supabase.from('email_logs').insert([
-        {
-          email: email.trim(),
-          status: 'error',
-          error_message: error.message,
-          email_type: 'password_reset'
-        }
-      ]);
-
+      console.error("Erreur lors de la réinitialisation:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de l'email. Veuillez réessayer.",
+        description: "Une erreur est survenue lors de l'envoi de l'email",
       });
     } finally {
       setIsLoading(false);
@@ -73,7 +48,7 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
@@ -88,19 +63,16 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
           />
         </div>
 
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full h-12"
-            onClick={onCancel}
-          >
-            Retour
-          </Button>
-          <Button type="submit" className="w-full h-12" disabled={isLoading}>
-            {isLoading ? "Envoi..." : "Envoyer le lien"}
-          </Button>
-        </div>
+        <Button type="submit" className="w-full h-12" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Envoi en cours...
+            </>
+          ) : (
+            "Envoyer le lien"
+          )}
+        </Button>
       </form>
     </div>
   );

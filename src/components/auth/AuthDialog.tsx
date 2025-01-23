@@ -38,6 +38,9 @@ export default function AuthDialog({
       <div className="p-6">
         {showForgotPassword ? (
           <div className="space-y-4">
+            <p className="text-sm text-gray-600 mb-4">
+              Entrez votre adresse email. Vous recevrez un lien pour réinitialiser votre mot de passe.
+            </p>
             <ForgotPasswordForm onSuccess={handleForgotPasswordSuccess} />
             <Button
               variant="ghost"
