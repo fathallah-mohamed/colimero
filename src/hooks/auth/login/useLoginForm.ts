@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { loginService } from "@/services/auth/login-service";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -31,59 +32,34 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
-      console.log("Attempting login with:", { email: email.trim() });
-      
-      // First check if the user exists and is a client
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('email_verified')
-        .eq('email', email.trim())
-        .maybeSingle();
+      // Check client verification status
+      const clientData = await loginService.checkClientVerification(email);
 
       // Attempt login
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      // Handle login errors
-      if (signInError) {
-        console.error("Sign in error:", signInError);
-        
-        // If invalid credentials, show error dialog
-        if (signInError.message.includes("Invalid login credentials")) {
-          setError("Email ou mot de passe incorrect");
-          setShowErrorDialog(true);
-          setPassword("");
-          return;
-        }
-
-        // For any other error
-        setError("Une erreur est survenue lors de la connexion");
+      const loginResponse = await loginService.signIn(email, password);
+      
+      if (!loginResponse.success) {
+        setError(loginResponse.error);
         setShowErrorDialog(true);
         setPassword("");
         return;
       }
 
-      // If login successful but no user data
-      if (!data.user) {
-        setError("Aucune donnée utilisateur reçue");
+      // Validate user type if required
+      const validationResponse = await loginService.handleUserTypeValidation(
+        loginResponse.user,
+        requiredUserType
+      );
+
+      if (!validationResponse.success) {
+        setError(validationResponse.error);
         setShowErrorDialog(true);
         return;
       }
 
-      // Check user type if required
-      const userType = data.user.user_metadata?.user_type;
-      if (requiredUserType && userType !== requiredUserType) {
-        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
-        setShowErrorDialog(true);
-        await supabase.auth.signOut();
-        return;
-      }
-
-      // For clients, check verification status
+      // Check client verification status
+      const userType = loginResponse.user.user_metadata?.user_type;
       if (userType === 'client' && clientData && !clientData.email_verified) {
-        console.log("Account exists but not verified");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
@@ -92,7 +68,7 @@ export function useLoginForm({
         return;
       }
 
-      // Success - show toast and handle navigation
+      // Success
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"
