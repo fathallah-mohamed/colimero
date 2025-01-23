@@ -13,9 +13,10 @@ serve(async (req) => {
 
   try {
     const { email } = await req.json()
-    console.log('Received request to send activation email to:', email)
+    console.log('📧 Starting send-activation-email for:', email)
 
     if (!email) {
+      console.error('❌ No email provided in request')
       throw new Error('Email is required')
     }
 
@@ -26,6 +27,7 @@ serve(async (req) => {
 
     // Wait a bit to ensure the client record is created
     await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log('⏳ Waited for client record creation')
 
     // Récupérer les détails du client et générer un nouveau token si nécessaire
     const { data: client, error: clientError } = await supabase
@@ -34,20 +36,24 @@ serve(async (req) => {
       .eq('email', email)
       .maybeSingle()
 
-    console.log('Client lookup result:', { client, error: clientError })
+    console.log('🔍 Client lookup result:', { 
+      found: !!client, 
+      verified: client?.email_verified,
+      error: clientError?.message 
+    })
 
     if (clientError) {
-      console.error('Error fetching client:', clientError)
+      console.error('❌ Error fetching client:', clientError)
       throw new Error(`Database error: ${clientError.message}`)
     }
 
     if (!client) {
-      console.error('No client found for email:', email)
+      console.error('❌ No client found for email:', email)
       throw new Error('No client found with this email address')
     }
 
     if (client.email_verified) {
-      console.log('Client already verified:', email)
+      console.log('✅ Client already verified:', email)
       return new Response(
         JSON.stringify({ message: 'Email already verified' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -57,7 +63,7 @@ serve(async (req) => {
     // Si pas de token d'activation, en générer un nouveau
     let activationToken = client.activation_token
     if (!activationToken) {
-      console.log('Generating new activation token for:', email)
+      console.log('🔑 Generating new activation token for:', email)
       const { data: updateData, error: updateError } = await supabase
         .from('clients')
         .update({
@@ -69,29 +75,35 @@ serve(async (req) => {
         .single()
 
       if (updateError || !updateData) {
-        console.error('Error updating activation token:', updateError)
+        console.error('❌ Error updating activation token:', updateError)
         throw new Error('Failed to generate activation token')
       }
 
       activationToken = updateData.activation_token
+      console.log('✨ New activation token generated')
     }
 
-    console.log('Client details:', { ...client, activationToken })
+    console.log('📋 Client details:', { 
+      firstName: client.first_name,
+      hasToken: !!activationToken 
+    })
 
     const baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
+      console.error('❌ SITE_URL environment variable is not set')
       throw new Error('SITE_URL environment variable is not set')
     }
 
     const activationLink = `${baseUrl.replace(/\/+$/, '')}/activation?token=${activationToken}`
-    console.log('Generated activation link:', activationLink)
+    console.log('🔗 Generated activation link')
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
+      console.error('❌ RESEND_API_KEY environment variable is not set')
       throw new Error('RESEND_API_KEY environment variable is not set')
     }
 
-    console.log('Sending email via Resend...')
+    console.log('📤 Sending email via Resend...')
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -157,11 +169,11 @@ serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json()
-      console.error('Email sending failed:', errorData)
+      console.error('❌ Email sending failed:', errorData)
       throw new Error('Failed to send activation email')
     }
 
-    console.log('Email sent successfully')
+    console.log('✅ Email sent successfully')
 
     // Enregistrer l'envoi de l'email
     await supabase
@@ -171,6 +183,8 @@ serve(async (req) => {
         status: 'sent',
         email_type: 'activation'
       })
+
+    console.log('📝 Email log created')
 
     return new Response(
       JSON.stringify({ message: 'Activation email sent successfully' }),
@@ -183,7 +197,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Function error:', error)
+    console.error('❌ Function error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
