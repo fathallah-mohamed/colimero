@@ -13,7 +13,7 @@ export const authService = {
     try {
       console.log("Attempting to sign in with email:", email.trim());
       
-      // Vérifier d'abord si c'est un transporteur
+      // Vérifier d'abord si c'est un transporteur et son statut
       const { data: carrierData, error: carrierError } = await supabase
         .from('carriers')
         .select('status, email')
