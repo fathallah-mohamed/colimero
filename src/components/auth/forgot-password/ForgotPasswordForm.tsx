@@ -47,7 +47,10 @@ export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
+      <div className="space-y-2">
+        <p className="text-sm text-gray-600">
+          Entrez votre adresse email. Vous recevrez un lien pour réinitialiser votre mot de passe.
+        </p>
         <Input
           type="email"
           placeholder="Votre adresse email"
@@ -63,7 +66,7 @@ export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
             Envoi en cours...
           </>
         ) : (
-          "Réinitialiser le mot de passe"
+          "Envoyer le lien de réinitialisation"
         )}
       </Button>
     </form>
