@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/auth/auth-service";
 import { clientVerificationService } from "@/services/auth/client-verification";
 import { useAuthState } from "./useAuthState";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;

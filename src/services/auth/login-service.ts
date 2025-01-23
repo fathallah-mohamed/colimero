@@ -4,7 +4,6 @@ import { AuthError } from "@supabase/supabase-js";
 interface LoginResponse {
   success: boolean;
   error?: string;
-  needsVerification?: boolean;
   user?: any;
 }
 
