@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { BookingStatus } from "@/types/booking";
-import { Edit2, RotateCcw, CheckSquare } from "lucide-react";
+import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
 import { CancelConfirmDialog } from "./CancelConfirmDialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CarrierBookingActionsProps {
   status: BookingStatus;
@@ -16,9 +18,42 @@ export function CarrierBookingActions({
   onStatusChange,
   onEdit
 }: CarrierBookingActionsProps) {
-  const handleStatusChange = (newStatus: BookingStatus) => {
-    console.log('CarrierBookingActions - Changing status to:', newStatus);
-    onStatusChange(newStatus);
+  const { toast } = useToast();
+
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    try {
+      console.log('CarrierBookingActions - Changing status to:', newStatus);
+      
+      // Mettre à jour le statut dans la base de données
+      const { error } = await supabase
+        .from('bookings')
+        .update({ 
+          status: newStatus,
+          delivery_status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('status', status);
+
+      if (error) throw error;
+
+      // Appeler la fonction de mise à jour du parent
+      onStatusChange(newStatus);
+
+      toast({
+        title: "Statut mis à jour",
+        description: `La réservation a été ${newStatus === 'confirmed' ? 'confirmée' : 
+          newStatus === 'cancelled' ? 'annulée' : 
+          newStatus === 'collected' ? 'collectée' : 
+          'mise à jour'}`
+      });
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut de la réservation"
+      });
+    }
   };
 
   // Ne montrer les actions que pour les tournées programmées ou en cours de ramassage
@@ -32,7 +67,7 @@ export function CarrierBookingActions({
         variant="outline"
         size="sm"
         onClick={onEdit}
-        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-[#8B5CF6] hover:text-[#7C3AED] border-[#8B5CF6] hover:border-[#7C3AED]"
+        className="flex items-center gap-2 bg-white hover:bg-gray-50"
       >
         <Edit2 className="h-4 w-4" />
         Modifier
