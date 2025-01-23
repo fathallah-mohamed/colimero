@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
-import type { Tour, RouteStop, TourStatus, TourType } from "@/types/tour";
-import { Json } from "@/types/database/tables";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { Tour, TourStatus, RouteStop } from '@/types/tour';
+import type { Json } from '@/types/database/tables';
 
 interface RawTourData {
   id: number;
@@ -17,12 +16,12 @@ interface RawTourData {
   departure_country: string;
   destination_country: string;
   status: string;
-  type: string;
+  type: Tour['type'];
   previous_status: string | null;
+  bookings?: any[];
   terms_accepted: boolean;
   customs_declaration: boolean;
   tour_number?: string;
-  bookings?: any[];
   carriers?: {
     company_name: string;
     avatar_url: string;
@@ -33,52 +32,98 @@ interface RawTourData {
 }
 
 const parseRouteData = (routeData: Json): RouteStop[] => {
-  if (!Array.isArray(routeData)) return [];
-  
-  return routeData.map((stop: any) => ({
-    name: stop.name,
-    location: stop.location,
-    time: stop.time,
-    type: stop.type,
-    collection_date: stop.collection_date
-  }));
+  if (!Array.isArray(routeData)) {
+    console.error('Route data is not an array:', routeData);
+    return [];
+  }
+
+  return routeData.map(stop => {
+    if (typeof stop !== 'object' || stop === null) {
+      console.error('Invalid stop data:', stop);
+      return {
+        name: 'Unknown',
+        location: 'Unknown',
+        time: '00:00',
+        type: 'pickup'
+      };
+    }
+
+    return {
+      name: String(stop.name || ''),
+      location: String(stop.location || ''),
+      time: String(stop.time || ''),
+      type: (stop.type as 'pickup' | 'dropoff') || 'pickup',
+      collection_date: stop.collection_date ? String(stop.collection_date) : undefined
+    };
+  });
 };
 
-const transformTourData = (rawTour: RawTourData): Tour => {
-  const routeData = typeof rawTour.route === 'string' 
-    ? JSON.parse(rawTour.route) 
-    : rawTour.route;
-
+const transformTourData = (rawData: RawTourData): Tour => {
   return {
-    id: rawTour.id,
-    carrier_id: rawTour.carrier_id,
-    route: parseRouteData(routeData),
-    total_capacity: rawTour.total_capacity,
-    remaining_capacity: rawTour.remaining_capacity,
-    departure_date: rawTour.departure_date,
-    collection_date: rawTour.collection_date,
-    created_at: rawTour.created_at,
-    updated_at: rawTour.updated_at,
-    departure_country: rawTour.departure_country,
-    destination_country: rawTour.destination_country,
-    status: rawTour.status as TourStatus,
-    type: rawTour.type as TourType,
-    previous_status: rawTour.previous_status as TourStatus | null,
-    terms_accepted: rawTour.terms_accepted,
-    customs_declaration: rawTour.customs_declaration,
-    tour_number: rawTour.tour_number,
-    bookings: rawTour.bookings || [],
-    carriers: rawTour.carriers
+    ...rawData,
+    route: parseRouteData(rawData.route),
+    status: rawData.status as TourStatus,
+    previous_status: rawData.previous_status as TourStatus | null,
+    bookings: rawData.bookings || [],
+    terms_accepted: Boolean(rawData.terms_accepted),
+    customs_declaration: Boolean(rawData.customs_declaration),
+    carriers: rawData.carriers
   };
 };
 
 export function useTourRealtime(tourId: number) {
-  const [localTour, setLocalTour] = useState<Tour | null>(null);
-  const queryClient = useQueryClient();
+  const [tour, setTour] = useState<Tour | null>(null);
 
   useEffect(() => {
-    console.log("Setting up tour realtime subscription for:", tourId);
-    
+    // Initial fetch
+    const fetchTour = async () => {
+      const { data, error } = await supabase
+        .from('tours')
+        .select(`
+          *,
+          carriers (
+            company_name,
+            avatar_url,
+            carrier_capacities (
+              price_per_kg
+            )
+          ),
+          bookings (
+            id,
+            user_id,
+            tour_id,
+            pickup_city,
+            delivery_city,
+            weight,
+            tracking_number,
+            status,
+            recipient_name,
+            recipient_phone,
+            recipient_address,
+            item_type,
+            sender_name,
+            sender_phone,
+            special_items,
+            content_types,
+            package_description
+          )
+        `)
+        .eq('id', tourId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching tour:', error);
+        return;
+      }
+
+      if (data) {
+        setTour(transformTourData(data as RawTourData));
+      }
+    };
+
+    fetchTour();
+
+    // Subscribe to realtime changes
     const channel = supabase
       .channel(`tour_${tourId}`)
       .on(
@@ -89,47 +134,61 @@ export function useTourRealtime(tourId: number) {
           table: 'tours',
           filter: `id=eq.${tourId}`
         },
-        (payload) => {
-          console.log('Tour updated:', payload);
-          
+        async (payload) => {
+          console.log('Received realtime update:', payload);
           if (payload.new) {
-            const updatedTour = transformTourData(payload.new as RawTourData);
-            setLocalTour(updatedTour);
-            
-            // Invalider tous les caches liés aux tournées
-            queryClient.invalidateQueries({ queryKey: ['tours'] });
-            queryClient.invalidateQueries({ queryKey: ['next-tour'] });
-            
-            // Mettre à jour le cache spécifique à cette tournée
-            queryClient.setQueryData(['tour', tourId], updatedTour);
+            // Fetch the complete tour data with relations
+            const { data, error } = await supabase
+              .from('tours')
+              .select(`
+                *,
+                carriers (
+                  company_name,
+                  avatar_url,
+                  carrier_capacities (
+                    price_per_kg
+                  )
+                ),
+                bookings (
+                  id,
+                  user_id,
+                  tour_id,
+                  pickup_city,
+                  delivery_city,
+                  weight,
+                  tracking_number,
+                  status,
+                  recipient_name,
+                  recipient_phone,
+                  recipient_address,
+                  item_type,
+                  sender_name,
+                  sender_phone,
+                  special_items,
+                  content_types,
+                  package_description
+                )
+              `)
+              .eq('id', tourId)
+              .single();
+
+            if (error) {
+              console.error('Error fetching updated tour:', error);
+              return;
+            }
+
+            if (data) {
+              setTour(transformTourData(data as RawTourData));
+            }
           }
         }
       )
-      .subscribe((status) => {
-        console.log("Tour subscription status:", status);
-      });
-
-    // Récupérer l'état initial de la tournée
-    const fetchInitialTourState = async () => {
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*, carriers(company_name, avatar_url, carrier_capacities(price_per_kg))')
-        .eq('id', tourId)
-        .single();
-        
-      if (!error && data) {
-        const initialTour = transformTourData(data as RawTourData);
-        setLocalTour(initialTour);
-      }
-    };
-
-    fetchInitialTourState();
+      .subscribe();
 
     return () => {
-      console.log("Cleaning up tour realtime subscription");
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
-  }, [tourId, queryClient]);
+  }, [tourId]);
 
-  return localTour;
+  return tour;
 }
