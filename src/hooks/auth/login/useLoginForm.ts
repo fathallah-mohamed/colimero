@@ -5,30 +5,26 @@ import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
 }
 
 export function useLoginForm({ onSuccess }: UseLoginFormProps = {}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (signInError) {
-        setError("Email ou mot de passe incorrect");
+      if (error) {
         toast({
           variant: "destructive",
           title: "Erreur de connexion",
@@ -50,12 +46,12 @@ export function useLoginForm({ onSuccess }: UseLoginFormProps = {}) {
       }
 
     } catch (error) {
-      setError("Une erreur est survenue lors de la connexion");
       toast({
         variant: "destructive",
         title: "Erreur",
         description: "Une erreur est survenue lors de la connexion"
       });
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +63,6 @@ export function useLoginForm({ onSuccess }: UseLoginFormProps = {}) {
     password,
     setPassword,
     isLoading,
-    error,
     handleSubmit,
   };
 }

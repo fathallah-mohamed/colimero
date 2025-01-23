@@ -1,38 +1,23 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 
 interface LoginFormFieldsProps {
   email: string;
   password: string;
   isLoading: boolean;
-  error?: string | null;
-  showVerificationDialog?: boolean;
-  showErrorDialog?: boolean;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
-  onVerificationDialogClose?: () => void;
-  onErrorDialogClose?: () => void;
 }
 
 export function LoginFormFields({
   email,
   password,
   isLoading,
-  error,
   onEmailChange,
   onPasswordChange,
 }: LoginFormFieldsProps) {
   return (
     <div className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
