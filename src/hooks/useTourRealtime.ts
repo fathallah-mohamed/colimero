@@ -3,6 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tour } from "@/types/tour";
 import { parseRouteData } from "@/utils/tour/routeParser";
 
+interface RealtimePayload {
+  new: {
+    route: any;
+    status: Tour['status'];
+    type: Tour['type'];
+    previous_status: Tour['status'] | null;
+    [key: string]: any;
+  };
+}
+
 export function useTourRealtime(tourId: number) {
   const [tour, setTour] = useState<Tour | null>(null);
 
@@ -19,7 +29,7 @@ export function useTourRealtime(tourId: number) {
           table: 'tours',
           filter: `id=eq.${tourId}`
         },
-        (payload) => {
+        (payload: RealtimePayload) => {
           if (!payload.new) return;
 
           const updatedTour = {
