@@ -29,33 +29,23 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
-      console.log("Attempting login with:", { email: email.trim() });
       const response = await authService.signIn(email, password);
-      console.log("Login response:", response);
 
       if (response.needsVerification) {
-        console.log("Email verification needed");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
         setShowVerificationDialog(true);
         setPassword("");
-        setIsLoading(false);
         return;
       }
 
       if (!response.success) {
-        console.log("Login failed:", response.error);
-        if (response.error) {
-          setError(response.error);
-          setShowErrorDialog(true);
-        }
+        setError(response.error || "Une erreur est survenue");
+        setShowErrorDialog(true);
         setPassword("");
-        setIsLoading(false);
         return;
       }
-
-      console.log("Login successful");
 
       if (onSuccess) {
         onSuccess();
@@ -70,9 +60,7 @@ export function useLoginForm({
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      const errorMessage = "Une erreur inattendue s'est produite";
-      
-      setError(errorMessage);
+      setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
       setPassword("");
     } finally {
@@ -81,11 +69,11 @@ export function useLoginForm({
   };
 
   return {
-    isLoading,
     email,
     setEmail,
     password,
     setPassword,
+    isLoading,
     error,
     showVerificationDialog,
     showErrorDialog,
