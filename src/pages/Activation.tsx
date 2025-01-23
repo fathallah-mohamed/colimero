@@ -41,6 +41,8 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
           .eq('activation_token', token)
           .single();
 
+        console.log('Client query result:', { client, clientError });
+
         if (clientError || !client) {
           console.error('Error fetching client:', clientError);
           throw new Error("Token invalide ou compte introuvable");
@@ -49,7 +51,8 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
         console.log('Client found:', client);
 
         // Vérifier si le token a expiré
-        if (new Date(client.activation_expires_at) < new Date()) {
+        if (client.activation_expires_at && new Date(client.activation_expires_at) < new Date()) {
+          console.error('Token expired:', client.activation_expires_at);
           throw new Error("Le token d'activation a expiré");
         }
 
@@ -105,7 +108,6 @@ export default function Activation({ onShowAuthDialog }: ActivationProps) {
             title: "Compte activé",
             description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
           });
-          // Rediriger vers la page d'accueil et ouvrir la pop-in de connexion après 2 secondes
           setTimeout(() => {
             if (mounted) {
               navigate('/');

@@ -139,6 +139,12 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         throw emailError;
       }
 
+      // Ajout du toast de confirmation d'envoi du mail d'activation
+      toast({
+        title: "Email d'activation envoyé",
+        description: "Un email d'activation a été envoyé à votre adresse. Veuillez vérifier votre boîte de réception.",
+      });
+
       await supabase.auth.signOut();
       onSuccess('new');
       
