@@ -8,9 +8,10 @@ import { Loader2 } from "lucide-react";
 
 interface ForgotPasswordFormProps {
   onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
+export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -63,16 +64,28 @@ export function ForgotPasswordForm({ onSuccess }: ForgotPasswordFormProps) {
           />
         </div>
 
-        <Button type="submit" className="w-full h-12" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Envoi en cours...
-            </>
-          ) : (
-            "Envoyer le lien"
+        <div className="flex gap-2">
+          <Button type="submit" className="w-full h-12" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Envoi en cours...
+              </>
+            ) : (
+              "Envoyer le lien"
+            )}
+          </Button>
+          {onCancel && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="h-12" 
+              onClick={onCancel}
+            >
+              Annuler
+            </Button>
           )}
-        </Button>
+        </div>
       </form>
     </div>
   );
