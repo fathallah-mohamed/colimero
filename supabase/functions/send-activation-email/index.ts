@@ -25,7 +25,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Wait a bit to ensure the client record is created
+    // Attendre un peu pour s'assurer que l'enregistrement client est créé
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log('⏳ Waited for client record creation')
 

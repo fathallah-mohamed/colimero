@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { authVerificationService } from "@/services/auth/auth-verification";
 import { useAuthState } from "../useAuthState";
+import { authService } from "@/services/auth/auth-service";
+import { clientVerificationService } from "@/services/auth/client-verification";
 
 export interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -40,17 +40,17 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
-      console.log("Attempting login with email:", email);
-      
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
+      // Vérifier le statut de vérification du client
+      const clientData = await clientVerificationService.checkVerificationStatus(email);
+      console.log("Client verification status:", clientData);
+
+      // Tentative de connexion
+      const { data: signInData, error: signInError } = await authService.signIn(email, password);
 
       if (signInError) {
         console.error("Sign in error:", signInError);
-        
         let errorMessage = "Une erreur est survenue lors de la connexion";
+        
         if (signInError.message === "Invalid login credentials") {
           errorMessage = "Email ou mot de passe incorrect";
         }
@@ -61,38 +61,34 @@ export function useLoginForm({
         return;
       }
 
-      if (!data.user) {
+      if (!signInData.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = data.user.user_metadata?.user_type;
+      const userType = signInData.user.user_metadata?.user_type;
       console.log("User type:", userType, "Required type:", requiredUserType);
 
-      // Validate user type
-      const validationResult = await authVerificationService.validateUserType(data.user, requiredUserType);
-      if ('error' in validationResult) {
-        setError(validationResult.error);
+      // Valider le type d'utilisateur
+      if (requiredUserType && userType !== requiredUserType) {
+        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         setShowErrorDialog(true);
-        await supabase.auth.signOut();
+        await authService.signOut();
         return;
       }
 
-      // Check email verification for clients
-      if (userType === 'client') {
-        const verificationResult = await authVerificationService.checkEmailVerification(email, userType);
-        if ('error' in verificationResult) {
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setError(verificationResult.error);
-          setShowVerificationDialog(true);
-          setPassword("");
-          await supabase.auth.signOut();
-          return;
+      // Vérifier l'activation du compte client
+      if (userType === 'client' && clientData && !clientData.email_verified) {
+        console.log("Client account not verified");
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
         }
+        setShowVerificationDialog(true);
+        setPassword("");
+        await authService.signOut();
+        return;
       }
 
-      // Success
+      // Succès
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"

@@ -1,66 +1,40 @@
 import { supabase } from "@/integrations/supabase/client";
 import { AuthError } from "@supabase/supabase-js";
 
-interface AuthResponse {
-  success: boolean;
-  error?: string;
-  needsVerification?: boolean;
-  user?: any;
-}
-
 export const authService = {
-  async signIn(email: string, password: string): Promise<AuthResponse> {
+  async signIn(email: string, password: string) {
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      console.log("Attempting sign in for:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (signInError) {
-        if (signInError.message.includes("Invalid login credentials")) {
-          return {
-            success: false,
-            error: "Email ou mot de passe incorrect"
-          };
-        }
-        return {
-          success: false,
-          error: "Une erreur est survenue lors de la connexion"
-        };
+      if (error) {
+        console.error("Sign in error:", error);
+        return { error };
       }
 
-      if (!data.user) {
-        return {
-          success: false,
-          error: "Aucune donnée utilisateur reçue"
-        };
-      }
-
-      return {
-        success: true,
-        user: data.user
-      };
+      return { data };
     } catch (error) {
-      console.error("Login error:", error);
-      return {
-        success: false,
-        error: error instanceof AuthError ? error.message : "Une erreur inattendue s'est produite"
+      console.error("Auth service error:", error);
+      return { 
+        error: error instanceof AuthError ? error : new Error("Une erreur inattendue s'est produite") 
       };
     }
   },
 
-  async validateUserType(user: any, requiredUserType?: 'client' | 'carrier'): Promise<{ success: boolean; error?: string }> {
-    if (!requiredUserType) return { success: true };
-
-    const userType = user.user_metadata?.user_type;
-    if (userType !== requiredUserType) {
-      await supabase.auth.signOut();
-      return {
-        success: false,
-        error: `Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`
-      };
+  async signOut() {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Sign out error:", error);
+        return { error };
+      }
+      return { success: true };
+    } catch (error) {
+      console.error("Sign out error:", error);
+      return { error };
     }
-
-    return { success: true };
   }
 };
