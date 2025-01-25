@@ -45,38 +45,26 @@ export function useLoginForm({
       console.log("Client verification status:", clientData);
 
       // Tentative de connexion
-      const { data: signInData, error: signInError } = await authService.signIn(email, password);
+      const loginResponse = await authService.signIn(email, password);
 
-      if (signInError) {
-        console.error("Sign in error:", signInError);
-        let errorMessage = "Une erreur est survenue lors de la connexion";
-        
-        if (signInError.message === "Invalid login credentials") {
-          errorMessage = "Email ou mot de passe incorrect";
-        }
-
-        setError(errorMessage);
+      if (!loginResponse.success || !loginResponse.user) {
+        setError(loginResponse.error || "Erreur de connexion");
         setShowErrorDialog(true);
         setPassword("");
         return;
       }
 
-      if (!signInData.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      const userType = signInData.user.user_metadata?.user_type;
-      console.log("User type:", userType, "Required type:", requiredUserType);
-
       // Valider le type d'utilisateur
-      if (requiredUserType && userType !== requiredUserType) {
-        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+      const validationResponse = authService.validateUserType(loginResponse.user, requiredUserType);
+      if (!validationResponse.success) {
+        setError(validationResponse.error);
         setShowErrorDialog(true);
         await authService.signOut();
         return;
       }
 
       // Vérifier l'activation du compte client
+      const userType = loginResponse.user.user_metadata?.user_type;
       if (userType === 'client' && clientData && !clientData.email_verified) {
         console.log("Client account not verified");
         if (onVerificationNeeded) {

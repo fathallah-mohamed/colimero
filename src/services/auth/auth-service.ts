@@ -1,17 +1,24 @@
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError } from "@supabase/supabase-js";
+import { AuthError, User } from "@supabase/supabase-js";
 
 interface AuthResponse {
   success: boolean;
   error?: string;
-  user?: any;
+  user?: User;
+}
+
+interface SignInResponse {
+  data: {
+    user: User | null;
+  };
+  error: AuthError | null;
 }
 
 export const authService = {
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
       console.log("Attempting sign in for:", email);
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error }: SignInResponse = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -60,7 +67,7 @@ export const authService = {
     }
   },
 
-  validateUserType(user: any, requiredType?: 'client' | 'carrier'): AuthResponse {
+  validateUserType(user: User, requiredType?: 'client' | 'carrier'): AuthResponse {
     if (!requiredType) return { success: true };
 
     const userType = user.user_metadata?.user_type;
