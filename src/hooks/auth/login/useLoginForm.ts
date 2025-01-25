@@ -53,12 +53,13 @@ export function useLoginForm({
       setShowErrorDialog(false);
 
       // Vérifier si le compte existe et n'est pas vérifié
-      const { data: clientData } = await supabase
+      const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified')
         .eq('email', email.trim())
-        .single();
+        .maybeSingle();
 
+      // Si le client existe et n'est pas vérifié
       if (clientData && !clientData.email_verified) {
         const emailSent = await handleActivationEmail(email);
         if (emailSent && onVerificationNeeded) {
