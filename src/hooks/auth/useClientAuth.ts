@@ -53,8 +53,12 @@ export function useClientAuth(onSuccess?: () => void) {
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
-      console.log("Checking client verification status for:", email);
+      setState(prev => ({ 
+        ...prev, 
+        isLoading: true, 
+        error: null,
+        isVerificationNeeded: false 
+      }));
 
       // First check if the client exists and is verified
       const { data: clientData, error: clientError } = await supabase
@@ -63,20 +67,19 @@ export function useClientAuth(onSuccess?: () => void) {
         .eq('email', email.trim())
         .single();
 
-      console.log("Client data:", clientData);
-      console.log("Client error:", clientError);
+      console.log("Client verification status:", clientData);
 
       if (clientError) {
-        if (clientError.code === 'PGRST116') {
-          console.log("No client found with this email");
-          throw new Error("Email ou mot de passe incorrect");
-        }
         console.error("Error checking client status:", clientError);
-        throw new Error("Une erreur est survenue lors de la vérification de votre compte");
+        setState(prev => ({
+          ...prev,
+          error: "Email ou mot de passe incorrect"
+        }));
+        return;
       }
 
-      // If client exists but isn't verified
-      if (clientData && !clientData.email_verified) {
+      // If client exists but isn't verified, prevent login and trigger verification flow
+      if (!clientData?.email_verified) {
         console.log("Client needs verification, sending activation email");
         setState(prev => ({ ...prev, isVerificationNeeded: true }));
         await handleResendActivation(email);
@@ -84,28 +87,22 @@ export function useClientAuth(onSuccess?: () => void) {
       }
 
       // Proceed with login only if client is verified
-      if (clientData && clientData.email_verified) {
-        console.log("Client is verified, proceeding with login");
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password.trim()
-        });
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim()
+      });
 
-        if (signInError) {
-          console.error("Sign in error:", signInError);
-          if (signInError.message.includes("Invalid login credentials")) {
-            throw new Error("Email ou mot de passe incorrect");
-          }
-          throw new Error("Une erreur est survenue lors de la connexion");
-        }
+      if (signInError) {
+        console.error("Sign in error:", signInError);
+        setState(prev => ({
+          ...prev,
+          error: "Email ou mot de passe incorrect"
+        }));
+        return;
+      }
 
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
-        console.log("Client verification status is false");
-        setState(prev => ({ ...prev, isVerificationNeeded: true }));
-        await handleResendActivation(email);
+      if (onSuccess) {
+        onSuccess();
       }
 
     } catch (error: any) {
@@ -114,12 +111,6 @@ export function useClientAuth(onSuccess?: () => void) {
         ...prev,
         error: error.message || "Une erreur est survenue lors de la connexion"
       }));
-      
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message || "Une erreur est survenue lors de la connexion"
-      });
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
