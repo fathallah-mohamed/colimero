@@ -17,6 +17,21 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
     setError(null);
 
     try {
+      // Vérifier d'abord si le client existe et n'est pas vérifié
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('email_verified')
+        .eq('email', email.trim())
+        .single();
+
+      if (clientData && !clientData.email_verified) {
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        }
+        setIsLoading(false);
+        return;
+      }
+
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -31,34 +46,17 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
           return;
         }
 
-        setError(signInError.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Une erreur est survenue lors de la connexion"
-        );
+        // Pour les autres erreurs, on affiche un message approprié
+        if (signInError.message.includes("Invalid login credentials")) {
+          setError("Email ou mot de passe incorrect");
+        } else {
+          setError("Une erreur est survenue lors de la connexion");
+        }
         return;
       }
 
       if (!user) {
         setError("Aucune donnée utilisateur reçue");
-        return;
-      }
-
-      // Vérifier le statut de vérification du client
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified')
-        .eq('id', user.id)
-        .single();
-
-      if (clientError) {
-        setError("Erreur lors de la vérification du compte client");
-        return;
-      }
-
-      if (!clientData?.email_verified) {
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
-        }
         return;
       }
 
