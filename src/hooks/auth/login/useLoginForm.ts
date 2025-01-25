@@ -27,43 +27,52 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
     setShowErrorDialog(false);
 
     try {
-      // Vérifier d'abord le type d'utilisateur si requis
-      if (requiredUserType) {
-        let userExists = false;
-        let isVerified = false;
+      if (requiredUserType === 'carrier') {
+        const { data: carrierData } = await supabase
+          .from('carriers')
+          .select('status, email_verified')
+          .eq('email', email.trim())
+          .single();
 
-        if (requiredUserType === 'client') {
-          const { data: clientData } = await supabase
-            .from('clients')
-            .select('email_verified')
-            .eq('email', email.trim())
-            .single();
-
-          userExists = !!clientData;
-          isVerified = clientData?.email_verified || false;
-        } else if (requiredUserType === 'carrier') {
-          const { data: carrierData } = await supabase
-            .from('carriers')
-            .select('status, email_verified')
-            .eq('email', email.trim())
-            .single();
-
-          userExists = !!carrierData;
-          isVerified = carrierData?.status === 'active';
-        }
-
-        if (!userExists) {
-          setError(`Aucun compte ${requiredUserType === 'client' ? 'client' : 'transporteur'} trouvé avec cet email`);
+        if (!carrierData) {
+          setError("Aucun compte transporteur trouvé avec cet email");
           setShowErrorDialog(true);
           setPassword("");
+          setIsLoading(false);
           return;
         }
 
-        if (!isVerified) {
+        if (carrierData.status !== 'active') {
+          setError("Votre compte transporteur n'est pas encore activé");
+          setShowErrorDialog(true);
+          setPassword("");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (requiredUserType === 'client') {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('email_verified')
+          .eq('email', email.trim())
+          .single();
+
+        if (!clientData) {
+          setError("Aucun compte client trouvé avec cet email");
+          setShowErrorDialog(true);
+          setPassword("");
+          setIsLoading(false);
+          return;
+        }
+
+        if (!clientData.email_verified) {
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
+          setPassword("");
+          setIsLoading(false);
           return;
         }
       }
@@ -99,6 +108,11 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
         return;
       }
 
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue sur votre espace personnel",
+      });
+
       if (onSuccess) {
         onSuccess();
         return;
@@ -120,11 +134,6 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
             navigate("/");
         }
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue sur votre espace personnel",
-      });
 
     } catch (error: any) {
       console.error("Complete error:", error);
