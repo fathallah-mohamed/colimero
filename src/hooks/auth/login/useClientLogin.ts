@@ -25,6 +25,8 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
         .eq('email', email.trim())
         .maybeSingle();
 
+      console.log('Client verification status:', clientData);
+
       if (clientError) {
         console.error('Error checking client:', clientError);
         setError("Une erreur est survenue lors de la vérification du compte");
@@ -36,18 +38,22 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
         return;
       }
 
-      console.log('Client verification status:', clientData);
-
-      // Si le client existe et n'est pas vérifié
-      if (clientData && !clientData.email_verified) {
+      // Si le client existe et n'est pas vérifié, bloquer la connexion
+      if (clientData && clientData.email_verified === false) {
         console.log('Client found but not verified, triggering verification needed');
+        setError("Veuillez activer votre compte via le lien envoyé par email avant de vous connecter");
+        toast({
+          variant: "destructive",
+          title: "Compte non activé",
+          description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter"
+        });
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        setIsLoading(false);
         return;
       }
 
+      // Procéder à la connexion uniquement si le compte est vérifié
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
