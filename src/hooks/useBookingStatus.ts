@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { BookingStatus } from "@/types/booking";
 
-export function useBookingStatus(bookingId: string, initialStatus: BookingStatus) {
+export function useBookingStatus(initialStatus: BookingStatus) {
   const [status, setStatus] = useState<BookingStatus>(initialStatus);
   const queryClient = useQueryClient();
 
@@ -12,17 +12,17 @@ export function useBookingStatus(bookingId: string, initialStatus: BookingStatus
   }, [initialStatus]);
 
   useEffect(() => {
-    console.log("Setting up realtime subscription for booking:", bookingId);
+    console.log("Setting up realtime subscription for booking status:", status);
     
     const channel = supabase
-      .channel(`booking_status_${bookingId}`)
+      .channel(`booking_status_${status}`)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
           table: 'bookings',
-          filter: `id=eq.${bookingId}`
+          filter: `status=eq.${status}`
         },
         (payload) => {
           console.log('Booking status updated:', payload);
@@ -43,7 +43,7 @@ export function useBookingStatus(bookingId: string, initialStatus: BookingStatus
       console.log("Cleaning up realtime subscription");
       supabase.removeChannel(channel);
     };
-  }, [bookingId, queryClient]);
+  }, [status, queryClient]);
 
   return status;
 }

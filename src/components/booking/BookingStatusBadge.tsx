@@ -1,11 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import type { BookingStatus } from "@/types/booking";
+import { useBookingStatus } from "@/hooks/useBookingStatus";
 
 interface BookingStatusBadgeProps {
   status: BookingStatus;
 }
 
 export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
+  const currentStatus = useBookingStatus(status);
+
   const getStatusColor = (status: BookingStatus) => {
     switch (status) {
       case "pending":
@@ -53,8 +56,8 @@ export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
   };
 
   return (
-    <Badge className={`${getStatusColor(status)} border-none`}>
-      {getStatusLabel(status)}
+    <Badge className={`${getStatusColor(currentStatus)} border-none`}>
+      {getStatusLabel(currentStatus)}
     </Badge>
   );
 }
