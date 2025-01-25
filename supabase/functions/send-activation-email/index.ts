@@ -12,10 +12,11 @@ serve(async (req) => {
   }
 
   try {
-    const { email } = await req.json()
+    const requestData = await req.json()
+    const { email } = requestData
     console.log('📧 Starting send-activation-email for:', email)
 
-    if (!email) {
+    if (!email || typeof email !== 'string' || !email.trim()) {
       console.error('❌ No email provided in request')
       throw new Error('Email is required')
     }
@@ -33,7 +34,7 @@ serve(async (req) => {
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .select('first_name, activation_token, email_verified')
-      .eq('email', email)
+      .eq('email', email.trim())
       .maybeSingle()
 
     console.log('🔍 Client lookup result:', { 
@@ -65,7 +66,7 @@ serve(async (req) => {
         activation_token: crypto.randomUUID(),
         activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
       })
-      .eq('email', email)
+      .eq('email', email.trim())
       .select('activation_token')
       .single()
 
@@ -103,7 +104,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'Colimero <no-reply@colimero.com>',
-        to: email,
+        to: email.trim(),
         subject: 'Activez votre compte Colimero',
         html: `
           <!DOCTYPE html>
@@ -170,7 +171,7 @@ serve(async (req) => {
     await supabase
       .from('email_logs')
       .insert({
-        email: email,
+        email: email.trim(),
         status: 'sent',
         email_type: 'activation'
       })
