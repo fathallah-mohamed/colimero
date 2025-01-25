@@ -18,72 +18,46 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
     setError(null);
 
     try {
-      // Vérifier d'abord si le client existe et n'est pas vérifié
+      // 1. Vérifier d'abord si le client existe et est vérifié
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified')
         .eq('email', email.trim())
         .maybeSingle();
 
-      console.log('Client verification status:', clientData);
+      console.log('Client verification check result:', clientData);
 
       if (clientError) {
-        console.error('Error checking client:', clientError);
-        setError("Une erreur est survenue lors de la vérification du compte");
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de la vérification du compte"
-        });
-        return;
+        console.error('Error checking client verification:', clientError);
+        throw new Error("Une erreur est survenue lors de la vérification du compte");
       }
 
-      // Si le client existe et n'est pas vérifié, bloquer la connexion
-      if (clientData && clientData.email_verified === false) {
-        console.log('Client found but not verified, triggering verification needed');
-        setError("Veuillez activer votre compte via le lien envoyé par email avant de vous connecter");
-        toast({
-          variant: "destructive",
-          title: "Compte non activé",
-          description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter"
-        });
+      // 2. Si le client n'existe pas ou n'est pas vérifié, bloquer la connexion
+      if (!clientData || clientData.email_verified === false) {
+        console.log('Account not verified or not found:', email);
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        return;
+        throw new Error("Veuillez activer votre compte via le lien envoyé par email avant de vous connecter");
       }
 
-      // Procéder à la connexion uniquement si le compte est vérifié
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      // 3. Si le client est vérifié, procéder à la connexion
+      console.log('Account verified, proceeding with login');
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        
-        if (signInError.message.includes("Invalid login credentials")) {
-          setError("Email ou mot de passe incorrect");
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Email ou mot de passe incorrect"
-          });
-        } else {
-          setError("Une erreur est survenue lors de la connexion");
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Une erreur est survenue lors de la connexion"
-          });
-        }
-        return;
+        throw new Error(signInError.message === "Invalid login credentials" 
+          ? "Email ou mot de passe incorrect"
+          : "Une erreur est survenue lors de la connexion"
+        );
       }
 
-      if (!user) {
-        console.error('No user data received');
-        setError("Aucune donnée utilisateur reçue");
-        return;
+      if (!authData.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
       }
 
       console.log('Login successful');
@@ -93,11 +67,11 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
 
     } catch (error: any) {
       console.error("Login error:", error);
-      setError("Une erreur inattendue s'est produite");
+      setError(error.message);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur inattendue s'est produite"
+        title: "Erreur de connexion",
+        description: error.message
       });
     } finally {
       setIsLoading(false);
