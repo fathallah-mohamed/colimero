@@ -1,20 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import type { BookingStatus } from "@/types/booking";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useBookingStatus } from "@/hooks/useBookingStatus";
 
 interface BookingStatusBadgeProps {
   status: BookingStatus;
 }
 
 export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
-  const [currentStatus, setCurrentStatus] = useState<BookingStatus>(status);
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    setCurrentStatus(status);
-  }, [status]);
+  const currentStatus = useBookingStatus(status);
 
   const getStatusColor = (status: BookingStatus) => {
     switch (status) {
