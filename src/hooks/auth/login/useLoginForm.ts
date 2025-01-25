@@ -19,50 +19,54 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const resetState = () => {
+    setPassword("");
+    setIsLoading(false);
     setError(null);
     setShowVerificationDialog(false);
     setShowErrorDialog(false);
+  };
+
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage);
+    setShowErrorDialog(true);
+    setPassword("");
+    setIsLoading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    resetState();
+    setIsLoading(true);
 
     try {
       if (requiredUserType === 'carrier') {
-        const { data: carrierData } = await supabase
+        const { data: carrierData, error: carrierError } = await supabase
           .from('carriers')
           .select('status, email_verified')
           .eq('email', email.trim())
           .single();
 
-        if (!carrierData) {
-          setError("Aucun compte transporteur trouvé avec cet email");
-          setShowErrorDialog(true);
-          setPassword("");
-          setIsLoading(false);
+        if (carrierError || !carrierData) {
+          handleError("Aucun compte transporteur trouvé avec cet email");
           return;
         }
 
         if (carrierData.status !== 'active') {
-          setError("Votre compte transporteur n'est pas encore activé");
-          setShowErrorDialog(true);
-          setPassword("");
-          setIsLoading(false);
+          handleError("Votre compte transporteur n'est pas encore activé");
           return;
         }
       }
 
       if (requiredUserType === 'client') {
-        const { data: clientData } = await supabase
+        const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('email_verified')
           .eq('email', email.trim())
           .single();
 
-        if (!clientData) {
-          setError("Aucun compte client trouvé avec cet email");
-          setShowErrorDialog(true);
-          setPassword("");
-          setIsLoading(false);
+        if (clientError || !clientData) {
+          handleError("Aucun compte client trouvé avec cet email");
           return;
         }
 
@@ -89,21 +93,19 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
           errorMessage = "Email ou mot de passe incorrect";
         }
 
-        setError(errorMessage);
-        setShowErrorDialog(true);
-        setPassword("");
+        handleError(errorMessage);
         return;
       }
 
       if (!user) {
-        throw new Error("Aucune donnée utilisateur reçue");
+        handleError("Aucune donnée utilisateur reçue");
+        return;
       }
 
       const userType = user.user_metadata?.user_type;
 
       if (requiredUserType && userType !== requiredUserType) {
-        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
-        setShowErrorDialog(true);
+        handleError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         await supabase.auth.signOut();
         return;
       }
@@ -112,6 +114,8 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
         title: "Connexion réussie",
         description: "Bienvenue sur votre espace personnel",
       });
+
+      setIsLoading(false);
 
       if (onSuccess) {
         onSuccess();
@@ -137,11 +141,7 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
 
     } catch (error: any) {
       console.error("Complete error:", error);
-      setError("Une erreur inattendue s'est produite");
-      setShowErrorDialog(true);
-      setPassword("");
-    } finally {
-      setIsLoading(false);
+      handleError("Une erreur inattendue s'est produite");
     }
   };
 
