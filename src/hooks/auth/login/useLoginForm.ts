@@ -1,7 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { authVerificationService } from "@/services/auth/auth-verification";
+import { useAuthState } from "../useAuthState";
 
 export interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -14,35 +15,22 @@ export function useLoginForm({
   requiredUserType,
   onVerificationNeeded 
 }: UseLoginFormProps = {}) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const checkEmailVerification = async (email: string, userType: string) => {
-    if (userType === 'client') {
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified')
-        .eq('email', email.trim())
-        .single();
-
-      if (clientError) {
-        console.error("Error checking client verification:", clientError);
-        return { error: "Une erreur est survenue lors de la vérification de votre compte." };
-      }
-
-      if (!clientData?.email_verified) {
-        return { error: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter." };
-      }
-    }
-
-    return { success: true };
-  };
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+    showVerificationDialog,
+    setShowVerificationDialog,
+    showErrorDialog,
+    setShowErrorDialog,
+  } = useAuthState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,16 +77,17 @@ export function useLoginForm({
       const userType = data.user.user_metadata?.user_type;
       console.log("User type:", userType, "Required type:", requiredUserType);
 
-      if (requiredUserType && userType !== requiredUserType) {
-        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+      // Validate user type
+      const validationResult = await authVerificationService.validateUserType(data.user, requiredUserType);
+      if ('error' in validationResult) {
+        setError(validationResult.error);
         setShowErrorDialog(true);
-        await supabase.auth.signOut();
         return;
       }
 
-      // Vérifier la validation de l'email pour les clients
+      // Check email verification for clients
       if (userType === 'client') {
-        const verificationResult = await checkEmailVerification(email, userType);
+        const verificationResult = await authVerificationService.checkEmailVerification(email, userType);
         if ('error' in verificationResult) {
           setError(verificationResult.error);
           setShowVerificationDialog(true);
