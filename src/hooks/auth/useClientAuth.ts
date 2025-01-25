@@ -21,27 +21,32 @@ export function useClientAuth(onSuccess?: () => void) {
   const handleLogin = async (email: string, password: string) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
+      console.log("Attempting login for:", email);
       
       // First check if the client exists and is verified
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
-        .select('email_verified, status')
+        .select('email_verified, status, activation_code')
         .eq('email', email.trim())
         .single();
+
+      console.log("Client data:", clientData);
 
       if (clientError) {
         console.error("Error checking client status:", clientError);
         throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
-      // If client exists but isn't verified
+      // If client exists but isn't verified or is pending
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
+        console.log("Client needs verification");
         setState(prev => ({ ...prev, isVerificationNeeded: true }));
         await handleResendActivation(email);
         return;
       }
 
       // Attempt to sign in
+      console.log("Attempting sign in with auth");
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -55,6 +60,7 @@ export function useClientAuth(onSuccess?: () => void) {
         throw new Error("Une erreur est survenue lors de la connexion");
       }
 
+      console.log("Login successful");
       toast({
         title: "Connexion réussie",
         description: "Bienvenue sur votre espace client",
@@ -63,7 +69,13 @@ export function useClientAuth(onSuccess?: () => void) {
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate('/');
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        } else {
+          navigate('/');
+        }
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -84,6 +96,7 @@ export function useClientAuth(onSuccess?: () => void) {
 
   const handleResendActivation = async (email: string) => {
     try {
+      console.log("Resending activation email to:", email);
       setState(prev => ({ ...prev, isLoading: true }));
       
       const { error } = await supabase.functions.invoke('send-activation-email', {
@@ -93,8 +106,12 @@ export function useClientAuth(onSuccess?: () => void) {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error sending activation email:", error);
+        throw error;
+      }
 
+      console.log("Activation email sent successfully");
       toast({
         title: "Code d'activation envoyé",
         description: "Veuillez vérifier votre boîte mail pour activer votre compte",
