@@ -1,23 +1,23 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { emailVerificationService } from "@/services/auth/email-verification-service";
 
 export function useEmailVerification() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
-  const verifyEmail = async (email: string) => {
+  const verifyEmail = async (email: string): Promise<boolean> => {
     setIsVerifying(true);
     try {
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('email_verified')
-        .eq('email', email)
-        .single();
+      const result = await emailVerificationService.verifyClientEmail(email);
+      
+      if (result.error) {
+        return false;
+      }
 
-      return clientData?.email_verified || false;
+      return result.isVerified;
     } catch (error) {
-      console.error('Error verifying email:', error);
+      console.error('Error in verifyEmail:', error);
       return false;
     } finally {
       setIsVerifying(false);
@@ -28,15 +28,12 @@ export function useEmailVerification() {
     console.log('Resending activation email to:', email);
     setIsResending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-activation-email', {
-        body: { email }
-      });
-
-      if (!error) {
+      const result = await emailVerificationService.resendActivationEmail(email);
+      
+      if (result) {
         setShowConfirmationDialog(true);
-        return true;
       }
-      return false;
+      return result;
     } catch (error) {
       console.error('Error resending activation email:', error);
       return false;
@@ -46,11 +43,11 @@ export function useEmailVerification() {
   };
 
   return {
-    verifyEmail,
     isVerifying,
     isResending,
     showConfirmationDialog,
     setShowConfirmationDialog,
+    verifyEmail,
     resendActivationEmail
   };
 }
