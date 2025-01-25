@@ -1,7 +1,7 @@
 import { BookingStatus } from "@/types/booking";
 import { Button } from "@/components/ui/button";
 import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
-import { CancelConfirmDialog } from "./CancelConfirmDialog";
+import { CancelConfirmDialog } from "../actions/CancelConfirmDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
