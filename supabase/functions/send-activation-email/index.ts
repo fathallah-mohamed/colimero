@@ -30,7 +30,7 @@ serve(async (req) => {
     // Vérifier si le client existe et n'est pas déjà vérifié
     const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select('email_verified, first_name, activation_token')
+      .select('email_verified, first_name, activation_code')
       .eq('email', email.trim())
       .maybeSingle()
 
@@ -55,25 +55,39 @@ serve(async (req) => {
       throw new Error('Email already verified')
     }
 
-    // Générer un nouveau token d'activation
-    console.log('🔑 Generating new activation token for:', email)
-    const { data: updateData, error: updateError } = await supabase
-      .from('clients')
-      .update({
-        activation_token: crypto.randomUUID(),
-        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-      })
-      .eq('email', email.trim())
-      .select('activation_token')
-      .single()
+    // Générer un nouveau code d'activation si nécessaire
+    if (resend || !client.activation_code) {
+      console.log('🔑 Generating new activation code for:', email)
+      const { error: updateError } = await supabase
+        .from('clients')
+        .update({
+          activation_code: supabase.rpc('generate_activation_code'),
+          activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+        })
+        .eq('email', email.trim())
+        .select('activation_code')
+        .single()
 
-    if (updateError || !updateData) {
-      console.error('❌ Error updating activation token:', updateError)
-      throw new Error('Failed to generate activation token')
+      if (updateError) {
+        console.error('❌ Error updating activation code:', updateError)
+        throw new Error('Failed to generate activation code')
+      }
     }
 
-    const activationToken = updateData.activation_token
-    console.log('✨ New activation token generated')
+    // Récupérer le code d'activation mis à jour
+    const { data: updatedClient, error: fetchError } = await supabase
+      .from('clients')
+      .select('activation_code, first_name')
+      .eq('email', email.trim())
+      .single()
+
+    if (fetchError || !updatedClient?.activation_code) {
+      console.error('❌ Error fetching updated client:', fetchError)
+      throw new Error('Failed to retrieve activation code')
+    }
+
+    const activationCode = updatedClient.activation_code
+    console.log('✨ Activation code retrieved:', activationCode)
 
     const baseUrl = Deno.env.get('SITE_URL')
     if (!baseUrl) {
@@ -82,8 +96,8 @@ serve(async (req) => {
     }
 
     const cleanBaseUrl = baseUrl.replace(/^(https?:\/\/)?(www\.)?/, 'https://').replace(/\/$/, '')
-    const activationLink = `${cleanBaseUrl}/activation?token=${activationToken}`
-    console.log('🔗 Generated activation link:', activationLink)
+    const activationUrl = `${cleanBaseUrl}/activation?code=${activationCode}`
+    console.log('🔗 Generated activation URL:', activationUrl)
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
@@ -111,14 +125,26 @@ serve(async (req) => {
             </head>
             <body>
               <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2>Bonjour ${client.first_name || ''}</h2>
+                <h2>Bonjour ${updatedClient.first_name || ''}</h2>
                 
                 <p>Merci de rejoindre <strong>Colimero</strong> !</p>
                 
-                <p>Pour activer votre compte, cliquez sur le lien ci-dessous :</p>
+                <p>Voici votre code d'activation :</p>
+                
+                <div style="background-color: #f5f5f5; 
+                           padding: 20px; 
+                           text-align: center; 
+                           font-size: 24px; 
+                           font-weight: bold; 
+                           letter-spacing: 5px;
+                           margin: 20px 0;">
+                  ${activationCode}
+                </div>
+                
+                <p>Vous pouvez également cliquer sur le lien ci-dessous pour activer votre compte :</p>
                 
                 <p style="margin: 20px 0;">
-                  <a href="${activationLink}" 
+                  <a href="${activationUrl}" 
                      style="background-color: #00B0F0; 
                             color: white; 
                             padding: 12px 24px; 
@@ -129,12 +155,7 @@ serve(async (req) => {
                   </a>
                 </p>
                 
-                <p>Si le bouton ne fonctionne pas, copiez et collez cette adresse dans votre navigateur :</p>
-                <p style="background-color: #f5f5f5; padding: 10px; word-break: break-all;">
-                  ${activationLink}
-                </p>
-                
-                <p><strong>Ce lien est valable pendant 48 heures.</strong></p>
+                <p><strong>Ce code est valable pendant 48 heures.</strong></p>
                 
                 <p style="color: #666; font-size: 0.9em; margin-top: 30px;">
                   Si vous n'avez pas créé de compte sur Colimero, ignorez cet email.

@@ -20,7 +20,7 @@ export function useClientAuth(onSuccess?: () => void) {
     console.log("Checking verification status for:", email);
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
-      .select('email_verified')
+      .select('status')
       .eq('email', email.trim())
       .single();
 
@@ -29,8 +29,8 @@ export function useClientAuth(onSuccess?: () => void) {
       return { error: "Une erreur est survenue lors de la vérification de votre compte." };
     }
 
-    if (clientData && !clientData.email_verified) {
-      return { error: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter." };
+    if (clientData && clientData.status !== 'active') {
+      return { error: "Veuillez activer votre compte via le code envoyé par email avant de vous connecter." };
     }
 
     return { success: true };
@@ -86,8 +86,35 @@ export function useClientAuth(onSuccess?: () => void) {
     }
   };
 
+  const handleResendActivation = async (email: string) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true }));
+      
+      const { error } = await supabase.functions.invoke('send-activation-email', {
+        body: { email, resend: true }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email envoyé",
+        description: "Un nouveau code d'activation vous a été envoyé par email.",
+      });
+    } catch (error: any) {
+      console.error("Error resending activation:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'envoyer le code d'activation. Veuillez réessayer.",
+      });
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
   return {
     ...state,
     handleLogin,
+    handleResendActivation,
   };
 }

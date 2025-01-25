@@ -477,6 +477,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          activation_code: string | null
           activation_expires_at: string | null
           activation_token: string | null
           address: string | null
@@ -488,8 +489,10 @@ export type Database = {
           last_name: string | null
           phone: string | null
           phone_secondary: string | null
+          status: string | null
         }
         Insert: {
+          activation_code?: string | null
           activation_expires_at?: string | null
           activation_token?: string | null
           address?: string | null
@@ -501,8 +504,10 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
+          status?: string | null
         }
         Update: {
+          activation_code?: string | null
           activation_expires_at?: string | null
           activation_token?: string | null
           address?: string | null
@@ -514,6 +519,7 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           phone_secondary?: string | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -892,6 +898,12 @@ export type Database = {
       }
     }
     Functions: {
+      activate_client_account: {
+        Args: {
+          p_activation_code: string
+        }
+        Returns: boolean
+      }
       approve_carrier: {
         Args: {
           carrier_id: string
@@ -951,6 +963,10 @@ export type Database = {
           carrier_email: string
         }
         Returns: undefined
+      }
+      generate_activation_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       generate_company_name: {
         Args: {
