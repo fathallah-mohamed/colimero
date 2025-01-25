@@ -32,7 +32,6 @@ export function BookingActions({
     try {
       console.log('BookingActions - Changing status to:', newStatus);
       
-      // Update the booking status in the database
       const { error } = await supabase
         .from('bookings')
         .update({ 
@@ -43,11 +42,9 @@ export function BookingActions({
 
       if (error) throw error;
 
-      // Call the parent's onStatusChange handler
       await onStatusChange(newStatus);
       await onUpdate();
 
-      // Invalidate queries to trigger a refresh
       await queryClient.invalidateQueries({ queryKey: ['bookings'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
@@ -136,18 +133,25 @@ export function BookingActions({
         </>
       )}
 
-      {status === "confirmed" && tourStatus === "Ramassage en cours" && (
+      {status === "confirmed" && (
         <>
-          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-green-500 hover:text-green-600 gap-2"
-            onClick={() => handleStatusChange("collected")}
-          >
-            <CheckSquare className="h-4 w-4" />
-            Marquer comme collectée
-          </Button>
+          {tourStatus === "Programmée" && (
+            <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          )}
+          {tourStatus === "Ramassage en cours" && (
+            <>
+              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-500 hover:text-green-600 gap-2"
+                onClick={() => handleStatusChange("collected")}
+              >
+                <CheckSquare className="h-4 w-4" />
+                Marquer comme collectée
+              </Button>
+            </>
+          )}
         </>
       )}
     </div>
