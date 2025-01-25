@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { useAuthState } from "./useAuthState";
 import { authService } from "@/services/auth/auth-service";
-import { useEmailVerification } from "../useEmailVerification";
+import { useEmailVerification } from "./useEmailVerification";
 
 export interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -15,7 +16,8 @@ export function useLoginForm({
   onVerificationNeeded 
 }: UseLoginFormProps = {}) {
   const navigate = useNavigate();
-  const { verifyEmail, isVerifying, showConfirmationDialog, setShowConfirmationDialog } = useEmailVerification();
+  const { toast } = useToast();
+  const { verifyEmail, isVerifying } = useEmailVerification();
   const {
     email,
     setEmail,
@@ -67,6 +69,26 @@ export function useLoginForm({
         return;
       }
 
+      // Double vérification pour les clients
+      if (userType === 'client') {
+        const isStillVerified = await verifyEmail(email);
+        if (!isStillVerified) {
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          setShowVerificationDialog(true);
+          setPassword("");
+          await authService.signOut();
+          return;
+        }
+      }
+
+      // Succès de la connexion
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté"
+      });
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -97,10 +119,8 @@ export function useLoginForm({
     error,
     showVerificationDialog,
     showErrorDialog,
-    showConfirmationDialog,
     setShowVerificationDialog,
     setShowErrorDialog,
-    setShowConfirmationDialog,
     handleSubmit,
   };
 }
