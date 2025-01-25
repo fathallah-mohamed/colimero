@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthState } from "./useAuthState";
 import { authService } from "@/services/auth/auth-service";
 import { clientVerificationService } from "@/services/auth/client-verification";
-import { useAuthState } from "./useAuthState";
-import { supabase } from "@/integrations/supabase/client";
 
-interface UseLoginFormProps {
+export interface UseLoginFormProps {
   onSuccess?: () => void;
   requiredUserType?: 'client' | 'carrier';
   onVerificationNeeded?: () => void;
@@ -42,43 +40,55 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
-      // Check client verification status
+      // Vérifier le statut de vérification du client
       const clientData = await clientVerificationService.checkVerificationStatus(email);
+      console.log("Client verification status:", clientData);
 
-      // Attempt login
-      const loginResponse = await authService.signIn(email, password);
-      
-      if (!loginResponse.success) {
-        setError(loginResponse.error);
+      // Tentative de connexion
+      const { data: signInData, error: signInError } = await authService.signIn(email, password);
+
+      if (signInError) {
+        console.error("Sign in error:", signInError);
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+        
+        if (signInError.message === "Invalid login credentials") {
+          errorMessage = "Email ou mot de passe incorrect";
+        }
+
+        setError(errorMessage);
         setShowErrorDialog(true);
         setPassword("");
         return;
       }
 
-      // Validate user type if required
-      const validationResponse = await authService.validateUserType(
-        loginResponse.user,
-        requiredUserType
-      );
+      if (!signInData.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
 
-      if (!validationResponse.success) {
-        setError(validationResponse.error);
+      const userType = signInData.user.user_metadata?.user_type;
+      console.log("User type:", userType, "Required type:", requiredUserType);
+
+      // Valider le type d'utilisateur
+      if (requiredUserType && userType !== requiredUserType) {
+        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         setShowErrorDialog(true);
+        await authService.signOut();
         return;
       }
 
-      // Check client verification status
-      const userType = loginResponse.user.user_metadata?.user_type;
+      // Vérifier l'activation du compte client
       if (userType === 'client' && clientData && !clientData.email_verified) {
+        console.log("Client account not verified");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
         setShowVerificationDialog(true);
-        await supabase.auth.signOut();
+        setPassword("");
+        await authService.signOut();
         return;
       }
 
-      // Success
+      // Succès
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"
@@ -95,9 +105,8 @@ export function useLoginForm({
           navigate("/");
         }
       }
-
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("Complete login error:", error);
       setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
       setPassword("");
