@@ -52,6 +52,11 @@ serve(async (req) => {
       throw new Error('No client found with this email address')
     }
 
+    if (client.email_verified) {
+      console.log('✅ Client already verified')
+      throw new Error('Email already verified')
+    }
+
     // Générer un nouveau token d'activation
     console.log('🔑 Generating new activation token for:', email)
     const { data: updateData, error: updateError } = await supabase
