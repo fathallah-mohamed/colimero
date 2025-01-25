@@ -50,15 +50,6 @@ export function useLoginForm({
       if (signInError) {
         console.error("Sign in error:", signInError);
         
-        if (signInError.message.includes("Email not confirmed")) {
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setShowVerificationDialog(true);
-          setPassword("");
-          return;
-        }
-
         let errorMessage = "Une erreur est survenue lors de la connexion";
         if (signInError.message === "Invalid login credentials") {
           errorMessage = "Email ou mot de passe incorrect";
@@ -82,6 +73,7 @@ export function useLoginForm({
       if ('error' in validationResult) {
         setError(validationResult.error);
         setShowErrorDialog(true);
+        await supabase.auth.signOut();
         return;
       }
 
@@ -89,8 +81,12 @@ export function useLoginForm({
       if (userType === 'client') {
         const verificationResult = await authVerificationService.checkEmailVerification(email, userType);
         if ('error' in verificationResult) {
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
           setError(verificationResult.error);
           setShowVerificationDialog(true);
+          setPassword("");
           await supabase.auth.signOut();
           return;
         }
