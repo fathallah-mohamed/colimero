@@ -8,6 +8,13 @@ export function useAuthState() {
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
 
+  const resetState = () => {
+    setPassword("");
+    setError(null);
+    setShowVerificationDialog(false);
+    setShowErrorDialog(false);
+  };
+
   return {
     email,
     setEmail,
@@ -21,5 +28,6 @@ export function useAuthState() {
     setShowVerificationDialog,
     showErrorDialog,
     setShowErrorDialog,
+    resetState
   };
 }

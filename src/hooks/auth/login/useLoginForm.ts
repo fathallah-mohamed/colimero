@@ -30,14 +30,13 @@ export function useLoginForm({
     setShowVerificationDialog,
     showErrorDialog,
     setShowErrorDialog,
+    resetState
   } = useAuthState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
-    setShowVerificationDialog(false);
-    setShowErrorDialog(false);
+    resetState();
 
     try {
       // Vérifier le statut de vérification du client

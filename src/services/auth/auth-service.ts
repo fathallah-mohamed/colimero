@@ -1,7 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { AuthError, User } from "@supabase/supabase-js";
+import { authVerificationService } from "./auth-verification";
 
-interface AuthResponse {
+export interface AuthResponse {
   success: boolean;
   error?: string;
   user?: User;
@@ -68,16 +69,11 @@ export const authService = {
   },
 
   validateUserType(user: User, requiredType?: 'client' | 'carrier'): AuthResponse {
-    if (!requiredType) return { success: true };
-
-    const userType = user.user_metadata?.user_type;
-    if (userType !== requiredType) {
-      return {
-        success: false,
-        error: `Ce compte n'est pas un compte ${requiredType === 'client' ? 'client' : 'transporteur'}`
-      };
-    }
-
-    return { success: true };
+    const validation = authVerificationService.validateUserType(user, requiredType);
+    return {
+      success: validation.success,
+      error: validation.error,
+      user: validation.success ? user : undefined
+    };
   }
 };
