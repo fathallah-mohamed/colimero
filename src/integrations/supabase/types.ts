@@ -1032,6 +1032,7 @@ export type Database = {
         | "collected"
         | "in_transit"
         | "reported"
+      carrier_status: "pending" | "active" | "rejected" | "suspended"
       french_city:
         | "Paris"
         | "Lyon"
