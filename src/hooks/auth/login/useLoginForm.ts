@@ -90,7 +90,7 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
           }
           setPassword("");
           setIsLoading(false);
-          await supabase.auth.signOut();
+          // On ne déconnecte plus l'utilisateur ici
           return;
         }
       } else if (userType === 'carrier') {
