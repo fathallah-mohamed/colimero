@@ -1,45 +1,49 @@
 import { useState } from "react";
-import { emailVerificationService } from "@/services/email-verification-service";
+import { emailVerificationService } from "@/services/auth/email-verification-service";
 import { useToast } from "@/hooks/use-toast";
 
 export function useEmailVerification() {
-  const [isResending, setIsResending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
 
-  const resendActivationEmail = async (email: string) => {
-    setIsResending(true);
+  const verifyEmail = async (email: string): Promise<boolean> => {
+    setIsVerifying(true);
     try {
-      const success = await emailVerificationService.resendActivationEmail(email);
+      const result = await emailVerificationService.verifyClientEmail(email);
       
-      if (success) {
-        toast({
-          title: "Email envoyé",
-          description: "Un nouveau lien d'activation a été envoyé à votre adresse email.",
-        });
-        return true;
-      } else {
+      if (result.error) {
         toast({
           variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de l'envoi de l'email.",
+          title: "Erreur de vérification",
+          description: result.error
         });
         return false;
       }
+
+      if (!result.isVerified) {
+        toast({
+          variant: "destructive",
+          title: "Compte non vérifié",
+          description: "Veuillez activer votre compte via le lien envoyé par email."
+        });
+      }
+
+      return result.isVerified;
     } catch (error) {
-      console.error('Error resending activation email:', error);
+      console.error('Error in verifyEmail:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de l'email.",
+        description: "Une erreur est survenue lors de la vérification"
       });
       return false;
     } finally {
-      setIsResending(false);
+      setIsVerifying(false);
     }
   };
 
   return {
-    isResending,
-    resendActivationEmail
+    isVerifying,
+    verifyEmail
   };
 }

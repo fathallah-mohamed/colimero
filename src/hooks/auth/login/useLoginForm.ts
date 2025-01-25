@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthState } from "../useAuthState";
 import { authService } from "@/services/auth/auth-service";
-import { clientVerificationService } from "@/services/auth/client-verification";
+import { useEmailVerification } from "../useEmailVerification";
 
 export interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -17,6 +17,7 @@ export function useLoginForm({
 }: UseLoginFormProps = {}) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { verifyEmail, isVerifying } = useEmailVerification();
   const {
     email,
     setEmail,
@@ -39,25 +40,19 @@ export function useLoginForm({
     resetState();
 
     try {
-      // Vérifier d'abord si c'est un client et si le compte est vérifié
-      const clientData = await clientVerificationService.checkVerificationStatus(email);
-      console.log("Client verification status:", clientData);
-
-      // Si c'est un client et que le compte n'est pas vérifié, bloquer la connexion
-      if (clientData && !clientData.email_verified) {
-        console.log("Client account not verified");
+      // Première vérification de l'email
+      const isEmailVerified = await verifyEmail(email);
+      if (!isEmailVerified) {
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
         setShowVerificationDialog(true);
         setPassword("");
-        setIsLoading(false);
         return;
       }
 
-      // Si le compte est vérifié ou si ce n'est pas un client, procéder à la connexion
+      // Tentative de connexion
       const loginResponse = await authService.signIn(email, password);
-
       if (!loginResponse.success || !loginResponse.user) {
         setError(loginResponse.error || "Erreur de connexion");
         setShowErrorDialog(true);
@@ -65,21 +60,19 @@ export function useLoginForm({
         return;
       }
 
-      // Valider le type d'utilisateur si requis
-      const validationResponse = authService.validateUserType(loginResponse.user, requiredUserType);
-      if (!validationResponse.success) {
-        setError(validationResponse.error);
+      // Vérification du type d'utilisateur
+      const userType = loginResponse.user.user_metadata?.user_type;
+      if (requiredUserType && userType !== requiredUserType) {
+        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         setShowErrorDialog(true);
         await authService.signOut();
         return;
       }
 
-      // Double vérification après la connexion pour les clients
-      const userType = loginResponse.user.user_metadata?.user_type;
+      // Double vérification pour les clients
       if (userType === 'client') {
-        const verificationStatus = await clientVerificationService.checkVerificationStatus(email);
-        if (!verificationStatus?.email_verified) {
-          console.log("Client account verification check failed after login");
+        const isStillVerified = await verifyEmail(email);
+        if (!isStillVerified) {
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
@@ -107,8 +100,8 @@ export function useLoginForm({
           navigate("/");
         }
       }
-    } catch (error: any) {
-      console.error("Complete login error:", error);
+    } catch (error) {
+      console.error("Login error:", error);
       setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
       setPassword("");
@@ -122,7 +115,7 @@ export function useLoginForm({
     setEmail,
     password,
     setPassword,
-    isLoading,
+    isLoading: isLoading || isVerifying,
     error,
     showVerificationDialog,
     showErrorDialog,
