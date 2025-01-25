@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-interface LoginFormValues {
+export interface LoginFormValues {
   email: string;
   password: string;
 }

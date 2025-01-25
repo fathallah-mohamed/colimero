@@ -1,4 +1,4 @@
-import { LoginFormFields } from "./LoginFormFields";
+import { LoginFormFields, LoginFormValues } from "./LoginFormFields";
 import { LoginFormActions } from "./LoginFormActions";
 import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +14,6 @@ const loginSchema = z.object({
     .min(1, "Le mot de passe est requis")
     .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 });
-
-type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   onForgotPassword: () => void;
