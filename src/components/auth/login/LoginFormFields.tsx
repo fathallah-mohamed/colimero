@@ -61,10 +61,9 @@ export function LoginFormFields({
         isOpen={showVerificationDialog}
         onClose={onVerificationDialogClose}
         email={email}
-        isResending={isLoading}
-        onResendEmail={onResendEmail || (() => {})}
         showConfirmationDialog={showConfirmationDialog}
         onConfirmationClose={onConfirmationClose}
+        onResendEmail={onResendEmail || (() => {})}
       />
 
       <Dialog open={showErrorDialog} onOpenChange={onErrorDialogClose}>
