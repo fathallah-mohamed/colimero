@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { BookingStatus } from "@/types/booking";
+import { useEffect } from "react";
 
 export default function CurrentTours() {
   const navigate = useNavigate();
@@ -27,6 +28,42 @@ export default function CurrentTours() {
     handleAuthSuccess
   } = useBookingFlow();
 
+  useEffect(() => {
+    if (!nextTour) return;
+
+    console.log("Setting up realtime subscription for tour:", nextTour.id);
+    
+    const channel = supabase
+      .channel(`tour_${nextTour.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bookings',
+          filter: `tour_id=eq.${nextTour.id}`
+        },
+        (payload) => {
+          console.log('Booking change detected:', payload);
+          queryClient.invalidateQueries({ queryKey: ['next-tour'] });
+          queryClient.invalidateQueries({ queryKey: ['tours'] });
+          
+          toast({
+            title: "Mise à jour",
+            description: "Les réservations ont été mises à jour.",
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
+
+    return () => {
+      console.log("Cleaning up realtime subscription");
+      supabase.removeChannel(channel);
+    };
+  }, [nextTour?.id, queryClient, toast]);
+
   const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
       const { error } = await supabase
@@ -36,7 +73,6 @@ export default function CurrentTours() {
 
       if (error) throw error;
 
-      // Invalider le cache pour forcer le rechargement des données
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
 
@@ -68,7 +104,6 @@ export default function CurrentTours() {
         throw error;
       }
 
-      // Invalider le cache pour forcer le rechargement des données
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
       
