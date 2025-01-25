@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useEmailVerification() {
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
   const verifyEmail = async (email: string) => {
@@ -23,10 +24,33 @@ export function useEmailVerification() {
     }
   };
 
+  const resendActivationEmail = async (email: string): Promise<boolean> => {
+    console.log('Resending activation email to:', email);
+    setIsResending(true);
+    try {
+      const { error } = await supabase.functions.invoke('send-activation-email', {
+        body: { email }
+      });
+
+      if (!error) {
+        setShowConfirmationDialog(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error resending activation email:', error);
+      return false;
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   return {
     verifyEmail,
     isVerifying,
+    isResending,
     showConfirmationDialog,
-    setShowConfirmationDialog
+    setShowConfirmationDialog,
+    resendActivationEmail
   };
 }
