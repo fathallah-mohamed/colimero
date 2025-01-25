@@ -19,9 +19,7 @@ export function EmailVerificationDialog({
 }: EmailVerificationDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        return;
-      }
+      if (!open) onClose();
     }}>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-center">

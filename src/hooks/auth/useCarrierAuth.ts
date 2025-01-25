@@ -17,10 +17,11 @@ export function useCarrierAuth(onSuccess?: () => void) {
   });
 
   const checkCarrierStatus = async (email: string) => {
+    console.log("Checking carrier status for:", email);
     const { data: carrierData, error: carrierError } = await supabase
       .from('carriers')
       .select('status')
-      .eq('email', email)
+      .eq('email', email.trim())
       .single();
 
     if (carrierError && carrierError.code !== 'PGRST116') {
