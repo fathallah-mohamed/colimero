@@ -1,6 +1,21 @@
 import { LoginFormFields } from "./LoginFormFields";
 import { LoginFormActions } from "./LoginFormActions";
 import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Form } from "@/components/ui/form";
+
+const loginSchema = z.object({
+  email: z.string()
+    .min(1, "L'email est requis")
+    .email("Format d'email invalide"),
+  password: z.string()
+    .min(1, "Le mot de passe est requis")
+    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -19,51 +34,58 @@ export function LoginForm({
   requiredUserType,
   hideRegisterButton = false,
 }: LoginFormProps) {
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
   const {
     isLoading,
-    email,
-    setEmail,
-    password,
-    setPassword,
     error,
     showVerificationDialog,
     showErrorDialog,
     setShowVerificationDialog,
     setShowErrorDialog,
-    handleSubmit,
+    handleLogin,
   } = useLoginForm({ 
     onSuccess,
     requiredUserType,
     onVerificationNeeded: () => {
       setShowVerificationDialog(true);
-      setPassword("");
+      form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <LoginFormFields
-        email={email}
-        password={password}
-        isLoading={isLoading}
-        error={error}
-        showVerificationDialog={showVerificationDialog}
-        showErrorDialog={showErrorDialog}
-        onEmailChange={setEmail}
-        onPasswordChange={setPassword}
-        onVerificationDialogClose={() => setShowVerificationDialog(false)}
-        onErrorDialogClose={() => setShowErrorDialog(false)}
-      />
+  const onSubmit = async (values: LoginFormValues) => {
+    await handleLogin(values.email, values.password);
+  };
 
-      {!hideRegisterButton && (
-        <LoginFormActions
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <LoginFormFields
+          form={form}
           isLoading={isLoading}
-          onForgotPassword={onForgotPassword}
-          onRegister={onRegister}
-          onCarrierRegister={onCarrierRegister}
-          requiredUserType={requiredUserType}
+          error={error}
+          showVerificationDialog={showVerificationDialog}
+          showErrorDialog={showErrorDialog}
+          onVerificationDialogClose={() => setShowVerificationDialog(false)}
+          onErrorDialogClose={() => setShowErrorDialog(false)}
         />
-      )}
-    </form>
+
+        {!hideRegisterButton && (
+          <LoginFormActions
+            isLoading={isLoading}
+            onForgotPassword={onForgotPassword}
+            onRegister={onRegister}
+            onCarrierRegister={onCarrierRegister}
+            requiredUserType={requiredUserType}
+          />
+        )}
+      </form>
+    </Form>
   );
 }

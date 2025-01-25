@@ -13,8 +13,9 @@ serve(async (req) => {
 
   try {
     const requestData = await req.json()
-    const { email } = requestData
-    console.log('📧 Starting send-activation-email for:', email)
+    const { email, resend } = requestData
+
+    console.log('📧 Starting send-activation-email for:', { email, resend })
 
     if (!email || typeof email !== 'string' || !email.trim()) {
       console.error('❌ No email provided in request')
@@ -26,14 +27,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Attendre un peu pour s'assurer que l'enregistrement client est créé
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    console.log('⏳ Waited for client record creation')
-
-    // Récupérer les détails du client
+    // Vérifier si le client existe et n'est pas déjà vérifié
     const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select('first_name, activation_token, email_verified')
+      .select('email_verified, first_name, activation_token')
       .eq('email', email.trim())
       .maybeSingle()
 
@@ -53,7 +50,7 @@ serve(async (req) => {
       throw new Error('No client found with this email address')
     }
 
-    if (client.email_verified) {
+    if (client.email_verified && !resend) {
       console.log('✅ Client already verified')
       throw new Error('Email already verified')
     }
@@ -84,7 +81,6 @@ serve(async (req) => {
       throw new Error('SITE_URL environment variable is not set')
     }
 
-    // Supprimer www. et tout slash final de l'URL de base
     const cleanBaseUrl = baseUrl.replace(/^(https?:\/\/)?(www\.)?/, 'https://').replace(/\/$/, '')
     const activationLink = `${cleanBaseUrl}/activation?token=${activationToken}`
     console.log('🔗 Generated activation link:', activationLink)
@@ -157,7 +153,7 @@ serve(async (req) => {
           </html>
         `,
       }),
-    });
+    })
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json()

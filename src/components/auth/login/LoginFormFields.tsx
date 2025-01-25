@@ -3,67 +3,86 @@ import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDial
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface LoginFormFieldsProps {
-  email: string;
-  password: string;
+  form: UseFormReturn<{
+    email: string;
+    password: string;
+  }>;
   isLoading: boolean;
   error: string | null;
   showVerificationDialog: boolean;
   showErrorDialog: boolean;
-  onEmailChange: (value: string) => void;
-  onPasswordChange: (value: string) => void;
   onVerificationDialogClose: () => void;
   onErrorDialogClose: () => void;
-  showConfirmationDialog?: boolean;
-  onConfirmationClose?: () => void;
-  onResendEmail?: () => void;
 }
 
 export function LoginFormFields({
-  email,
-  password,
+  form,
   isLoading,
   error,
   showVerificationDialog,
   showErrorDialog,
-  onEmailChange,
-  onPasswordChange,
   onVerificationDialogClose,
   onErrorDialogClose,
-  showConfirmationDialog,
-  onConfirmationClose,
-  onResendEmail
 }: LoginFormFieldsProps) {
+  const email = form.watch("email");
+
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => onEmailChange(e.target.value)}
-          disabled={isLoading}
-        />
-      </div>
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Email</FormLabel>
+            <FormControl>
+              <Input
+                type="email"
+                placeholder="votre@email.com"
+                disabled={isLoading}
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className="space-y-2">
-        <Input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => onPasswordChange(e.target.value)}
-          disabled={isLoading}
-        />
-      </div>
+      <FormField
+        control={form.control}
+        name="password"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Mot de passe</FormLabel>
+            <FormControl>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                disabled={isLoading}
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <EmailVerificationDialog
         isOpen={showVerificationDialog}
         onClose={onVerificationDialogClose}
         email={email}
-        showConfirmationDialog={showConfirmationDialog}
-        onConfirmationClose={onConfirmationClose}
-        onResendEmail={onResendEmail || (() => {})}
+        onResendEmail={() => {
+          console.log("Resending verification email to:", email);
+        }}
       />
 
       <Dialog open={showErrorDialog} onOpenChange={onErrorDialogClose}>
@@ -74,14 +93,19 @@ export function LoginFormFields({
                 <AlertCircle className="h-6 w-6 text-red-500" />
               </div>
             </div>
-            <DialogTitle className="text-center text-xl">Erreur de connexion</DialogTitle>
+            <DialogTitle className="text-center text-xl">
+              Erreur de connexion
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-center text-gray-600">
               {error}
             </p>
             <div className="flex justify-center">
-              <Button onClick={onErrorDialogClose} className="bg-[#00B0F0] hover:bg-[#0082b3] text-white">
+              <Button 
+                onClick={onErrorDialogClose} 
+                className="bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+              >
                 Fermer
               </Button>
             </div>
