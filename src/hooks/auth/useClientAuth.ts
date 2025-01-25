@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-export interface ClientAuthState {
+interface ClientAuthState {
   isLoading: boolean;
-  statusMessage: { type: 'default' | 'destructive'; message: string } | null;
+  error: string | null;
+  isVerificationNeeded: boolean;
 }
 
 export function useClientAuth(onSuccess?: () => void) {
@@ -13,59 +14,47 @@ export function useClientAuth(onSuccess?: () => void) {
   const { toast } = useToast();
   const [state, setState] = useState<ClientAuthState>({
     isLoading: false,
-    statusMessage: null,
+    error: null,
+    isVerificationNeeded: false
   });
-
-  const checkClientVerification = async (email: string) => {
-    console.log("Checking verification status for:", email);
-    const { data: clientData, error: clientError } = await supabase
-      .from('clients')
-      .select('status')
-      .eq('email', email.trim())
-      .single();
-
-    if (clientError) {
-      console.error("Error checking client status:", clientError);
-      return { error: "Une erreur est survenue lors de la vérification de votre compte." };
-    }
-
-    if (clientData && clientData.status !== 'active') {
-      return { error: "Veuillez activer votre compte via le code envoyé par email avant de vous connecter." };
-    }
-
-    return { success: true };
-  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, statusMessage: null }));
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      
+      // Vérifier d'abord si le client existe et n'est pas vérifié
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('status')
+        .eq('email', email.trim())
+        .single();
 
-      const verificationCheck = await checkClientVerification(email);
-      if ('error' in verificationCheck) {
-        setState(prev => ({
-          ...prev,
-          statusMessage: { type: 'default', message: verificationCheck.error }
-        }));
+      if (clientError) {
+        console.error("Error checking client status:", clientError);
+        throw new Error("Une erreur est survenue lors de la vérification de votre compte");
+      }
+
+      if (clientData?.status === 'pending') {
+        setState(prev => ({ ...prev, isVerificationNeeded: true }));
+        await handleResendActivation(email);
         return;
       }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: email.trim(),
+        password: password.trim()
       });
 
       if (signInError) {
-        setState(prev => ({
-          ...prev,
-          statusMessage: {
-            type: 'destructive',
-            message: signInError.message === "Invalid login credentials"
-              ? "Email ou mot de passe incorrect"
-              : "Une erreur est survenue lors de la connexion"
-          }
-        }));
-        return;
+        throw new Error(signInError.message === "Invalid login credentials" 
+          ? "Email ou mot de passe incorrect"
+          : "Une erreur est survenue lors de la connexion");
       }
+
+      toast({
+        title: "Connexion réussie",
+        description: "Bienvenue sur votre espace client",
+      });
 
       if (onSuccess) {
         onSuccess();
@@ -76,11 +65,14 @@ export function useClientAuth(onSuccess?: () => void) {
       console.error("Login error:", error);
       setState(prev => ({
         ...prev,
-        statusMessage: {
-          type: 'destructive',
-          message: "Une erreur est survenue lors de la connexion"
-        }
+        error: error.message || "Une erreur est survenue lors de la connexion"
       }));
+      
+      toast({
+        variant: "destructive",
+        title: "Erreur de connexion",
+        description: error.message || "Une erreur est survenue lors de la connexion"
+      });
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
     }
@@ -91,21 +83,21 @@ export function useClientAuth(onSuccess?: () => void) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       const { error } = await supabase.functions.invoke('send-activation-email', {
-        body: { email, resend: true }
+        body: { email: email.trim() }
       });
 
       if (error) throw error;
 
       toast({
-        title: "Email envoyé",
-        description: "Un nouveau code d'activation vous a été envoyé par email.",
+        title: "Code d'activation envoyé",
+        description: "Veuillez vérifier votre boîte mail pour activer votre compte",
       });
     } catch (error: any) {
       console.error("Error resending activation:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible d'envoyer le code d'activation. Veuillez réessayer.",
+        description: "Impossible d'envoyer le code d'activation"
       });
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
@@ -115,6 +107,6 @@ export function useClientAuth(onSuccess?: () => void) {
   return {
     ...state,
     handleLogin,
-    handleResendActivation,
+    handleResendActivation
   };
 }

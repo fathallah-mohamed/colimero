@@ -1,25 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useState } from "react";
 import { useClientAuth } from "@/hooks/auth/useClientAuth";
-
-const loginSchema = z.object({
-  email: z.string()
-    .min(1, "L'email est requis")
-    .email("Format d'email invalide"),
-  password: z.string()
-    .min(1, "Le mot de passe est requis")
-    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface ClientLoginFormProps {
   onRegister: () => void;
@@ -30,96 +15,89 @@ interface ClientLoginFormProps {
 export function ClientLoginForm({
   onRegister,
   onForgotPassword,
-  onSuccess,
+  onSuccess
 }: ClientLoginFormProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showActivationDialog, setShowActivationDialog] = useState(false);
-  const [currentEmail, setCurrentEmail] = useState("");
-  const { isLoading, statusMessage, handleLogin, handleResendActivation } = useClientAuth(onSuccess);
+  
+  const {
+    isLoading,
+    error,
+    isVerificationNeeded,
+    handleLogin,
+    handleResendActivation
+  } = useClientAuth(onSuccess);
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = async (values: LoginFormValues) => {
-    setCurrentEmail(values.email);
-    await handleLogin(values.email, values.password);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleLogin(email, password);
     
-    if (statusMessage?.message.includes("activer votre compte")) {
+    if (isVerificationNeeded) {
       setShowActivationDialog(true);
     }
   };
 
   return (
     <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {statusMessage && statusMessage.type === 'destructive' && (
-            <Alert variant="destructive">
-              <AlertDescription>{statusMessage.message}</AlertDescription>
-            </Alert>
-          )}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input {...field} type="email" placeholder="votre@email.com" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="votre@email.com"
+            required
           />
+        </div>
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mot de passe</FormLabel>
-                <FormControl>
-                  <Input {...field} type="password" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+        <div className="space-y-2">
+          <Label htmlFor="password">Mot de passe</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
+        </div>
 
-          <div className="space-y-4">
-            <Button
-              type="submit"
-              className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
-              disabled={isLoading}
+        <div className="space-y-4">
+          <Button
+            type="submit"
+            className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+            disabled={isLoading}
+          >
+            {isLoading ? "Connexion..." : "Se connecter"}
+          </Button>
+
+          <div className="flex flex-col space-y-2 text-center text-sm">
+            <button
+              type="button"
+              onClick={onRegister}
+              className="text-[#00B0F0] hover:underline"
             >
-              {isLoading ? "Connexion..." : "Se connecter"}
-            </Button>
+              Créer un compte
+            </button>
 
-            <div className="flex flex-col space-y-2 text-center text-sm">
-              <button
-                type="button"
-                onClick={onRegister}
-                className="text-[#00B0F0] hover:underline"
-              >
-                Créer un compte
-              </button>
-
-              <button
-                type="button"
-                onClick={onForgotPassword}
-                className="text-[#00B0F0] hover:underline"
-              >
-                Mot de passe oublié ?
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-[#00B0F0] hover:underline"
+            >
+              Mot de passe oublié ?
+            </button>
           </div>
-        </form>
-      </Form>
+        </div>
+      </form>
 
       <Dialog open={showActivationDialog} onOpenChange={setShowActivationDialog}>
         <DialogContent>
@@ -129,7 +107,7 @@ export function ClientLoginForm({
           
           <div className="space-y-4">
             <p className="text-center text-gray-600">
-              Votre compte n'est pas encore activé. Un code d'activation a été envoyé à l'adresse <span className="font-medium">{currentEmail}</span>.
+              Votre compte n'est pas encore activé. Un code d'activation a été envoyé à l'adresse <span className="font-medium">{email}</span>.
             </p>
             
             <p className="text-sm text-center text-gray-500">
@@ -139,7 +117,7 @@ export function ClientLoginForm({
             <div className="flex justify-center">
               <Button
                 onClick={() => {
-                  handleResendActivation(currentEmail);
+                  handleResendActivation(email);
                   setShowActivationDialog(false);
                 }}
                 variant="outline"
