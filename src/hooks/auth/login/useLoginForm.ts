@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -22,6 +22,27 @@ export function useLoginForm({
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const checkEmailVerification = async (email: string, userType: string) => {
+    if (userType === 'client') {
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified')
+        .eq('email', email.trim())
+        .single();
+
+      if (clientError) {
+        console.error("Error checking client verification:", clientError);
+        return { error: "Une erreur est survenue lors de la vérification de votre compte." };
+      }
+
+      if (!clientData?.email_verified) {
+        return { error: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter." };
+      }
+    }
+
+    return { success: true };
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +94,17 @@ export function useLoginForm({
         setShowErrorDialog(true);
         await supabase.auth.signOut();
         return;
+      }
+
+      // Vérifier la validation de l'email pour les clients
+      if (userType === 'client') {
+        const verificationResult = await checkEmailVerification(email, userType);
+        if ('error' in verificationResult) {
+          setError(verificationResult.error);
+          setShowVerificationDialog(true);
+          await supabase.auth.signOut();
+          return;
+        }
       }
 
       // Success
