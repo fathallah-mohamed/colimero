@@ -20,7 +20,7 @@ export function LoginFormActions({
     <div className="space-y-4">
       <Button
         type="submit"
-        className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+        className="w-full bg-primary hover:bg-primary/90 text-white"
         disabled={isLoading}
       >
         {isLoading ? "Connexion..." : "Se connecter"}
@@ -46,7 +46,7 @@ export function LoginFormActions({
                 type="button"
                 variant="outline"
                 onClick={onRegister}
-                className="w-full"
+                className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors"
               >
                 Créer un compte client
               </Button>
@@ -57,7 +57,7 @@ export function LoginFormActions({
                 type="button"
                 variant="outline"
                 onClick={onCarrierRegister}
-                className="w-full"
+                className="w-full border-2 border-client text-client hover:bg-client hover:text-white transition-colors"
               >
                 Devenir transporteur
               </Button>
@@ -69,7 +69,7 @@ export function LoginFormActions({
       <div className="text-center">
         <button
           type="button"
-          className="text-sm text-[#00B0F0] hover:underline"
+          className="text-sm text-primary hover:text-primary/90 hover:underline transition-colors"
           onClick={onForgotPassword}
         >
           Mot de passe oublié ?
