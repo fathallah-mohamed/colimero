@@ -10,6 +10,7 @@ interface UseClientLoginProps {
 export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLoginProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     console.log('Starting login process for:', email);
@@ -27,6 +28,11 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
       if (clientError) {
         console.error('Error checking client:', clientError);
         setError("Une erreur est survenue lors de la vérification du compte");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la vérification du compte"
+        });
         return;
       }
 
@@ -38,6 +44,7 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
+        setIsLoading(false);
         return;
       }
 
@@ -51,8 +58,18 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
         
         if (signInError.message.includes("Invalid login credentials")) {
           setError("Email ou mot de passe incorrect");
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Email ou mot de passe incorrect"
+          });
         } else {
           setError("Une erreur est survenue lors de la connexion");
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Une erreur est survenue lors de la connexion"
+          });
         }
         return;
       }
@@ -71,6 +88,11 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
     } catch (error: any) {
       console.error("Login error:", error);
       setError("Une erreur inattendue s'est produite");
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite"
+      });
     } finally {
       setIsLoading(false);
     }
