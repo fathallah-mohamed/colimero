@@ -21,6 +21,30 @@ export function useLoginForm({
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleActivationEmail = async (email: string) => {
+    const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
+      body: { 
+        email: email.trim(),
+        resend: true
+      }
+    });
+
+    if (functionError) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'envoyer l'email d'activation"
+      });
+      return false;
+    }
+
+    toast({
+      title: "Email envoyé",
+      description: "Un nouvel email d'activation vous a été envoyé"
+    });
+    return true;
+  };
+
   const handleLogin = async (email: string, password: string) => {
     try {
       setIsLoading(true);
@@ -28,38 +52,16 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Vérifier d'abord si le client existe et son statut de vérification
+      // Vérifier si le compte existe et n'est pas vérifié
       const { data: clientData } = await supabase
         .from('clients')
         .select('email_verified')
         .eq('email', email.trim())
         .single();
 
-      // Si le compte existe et n'est pas vérifié
       if (clientData && !clientData.email_verified) {
-        // Envoyer un nouvel email d'activation
-        const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
-          body: { 
-            email: email.trim(),
-            resend: true
-          }
-        });
-
-        if (functionError) {
-          console.error("Error sending activation email:", functionError);
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible d'envoyer l'email d'activation"
-          });
-        } else {
-          toast({
-            title: "Email envoyé",
-            description: "Un nouvel email d'activation vous a été envoyé"
-          });
-        }
-
-        if (onVerificationNeeded) {
+        const emailSent = await handleActivationEmail(email);
+        if (emailSent && onVerificationNeeded) {
           onVerificationNeeded();
         }
         setShowVerificationDialog(true);
@@ -67,7 +69,7 @@ export function useLoginForm({
         return;
       }
 
-      // Si le compte est vérifié ou n'existe pas, tenter la connexion
+      // Tentative de connexion
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -75,14 +77,11 @@ export function useLoginForm({
 
       if (signInError) {
         let errorMessage = "Une erreur est survenue lors de la connexion";
-        
         if (signInError.message === "Invalid login credentials") {
           errorMessage = "Email ou mot de passe incorrect";
         }
-
         setError(errorMessage);
         setShowErrorDialog(true);
-        setIsLoading(false);
         return;
       }
 
@@ -96,11 +95,10 @@ export function useLoginForm({
         await supabase.auth.signOut();
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         setShowErrorDialog(true);
-        setIsLoading(false);
         return;
       }
 
-      // Succès de la connexion
+      // Navigation après connexion réussie
       if (onSuccess) {
         onSuccess();
       } else {
