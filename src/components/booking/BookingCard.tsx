@@ -23,7 +23,7 @@ interface BookingCardProps {
 }
 
 export function BookingCard({ 
-  booking, 
+  booking: initialBooking, 
   isCollecting, 
   onStatusChange, 
   onUpdate, 
@@ -31,27 +31,27 @@ export function BookingCard({
 }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [localBooking, setLocalBooking] = useState(booking);
+  const [localBooking, setLocalBooking] = useState(initialBooking);
   const { toast } = useToast();
   const { userType } = useProfile();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    setLocalBooking(booking);
-  }, [booking]);
+    setLocalBooking(initialBooking);
+  }, [initialBooking]);
 
   useEffect(() => {
-    console.log("Setting up realtime subscription for booking:", booking.id);
+    console.log("Setting up realtime subscription for booking:", initialBooking.id);
     
     const channel = supabase
-      .channel(`booking_${booking.id}`)
+      .channel(`booking_${initialBooking.id}`)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
           table: 'bookings',
-          filter: `id=eq.${booking.id}`
+          filter: `id=eq.${initialBooking.id}`
         },
         (payload) => {
           console.log('Booking updated:', payload);
@@ -59,6 +59,12 @@ export function BookingCard({
           queryClient.invalidateQueries({ queryKey: ['bookings'] });
           queryClient.invalidateQueries({ queryKey: ['tours'] });
           queryClient.invalidateQueries({ queryKey: ['next-tour'] });
+          
+          // Show toast notification
+          toast({
+            title: "Réservation mise à jour",
+            description: "Le statut de la réservation a été mis à jour.",
+          });
         }
       )
       .subscribe((status) => {
@@ -69,7 +75,7 @@ export function BookingCard({
       console.log("Cleaning up realtime subscription");
       supabase.removeChannel(channel);
     };
-  }, [booking.id, queryClient]);
+  }, [initialBooking.id, queryClient, toast]);
 
   const handleEdit = () => {
     console.log("Opening edit dialog for booking:", localBooking.id);
@@ -78,8 +84,10 @@ export function BookingCard({
 
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
+      console.log("Changing booking status to:", newStatus);
       await onStatusChange(localBooking.id, newStatus);
       await onUpdate();
+      
       toast({
         title: "Statut mis à jour",
         description: "Le statut de la réservation a été mis à jour avec succès.",
