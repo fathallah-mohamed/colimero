@@ -23,6 +23,7 @@ export function useLoginForm({
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log("Starting login process for:", email);
       setIsLoading(true);
       setError(null);
       setShowVerificationDialog(false);
@@ -58,14 +59,17 @@ export function useLoginForm({
           });
         } else {
           console.log("Activation email sent successfully");
+          toast({
+            title: "Email envoyé",
+            description: "Un nouvel email d'activation vous a été envoyé"
+          });
         }
 
         // Afficher le dialogue de vérification
         if (onVerificationNeeded) {
           onVerificationNeeded();
-        } else {
-          setShowVerificationDialog(true);
         }
+        setShowVerificationDialog(true);
         
         setIsLoading(false);
         return;
@@ -118,9 +122,8 @@ export function useLoginForm({
           await supabase.auth.signOut();
           if (onVerificationNeeded) {
             onVerificationNeeded();
-          } else {
-            setShowVerificationDialog(true);
           }
+          setShowVerificationDialog(true);
           setIsLoading(false);
           return;
         }
