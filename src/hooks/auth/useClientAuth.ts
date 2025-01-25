@@ -31,15 +31,20 @@ export function useClientAuth(onSuccess?: () => void) {
         .single();
 
       console.log("Client data:", clientData);
+      console.log("Client error:", clientError);
 
       if (clientError) {
+        if (clientError.code === 'PGRST116') {
+          console.log("No client found with this email");
+          throw new Error("Email ou mot de passe incorrect");
+        }
         console.error("Error checking client status:", clientError);
         throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
       // If client exists but isn't verified or is pending
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
-        console.log("Client needs verification");
+        console.log("Client needs verification, sending activation email");
         setState(prev => ({ ...prev, isVerificationNeeded: true }));
         await handleResendActivation(email);
         return;
