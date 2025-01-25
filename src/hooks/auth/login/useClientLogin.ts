@@ -23,6 +23,14 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
       });
 
       if (signInError) {
+        // Ne pas afficher d'erreur si c'est un problème de vérification d'email
+        if (signInError.message === "Email not confirmed") {
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          return;
+        }
+
         setError(signInError.message === "Invalid login credentials" 
           ? "Email ou mot de passe incorrect"
           : "Une erreur est survenue lors de la connexion"
