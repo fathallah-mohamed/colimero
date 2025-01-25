@@ -39,11 +39,11 @@ export function useLoginForm({
     resetState();
 
     try {
-      // Vérifier le statut de vérification du client
+      // Vérifier d'abord si c'est un client et si le compte est vérifié
       const clientData = await clientVerificationService.checkVerificationStatus(email);
       console.log("Client verification status:", clientData);
 
-      // Si le client existe et n'est pas vérifié, afficher le dialogue de vérification
+      // Si c'est un client et que le compte n'est pas vérifié, bloquer la connexion
       if (clientData && !clientData.email_verified) {
         console.log("Client account not verified");
         if (onVerificationNeeded) {
@@ -55,7 +55,7 @@ export function useLoginForm({
         return;
       }
 
-      // Tentative de connexion
+      // Si le compte est vérifié ou si ce n'est pas un client, procéder à la connexion
       const loginResponse = await authService.signIn(email, password);
 
       if (!loginResponse.success || !loginResponse.user) {
@@ -65,7 +65,7 @@ export function useLoginForm({
         return;
       }
 
-      // Valider le type d'utilisateur
+      // Valider le type d'utilisateur si requis
       const validationResponse = authService.validateUserType(loginResponse.user, requiredUserType);
       if (!validationResponse.success) {
         setError(validationResponse.error);
@@ -74,20 +74,23 @@ export function useLoginForm({
         return;
       }
 
-      // Vérifier à nouveau l'activation du compte client après la connexion
+      // Double vérification après la connexion pour les clients
       const userType = loginResponse.user.user_metadata?.user_type;
-      if (userType === 'client' && clientData && !clientData.email_verified) {
-        console.log("Client account not verified");
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
+      if (userType === 'client') {
+        const verificationStatus = await clientVerificationService.checkVerificationStatus(email);
+        if (!verificationStatus?.email_verified) {
+          console.log("Client account verification check failed after login");
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          setShowVerificationDialog(true);
+          setPassword("");
+          await authService.signOut();
+          return;
         }
-        setShowVerificationDialog(true);
-        setPassword("");
-        await authService.signOut();
-        return;
       }
 
-      // Succès
+      // Succès de la connexion
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"

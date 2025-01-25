@@ -8,7 +8,7 @@ export const clientVerificationService = {
         .from('clients')
         .select('email_verified')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error checking client status:', error);
@@ -16,10 +16,21 @@ export const clientVerificationService = {
       }
 
       console.log('Client verification data:', clientData);
+      
+      // Si aucune donnée n'est trouvée, considérer comme non vérifié
+      if (!clientData) {
+        return {
+          email_verified: false
+        };
+      }
+
       return clientData;
     } catch (error) {
       console.error('Error checking verification status:', error);
-      return null;
+      // En cas d'erreur, par sécurité on considère le compte comme non vérifié
+      return {
+        email_verified: false
+      };
     }
   },
 
