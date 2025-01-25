@@ -40,33 +40,46 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
     setIsLoading(true);
 
     try {
-      if (requiredUserType === 'carrier') {
-        const { data: carrierData, error: carrierError } = await supabase
-          .from('carriers')
-          .select('status, email_verified')
-          .eq('email', email.trim())
-          .single();
+      // Première étape : Vérifier les identifiants avec Supabase Auth
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
 
-        if (carrierError || !carrierData) {
-          handleError("Aucun compte transporteur trouvé avec cet email");
-          return;
+      if (signInError) {
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+        if (signInError.message === "Invalid login credentials") {
+          errorMessage = "Email ou mot de passe incorrect";
         }
-
-        if (carrierData.status !== 'active') {
-          handleError("Votre compte transporteur n'est pas encore activé");
-          return;
-        }
+        handleError(errorMessage);
+        return;
       }
 
-      if (requiredUserType === 'client') {
+      if (!user) {
+        handleError("Aucune donnée utilisateur reçue");
+        return;
+      }
+
+      // Deuxième étape : Vérifier le type d'utilisateur et son statut
+      const userType = user.user_metadata?.user_type;
+
+      if (requiredUserType && userType !== requiredUserType) {
+        handleError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // Vérification spécifique selon le type d'utilisateur
+      if (userType === 'client') {
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('email_verified')
-          .eq('email', email.trim())
+          .eq('id', user.id)
           .single();
 
         if (clientError || !clientData) {
-          handleError("Aucun compte client trouvé avec cet email");
+          handleError("Erreur lors de la vérification du compte client");
+          await supabase.auth.signOut();
           return;
         }
 
@@ -77,39 +90,30 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
           }
           setPassword("");
           setIsLoading(false);
+          await supabase.auth.signOut();
+          return;
+        }
+      } else if (userType === 'carrier') {
+        const { data: carrierData, error: carrierError } = await supabase
+          .from('carriers')
+          .select('status')
+          .eq('id', user.id)
+          .single();
+
+        if (carrierError || !carrierData) {
+          handleError("Erreur lors de la vérification du compte transporteur");
+          await supabase.auth.signOut();
+          return;
+        }
+
+        if (carrierData.status !== 'active') {
+          handleError("Votre compte transporteur n'est pas encore activé");
+          await supabase.auth.signOut();
           return;
         }
       }
 
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        let errorMessage = "Une erreur est survenue lors de la connexion";
-        
-        if (signInError.message === "Invalid login credentials") {
-          errorMessage = "Email ou mot de passe incorrect";
-        }
-
-        handleError(errorMessage);
-        return;
-      }
-
-      if (!user) {
-        handleError("Aucune donnée utilisateur reçue");
-        return;
-      }
-
-      const userType = user.user_metadata?.user_type;
-
-      if (requiredUserType && userType !== requiredUserType) {
-        handleError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
-        await supabase.auth.signOut();
-        return;
-      }
-
+      // Si tout est OK, on procède à la connexion
       toast({
         title: "Connexion réussie",
         description: "Bienvenue sur votre espace personnel",
@@ -138,7 +142,6 @@ export function useLoginForm({ onSuccess, requiredUserType, onVerificationNeeded
             navigate("/");
         }
       }
-
     } catch (error: any) {
       console.error("Complete error:", error);
       handleError("Une erreur inattendue s'est produite");
