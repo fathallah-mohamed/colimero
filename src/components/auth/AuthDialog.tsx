@@ -1,4 +1,4 @@
-import { LoginForm } from "./LoginForm";
+import { LoginFormContainer } from "./login/LoginFormContainer";
 import { ForgotPasswordForm } from "./ForgotPasswordForm";
 import { useState } from "react";
 import { CustomDialog } from "../ui/custom-dialog";
@@ -20,33 +20,20 @@ export default function AuthDialog({
   onCarrierRegisterClick,
   requiredUserType,
 }: AuthDialogProps) {
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-
   return (
     <CustomDialog 
       open={isOpen} 
       onClose={onClose}
-      title={showForgotPassword ? "Réinitialisation du mot de passe" : "Connexion"}
+      title="Connexion"
       className="sm:max-w-[500px]"
     >
       <div className="p-6">
-        {showForgotPassword ? (
-          <div className="space-y-4">
-            <ForgotPasswordForm 
-              onCancel={() => setShowForgotPassword(false)}
-            />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <LoginForm
-              onSuccess={onSuccess}
-              onForgotPassword={() => setShowForgotPassword(true)}
-              onRegister={onRegisterClick}
-              onCarrierRegister={onCarrierRegisterClick}
-              requiredUserType={requiredUserType}
-            />
-          </div>
-        )}
+        <LoginFormContainer
+          onRegister={onRegisterClick}
+          onCarrierRegister={onCarrierRegisterClick}
+          onSuccess={onSuccess}
+          requiredUserType={requiredUserType}
+        />
       </div>
     </CustomDialog>
   );
