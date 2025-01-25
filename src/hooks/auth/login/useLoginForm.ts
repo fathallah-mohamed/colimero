@@ -22,14 +22,13 @@ export function useLoginForm({
   const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
-    console.log("Starting login process for email:", email);
-    setIsLoading(true);
-    setError(null);
-    setShowVerificationDialog(false);
-    setShowErrorDialog(false);
-
     try {
-      // Vérifier d'abord si le client existe et n'est pas vérifié
+      setIsLoading(true);
+      setError(null);
+      setShowVerificationDialog(false);
+      setShowErrorDialog(false);
+
+      // Vérifier d'abord si le client existe et son statut de vérification
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified')
@@ -38,10 +37,11 @@ export function useLoginForm({
 
       console.log("Client verification check:", { clientData, clientError });
 
-      // Si le client existe et n'est pas vérifié
+      // Si le client existe et n'est pas vérifié, bloquer la connexion
       if (clientData && !clientData.email_verified) {
-        console.log("Client found but not verified, sending activation email");
+        console.log("Client found but not verified, blocking login");
         
+        // Envoyer un nouvel email d'activation
         const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
           body: { 
             email: email.trim(),
@@ -58,17 +58,20 @@ export function useLoginForm({
           });
         } else {
           console.log("Activation email sent successfully");
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          } else {
-            setShowVerificationDialog(true);
-          }
         }
+
+        // Afficher le dialogue de vérification
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        } else {
+          setShowVerificationDialog(true);
+        }
+        
         setIsLoading(false);
         return;
       }
 
-      // Tentative de connexion
+      // Si le client n'existe pas ou est vérifié, procéder à la connexion
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -80,14 +83,6 @@ export function useLoginForm({
         
         if (signInError.message === "Invalid login credentials") {
           errorMessage = "Email ou mot de passe incorrect";
-        } else if (signInError.message === "Email not confirmed") {
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          } else {
-            setShowVerificationDialog(true);
-          }
-          setIsLoading(false);
-          return;
         }
 
         setError(errorMessage);
@@ -100,19 +95,17 @@ export function useLoginForm({
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // Vérification du type d'utilisateur si requis
+      // Vérification du type d'utilisateur
       const userType = user.user_metadata?.user_type;
-      console.log("User type check:", { userType, requiredUserType });
-
       if (requiredUserType && userType !== requiredUserType) {
+        await supabase.auth.signOut();
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         setShowErrorDialog(true);
-        await supabase.auth.signOut();
         setIsLoading(false);
         return;
       }
 
-      // Vérifier à nouveau le statut de vérification après la connexion
+      // Double vérification finale du statut de vérification
       if (userType === 'client') {
         const { data: verifiedCheck } = await supabase
           .from('clients')
@@ -121,18 +114,19 @@ export function useLoginForm({
           .single();
 
         if (!verifiedCheck?.email_verified) {
-          console.log("User not verified, showing verification dialog");
+          console.log("Final verification check failed, signing out");
+          await supabase.auth.signOut();
           if (onVerificationNeeded) {
             onVerificationNeeded();
           } else {
             setShowVerificationDialog(true);
           }
-          await supabase.auth.signOut();
           setIsLoading(false);
           return;
         }
       }
 
+      // Succès de la connexion
       console.log("Login successful, handling navigation");
       if (onSuccess) {
         onSuccess();
