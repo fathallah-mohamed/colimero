@@ -9,7 +9,7 @@ export function useActivation(token: string | null) {
   const [email, setEmail] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isResending, resendActivationEmail } = useEmailVerification();
+  const { verifyEmail, isVerifying, showConfirmationDialog, setShowConfirmationDialog, resendActivationEmail } = useEmailVerification();
 
   useEffect(() => {
     let mounted = true;
@@ -29,7 +29,6 @@ export function useActivation(token: string | null) {
       try {
         console.log('Starting account activation with token:', token);
 
-        // 1. Vérifier si le token est expiré
         const { data: isExpired } = await supabase
           .rpc('is_activation_token_expired', { token });
 
@@ -49,37 +48,6 @@ export function useActivation(token: string | null) {
           return;
         }
 
-        // 2. Récupérer les informations du client
-        const { data: client, error: clientError } = await supabase
-          .from('clients')
-          .select('id, email, email_verified')
-          .eq('activation_token', token)
-          .maybeSingle();
-
-        if (clientError || !client) {
-          console.error('Error fetching client:', clientError);
-          throw new Error("Token invalide ou compte introuvable");
-        }
-
-        console.log('Client found:', client);
-
-        // 3. Vérifier si le compte est déjà activé
-        if (client.email_verified) {
-          console.log('Account already verified');
-          if (mounted) {
-            setStatus('success');
-            toast({
-              title: "Compte déjà activé",
-              description: "Votre compte a déjà été activé. Vous pouvez vous connecter.",
-            });
-            setTimeout(() => {
-              navigate('/connexion');
-            }, 2000);
-          }
-          return;
-        }
-
-        // 4. Activer le compte
         const { error: updateError } = await supabase
           .from('clients')
           .update({
@@ -87,7 +55,7 @@ export function useActivation(token: string | null) {
             activation_token: null,
             activation_expires_at: null
           })
-          .eq('id', client.id);
+          .eq('activation_token', token);
 
         if (updateError) throw updateError;
 
@@ -143,7 +111,9 @@ export function useActivation(token: string | null) {
   return {
     status,
     email,
-    isResending,
-    handleResendEmail
+    isVerifying,
+    handleResendEmail,
+    showConfirmationDialog,
+    setShowConfirmationDialog
   };
 }

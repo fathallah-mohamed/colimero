@@ -40,7 +40,6 @@ export function useLoginForm({
     resetState();
 
     try {
-      // Première vérification de l'email
       const isEmailVerified = await verifyEmail(email);
       if (!isEmailVerified) {
         if (onVerificationNeeded) {
@@ -51,7 +50,6 @@ export function useLoginForm({
         return;
       }
 
-      // Tentative de connexion
       const loginResponse = await authService.signIn(email, password);
       if (!loginResponse.success || !loginResponse.user) {
         setError(loginResponse.error || "Erreur de connexion");
@@ -60,7 +58,6 @@ export function useLoginForm({
         return;
       }
 
-      // Vérification du type d'utilisateur
       const userType = loginResponse.user.user_metadata?.user_type;
       if (requiredUserType && userType !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
@@ -69,21 +66,6 @@ export function useLoginForm({
         return;
       }
 
-      // Double vérification pour les clients
-      if (userType === 'client') {
-        const isStillVerified = await verifyEmail(email);
-        if (!isStillVerified) {
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setShowVerificationDialog(true);
-          setPassword("");
-          await authService.signOut();
-          return;
-        }
-      }
-
-      // Succès de la connexion
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"
