@@ -12,11 +12,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
 interface LoginFormFieldsProps {
-  form: UseFormReturn<{
-    email: string;
-    password: string;
-  }>;
+  form: UseFormReturn<LoginFormValues>;
   isLoading: boolean;
   error: string | null;
   showVerificationDialog: boolean;
