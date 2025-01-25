@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useClientLogin } from "./useClientLogin";
 import { useCarrierLogin } from "./useCarrierLogin";
-import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -20,7 +19,6 @@ export function useLoginForm({
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const clientLogin = useClientLogin({ 
     onSuccess: handleSuccess,
@@ -56,12 +54,14 @@ export function useLoginForm({
     
     if (requiredUserType === 'carrier') {
       await carrierLogin.handleLogin(email, password);
+      if (carrierLogin.error) {
+        setShowErrorDialog(true);
+      }
     } else {
       await clientLogin.handleLogin(email, password);
-    }
-
-    if (clientLogin.error || carrierLogin.error) {
-      setShowErrorDialog(true);
+      if (clientLogin.error) {
+        setShowErrorDialog(true);
+      }
     }
   };
 

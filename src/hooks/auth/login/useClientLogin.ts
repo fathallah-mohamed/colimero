@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface UseClientLoginProps {
   onSuccess?: () => void;
@@ -10,7 +9,6 @@ interface UseClientLoginProps {
 export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLoginProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     console.log('Starting login process for:', email);
@@ -29,7 +27,8 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
 
       if (clientError) {
         console.error('Error checking client verification:', clientError);
-        throw new Error("Une erreur est survenue lors de la vérification du compte");
+        setError("Une erreur est survenue lors de la vérification du compte");
+        return;
       }
 
       // 2. Si le client n'existe pas ou n'est pas vérifié, bloquer la connexion
@@ -38,7 +37,7 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        throw new Error("Veuillez activer votre compte via le lien envoyé par email avant de vous connecter");
+        return;
       }
 
       // 3. Si le client est vérifié, procéder à la connexion
@@ -50,14 +49,16 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        throw new Error(signInError.message === "Invalid login credentials" 
+        setError(signInError.message === "Invalid login credentials" 
           ? "Email ou mot de passe incorrect"
           : "Une erreur est survenue lors de la connexion"
         );
+        return;
       }
 
       if (!authData.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
+        setError("Aucune donnée utilisateur reçue");
+        return;
       }
 
       console.log('Login successful');
@@ -68,11 +69,6 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message);
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message
-      });
     } finally {
       setIsLoading(false);
     }
