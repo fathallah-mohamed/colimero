@@ -10,7 +10,6 @@ interface UseClientLoginProps {
 export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLoginProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     console.log('Starting login process for:', email);
@@ -19,20 +18,26 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
 
     try {
       // Vérifier d'abord si le client existe et n'est pas vérifié
-      const { data: clientData } = await supabase
+      const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified')
         .eq('email', email.trim())
-        .single();
+        .maybeSingle();
+
+      if (clientError) {
+        console.error('Error checking client:', clientError);
+        setError("Une erreur est survenue lors de la vérification du compte");
+        return;
+      }
 
       console.log('Client verification status:', clientData);
 
+      // Si le client existe et n'est pas vérifié
       if (clientData && !clientData.email_verified) {
         console.log('Client found but not verified, triggering verification needed');
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        setIsLoading(false);
         return;
       }
 
