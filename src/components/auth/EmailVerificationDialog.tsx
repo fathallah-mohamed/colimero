@@ -4,6 +4,7 @@ import { Mail, CheckCircle } from "lucide-react";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -25,6 +26,28 @@ export function EmailVerificationDialog({
   onConfirmationClose
 }: EmailVerificationDialogProps) {
   const [emailInput, setEmailInput] = useState(email);
+
+  const handleResendEmail = async () => {
+    console.log('Attempting to resend activation email to:', emailInput);
+    try {
+      // Appeler la fonction d'envoi d'email d'activation
+      const { error } = await supabase.functions.invoke('send-activation-email', {
+        body: { 
+          email: emailInput,
+        }
+      });
+
+      if (error) {
+        console.error('Error sending activation email:', error);
+        return;
+      }
+
+      console.log('Activation email sent successfully');
+      onResendEmail();
+    } catch (error) {
+      console.error('Error in handleResendEmail:', error);
+    }
+  };
 
   return (
     <>
@@ -52,7 +75,7 @@ export function EmailVerificationDialog({
 
             <div className="space-y-4">
               <Button 
-                onClick={onResendEmail} 
+                onClick={handleResendEmail} 
                 variant="outline" 
                 className="w-full"
                 disabled={isResending}

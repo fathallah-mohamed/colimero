@@ -13,6 +13,7 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
   const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
+    console.log('Starting login process for:', email);
     setIsLoading(true);
     setError(null);
 
@@ -24,7 +25,10 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
         .eq('email', email.trim())
         .single();
 
+      console.log('Client verification status:', clientData);
+
       if (clientData && !clientData.email_verified) {
+        console.log('Client found but not verified, triggering verification needed');
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
@@ -38,15 +42,8 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
       });
 
       if (signInError) {
-        // Ne pas afficher d'erreur si c'est un problème de vérification d'email
-        if (signInError.message === "Email not confirmed") {
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          return;
-        }
-
-        // Pour les autres erreurs, on affiche un message approprié
+        console.error('Sign in error:', signInError);
+        
         if (signInError.message.includes("Invalid login credentials")) {
           setError("Email ou mot de passe incorrect");
         } else {
@@ -56,18 +53,16 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
       }
 
       if (!user) {
+        console.error('No user data received');
         setError("Aucune donnée utilisateur reçue");
         return;
       }
 
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue sur votre espace personnel",
-      });
-
+      console.log('Login successful');
       if (onSuccess) {
         onSuccess();
       }
+
     } catch (error: any) {
       console.error("Login error:", error);
       setError("Une erreur inattendue s'est produite");
