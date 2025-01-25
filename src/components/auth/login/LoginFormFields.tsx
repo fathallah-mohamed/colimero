@@ -17,7 +17,7 @@ export interface LoginFormValues {
   password: string;
 }
 
-interface LoginFormFieldsProps {
+export interface LoginFormFieldsProps {
   form: UseFormReturn<LoginFormValues>;
   isLoading: boolean;
   error: string | null;

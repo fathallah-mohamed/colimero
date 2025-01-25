@@ -34,7 +34,7 @@ export function useLoginForm({
         .from('clients')
         .select('email_verified')
         .eq('email', email.trim())
-        .single();
+        .maybeSingle();
 
       console.log("Client verification check:", { clientData, clientError });
 
