@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -20,6 +21,7 @@ export function useLoginForm({
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,17 +31,17 @@ export function useLoginForm({
     setShowErrorDialog(false);
 
     try {
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      console.log("Attempting login with email:", email);
+      
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (signInError) {
-        let errorMessage = "Une erreur est survenue lors de la connexion";
+        console.error("Sign in error:", signInError);
         
-        if (signInError.message === "Invalid login credentials") {
-          errorMessage = "Email ou mot de passe incorrect";
-        } else if (signInError.message === "Email not confirmed") {
+        if (signInError.message.includes("Email not confirmed")) {
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
@@ -48,17 +50,23 @@ export function useLoginForm({
           return;
         }
 
+        let errorMessage = "Une erreur est survenue lors de la connexion";
+        if (signInError.message === "Invalid login credentials") {
+          errorMessage = "Email ou mot de passe incorrect";
+        }
+
         setError(errorMessage);
         setShowErrorDialog(true);
         setPassword("");
         return;
       }
 
-      if (!user) {
+      if (!data.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      const userType = user.user_metadata?.user_type;
+      const userType = data.user.user_metadata?.user_type;
+      console.log("User type:", userType, "Required type:", requiredUserType);
 
       if (requiredUserType && userType !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
@@ -66,6 +74,12 @@ export function useLoginForm({
         await supabase.auth.signOut();
         return;
       }
+
+      // Success
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté"
+      });
 
       if (onSuccess) {
         onSuccess();
@@ -79,7 +93,7 @@ export function useLoginForm({
         }
       }
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("Complete login error:", error);
       setError("Une erreur inattendue s'est produite");
       setShowErrorDialog(true);
       setPassword("");
