@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { AuthError, User } from "@supabase/supabase-js";
-import { authVerificationService } from "./auth-verification";
+import { userTypeValidator } from "./validation/user-type-validator";
+import { authErrorHandler } from "./errors/auth-error-handler";
 
 export interface AuthResponse {
   success: boolean;
@@ -8,33 +9,23 @@ export interface AuthResponse {
   user?: User;
 }
 
-interface SignInResponse {
-  data: {
-    user: User | null;
-  };
-  error: AuthError | null;
-}
-
 export const authService = {
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
-      console.log("Attempting sign in for:", email);
-      const { data, error }: SignInResponse = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
       if (error) {
-        console.error("Sign in error:", error);
+        const errorResponse = authErrorHandler.handle(error);
         return {
           success: false,
-          error: error.message === "Invalid login credentials" 
-            ? "Email ou mot de passe incorrect"
-            : "Une erreur est survenue lors de la connexion"
+          error: errorResponse.message
         };
       }
 
-      if (!data.user) {
+      if (!user) {
         return {
           success: false,
           error: "Aucune donnée utilisateur reçue"
@@ -43,33 +34,27 @@ export const authService = {
 
       return {
         success: true,
-        user: data.user
+        user
       };
     } catch (error) {
-      console.error("Auth service error:", error);
+      console.error("Sign in error:", error);
       return {
         success: false,
-        error: error instanceof AuthError ? error.message : "Une erreur inattendue s'est produite"
+        error: "Une erreur est survenue lors de la connexion"
       };
     }
   },
 
-  async signOut() {
+  async signOut(): Promise<void> {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Sign out error:", error);
-        return { error };
-      }
-      return { success: true };
+      await supabase.auth.signOut();
     } catch (error) {
       console.error("Sign out error:", error);
-      return { error };
     }
   },
 
   validateUserType(user: User, requiredType?: 'client' | 'carrier'): AuthResponse {
-    const validation = authVerificationService.validateUserType(user, requiredType);
+    const validation = userTypeValidator.validate(user, requiredType);
     return {
       success: validation.success,
       error: validation.error,
