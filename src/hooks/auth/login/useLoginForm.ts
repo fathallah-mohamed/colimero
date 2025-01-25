@@ -40,7 +40,7 @@ export function useLoginForm({
 
       // Si le client existe et n'est pas vérifié, bloquer la connexion
       if (clientData && !clientData.email_verified) {
-        console.log("Client found but not verified, blocking login");
+        console.log("Client found but not verified, sending activation email");
         
         // Envoyer un nouvel email d'activation
         const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
@@ -70,7 +70,6 @@ export function useLoginForm({
           onVerificationNeeded();
         }
         setShowVerificationDialog(true);
-        
         setIsLoading(false);
         return;
       }
