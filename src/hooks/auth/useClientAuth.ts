@@ -22,10 +22,10 @@ export function useClientAuth(onSuccess?: () => void) {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
-      // Vérifier d'abord si le client existe et n'est pas vérifié
+      // First check if the client exists and is verified
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
-        .select('status')
+        .select('email_verified, status')
         .eq('email', email.trim())
         .single();
 
@@ -34,21 +34,25 @@ export function useClientAuth(onSuccess?: () => void) {
         throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
-      if (clientData?.status === 'pending') {
+      // If client exists but isn't verified
+      if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
         setState(prev => ({ ...prev, isVerificationNeeded: true }));
         await handleResendActivation(email);
         return;
       }
 
+      // Attempt to sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
       });
 
       if (signInError) {
-        throw new Error(signInError.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Une erreur est survenue lors de la connexion");
+        console.error("Sign in error:", signInError);
+        if (signInError.message.includes("Invalid login credentials")) {
+          throw new Error("Email ou mot de passe incorrect");
+        }
+        throw new Error("Une erreur est survenue lors de la connexion");
       }
 
       toast({
@@ -83,7 +87,10 @@ export function useClientAuth(onSuccess?: () => void) {
       setState(prev => ({ ...prev, isLoading: true }));
       
       const { error } = await supabase.functions.invoke('send-activation-email', {
-        body: { email: email.trim() }
+        body: { 
+          email: email.trim(),
+          resend: true
+        }
       });
 
       if (error) throw error;
