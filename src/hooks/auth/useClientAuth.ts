@@ -63,12 +63,13 @@ export function useClientAuth(onSuccess?: () => void) {
       // First check if the client exists and is verified
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
-        .select('email_verified, status')
+        .select('email_verified')
         .eq('email', email.trim())
         .single();
 
       console.log("Client verification status:", clientData);
 
+      // If client doesn't exist or there's an error checking
       if (clientError) {
         console.error("Error checking client status:", clientError);
         setState(prev => ({
@@ -78,15 +79,20 @@ export function useClientAuth(onSuccess?: () => void) {
         return;
       }
 
-      // If client exists but isn't verified, prevent login and trigger verification flow
+      // IMPORTANT: Block login if email is not verified
       if (!clientData?.email_verified) {
-        console.log("Client needs verification, sending activation email");
-        setState(prev => ({ ...prev, isVerificationNeeded: true }));
+        console.log("Email not verified, blocking login");
+        setState(prev => ({ 
+          ...prev, 
+          isVerificationNeeded: true,
+          error: "Votre compte n'est pas activé. Veuillez vérifier votre email."
+        }));
         await handleResendActivation(email);
         return;
       }
 
-      // Proceed with login only if client is verified
+      // Only proceed with login if email is verified
+      console.log("Email is verified, proceeding with login attempt");
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -101,6 +107,8 @@ export function useClientAuth(onSuccess?: () => void) {
         return;
       }
 
+      // Login successful
+      console.log("Login successful");
       if (onSuccess) {
         onSuccess();
       }
