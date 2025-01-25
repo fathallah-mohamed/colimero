@@ -22,27 +22,32 @@ export function useLoginForm({
   const { toast } = useToast();
 
   const handleActivationEmail = async (email: string) => {
-    const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
-      body: { 
-        email: email.trim(),
-        resend: true
-      }
-    });
-
-    if (functionError) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'envoyer l'email d'activation"
+    try {
+      const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
+        body: { 
+          email: email.trim(),
+          resend: true
+        }
       });
+
+      if (functionError) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible d'envoyer l'email d'activation"
+        });
+        return false;
+      }
+
+      toast({
+        title: "Email envoyé",
+        description: "Un nouvel email d'activation vous a été envoyé"
+      });
+      return true;
+    } catch (error) {
+      console.error("Error sending activation email:", error);
       return false;
     }
-
-    toast({
-      title: "Email envoyé",
-      description: "Un nouvel email d'activation vous a été envoyé"
-    });
-    return true;
   };
 
   const handleLogin = async (email: string, password: string) => {
@@ -52,7 +57,7 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Vérifier si le compte existe et n'est pas vérifié
+      // Vérifier d'abord si le client existe et n'est pas vérifié
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified')
@@ -70,7 +75,7 @@ export function useLoginForm({
         return;
       }
 
-      // Tentative de connexion
+      // Si le client n'existe pas ou est vérifié, on tente la connexion
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
