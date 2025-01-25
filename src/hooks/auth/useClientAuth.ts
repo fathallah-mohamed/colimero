@@ -23,7 +23,7 @@ export function useClientAuth(onSuccess?: () => void) {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       console.log("Attempting login for:", email);
       
-      // First check if the client exists and is verified
+      // First check if the client exists and isn't verified
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified, status, activation_code')
