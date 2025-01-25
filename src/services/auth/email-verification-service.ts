@@ -50,6 +50,27 @@ export const emailVerificationService = {
     }
   },
 
+  async resendActivationEmail(email: string): Promise<boolean> {
+    try {
+      console.log('Requesting new activation email for:', email);
+      
+      const { error } = await supabase.functions.invoke('send-activation-email', {
+        body: { email }
+      });
+
+      if (error) {
+        console.error('Error sending activation email:', error);
+        return false;
+      }
+
+      console.log('Activation email sent successfully');
+      return true;
+    } catch (error) {
+      console.error('Error in resendActivationEmail:', error);
+      return false;
+    }
+  },
+
   async handleVerificationCheck(email: string): Promise<boolean> {
     const result = await this.verifyClientEmail(email);
     return result.isVerified;
