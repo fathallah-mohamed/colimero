@@ -43,6 +43,18 @@ export function useLoginForm({
       const clientData = await clientVerificationService.checkVerificationStatus(email);
       console.log("Client verification status:", clientData);
 
+      // Si le client existe et n'est pas vérifié, afficher le dialogue de vérification
+      if (clientData && !clientData.email_verified) {
+        console.log("Client account not verified");
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        }
+        setShowVerificationDialog(true);
+        setPassword("");
+        setIsLoading(false);
+        return;
+      }
+
       // Tentative de connexion
       const loginResponse = await authService.signIn(email, password);
 
@@ -62,7 +74,7 @@ export function useLoginForm({
         return;
       }
 
-      // Vérifier l'activation du compte client
+      // Vérifier à nouveau l'activation du compte client après la connexion
       const userType = loginResponse.user.user_metadata?.user_type;
       if (userType === 'client' && clientData && !clientData.email_verified) {
         console.log("Client account not verified");
