@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
@@ -67,24 +67,28 @@ export function LoginFormFields({
         onConfirmationClose={onConfirmationClose}
       />
 
-      <AlertDialog open={showErrorDialog} onOpenChange={onErrorDialogClose}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <div className="flex justify-center mb-4">
-              <AlertCircle className="h-12 w-12 text-red-500" />
+      <Dialog open={showErrorDialog} onOpenChange={onErrorDialogClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-red-50 p-3 rounded-full">
+                <AlertCircle className="h-6 w-6 text-red-500" />
+              </div>
             </div>
-            <AlertDialogTitle className="text-center">Erreur de connexion</AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
+            <DialogTitle className="text-center text-xl">Erreur de connexion</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-center text-gray-600">
               {error}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex justify-center mt-4">
-            <Button onClick={onErrorDialogClose} variant="default">
-              Fermer
-            </Button>
+            </p>
+            <div className="flex justify-center">
+              <Button onClick={onErrorDialogClose} className="bg-[#00B0F0] hover:bg-[#0082b3] text-white">
+                Fermer
+              </Button>
+            </div>
           </div>
-        </AlertDialogContent>
-      </AlertDialog>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
