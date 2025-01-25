@@ -28,12 +28,17 @@ export function EmailVerificationDialog({
   const [emailInput, setEmailInput] = useState(email);
 
   const handleResendEmail = async () => {
+    if (!emailInput?.trim()) {
+      console.error('No email provided');
+      return;
+    }
+
     console.log('Attempting to resend activation email to:', emailInput);
     try {
-      // Appeler la fonction d'envoi d'email d'activation
       const { error } = await supabase.functions.invoke('send-activation-email', {
         body: { 
-          email: emailInput,
+          email: emailInput.trim(),
+          firstName: 'Utilisateur' // Default value if firstName is not available
         }
       });
 
