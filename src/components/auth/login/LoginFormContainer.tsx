@@ -2,13 +2,14 @@ import { useState } from "react";
 import { LoginForm } from "./LoginForm";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { ForgotPasswordForm } from "../ForgotPasswordForm";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormContainerProps {
-  onRegister: () => void;
-  onCarrierRegister: () => void;
+  onRegister?: () => void;
+  onCarrierRegister?: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
-  hideRegisterButton?: boolean;
+  requiredUserType?: "client" | "carrier";
 }
 
 export function LoginFormContainer({
@@ -16,12 +17,36 @@ export function LoginFormContainer({
   onCarrierRegister,
   onSuccess,
   requiredUserType,
-  hideRegisterButton = false,
 }: LoginFormContainerProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleLoginSuccess = () => {
+    toast({
+      title: "Connexion réussie",
+      description: "Vous êtes maintenant connecté",
+    });
+    
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      const returnPath = sessionStorage.getItem('returnPath');
+      if (returnPath) {
+        sessionStorage.removeItem('returnPath');
+        navigate(returnPath);
+      } else {
+        navigate('/');
+      }
+    }
+  };
 
   const handleForgotPasswordSuccess = () => {
     setShowForgotPassword(false);
+    toast({
+      title: "Email envoyé",
+      description: "Consultez votre boîte mail pour réinitialiser votre mot de passe",
+    });
   };
 
   return (
@@ -30,9 +55,8 @@ export function LoginFormContainer({
         onForgotPassword={() => setShowForgotPassword(true)}
         onRegister={onRegister}
         onCarrierRegister={onCarrierRegister}
-        onSuccess={onSuccess}
+        onSuccess={handleLoginSuccess}
         requiredUserType={requiredUserType}
-        hideRegisterButton={hideRegisterButton}
       />
 
       <CustomDialog

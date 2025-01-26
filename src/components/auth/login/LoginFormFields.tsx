@@ -4,7 +4,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { UseFormReturn } from "react-hook-form";
-import { LoginFormValues } from "@/types/auth";
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
+}
 
 interface LoginFormFieldsProps {
   form: UseFormReturn<LoginFormValues>;
@@ -46,6 +50,7 @@ export function LoginFormFields({
                     placeholder="votre@email.com"
                     {...field}
                     disabled={isLoading}
+                    autoComplete="email"
                   />
                 </FormControl>
                 <FormMessage />
@@ -64,6 +69,7 @@ export function LoginFormFields({
                     type="password"
                     {...field}
                     disabled={isLoading}
+                    autoComplete="current-password"
                   />
                 </FormControl>
                 <FormMessage />
@@ -91,5 +97,3 @@ export function LoginFormFields({
     </>
   );
 }
-
-export type { LoginFormValues };
