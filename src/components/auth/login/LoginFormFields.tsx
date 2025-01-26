@@ -18,6 +18,7 @@ interface LoginFormFieldsProps {
   showErrorDialog?: boolean;
   onVerificationDialogClose?: () => void;
   onErrorDialogClose?: () => void;
+  onResendEmail?: () => void;
 }
 
 export function LoginFormFields({
@@ -28,6 +29,7 @@ export function LoginFormFields({
   showErrorDialog = false,
   onVerificationDialogClose = () => {},
   onErrorDialogClose = () => {},
+  onResendEmail = () => {},
 }: LoginFormFieldsProps) {
   return (
     <>
@@ -87,7 +89,7 @@ export function LoginFormFields({
           email={form.getValues("email")}
           showConfirmationDialog={false}
           onConfirmationClose={() => {}}
-          onResendEmail={() => {}}
+          onResendEmail={onResendEmail}
         />
       )}
 
