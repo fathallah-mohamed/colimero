@@ -2,9 +2,11 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAuthService } from "@/services/auth/client-auth-service";
 
+type UserType = 'client' | 'carrier' | 'admin';
+
 interface UseLoginFormProps {
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier' | 'admin';
+  requiredUserType?: UserType;
   onVerificationNeeded?: () => void;
 }
 
@@ -60,7 +62,7 @@ export function useLoginForm({
         }
 
         // Check user type from metadata
-        const userType = authData.user.user_metadata?.user_type;
+        const userType = authData.user.user_metadata?.user_type as UserType;
         console.log('User type:', userType);
 
         // Verify required user type if specified
