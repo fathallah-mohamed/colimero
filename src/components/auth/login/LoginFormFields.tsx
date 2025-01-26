@@ -4,11 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { UseFormReturn } from "react-hook-form";
-
-interface LoginFormValues {
-  email: string;
-  password: string;
-}
+import { LoginFormValues } from "@/types/auth";
 
 interface LoginFormFieldsProps {
   form: UseFormReturn<LoginFormValues>;
@@ -86,8 +82,8 @@ export function LoginFormFields({
         onResendEmail={() => {}}
       />
 
-      <ErrorDialog
-        open={showErrorDialog}
+      <ErrorDialog 
+        isOpen={showErrorDialog}
         onClose={onErrorDialogClose}
         title="Erreur de connexion"
         description={error || "Une erreur est survenue lors de la connexion"}

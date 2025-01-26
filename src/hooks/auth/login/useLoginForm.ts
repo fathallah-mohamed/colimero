@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { UserType } from "@/types/auth";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: UserType;
   onVerificationNeeded?: () => void;
 }
 
@@ -64,7 +65,9 @@ export function useLoginForm({
         .eq('email', email.trim())
         .maybeSingle();
 
-      console.log("Client verification status:", clientData);
+      if (clientError) {
+        throw new Error("Erreur lors de la vérification du compte");
+      }
 
       // 2. Si le client existe et n'est pas vérifié ou est en attente
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
