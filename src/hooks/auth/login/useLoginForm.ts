@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { clientAuthService } from "@/services/auth/client-auth-service";
 import { LoginHookProps, UserType } from "@/types/auth";
 import { useLoginState } from "./useLoginState";
+import { authErrorHandler } from "@/services/auth/errors/auth-error-handler";
 
 export function useLoginForm({ 
   onSuccess, 
@@ -23,6 +24,7 @@ export function useLoginForm({
 
       console.log('Attempting login for:', email, 'type:', requiredUserType);
 
+      // Gestion spécifique pour les clients
       if (requiredUserType === 'client') {
         const result = await clientAuthService.signIn(email, password);
         
@@ -37,33 +39,35 @@ export function useLoginForm({
           throw new Error(result.error);
         }
       } else {
+        // Authentification standard pour les autres types d'utilisateurs
         const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password: password.trim(),
         });
 
         if (signInError) {
-          console.error('Sign in error:', signInError);
-          throw new Error(signInError.message === "Invalid login credentials" 
-            ? "Email ou mot de passe incorrect"
-            : "Erreur lors de la connexion");
+          const errorResponse = authErrorHandler.handle(signInError);
+          throw new Error(errorResponse.message);
         }
 
         if (!authData.user) {
           throw new Error("Aucune donnée utilisateur reçue");
         }
 
+        // Vérification du type d'utilisateur
         const userType = authData.user.user_metadata?.user_type as UserType;
         console.log('User type:', userType);
 
         if (requiredUserType && userType !== requiredUserType) {
           console.log('Invalid user type:', userType, 'required:', requiredUserType);
           await supabase.auth.signOut();
-          throw new Error(`Ce compte n'est pas un compte ${
-            requiredUserType === 'client' ? 'client' : 
-            requiredUserType === 'carrier' ? 'transporteur' : 
-            'administrateur'
-          }`);
+          throw new Error(
+            `Ce compte n'est pas un compte ${
+              requiredUserType === 'client' ? 'client' : 
+              requiredUserType === 'carrier' ? 'transporteur' : 
+              'administrateur'
+            }`
+          );
         }
       }
 
