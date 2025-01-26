@@ -83,6 +83,7 @@ export function LoginForm({
           showErrorDialog={showErrorDialog}
           onVerificationDialogClose={() => setShowVerificationDialog(false)}
           onErrorDialogClose={() => setShowErrorDialog(false)}
+          onResendEmail={() => handleLogin(form.getValues("email"), form.getValues("password"))}
         />
 
         <div className="space-y-4">

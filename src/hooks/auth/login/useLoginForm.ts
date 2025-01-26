@@ -25,40 +25,39 @@ export function useLoginForm({
       setShowErrorDialog(false);
 
       // 1. Vérifier d'abord si le client existe et n'est pas vérifié
-      if (!requiredUserType || requiredUserType === 'client') {
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('email_verified, status')
-          .eq('email', email.trim())
-          .maybeSingle();
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email.trim())
+        .maybeSingle();
 
-        if (clientError && !clientError.message.includes('contain')) {
-          console.error('Error checking client status:', clientError);
-          throw new Error("Erreur lors de la vérification du compte");
+      if (clientError && !clientError.message.includes('contain')) {
+        console.error('Error checking client status:', clientError);
+        throw new Error("Erreur lors de la vérification du compte");
+      }
+
+      // Si le compte existe et n'est pas vérifié
+      if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
+        console.log('Account needs verification, sending activation email');
+        
+        const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
+          body: { 
+            email: email.trim(),
+            resend: true
+          }
+        });
+
+        if (functionError) {
+          console.error('Error sending activation email:', functionError);
+          throw new Error("Erreur lors de l'envoi de l'email d'activation");
         }
 
-        // Si le compte existe et n'est pas vérifié
-        if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-          console.log('Account needs verification, sending activation email');
-          
-          const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
-            body: { 
-              email: email.trim(),
-              resend: true
-            }
-          });
-
-          if (functionError) {
-            console.error('Error sending activation email:', functionError);
-          }
-
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          
-          setShowVerificationDialog(true);
-          return;
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
         }
+        
+        setShowVerificationDialog(true);
+        return;
       }
 
       // 2. Tentative de connexion
@@ -71,7 +70,7 @@ export function useLoginForm({
         console.error('Sign in error:', signInError);
         throw new Error(signInError.message === "Invalid login credentials" 
           ? "Email ou mot de passe incorrect"
-          : "Une erreur est survenue lors de la connexion");
+          : "Erreur lors de la connexion");
       }
 
       if (!data.user) {
