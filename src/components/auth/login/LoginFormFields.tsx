@@ -91,3 +91,5 @@ export function LoginFormFields({
     </>
   );
 }
+
+export type { LoginFormValues };
