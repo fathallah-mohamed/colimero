@@ -11,24 +11,49 @@ export const clientAuthService = {
     try {
       console.log('Attempting login for:', email);
       
-      // 1. First check if the client exists and their verification status
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified, status')
-        .eq('email', email.trim())
-        .maybeSingle();
+      // 1. First attempt to sign in
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim()
+      });
 
-      if (clientError) {
-        console.error('Error checking client status:', clientError);
+      if (signInError) {
+        console.error('Sign in error:', signInError);
         return {
           success: false,
-          error: "Une erreur est survenue lors de la vérification de votre compte"
+          error: "Email ou mot de passe incorrect"
         };
       }
 
-      // 2. If client exists but not verified or pending, block login
-      if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
-        console.log('Account not verified or pending:', email);
+      if (!authData.user) {
+        return {
+          success: false,
+          error: "Aucune donnée utilisateur reçue"
+        };
+      }
+
+      // 2. After successful sign in, check client verification status
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (clientError) {
+        console.error('Error checking client status:', clientError);
+        // Sign out the user since we couldn't verify their status
+        await supabase.auth.signOut();
+        return {
+          success: false,
+          error: "Erreur lors de la vérification du compte"
+        };
+      }
+
+      // 3. Check verification status
+      if (!clientData?.email_verified || clientData?.status !== 'active') {
+        console.log('Account not verified or not active:', email);
+        // Sign out the user since they're not verified
+        await supabase.auth.signOut();
         
         // Try to resend activation email
         const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
@@ -42,43 +67,6 @@ export const clientAuthService = {
           console.error('Error sending activation email:', functionError);
         }
 
-        return {
-          success: false,
-          needsVerification: true,
-          error: "Votre compte n'est pas activé. Veuillez vérifier votre email pour le lien d'activation."
-        };
-      }
-
-      // 3. Attempt login only if account is verified
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim()
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        return {
-          success: false,
-          error: "Email ou mot de passe incorrect"
-        };
-      }
-
-      if (!user) {
-        return {
-          success: false,
-          error: "Aucune donnée utilisateur reçue"
-        };
-      }
-
-      // 4. Final verification check after login
-      const { data: finalCheck } = await supabase
-        .from('clients')
-        .select('email_verified, status')
-        .eq('id', user.id)
-        .single();
-
-      if (!finalCheck?.email_verified || finalCheck?.status !== 'active') {
-        await supabase.auth.signOut();
         return {
           success: false,
           needsVerification: true,
