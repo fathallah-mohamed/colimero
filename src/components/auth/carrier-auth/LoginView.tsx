@@ -10,7 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useCarrierAuth } from "@/hooks/auth/useCarrierAuth";
+import { useCarrierLogin } from "@/hooks/auth/login/useCarrierLogin";
 import { StatusMessage } from "./StatusMessage";
 import { LoginActions } from "./LoginActions";
 
@@ -28,7 +28,7 @@ interface LoginViewProps {
 }
 
 export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: LoginViewProps) {
-  const { isLoading, statusMessage, handleLogin } = useCarrierAuth(onSuccess);
+  const { isLoading, error, handleLogin } = useCarrierLogin({ onSuccess });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,8 +44,8 @@ export function LoginView({ onForgotPassword, onCarrierRegister, onSuccess }: Lo
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      {statusMessage && (
-        <StatusMessage type={statusMessage.type} message={statusMessage.message} />
+      {error && (
+        <StatusMessage type="destructive" message={error} />
       )}
 
       <Form {...form}>

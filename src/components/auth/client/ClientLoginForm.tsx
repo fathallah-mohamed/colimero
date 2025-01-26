@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useClientAuth } from "@/hooks/auth/useClientAuth";
+import { useClientLogin } from "@/hooks/auth/login/useClientLogin";
 
 interface ClientLoginFormProps {
   onRegister: () => void;
@@ -24,18 +24,15 @@ export function ClientLoginForm({
   const {
     isLoading,
     error,
-    isVerificationNeeded,
-    handleLogin,
-    handleResendActivation
-  } = useClientAuth(onSuccess);
+    handleLogin
+  } = useClientLogin({
+    onSuccess,
+    onVerificationNeeded: () => setShowActivationDialog(true)
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await handleLogin(email, password);
-    
-    if (isVerificationNeeded) {
-      setShowActivationDialog(true);
-    }
   };
 
   return (
@@ -117,7 +114,7 @@ export function ClientLoginForm({
             <div className="flex justify-center">
               <Button
                 onClick={() => {
-                  handleResendActivation(email);
+                  handleLogin(email, password);
                   setShowActivationDialog(false);
                 }}
                 variant="outline"
