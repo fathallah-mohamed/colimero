@@ -61,7 +61,7 @@ export function useLoginForm({
         }
 
         // Check user type from metadata
-        const userType = authData.user.user_metadata?.user_type;
+        const userType = authData.user.user_metadata?.user_type as UserType;
         console.log('User type:', userType);
 
         // Verify required user type if specified
