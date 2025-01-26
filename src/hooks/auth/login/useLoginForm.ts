@@ -1,35 +1,24 @@
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAuthService } from "@/services/auth/client-auth-service";
-import { UseLoginFormProps, LoginFormState } from "@/types/auth/login";
-import { UserType } from "@/types/auth";
+import { LoginHookProps, UserType } from "@/types/auth";
+import { useLoginState } from "./useLoginState";
 
 export function useLoginForm({ 
   onSuccess, 
   requiredUserType,
   onVerificationNeeded 
-}: UseLoginFormProps = {}) {
-  const [state, setState] = useState<LoginFormState>({
-    isLoading: false,
-    error: null,
-    showVerificationDialog: false,
-    showErrorDialog: false,
-    showActivationDialog: false,
-  });
-
-  const resetState = () => {
-    setState(prev => ({
-      ...prev,
-      error: null,
-      showVerificationDialog: false,
-      showErrorDialog: false,
-      showActivationDialog: false,
-    }));
-  };
+}: LoginHookProps = {}) {
+  const { 
+    state,
+    resetState,
+    setLoading,
+    setError,
+    setDialogState
+  } = useLoginState();
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true }));
+      setLoading(true);
       resetState();
 
       console.log('Attempting login for:', email, 'type:', requiredUserType);
@@ -42,7 +31,7 @@ export function useLoginForm({
             if (onVerificationNeeded) {
               onVerificationNeeded();
             }
-            setState(prev => ({ ...prev, isLoading: false }));
+            setLoading(false);
             return;
           }
           throw new Error(result.error);
@@ -84,24 +73,20 @@ export function useLoginForm({
 
     } catch (error: any) {
       console.error('Login error:', error);
-      setState(prev => ({
-        ...prev,
-        error: error.message || "Une erreur est survenue lors de la connexion",
-        showErrorDialog: !state.showVerificationDialog && !state.showActivationDialog
-      }));
+      setError(error.message || "Une erreur est survenue lors de la connexion");
     } finally {
-      setState(prev => ({ ...prev, isLoading: false }));
+      setLoading(false);
     }
   };
 
   const setShowVerificationDialog = (show: boolean) => 
-    setState(prev => ({ ...prev, showVerificationDialog: show }));
+    setDialogState('showVerificationDialog', show);
 
   const setShowErrorDialog = (show: boolean) => 
-    setState(prev => ({ ...prev, showErrorDialog: show }));
+    setDialogState('showErrorDialog', show);
 
   const setShowActivationDialog = (show: boolean) => 
-    setState(prev => ({ ...prev, showActivationDialog: show }));
+    setDialogState('showActivationDialog', show);
 
   return {
     ...state,
