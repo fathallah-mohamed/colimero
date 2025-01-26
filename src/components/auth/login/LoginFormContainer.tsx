@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { LoginForm } from "./LoginForm";
+import { CarrierLoginForm } from "./CarrierLoginForm";
 import { CustomDialog } from "@/components/ui/custom-dialog";
 import { ForgotPasswordForm } from "../ForgotPasswordForm";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface LoginFormContainerProps {
   onRegister?: () => void;
@@ -21,6 +23,7 @@ export function LoginFormContainer({
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string>("client");
 
   const handleLoginSuccess = () => {
     toast({
@@ -51,16 +54,44 @@ export function LoginFormContainer({
 
   return (
     <>
-      <div className="w-full">
-        <LoginForm
-          onForgotPassword={() => setShowForgotPassword(true)}
-          onRegister={onRegister}
-          onCarrierRegister={onCarrierRegister}
-          onSuccess={handleLoginSuccess}
-          requiredUserType={requiredUserType}
-          hideRegisterButton={false}
-        />
-      </div>
+      <Tabs defaultValue="client" className="w-full" onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="client">Client</TabsTrigger>
+          <TabsTrigger value="carrier">Transporteur</TabsTrigger>
+          <TabsTrigger value="admin">Admin</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="client">
+          <LoginForm
+            onForgotPassword={() => setShowForgotPassword(true)}
+            onRegister={onRegister}
+            onCarrierRegister={onCarrierRegister}
+            onSuccess={handleLoginSuccess}
+            requiredUserType="client"
+            hideRegisterButton={activeTab !== "client"}
+          />
+        </TabsContent>
+
+        <TabsContent value="carrier">
+          <CarrierLoginForm
+            onForgotPassword={() => setShowForgotPassword(true)}
+            onCarrierRegister={onCarrierRegister}
+            onSuccess={handleLoginSuccess}
+            requiredUserType="carrier"
+          />
+        </TabsContent>
+
+        <TabsContent value="admin">
+          <LoginForm
+            onForgotPassword={() => setShowForgotPassword(true)}
+            onRegister={onRegister}
+            onCarrierRegister={onCarrierRegister}
+            onSuccess={handleLoginSuccess}
+            requiredUserType="admin"
+            hideRegisterButton={true}
+          />
+        </TabsContent>
+      </Tabs>
 
       <CustomDialog
         open={showForgotPassword}
