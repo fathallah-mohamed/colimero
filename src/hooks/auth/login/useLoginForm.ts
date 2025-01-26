@@ -24,6 +24,8 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
+      console.log('Attempting login for:', email);
+
       // First attempt to sign in to get user metadata
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -60,8 +62,13 @@ export function useLoginForm({
           .eq('email', email.trim())
           .maybeSingle();
 
+        if (clientError) {
+          console.error('Error checking client status:', clientError);
+          throw new Error("Erreur lors de la vérification du compte");
+        }
+
         if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-          console.log('Client account needs verification, sending activation email');
+          console.log('Client account needs verification');
           
           const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
             body: { 
