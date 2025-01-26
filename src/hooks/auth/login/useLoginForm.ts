@@ -1,32 +1,36 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAuthService } from "@/services/auth/client-auth-service";
+import { UseLoginFormProps, LoginFormState } from "@/types/auth/login";
 import { UserType } from "@/types/auth";
-
-interface UseLoginFormProps {
-  onSuccess?: () => void;
-  requiredUserType?: UserType;
-  onVerificationNeeded?: () => void;
-}
 
 export function useLoginForm({ 
   onSuccess, 
   requiredUserType,
   onVerificationNeeded 
 }: UseLoginFormProps = {}) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const [showActivationDialog, setShowActivationDialog] = useState(false);
+  const [state, setState] = useState<LoginFormState>({
+    isLoading: false,
+    error: null,
+    showVerificationDialog: false,
+    showErrorDialog: false,
+    showActivationDialog: false,
+  });
+
+  const resetState = () => {
+    setState(prev => ({
+      ...prev,
+      error: null,
+      showVerificationDialog: false,
+      showErrorDialog: false,
+      showActivationDialog: false,
+    }));
+  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      setIsLoading(true);
-      setError(null);
-      setShowVerificationDialog(false);
-      setShowErrorDialog(false);
-      setShowActivationDialog(false);
+      setState(prev => ({ ...prev, isLoading: true }));
+      resetState();
 
       console.log('Attempting login for:', email, 'type:', requiredUserType);
 
@@ -43,7 +47,6 @@ export function useLoginForm({
           throw new Error(result.error);
         }
       } else {
-        // First attempt to sign in to get user metadata
         const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password: password.trim(),
@@ -60,11 +63,9 @@ export function useLoginForm({
           throw new Error("Aucune donnée utilisateur reçue");
         }
 
-        // Check user type from metadata and ensure it's a valid UserType
         const userType = authData.user.user_metadata?.user_type as UserType;
         console.log('User type:', userType);
 
-        // Verify required user type if specified
         if (requiredUserType && userType !== requiredUserType) {
           console.log('Invalid user type:', userType, 'required:', requiredUserType);
           await supabase.auth.signOut();
@@ -82,21 +83,27 @@ export function useLoginForm({
 
     } catch (error: any) {
       console.error('Login error:', error);
-      setError(error.message || "Une erreur est survenue lors de la connexion");
-      if (!showVerificationDialog && !showActivationDialog) {
-        setShowErrorDialog(true);
-      }
+      setState(prev => ({
+        ...prev,
+        error: error.message || "Une erreur est survenue lors de la connexion",
+        showErrorDialog: !state.showVerificationDialog && !state.showActivationDialog
+      }));
     } finally {
-      setIsLoading(false);
+      setState(prev => ({ ...prev, isLoading: false }));
     }
   };
 
+  const setShowVerificationDialog = (show: boolean) => 
+    setState(prev => ({ ...prev, showVerificationDialog: show }));
+
+  const setShowErrorDialog = (show: boolean) => 
+    setState(prev => ({ ...prev, showErrorDialog: show }));
+
+  const setShowActivationDialog = (show: boolean) => 
+    setState(prev => ({ ...prev, showActivationDialog: show }));
+
   return {
-    isLoading,
-    error,
-    showVerificationDialog,
-    showErrorDialog,
-    showActivationDialog,
+    ...state,
     setShowVerificationDialog,
     setShowErrorDialog,
     setShowActivationDialog,
