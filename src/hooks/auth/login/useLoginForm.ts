@@ -42,6 +42,7 @@ export function useLoginForm({
             if (onVerificationNeeded) {
               onVerificationNeeded();
             }
+            setState(prev => ({ ...prev, isLoading: false }));
             return;
           }
           throw new Error(result.error);
