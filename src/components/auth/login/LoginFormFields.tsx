@@ -31,7 +31,7 @@ export function LoginFormFields({
 }: LoginFormFieldsProps) {
   return (
     <>
-      {error && (
+      {error && !showVerificationDialog && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -91,7 +91,7 @@ export function LoginFormFields({
         />
       )}
 
-      {showErrorDialog && (
+      {showErrorDialog && !showVerificationDialog && (
         <ErrorDialog 
           isOpen={showErrorDialog}
           onClose={onErrorDialogClose}

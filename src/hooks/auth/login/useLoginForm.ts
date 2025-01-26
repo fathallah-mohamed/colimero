@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -17,7 +16,6 @@ export function useLoginForm({
   const [error, setError] = useState<string | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -56,17 +54,8 @@ export function useLoginForm({
 
           if (functionError) {
             console.error('Error sending activation email:', functionError);
-            toast({
-              variant: "destructive",
-              title: "Erreur",
-              description: "Impossible d'envoyer l'email d'activation"
-            });
           } else {
             console.log('Activation email sent successfully');
-            toast({
-              title: "Email envoyé",
-              description: "Un nouvel email d'activation vous a été envoyé"
-            });
           }
 
           if (onVerificationNeeded) {
@@ -114,11 +103,6 @@ export function useLoginForm({
       console.error('Login error:', error);
       setError(error.message);
       setShowErrorDialog(true);
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message
-      });
     } finally {
       setIsLoading(false);
     }
