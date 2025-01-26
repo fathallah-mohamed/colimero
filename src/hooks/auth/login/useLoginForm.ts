@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -17,7 +16,6 @@ export function useLoginForm({
   const [error, setError] = useState<string | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
-  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -45,6 +43,7 @@ export function useLoginForm({
 
       // Check user type from metadata
       const userType = authData.user.user_metadata?.user_type;
+      console.log('User type:', userType);
 
       // Verify required user type if specified
       if (requiredUserType && userType !== requiredUserType) {
