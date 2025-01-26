@@ -9,6 +9,8 @@ interface AuthResult {
 export const clientAuthService = {
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
+      console.log('Attempting login for:', email);
+      
       // 1. First check if the client exists and their verification status
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
