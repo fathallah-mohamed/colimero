@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields, LoginFormValues } from "./LoginFormFields";
-import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
+import { useClientLogin } from "@/hooks/auth/login/useClientLogin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -46,12 +46,8 @@ export function LoginForm({
   const {
     isLoading,
     error,
-    showVerificationDialog,
-    showErrorDialog,
-    setShowVerificationDialog,
-    setShowErrorDialog,
     handleLogin,
-  } = useLoginForm({ 
+  } = useClientLogin({ 
     onSuccess: () => {
       const returnPath = sessionStorage.getItem('returnPath');
       if (returnPath) {
@@ -60,11 +56,6 @@ export function LoginForm({
       } else {
         navigate('/');
       }
-    }, 
-    requiredUserType,
-    onVerificationNeeded: () => {
-      setShowVerificationDialog(true);
-      form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
@@ -79,10 +70,6 @@ export function LoginForm({
           form={form}
           isLoading={isLoading}
           error={error}
-          showVerificationDialog={showVerificationDialog}
-          showErrorDialog={showErrorDialog}
-          onVerificationDialogClose={() => setShowVerificationDialog(false)}
-          onErrorDialogClose={() => setShowErrorDialog(false)}
         />
 
         <div className="space-y-4">
