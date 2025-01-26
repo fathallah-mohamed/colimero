@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { UserType } from "@/types/auth";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -17,6 +18,7 @@ export function useLoginForm({
   const [error, setError] = useState<string | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -27,7 +29,44 @@ export function useLoginForm({
 
       console.log('Attempting login for:', email, 'type:', requiredUserType);
 
-      // Attempt to sign in
+      // Vérifier d'abord le statut du client
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (clientError) {
+        console.error('Error checking client status:', clientError);
+        throw new Error("Erreur lors de la vérification du compte");
+      }
+
+      // Si le client existe mais n'est pas vérifié ou est en attente
+      if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
+        console.log('Client not verified:', clientData);
+        
+        // Envoyer un nouvel email d'activation
+        const { error: activationError } = await supabase.functions.invoke(
+          'send-activation-email',
+          {
+            body: { email }
+          }
+        );
+
+        if (activationError) {
+          console.error('Error sending activation email:', activationError);
+          throw new Error("Erreur lors de l'envoi de l'email d'activation");
+        }
+
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        }
+        
+        setShowVerificationDialog(true);
+        return;
+      }
+
+      // Tentative de connexion
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -44,13 +83,9 @@ export function useLoginForm({
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // Check user type from metadata
+      // Vérifier le type d'utilisateur
       const userType = authData.user.user_metadata?.user_type as UserType;
-      console.log('User type:', userType);
-
-      // Verify required user type if specified
       if (requiredUserType && userType !== requiredUserType) {
-        console.log('Invalid user type:', userType, 'required:', requiredUserType);
         await supabase.auth.signOut();
         throw new Error(`Ce compte n'est pas un compte ${
           requiredUserType === 'client' ? 'client' : 
@@ -59,43 +94,10 @@ export function useLoginForm({
         }`);
       }
 
-      // Check verification status for clients
-      if (userType === 'client') {
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('email_verified, status')
-          .eq('email', email)
-          .maybeSingle();
-
-        if (clientError) {
-          console.error('Error checking client status:', clientError);
-          throw new Error("Erreur lors de la vérification du compte");
-        }
-
-        if (!clientData?.email_verified || clientData.status === 'pending') {
-          console.log('Client not verified:', clientData);
-          
-          // Send activation email
-          const { error: activationError } = await supabase.functions.invoke(
-            'send-activation-email',
-            {
-              body: { email }
-            }
-          );
-
-          if (activationError) {
-            console.error('Error sending activation email:', activationError);
-            throw new Error("Erreur lors de l'envoi de l'email d'activation");
-          }
-
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          
-          setShowVerificationDialog(true);
-          return;
-        }
-      }
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
 
       if (onSuccess) {
         onSuccess();
