@@ -1,9 +1,5 @@
 import { AuthError } from "@supabase/supabase-js";
-
-export interface AuthErrorResponse {
-  message: string;
-  requiresVerification?: boolean;
-}
+import { AuthErrorResponse } from "@/types/auth";
 
 export const authErrorHandler = {
   handle(error: AuthError): AuthErrorResponse {

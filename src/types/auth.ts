@@ -25,3 +25,8 @@ export interface LoginHookProps {
   requiredUserType?: UserType;
   onVerificationNeeded?: () => void;
 }
+
+export interface AuthErrorResponse {
+  message: string;
+  requiresVerification?: boolean;
+}
