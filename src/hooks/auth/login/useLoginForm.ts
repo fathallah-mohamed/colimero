@@ -25,7 +25,7 @@ export function useLoginForm({
       console.log('Attempting login for:', email, 'type:', requiredUserType);
 
       // Gestion spécifique pour les clients
-      if (requiredUserType === 'client') {
+      if (!requiredUserType || requiredUserType === 'client') {
         const result = await clientAuthService.signIn(email, password);
         
         if (!result.success) {

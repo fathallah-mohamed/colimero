@@ -54,7 +54,7 @@ export const clientAuthService = {
         };
       }
 
-      // Attempt to sign in
+      // Attempt to sign in only if the client is verified and active
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
