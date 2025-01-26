@@ -58,7 +58,7 @@ export function useLoginForm({
         }`);
       }
 
-      // Only check client verification for client accounts
+      // Check verification status based on user type
       if (userType === 'client') {
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
@@ -86,15 +86,27 @@ export function useLoginForm({
             throw new Error("Erreur lors de l'envoi de l'email d'activation");
           }
 
-          // Sign out since the account isn't verified
           await supabase.auth.signOut();
-
+          
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
           
           setShowVerificationDialog(true);
           return;
+        }
+      } else if (userType === 'admin') {
+        // Verify admin exists in administrators table
+        const { data: adminData, error: adminError } = await supabase
+          .from('administrators')
+          .select('id')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        if (adminError || !adminData) {
+          console.error('Error checking admin status:', adminError);
+          await supabase.auth.signOut();
+          throw new Error("Ce compte administrateur n'existe pas ou n'est pas autorisé");
         }
       }
 
