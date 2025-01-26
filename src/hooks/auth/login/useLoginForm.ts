@@ -57,25 +57,28 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Vérifier d'abord si le client existe et n'est pas vérifié
+      // 1. Vérifier d'abord si le client existe et son statut
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
-        .select('email_verified')
+        .select('email_verified, status')
         .eq('email', email.trim())
         .maybeSingle();
 
-      // Si le client existe et n'est pas vérifié
-      if (clientData && !clientData.email_verified) {
+      console.log("Client verification status:", clientData);
+
+      // 2. Si le client existe et n'est pas vérifié ou est en attente
+      if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
+        console.log("Account not verified or pending, blocking login");
         const emailSent = await handleActivationEmail(email);
         if (emailSent && onVerificationNeeded) {
           onVerificationNeeded();
         }
         setShowVerificationDialog(true);
-        setIsLoading(false);
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
         return;
       }
 
-      // Si le client n'existe pas ou est vérifié, on tente la connexion
+      // 3. Tenter la connexion seulement si le compte est vérifié
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
