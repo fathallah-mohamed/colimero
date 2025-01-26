@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { clientAuthService } from "@/services/auth/client-auth-service";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -16,6 +17,7 @@ export function useLoginForm({
   const [error, setError] = useState<string | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [showActivationDialog, setShowActivationDialog] = useState(false);
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -23,90 +25,53 @@ export function useLoginForm({
       setError(null);
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
+      setShowActivationDialog(false);
 
       console.log('Attempting login for:', email, 'type:', requiredUserType);
 
-      // First attempt to sign in to get user metadata
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        throw new Error(signInError.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Erreur lors de la connexion");
-      }
-
-      if (!authData.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      // Check user type from metadata
-      const userType = authData.user.user_metadata?.user_type;
-      console.log('User type:', userType);
-
-      // Verify required user type if specified
-      if (requiredUserType && userType !== requiredUserType) {
-        console.log('Invalid user type:', userType, 'required:', requiredUserType);
-        await supabase.auth.signOut();
-        throw new Error(`Ce compte n'est pas un compte ${
-          requiredUserType === 'client' ? 'client' : 
-          requiredUserType === 'carrier' ? 'transporteur' : 
-          'administrateur'
-        }`);
-      }
-
-      // Check verification status based on user type
-      if (userType === 'client') {
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('email_verified, status')
-          .eq('email', email.trim())
-          .maybeSingle();
-
-        if (clientError) {
-          console.error('Error checking client status:', clientError);
-          throw new Error("Erreur lors de la vérification du compte");
-        }
-
-        if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-          console.log('Client account needs verification');
-          
-          const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
-            body: { 
-              email: email.trim(),
-              resend: true
+      if (requiredUserType === 'client') {
+        const result = await clientAuthService.signIn(email, password);
+        
+        if (!result.success) {
+          if (result.needsVerification) {
+            if (onVerificationNeeded) {
+              onVerificationNeeded();
             }
-          });
-
-          if (functionError) {
-            console.error('Error sending activation email:', functionError);
-            throw new Error("Erreur lors de l'envoi de l'email d'activation");
+            return;
           }
-
-          await supabase.auth.signOut();
-          
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          
-          setShowVerificationDialog(true);
-          return;
+          throw new Error(result.error);
         }
-      } else if (userType === 'admin') {
-        // Verify admin exists in administrators table
-        const { data: adminData, error: adminError } = await supabase
-          .from('administrators')
-          .select('id')
-          .eq('id', authData.user.id)
-          .maybeSingle();
+      } else {
+        // First attempt to sign in to get user metadata
+        const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: password.trim(),
+        });
 
-        if (adminError || !adminData) {
-          console.error('Error checking admin status:', adminError);
+        if (signInError) {
+          console.error('Sign in error:', signInError);
+          throw new Error(signInError.message === "Invalid login credentials" 
+            ? "Email ou mot de passe incorrect"
+            : "Erreur lors de la connexion");
+        }
+
+        if (!authData.user) {
+          throw new Error("Aucune donnée utilisateur reçue");
+        }
+
+        // Check user type from metadata
+        const userType = authData.user.user_metadata?.user_type;
+        console.log('User type:', userType);
+
+        // Verify required user type if specified
+        if (requiredUserType && userType !== requiredUserType) {
+          console.log('Invalid user type:', userType, 'required:', requiredUserType);
           await supabase.auth.signOut();
-          throw new Error("Ce compte administrateur n'existe pas ou n'est pas autorisé");
+          throw new Error(`Ce compte n'est pas un compte ${
+            requiredUserType === 'client' ? 'client' : 
+            requiredUserType === 'carrier' ? 'transporteur' : 
+            'administrateur'
+          }`);
         }
       }
 
@@ -117,7 +82,7 @@ export function useLoginForm({
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || "Une erreur est survenue lors de la connexion");
-      if (!showVerificationDialog) {
+      if (!showVerificationDialog && !showActivationDialog) {
         setShowErrorDialog(true);
       }
     } finally {
@@ -130,8 +95,10 @@ export function useLoginForm({
     error,
     showVerificationDialog,
     showErrorDialog,
+    showActivationDialog,
     setShowVerificationDialog,
     setShowErrorDialog,
+    setShowActivationDialog,
     handleLogin,
   };
 }
