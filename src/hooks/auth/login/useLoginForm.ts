@@ -27,7 +27,7 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // 1. Vérifier si le compte existe et est vérifié
+      // 1. Vérifier d'abord si le client existe et n'est pas vérifié
       if (!requiredUserType || requiredUserType === 'client') {
         console.log('Checking client verification status...');
         const { data: clientData, error: clientError } = await supabase
@@ -36,14 +36,13 @@ export function useLoginForm({
           .eq('email', email.trim())
           .maybeSingle();
 
-        console.log('Client verification data:', clientData);
-
         if (clientError) {
           console.error('Error checking client status:', clientError);
           throw new Error("Erreur lors de la vérification du compte");
         }
 
-        // Si le compte existe mais n'est pas vérifié
+        console.log('Client verification data:', clientData);
+
         if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
           console.log('Account needs verification');
           
@@ -82,7 +81,7 @@ export function useLoginForm({
 
       // 2. Tentative de connexion
       console.log('Attempting login...');
-      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
@@ -94,12 +93,12 @@ export function useLoginForm({
           : "Une erreur est survenue lors de la connexion");
       }
 
-      if (!user) {
+      if (!data.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
       // 3. Vérification du type d'utilisateur
-      const userType = user.user_metadata?.user_type;
+      const userType = data.user.user_metadata?.user_type;
       if (requiredUserType && userType !== requiredUserType) {
         console.log('Invalid user type:', userType, 'required:', requiredUserType);
         await supabase.auth.signOut();
