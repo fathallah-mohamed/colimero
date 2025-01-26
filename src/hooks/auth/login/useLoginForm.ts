@@ -102,7 +102,9 @@ export function useLoginForm({
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message);
-      setShowErrorDialog(true);
+      if (!showVerificationDialog) {
+        setShowErrorDialog(true);
+      }
     } finally {
       setIsLoading(false);
     }
