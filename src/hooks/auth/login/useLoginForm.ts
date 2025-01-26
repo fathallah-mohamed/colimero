@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { UserType } from "@/types/auth";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier' | 'admin';
+  requiredUserType?: UserType;
   onVerificationNeeded?: () => void;
 }
 
@@ -26,40 +27,8 @@ export function useLoginForm({
 
       console.log('Attempting login for:', email, 'type:', requiredUserType);
 
-      // First attempt to sign in to get user metadata
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        throw new Error(signInError.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Erreur lors de la connexion");
-      }
-
-      if (!authData.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      // Check user type from metadata
-      const userType = authData.user.user_metadata?.user_type;
-      console.log('User type:', userType);
-
-      // Verify required user type if specified
-      if (requiredUserType && userType !== requiredUserType) {
-        console.log('Invalid user type:', userType, 'required:', requiredUserType);
-        await supabase.auth.signOut();
-        throw new Error(`Ce compte n'est pas un compte ${
-          requiredUserType === 'client' ? 'client' : 
-          requiredUserType === 'carrier' ? 'transporteur' : 
-          'administrateur'
-        }`);
-      }
-
-      // Check verification status based on user type
-      if (userType === 'client') {
+      // Check client verification status if required type is client
+      if (requiredUserType === 'client') {
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('email_verified, status')
@@ -86,8 +55,6 @@ export function useLoginForm({
             throw new Error("Erreur lors de l'envoi de l'email d'activation");
           }
 
-          await supabase.auth.signOut();
-          
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
@@ -95,19 +62,38 @@ export function useLoginForm({
           setShowVerificationDialog(true);
           return;
         }
-      } else if (userType === 'admin') {
-        // Verify admin exists in administrators table
-        const { data: adminData, error: adminError } = await supabase
-          .from('administrators')
-          .select('id')
-          .eq('id', authData.user.id)
-          .maybeSingle();
+      }
 
-        if (adminError || !adminData) {
-          console.error('Error checking admin status:', adminError);
-          await supabase.auth.signOut();
-          throw new Error("Ce compte administrateur n'existe pas ou n'est pas autorisé");
-        }
+      // Attempt to sign in
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        throw new Error(signInError.message === "Invalid login credentials" 
+          ? "Email ou mot de passe incorrect"
+          : "Erreur lors de la connexion");
+      }
+
+      if (!authData.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
+
+      // Check user type from metadata
+      const userType = authData.user.user_metadata?.user_type as UserType;
+      console.log('User type:', userType);
+
+      // Verify required user type if specified
+      if (requiredUserType && userType !== requiredUserType) {
+        console.log('Invalid user type:', userType, 'required:', requiredUserType);
+        await supabase.auth.signOut();
+        throw new Error(`Ce compte n'est pas un compte ${
+          requiredUserType === 'client' ? 'client' : 
+          requiredUserType === 'carrier' ? 'transporteur' : 
+          'administrateur'
+        }`);
       }
 
       if (onSuccess) {
