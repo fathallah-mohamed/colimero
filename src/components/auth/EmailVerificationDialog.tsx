@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { VerificationDialogContent } from "./verification/VerificationDialogContent";
 import { ConfirmationDialog } from "./verification/ConfirmationDialog";
 import { useVerificationEmail } from "@/hooks/auth/useVerificationEmail";
+import { useToast } from "@/hooks/use-toast";
 
 export interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -21,11 +22,31 @@ export function EmailVerificationDialog({
   onResendEmail
 }: EmailVerificationDialogProps) {
   const { isResending, sendVerificationEmail } = useVerificationEmail();
+  const { toast } = useToast();
 
   const handleResendEmail = async () => {
-    const success = await sendVerificationEmail(email);
-    if (success) {
-      onResendEmail();
+    try {
+      const success = await sendVerificationEmail(email);
+      if (success) {
+        toast({
+          title: "Email envoyé",
+          description: "Un nouvel email d'activation vous a été envoyé",
+        });
+        onResendEmail();
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Impossible d'envoyer l'email d'activation",
+        });
+      }
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'envoi de l'email",
+      });
     }
   };
 

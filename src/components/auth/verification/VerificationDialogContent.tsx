@@ -28,7 +28,7 @@ export function VerificationDialogContent({
         </p>
         
         <p className="text-sm text-center text-gray-500">
-          Si vous n'avez pas reçu l'email, vérifiez vos spams ou cliquez sur le bouton ci-dessous pour recevoir un nouveau lien.
+          Si vous n'avez pas reçu l'email, vérifiez vos spams ou cliquez sur le bouton ci-dessous pour recevoir un nouveau code.
         </p>
 
         <div className="space-y-4">
@@ -47,7 +47,7 @@ export function VerificationDialogContent({
         </div>
 
         <p className="text-sm text-gray-500 text-center">
-          Le lien d'activation est valable pendant 48 heures
+          Le code d'activation est valable pendant 48 heures
         </p>
       </div>
     </>
