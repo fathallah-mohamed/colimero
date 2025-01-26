@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
 import { ErrorDialog } from "@/components/ui/error-dialog";
 import { UseFormReturn } from "react-hook-form";
+import { ActivationDialog } from "../activation/ActivationDialog";
 
 export interface LoginFormValues {
   email: string;
@@ -16,9 +17,12 @@ interface LoginFormFieldsProps {
   error: string | null;
   showVerificationDialog?: boolean;
   showErrorDialog?: boolean;
+  showActivationDialog?: boolean;
   onVerificationDialogClose?: () => void;
   onErrorDialogClose?: () => void;
+  onActivationDialogClose?: () => void;
   onResendEmail?: () => void;
+  onActivationSuccess?: () => void;
 }
 
 export function LoginFormFields({
@@ -27,13 +31,16 @@ export function LoginFormFields({
   error,
   showVerificationDialog = false,
   showErrorDialog = false,
+  showActivationDialog = false,
   onVerificationDialogClose = () => {},
   onErrorDialogClose = () => {},
+  onActivationDialogClose = () => {},
   onResendEmail = () => {},
+  onActivationSuccess = () => {},
 }: LoginFormFieldsProps) {
   return (
     <>
-      {error && !showVerificationDialog && !showErrorDialog && (
+      {error && !showVerificationDialog && !showErrorDialog && !showActivationDialog && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -93,7 +100,16 @@ export function LoginFormFields({
         />
       )}
 
-      {showErrorDialog && !showVerificationDialog && (
+      {showActivationDialog && (
+        <ActivationDialog
+          isOpen={showActivationDialog}
+          onClose={onActivationDialogClose}
+          email={form.getValues("email")}
+          onSuccess={onActivationSuccess}
+        />
+      )}
+
+      {showErrorDialog && !showVerificationDialog && !showActivationDialog && (
         <ErrorDialog 
           isOpen={showErrorDialog}
           onClose={onErrorDialogClose}
