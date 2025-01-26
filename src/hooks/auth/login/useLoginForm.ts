@@ -32,7 +32,7 @@ export function useLoginForm({
       // Vérifier d'abord le statut du client
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
-        .select('email_verified, status')
+        .select('email_verified, status, activation_code')
         .eq('email', email)
         .maybeSingle();
 
@@ -41,21 +41,26 @@ export function useLoginForm({
         throw new Error("Erreur lors de la vérification du compte");
       }
 
+      console.log('Client status check:', clientData);
+
       // Si le client existe mais n'est pas vérifié ou est en attente
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
-        console.log('Client not verified:', clientData);
+        console.log('Client not verified or pending:', clientData);
         
-        // Envoyer un nouvel email d'activation
-        const { error: activationError } = await supabase.functions.invoke(
-          'send-activation-email',
-          {
-            body: { email }
-          }
-        );
+        // Envoyer un nouvel email d'activation si pas de code existant
+        if (!clientData.activation_code) {
+          console.log('No activation code found, sending new one...');
+          const { error: activationError } = await supabase.functions.invoke(
+            'send-activation-email',
+            {
+              body: { email }
+            }
+          );
 
-        if (activationError) {
-          console.error('Error sending activation email:', activationError);
-          throw new Error("Erreur lors de l'envoi de l'email d'activation");
+          if (activationError) {
+            console.error('Error sending activation email:', activationError);
+            throw new Error("Erreur lors de l'envoi de l'email d'activation");
+          }
         }
 
         if (onVerificationNeeded) {
@@ -67,6 +72,7 @@ export function useLoginForm({
       }
 
       // Tentative de connexion
+      console.log('Attempting sign in...');
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -82,6 +88,8 @@ export function useLoginForm({
       if (!authData.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
+
+      console.log('Sign in successful:', authData.user);
 
       // Vérifier le type d'utilisateur
       const userType = authData.user.user_metadata?.user_type as UserType;

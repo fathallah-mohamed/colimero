@@ -31,6 +31,7 @@ export async function registerClient(formData: RegisterFormData) {
     }
 
     // 2. Create auth user first
+    console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
@@ -54,7 +55,10 @@ export async function registerClient(formData: RegisterFormData) {
       throw new Error("Échec de la création du compte");
     }
 
+    console.log('Auth user created successfully');
+
     // 3. Create client profile
+    console.log('Creating client profile...');
     const { error: insertError } = await supabase
       .from('clients')
       .insert({
@@ -78,7 +82,10 @@ export async function registerClient(formData: RegisterFormData) {
       throw insertError;
     }
 
+    console.log('Client profile created successfully');
+
     // 4. Send activation email
+    console.log('Sending activation email...');
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
       body: {
         email: formData.email,
@@ -94,6 +101,7 @@ export async function registerClient(formData: RegisterFormData) {
     console.log('Activation email sent successfully');
 
     // 5. Force sign out to ensure email verification
+    console.log('Signing out user...');
     await supabase.auth.signOut();
 
     return {
