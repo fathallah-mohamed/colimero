@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { registerClient } from "./useClientRegistration";
-import { RegisterFormState } from "./types";
+import { RegisterFormState } from "@/types/auth";
+import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
@@ -19,7 +19,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const { toast } = useToast();
 
   const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
-    console.log(`Field ${field} changed to:`, value);
+    console.log(`Field ${String(field)} changed to:`, value);
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -38,7 +38,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
         return;
       }
 
-      const result = await registerClient(formState);
+      const result = await clientAuthService.signIn(formState.email, formState.password);
       console.log("Registration result:", result);
 
       if (result.success) {
