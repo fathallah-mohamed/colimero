@@ -5,6 +5,7 @@ interface VerificationDialogContentProps {
   email: string;
   isResending: boolean;
   onResendEmail: () => void;
+  onActivate: () => void;
   onClose: () => void;
 }
 
@@ -12,6 +13,7 @@ export function VerificationDialogContent({
   email,
   isResending,
   onResendEmail,
+  onActivate,
   onClose,
 }: VerificationDialogContentProps) {
   return (
@@ -24,14 +26,21 @@ export function VerificationDialogContent({
       
       <div className="space-y-4">
         <p className="text-center text-gray-600">
-          Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail à l'adresse <span className="font-medium">{email}</span> et cliquer sur le lien d'activation.
+          Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail à l'adresse <span className="font-medium">{email}</span> et entrer le code d'activation reçu.
         </p>
         
-        <p className="text-sm text-center text-gray-500">
-          Si vous n'avez pas reçu l'email, vérifiez vos spams ou cliquez sur le bouton ci-dessous pour recevoir un nouveau code.
-        </p>
-
         <div className="space-y-4">
+          <Button 
+            onClick={onActivate}
+            className="w-full"
+          >
+            Entrer le code d'activation
+          </Button>
+
+          <p className="text-sm text-center text-gray-500">
+            Si vous n'avez pas reçu l'email, vérifiez vos spams ou cliquez sur le bouton ci-dessous pour recevoir un nouveau code.
+          </p>
+
           <Button 
             onClick={onResendEmail} 
             variant="outline" 
@@ -41,7 +50,7 @@ export function VerificationDialogContent({
             {isResending ? "Envoi en cours..." : "Renvoyer l'email d'activation"}
           </Button>
           
-          <Button onClick={onClose} className="w-full">
+          <Button onClick={onClose} variant="ghost" className="w-full">
             Fermer
           </Button>
         </div>

@@ -3,6 +3,8 @@ import { VerificationDialogContent } from "./verification/VerificationDialogCont
 import { ConfirmationDialog } from "./verification/ConfirmationDialog";
 import { useVerificationEmail } from "@/hooks/auth/useVerificationEmail";
 import { useToast } from "@/hooks/use-toast";
+import { ActivationDialog } from "./activation/ActivationDialog";
+import { useState } from "react";
 
 export interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ export function EmailVerificationDialog({
 }: EmailVerificationDialogProps) {
   const { isResending, sendVerificationEmail } = useVerificationEmail();
   const { toast } = useToast();
+  const [showActivationDialog, setShowActivationDialog] = useState(false);
 
   const handleResendEmail = async () => {
     try {
@@ -66,6 +69,7 @@ export function EmailVerificationDialog({
             email={email}
             isResending={isResending}
             onResendEmail={handleResendEmail}
+            onActivate={() => setShowActivationDialog(true)}
             onClose={onClose}
           />
         </DialogContent>
@@ -74,6 +78,13 @@ export function EmailVerificationDialog({
       <ConfirmationDialog 
         open={showConfirmationDialog} 
         onClose={onConfirmationClose}
+      />
+
+      <ActivationDialog
+        isOpen={showActivationDialog}
+        onClose={() => setShowActivationDialog(false)}
+        email={email}
+        onSuccess={onClose}
       />
     </>
   );
