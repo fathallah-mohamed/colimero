@@ -22,35 +22,6 @@ export function useLoginForm({
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleActivationEmail = async (email: string) => {
-    try {
-      const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
-        body: { 
-          email: email.trim(),
-          resend: true
-        }
-      });
-
-      if (functionError) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible d'envoyer l'email d'activation"
-        });
-        return false;
-      }
-
-      toast({
-        title: "Email envoyé",
-        description: "Un nouvel email d'activation vous a été envoyé"
-      });
-      return true;
-    } catch (error) {
-      console.error("Error sending activation email:", error);
-      return false;
-    }
-  };
-
   const handleLogin = async (email: string, password: string) => {
     try {
       setIsLoading(true);
@@ -72,10 +43,33 @@ export function useLoginForm({
       // 2. Si le client existe et n'est pas vérifié ou est en attente
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
         console.log("Account not verified or pending, blocking login");
-        const emailSent = await handleActivationEmail(email);
-        if (emailSent && onVerificationNeeded) {
+        
+        // Envoyer un nouvel email d'activation
+        const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
+          body: { 
+            email: email.trim(),
+            resend: true
+          }
+        });
+
+        if (functionError) {
+          console.error('Error sending activation email:', functionError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible d'envoyer l'email d'activation"
+          });
+        } else {
+          toast({
+            title: "Email envoyé",
+            description: "Un nouvel email d'activation vous a été envoyé"
+          });
+        }
+
+        if (onVerificationNeeded) {
           onVerificationNeeded();
         }
+        
         setShowVerificationDialog(true);
         setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
         return;
