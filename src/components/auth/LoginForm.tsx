@@ -48,10 +48,8 @@ export function LoginForm({
     error,
     showVerificationDialog,
     showErrorDialog,
-    showActivationDialog,
     setShowVerificationDialog,
     setShowErrorDialog,
-    setShowActivationDialog,
     handleLogin,
   } = useLoginForm({ 
     onSuccess: () => {
@@ -65,18 +63,13 @@ export function LoginForm({
     }, 
     requiredUserType,
     onVerificationNeeded: () => {
-      setShowActivationDialog(true);
+      setShowVerificationDialog(true);
       form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
   const onSubmit = async (values: LoginFormValues) => {
     await handleLogin(values.email, values.password);
-  };
-
-  const handleActivationSuccess = () => {
-    setShowActivationDialog(false);
-    handleLogin(form.getValues("email"), form.getValues("password"));
   };
 
   return (
@@ -88,12 +81,9 @@ export function LoginForm({
           error={error}
           showVerificationDialog={showVerificationDialog}
           showErrorDialog={showErrorDialog}
-          showActivationDialog={showActivationDialog}
           onVerificationDialogClose={() => setShowVerificationDialog(false)}
           onErrorDialogClose={() => setShowErrorDialog(false)}
-          onActivationDialogClose={() => setShowActivationDialog(false)}
           onResendEmail={() => handleLogin(form.getValues("email"), form.getValues("password"))}
-          onActivationSuccess={handleActivationSuccess}
         />
 
         <div className="space-y-4">
