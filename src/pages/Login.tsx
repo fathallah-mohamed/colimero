@@ -1,5 +1,5 @@
 import Navigation from "@/components/Navigation";
-import { LoginForm } from "@/components/auth/login/LoginForm";
+import { LoginFormContainer } from "@/components/auth/login/LoginFormContainer";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,11 +58,7 @@ export default function Login() {
       {/* Login Form Section */}
       <div className="max-w-md mx-auto -mt-8 px-4 relative z-10 pb-16">
         <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100">
-          <h2 className="text-2xl font-bold text-center mb-8">
-            Connexion
-          </h2>
-          <LoginForm
-            onForgotPassword={() => navigate('/reset-password')}
+          <LoginFormContainer
             onRegister={handleRegister}
             onCarrierRegister={handleCarrierRegister}
             onSuccess={handleSuccess}
