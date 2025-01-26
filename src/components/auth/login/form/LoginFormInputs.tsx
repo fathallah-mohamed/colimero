@@ -1,5 +1,4 @@
-import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { LoginFormValues } from "../types";
@@ -23,6 +22,7 @@ export function LoginFormInputs({ form, isLoading }: LoginFormInputsProps) {
                 placeholder="votre@email.com"
                 {...field}
                 disabled={isLoading}
+                type="email"
               />
             </FormControl>
             <FormMessage />

@@ -1,21 +1,20 @@
-import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 interface LoginFormButtonsProps {
   isLoading: boolean;
+  onForgotPassword: () => void;
   onRegister: () => void;
   onCarrierRegister: () => void;
-  onForgotPassword: () => void;
   hideRegisterButton?: boolean;
   requiredUserType?: 'client' | 'carrier';
 }
 
 export function LoginFormButtons({
   isLoading,
+  onForgotPassword,
   onRegister,
   onCarrierRegister,
-  onForgotPassword,
   hideRegisterButton = false,
   requiredUserType,
 }: LoginFormButtonsProps) {
@@ -23,7 +22,7 @@ export function LoginFormButtons({
     <div className="space-y-4">
       <Button
         type="submit"
-        className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+        className="w-full bg-primary hover:bg-primary/90 text-white"
         disabled={isLoading}
       >
         {isLoading ? "Connexion..." : "Se connecter"}
@@ -61,7 +60,7 @@ export function LoginFormButtons({
                 onClick={onCarrierRegister}
                 className="w-full"
               >
-                Créer un compte transporteur
+                Devenir transporteur
               </Button>
             )}
           </div>
@@ -71,7 +70,7 @@ export function LoginFormButtons({
       <div className="text-center">
         <button
           type="button"
-          className="text-sm text-[#00B0F0] hover:underline"
+          className="text-sm text-primary hover:text-primary/90 hover:underline transition-colors"
           onClick={onForgotPassword}
         >
           Mot de passe oublié ?

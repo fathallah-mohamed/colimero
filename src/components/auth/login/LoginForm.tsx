@@ -1,16 +1,14 @@
-import React from 'react';
 import { Form } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { EmailVerificationDialog } from "@/components/auth/EmailVerificationDialog";
-import { ErrorDialog } from "@/components/ui/error-dialog";
 import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { LoginFormValues } from "./types";
 import { LoginFormHeader } from "./form/LoginFormHeader";
 import { LoginFormInputs } from "./form/LoginFormInputs";
 import { LoginFormButtons } from "./form/LoginFormButtons";
-import { LoginFormValues } from "./types";
+import { LoginFormDialogs } from "./form/LoginFormDialogs";
 
 const loginSchema = z.object({
   email: z.string()
@@ -89,20 +87,14 @@ export function LoginForm({
           requiredUserType={requiredUserType}
         />
 
-        <EmailVerificationDialog
-          isOpen={showVerificationDialog}
-          onClose={() => setShowVerificationDialog(false)}
+        <LoginFormDialogs
+          showVerificationDialog={showVerificationDialog}
+          showErrorDialog={showErrorDialog}
+          error={error}
           email={form.getValues("email")}
-          showConfirmationDialog={false}
-          onConfirmationClose={() => {}}
+          onVerificationDialogClose={() => setShowVerificationDialog(false)}
+          onErrorDialogClose={() => setShowErrorDialog(false)}
           onResendEmail={() => {}}
-        />
-
-        <ErrorDialog 
-          isOpen={showErrorDialog}
-          onClose={() => setShowErrorDialog(false)}
-          title="Erreur de connexion"
-          description={error || "Une erreur est survenue lors de la connexion"}
         />
       </form>
     </Form>
