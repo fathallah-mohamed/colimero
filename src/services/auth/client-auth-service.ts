@@ -31,7 +31,7 @@ export const clientAuthService = {
         };
       }
 
-      // If client exists but isn't verified, handle verification flow
+      // If client exists but isn't verified or active, handle verification flow
       if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
         console.log('Account needs verification:', email);
         
