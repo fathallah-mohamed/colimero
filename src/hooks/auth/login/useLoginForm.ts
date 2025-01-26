@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAuthService } from "@/services/auth/client-auth-service";
+import { UserType } from "@/types/auth";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier' | 'admin';
+  requiredUserType?: UserType;
   onVerificationNeeded?: () => void;
 }
 
