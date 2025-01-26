@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = z.object({
   email: z.string()
@@ -33,6 +34,7 @@ export function LoginForm({
   requiredUserType,
   hideRegisterButton = false,
 }: LoginFormProps) {
+  const navigate = useNavigate();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -50,7 +52,15 @@ export function LoginForm({
     setShowErrorDialog,
     handleLogin,
   } = useLoginForm({ 
-    onSuccess,
+    onSuccess: () => {
+      const returnPath = sessionStorage.getItem('returnPath');
+      if (returnPath) {
+        sessionStorage.removeItem('returnPath');
+        navigate(returnPath);
+      } else {
+        navigate('/');
+      }
+    }, 
     requiredUserType,
     onVerificationNeeded: () => {
       setShowVerificationDialog(true);

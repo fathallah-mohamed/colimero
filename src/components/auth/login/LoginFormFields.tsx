@@ -51,6 +51,7 @@ export function LoginFormFields({
                     {...field}
                     disabled={isLoading}
                     autoComplete="email"
+                    type="email"
                   />
                 </FormControl>
                 <FormMessage />
