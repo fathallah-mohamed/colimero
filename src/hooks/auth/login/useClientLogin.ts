@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { clientAuthService } from "@/services/auth/client-auth-service";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseClientLoginProps {
   onSuccess?: () => void;
@@ -9,66 +10,49 @@ interface UseClientLoginProps {
 export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLoginProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
-    console.log('Starting login process for:', email);
-    setIsLoading(true);
-    setError(null);
-
     try {
-      // 1. Vérifier d'abord si le client existe et est vérifié
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified')
-        .eq('email', email.trim())
-        .maybeSingle();
+      setIsLoading(true);
+      setError(null);
 
-      console.log('Client verification check result:', clientData);
+      const result = await clientAuthService.signIn(email, password);
 
-      if (clientError) {
-        console.error('Error checking client verification:', clientError);
-        setError("Une erreur est survenue lors de la vérification du compte");
-        return;
-      }
-
-      // 2. Si le client n'existe pas ou n'est pas vérifié, bloquer la connexion
-      if (!clientData || clientData.email_verified === false) {
-        console.log('Account not verified or not found:', email);
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
+      if (!result.success) {
+        setError(result.error || "Une erreur est survenue");
+        
+        if (result.needsVerification) {
+          toast({
+            variant: "destructive",
+            title: "Compte non activé",
+            description: "Veuillez activer votre compte via le lien envoyé par email.",
+          });
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          return;
         }
+        
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: result.error,
+        });
         return;
       }
 
-      // 3. Si le client est vérifié, procéder à la connexion
-      console.log('Account verified, proceeding with login');
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        setError(signInError.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Une erreur est survenue lors de la connexion"
-        );
-        return;
-      }
-
-      if (!authData.user) {
-        setError("Aucune donnée utilisateur reçue");
-        return;
-      }
-
-      console.log('Login successful');
       if (onSuccess) {
         onSuccess();
       }
-
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setError(error.message);
+    } catch (error) {
+      console.error('Login error:', error);
+      setError("Une erreur inattendue s'est produite");
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +61,6 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
   return {
     isLoading,
     error,
-    handleLogin,
+    handleLogin
   };
 }
