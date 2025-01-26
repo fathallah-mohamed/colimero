@@ -20,8 +20,6 @@ export function useClientLogin({ onSuccess, onVerificationNeeded }: UseClientLog
       const result = await clientAuthService.signIn(email, password);
 
       if (!result.success) {
-        setError(result.error || "Une erreur est survenue");
-        
         if (result.needsVerification) {
           toast({
             variant: "destructive",
