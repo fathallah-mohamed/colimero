@@ -32,12 +32,12 @@ export function useLoginForm({
           .eq('email', email.trim())
           .maybeSingle();
 
-        if (clientError) {
+        if (clientError && !clientError.message.includes('contain')) {
           console.error('Error checking client status:', clientError);
           throw new Error("Erreur lors de la vérification du compte");
         }
 
-        // Si le compte existe mais n'est pas vérifié
+        // Si le compte existe et n'est pas vérifié
         if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
           console.log('Account needs verification, sending activation email');
           
