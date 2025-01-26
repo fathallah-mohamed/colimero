@@ -26,18 +26,43 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // First check if the client exists and their verification status
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified, status')
-        .eq('email', email.trim())
-        .maybeSingle();
+      // First attempt to sign in to get user metadata
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
 
-      // If there's a client record
-      if (clientData) {
-        // Check verification status
-        if (!clientData.email_verified || clientData.status !== 'active') {
-          console.log('Account needs verification, sending activation email');
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        throw new Error(signInError.message === "Invalid login credentials" 
+          ? "Email ou mot de passe incorrect"
+          : "Erreur lors de la connexion");
+      }
+
+      if (!authData.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
+
+      // Check user type from metadata
+      const userType = authData.user.user_metadata?.user_type;
+
+      // Verify required user type if specified
+      if (requiredUserType && userType !== requiredUserType) {
+        console.log('Invalid user type:', userType, 'required:', requiredUserType);
+        await supabase.auth.signOut();
+        throw new Error(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+      }
+
+      // Only check client verification for client accounts
+      if (userType === 'client') {
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('email_verified, status')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
+          console.log('Client account needs verification, sending activation email');
           
           const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
             body: { 
@@ -51,6 +76,9 @@ export function useLoginForm({
             throw new Error("Erreur lors de l'envoi de l'email d'activation");
           }
 
+          // Sign out since the account isn't verified
+          await supabase.auth.signOut();
+
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
@@ -58,31 +86,6 @@ export function useLoginForm({
           setShowVerificationDialog(true);
           return;
         }
-      }
-
-      // Attempt to sign in
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        throw new Error(signInError.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Erreur lors de la connexion");
-      }
-
-      if (!data.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      // Verify user type if required
-      const userType = data.user.user_metadata?.user_type;
-      if (requiredUserType && userType !== requiredUserType) {
-        console.log('Invalid user type:', userType, 'required:', requiredUserType);
-        await supabase.auth.signOut();
-        throw new Error(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
       }
 
       if (onSuccess) {
