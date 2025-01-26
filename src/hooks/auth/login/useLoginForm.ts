@@ -19,7 +19,6 @@ export function useLoginForm({
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
       setShowVerificationDialog(false);
@@ -27,7 +26,6 @@ export function useLoginForm({
 
       // 1. Vérifier d'abord si le client existe et n'est pas vérifié
       if (!requiredUserType || requiredUserType === 'client') {
-        console.log('Checking client verification status...');
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('email_verified, status')
@@ -39,12 +37,10 @@ export function useLoginForm({
           throw new Error("Erreur lors de la vérification du compte");
         }
 
-        console.log('Client verification data:', clientData);
-
+        // Si le compte existe mais n'est pas vérifié
         if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-          console.log('Account needs verification');
+          console.log('Account needs verification, sending activation email');
           
-          // Envoyer un nouvel email d'activation
           const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
             body: { 
               email: email.trim(),
@@ -54,8 +50,6 @@ export function useLoginForm({
 
           if (functionError) {
             console.error('Error sending activation email:', functionError);
-          } else {
-            console.log('Activation email sent successfully');
           }
 
           if (onVerificationNeeded) {
@@ -63,13 +57,11 @@ export function useLoginForm({
           }
           
           setShowVerificationDialog(true);
-          setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
           return;
         }
       }
 
       // 2. Tentative de connexion
-      console.log('Attempting login...');
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -94,7 +86,6 @@ export function useLoginForm({
         throw new Error(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
       }
 
-      console.log('Login successful');
       if (onSuccess) {
         onSuccess();
       }
