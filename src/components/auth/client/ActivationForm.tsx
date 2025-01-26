@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,82 +12,94 @@ interface ActivationFormProps {
 }
 
 export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
-  const [code, setCode] = useState("");
+  const [activationCode, setActivationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return;
+
     setIsLoading(true);
+    setError(null);
 
     try {
-      const { data, error } = await supabase
-        .rpc('activate_client_account', {
-          p_activation_code: code.trim()
+      const result = await clientAuthService.activateAccount(activationCode, email);
+
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+
+      // Refresh the session after activation
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Error getting session:', sessionError);
+        throw sessionError;
+      }
+
+      if (!session) {
+        // If no session, try to sign in again
+        const { data: { session: newSession }, error: signInError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: activationCode // Use activation code as temporary password
         });
 
-      if (error) throw error;
-
-      if (data) {
-        toast({
-          title: "Compte activé",
-          description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
-        });
-        
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          navigate('/connexion');
+        if (signInError) {
+          console.error('Error signing in after activation:', signInError);
+          throw signInError;
         }
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Code invalide",
-          description: "Le code d'activation est invalide ou a expiré.",
-        });
+
+        if (!newSession) {
+          throw new Error('No session after activation');
+        }
+      }
+
+      toast({
+        title: "Compte activé",
+        description: "Votre compte a été activé avec succès",
+      });
+
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error) {
-      console.error('Activation error:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'activation de votre compte.",
-      });
+      console.error('Error in activation:', error);
+      setError("Une erreur est survenue lors de l'activation");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-2">
-        <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-          Code d'activation
-        </label>
         <Input
-          id="code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Entrez votre code d'activation"
-          className="text-center tracking-widest text-lg"
-          maxLength={7}
+          type="text"
+          value={activationCode}
+          onChange={(e) => setActivationCode(e.target.value)}
+          placeholder="Entrez le code d'activation"
+          className="text-center text-lg tracking-widest"
+          maxLength={6}
+          required
         />
       </div>
 
       <Button
         type="submit"
         className="w-full"
-        disabled={isLoading || code.length < 6}
+        disabled={isLoading || !activationCode}
       >
         {isLoading ? "Activation..." : "Activer mon compte"}
       </Button>
-
-      {email && (
-        <p className="text-sm text-center text-gray-500">
-          Un code d'activation a été envoyé à {email}
-        </p>
-      )}
     </form>
   );
 }
