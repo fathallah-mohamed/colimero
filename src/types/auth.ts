@@ -1,3 +1,5 @@
+export type UserType = 'client' | 'carrier' | 'admin';
+
 export interface RegisterFormState {
   firstName: string;
   lastName: string;
