@@ -9,7 +9,7 @@ interface AuthResult {
 export const clientAuthService = {
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
-      // 1. Vérifier d'abord si le client existe et son statut de vérification
+      // 1. First check if the client exists and their verification status
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified, status')
@@ -24,11 +24,11 @@ export const clientAuthService = {
         };
       }
 
-      // 2. Si le client existe mais n'est pas vérifié ou en attente, bloquer la connexion
+      // 2. If client exists but not verified or pending, block login
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
         console.log('Account not verified or pending:', email);
         
-        // Essayer de renvoyer l'email d'activation
+        // Try to resend activation email
         const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
           body: { 
             email: email.trim(),
@@ -47,7 +47,7 @@ export const clientAuthService = {
         };
       }
 
-      // 3. Tenter la connexion uniquement si le compte est vérifié
+      // 3. Attempt login only if account is verified
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -68,7 +68,7 @@ export const clientAuthService = {
         };
       }
 
-      // 4. Vérification finale après la connexion
+      // 4. Final verification check after login
       const { data: finalCheck } = await supabase
         .from('clients')
         .select('email_verified, status')
