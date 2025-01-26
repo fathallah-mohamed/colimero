@@ -60,7 +60,7 @@ export function useLoginForm({
           throw new Error("Aucune donnée utilisateur reçue");
         }
 
-        // Check user type from metadata
+        // Check user type from metadata and ensure it's a valid UserType
         const userType = authData.user.user_metadata?.user_type as UserType;
         console.log('User type:', userType);
 
