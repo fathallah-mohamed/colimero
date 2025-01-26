@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: 'client' | 'carrier' | 'admin';
   onVerificationNeeded?: () => void;
 }
 
@@ -24,7 +24,7 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      console.log('Attempting login for:', email);
+      console.log('Attempting login for:', email, 'type:', requiredUserType);
 
       // First attempt to sign in to get user metadata
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -51,7 +51,11 @@ export function useLoginForm({
       if (requiredUserType && userType !== requiredUserType) {
         console.log('Invalid user type:', userType, 'required:', requiredUserType);
         await supabase.auth.signOut();
-        throw new Error(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+        throw new Error(`Ce compte n'est pas un compte ${
+          requiredUserType === 'client' ? 'client' : 
+          requiredUserType === 'carrier' ? 'transporteur' : 
+          'administrateur'
+        }`);
       }
 
       // Only check client verification for client accounts

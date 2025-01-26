@@ -11,7 +11,7 @@ interface LoginFormContainerProps {
   onRegister?: () => void;
   onCarrierRegister?: () => void;
   onSuccess?: () => void;
-  requiredUserType?: "client" | "carrier" | "admin";
+  requiredUserType?: 'client' | 'carrier' | 'admin';
 }
 
 export function LoginFormContainer({

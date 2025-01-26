@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields, LoginFormValues } from "./LoginFormFields";
-import { useClientLogin } from "@/hooks/auth/login/useClientLogin";
+import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -22,7 +22,7 @@ interface LoginFormProps {
   onRegister: () => void;
   onCarrierRegister: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: 'client' | 'carrier' | 'admin';
   hideRegisterButton?: boolean;
 }
 
@@ -47,7 +47,7 @@ export function LoginForm({
     isLoading,
     error,
     handleLogin,
-  } = useClientLogin({ 
+  } = useLoginForm({ 
     onSuccess: () => {
       const returnPath = sessionStorage.getItem('returnPath');
       if (returnPath) {
