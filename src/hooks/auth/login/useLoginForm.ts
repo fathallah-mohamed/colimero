@@ -1,31 +1,35 @@
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAuthService } from "@/services/auth/client-auth-service";
-import { LoginHookProps, UserType } from "@/types/auth";
-import { useLoginState } from "./useLoginState";
-import { authErrorHandler } from "@/services/auth/errors/auth-error-handler";
+
+interface UseLoginFormProps {
+  onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier' | 'admin';
+  onVerificationNeeded?: () => void;
+}
 
 export function useLoginForm({ 
   onSuccess, 
   requiredUserType,
   onVerificationNeeded 
-}: LoginHookProps = {}) {
-  const { 
-    state,
-    resetState,
-    setLoading,
-    setError,
-    setDialogState
-  } = useLoginState();
+}: UseLoginFormProps = {}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [showActivationDialog, setShowActivationDialog] = useState(false);
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      resetState();
+      setIsLoading(true);
+      setError(null);
+      setShowVerificationDialog(false);
+      setShowErrorDialog(false);
+      setShowActivationDialog(false);
 
       console.log('Attempting login for:', email, 'type:', requiredUserType);
 
-      // Si c'est un client ou pas de type requis spécifié
-      if (!requiredUserType || requiredUserType === 'client') {
+      if (requiredUserType === 'client') {
         const result = await clientAuthService.signIn(email, password);
         
         if (!result.success) {
@@ -33,41 +37,41 @@ export function useLoginForm({
             if (onVerificationNeeded) {
               onVerificationNeeded();
             }
-            setLoading(false);
             return;
           }
           throw new Error(result.error);
         }
       } else {
-        // Authentification standard pour les autres types d'utilisateurs
+        // First attempt to sign in to get user metadata
         const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password: password.trim(),
         });
 
         if (signInError) {
-          const errorResponse = authErrorHandler.handle(signInError);
-          throw new Error(errorResponse.message);
+          console.error('Sign in error:', signInError);
+          throw new Error(signInError.message === "Invalid login credentials" 
+            ? "Email ou mot de passe incorrect"
+            : "Erreur lors de la connexion");
         }
 
         if (!authData.user) {
           throw new Error("Aucune donnée utilisateur reçue");
         }
 
-        // Vérification du type d'utilisateur
-        const userType = authData.user.user_metadata?.user_type as UserType;
+        // Check user type from metadata
+        const userType = authData.user.user_metadata?.user_type;
         console.log('User type:', userType);
 
+        // Verify required user type if specified
         if (requiredUserType && userType !== requiredUserType) {
           console.log('Invalid user type:', userType, 'required:', requiredUserType);
           await supabase.auth.signOut();
-          throw new Error(
-            `Ce compte n'est pas un compte ${
-              requiredUserType === 'client' ? 'client' : 
-              requiredUserType === 'carrier' ? 'transporteur' : 
-              'administrateur'
-            }`
-          );
+          throw new Error(`Ce compte n'est pas un compte ${
+            requiredUserType === 'client' ? 'client' : 
+            requiredUserType === 'carrier' ? 'transporteur' : 
+            'administrateur'
+          }`);
         }
       }
 
@@ -78,22 +82,20 @@ export function useLoginForm({
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || "Une erreur est survenue lors de la connexion");
+      if (!showVerificationDialog && !showActivationDialog) {
+        setShowErrorDialog(true);
+      }
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const setShowVerificationDialog = (show: boolean) => 
-    setDialogState('showVerificationDialog', show);
-
-  const setShowErrorDialog = (show: boolean) => 
-    setDialogState('showErrorDialog', show);
-
-  const setShowActivationDialog = (show: boolean) => 
-    setDialogState('showActivationDialog', show);
-
   return {
-    ...state,
+    isLoading,
+    error,
+    showVerificationDialog,
+    showErrorDialog,
+    showActivationDialog,
     setShowVerificationDialog,
     setShowErrorDialog,
     setShowActivationDialog,

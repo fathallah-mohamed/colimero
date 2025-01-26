@@ -31,7 +31,7 @@ export const clientAuthService = {
         };
       }
 
-      // If client exists but isn't verified or active, handle verification flow
+      // If client exists but isn't verified, handle verification flow
       if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
         console.log('Account needs verification:', email);
         
@@ -54,7 +54,7 @@ export const clientAuthService = {
         };
       }
 
-      // Attempt to sign in only if the client is verified and active
+      // Attempt to sign in
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
