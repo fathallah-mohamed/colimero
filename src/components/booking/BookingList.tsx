@@ -38,6 +38,29 @@ export function BookingList() {
     try {
       console.log("BookingList - Updating booking status:", { bookingId, newStatus });
       
+      // Check if there's already a pending booking for this tour
+      if (newStatus === 'pending') {
+        const booking = bookings.find(b => b.id === bookingId);
+        if (!booking) return;
+
+        const { data: existingBooking, error: checkError } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('tour_id', booking.tour_id)
+          .eq('user_id', booking.user_id)
+          .eq('status', 'pending')
+          .single();
+
+        if (existingBooking) {
+          toast({
+            variant: "destructive",
+            title: "Action impossible",
+            description: "Vous avez déjà une réservation en attente pour cette tournée.",
+          });
+          return;
+        }
+      }
+
       const { error: updateError } = await supabase
         .from('bookings')
         .update({ 
@@ -49,7 +72,21 @@ export function BookingList() {
 
       if (updateError) {
         console.error("Error updating booking status:", updateError);
-        throw updateError;
+        
+        if (updateError.code === '23505') {
+          toast({
+            variant: "destructive",
+            title: "Action impossible",
+            description: "Vous avez déjà une réservation en attente pour cette tournée.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Une erreur est survenue lors de la mise à jour du statut.",
+          });
+        }
+        return;
       }
 
       await refetch();
@@ -65,7 +102,6 @@ export function BookingList() {
         title: "Erreur",
         description: "Une erreur est survenue lors de la mise à jour du statut.",
       });
-      throw err;
     }
   };
 

@@ -1,6 +1,6 @@
 import { BookingStatus } from "@/types/booking";
 import { Button } from "@/components/ui/button";
-import { Edit2, RotateCcw, CheckSquare, XCircle } from "lucide-react";
+import { Edit2, RotateCcw, XCircle } from "lucide-react";
 import { CancelConfirmDialog } from "./CancelConfirmDialog";
 
 interface BookingActionsProps {
@@ -53,56 +53,19 @@ export function BookingActions({
       {status === "pending" && (
         <>
           {tourStatus === "Programmée" && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-red-500 hover:text-red-600 gap-2"
-                onClick={() => handleStatusChange("cancelled")}
-              >
-                <XCircle className="h-4 w-4" />
-                Annuler
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-500 hover:text-green-600 gap-2"
-                onClick={() => handleStatusChange("confirmed")}
-              >
-                <CheckSquare className="h-4 w-4" />
-                Confirmer
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-500 hover:text-red-600 gap-2"
+              onClick={() => handleStatusChange("cancelled")}
+            >
+              <XCircle className="h-4 w-4" />
+              Annuler
+            </Button>
           )}
           {tourStatus === "Ramassage en cours" && (
-            <>
-              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-500 hover:text-green-600 gap-2"
-                onClick={() => handleStatusChange("collected")}
-              >
-                <CheckSquare className="h-4 w-4" />
-                Marquer comme collectée
-              </Button>
-            </>
+            <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
           )}
-        </>
-      )}
-
-      {status === "confirmed" && tourStatus === "Ramassage en cours" && (
-        <>
-          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-green-500 hover:text-green-600 gap-2"
-            onClick={() => handleStatusChange("collected")}
-          >
-            <CheckSquare className="h-4 w-4" />
-            Marquer comme collectée
-          </Button>
         </>
       )}
     </div>
