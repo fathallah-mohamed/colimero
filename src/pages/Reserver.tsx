@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import CarrierAuthDialog from "@/components/auth/CarrierAuthDialog";
 import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 
 export default function Reserver() {
   const { tourId } = useParams();
@@ -16,6 +17,8 @@ export default function Reserver() {
   const { toast } = useToast();
   const [showCarrierDialog, setShowCarrierDialog] = useState(false);
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
+  const [accessDeniedReason, setAccessDeniedReason] = useState("");
 
   const { data: tour, isLoading } = useQuery({
     queryKey: ["tour", tourId],
@@ -40,7 +43,6 @@ export default function Reserver() {
         .maybeSingle();
 
       if (error) throw error;
-
       if (!data) throw new Error("Tour not found");
 
       const transformedTour: Tour = {
@@ -63,7 +65,7 @@ export default function Reserver() {
   });
 
   useEffect(() => {
-    const checkAuthAndApproval = async () => {
+    const checkAuthAndAccess = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -79,22 +81,55 @@ export default function Reserver() {
         return;
       }
 
+      // Vérifier s'il existe une réservation en attente pour cette tournée
+      const { data: existingBooking, error: bookingError } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('user_id', session.user.id)
+        .eq('tour_id', tourId)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (bookingError) {
+        console.error('Error checking existing booking:', bookingError);
+        return;
+      }
+
+      if (existingBooking) {
+        setAccessDeniedReason("Vous avez déjà une réservation en attente pour cette tournée. Veuillez attendre que votre réservation soit traitée avant d'en effectuer une nouvelle.");
+        setShowAccessDeniedDialog(true);
+        return;
+      }
+
+      // Pour les tournées privées, vérifier s'il y a une réservation annulée
       if (tour?.type === 'private') {
-        const { data: existingRequest } = await supabase
-          .from('approval_requests')
-          .select('*')
-          .eq('tour_id', parseInt(tourId!, 10))
+        const { data: cancelledBooking } = await supabase
+          .from('bookings')
+          .select('status')
           .eq('user_id', session.user.id)
+          .eq('tour_id', tourId)
+          .eq('status', 'cancelled')
           .maybeSingle();
 
-        if (!existingRequest || existingRequest.status !== 'approved') {
-          setShowApprovalDialog(true);
+        if (cancelledBooking) {
+          const { data: approvalRequest } = await supabase
+            .from('approval_requests')
+            .select('status')
+            .eq('user_id', session.user.id)
+            .eq('tour_id', tourId)
+            .eq('status', 'approved')
+            .maybeSingle();
+
+          if (!approvalRequest) {
+            setShowApprovalDialog(true);
+            return;
+          }
         }
       }
     };
 
     if (tour) {
-      checkAuthAndApproval();
+      checkAuthAndAccess();
     }
   }, [tour, tourId, pickupCity, navigate]);
 
@@ -114,6 +149,20 @@ export default function Reserver() {
 
   if (showCarrierDialog) {
     return <CarrierAuthDialog isOpen={true} onClose={handleDialogClose} />;
+  }
+
+  if (showAccessDeniedDialog) {
+    return (
+      <AccessDeniedMessage
+        userType="client"
+        isOpen={true}
+        onClose={() => {
+          setShowAccessDeniedDialog(false);
+          navigate('/mes-reservations');
+        }}
+        message={accessDeniedReason}
+      />
+    );
   }
 
   if (showApprovalDialog && tourId) {
