@@ -49,7 +49,7 @@ export function BookingList() {
           .eq('tour_id', booking.tour_id)
           .eq('user_id', booking.user_id)
           .eq('status', 'pending')
-          .single();
+          .maybeSingle(); // Changed from .single() to .maybeSingle()
 
         if (existingBooking) {
           toast({
