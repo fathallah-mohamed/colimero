@@ -69,6 +69,7 @@ export function CarrierLoginForm({
           showErrorDialog={showErrorDialog}
           onVerificationDialogClose={() => setShowVerificationDialog(false)}
           onErrorDialogClose={() => setShowErrorDialog(false)}
+          onResendEmail={() => handleLogin(form.getValues("email"), form.getValues("password"))}
         />
 
         <div className="space-y-4">
@@ -80,29 +81,25 @@ export function CarrierLoginForm({
             {isLoading ? "Connexion..." : "Se connecter"}
           </Button>
 
-          {(!requiredUserType || requiredUserType === 'carrier') && (
-            <>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Pas encore de compte ?
-                  </span>
-                </div>
-              </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Pas encore de compte ?
+              </span>
+            </div>
+          </div>
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCarrierRegister}
-                className="w-full"
-              >
-                Devenir transporteur
-              </Button>
-            </>
-          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCarrierRegister}
+            className="w-full"
+          >
+            Devenir transporteur
+          </Button>
 
           <div className="text-center">
             <button
