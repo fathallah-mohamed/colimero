@@ -22,7 +22,7 @@ interface LoginFormProps {
   onRegister: () => void;
   onCarrierRegister: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier' | 'admin';
+  requiredUserType?: 'client' | 'carrier';
   hideRegisterButton?: boolean;
 }
 
@@ -60,6 +60,12 @@ export function LoginForm({
       } else {
         navigate('/');
       }
+    },
+    requiredUserType,
+    onVerificationNeeded: () => {
+      console.log("Verification needed, showing dialog");
+      setShowVerificationDialog(true);
+      form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
