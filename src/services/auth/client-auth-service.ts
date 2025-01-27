@@ -8,10 +8,53 @@ interface AuthResult {
 }
 
 export const clientAuthService = {
+  async checkClientStatus(email: string) {
+    try {
+      const { data: clientData, error } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking client status:", error);
+        throw new Error("Une erreur est survenue lors de la vérification de votre compte");
+      }
+
+      return {
+        isVerified: clientData?.email_verified ?? false,
+        status: clientData?.status ?? 'pending',
+        exists: clientData !== null
+      };
+    } catch (error) {
+      console.error("Error in checkClientStatus:", error);
+      throw error;
+    }
+  },
+
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
-      console.log('Attempting login for:', email);
+      console.log('Checking client status for:', email);
       
+      // Check client status before attempting login
+      const clientStatus = await this.checkClientStatus(email);
+      
+      if (!clientStatus.exists) {
+        return {
+          success: false,
+          error: "Compte non trouvé"
+        };
+      }
+
+      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
+        console.log("Account needs verification:", email);
+        return {
+          success: false,
+          error: "Votre compte n'est pas activé. Veuillez vérifier votre email.",
+          needsVerification: true
+        };
+      }
+
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -57,25 +100,6 @@ export const clientAuthService = {
         return {
           success: false,
           error: "Code d'activation invalide"
-        };
-      }
-
-      // Update client status
-      const { error: updateError } = await supabase
-        .from('clients')
-        .update({
-          email_verified: true,
-          status: 'active',
-          activation_code: null,
-          activation_expires_at: null
-        })
-        .eq('email', email);
-
-      if (updateError) {
-        console.error('Error updating client status:', updateError);
-        return {
-          success: false,
-          error: "Erreur lors de la mise à jour du statut"
         };
       }
 
