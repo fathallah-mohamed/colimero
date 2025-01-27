@@ -26,10 +26,19 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
+      // If no client found, return default values
+      if (!clientData) {
+        return {
+          isVerified: false,
+          status: 'pending',
+          exists: false
+        };
+      }
+
       return {
-        isVerified: clientData?.email_verified ?? false,
-        status: clientData?.status ?? 'pending',
-        exists: clientData !== null
+        isVerified: clientData.email_verified ?? false,
+        status: clientData.status ?? 'pending',
+        exists: true
       };
     } catch (error) {
       console.error("Error in checkClientStatus:", error);
@@ -42,11 +51,11 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       setIsLoading(true);
       setError(null);
 
-      // Vérifier d'abord le statut du client
+      // First check if the client exists and their status
       const clientStatus = await checkClientStatus(email);
       
       if (!clientStatus.exists) {
-        setError("Compte non trouvé");
+        setError("Aucun compte trouvé avec cet email");
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -60,7 +69,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
         toast({
           variant: "destructive",
           title: "Compte non activé",
@@ -69,6 +78,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         return;
       }
 
+      // Only attempt login if the client exists and is verified
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -76,11 +86,19 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       if (signInError) {
         console.error("Sign in error:", signInError);
-        setError("Email ou mot de passe incorrect");
+        let errorMessage = "Email ou mot de passe incorrect";
+        
+        if (signInError.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else {
+          errorMessage = "Une erreur est survenue lors de la connexion";
+        }
+        
+        setError(errorMessage);
         toast({
           variant: "destructive",
           title: "Erreur de connexion",
-          description: "Email ou mot de passe incorrect"
+          description: errorMessage
         });
         return;
       }
