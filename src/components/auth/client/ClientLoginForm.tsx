@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "../EmailVerificationDialog";
 import { useClientAuth } from "@/hooks/auth/useClientAuth";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ClientLoginFormProps {
   onRegister: () => void;
@@ -21,6 +22,7 @@ export function ClientLoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const navigate = useNavigate();
   
   const {
     isLoading,
@@ -28,7 +30,10 @@ export function ClientLoginForm({
     handleLogin,
   } = useClientAuth({
     onSuccess,
-    onVerificationNeeded: () => setShowVerificationDialog(true)
+    onVerificationNeeded: () => {
+      console.log("Verification needed, redirecting to activation page");
+      navigate('/activation-compte');
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {

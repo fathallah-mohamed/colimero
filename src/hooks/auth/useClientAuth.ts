@@ -25,12 +25,6 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
       // Check client status before attempting login
       const clientStatus = await checkClientStatus(email);
       console.log('Client status:', clientStatus);
-      
-      if (!clientStatus.exists) {
-        console.log('Client not found');
-        setError("Compte non trouvé");
-        return;
-      }
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -44,7 +38,7 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
       }
 
       if (!clientStatus.isVerified || clientStatus.status !== 'active') {
-        console.log('Account needs verification:', email);
+        console.log('Account needs verification, redirecting to activation page');
         navigate('/activation-compte');
         return;
       }
@@ -56,6 +50,8 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
 
       if (onSuccess) {
         onSuccess();
+      } else {
+        navigate('/');
       }
 
     } catch (error) {
