@@ -9,68 +9,36 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail } from "lucide-react";
-import { verificationService } from "@/services/auth/verification-service";
-import { useToast } from "@/hooks/use-toast";
+import { useAccountActivation } from "@/hooks/auth/useAccountActivation";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   email: string;
-  onResendEmail: () => void;
 }
 
 export function EmailVerificationDialog({
   isOpen,
   onClose,
   email,
-  onResendEmail,
 }: EmailVerificationDialogProps) {
   const [activationCode, setActivationCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { isLoading, sendActivationEmail, activateAccount } = useAccountActivation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activationCode) return;
 
-    setIsLoading(true);
     setError(null);
-
-    try {
-      const result = await verificationService.activateAccount(activationCode, email);
-      
-      if (result.success) {
-        toast({
-          title: "Compte activé",
-          description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
-        });
-        onClose();
-      } else {
-        setError(result.error || "Une erreur est survenue lors de l'activation");
-        toast({
-          variant: "destructive",
-          title: "Erreur d'activation",
-          description: result.error || "Une erreur est survenue lors de l'activation",
-        });
-      }
-    } catch (error) {
-      console.error("Error activating account:", error);
-      setError("Une erreur est survenue lors de l'activation");
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'activation du compte",
-      });
-    } finally {
-      setIsLoading(false);
+    const success = await activateAccount(activationCode, email);
+    if (success) {
+      onClose();
     }
   };
 
   const handleResendEmail = async () => {
-    setIsLoading(true);
-    await onResendEmail();
-    setIsLoading(false);
+    await sendActivationEmail(email);
   };
 
   return (
