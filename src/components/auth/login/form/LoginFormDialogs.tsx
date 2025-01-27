@@ -26,8 +26,6 @@ export function LoginFormDialogs({
         isOpen={showVerificationDialog}
         onClose={onVerificationDialogClose}
         email={email}
-        showConfirmationDialog={false}
-        onConfirmationClose={() => {}}
         onResendEmail={onResendEmail}
       />
 
