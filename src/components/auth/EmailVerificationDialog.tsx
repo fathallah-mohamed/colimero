@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import { verificationService } from "@/services/auth/verification-service";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export function EmailVerificationDialog({
   const [activationCode, setActivationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,13 +41,27 @@ export function EmailVerificationDialog({
       const result = await verificationService.activateAccount(activationCode, email);
       
       if (result.success) {
+        toast({
+          title: "Compte activé",
+          description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
+        });
         onClose();
       } else {
-        setError(result.error || "Une erreur est survenue");
+        setError(result.error || "Une erreur est survenue lors de l'activation");
+        toast({
+          variant: "destructive",
+          title: "Erreur d'activation",
+          description: result.error || "Une erreur est survenue lors de l'activation",
+        });
       }
     } catch (error) {
       console.error("Error activating account:", error);
       setError("Une erreur est survenue lors de l'activation");
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'activation du compte",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -61,14 +77,17 @@ export function EmailVerificationDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
+          <div className="mx-auto mb-4 bg-blue-50 p-3 rounded-full">
+            <Mail className="h-6 w-6 text-blue-500" />
+          </div>
           <DialogTitle className="text-center text-xl">
-            Activation du compte
+            Activation de votre compte
           </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <p className="text-center text-gray-600">
-            Veuillez entrer le code d'activation reçu par email à l'adresse <span className="font-medium">{email}</span>
+            Pour activer votre compte, veuillez entrer le code d'activation reçu par email à l'adresse <span className="font-medium">{email}</span>
           </p>
 
           {error && (

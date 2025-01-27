@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "../EmailVerificationDialog";
 import { useClientAuth } from "@/hooks/auth/useClientAuth";
+import { Loader2 } from "lucide-react";
 
 interface ClientLoginFormProps {
   onRegister: () => void;
@@ -24,7 +25,6 @@ export function ClientLoginForm({
   const {
     isLoading,
     error,
-    isVerificationNeeded,
     handleLogin,
     handleResendActivation
   } = useClientAuth({
@@ -40,7 +40,7 @@ export function ClientLoginForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && !isVerificationNeeded && (
+        {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -75,7 +75,14 @@ export function ClientLoginForm({
             className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
             disabled={isLoading}
           >
-            {isLoading ? "Connexion..." : "Se connecter"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Connexion en cours...
+              </>
+            ) : (
+              "Se connecter"
+            )}
           </Button>
 
           <div className="flex flex-col space-y-2 text-center text-sm">

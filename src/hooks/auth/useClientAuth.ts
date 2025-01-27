@@ -23,8 +23,6 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       const result = await clientAuthService.signIn(email, password);
 
       if (!result.success) {
-        setError(result.error || "Une erreur est survenue");
-        
         if (result.needsVerification) {
           setIsVerificationNeeded(true);
           if (onVerificationNeeded) {
@@ -33,18 +31,24 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
           toast({
             variant: "destructive",
             title: "Compte non activé",
-            description: "Veuillez activer votre compte via le lien envoyé par email.",
+            description: "Votre compte n'est pas encore activé. Veuillez vérifier vos emails ou demander un nouveau code d'activation.",
           });
           return;
         }
         
+        setError(result.error);
         toast({
           variant: "destructive",
-          title: "Erreur",
+          title: "Erreur de connexion",
           description: result.error,
         });
         return;
       }
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté",
+      });
 
       if (onSuccess) {
         onSuccess();
@@ -55,7 +59,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Une erreur inattendue s'est produite",
+        description: "Une erreur inattendue s'est produite lors de la connexion",
       });
     } finally {
       setIsLoading(false);
@@ -78,18 +82,23 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Impossible d'envoyer l'email d'activation"
+          description: "Impossible d'envoyer l'email d'activation. Veuillez réessayer."
         });
         return false;
       }
 
       toast({
         title: "Email envoyé",
-        description: "Un nouvel email d'activation vous a été envoyé"
+        description: "Un nouvel email d'activation vous a été envoyé. Veuillez vérifier votre boîte de réception."
       });
       return true;
     } catch (error) {
       console.error("Error in handleResendActivation:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'envoi de l'email d'activation"
+      });
       return false;
     } finally {
       setIsLoading(false);
