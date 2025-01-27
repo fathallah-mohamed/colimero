@@ -17,7 +17,7 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
       .select('id, status')
       .eq('user_id', userId)
       .eq('tour_id', tour.id)
-      .eq('status', 'cancelled')
+      .eq('status', 'pending')
       .maybeSingle();
 
     if (error) {
@@ -51,15 +51,20 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
       return;
     }
 
+    // Vérifier si une réservation en attente existe déjà
+    const existingBooking = await checkExistingBooking(session.user.id);
+    if (existingBooking) {
+      toast({
+        variant: "destructive",
+        title: "Accès refusé",
+        description: "Vous avez déjà une réservation en attente pour cette tournée. Veuillez attendre que votre réservation soit traitée avant d'en effectuer une nouvelle.",
+      });
+      setShowAccessDeniedDialog(true);
+      return;
+    }
+
     // Pour les tournées privées
     if (tour.type === 'private') {
-      // Vérifier s'il y a eu une réservation annulée
-      const existingBooking = await checkExistingBooking(session.user.id);
-      if (existingBooking?.status === 'cancelled') {
-        setShowApprovalDialog(true);
-        return;
-      }
-
       if (existingRequest) {
         switch (existingRequest.status) {
           case 'pending':
@@ -86,15 +91,6 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
     }
 
     // Pour les tournées publiques
-    const existingBooking = await checkExistingBooking(session.user.id);
-    if (existingBooking) {
-      toast({
-        variant: "destructive",
-        title: "Réservation impossible",
-        description: "Vous avez déjà une réservation en attente pour cette tournée",
-      });
-      return;
-    }
     navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
   };
 
