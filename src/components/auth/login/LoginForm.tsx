@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
+import { UserType } from "@/types/auth";
 
 const loginSchema = z.object({
   email: z.string()
@@ -22,7 +23,7 @@ interface LoginFormProps {
   onRegister: () => void;
   onCarrierRegister: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: UserType;
   hideRegisterButton?: boolean;
 }
 
@@ -53,14 +54,17 @@ export function LoginForm({
     handleLogin,
   } = useLoginForm({ 
     onSuccess: () => {
-      const returnPath = sessionStorage.getItem('returnPath');
-      if (returnPath) {
-        sessionStorage.removeItem('returnPath');
-        navigate(returnPath);
-      } else {
-        navigate('/');
+      // Ne rediriger que si l'utilisateur est vérifié
+      if (!showVerificationDialog) {
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        } else {
+          navigate('/');
+        }
       }
-    },
+    }, 
     requiredUserType,
     onVerificationNeeded: () => {
       console.log("Verification needed, showing dialog");
@@ -70,6 +74,7 @@ export function LoginForm({
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    console.log("Form submitted with values:", values);
     await handleLogin(values.email, values.password);
   };
 
