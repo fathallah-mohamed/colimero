@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
+import { EmailVerificationDialog } from "../EmailVerificationDialog";
 import { UserType } from "@/types/auth";
 
 const loginSchema = z.object({
@@ -146,6 +147,15 @@ export function LoginForm({
             </button>
           </div>
         </div>
+
+        {showVerificationDialog && (
+          <EmailVerificationDialog
+            isOpen={showVerificationDialog}
+            onClose={() => setShowVerificationDialog(false)}
+            email={form.getValues("email")}
+            onResendEmail={() => handleLogin(form.getValues("email"), form.getValues("password"))}
+          />
+        )}
       </form>
     </Form>
   );

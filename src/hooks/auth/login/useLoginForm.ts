@@ -33,7 +33,7 @@ export function useLoginForm({
         console.log('Checking client status...');
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
-          .select('email_verified, status, activation_code, activation_expires_at')
+          .select('email_verified, status')
           .eq('email', email.trim())
           .maybeSingle();
 
@@ -42,35 +42,14 @@ export function useLoginForm({
           throw new Error("Erreur lors de la vérification du compte");
         }
 
-        // Si le client existe mais n'est pas vérifié ou est en attente
-        if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
-          console.log('Account not verified or pending, showing verification dialog');
-          
-          // Vérifier si le code d'activation est expiré
-          const isExpired = !clientData.activation_expires_at || 
-                           new Date(clientData.activation_expires_at) < new Date();
-
-          // Générer et envoyer un nouveau code si nécessaire
-          if (!clientData.activation_code || isExpired) {
-            console.log('Sending new activation code...');
-            const { error: functionError } = await supabase.functions.invoke(
-              'send-activation-email',
-              {
-                body: { email: email.trim() }
-              }
-            );
-
-            if (functionError) {
-              console.error('Error sending activation email:', functionError);
-              throw new Error("Erreur lors de l'envoi de l'email d'activation");
-            }
-          }
-
+        // Si le client existe et n'est pas vérifié, bloquer la connexion
+        if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
+          console.log('Account needs verification, showing dialog');
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
-          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour activer votre compte.");
           return;
         }
       }
@@ -101,6 +80,25 @@ export function useLoginForm({
           requiredUserType === 'carrier' ? 'transporteur' : 
           'administrateur'
         }`);
+      }
+
+      // Pour les clients, vérifier une dernière fois le statut
+      if (userType === 'client') {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('email_verified, status')
+          .eq('id', authData.user.id)
+          .single();
+
+        if (!clientData?.email_verified || clientData.status !== 'active') {
+          await supabase.auth.signOut();
+          setShowVerificationDialog(true);
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour activer votre compte.");
+          return;
+        }
       }
 
       console.log('Login successful');
