@@ -61,13 +61,40 @@ export function useClientAuth(onSuccess?: () => void) {
         isVerificationNeeded: false 
       }));
 
+      // Vérifier d'abord le statut du client
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email.trim())
+        .single();
+
+      if (clientError) {
+        console.error("Error checking client status:", clientError);
+        setState(prev => ({
+          ...prev,
+          error: "Erreur lors de la vérification du compte"
+        }));
+        return;
+      }
+
+      // Si le compte n'est pas vérifié, afficher le dialogue de vérification
+      if (!clientData?.email_verified || clientData.status !== 'active') {
+        console.log("Account needs verification:", email);
+        setState(prev => ({
+          ...prev,
+          isVerificationNeeded: true,
+          error: "Votre compte n'est pas activé. Veuillez vérifier votre email."
+        }));
+        return;
+      }
+
+      // Si le compte est vérifié, procéder à la connexion
       const result = await clientAuthService.signIn(email, password);
 
       if (!result.success) {
         setState(prev => ({
           ...prev,
-          error: result.error || "Une erreur est survenue",
-          isVerificationNeeded: result.needsVerification || false
+          error: result.error || "Une erreur est survenue"
         }));
         return;
       }

@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface AuthResult {
   success: boolean;
@@ -12,48 +12,6 @@ export const clientAuthService = {
     try {
       console.log('Attempting login for:', email);
       
-      // 1. First check client verification status
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified, status')
-        .eq('email', email.trim())
-        .maybeSingle();
-
-      console.log("Client verification status:", clientData);
-
-      if (clientError) {
-        console.error('Error checking client status:', clientError);
-        return {
-          success: false,
-          error: "Erreur lors de la vérification du compte"
-        };
-      }
-
-      // 2. Block login if email is not verified
-      if (!clientData?.email_verified || clientData.status !== 'active') {
-        console.log("Account needs verification:", email);
-        
-        // Try to resend activation email
-        const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
-          body: { 
-            email: email.trim(),
-            resend: true
-          }
-        });
-
-        if (functionError) {
-          console.error('Error sending activation email:', functionError);
-        }
-
-        return {
-          success: false,
-          needsVerification: true,
-          error: "Votre compte n'est pas activé. Veuillez vérifier votre email."
-        };
-      }
-
-      // 3. Only proceed with login if email is verified
-      console.log("Email is verified, proceeding with login attempt");
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -99,6 +57,25 @@ export const clientAuthService = {
         return {
           success: false,
           error: "Code d'activation invalide"
+        };
+      }
+
+      // Mettre à jour le statut dans la table clients
+      const { error: updateError } = await supabase
+        .from('clients')
+        .update({
+          email_verified: true,
+          status: 'active',
+          activation_code: null,
+          activation_expires_at: null
+        })
+        .eq('email', email);
+
+      if (updateError) {
+        console.error('Error updating client status:', updateError);
+        return {
+          success: false,
+          error: "Erreur lors de la mise à jour du statut"
         };
       }
 

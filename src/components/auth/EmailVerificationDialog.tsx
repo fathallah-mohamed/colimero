@@ -35,15 +35,20 @@ export function EmailVerificationDialog({
     setIsLoading(true);
     setError(null);
 
-    const result = await clientAuthService.activateAccount(activationCode, email);
-    
-    if (result.success) {
-      onClose();
-    } else {
-      setError(result.error || "Une erreur est survenue");
+    try {
+      const result = await clientAuthService.activateAccount(activationCode, email);
+      
+      if (result.success) {
+        onClose();
+      } else {
+        setError(result.error || "Une erreur est survenue");
+      }
+    } catch (error) {
+      console.error("Error activating account:", error);
+      setError("Une erreur est survenue lors de l'activation");
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleResendEmail = async () => {
