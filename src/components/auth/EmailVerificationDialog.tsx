@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { clientAuthService } from "@/services/auth/client-auth-service";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 export interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -21,6 +23,7 @@ export function EmailVerificationDialog({
   const [activationCode, setActivationCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,6 +31,8 @@ export function EmailVerificationDialog({
     if (!activationCode) return;
 
     setIsSubmitting(true);
+    setError(null);
+
     try {
       const result = await clientAuthService.activateAccount(activationCode, email);
       
@@ -38,19 +43,11 @@ export function EmailVerificationDialog({
         });
         onClose();
       } else {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: result.error || "Code d'activation invalide",
-        });
+        setError(result.error || "Code d'activation invalide");
       }
     } catch (error) {
       console.error("Error activating account:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'activation",
-      });
+      setError("Une erreur est survenue lors de l'activation");
     } finally {
       setIsSubmitting(false);
     }
@@ -58,6 +55,8 @@ export function EmailVerificationDialog({
 
   const handleResendEmail = async () => {
     setIsResending(true);
+    setError(null);
+
     try {
       await onResendEmail();
       toast({
@@ -66,11 +65,7 @@ export function EmailVerificationDialog({
       });
     } catch (error) {
       console.error("Error resending activation email:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'envoyer le code d'activation",
-      });
+      setError("Impossible d'envoyer le code d'activation");
     } finally {
       setIsResending(false);
     }
@@ -89,8 +84,14 @@ export function EmailVerificationDialog({
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <p className="text-center text-gray-600">
-            Veuillez entrer le code d'activation reçu par email à l'adresse <span className="font-medium">{email}</span>.
+            Veuillez entrer le code d'activation reçu par email à l'adresse <span className="font-medium">{email}</span>
           </p>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="space-y-4">
             <Input
@@ -108,7 +109,14 @@ export function EmailVerificationDialog({
               className="w-full"
               disabled={isSubmitting || !activationCode}
             >
-              {isSubmitting ? "Activation..." : "Activer mon compte"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Activation en cours...
+                </>
+              ) : (
+                "Activer mon compte"
+              )}
             </Button>
 
             <div className="relative">
@@ -127,7 +135,14 @@ export function EmailVerificationDialog({
               className="w-full"
               disabled={isResending}
             >
-              {isResending ? "Envoi en cours..." : "Recevoir un nouveau code"}
+              {isResending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Envoi en cours...
+                </>
+              ) : (
+                "Recevoir un nouveau code"
+              )}
             </Button>
           </div>
 
