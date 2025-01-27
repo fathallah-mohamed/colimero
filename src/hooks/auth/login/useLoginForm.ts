@@ -27,13 +27,13 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      console.log('Attempting login for:', email, 'type:', requiredUserType);
+      console.log('Checking client status for:', email);
 
-      // Vérifier d'abord le statut du client
+      // 1. Vérifier d'abord le statut du client
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified, status, activation_code')
-        .eq('email', email)
+        .eq('email', email.trim())
         .maybeSingle();
 
       if (clientError) {
@@ -41,10 +41,15 @@ export function useLoginForm({
         throw new Error("Erreur lors de la vérification du compte");
       }
 
-      console.log('Client status check:', clientData);
+      // 2. Si le client n'existe pas
+      if (!clientData) {
+        setError("Email ou mot de passe incorrect");
+        setShowErrorDialog(true);
+        return;
+      }
 
-      // Si le client existe mais n'est pas vérifié ou est en attente
-      if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
+      // 3. Si le client existe mais n'est pas vérifié ou est en attente
+      if (!clientData.email_verified || clientData.status === 'pending') {
         console.log('Client not verified or pending:', clientData);
         
         // Envoyer un nouvel email d'activation si pas de code existant
@@ -63,15 +68,15 @@ export function useLoginForm({
           }
         }
 
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        
         setShowVerificationDialog(true);
         return;
       }
 
-      // Tentative de connexion
+      // 4. Tentative de connexion
       console.log('Attempting sign in...');
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
@@ -80,18 +85,16 @@ export function useLoginForm({
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        throw new Error(signInError.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Erreur lors de la connexion");
+        setError("Email ou mot de passe incorrect");
+        setShowErrorDialog(true);
+        return;
       }
 
       if (!authData.user) {
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      console.log('Sign in successful:', authData.user);
-
-      // Vérifier le type d'utilisateur
+      // 5. Vérifier le type d'utilisateur si requis
       const userType = authData.user.user_metadata?.user_type as UserType;
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
