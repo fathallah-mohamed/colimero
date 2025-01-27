@@ -94,10 +94,10 @@ export function useLoginForm({
         await supabase.auth.signOut();
         
         setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
+        setShowVerificationDialog(true);
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        setShowVerificationDialog(true);
         return;
       }
 
