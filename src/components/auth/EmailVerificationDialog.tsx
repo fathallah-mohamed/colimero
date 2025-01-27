@@ -7,10 +7,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { useVerification } from "@/hooks/auth/useVerification";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -26,74 +25,20 @@ export function EmailVerificationDialog({
   onResendEmail,
 }: EmailVerificationDialogProps) {
   const [activationCode, setActivationCode] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { isLoading, error, activateAccount, resendActivationEmail } = useVerification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activationCode) return;
 
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const { data, error: activationError } = await supabase.rpc('activate_client_account', {
-        p_activation_code: activationCode
-      });
-      
-      if (activationError || !data) {
-        setError("Code d'activation invalide");
-        return;
-      }
-
-      // Refresh the session after activation
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Error getting session:', sessionError);
-        throw sessionError;
-      }
-
-      if (!session) {
-        // If no session, try to sign in again
-        const { data: { session: newSession }, error: signInError } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: activationCode // Use activation code as temporary password
-        });
-
-        if (signInError) {
-          console.error('Error signing in after activation:', signInError);
-          throw signInError;
-        }
-
-        if (!newSession) {
-          throw new Error('No session after activation');
-        }
-      }
-
+    const success = await activateAccount(activationCode, email);
+    if (success) {
       onClose();
-    } catch (error) {
-      console.error("Error activating account:", error);
-      setError("Une erreur est survenue lors de l'activation");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleResendEmail = async () => {
-    setIsResending(true);
-    setError(null);
-
-    try {
-      await onResendEmail();
-    } catch (error) {
-      console.error("Error resending activation email:", error);
-      setError("Impossible d'envoyer le code d'activation");
-    } finally {
-      setIsResending(false);
-    }
+    await resendActivationEmail(email);
   };
 
   return (
@@ -130,9 +75,9 @@ export function EmailVerificationDialog({
             <Button
               type="submit"
               className="w-full"
-              disabled={isSubmitting || !activationCode}
+              disabled={isLoading || !activationCode}
             >
-              {isSubmitting ? (
+              {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Activation en cours...
@@ -156,9 +101,9 @@ export function EmailVerificationDialog({
               onClick={handleResendEmail}
               variant="outline"
               className="w-full"
-              disabled={isResending}
+              disabled={isLoading}
             >
-              {isResending ? (
+              {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Envoi en cours...
