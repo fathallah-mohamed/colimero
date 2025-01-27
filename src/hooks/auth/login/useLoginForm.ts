@@ -32,7 +32,7 @@ export function useLoginForm({
       // 1. Vérifier d'abord le statut du client
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
-        .select('email_verified, status, activation_code')
+        .select('email_verified, status, activation_code, activation_expires_at')
         .eq('email', email.trim())
         .maybeSingle();
 
@@ -52,19 +52,31 @@ export function useLoginForm({
       if (!clientData.email_verified || clientData.status === 'pending') {
         console.log('Client not verified or pending:', clientData);
         
-        // Envoyer un nouvel email d'activation si pas de code existant
-        if (!clientData.activation_code) {
-          console.log('No activation code found, sending new one...');
-          const { error: activationError } = await supabase.functions.invoke(
+        // Vérifier si le code d'activation est expiré
+        const isExpired = !clientData.activation_expires_at || new Date(clientData.activation_expires_at) < new Date();
+        
+        // Envoyer un nouvel email d'activation si pas de code ou code expiré
+        if (!clientData.activation_code || isExpired) {
+          console.log('No activation code or expired, sending new one...');
+          const { error: functionError } = await supabase.functions.invoke(
             'send-activation-email',
             {
-              body: { email }
+              body: { email: email.trim() }
             }
           );
 
-          if (activationError) {
-            console.error('Error sending activation email:', activationError);
-            throw new Error("Erreur lors de l'envoi de l'email d'activation");
+          if (functionError) {
+            console.error('Error sending activation email:', functionError);
+            toast({
+              variant: "destructive",
+              title: "Erreur",
+              description: "Impossible d'envoyer l'email d'activation"
+            });
+          } else {
+            toast({
+              title: "Email envoyé",
+              description: "Un nouvel email d'activation vous a été envoyé"
+            });
           }
         }
 
