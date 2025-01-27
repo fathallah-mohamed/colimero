@@ -65,7 +65,7 @@ export function useClientAuth(onSuccess?: () => void) {
         .from('clients')
         .select('email_verified')
         .eq('email', email.trim())
-        .single();
+        .maybeSingle();
 
       console.log("Client verification status:", clientData);
 
@@ -79,7 +79,7 @@ export function useClientAuth(onSuccess?: () => void) {
         return;
       }
 
-      // IMPORTANT: Block login if email is not verified
+      // Block login if email is not verified
       if (!clientData?.email_verified) {
         console.log("Email not verified, blocking login");
         setState(prev => ({ 

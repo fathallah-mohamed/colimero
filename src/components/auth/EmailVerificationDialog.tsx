@@ -48,10 +48,31 @@ export function EmailVerificationDialog({
         return;
       }
 
-      toast({
-        title: "Compte activé",
-        description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
-      });
+      // Refresh the session after activation
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Error getting session:', sessionError);
+        throw sessionError;
+      }
+
+      if (!session) {
+        // If no session, try to sign in again
+        const { data: { session: newSession }, error: signInError } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: activationCode // Use activation code as temporary password
+        });
+
+        if (signInError) {
+          console.error('Error signing in after activation:', signInError);
+          throw signInError;
+        }
+
+        if (!newSession) {
+          throw new Error('No session after activation');
+        }
+      }
+
       onClose();
     } catch (error) {
       console.error("Error activating account:", error);
@@ -67,10 +88,6 @@ export function EmailVerificationDialog({
 
     try {
       await onResendEmail();
-      toast({
-        title: "Email envoyé",
-        description: "Un nouveau code d'activation vous a été envoyé",
-      });
     } catch (error) {
       console.error("Error resending activation email:", error);
       setError("Impossible d'envoyer le code d'activation");
