@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields, LoginFormValues } from "./LoginFormFields";
-import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
+import { useLoginForm } from "@/hooks/auth/useLoginForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -54,24 +54,14 @@ export function LoginForm({
     setShowErrorDialog,
     handleLogin,
   } = useLoginForm({ 
-    onSuccess: () => {
-      const returnPath = sessionStorage.getItem('returnPath');
-      if (returnPath) {
-        sessionStorage.removeItem('returnPath');
-        navigate(returnPath);
-      } else {
-        navigate('/');
-      }
-    }, 
+    onSuccess,
     requiredUserType,
     onVerificationNeeded: () => {
-      console.log("Verification needed, showing dialog");
       form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    console.log("Form submitted with values:", values);
     await handleLogin(values.email, values.password);
   };
 

@@ -5,56 +5,69 @@ interface AuthResult {
   success: boolean;
   error?: string;
   needsVerification?: boolean;
-  user?: any;
 }
 
 export const authService = {
-  async checkClientVerification(email: string) {
-    const { data: clientData, error: clientError } = await supabase
-      .from('clients')
-      .select('email_verified, status, activation_code, activation_expires_at')
-      .eq('email', email.trim())
-      .maybeSingle();
-
-    if (clientError) {
-      console.error('Error checking client status:', clientError);
-      throw new Error("Erreur lors de la vérification du compte");
-    }
-
-    return clientData;
-  },
-
-  async signIn(email: string, password: string): Promise<AuthResult> {
+  async signIn(email: string, password: string, requiredUserType?: UserType): Promise<AuthResult> {
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      // Vérifier d'abord si c'est un client et s'il est vérifié
+      if (!requiredUserType || requiredUserType === 'client') {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('email_verified, status')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (clientData) {
+          if (!clientData.email_verified || clientData.status !== 'active') {
+            return {
+              success: false,
+              needsVerification: true,
+              error: "Votre compte n'est pas activé. Veuillez vérifier votre email."
+            };
+          }
+        }
+      }
+
+      // Tentative de connexion
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password.trim(),
+        password: password.trim()
       });
 
       if (signInError) {
-        if (signInError.message.includes("Invalid login credentials")) {
-          return {
-            success: false,
-            error: "Email ou mot de passe incorrect"
-          };
-        }
         return {
           success: false,
-          error: "Une erreur est survenue lors de la connexion"
+          error: signInError.message === "Invalid login credentials" 
+            ? "Email ou mot de passe incorrect"
+            : "Une erreur est survenue lors de la connexion"
         };
       }
 
-      if (!data.user) {
+      if (!user) {
         return {
           success: false,
           error: "Aucune donnée utilisateur reçue"
         };
       }
 
-      return {
-        success: true,
-        user: data.user
-      };
+      // Vérifier le type d'utilisateur si requis
+      if (requiredUserType) {
+        const userType = user.user_metadata?.user_type;
+        if (userType !== requiredUserType) {
+          await supabase.auth.signOut();
+          return {
+            success: false,
+            error: `Ce compte n'est pas un compte ${
+              requiredUserType === 'client' ? 'client' : 
+              requiredUserType === 'carrier' ? 'transporteur' : 
+              'administrateur'
+            }`
+          };
+        }
+      }
+
+      return { success: true };
     } catch (error) {
       console.error("Login error:", error);
       return {
@@ -62,20 +75,5 @@ export const authService = {
         error: "Une erreur inattendue s'est produite"
       };
     }
-  },
-
-  async handleUserTypeValidation(user: any, requiredUserType?: UserType) {
-    if (!requiredUserType) return { success: true };
-
-    const userType = user.user_metadata?.user_type;
-    if (userType !== requiredUserType) {
-      await supabase.auth.signOut();
-      return {
-        success: false,
-        error: `Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : requiredUserType === 'carrier' ? 'transporteur' : 'administrateur'}`
-      };
-    }
-
-    return { success: true };
   }
 };
