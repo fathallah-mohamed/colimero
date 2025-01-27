@@ -23,7 +23,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       if (error) {
         console.error("Error checking client status:", error);
-        return { isVerified: false, error: "Une erreur est survenue" };
+        throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
       return {
@@ -33,7 +33,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       };
     } catch (error) {
       console.error("Error in checkClientStatus:", error);
-      return { isVerified: false, error: "Une erreur est survenue" };
+      throw error;
     }
   };
 
