@@ -26,56 +26,29 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Vérifier d'abord le statut du client
-      if (requiredUserType === 'client' || !requiredUserType) {
-        console.log('Checking client verification status...');
-        const { data: clientData, error: clientError } = await supabase
+      // Check if it's a client trying to log in
+      if (!requiredUserType || requiredUserType === 'client') {
+        const { data: clientData } = await supabase
           .from('clients')
-          .select('email_verified, status, activation_code, activation_expires_at')
+          .select('email_verified, status, activation_code')
           .eq('email', email.trim())
           .maybeSingle();
 
-        if (clientError) {
-          console.error('Error checking client status:', clientError);
-          throw new Error("Erreur lors de la vérification du compte");
-        }
-
-        // Si le client existe et n'est pas vérifié ou actif
-        if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-          console.log('Account needs verification, checking activation code...');
-          
-          // Vérifier si le code d'activation est expiré ou n'existe pas
-          const isExpired = !clientData.activation_expires_at || 
-                           new Date(clientData.activation_expires_at) < new Date();
-
-          if (!clientData.activation_code || isExpired) {
-            console.log('Generating new activation code...');
-            const { error: functionError } = await supabase.functions.invoke(
-              'send-activation-email',
-              {
-                body: { 
-                  email: email.trim(),
-                  resend: true
-                }
-              }
-            );
-
-            if (functionError) {
-              console.error('Error sending activation email:', functionError);
-              throw new Error("Erreur lors de l'envoi de l'email d'activation");
+        if (clientData) {
+          // If client exists but isn't verified
+          if (!clientData.email_verified || clientData.status !== 'active') {
+            console.log('Account needs verification');
+            setShowVerificationDialog(true);
+            if (onVerificationNeeded) {
+              onVerificationNeeded();
             }
+            setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+            return;
           }
-
-          setShowVerificationDialog(true);
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setError("Votre compte n'est pas activé. Veuillez saisir le code d'activation reçu par email.");
-          return;
         }
       }
 
-      // Tentative de connexion
+      // Attempt login
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -83,7 +56,17 @@ export function useLoginForm({
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        setError("Email ou mot de passe incorrect");
+        let errorMessage = "Email ou mot de passe incorrect";
+        
+        if (signInError.message.includes("Email not confirmed")) {
+          setShowVerificationDialog(true);
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          errorMessage = "Votre compte n'est pas activé. Veuillez vérifier votre email.";
+        }
+
+        setError(errorMessage);
         setShowErrorDialog(true);
         return;
       }
@@ -92,8 +75,8 @@ export function useLoginForm({
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // Vérifier le type d'utilisateur
-      const userType = authData.user.user_metadata?.user_type as UserType;
+      // Verify user type if required
+      const userType = authData.user.user_metadata?.user_type;
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
         throw new Error(`Ce compte n'est pas un compte ${
@@ -103,7 +86,7 @@ export function useLoginForm({
         }`);
       }
 
-      // Vérification finale pour les clients
+      // Final verification for clients
       if (userType === 'client' || !userType) {
         const { data: finalCheck } = await supabase
           .from('clients')
@@ -118,7 +101,7 @@ export function useLoginForm({
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
-          setError("Votre compte n'est pas activé. Veuillez saisir le code d'activation reçu par email.");
+          setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
           return;
         }
       }
