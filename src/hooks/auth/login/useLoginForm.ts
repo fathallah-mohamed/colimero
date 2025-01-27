@@ -63,18 +63,12 @@ export function useLoginForm({
 
           if (functionError) {
             console.error('Error sending activation email:', functionError);
-            toast({
-              variant: "destructive",
-              title: "Erreur",
-              description: "Impossible d'envoyer l'email d'activation"
-            });
-          } else {
-            console.log('Activation email sent successfully');
-            toast({
-              title: "Email envoyé",
-              description: "Un nouvel email d'activation vous a été envoyé"
-            });
+            setError("Impossible d'envoyer l'email d'activation");
+            setShowErrorDialog(true);
+            setIsLoading(false);
+            return;
           }
+          console.log('Activation email sent successfully');
         }
 
         setShowVerificationDialog(true);
@@ -116,12 +110,7 @@ export function useLoginForm({
         }`);
       }
 
-      console.log('Login successful, showing success toast');
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté",
-      });
-
+      console.log('Login successful');
       if (onSuccess) {
         console.log('Calling onSuccess callback');
         onSuccess();
