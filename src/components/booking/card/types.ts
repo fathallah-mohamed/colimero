@@ -1,19 +1,20 @@
 import { BookingStatus } from "@/types/booking";
+import { ReactNode } from "react";
 
 export interface BookingActionProps {
   bookingId: string;
   status: BookingStatus;
-  tourStatus: string;
+  tourStatus?: string;
   onStatusChange: (newStatus: BookingStatus) => Promise<void>;
   onUpdate: () => Promise<void>;
   onEdit: () => void;
-  userType: string;
+  userType?: string;
 }
 
 export interface StatusChangeButtonProps {
-  onClick: () => Promise<void>;
-  icon: React.ReactNode;
+  onClick: () => void;
+  icon: ReactNode;
   label: string;
-  variant?: "default" | "outline";
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   className?: string;
 }
