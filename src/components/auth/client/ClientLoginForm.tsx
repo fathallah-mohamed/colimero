@@ -27,15 +27,14 @@ export function ClientLoginForm({
     isVerificationNeeded,
     handleLogin,
     handleResendActivation
-  } = useClientAuth(onSuccess);
+  } = useClientAuth({
+    onSuccess,
+    onVerificationNeeded: () => setShowVerificationDialog(true)
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await handleLogin(email, password);
-    
-    if (isVerificationNeeded) {
-      setShowVerificationDialog(true);
-    }
   };
 
   return (

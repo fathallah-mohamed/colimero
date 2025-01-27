@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-interface UseClientAuthProps {
+export interface UseClientAuthProps {
   onSuccess?: () => void;
   onVerificationNeeded?: () => void;
 }

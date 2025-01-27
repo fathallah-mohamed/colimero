@@ -1,25 +1,22 @@
 import { supabase } from "@/integrations/supabase/client";
-
-interface VerificationResult {
-  success: boolean;
-  error?: string;
-}
+import { VerificationResult } from "@/types/verification";
 
 export const verificationService = {
-  async verifyClientStatus(email: string): Promise<{ isVerified: boolean; error?: string }> {
+  async verifyClientStatus(email: string) {
     try {
-      const { data: client, error } = await supabase
+      const { data, error } = await supabase
         .from('clients')
         .select('email_verified, status')
         .eq('email', email.trim())
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
       return {
-        isVerified: Boolean(client?.email_verified && client?.status === 'active')
+        isVerified: data?.email_verified ?? false,
+        error: undefined
       };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error verifying client status:', error);
       return {
         isVerified: false,
@@ -35,34 +32,50 @@ export const verificationService = {
           p_activation_code: activationCode
         });
 
-      if (error) throw error;
-
-      if (!data) {
+      if (error) {
         return {
           success: false,
           error: "Code d'activation invalide"
         };
       }
 
-      // Mettre à jour le statut du client
-      const { error: updateError } = await supabase
-        .from('clients')
-        .update({
-          email_verified: true,
-          status: 'active',
-          activation_code: null,
-          activation_expires_at: null
-        })
-        .eq('email', email);
-
-      if (updateError) throw updateError;
-
-      return { success: true };
-    } catch (error: any) {
+      return {
+        success: true
+      };
+    } catch (error) {
       console.error('Error in activateAccount:', error);
       return {
         success: false,
         error: "Une erreur est survenue lors de l'activation"
+      };
+    }
+  },
+
+  async resendActivationEmail(email: string): Promise<VerificationResult> {
+    try {
+      const { error } = await supabase.functions.invoke('send-activation-email', {
+        body: { 
+          email: email.trim(),
+          resend: true
+        }
+      });
+
+      if (error) {
+        console.error("Error sending activation email:", error);
+        return {
+          success: false,
+          error: "Impossible d'envoyer l'email d'activation"
+        };
+      }
+
+      return {
+        success: true
+      };
+    } catch (error) {
+      console.error("Error in resendActivationEmail:", error);
+      return {
+        success: false,
+        error: "Une erreur est survenue lors de l'envoi"
       };
     }
   }
