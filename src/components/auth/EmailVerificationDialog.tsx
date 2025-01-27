@@ -5,6 +5,7 @@ import { useVerificationEmail } from "@/hooks/auth/useVerificationEmail";
 import { useToast } from "@/hooks/use-toast";
 import { ActivationDialog } from "./activation/ActivationDialog";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -65,13 +66,42 @@ export function EmailVerificationDialog({
             </DialogTitle>
           </DialogHeader>
           
-          <VerificationDialogContent
-            email={email}
-            isResending={isResending}
-            onResendEmail={handleResendEmail}
-            onActivate={() => setShowActivationDialog(true)}
-            onClose={onClose}
-          />
+          <div className="space-y-4">
+            <p className="text-center text-gray-600">
+              Votre compte n'est pas encore activé. Veuillez entrer le code d'activation reçu par email à l'adresse <span className="font-medium">{email}</span>.
+            </p>
+
+            <div className="flex flex-col gap-4">
+              <Button
+                onClick={() => setShowActivationDialog(true)}
+                className="w-full bg-primary"
+              >
+                Entrer le code d'activation
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-gray-500">ou</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleResendEmail}
+                variant="outline"
+                className="w-full"
+                disabled={isResending}
+              >
+                {isResending ? "Envoi en cours..." : "Recevoir un nouveau code"}
+              </Button>
+            </div>
+
+            <p className="text-sm text-gray-500 text-center">
+              Le code d'activation est valable pendant 48 heures
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
 
