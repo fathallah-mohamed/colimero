@@ -2,7 +2,6 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UseFormReturn } from "react-hook-form";
-import { EmailVerificationDialog } from "../EmailVerificationDialog";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export interface LoginFormValues {
@@ -73,14 +72,6 @@ export function LoginFormFields({
           </FormItem>
         )}
       />
-
-      {showVerificationDialog && (
-        <EmailVerificationDialog
-          isOpen={showVerificationDialog}
-          onClose={onVerificationDialogClose}
-          email={form.getValues("email")}
-        />
-      )}
 
       <AlertDialog open={showErrorDialog} onOpenChange={onErrorDialogClose}>
         <AlertDialogContent>

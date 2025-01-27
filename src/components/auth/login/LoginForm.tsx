@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields, LoginFormValues } from "./LoginFormFields";
-import { useLoginForm } from "@/hooks/auth/useLoginForm";
+import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -76,7 +76,6 @@ export function LoginForm({
           showErrorDialog={showErrorDialog}
           onVerificationDialogClose={() => setShowVerificationDialog(false)}
           onErrorDialogClose={() => setShowErrorDialog(false)}
-          onResendEmail={() => handleLogin(form.getValues("email"), form.getValues("password"))}
         />
 
         <div className="space-y-4">
@@ -143,7 +142,6 @@ export function LoginForm({
             isOpen={showVerificationDialog}
             onClose={() => setShowVerificationDialog(false)}
             email={form.getValues("email")}
-            onResendEmail={() => handleLogin(form.getValues("email"), form.getValues("password"))}
           />
         )}
       </form>
