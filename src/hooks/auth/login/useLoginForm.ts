@@ -41,11 +41,18 @@ export function useLoginForm({
         throw new Error("Erreur lors de la vérification du compte");
       }
 
-      // 2. Si le client n'existe pas
+      // 2. Si le client n'existe pas ou si les informations d'identification sont incorrectes
       if (!clientData) {
-        setError("Email ou mot de passe incorrect");
-        setShowErrorDialog(true);
-        return;
+        const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: password.trim(),
+        });
+
+        if (signInError || !authData.user) {
+          setError("Email ou mot de passe incorrect");
+          setShowErrorDialog(true);
+          return;
+        }
       }
 
       // 3. Si le client existe mais n'est pas vérifié ou est en attente
