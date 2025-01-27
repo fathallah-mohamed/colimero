@@ -7,7 +7,7 @@ interface AuthDialogProps {
   onSuccess?: () => void;
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
-  requiredUserType?: "client" | "carrier";
+  requiredUserType?: "client" | "carrier" | "admin";
 }
 
 export default function AuthDialog({

@@ -9,7 +9,7 @@ interface LoginFormContainerProps {
   onRegister?: () => void;
   onCarrierRegister?: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: "client" | "carrier" | "admin";
 }
 
 export function LoginFormContainer({
@@ -57,6 +57,7 @@ export function LoginFormContainer({
         onCarrierRegister={onCarrierRegister}
         onSuccess={handleLoginSuccess}
         requiredUserType={requiredUserType}
+        hideRegisterButton={requiredUserType === "admin"}
       />
 
       <CustomDialog
