@@ -9,7 +9,6 @@ import { BookingHeaderSection } from "./header/BookingHeaderSection";
 import { BookingDetailsContent } from "./details/BookingDetailsContent";
 import type { Booking, BookingStatus } from "@/types/booking";
 import { useToast } from "@/hooks/use-toast";
-import { useProfile } from "@/hooks/use-profile";
 import { generateDeliverySlip } from "@/utils/generateDeliverySlip";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -82,26 +81,6 @@ export function BookingCard({
     setShowEditDialog(true);
   };
 
-  const handleStatusChange = async (newStatus: BookingStatus) => {
-    try {
-      console.log("Changing booking status to:", newStatus);
-      await onStatusChange(localBooking.id, newStatus);
-      await onUpdate();
-      
-      toast({
-        title: "Statut mis à jour",
-        description: "Le statut de la réservation a été mis à jour avec succès.",
-      });
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la réservation.",
-      });
-    }
-  };
-
   const handleDownloadDeliverySlip = () => {
     try {
       generateDeliverySlip(localBooking);
@@ -139,10 +118,12 @@ export function BookingCard({
             bookingId={localBooking.id}
             status={localBooking.status}
             tourStatus={tourStatus}
-            onStatusChange={handleStatusChange}
+            onStatusChange={onStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
             userType={userType}
+            tourId={localBooking.tour_id}
+            userId={localBooking.user_id}
           />
         </div>
 

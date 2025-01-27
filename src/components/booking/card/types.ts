@@ -1,5 +1,4 @@
 import { BookingStatus } from "@/types/booking";
-import { ReactNode } from "react";
 
 export interface BookingActionProps {
   bookingId: string;
@@ -9,12 +8,6 @@ export interface BookingActionProps {
   onUpdate: () => Promise<void>;
   onEdit: () => void;
   userType?: string;
-}
-
-export interface StatusChangeButtonProps {
-  onClick: () => void;
-  icon: ReactNode;
-  label: string;
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
-  className?: string;
+  tourId: number;
+  userId: string;
 }
