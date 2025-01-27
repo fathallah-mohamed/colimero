@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { BookingStatus } from "@/types/booking";
 import { Edit2, RotateCcw, CheckSquare } from "lucide-react";
 import { CancelConfirmDialog } from "../actions/CancelConfirmDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { BookingStatus } from "@/types/booking";
 import { StatusChangeButton } from "./StatusChangeButton";
 import { BookingActionProps } from "./types";
 
@@ -59,6 +59,28 @@ export function BookingActions({
     return null;
   }
 
+  // Actions pour les clients
+  if (userType === 'client') {
+    return (
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onEdit}
+          className="gap-2"
+        >
+          <Edit2 className="h-4 w-4" />
+          Modifier
+        </Button>
+
+        {status === "pending" && (
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+        )}
+      </div>
+    );
+  }
+
+  // Actions pour les transporteurs
   return (
     <div className="flex items-center gap-2">
       <Button
