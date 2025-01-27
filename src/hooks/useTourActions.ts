@@ -77,7 +77,6 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
         title: "Accès refusé",
         description: "Vous avez déjà une réservation en attente pour cette tournée. Veuillez attendre que votre réservation soit traitée avant d'en effectuer une nouvelle.",
       });
-      setShowAccessDeniedDialog(true);
       return;
     }
 
