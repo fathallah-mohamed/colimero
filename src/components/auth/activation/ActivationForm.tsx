@@ -19,12 +19,16 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email) {
+      setError("Email manquant");
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log("Attempting activation with code:", activationCode);
       const result = await clientAuthService.activateAccount(activationCode, email);
 
       if (!result.success) {

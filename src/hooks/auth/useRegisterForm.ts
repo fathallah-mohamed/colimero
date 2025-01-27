@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { RegisterFormState } from "@/types/auth";
-import { clientAuthService } from "@/services/auth/client-auth-service";
+import { registerClient } from "./useClientRegistration";
 import { useToast } from "@/hooks/use-toast";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
@@ -19,26 +19,26 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const { toast } = useToast();
 
   const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
-    console.log(`Field ${String(field)} changed to:`, value);
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Starting registration process with data:", formState);
+    
+    if (formState.password !== formState.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      if (formState.password !== formState.confirmPassword) {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Les mots de passe ne correspondent pas",
-        });
-        return;
-      }
-
-      const result = await clientAuthService.signIn(formState.email, formState.password);
+      const result = await registerClient(formState);
       console.log("Registration result:", result);
 
       if (result.success) {
