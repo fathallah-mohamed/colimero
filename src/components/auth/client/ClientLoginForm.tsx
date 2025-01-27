@@ -6,7 +6,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailVerificationDialog } from "../EmailVerificationDialog";
 import { useClientAuth } from "@/hooks/auth/useClientAuth";
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface ClientLoginFormProps {
   onRegister: () => void;

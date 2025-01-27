@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 
 interface UseClientAuthProps {
   onSuccess?: () => void;
-  onVerificationNeeded?: () => void;
 }
 
 export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
@@ -47,6 +46,8 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
       if (clientError) {
         console.error("Error checking client status:", clientError);
         setError("Erreur lors de la vérification du compte");
+        // Make sure to sign out if there's an error
+        await supabase.auth.signOut();
         return;
       }
 
@@ -57,7 +58,8 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
         console.log('Account needs verification, redirecting to activation page');
         // Sign out the user since they shouldn't be logged in yet
         await supabase.auth.signOut();
-        navigate('/activation-compte');
+        // Use replace instead of navigate to prevent going back
+        navigate('/activation-compte', { replace: true });
         return;
       }
 
@@ -76,6 +78,8 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
     } catch (error) {
       console.error('Unexpected error during login:', error);
       setError("Une erreur inattendue s'est produite");
+      // Make sure to sign out if there's an error
+      await supabase.auth.signOut();
     } finally {
       setIsLoading(false);
     }
