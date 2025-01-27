@@ -50,6 +50,9 @@ export function LoginFormContainer({
     });
   };
 
+  // Convertir le type UserType en type accepté par LoginForm
+  const loginFormUserType = requiredUserType === 'admin' ? undefined : requiredUserType;
+
   return (
     <>
       <LoginForm
@@ -57,7 +60,7 @@ export function LoginFormContainer({
         onRegister={onRegister}
         onCarrierRegister={onCarrierRegister}
         onSuccess={handleLoginSuccess}
-        requiredUserType={requiredUserType}
+        requiredUserType={loginFormUserType}
         hideRegisterButton={requiredUserType === "admin"}
       />
 
