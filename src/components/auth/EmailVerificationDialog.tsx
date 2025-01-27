@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { clientAuthService } from "@/services/auth/client-auth-service";
+import { verificationService } from "@/services/auth/verification-service";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -36,7 +36,7 @@ export function EmailVerificationDialog({
     setError(null);
 
     try {
-      const result = await clientAuthService.activateAccount(activationCode, email);
+      const result = await verificationService.activateAccount(activationCode, email);
       
       if (result.success) {
         onClose();

@@ -6,21 +6,36 @@ interface VerificationResult {
 }
 
 export const verificationService = {
+  async verifyClientStatus(email: string): Promise<{ isVerified: boolean; error?: string }> {
+    try {
+      const { data: client, error } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email.trim())
+        .single();
+
+      if (error) throw error;
+
+      return {
+        isVerified: Boolean(client?.email_verified && client?.status === 'active')
+      };
+    } catch (error: any) {
+      console.error('Error verifying client status:', error);
+      return {
+        isVerified: false,
+        error: "Erreur lors de la vérification du statut"
+      };
+    }
+  },
+
   async activateAccount(activationCode: string, email: string): Promise<VerificationResult> {
     try {
-      console.log('Activating account with code:', activationCode);
-      
-      const { data, error } = await supabase.rpc('activate_client_account', {
-        p_activation_code: activationCode
-      });
+      const { data, error } = await supabase
+        .rpc('activate_client_account', {
+          p_activation_code: activationCode
+        });
 
-      if (error) {
-        console.error('Error activating account:', error);
-        return {
-          success: false,
-          error: "Code d'activation invalide ou expiré"
-        };
-      }
+      if (error) throw error;
 
       if (!data) {
         return {
@@ -29,52 +44,25 @@ export const verificationService = {
         };
       }
 
-      // Try to sign in after activation
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: activationCode // Use activation code as temporary password
-      });
+      // Mettre à jour le statut du client
+      const { error: updateError } = await supabase
+        .from('clients')
+        .update({
+          email_verified: true,
+          status: 'active',
+          activation_code: null,
+          activation_expires_at: null
+        })
+        .eq('email', email);
 
-      if (signInError) {
-        console.error('Error signing in after activation:', signInError);
-        return {
-          success: false,
-          error: "Erreur lors de la connexion après activation"
-        };
-      }
+      if (updateError) throw updateError;
 
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in activateAccount:', error);
       return {
         success: false,
         error: "Une erreur est survenue lors de l'activation"
-      };
-    }
-  },
-
-  async resendActivationEmail(email: string): Promise<VerificationResult> {
-    try {
-      console.log('Requesting new activation email for:', email);
-      
-      const { error } = await supabase.functions.invoke('send-activation-email', {
-        body: { email }
-      });
-
-      if (error) {
-        console.error('Error sending activation email:', error);
-        return {
-          success: false,
-          error: "Impossible d'envoyer l'email d'activation"
-        };
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error in resendActivationEmail:', error);
-      return {
-        success: false,
-        error: "Une erreur est survenue lors de l'envoi"
       };
     }
   }
