@@ -61,14 +61,7 @@ export function useLoginForm({
 
           if (functionError) {
             console.error('Error sending activation email:', functionError);
-            setShowVerificationDialog(true);
-            if (onVerificationNeeded) {
-              onVerificationNeeded();
-            }
-            setIsLoading(false);
-            return;
           }
-          console.log('Activation email sent successfully');
         }
 
         setShowVerificationDialog(true);
