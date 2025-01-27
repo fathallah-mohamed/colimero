@@ -108,6 +108,8 @@ export function BookingActions({
   }
 
   // Actions pour les transporteurs
+  const canCancelBooking = tourStatus === "Programmée";
+  
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -145,6 +147,10 @@ export function BookingActions({
             Confirmer
           </Button>
         </>
+      )}
+
+      {status === "confirmed" && canCancelBooking && (
+        <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
       )}
 
       <DuplicateBookingDialog 
