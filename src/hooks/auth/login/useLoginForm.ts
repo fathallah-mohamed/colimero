@@ -82,6 +82,7 @@ export function useLoginForm({
           console.log('Calling onVerificationNeeded callback');
           onVerificationNeeded();
         }
+        setIsLoading(false);
         return;
       }
 
@@ -96,6 +97,7 @@ export function useLoginForm({
         console.error('Sign in error:', signInError);
         setError("Email ou mot de passe incorrect");
         setShowErrorDialog(true);
+        setIsLoading(false);
         return;
       }
 
