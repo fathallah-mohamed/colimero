@@ -98,6 +98,10 @@ export function BookingCard({
     }
   };
 
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    await onStatusChange(localBooking.id, newStatus);
+  };
+
   return (
     <Card className="p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="space-y-4">
@@ -118,7 +122,7 @@ export function BookingCard({
             bookingId={localBooking.id}
             status={localBooking.status}
             tourStatus={tourStatus}
-            onStatusChange={onStatusChange}
+            onStatusChange={handleStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
             userType={userType}
