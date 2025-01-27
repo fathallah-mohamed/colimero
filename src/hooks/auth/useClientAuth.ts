@@ -22,12 +22,8 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
       setIsLoading(true);
       setError(null);
 
-      // Vérifier d'abord le statut du client
-      const clientStatus = await checkClientStatus(email);
-      console.log('Client status:', clientStatus);
-
-      // Tenter la connexion
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // First attempt login
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
       });
@@ -38,14 +34,17 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
         return;
       }
 
-      // Vérifier si le compte est actif
+      // Then check client status
+      const clientStatus = await checkClientStatus(email);
+      console.log('Client status after login:', clientStatus);
+
       if (!clientStatus.isVerified || clientStatus.status !== 'active') {
         console.log('Account needs verification, redirecting to activation page');
         navigate('/activation-compte');
         return;
       }
 
-      // Si tout est bon, afficher le toast et rediriger
+      // If everything is good, show success toast and redirect
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"
