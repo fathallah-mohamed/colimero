@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useClientVerification } from "./useClientVerification";
 
 interface UseClientAuthProps {
   onSuccess?: () => void;
@@ -13,7 +12,6 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { checkClientStatus } = useClientVerification();
   const navigate = useNavigate();
 
   const handleLogin = async (email: string, password: string) => {
@@ -22,7 +20,7 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
       setIsLoading(true);
       setError(null);
 
-      // First attempt login
+      // First, attempt login
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -34,12 +32,31 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
         return;
       }
 
-      // Then check client status
-      const clientStatus = await checkClientStatus(email);
-      console.log('Client status after login:', clientStatus);
+      if (!authData.user) {
+        setError("Une erreur inattendue s'est produite");
+        return;
+      }
 
-      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
+      // Then check client status
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (clientError) {
+        console.error("Error checking client status:", clientError);
+        setError("Erreur lors de la vérification du compte");
+        return;
+      }
+
+      console.log('Client status:', clientData);
+
+      // If client is not verified or not active, redirect to activation
+      if (!clientData?.email_verified || clientData?.status !== 'active') {
         console.log('Account needs verification, redirecting to activation page');
+        // Sign out the user since they shouldn't be logged in yet
+        await supabase.auth.signOut();
         navigate('/activation-compte');
         return;
       }

@@ -22,18 +22,13 @@ export function ClientLoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const navigate = useNavigate();
   
   const {
     isLoading,
     error,
     handleLogin,
   } = useClientAuth({
-    onSuccess,
-    onVerificationNeeded: () => {
-      console.log("Verification needed, redirecting to activation page");
-      navigate('/activation-compte');
-    }
+    onSuccess
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
