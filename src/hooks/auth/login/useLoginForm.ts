@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { UserType } from "@/types/auth";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -17,6 +18,7 @@ export function useLoginForm({
   const [error, setError] = useState<string | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -39,17 +41,15 @@ export function useLoginForm({
         throw new Error("Erreur lors de la vérification du compte");
       }
 
-      console.log('Client data:', clientData);
-
-      // Vérifier si le compte existe et n'est pas activé
+      // Si le client existe mais n'est pas vérifié ou est en attente
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
         console.log('Account not verified or pending, showing verification dialog');
         
         // Vérifier si le code d'activation est expiré
         const isExpired = !clientData.activation_expires_at || 
                          new Date(clientData.activation_expires_at) < new Date();
-        
-        // Envoyer un nouvel email d'activation si nécessaire
+
+        // Générer et envoyer un nouveau code si nécessaire
         if (!clientData.activation_code || isExpired) {
           console.log('Sending new activation code...');
           const { error: functionError } = await supabase.functions.invoke(
@@ -61,20 +61,26 @@ export function useLoginForm({
 
           if (functionError) {
             console.error('Error sending activation email:', functionError);
+            throw new Error("Erreur lors de l'envoi de l'email d'activation");
           }
         }
 
         setShowVerificationDialog(true);
         if (onVerificationNeeded) {
-          console.log('Calling onVerificationNeeded callback');
           onVerificationNeeded();
         }
-        setIsLoading(false);
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
         return;
       }
 
-      // 2. Si le compte est vérifié, tenter la connexion
-      console.log('Attempting sign in...');
+      // 2. Si le compte n'est pas vérifié, bloquer la connexion
+      if (!clientData?.email_verified) {
+        setError("Ce compte n'est pas activé. Veuillez l'activer avant de vous connecter.");
+        setShowErrorDialog(true);
+        return;
+      }
+
+      // 3. Tenter la connexion uniquement si le compte est vérifié
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -84,7 +90,6 @@ export function useLoginForm({
         console.error('Sign in error:', signInError);
         setError("Email ou mot de passe incorrect");
         setShowErrorDialog(true);
-        setIsLoading(false);
         return;
       }
 
@@ -92,7 +97,7 @@ export function useLoginForm({
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // 3. Vérifier le type d'utilisateur si requis
+      // 4. Vérifier le type d'utilisateur si requis
       const userType = authData.user.user_metadata?.user_type as UserType;
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
@@ -105,9 +110,9 @@ export function useLoginForm({
 
       console.log('Login successful');
       if (onSuccess) {
-        console.log('Calling onSuccess callback');
         onSuccess();
       }
+
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message);

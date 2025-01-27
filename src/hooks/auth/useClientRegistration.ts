@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import crypto from 'crypto';
+import { useToast } from "@/hooks/use-toast";
 
 interface RegisterFormData {
   firstName: string;
