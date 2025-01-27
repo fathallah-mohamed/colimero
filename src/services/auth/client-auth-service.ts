@@ -10,6 +10,7 @@ interface AuthResult {
 export const clientAuthService = {
   async checkClientStatus(email: string) {
     try {
+      console.log('Checking client status for:', email);
       const { data: clientData, error } = await supabase
         .from('clients')
         .select('email_verified, status')
