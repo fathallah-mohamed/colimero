@@ -33,7 +33,7 @@ export function BookingActions({
       .eq('user_id', userId)
       .eq('tour_id', tourId)
       .eq('status', 'pending')
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error checking existing booking:', error);
