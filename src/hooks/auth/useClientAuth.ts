@@ -64,6 +64,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         return;
       }
 
+      // Check if account is verified and active before attempting login
       if (!clientStatus.isVerified || clientStatus.status !== 'active') {
         console.log("Account needs verification:", email);
         if (onVerificationNeeded) {
