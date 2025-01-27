@@ -20,6 +20,7 @@ interface BookingCardProps {
   onStatusChange: (bookingId: string, status: BookingStatus) => Promise<void>;
   onUpdate: () => Promise<void>;
   tourStatus?: string;
+  userType?: string;
 }
 
 export function BookingCard({ 
@@ -27,13 +28,13 @@ export function BookingCard({
   isCollecting, 
   onStatusChange, 
   onUpdate, 
-  tourStatus 
+  tourStatus,
+  userType 
 }: BookingCardProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [localBooking, setLocalBooking] = useState(initialBooking);
   const { toast } = useToast();
-  const { userType } = useProfile();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -60,7 +61,6 @@ export function BookingCard({
           queryClient.invalidateQueries({ queryKey: ['tours'] });
           queryClient.invalidateQueries({ queryKey: ['next-tour'] });
           
-          // Show toast notification
           toast({
             title: "Réservation mise à jour",
             description: "Le statut de la réservation a été mis à jour.",
