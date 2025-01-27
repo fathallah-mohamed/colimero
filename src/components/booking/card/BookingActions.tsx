@@ -20,6 +20,8 @@ export function BookingActions({
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  console.log("BookingActions - Props:", { bookingId, status, tourStatus, userType });
+
   const handleStatusChange = async (newStatus: BookingStatus) => {
     try {
       console.log('BookingActions - Changing status to:', newStatus);
@@ -101,12 +103,15 @@ export function BookingActions({
       {status === "pending" && (
         <>
           <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-          <StatusChangeButton
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-green-500 hover:text-green-600 gap-2"
             onClick={() => handleStatusChange("confirmed")}
-            icon={<CheckSquare className="h-4 w-4" />}
-            label="Confirmer"
-            className="text-green-500 hover:text-green-600"
-          />
+          >
+            <CheckSquare className="h-4 w-4" />
+            Confirmer
+          </Button>
         </>
       )}
     </div>
