@@ -26,7 +26,6 @@ export function ClientLoginForm({
     isLoading,
     error,
     handleLogin,
-    handleResendActivation
   } = useClientAuth({
     onSuccess,
     onVerificationNeeded: () => setShowVerificationDialog(true)
@@ -109,7 +108,6 @@ export function ClientLoginForm({
         isOpen={showVerificationDialog}
         onClose={() => setShowVerificationDialog(false)}
         email={email}
-        onResendEmail={() => handleResendActivation(email)}
       />
     </>
   );
