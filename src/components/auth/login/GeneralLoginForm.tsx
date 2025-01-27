@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
+import { EmailVerificationDialog } from "../EmailVerificationDialog";
 
 const loginSchema = z.object({
   email: z.string()
@@ -68,7 +69,6 @@ export function GeneralLoginForm({
           showErrorDialog={showErrorDialog}
           onVerificationDialogClose={() => setShowVerificationDialog(false)}
           onErrorDialogClose={() => setShowErrorDialog(false)}
-          onResendEmail={() => handleLogin(form.getValues("email"), form.getValues("password"))}
         />
 
         <div className="space-y-4">
@@ -120,6 +120,14 @@ export function GeneralLoginForm({
             </button>
           </div>
         </div>
+
+        {showVerificationDialog && (
+          <EmailVerificationDialog
+            isOpen={showVerificationDialog}
+            onClose={() => setShowVerificationDialog(false)}
+            email={form.getValues("email")}
+          />
+        )}
       </form>
     </Form>
   );
