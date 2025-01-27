@@ -53,16 +53,20 @@ export function LoginForm({
     handleLogin,
   } = useLoginForm({ 
     onSuccess: () => {
-      const returnPath = sessionStorage.getItem('returnPath');
-      if (returnPath) {
-        sessionStorage.removeItem('returnPath');
-        navigate(returnPath);
-      } else {
-        navigate('/');
+      // Ne rediriger que si l'utilisateur est vérifié
+      if (!showVerificationDialog) {
+        const returnPath = sessionStorage.getItem('returnPath');
+        if (returnPath) {
+          sessionStorage.removeItem('returnPath');
+          navigate(returnPath);
+        } else {
+          navigate('/');
+        }
       }
     }, 
     requiredUserType,
     onVerificationNeeded: () => {
+      console.log("Verification needed, showing dialog");
       setShowVerificationDialog(true);
       form.reset({ email: form.getValues("email"), password: "" });
     }
