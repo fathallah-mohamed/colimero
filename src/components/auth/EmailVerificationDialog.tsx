@@ -23,14 +23,12 @@ export function EmailVerificationDialog({
   email,
 }: EmailVerificationDialogProps) {
   const [activationCode, setActivationCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const { isLoading, sendActivationEmail, activateAccount } = useAccountActivation();
+  const { isLoading, error, sendActivationEmail, activateAccount } = useAccountActivation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activationCode) return;
 
-    setError(null);
     const success = await activateAccount(activationCode, email);
     if (success) {
       onClose();
