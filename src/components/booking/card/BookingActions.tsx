@@ -55,10 +55,6 @@ export function BookingActions({
     }
   };
 
-  if (!['Programmée', 'Ramassage en cours'].includes(tourStatus)) {
-    return null;
-  }
-
   // Actions pour les clients
   if (userType === 'client') {
     return (
@@ -104,47 +100,13 @@ export function BookingActions({
 
       {status === "pending" && (
         <>
-          {tourStatus === "Programmée" && (
-            <>
-              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-              <StatusChangeButton
-                onClick={() => handleStatusChange("confirmed")}
-                icon={<CheckSquare className="h-4 w-4" />}
-                label="Confirmer"
-                className="text-green-500 hover:text-green-600"
-              />
-            </>
-          )}
-          {tourStatus === "Ramassage en cours" && (
-            <>
-              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-              <StatusChangeButton
-                onClick={() => handleStatusChange("collected")}
-                icon={<CheckSquare className="h-4 w-4" />}
-                label="Marquer comme collectée"
-                className="text-green-500 hover:text-green-600"
-              />
-            </>
-          )}
-        </>
-      )}
-
-      {status === "confirmed" && (
-        <>
-          {tourStatus === "Programmée" && (
-            <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-          )}
-          {tourStatus === "Ramassage en cours" && (
-            <>
-              <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-              <StatusChangeButton
-                onClick={() => handleStatusChange("collected")}
-                icon={<CheckSquare className="h-4 w-4" />}
-                label="Marquer comme collectée"
-                className="text-green-500 hover:text-green-600"
-              />
-            </>
-          )}
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <StatusChangeButton
+            onClick={() => handleStatusChange("confirmed")}
+            icon={<CheckSquare className="h-4 w-4" />}
+            label="Confirmer"
+            className="text-green-500 hover:text-green-600"
+          />
         </>
       )}
     </div>
