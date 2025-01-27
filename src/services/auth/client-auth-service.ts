@@ -60,7 +60,7 @@ export const clientAuthService = {
         };
       }
 
-      // Mettre à jour le statut dans la table clients
+      // Update client status
       const { error: updateError } = await supabase
         .from('clients')
         .update({
