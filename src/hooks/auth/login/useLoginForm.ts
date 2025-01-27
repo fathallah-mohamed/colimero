@@ -22,14 +22,29 @@ export function useLoginForm({
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      console.log('Checking client status for:', email);
+      // 1. Vérifier d'abord le statut du client
+      console.log('Checking client status...');
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status, activation_code, activation_expires_at')
+        .eq('email', email.trim())
+        .maybeSingle();
 
-      // 1. Tenter d'abord la connexion pour vérifier les identifiants
+      if (clientError) {
+        console.error('Error checking client status:', clientError);
+        throw new Error("Erreur lors de la vérification du compte");
+      }
+
+      console.log('Client data:', clientData);
+
+      // 2. Tenter la connexion
+      console.log('Attempting sign in...');
       const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
@@ -46,28 +61,20 @@ export function useLoginForm({
         throw new Error("Aucune donnée utilisateur reçue");
       }
 
-      // 2. Une fois connecté, vérifier le statut du client
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified, status, activation_code, activation_expires_at')
-        .eq('email', email.trim())
-        .maybeSingle();
-
-      if (clientError) {
-        console.error('Error checking client status:', clientError);
-        throw new Error("Erreur lors de la vérification du compte");
-      }
-
-      // 3. Si le client existe et n'est pas vérifié ou est en attente
+      // 3. Vérifier si le compte est activé
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
-        console.log('Client not verified or pending:', clientData);
+        console.log('Account not verified, initiating verification process...');
+        
+        // Déconnecter l'utilisateur car le compte n'est pas activé
+        await supabase.auth.signOut();
         
         // Vérifier si le code d'activation est expiré
-        const isExpired = !clientData.activation_expires_at || new Date(clientData.activation_expires_at) < new Date();
+        const isExpired = !clientData.activation_expires_at || 
+                         new Date(clientData.activation_expires_at) < new Date();
         
-        // Envoyer un nouvel email d'activation si pas de code ou code expiré
+        // Envoyer un nouvel email d'activation si nécessaire
         if (!clientData.activation_code || isExpired) {
-          console.log('No activation code or expired, sending new one...');
+          console.log('Sending new activation code...');
           const { error: functionError } = await supabase.functions.invoke(
             'send-activation-email',
             {
@@ -83,6 +90,7 @@ export function useLoginForm({
               description: "Impossible d'envoyer l'email d'activation"
             });
           } else {
+            console.log('Activation email sent successfully');
             toast({
               title: "Email envoyé",
               description: "Un nouvel email d'activation vous a été envoyé"
@@ -90,12 +98,10 @@ export function useLoginForm({
           }
         }
 
-        // Déconnecter l'utilisateur car le compte n'est pas activé
-        await supabase.auth.signOut();
-        
-        setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
         setShowVerificationDialog(true);
+        console.log('Showing verification dialog...');
         if (onVerificationNeeded) {
+          console.log('Calling onVerificationNeeded callback...');
           onVerificationNeeded();
         }
         return;
@@ -112,12 +118,14 @@ export function useLoginForm({
         }`);
       }
 
+      console.log('Login successful, showing success toast');
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté",
       });
 
       if (onSuccess) {
+        console.log('Calling onSuccess callback');
         onSuccess();
       }
     } catch (error: any) {
