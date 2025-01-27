@@ -13,9 +13,14 @@ interface AccessDeniedMessageProps {
   userType: 'client' | 'carrier';
   isOpen: boolean;
   onClose: () => void;
+  message?: string;
 }
 
-export function AccessDeniedMessage({ userType, isOpen, onClose }: AccessDeniedMessageProps) {
+export function AccessDeniedMessage({ userType, isOpen, onClose, message }: AccessDeniedMessageProps) {
+  const defaultMessage = userType === 'client' 
+    ? "Cette fonctionnalité est réservée aux transporteurs. Les clients ne peuvent pas créer de tournées."
+    : "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client.";
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -25,10 +30,7 @@ export function AccessDeniedMessage({ userType, isOpen, onClose }: AccessDeniedM
             Accès refusé
           </DialogTitle>
           <DialogDescription>
-            {userType === 'client' 
-              ? "Cette fonctionnalité est réservée aux transporteurs. Les clients ne peuvent pas créer de tournées."
-              : "Cette fonctionnalité est réservée aux clients. Veuillez vous connecter avec un compte client."
-            }
+            {message || defaultMessage}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

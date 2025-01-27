@@ -86,7 +86,7 @@ export default function Reserver() {
         .from('bookings')
         .select('status')
         .eq('user_id', session.user.id)
-        .eq('tour_id', tourId)
+        .eq('tour_id', parseInt(tourId!, 10))
         .eq('status', 'pending')
         .maybeSingle();
 
@@ -107,7 +107,7 @@ export default function Reserver() {
           .from('bookings')
           .select('status')
           .eq('user_id', session.user.id)
-          .eq('tour_id', tourId)
+          .eq('tour_id', parseInt(tourId!, 10))
           .eq('status', 'cancelled')
           .maybeSingle();
 
@@ -116,7 +116,7 @@ export default function Reserver() {
             .from('approval_requests')
             .select('status')
             .eq('user_id', session.user.id)
-            .eq('tour_id', tourId)
+            .eq('tour_id', parseInt(tourId!, 10))
             .eq('status', 'approved')
             .maybeSingle();
 
