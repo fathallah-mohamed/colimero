@@ -5,14 +5,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Tour } from "@/types/tour";
 
 export function useTourActions(tour: Tour, selectedPickupCity: string | null, existingRequest: any) {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const checkExistingBooking = async (userId: string) => {
-    const { data: existingBooking, error } = await supabase
+  const checkExistingBookings = async (userId: string) => {
+    // Vérifier les réservations en attente
+    const { data: pendingBooking, error: pendingError } = await supabase
       .from('bookings')
       .select('id, status')
       .eq('user_id', userId)
@@ -20,12 +20,26 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
       .eq('status', 'pending')
       .maybeSingle();
 
-    if (error) {
-      console.error('Error checking existing bookings:', error);
-      return null;
+    if (pendingError) {
+      console.error('Error checking pending bookings:', pendingError);
+      return { pendingBooking: null, cancelledBooking: null };
     }
 
-    return existingBooking;
+    // Vérifier les réservations annulées
+    const { data: cancelledBooking, error: cancelledError } = await supabase
+      .from('bookings')
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('tour_id', tour.id)
+      .eq('status', 'cancelled')
+      .maybeSingle();
+
+    if (cancelledError) {
+      console.error('Error checking cancelled bookings:', cancelledError);
+      return { pendingBooking, cancelledBooking: null };
+    }
+
+    return { pendingBooking, cancelledBooking };
   };
 
   const handleActionClick = async () => {
@@ -41,7 +55,9 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      setShowAuthDialog(true);
+      const returnPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`;
+      sessionStorage.setItem('returnPath', returnPath);
+      navigate('/connexion');
       return;
     }
 
@@ -51,8 +67,28 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
       return;
     }
 
+    // Vérifier les réservations existantes
+    const { pendingBooking, cancelledBooking } = await checkExistingBookings(session.user.id);
+
+    // Si une réservation est en attente, bloquer l'accès
+    if (pendingBooking) {
+      toast({
+        variant: "destructive",
+        title: "Accès refusé",
+        description: "Vous avez déjà une réservation en attente pour cette tournée. Veuillez attendre que votre réservation soit traitée avant d'en effectuer une nouvelle.",
+      });
+      setShowAccessDeniedDialog(true);
+      return;
+    }
+
     // Pour les tournées privées
     if (tour.type === 'private') {
+      // Si une réservation a été annulée, forcer une nouvelle demande d'approbation
+      if (cancelledBooking) {
+        setShowApprovalDialog(true);
+        return;
+      }
+
       if (existingRequest) {
         switch (existingRequest.status) {
           case 'pending':
@@ -71,24 +107,17 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
               description: "Votre demande d'approbation a été rejetée pour cette tournée",
             });
             return;
+          default:
+            setShowApprovalDialog(true);
+            return;
         }
+      } else {
+        setShowApprovalDialog(true);
       }
-      // Ouvrir directement la popup de demande d'approbation
-      setShowApprovalDialog(true);
-      return;
+    } else {
+      // Pour les tournées publiques
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
-
-    // Pour les tournées publiques
-    const existingBooking = await checkExistingBooking(session.user.id);
-    if (existingBooking) {
-      toast({
-        variant: "destructive",
-        title: "Réservation impossible",
-        description: "Vous avez déjà une réservation en attente pour cette tournée",
-      });
-      return;
-    }
-    navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
   };
 
   const getActionButtonText = () => {
@@ -123,12 +152,10 @@ export function useTourActions(tour: Tour, selectedPickupCity: string | null, ex
   };
 
   return {
-    showAuthDialog,
-    setShowAuthDialog,
-    showApprovalDialog,
-    setShowApprovalDialog,
     showAccessDeniedDialog,
     setShowAccessDeniedDialog,
+    showApprovalDialog,
+    setShowApprovalDialog,
     handleActionClick,
     getActionButtonText,
     isActionEnabled
