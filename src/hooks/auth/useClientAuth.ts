@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useClientVerification } from "./useClientVerification";
@@ -8,11 +9,12 @@ interface UseClientAuthProps {
   onVerificationNeeded?: () => void;
 }
 
-export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuthProps = {}) {
+export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { checkClientStatus } = useClientVerification();
+  const navigate = useNavigate();
 
   const handleLogin = async (email: string, password: string) => {
     try {
@@ -30,16 +32,6 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         return;
       }
 
-      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
-        console.log('Account needs verification:', email);
-        if (onVerificationNeeded) {
-          console.log('Calling onVerificationNeeded callback');
-          onVerificationNeeded();
-        }
-        setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
-        return;
-      }
-
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -48,6 +40,12 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       if (signInError) {
         console.error("Sign in error:", signInError);
         setError("Email ou mot de passe incorrect");
+        return;
+      }
+
+      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
+        console.log('Account needs verification:', email);
+        navigate('/activation-compte');
         return;
       }
 
