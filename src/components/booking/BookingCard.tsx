@@ -138,11 +138,11 @@ export function BookingCard({
           <BookingActions
             bookingId={localBooking.id}
             status={localBooking.status}
-            tourStatus={tourStatus || ''}
+            tourStatus={tourStatus}
             onStatusChange={handleStatusChange}
             onUpdate={onUpdate}
             onEdit={handleEdit}
-            userType={userType || 'client'}
+            userType={userType}
           />
         </div>
 
