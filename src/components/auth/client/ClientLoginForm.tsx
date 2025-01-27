@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EmailVerificationDialog } from "../EmailVerificationDialog";
 import { useClientAuth } from "@/hooks/auth/useClientAuth";
 
 interface ClientLoginFormProps {
@@ -19,7 +19,7 @@ export function ClientLoginForm({
 }: ClientLoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showActivationDialog, setShowActivationDialog] = useState(false);
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   
   const {
     isLoading,
@@ -34,14 +34,14 @@ export function ClientLoginForm({
     await handleLogin(email, password);
     
     if (isVerificationNeeded) {
-      setShowActivationDialog(true);
+      setShowVerificationDialog(true);
     }
   };
 
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
+        {error && !isVerificationNeeded && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -99,36 +99,12 @@ export function ClientLoginForm({
         </div>
       </form>
 
-      <Dialog open={showActivationDialog} onOpenChange={setShowActivationDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Compte non activé</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <p className="text-center text-gray-600">
-              Votre compte n'est pas encore activé. Un code d'activation a été envoyé à l'adresse <span className="font-medium">{email}</span>.
-            </p>
-            
-            <p className="text-sm text-center text-gray-500">
-              Si vous n'avez pas reçu le code, vous pouvez en demander un nouveau.
-            </p>
-
-            <div className="flex justify-center">
-              <Button
-                onClick={() => {
-                  handleResendActivation(email);
-                  setShowActivationDialog(false);
-                }}
-                variant="outline"
-                disabled={isLoading}
-              >
-                {isLoading ? "Envoi..." : "Renvoyer le code"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EmailVerificationDialog
+        isOpen={showVerificationDialog}
+        onClose={() => setShowVerificationDialog(false)}
+        email={email}
+        onResendEmail={() => handleResendActivation(email)}
+      />
     </>
   );
 }

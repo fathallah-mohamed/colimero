@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
 
 interface UseClientAuthState {
@@ -60,55 +60,17 @@ export function useClientAuth(onSuccess?: () => void) {
         isVerificationNeeded: false 
       }));
 
-      // First check if the client exists and is verified
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified')
-        .eq('email', email.trim())
-        .maybeSingle();
+      const result = await clientAuthService.signIn(email, password);
 
-      console.log("Client verification status:", clientData);
-
-      // If client doesn't exist or there's an error checking
-      if (clientError) {
-        console.error("Error checking client status:", clientError);
+      if (!result.success) {
         setState(prev => ({
           ...prev,
-          error: "Email ou mot de passe incorrect"
+          error: result.error || "Une erreur est survenue",
+          isVerificationNeeded: result.needsVerification || false
         }));
         return;
       }
 
-      // Block login if email is not verified
-      if (!clientData?.email_verified) {
-        console.log("Email not verified, blocking login");
-        setState(prev => ({ 
-          ...prev, 
-          isVerificationNeeded: true,
-          error: "Votre compte n'est pas activé. Veuillez vérifier votre email."
-        }));
-        await handleResendActivation(email);
-        return;
-      }
-
-      // Only proceed with login if email is verified
-      console.log("Email is verified, proceeding with login attempt");
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim()
-      });
-
-      if (signInError) {
-        console.error("Sign in error:", signInError);
-        setState(prev => ({
-          ...prev,
-          error: "Email ou mot de passe incorrect"
-        }));
-        return;
-      }
-
-      // Login successful
-      console.log("Login successful");
       if (onSuccess) {
         onSuccess();
       }

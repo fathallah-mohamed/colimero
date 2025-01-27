@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 interface AuthResult {
   success: boolean;
@@ -6,22 +7,19 @@ interface AuthResult {
   needsVerification?: boolean;
 }
 
-interface ActivationResult {
-  success: boolean;
-  error?: string;
-}
-
 export const clientAuthService = {
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
       console.log('Attempting login for:', email);
       
-      // First check client verification status
+      // 1. First check client verification status
       const { data: clientData, error: clientError } = await supabase
         .from('clients')
         .select('email_verified, status')
         .eq('email', email.trim())
         .maybeSingle();
+
+      console.log("Client verification status:", clientData);
 
       if (clientError) {
         console.error('Error checking client status:', clientError);
@@ -31,9 +29,9 @@ export const clientAuthService = {
         };
       }
 
-      // If client exists but isn't verified, handle verification flow
-      if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-        console.log('Account needs verification:', email);
+      // 2. Block login if email is not verified
+      if (!clientData?.email_verified || clientData.status !== 'active') {
+        console.log("Account needs verification:", email);
         
         // Try to resend activation email
         const { error: functionError } = await supabase.functions.invoke('send-activation-email', {
@@ -54,30 +52,23 @@ export const clientAuthService = {
         };
       }
 
-      // Attempt to sign in
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+      // 3. Only proceed with login if email is verified
+      console.log("Email is verified, proceeding with login attempt");
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
       });
 
       if (signInError) {
-        console.error('Sign in error:', signInError);
+        console.error("Sign in error:", signInError);
         return {
           success: false,
           error: "Email ou mot de passe incorrect"
         };
       }
 
-      // Ensure we have a session
-      if (!authData.session) {
-        console.error('No session data received');
-        return {
-          success: false,
-          error: "Erreur lors de la connexion"
-        };
-      }
-
       return { success: true };
+
     } catch (error) {
       console.error('Unexpected error during login:', error);
       return {
@@ -87,7 +78,7 @@ export const clientAuthService = {
     }
   },
 
-  async activateAccount(activationCode: string, email: string): Promise<ActivationResult> {
+  async activateAccount(activationCode: string, email: string): Promise<AuthResult> {
     try {
       console.log('Activating account with code:', activationCode);
       
@@ -111,9 +102,12 @@ export const clientAuthService = {
         };
       }
 
-      return {
-        success: true
-      };
+      toast({
+        title: "Compte activé",
+        description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter."
+      });
+
+      return { success: true };
     } catch (error) {
       console.error('Error in activateAccount:', error);
       return {

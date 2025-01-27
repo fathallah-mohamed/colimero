@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { useVerification } from "@/hooks/auth/useVerification";
+import { clientAuthService } from "@/services/auth/client-auth-service";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -25,20 +25,31 @@ export function EmailVerificationDialog({
   onResendEmail,
 }: EmailVerificationDialogProps) {
   const [activationCode, setActivationCode] = useState("");
-  const { isLoading, error, activateAccount, resendActivationEmail } = useVerification();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activationCode) return;
 
-    const success = await activateAccount(activationCode, email);
-    if (success) {
+    setIsLoading(true);
+    setError(null);
+
+    const result = await clientAuthService.activateAccount(activationCode, email);
+    
+    if (result.success) {
       onClose();
+    } else {
+      setError(result.error || "Une erreur est survenue");
     }
+    
+    setIsLoading(false);
   };
 
   const handleResendEmail = async () => {
-    await resendActivationEmail(email);
+    setIsLoading(true);
+    await onResendEmail();
+    setIsLoading(false);
   };
 
   return (
