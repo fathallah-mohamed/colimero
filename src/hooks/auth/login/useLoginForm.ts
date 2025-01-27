@@ -43,30 +43,9 @@ export function useLoginForm({
 
       console.log('Client data:', clientData);
 
-      // 2. Tenter la connexion
-      console.log('Attempting sign in...');
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        setError("Email ou mot de passe incorrect");
-        setShowErrorDialog(true);
-        return;
-      }
-
-      if (!authData.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      // 3. Vérifier si le compte est activé
+      // Vérifier si le compte existe et n'est pas activé
       if (clientData && (!clientData.email_verified || clientData.status === 'pending')) {
-        console.log('Account not verified, initiating verification process...');
-        
-        // Déconnecter l'utilisateur car le compte n'est pas activé
-        await supabase.auth.signOut();
+        console.log('Account not verified or pending, showing verification dialog');
         
         // Vérifier si le code d'activation est expiré
         const isExpired = !clientData.activation_expires_at || 
@@ -99,15 +78,32 @@ export function useLoginForm({
         }
 
         setShowVerificationDialog(true);
-        console.log('Showing verification dialog...');
         if (onVerificationNeeded) {
-          console.log('Calling onVerificationNeeded callback...');
+          console.log('Calling onVerificationNeeded callback');
           onVerificationNeeded();
         }
         return;
       }
 
-      // 4. Vérifier le type d'utilisateur si requis
+      // 2. Si le compte est vérifié, tenter la connexion
+      console.log('Attempting sign in...');
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        setError("Email ou mot de passe incorrect");
+        setShowErrorDialog(true);
+        return;
+      }
+
+      if (!authData.user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
+
+      // 3. Vérifier le type d'utilisateur si requis
       const userType = authData.user.user_metadata?.user_type as UserType;
       if (requiredUserType && userType !== requiredUserType) {
         await supabase.auth.signOut();
