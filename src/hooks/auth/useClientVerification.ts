@@ -27,6 +27,8 @@ export function useClientVerification() {
         throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
+      console.log('Client data:', clientData);
+
       return {
         isVerified: clientData?.email_verified ?? false,
         status: clientData?.status ?? 'pending',

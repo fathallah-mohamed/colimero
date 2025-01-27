@@ -22,15 +22,18 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       // Check client status before attempting login
       const clientStatus = await checkClientStatus(email);
+      console.log('Client status:', clientStatus);
       
       if (!clientStatus.exists) {
+        console.log('Client not found');
         setError("Compte non trouvé");
         return;
       }
 
       if (!clientStatus.isVerified || clientStatus.status !== 'active') {
-        console.log("Account needs verification:", email);
+        console.log('Account needs verification:', email);
         if (onVerificationNeeded) {
+          console.log('Calling onVerificationNeeded callback');
           onVerificationNeeded();
         }
         setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
