@@ -1,24 +1,28 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { clientAuthService } from "@/services/auth/client-auth-service";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export interface EmailVerificationDialogProps {
+interface EmailVerificationDialogProps {
   isOpen: boolean;
   onClose: () => void;
   email: string;
   onResendEmail: () => void;
 }
 
-export function EmailVerificationDialog({ 
-  isOpen, 
-  onClose, 
+export function EmailVerificationDialog({
+  isOpen,
+  onClose,
   email,
-  onResendEmail
+  onResendEmail,
 }: EmailVerificationDialogProps) {
   const [activationCode, setActivationCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,17 +38,20 @@ export function EmailVerificationDialog({
     setError(null);
 
     try {
-      const result = await clientAuthService.activateAccount(activationCode, email);
+      const { data, error: activationError } = await supabase.rpc('activate_client_account', {
+        p_activation_code: activationCode
+      });
       
-      if (result.success) {
-        toast({
-          title: "Compte activé",
-          description: "Votre compte a été activé avec succès",
-        });
-        onClose();
-      } else {
-        setError(result.error || "Code d'activation invalide");
+      if (activationError || !data) {
+        setError("Code d'activation invalide");
+        return;
       }
+
+      toast({
+        title: "Compte activé",
+        description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
+      });
+      onClose();
     } catch (error) {
       console.error("Error activating account:", error);
       setError("Une erreur est survenue lors de l'activation");
@@ -72,9 +79,7 @@ export function EmailVerificationDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) onClose();
-    }}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-xl">

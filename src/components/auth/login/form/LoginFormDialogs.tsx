@@ -22,14 +22,12 @@ export function LoginFormDialogs({
 }: LoginFormDialogsProps) {
   return (
     <>
-      {showVerificationDialog && (
-        <EmailVerificationDialog
-          isOpen={showVerificationDialog}
-          onClose={onVerificationDialogClose}
-          email={email}
-          onResendEmail={onResendEmail}
-        />
-      )}
+      <EmailVerificationDialog
+        isOpen={showVerificationDialog}
+        onClose={onVerificationDialogClose}
+        email={email}
+        onResendEmail={onResendEmail}
+      />
 
       <ErrorDialog 
         isOpen={showErrorDialog}
