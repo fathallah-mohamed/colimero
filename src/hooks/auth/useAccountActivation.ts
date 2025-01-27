@@ -4,11 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useAccountActivation() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const sendActivationEmail = async (email: string) => {
     try {
       setIsLoading(true);
+      setError(null);
       
       const { error } = await supabase.functions.invoke('send-activation-email', {
         body: { 
@@ -19,6 +21,7 @@ export function useAccountActivation() {
 
       if (error) {
         console.error("Error sending activation email:", error);
+        setError("Impossible d'envoyer l'email d'activation");
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -34,11 +37,7 @@ export function useAccountActivation() {
       return true;
     } catch (error) {
       console.error("Error in sendActivationEmail:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'envoi de l'email d'activation"
-      });
+      setError("Une erreur est survenue lors de l'envoi de l'email d'activation");
       return false;
     } finally {
       setIsLoading(false);
@@ -48,6 +47,7 @@ export function useAccountActivation() {
   const activateAccount = async (activationCode: string, email: string) => {
     try {
       setIsLoading(true);
+      setError(null);
       
       const { data, error } = await supabase
         .rpc('activate_client_account', {
@@ -55,6 +55,7 @@ export function useAccountActivation() {
         });
 
       if (error) {
+        setError("Code d'activation invalide ou expiré");
         toast({
           variant: "destructive",
           title: "Erreur d'activation",
@@ -64,6 +65,7 @@ export function useAccountActivation() {
       }
 
       if (!data) {
+        setError("Code d'activation invalide");
         toast({
           variant: "destructive",
           title: "Erreur",
@@ -80,11 +82,7 @@ export function useAccountActivation() {
       return true;
     } catch (error) {
       console.error('Error in activateAccount:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'activation"
-      });
+      setError("Une erreur est survenue lors de l'activation");
       return false;
     } finally {
       setIsLoading(false);
@@ -93,6 +91,7 @@ export function useAccountActivation() {
 
   return {
     isLoading,
+    error,
     sendActivationEmail,
     activateAccount
   };
