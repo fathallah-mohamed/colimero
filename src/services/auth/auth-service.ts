@@ -1,31 +1,50 @@
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError, User } from "@supabase/supabase-js";
-import { userTypeValidator } from "./validation/user-type-validator";
-import { authErrorHandler } from "./errors/auth-error-handler";
+import { UserType } from "@/types/auth";
 
-export interface AuthResponse {
+interface AuthResult {
   success: boolean;
   error?: string;
-  user?: User;
+  needsVerification?: boolean;
+  user?: any;
 }
 
 export const authService = {
-  async signIn(email: string, password: string): Promise<AuthResponse> {
+  async checkClientVerification(email: string) {
+    const { data: clientData, error: clientError } = await supabase
+      .from('clients')
+      .select('email_verified, status, activation_code, activation_expires_at')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    if (clientError) {
+      console.error('Error checking client status:', clientError);
+      throw new Error("Erreur lors de la vérification du compte");
+    }
+
+    return clientData;
+  },
+
+  async signIn(email: string, password: string): Promise<AuthResult> {
     try {
-      const { data: { user }, error } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       });
 
-      if (error) {
-        const errorResponse = authErrorHandler.handle(error);
+      if (signInError) {
+        if (signInError.message.includes("Invalid login credentials")) {
+          return {
+            success: false,
+            error: "Email ou mot de passe incorrect"
+          };
+        }
         return {
           success: false,
-          error: errorResponse.message
+          error: "Une erreur est survenue lors de la connexion"
         };
       }
 
-      if (!user) {
+      if (!data.user) {
         return {
           success: false,
           error: "Aucune donnée utilisateur reçue"
@@ -34,31 +53,29 @@ export const authService = {
 
       return {
         success: true,
-        user
+        user: data.user
       };
     } catch (error) {
-      console.error("Sign in error:", error);
+      console.error("Login error:", error);
       return {
         success: false,
-        error: "Une erreur est survenue lors de la connexion"
+        error: "Une erreur inattendue s'est produite"
       };
     }
   },
 
-  async signOut(): Promise<void> {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
-  },
+  async handleUserTypeValidation(user: any, requiredUserType?: UserType) {
+    if (!requiredUserType) return { success: true };
 
-  validateUserType(user: User, requiredType?: 'client' | 'carrier'): AuthResponse {
-    const validation = userTypeValidator.validate(user, requiredType);
-    return {
-      success: validation.success,
-      error: validation.error,
-      user: validation.success ? user : undefined
-    };
+    const userType = user.user_metadata?.user_type;
+    if (userType !== requiredUserType) {
+      await supabase.auth.signOut();
+      return {
+        success: false,
+        error: `Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : requiredUserType === 'carrier' ? 'transporteur' : 'administrateur'}`
+      };
+    }
+
+    return { success: true };
   }
 };

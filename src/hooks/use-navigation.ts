@@ -2,13 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { useToast } from "@/hooks/use-toast";
 
 export function useNavigation() {
   const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
@@ -77,44 +75,24 @@ export function useNavigation() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        // If no session exists, just handle as successful logout
-        toast({
-          title: "Déconnexion réussie",
-          description: "À bientôt !",
-        });
         navigate('/');
         return;
       }
 
       // Attempt to sign out
       const { error } = await supabase.auth.signOut({
-        scope: 'local' // Only clear local session to avoid token errors
+        scope: 'local'
       });
       
       if (error) {
         console.error("Logout error:", error);
-        // Handle any error as successful local logout
-        toast({
-          title: "Déconnexion réussie",
-          description: "Votre session a été terminée.",
-        });
         navigate('/');
         return;
       }
 
-      toast({
-        title: "Déconnexion réussie",
-        description: "À bientôt !",
-      });
-
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
-      // Ensure user is logged out locally even if there's an error
-      toast({
-        title: "Déconnexion réussie",
-        description: "Votre session a été terminée.",
-      });
       navigate('/');
     }
   };
