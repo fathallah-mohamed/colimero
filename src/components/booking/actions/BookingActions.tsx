@@ -1,6 +1,6 @@
 import { BookingStatus } from "@/types/booking";
 import { Button } from "@/components/ui/button";
-import { Edit2, RotateCcw, XCircle } from "lucide-react";
+import { Edit2, RotateCcw, XCircle, CheckSquare } from "lucide-react";
 import { CancelConfirmDialog } from "./CancelConfirmDialog";
 
 interface BookingActionsProps {
@@ -9,6 +9,7 @@ interface BookingActionsProps {
   onStatusChange: (newStatus: BookingStatus) => void;
   onEdit: () => void;
   tourStatus?: string;
+  userType?: string;
 }
 
 export function BookingActions({ 
@@ -16,7 +17,8 @@ export function BookingActions({
   isCollecting, 
   onStatusChange, 
   onEdit,
-  tourStatus
+  tourStatus,
+  userType
 }: BookingActionsProps) {
   // On autorise les actions si on est en collecte OU si la tournée est programmée
   if (!isCollecting && tourStatus !== "Programmée") return null;
@@ -26,6 +28,28 @@ export function BookingActions({
     onStatusChange(newStatus);
   };
 
+  // Actions pour les clients
+  if (userType === 'client') {
+    return (
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onEdit}
+          className="gap-2"
+        >
+          <Edit2 className="h-4 w-4" />
+          Modifier
+        </Button>
+
+        {status === "pending" && (
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+        )}
+      </div>
+    );
+  }
+
+  // Actions pour les transporteurs
   return (
     <div className="flex items-center gap-2">
       <Button
@@ -52,20 +76,16 @@ export function BookingActions({
 
       {status === "pending" && (
         <>
-          {tourStatus === "Programmée" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-red-500 hover:text-red-600 gap-2"
-              onClick={() => handleStatusChange("cancelled")}
-            >
-              <XCircle className="h-4 w-4" />
-              Annuler
-            </Button>
-          )}
-          {tourStatus === "Ramassage en cours" && (
-            <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
-          )}
+          <CancelConfirmDialog onConfirm={() => handleStatusChange("cancelled")} />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-green-500 hover:text-green-600 gap-2"
+            onClick={() => handleStatusChange("confirmed")}
+          >
+            <CheckSquare className="h-4 w-4" />
+            Confirmer
+          </Button>
         </>
       )}
     </div>

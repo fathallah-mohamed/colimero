@@ -6,10 +6,12 @@ import { useBookings } from "@/hooks/useBookings";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { BookingStatus } from "@/types/booking";
+import { useProfile } from "@/hooks/use-profile";
 
 export function BookingList() {
   const { data: bookings = [], isLoading, error, refetch } = useBookings();
   const { toast } = useToast();
+  const { userType } = useProfile();
 
   if (isLoading) {
     return <BookingListLoading />;
@@ -49,7 +51,7 @@ export function BookingList() {
           .eq('tour_id', booking.tour_id)
           .eq('user_id', booking.user_id)
           .eq('status', 'pending')
-          .maybeSingle(); // Changed from .single() to .maybeSingle()
+          .maybeSingle();
 
         if (existingBooking) {
           toast({
@@ -115,6 +117,7 @@ export function BookingList() {
           onStatusChange={handleStatusChange}
           onUpdate={async () => { await refetch(); }}
           tourStatus={booking.tours?.status}
+          userType={userType}
         />
       ))}
     </div>
