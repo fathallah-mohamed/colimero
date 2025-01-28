@@ -1001,17 +1001,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      get_client_status: {
-        Args: {
-          p_user_id: string
-        }
-        Returns: {
-          is_verified: boolean
-          status: string
-          activation_code: string
-          expires_at: string
-        }[]
-      }
       is_activation_token_expired: {
         Args: {
           token: string
@@ -1050,13 +1039,6 @@ export type Database = {
       validate_route_structure: {
         Args: {
           route: Json
-        }
-        Returns: boolean
-      }
-      verify_client_account: {
-        Args: {
-          p_user_id: string
-          p_activation_code: string
         }
         Returns: boolean
       }

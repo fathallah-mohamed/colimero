@@ -24,16 +24,18 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
         .from('clients')
         .select('email_verified, status')
         .eq('email', email.trim())
-        .maybeSingle();
+        .single();
 
-      if (clientError && clientError.code !== 'PGRST116') {
+      if (clientError) {
         console.error("Error checking client status:", clientError);
         setError("Erreur lors de la vérification du compte");
         return;
       }
 
-      // If this is a client account but not verified or not active
-      if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
+      console.log('Client status:', clientData);
+
+      // If client is not verified or not active, redirect to activation
+      if (!clientData?.email_verified || clientData?.status !== 'active') {
         console.log('Account needs verification, redirecting to activation page');
         
         // Attempt login to get the session
@@ -54,7 +56,7 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
         return;
       }
 
-      // If account is verified or not a client account, proceed with normal login
+      // If account is verified, proceed with normal login
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()

@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
 import MobileMenu from "@/components/navigation/MobileMenu";
+import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { NavigationHeader } from "./navigation/NavigationHeader";
-import { Loader } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useClientVerificationRedirect } from "@/hooks/auth/useClientVerificationRedirect";
+import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
@@ -16,12 +20,17 @@ export default function Navigation({
   setShowAuthDialog: externalSetShowAuthDialog 
 }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, userType, handleLogout, isLoading } = useNavigation();
+  const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
-  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useSessionInitializer();
+  useClientVerificationRedirect();
+  useProtectedRoute();
+
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -31,6 +40,7 @@ export default function Navigation({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Handle click outside mobile menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -48,15 +58,18 @@ export default function Navigation({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location.pathname]);
-
   if (isLoading) {
     return (
-      <div className="fixed top-0 left-0 right-0 bg-white z-50 py-4 flex items-center justify-center">
-        <Loader className="w-6 h-6 animate-spin text-primary" />
-      </div>
+      <nav className={cn(
+        "fixed top-0 left-0 right-0 bg-white z-50 transition-all duration-300",
+        isScrolled ? "shadow-lg py-2" : "shadow-sm py-4"
+      )}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center h-16">
+            <div className="text-gray-500">Chargement...</div>
+          </div>
+        </div>
+      </nav>
     );
   }
 
@@ -74,24 +87,24 @@ export default function Navigation({
           userType={userType}
           handleLogout={handleLogout}
           mobileButtonRef={mobileButtonRef}
-          setShowAuthDialog={externalSetShowAuthDialog}
         />
       </div>
 
-      {isOpen && (
-        <div 
-          ref={mobileMenuRef}
-          className="block lg:hidden"
-        >
-          <MobileMenu
-            isOpen={isOpen}
-            user={user}
-            userType={userType}
-            handleLogout={handleLogout}
-            setIsOpen={setIsOpen}
-          />
-        </div>
-      )}
+      <div 
+        ref={mobileMenuRef}
+        className={cn(
+          "block lg:hidden transition-all duration-300 ease-in-out",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+      >
+        <MobileMenu
+          isOpen={isOpen}
+          user={user}
+          userType={userType}
+          handleLogout={handleLogout}
+          setIsOpen={setIsOpen}
+        />
+      </div>
     </nav>
   );
 }
