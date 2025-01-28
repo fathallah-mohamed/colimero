@@ -40,7 +40,6 @@ export function useSessionInitializer() {
 
         const session = await getSessionWithRetry();
         
-        // Configurer l'écouteur avec gestion d'erreur
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
           if (!mounted) return;
 
@@ -48,24 +47,7 @@ export function useSessionInitializer() {
 
           try {
             if (event === 'SIGNED_IN') {
-              if (newSession?.user?.user_metadata?.user_type === 'client') {
-                const { data: client } = await supabase
-                  .from('clients')
-                  .select('email_verified')
-                  .eq('id', newSession.user.id)
-                  .maybeSingle();
-
-                if (client && !client?.email_verified) {
-                  toast({
-                    variant: "destructive",
-                    title: "Compte non activé",
-                    description: "Veuillez activer votre compte via le lien envoyé par email avant de vous connecter.",
-                  });
-                  await supabase.auth.signOut();
-                  return;
-                }
-              }
-
+              // Ne pas vérifier l'activation ici car c'est déjà géré dans useLoginForm
               const returnPath = sessionStorage.getItem('returnPath');
               if (returnPath) {
                 sessionStorage.removeItem('returnPath');

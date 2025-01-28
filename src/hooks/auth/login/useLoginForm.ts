@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { authService } from "@/services/auth/auth-service";
 import { UserType } from "@/types/auth";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
@@ -11,109 +14,86 @@ interface UseLoginFormProps {
 export function useLoginForm({ 
   onSuccess,
   requiredUserType,
-  onVerificationNeeded,
+  onVerificationNeeded
 }: UseLoginFormProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const checkClientVerification = async (email: string) => {
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('email_verified, status')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    return {
+      isVerified: clientData?.email_verified ?? false,
+      status: clientData?.status ?? 'pending'
+    };
+  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Check if it's a client trying to log in
+      // Vérifier d'abord le statut du client
       if (!requiredUserType || requiredUserType === 'client') {
-        const { data: clientData } = await supabase
-          .from('clients')
-          .select('email_verified, status, activation_code')
-          .eq('email', email.trim())
-          .maybeSingle();
-
-        if (clientData) {
-          // If client exists but isn't verified
-          if (!clientData.email_verified || clientData.status !== 'active') {
-            console.log('Account needs verification');
-            setShowVerificationDialog(true);
-            if (onVerificationNeeded) {
-              onVerificationNeeded();
-            }
-            setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
-            return;
-          }
-        }
-      }
-
-      // Attempt login
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim(),
-      });
-
-      if (signInError) {
-        console.error('Sign in error:', signInError);
-        let errorMessage = "Email ou mot de passe incorrect";
+        const { isVerified, status } = await checkClientVerification(email);
         
-        if (signInError.message.includes("Email not confirmed")) {
+        if (!isVerified || status !== 'active') {
+          console.log("Account needs verification:", email);
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
-          errorMessage = "Votre compte n'est pas activé. Veuillez vérifier votre email.";
-        }
-
-        setError(errorMessage);
-        setShowErrorDialog(true);
-        return;
-      }
-
-      if (!authData.user) {
-        throw new Error("Aucune donnée utilisateur reçue");
-      }
-
-      // Verify user type if required
-      const userType = authData.user.user_metadata?.user_type;
-      if (requiredUserType && userType !== requiredUserType) {
-        await supabase.auth.signOut();
-        throw new Error(`Ce compte n'est pas un compte ${
-          requiredUserType === 'client' ? 'client' : 
-          requiredUserType === 'carrier' ? 'transporteur' : 
-          'administrateur'
-        }`);
-      }
-
-      // Final verification for clients
-      if (userType === 'client' || !userType) {
-        const { data: finalCheck } = await supabase
-          .from('clients')
-          .select('email_verified, status')
-          .eq('id', authData.user.id)
-          .single();
-
-        if (!finalCheck?.email_verified || finalCheck.status !== 'active') {
-          console.log('Final check failed - logging out user');
-          await supabase.auth.signOut();
-          setShowVerificationDialog(true);
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
+          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
           return;
         }
       }
 
-      console.log('Login successful');
-      if (onSuccess) {
-        onSuccess();
+      const result = await authService.signIn(email, password, requiredUserType);
+
+      if (!result.success) {
+        if (result.needsVerification) {
+          setShowVerificationDialog(true);
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+        }
+        setError(result.error || "Une erreur est survenue");
+        setShowErrorDialog(!result.needsVerification);
+        return;
       }
 
+      // Ne pas rediriger si le dialogue de vérification est affiché
+      if (!showVerificationDialog) {
+        toast({
+          title: "Connexion réussie",
+          description: "Vous êtes maintenant connecté",
+        });
+
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          const returnPath = sessionStorage.getItem('returnPath');
+          if (returnPath) {
+            sessionStorage.removeItem('returnPath');
+            navigate(returnPath);
+          } else {
+            navigate('/');
+          }
+        }
+      }
     } catch (error: any) {
-      console.error('Login error:', error);
-      setError(error.message);
+      console.error("Login error:", error);
+      setError(error.message || "Une erreur est survenue");
       setShowErrorDialog(true);
     } finally {
       setIsLoading(false);
