@@ -12,6 +12,25 @@ Colimero est une plateforme de gestion de transport de colis entre la France et 
 - [Profils utilisateurs](docs/profiles.md)
 - [Fonctionnalités spécifiques](docs/features.md)
 
+## Workflow d'activation des clients
+
+### Tentative de connexion d'un compte non activé
+1. Le client tente de se connecter avec son email/mot de passe
+2. Le système vérifie le statut d'activation du compte
+3. Si le compte n'est pas activé :
+   - Une popup d'activation s'affiche
+   - Un nouveau code d'activation est généré et envoyé par email
+   - Le client doit saisir le code reçu pour activer son compte
+4. Une fois le code validé :
+   - Le compte est activé
+   - Le client est automatiquement connecté
+   - Redirection vers la page d'accueil
+
+### Délais et restrictions
+- Le code d'activation est valable pendant 48h
+- En cas de code expiré, un nouveau code peut être demandé
+- Le compte doit être activé pour accéder aux fonctionnalités de réservation
+
 ## Informations techniques
 
 ### URL du projet
