@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
@@ -12,11 +12,13 @@ interface NavigationProps {
 }
 
 export default function Navigation({ 
-  showAuthDialog, 
-  setShowAuthDialog 
+  showAuthDialog: externalShowAuthDialog, 
+  setShowAuthDialog: externalSetShowAuthDialog 
 }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, userType, handleLogout, isLoading } = useNavigation();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -28,6 +30,23 @@ export default function Navigation({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        mobileButtonRef.current &&
+        !mobileButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
   // Fermer le menu mobile lors du changement de route
   useEffect(() => {
@@ -55,18 +74,24 @@ export default function Navigation({
           user={user}
           userType={userType}
           handleLogout={handleLogout}
-          setShowAuthDialog={setShowAuthDialog}
+          mobileButtonRef={mobileButtonRef}
+          setShowAuthDialog={externalSetShowAuthDialog}
         />
       </div>
 
       {isOpen && (
-        <MobileMenu
-          isOpen={isOpen}
-          user={user}
-          userType={userType}
-          handleLogout={handleLogout}
-          setIsOpen={setIsOpen}
-        />
+        <div 
+          ref={mobileMenuRef}
+          className="block lg:hidden"
+        >
+          <MobileMenu
+            isOpen={isOpen}
+            user={user}
+            userType={userType}
+            handleLogout={handleLogout}
+            setIsOpen={setIsOpen}
+          />
+        </div>
       )}
     </nav>
   );

@@ -27,18 +27,19 @@ export function useNavigation() {
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      setUserType(session?.user?.user_metadata?.user_type ?? null);
-      
-      if (event === 'SIGNED_OUT') {
-        navigate('/');
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+        setUserType(session?.user?.user_metadata?.user_type ?? null);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setUserType(null);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   const handleLogout = async () => {
     try {
