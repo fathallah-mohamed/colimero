@@ -69,25 +69,53 @@ export function LoginForm({
     }, 
     requiredUserType,
     onVerificationNeeded: async (email: string) => {
-      // Vérifier si le compte existe avant d'afficher le dialogue d'activation
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified, status')
-        .eq('email', email.trim())
-        .maybeSingle();
+      try {
+        console.log("Checking client status for email:", email);
+        
+        // Vérifier si le compte existe dans la table clients
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('email_verified, status')
+          .eq('email', email.trim())
+          .maybeSingle();
 
-      if (!clientData) {
+        console.log("Client data:", clientData);
+        console.log("Client error:", clientError);
+
+        if (clientError) {
+          console.error("Error checking client:", clientError);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Une erreur est survenue lors de la vérification du compte.",
+          });
+          return;
+        }
+
+        if (!clientData) {
+          console.log("No client found for email:", email);
+          toast({
+            variant: "destructive",
+            title: "Compte non trouvé",
+            description: "Aucun compte n'existe avec cet email. Veuillez créer un compte.",
+          });
+          return;
+        }
+
+        // Si le compte existe mais n'est pas vérifié, montrer le dialogue d'activation
+        if (!clientData.email_verified || clientData.status !== 'active') {
+          console.log("Account needs verification, showing dialog");
+          setShowVerificationDialog(true);
+          form.reset({ email: form.getValues("email"), password: "" });
+        }
+      } catch (error) {
+        console.error("Error in onVerificationNeeded:", error);
         toast({
           variant: "destructive",
-          title: "Compte non trouvé",
-          description: "Aucun compte n'existe avec cet email. Veuillez créer un compte.",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la vérification du compte.",
         });
-        return;
       }
-
-      console.log("Verification needed, showing dialog");
-      setShowVerificationDialog(true);
-      form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
