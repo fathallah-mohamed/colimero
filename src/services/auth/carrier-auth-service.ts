@@ -15,6 +15,8 @@ class CarrierAuthService extends BaseAuthService {
       throw error;
     }
 
+    console.log('Carrier status data:', data);
+
     return {
       exists: !!data,
       status: data?.status ?? 'pending',
@@ -27,6 +29,7 @@ class CarrierAuthService extends BaseAuthService {
       console.log('Starting carrier sign in process for:', email);
       
       const status = await this.checkCarrierStatus(email);
+      console.log('Carrier status check result:', status);
       
       if (!status.exists) {
         return {
@@ -56,6 +59,7 @@ class CarrierAuthService extends BaseAuthService {
         };
       }
 
+      console.log('Carrier login successful');
       return { success: true };
     } catch (error) {
       console.error('Unexpected error during carrier login:', error);

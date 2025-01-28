@@ -15,6 +15,8 @@ class AdminAuthService extends BaseAuthService {
       throw error;
     }
 
+    console.log('Admin status data:', data);
+
     return {
       isAdmin: !!data
     };
@@ -25,6 +27,7 @@ class AdminAuthService extends BaseAuthService {
       console.log('Starting admin sign in process for:', email);
       
       const status = await this.checkAdminStatus(email);
+      console.log('Admin status check result:', status);
       
       if (!status.isAdmin) {
         return {
@@ -46,6 +49,7 @@ class AdminAuthService extends BaseAuthService {
         };
       }
 
+      console.log('Admin login successful');
       return { success: true };
     } catch (error) {
       console.error('Unexpected error during admin login:', error);

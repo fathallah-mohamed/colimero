@@ -15,6 +15,8 @@ class ClientAuthService extends BaseAuthService {
       throw error;
     }
 
+    console.log('Client status data:', data);
+
     return {
       exists: !!data,
       isVerified: data?.email_verified ?? false,
@@ -27,8 +29,10 @@ class ClientAuthService extends BaseAuthService {
       console.log('Starting client sign in process for:', email);
       
       const status = await this.checkClientStatus(email);
+      console.log('Client status check result:', status);
       
       if (!status.exists) {
+        console.log('No client account found');
         return {
           success: false,
           error: "Aucun compte client trouvé avec cet email"
@@ -36,6 +40,7 @@ class ClientAuthService extends BaseAuthService {
       }
 
       if (!status.isVerified || status.status !== 'active') {
+        console.log('Client account needs verification');
         return {
           success: false,
           error: "Votre compte n'est pas activé. Veuillez vérifier votre email.",
@@ -50,12 +55,14 @@ class ClientAuthService extends BaseAuthService {
       }
 
       if (!data.user) {
+        console.log('No user data received');
         return {
           success: false,
           error: "Erreur lors de la connexion"
         };
       }
 
+      console.log('Client login successful');
       return { success: true };
     } catch (error) {
       console.error('Unexpected error during client login:', error);
@@ -83,6 +90,7 @@ class ClientAuthService extends BaseAuthService {
         };
       }
 
+      console.log('Account activation result:', data);
       return { success: true };
     } catch (error) {
       console.error('Error in activateAccount:', error);

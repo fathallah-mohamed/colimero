@@ -11,10 +11,26 @@ export interface AuthResult {
 export class BaseAuthService {
   protected async signInWithEmail(email: string, password: string): Promise<AuthResponse> {
     console.log('Attempting sign in for:', email);
-    return await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password.trim()
-    });
+    
+    try {
+      const response = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim()
+      });
+
+      console.log('Sign in response:', response);
+      
+      if (response.error) {
+        console.error('Sign in error:', response.error);
+      } else if (response.data.user) {
+        console.log('User successfully authenticated:', response.data.user.id);
+      }
+
+      return response;
+    } catch (error) {
+      console.error('Unexpected error during sign in:', error);
+      throw error;
+    }
   }
 
   protected handleAuthError(error: AuthError): AuthResult {
@@ -24,6 +40,14 @@ export class BaseAuthService {
       return {
         success: false,
         error: "Email ou mot de passe incorrect"
+      };
+    }
+
+    if (error.message.includes("Email not confirmed")) {
+      return {
+        success: false,
+        error: "Email non vérifié",
+        needsVerification: true
       };
     }
 
