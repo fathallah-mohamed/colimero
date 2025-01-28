@@ -26,7 +26,6 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
-      // If no client found, return default values
       if (!clientData) {
         return {
           isVerified: false,
@@ -51,20 +50,13 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       setIsLoading(true);
       setError(null);
 
-      // First check if the client exists and their status
       const clientStatus = await checkClientStatus(email);
       
       if (!clientStatus.exists) {
         setError("Aucun compte trouvé avec cet email");
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Aucun compte trouvé avec cet email"
-        });
         return;
       }
 
-      // Check if account is verified and active before attempting login
       if (!clientStatus.isVerified || clientStatus.status !== 'active') {
         console.log("Account needs verification:", email);
         if (onVerificationNeeded) {
@@ -74,7 +66,6 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         return;
       }
 
-      // Only attempt login if the client exists and is verified
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -99,22 +90,12 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         return;
       }
 
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté"
-      });
-
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
       console.error('Login error:', error);
       setError("Une erreur inattendue s'est produite");
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur inattendue s'est produite"
-      });
     } finally {
       setIsLoading(false);
     }

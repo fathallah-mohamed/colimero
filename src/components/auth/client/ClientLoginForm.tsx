@@ -43,7 +43,7 @@ export function ClientLoginForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
+        {error && !showVerificationDialog && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
