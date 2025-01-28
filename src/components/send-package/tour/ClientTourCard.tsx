@@ -28,10 +28,7 @@ export function ClientTourCard({
 
   const handleBookingClick = () => {
     if (selectedPoint) {
-      // Pour les tournées publiques avec un client connecté, redirection directe vers le formulaire
-      if (type === "public" && userType === "client") {
-        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
-      }
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
     }
   };
 
