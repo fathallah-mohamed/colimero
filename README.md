@@ -1,69 +1,111 @@
-# Welcome to your Lovable project for Colimero
+# Colimero - Documentation
 
-## Project info
+## Vue d'ensemble
+Colimero est une plateforme de gestion de transport de colis entre la France et la Tunisie, permettant aux clients d'effectuer des réservations auprès de transporteurs agréés.
 
-**URL**: https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770
+## Fonctionnalités principales
 
-## How can I edit this code?
+### Gestion des utilisateurs
 
-There are several ways of editing your application.
+#### Clients
+- **Inscription** : Les clients peuvent créer un compte en fournissant leurs informations personnelles
+- **Activation du compte** : 
+  - Un code d'activation est envoyé par email
+  - Le code est valable pendant 48h
+  - Le compte doit être activé pour pouvoir effectuer des réservations
 
-**Use Lovable**
+#### Transporteurs
+- **Inscription** : Les transporteurs soumettent une demande d'inscription avec leurs informations
+- **Validation** : 
+  - La demande est examinée par les administrateurs
+  - Vérification des documents et informations fournis
+  - Activation du compte après validation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770) and start prompting.
+### Gestion des tournées
 
-Changes made via Lovable will be committed automatically to this repo.
+#### Types de tournées
+- **Publiques** : Accessibles à tous les clients
+- **Privées** : Nécessitent une demande d'approbation avant réservation
 
-**Use your preferred IDE**
+#### Statuts des tournées
+1. **Programmée** : Tournée créée et ouverte aux réservations
+2. **Ramassage en cours** : Phase de collecte des colis
+3. **En transit** : Transport des colis vers la destination
+4. **Livraison en cours** : Distribution des colis aux destinataires
+5. **Terminée** : Tournée complétée
+6. **Annulée** : Tournée annulée
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Gestion des réservations
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+#### Processus de réservation
+1. Sélection d'une tournée
+2. Choix du point de collecte
+3. Saisie des informations du colis et du destinataire
+4. Confirmation de la réservation
 
-Follow these steps:
+#### Statuts des réservations
+- **En attente** : Réservation créée
+- **Confirmée** : Acceptée par le transporteur
+- **Collectée** : Colis récupéré
+- **En transit** : En cours de transport
+- **Livrée** : Colis remis au destinataire
+- **Annulée** : Réservation annulée
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Profils utilisateurs
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+#### Profil client
+- Gestion des informations personnelles
+- Historique des réservations
+- Suivi des colis en cours
+- Gestion des destinataires favoris
 
-# Step 3: Install the necessary dependencies.
-npm i
+#### Profil transporteur
+- Gestion des informations de l'entreprise
+- Gestion des capacités et tarifs
+- Planning des tournées
+- Suivi des réservations
+- Gestion des points de collecte
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### Fonctionnalités spécifiques
 
-**Edit a file directly in GitHub**
+#### Tournées privées
+- Réservées à des clients spécifiques
+- Processus de demande d'approbation
+- Validation requise avant réservation
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#### Gestion des points de collecte
+- Définition des villes de collecte
+- Horaires de passage
+- Capacités par point de collecte
 
-**Use GitHub Codespaces**
+## Informations techniques
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### URL du projet
+https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770
 
-## What technologies are used for this project?
-
-This project is built with .
-
+### Technologies utilisées
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Backend)
 
-## How can I deploy this project?
+### Comment démarrer le projet
 
-Simply open [Lovable](https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770) and click on Share -> Publish.
+```sh
+# Cloner le repository
+git clone <URL_DU_REPO>
 
-## I want to use a custom domain - is that possible?
+# Installer les dépendances
+npm install
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+# Démarrer le serveur de développement
+npm run dev
+```
+
+### Déploiement
+Pour déployer l'application, utilisez l'option de déploiement dans l'interface Lovable ou déployez manuellement sur votre hébergeur préféré.
+
+## Support et contact
+Pour toute question ou assistance, veuillez contacter l'équipe de support Colimero.
