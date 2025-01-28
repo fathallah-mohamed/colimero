@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface UseClientAuthProps {
   onSuccess?: () => void;
@@ -9,6 +10,7 @@ export interface UseClientAuthProps {
 export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const checkClientStatus = async (email: string) => {
     try {
@@ -71,14 +73,22 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       }
 
       // 3. Si le compte est vérifié et actif, procéder à la connexion
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
       });
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        setError("Email ou mot de passe incorrect");
+        // Ne pas afficher le toast pour l'erreur "Email not confirmed"
+        if (signInError.message !== 'Email not confirmed') {
+          setError("Email ou mot de passe incorrect");
+        }
+        return;
+      }
+
+      if (!session) {
+        setError("Erreur de connexion");
         return;
       }
 
