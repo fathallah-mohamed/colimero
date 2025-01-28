@@ -7,31 +7,27 @@ import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { NavigationHeader } from "./navigation/NavigationHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useClientVerificationRedirect } from "@/hooks/auth/useClientVerificationRedirect";
-import { useProtectedRoute } from "@/hooks/auth/useProtectedRoute";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
   setShowAuthDialog?: (show: boolean) => void;
 }
 
-export default function Navigation({ 
-  showAuthDialog: externalShowAuthDialog, 
-  setShowAuthDialog: externalSetShowAuthDialog 
-}: NavigationProps) {
+export default function Navigation({ showAuthDialog: externalShowAuthDialog, setShowAuthDialog: externalSetShowAuthDialog }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
   useSessionInitializer();
-  useClientVerificationRedirect();
-  useProtectedRoute();
 
   // Handle scroll effect
-  useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
@@ -41,7 +37,7 @@ export default function Navigation({
   }, []);
 
   // Handle click outside mobile menu
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isOpen &&
@@ -57,6 +53,77 @@ export default function Navigation({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
+
+  // Store return path for auth redirects and handle protected routes
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session error:", error);
+          toast({
+            variant: "destructive",
+            title: "Erreur de session",
+            description: "Une erreur est survenue lors de la vérification de votre session.",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (session?.user) {
+          console.log("Checking user session:", session.user);
+          const userType = session.user.user_metadata?.user_type;
+
+          // Vérification spécifique pour les clients
+          if (userType === 'client') {
+            console.log("Checking client verification status");
+            const { data: clientData, error: clientError } = await supabase
+              .from('clients')
+              .select('email_verified, status')
+              .eq('id', session.user.id)
+              .single();
+
+            if (clientError) {
+              console.error("Error checking client status:", clientError);
+              return;
+            }
+
+            console.log("Client data:", clientData);
+
+            // Si le compte n'est pas vérifié ou n'est pas actif
+            if (!clientData?.email_verified || clientData?.status !== 'active') {
+              console.log("Account needs verification, redirecting to activation");
+              // Se déconnecter et rediriger vers la page d'activation
+              await supabase.auth.signOut();
+              navigate('/activation-compte', { replace: true });
+              return;
+            }
+          }
+
+          // Vérification des routes protégées
+          const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
+          if (protectedRoutes.includes(location.pathname) && !session) {
+            console.log("Protected route access attempt without session");
+            sessionStorage.setItem('returnPath', location.pathname);
+            navigate('/connexion', { replace: true });
+          }
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur d'authentification",
+          description: "Une erreur est survenue lors de la vérification de votre authentification.",
+        });
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [location.pathname, navigate, toast]);
 
   if (isLoading) {
     return (
