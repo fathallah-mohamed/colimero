@@ -93,45 +93,48 @@ export function LoginForm({
           return;
         }
 
-        // Une fois connecté, vérifier le type d'utilisateur
-        const [{ data: adminData }, { data: carrierData }, { data: clientData }] = await Promise.all([
+        // Vérifier tous les types de profils en parallèle
+        const [adminData, carrierData, clientData] = await Promise.all([
           supabase.from('administrators').select('id').eq('email', email.trim()).maybeSingle(),
           supabase.from('carriers').select('email_verified, status').eq('email', email.trim()).maybeSingle(),
           supabase.from('clients').select('email_verified, status').eq('email', email.trim()).maybeSingle()
         ]);
 
-        // Vérifier le type d'utilisateur et son statut
-        if (adminData) {
+        console.log("Profile check results:", { adminData, carrierData, clientData });
+
+        // Vérifier d'abord si c'est un admin
+        if (adminData.data) {
           console.log("Admin account found");
           return;
         }
 
-        if (carrierData) {
-          console.log("Carrier account found:", carrierData);
-          if (!carrierData.email_verified || carrierData.status !== 'active') {
+        // Ensuite vérifier si c'est un transporteur
+        if (carrierData.data) {
+          console.log("Carrier account found:", carrierData.data);
+          if (!carrierData.data.email_verified || carrierData.data.status !== 'active') {
             toast({
               variant: "destructive",
               title: "Compte en attente",
               description: "Votre compte transporteur est en attente de validation.",
             });
             setShowErrorDialog(true);
-            // Déconnecter l'utilisateur si le compte n'est pas actif
             await supabase.auth.signOut();
           }
           return;
         }
 
-        if (clientData) {
-          console.log("Client account found:", clientData);
-          if (!clientData.email_verified || clientData.status !== 'active') {
+        // Enfin vérifier si c'est un client
+        if (clientData.data) {
+          console.log("Client account found:", clientData.data);
+          if (!clientData.data.email_verified || clientData.data.status !== 'active') {
             setShowVerificationDialog(true);
             form.reset({ email: form.getValues("email"), password: "" });
-            // Déconnecter l'utilisateur si le compte n'est pas vérifié
             await supabase.auth.signOut();
           }
           return;
         }
 
+        // Si aucun profil n'est trouvé
         console.log("No profile found");
         toast({
           title: "Compte inexistant",
