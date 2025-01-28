@@ -1,7 +1,5 @@
-import { Tour } from "@/types/tour";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { TourTimelineDisplay } from "../../tour/shared/TourTimelineDisplay";
-import { ClientTimeline } from "../../tour/timeline/client/ClientTimeline";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, CreditCard, AlertOctagon } from "lucide-react";
@@ -9,13 +7,13 @@ import { useState } from "react";
 import { SelectableCollectionPointsList } from "../../tour/SelectableCollectionPointsList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
+import { Tour } from "@/types/tour";
 
 interface TourCardProps {
   tour: Tour;
   type?: "public" | "private";
   userType?: string | null;
-  onBookingClick?: (tourId: number, pickupCity: string) => void;
-  TimelineComponent?: typeof TourTimelineDisplay | typeof ClientTimeline;
+  TimelineComponent?: typeof TourTimelineDisplay;
 }
 
 export function ClientTourCard({ 
@@ -30,12 +28,15 @@ export function ClientTourCard({
 
   const handleBookingClick = () => {
     if (selectedPoint) {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+      // Pour les tournées publiques avec un client connecté, redirection directe vers le formulaire
+      if (type === "public" && userType === "client") {
+        navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+      }
     }
   };
 
   // Vérifier si l'utilisateur peut réserver (client uniquement et tournée programmée)
-  const canBook = tour.status === "Programmée" && userType !== "carrier";
+  const canBook = tour.status === "Programmée" && userType === "client";
 
   const getBookingStatusMessage = () => {
     if (userType === "carrier") {
