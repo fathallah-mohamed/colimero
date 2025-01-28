@@ -71,11 +71,6 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
           onVerificationNeeded();
         }
         setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
-        toast({
-          variant: "destructive",
-          title: "Compte non activé",
-          description: "Veuillez activer votre compte via le code reçu par email."
-        });
         return;
       }
 
@@ -91,16 +86,16 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         
         if (signInError.message.includes("Invalid login credentials")) {
           errorMessage = "Email ou mot de passe incorrect";
+        } else if (signInError.message.includes("Email not confirmed")) {
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          errorMessage = "Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.";
         } else {
           errorMessage = "Une erreur est survenue lors de la connexion";
         }
         
         setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: errorMessage
-        });
         return;
       }
 

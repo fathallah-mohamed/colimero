@@ -28,7 +28,11 @@ export function ClientLoginForm({
     handleLogin,
   } = useClientAuth({
     onSuccess,
-    onVerificationNeeded: () => setShowVerificationDialog(true)
+    onVerificationNeeded: () => {
+      console.log("Showing verification dialog for:", email);
+      setShowVerificationDialog(true);
+      setPassword("");
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
