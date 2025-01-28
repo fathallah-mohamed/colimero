@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface UseLoginFormProps {
   onSuccess?: () => void;
   requiredUserType?: UserType;
-  onVerificationNeeded?: (email: string) => void;  // Mise à jour ici pour accepter l'email
+  onVerificationNeeded?: (email: string) => void;
 }
 
 export function useLoginForm({ 
@@ -22,6 +22,22 @@ export function useLoginForm({
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const checkAdminStatus = async (email: string) => {
+    console.log('Checking admin status for:', email);
+    const { data: adminData, error: adminError } = await supabase
+      .from('administrators')
+      .select('id')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    if (adminError) {
+      console.error("Error checking admin status:", adminError);
+      return false;
+    }
+
+    return !!adminData;
+  };
 
   const checkClientVerification = async (email: string) => {
     console.log('Checking client verification status for:', email);
@@ -46,8 +62,12 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Vérifier d'abord le statut du client
-      if (!requiredUserType || requiredUserType === 'client') {
+      // Vérifier d'abord si c'est un compte admin
+      const isAdmin = await checkAdminStatus(email);
+      console.log('Is admin account:', isAdmin);
+
+      // Si ce n'est pas un admin et qu'on n'exige pas un type spécifique ou qu'on exige un client
+      if (!isAdmin && (!requiredUserType || requiredUserType === 'client')) {
         const { isVerified, status } = await checkClientVerification(email);
         console.log('Verification status:', { isVerified, status });
         
