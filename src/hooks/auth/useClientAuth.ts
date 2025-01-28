@@ -51,24 +51,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       setIsLoading(true);
       setError(null);
 
-      const clientStatus = await checkClientStatus(email);
-      console.log('Client status check result:', clientStatus);
-      
-      if (!clientStatus.exists) {
-        setError("Aucun compte trouvé avec cet email");
-        return;
-      }
-
-      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
-        console.log('Client account needs verification:', email);
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
-        }
-        setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
-        return;
-      }
-
-      // Only attempt sign in if the client is verified and active
+      // Attempt sign in first to handle the email_not_confirmed error
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
