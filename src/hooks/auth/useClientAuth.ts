@@ -80,8 +80,8 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        if (signInError.message === 'Email not confirmed') {
-          // Si l'email n'est pas confirmé, on déclenche la vérification sans afficher d'erreur
+        // Si l'erreur est "Email not confirmed", on déclenche la vérification
+        if (signInError.message.includes('Email not confirmed')) {
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
