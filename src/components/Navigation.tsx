@@ -27,7 +27,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   useSessionInitializer();
 
   // Handle scroll effect
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
@@ -37,7 +37,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   }, []);
 
   // Handle click outside mobile menu
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isOpen &&
@@ -55,7 +55,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   }, [isOpen]);
 
   // Store return path for auth redirects and handle protected routes
-  React.useEffect(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -80,7 +80,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
               .from('clients')
               .select('email_verified, status')
               .eq('id', session.user.id)
-              .single();
+              .maybeSingle();
 
             if (clientError) {
               console.error("Error checking client status:", clientError);
@@ -90,7 +90,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
             if (!clientData?.email_verified || clientData?.status !== 'active') {
               console.log("Account needs verification, redirecting to activation");
               await supabase.auth.signOut();
-              navigate('/activation-compte', { replace: true });
+              navigate('/activation-compte');
               return;
             }
           }
@@ -99,7 +99,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
           if (protectedRoutes.includes(location.pathname) && !session) {
             sessionStorage.setItem('returnPath', location.pathname);
-            navigate('/connexion', { replace: true });
+            navigate('/connexion');
           }
         }
         
