@@ -51,7 +51,26 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       setIsLoading(true);
       setError(null);
 
-      // Attempt sign in first to handle the email_not_confirmed error
+      // 1. D'abord vérifier le statut du client
+      const clientStatus = await checkClientStatus(email);
+      console.log('Client status check result:', clientStatus);
+      
+      if (!clientStatus.exists) {
+        setError("Aucun compte trouvé avec cet email");
+        return;
+      }
+
+      // 2. Si non vérifié, afficher la dialog de vérification
+      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
+        console.log('Client account needs verification:', email);
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        }
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+        return;
+      }
+
+      // 3. Seulement si vérifié, tenter la connexion
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -59,18 +78,6 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        
-        // Check if it's an email confirmation error
-        if (signInError.message.includes("Email not confirmed")) {
-          console.log('Email not confirmed, showing verification dialog');
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
-          return;
-        }
-        
-        // For any other error
         setError("Email ou mot de passe incorrect");
         return;
       }
