@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { LoginFormFields, LoginFormValues } from "./login/LoginFormFields";
-import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
+import { useAuthService } from "@/hooks/auth/useAuthService";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -9,7 +9,7 @@ import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { EmailVerificationDialog } from "./EmailVerificationDialog";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
 const loginSchema = z.object({
   email: z.string()
@@ -38,7 +38,9 @@ export function LoginForm({
   hideRegisterButton = false,
 }: LoginFormProps) {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -47,15 +49,7 @@ export function LoginForm({
     },
   });
 
-  const {
-    isLoading,
-    error,
-    showVerificationDialog,
-    showErrorDialog,
-    setShowVerificationDialog,
-    setShowErrorDialog,
-    handleLogin,
-  } = useLoginForm({ 
+  const { isLoading, error, handleLogin } = useAuthService({
     onSuccess: () => {
       if (!showVerificationDialog) {
         const returnPath = sessionStorage.getItem('returnPath');
@@ -66,96 +60,14 @@ export function LoginForm({
           navigate('/');
         }
       }
-    }, 
-    requiredUserType,
-    onVerificationNeeded: async (email: string) => {
-      try {
-        console.log("Checking user profile for:", email);
-        
-        // D'abord, essayer de se connecter
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: form.getValues("password"),
-        });
-
-        if (signInError) {
-          console.error("Sign in error:", signInError);
-          toast({
-            variant: "destructive",
-            title: "Erreur de connexion",
-            description: "Email ou mot de passe incorrect",
-          });
-          return;
-        }
-
-        if (!signInData.user) {
-          console.log("No user found");
-          return;
-        }
-
-        // Vérifier tous les types de profils en parallèle
-        const [adminData, carrierData, clientData] = await Promise.all([
-          supabase.from('administrators').select('id').eq('email', email.trim()).maybeSingle(),
-          supabase.from('carriers').select('email_verified, status').eq('email', email.trim()).maybeSingle(),
-          supabase.from('clients').select('email_verified, status').eq('email', email.trim()).maybeSingle()
-        ]);
-
-        console.log("Profile check results:", { adminData, carrierData, clientData });
-
-        // Vérifier d'abord si c'est un admin
-        if (adminData.data) {
-          console.log("Admin account found");
-          return;
-        }
-
-        // Ensuite vérifier si c'est un transporteur
-        if (carrierData.data) {
-          console.log("Carrier account found:", carrierData.data);
-          if (!carrierData.data.email_verified || carrierData.data.status !== 'active') {
-            toast({
-              variant: "destructive",
-              title: "Compte en attente",
-              description: "Votre compte transporteur est en attente de validation.",
-            });
-            setShowErrorDialog(true);
-            await supabase.auth.signOut();
-          }
-          return;
-        }
-
-        // Enfin vérifier si c'est un client
-        if (clientData.data) {
-          console.log("Client account found:", clientData.data);
-          if (!clientData.data.email_verified || clientData.data.status !== 'active') {
-            setShowVerificationDialog(true);
-            form.reset({ email: form.getValues("email"), password: "" });
-            await supabase.auth.signOut();
-          }
-          return;
-        }
-
-        // Si aucun profil n'est trouvé
-        console.log("No profile found");
-        toast({
-          title: "Compte inexistant",
-          description: "Ce compte n'existe pas. Veuillez créer un compte.",
-        });
-        await supabase.auth.signOut();
-        onRegister();
-
-      } catch (error) {
-        console.error("Error in onVerificationNeeded:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur est survenue lors de la vérification du compte.",
-        });
-      }
+    },
+    onVerificationNeeded: () => {
+      setShowVerificationDialog(true);
+      form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    console.log("Form submitted with values:", values);
     await handleLogin(values.email, values.password);
   };
 
@@ -175,7 +87,7 @@ export function LoginForm({
         <div className="space-y-4">
           <Button
             type="submit"
-            className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-white"
             disabled={isLoading}
           >
             {isLoading ? "Connexion..." : "Se connecter"}
@@ -195,23 +107,27 @@ export function LoginForm({
               </div>
 
               <div className="space-y-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onRegister}
-                  className="w-full"
-                >
-                  Créer un compte client
-                </Button>
+                {(!requiredUserType || requiredUserType === 'client') && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onRegister}
+                    className="w-full"
+                  >
+                    Créer un compte client
+                  </Button>
+                )}
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCarrierRegister}
-                  className="w-full"
-                >
-                  Créer un compte transporteur
-                </Button>
+                {(!requiredUserType || requiredUserType === 'carrier') && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onCarrierRegister}
+                    className="w-full"
+                  >
+                    Créer un compte transporteur
+                  </Button>
+                )}
               </div>
             </>
           )}
@@ -219,13 +135,21 @@ export function LoginForm({
           <div className="text-center">
             <button
               type="button"
-              className="text-sm text-[#00B0F0] hover:underline"
+              className="text-sm text-primary hover:text-primary/90 hover:underline transition-colors"
               onClick={onForgotPassword}
             >
               Mot de passe oublié ?
             </button>
           </div>
         </div>
+
+        {showVerificationDialog && (
+          <EmailVerificationDialog
+            isOpen={showVerificationDialog}
+            onClose={() => setShowVerificationDialog(false)}
+            email={form.getValues("email")}
+          />
+        )}
       </form>
     </Form>
   );
