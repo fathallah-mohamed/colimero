@@ -43,16 +43,11 @@ export function useClientAuth({ onVerificationNeeded, onSuccess }: UseClientAuth
       const { isVerified, status } = await checkClientStatus(email);
       console.log('Client status:', { isVerified, status });
 
-      if (!isVerified) {
-        console.log('Account not verified, triggering verification flow');
+      if (!isVerified || status !== 'active') {
+        console.log('Account needs verification, triggering verification flow');
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        return;
-      }
-
-      if (status !== 'active') {
-        setError("Votre compte n'est pas encore activé. Veuillez vérifier votre email.");
         return;
       }
 
