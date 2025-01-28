@@ -31,7 +31,14 @@ export function EmailVerificationDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activationCode) return;
+    if (!activationCode) {
+      toast({
+        variant: "destructive",
+        title: "Code manquant",
+        description: "Veuillez entrer le code d'activation reçu par email.",
+      });
+      return;
+    }
 
     const success = await activateAccount(activationCode, email);
     if (success) {
@@ -45,12 +52,22 @@ export function EmailVerificationDialog({
   };
 
   const handleResendEmail = async () => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "Email manquant",
+        description: "Une erreur est survenue. Veuillez réessayer.",
+      });
+      return;
+    }
+
     const success = await sendActivationEmail(email);
     if (success) {
       toast({
         title: "Email envoyé",
         description: "Un nouveau code d'activation vous a été envoyé par email.",
       });
+      setActivationCode(""); // Reset le champ de code
     }
   };
 
