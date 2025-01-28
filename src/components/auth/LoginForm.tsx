@@ -72,7 +72,19 @@ export function LoginForm({
       try {
         console.log("Checking client status for email:", email);
         
-        // Vérifier si le compte existe dans la table clients
+        // Vérifier d'abord si c'est un compte admin
+        const { data: adminData } = await supabase
+          .from('administrators')
+          .select('id')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (adminData) {
+          console.log("Admin account found, skipping verification check");
+          return;
+        }
+
+        // Si ce n'est pas un admin, vérifier si le compte existe dans la table clients
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('email_verified, status')
