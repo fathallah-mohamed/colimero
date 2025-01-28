@@ -10,6 +10,8 @@ import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail } from "lucide-react";
 import { useAccountActivation } from "@/hooks/auth/useAccountActivation";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -24,6 +26,8 @@ export function EmailVerificationDialog({
 }: EmailVerificationDialogProps) {
   const [activationCode, setActivationCode] = useState("");
   const { isLoading, error, sendActivationEmail, activateAccount } = useAccountActivation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +35,23 @@ export function EmailVerificationDialog({
 
     const success = await activateAccount(activationCode, email);
     if (success) {
+      toast({
+        title: "Compte activé",
+        description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
+      });
       onClose();
+      navigate('/connexion');
     }
   };
 
   const handleResendEmail = async () => {
-    await sendActivationEmail(email);
+    const success = await sendActivationEmail(email);
+    if (success) {
+      toast({
+        title: "Email envoyé",
+        description: "Un nouveau code d'activation vous a été envoyé par email.",
+      });
+    }
   };
 
   return (
