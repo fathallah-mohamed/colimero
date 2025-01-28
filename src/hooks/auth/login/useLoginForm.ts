@@ -23,12 +23,16 @@ export function useLoginForm({
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const normalizeEmail = (email: string) => {
+    return email.trim().toLowerCase();
+  };
+
   const checkAdminStatus = async (email: string) => {
     console.log('Checking admin status for:', email);
     const { data: adminData, error: adminError } = await supabase
       .from('administrators')
       .select('id')
-      .eq('email', email.trim())
+      .eq('email', normalizeEmail(email))
       .maybeSingle();
 
     if (adminError) {
@@ -44,7 +48,7 @@ export function useLoginForm({
     const { data: carrierData, error: carrierError } = await supabase
       .from('carriers')
       .select('status, reason')
-      .eq('email', email.trim())
+      .eq('email', normalizeEmail(email))
       .maybeSingle();
 
     if (carrierError) {
@@ -84,7 +88,7 @@ export function useLoginForm({
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
       .select('email_verified, status')
-      .eq('email', email.trim())
+      .eq('email', normalizeEmail(email))
       .maybeSingle();
 
     if (clientError) {
@@ -110,15 +114,17 @@ export function useLoginForm({
   };
 
   const determineUserType = async (email: string) => {
+    const normalizedEmail = normalizeEmail(email);
+    
     // Vérifier d'abord si c'est un admin
-    const isAdmin = await checkAdminStatus(email);
+    const isAdmin = await checkAdminStatus(normalizedEmail);
     if (isAdmin) return 'admin';
 
     // Vérifier ensuite si c'est un transporteur
     const { data: carrier } = await supabase
       .from('carriers')
       .select('id')
-      .eq('email', email.trim())
+      .eq('email', normalizedEmail)
       .maybeSingle();
     if (carrier) return 'carrier';
 
@@ -126,7 +132,7 @@ export function useLoginForm({
     const { data: client } = await supabase
       .from('clients')
       .select('id')
-      .eq('email', email.trim())
+      .eq('email', normalizedEmail)
       .maybeSingle();
     if (client) return 'client';
 
@@ -141,8 +147,10 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
+      const normalizedEmail = normalizeEmail(email);
+
       // 1. Déterminer le type d'utilisateur
-      const userType = await determineUserType(email);
+      const userType = await determineUserType(normalizedEmail);
       console.log('Determined user type:', userType);
 
       if (!userType) {
@@ -169,7 +177,7 @@ export function useLoginForm({
           break;
 
         case 'carrier':
-          const carrierStatus = await checkCarrierStatus(email);
+          const carrierStatus = await checkCarrierStatus(normalizedEmail);
           if (!carrierStatus.isValid) {
             setError(carrierStatus.error);
             setShowErrorDialog(true);
@@ -178,12 +186,12 @@ export function useLoginForm({
           break;
 
         case 'client':
-          const clientStatus = await checkClientStatus(email);
+          const clientStatus = await checkClientStatus(normalizedEmail);
           if (!clientStatus.isValid) {
             if (clientStatus.needsVerification) {
               setShowVerificationDialog(true);
               if (onVerificationNeeded) {
-                onVerificationNeeded(email);
+                onVerificationNeeded(normalizedEmail);
               }
             }
             setError(clientStatus.error);
@@ -196,7 +204,7 @@ export function useLoginForm({
       }
 
       // 4. Tenter la connexion
-      const result = await authService.signIn(email, password);
+      const result = await authService.signIn(normalizedEmail, password);
       console.log('Sign in result:', result);
 
       if (!result.success) {
