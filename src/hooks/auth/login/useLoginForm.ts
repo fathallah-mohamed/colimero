@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface UseLoginFormProps {
   onSuccess?: () => void;
   requiredUserType?: UserType;
-  onVerificationNeeded?: () => void;
+  onVerificationNeeded?: (email: string) => void;  // Mise à jour ici pour accepter l'email
 }
 
 export function useLoginForm({ 
@@ -55,7 +55,7 @@ export function useLoginForm({
           console.log("Account needs verification");
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
-            onVerificationNeeded();
+            onVerificationNeeded(email);
           }
           setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
           return;
@@ -69,7 +69,7 @@ export function useLoginForm({
         if (result.needsVerification) {
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
-            onVerificationNeeded();
+            onVerificationNeeded(email);
           }
         }
         setError(result.error || "Une erreur est survenue");
