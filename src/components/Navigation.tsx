@@ -48,7 +48,6 @@ export default function Navigation({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // Fermer le menu mobile lors du changement de route
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
