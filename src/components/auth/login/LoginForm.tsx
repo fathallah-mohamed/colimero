@@ -62,7 +62,16 @@ export function LoginForm({
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    await handleLogin(values.email, values.password);
+    const result = await handleLogin(values.email, values.password);
+    if (result?.success && !showVerificationDialog) {
+      const returnPath = sessionStorage.getItem('returnPath');
+      if (returnPath) {
+        sessionStorage.removeItem('returnPath');
+        navigate(returnPath);
+      } else {
+        navigate('/');
+      }
+    }
   };
 
   return (
