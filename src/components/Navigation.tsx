@@ -77,32 +77,27 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           return;
         }
 
-        // Si l'utilisateur est connecté
-        if (session?.user) {
-          const userType = session.user.user_metadata?.user_type;
+        // Si l'utilisateur est connecté et est un client
+        if (session?.user && session.user.user_metadata?.user_type === 'client') {
+          const { data: clientData, error: clientError } = await supabase
+            .from('clients')
+            .select('email_verified, status')
+            .eq('id', session.user.id)
+            .maybeSingle();
 
-          // Vérification spécifique pour les clients
-          if (userType === 'client') {
-            const { data: clientData, error: clientError } = await supabase
-              .from('clients')
-              .select('email_verified, status')
-              .eq('id', session.user.id)
-              .maybeSingle();
+          if (clientError) {
+            console.error("Error checking client status:", clientError);
+            setIsLoading(false);
+            return;
+          }
 
-            if (clientError) {
-              console.error("Error checking client status:", clientError);
-              setIsLoading(false);
-              return;
-            }
-
-            // Redirection vers l'activation du compte si nécessaire
-            if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-              console.log("Account needs verification, redirecting to activation");
-              await supabase.auth.signOut();
-              navigate('/activation-compte');
-              setIsLoading(false);
-              return;
-            }
+          // Redirection vers l'activation du compte si nécessaire
+          if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
+            console.log("Account needs verification, redirecting to activation");
+            await supabase.auth.signOut();
+            navigate('/activation-compte');
+            setIsLoading(false);
+            return;
           }
         }
         
