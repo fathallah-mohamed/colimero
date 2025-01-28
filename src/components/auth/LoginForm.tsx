@@ -70,17 +70,20 @@ export function LoginForm({
     requiredUserType,
     onVerificationNeeded: async (email: string) => {
       try {
-        console.log("Checking client status for email:", email);
-        
         // Vérifier d'abord si c'est un compte admin
-        const { data: adminData } = await supabase
+        const { data: adminData, error: adminError } = await supabase
           .from('administrators')
           .select('id')
           .eq('email', email.trim())
           .maybeSingle();
 
+        if (adminError) {
+          console.error("Error checking admin status:", adminError);
+          return;
+        }
+
         if (adminData) {
-          console.log("Admin account found, skipping verification check");
+          console.log("Admin account found, skipping verification");
           return;
         }
 
