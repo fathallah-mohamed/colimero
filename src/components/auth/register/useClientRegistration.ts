@@ -70,8 +70,6 @@ export async function registerClient(formData: RegisterFormData) {
       throw error;
     }
 
-    console.log('Auth user created successfully with metadata:', authData.user.user_metadata);
-
     // 3. Force sign out to ensure email verification
     await supabase.auth.signOut();
 
