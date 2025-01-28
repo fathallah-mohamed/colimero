@@ -44,6 +44,42 @@ Colimero est une plateforme de gestion de transport de colis entre la France et 
      - Possibilité de créer des tournées
      - Gestion des réservations
 
+### Gestion des rôles
+
+#### Administrateurs
+- **Responsabilités** :
+  - Validation des inscriptions transporteurs
+  - Gestion des utilisateurs
+  - Supervision des tournées et réservations
+  - Accès aux statistiques globales
+- **Permissions** :
+  - Accès complet au tableau de bord admin
+  - Validation/rejet des demandes d'inscription
+  - Modification des paramètres système
+  - Gestion des contenus interdits
+
+#### Clients
+- **Responsabilités** :
+  - Gestion de leur profil
+  - Création de réservations
+  - Suivi des colis
+- **Permissions** :
+  - Modification de leur profil
+  - Création/annulation de réservations
+  - Accès aux tournées publiques
+  - Demande d'accès aux tournées privées
+
+#### Transporteurs
+- **Responsabilités** :
+  - Gestion des tournées
+  - Traitement des réservations
+  - Mise à jour des statuts
+- **Permissions** :
+  - Création/modification de tournées
+  - Gestion des points de collecte
+  - Acceptation/refus des réservations
+  - Mise à jour des statuts de livraison
+
 ### Gestion des tournées
 
 #### Types de tournées
@@ -57,6 +93,20 @@ Colimero est une plateforme de gestion de transport de colis entre la France et 
 4. **Livraison en cours** : Distribution des colis aux destinataires
 5. **Terminée** : Tournée complétée
 6. **Annulée** : Tournée annulée
+
+#### Workflow de création de tournée
+1. **Planification** :
+   - Définition des dates (départ, collecte)
+   - Sélection des points de collecte
+   - Configuration de la capacité
+2. **Configuration** :
+   - Choix du type (publique/privée)
+   - Définition des villes desservies
+   - Configuration des tarifs
+3. **Validation** :
+   - Vérification des informations
+   - Acceptation des conditions
+   - Publication de la tournée
 
 ### Gestion des réservations
 
@@ -73,6 +123,20 @@ Colimero est une plateforme de gestion de transport de colis entre la France et 
 - **En transit** : En cours de transport
 - **Livrée** : Colis remis au destinataire
 - **Annulée** : Réservation annulée
+
+#### Workflow de validation des réservations
+1. **Création** :
+   - Saisie des informations
+   - Vérification des disponibilités
+   - Calcul du prix
+2. **Validation** :
+   - Vérification par le transporteur
+   - Confirmation ou refus
+   - Notification au client
+3. **Suivi** :
+   - Mise à jour des statuts
+   - Notifications aux parties
+   - Confirmation de livraison
 
 ### Profils utilisateurs
 
@@ -100,6 +164,20 @@ Colimero est une plateforme de gestion de transport de colis entre la France et 
 - Définition des villes de collecte
 - Horaires de passage
 - Capacités par point de collecte
+
+#### Workflow de demande d'accès aux tournées privées
+1. **Soumission** :
+   - Sélection de la tournée
+   - Motif de la demande
+   - Informations complémentaires
+2. **Traitement** :
+   - Examen par le transporteur
+   - Vérification des critères
+   - Décision d'approbation
+3. **Finalisation** :
+   - Notification de la décision
+   - Accès accordé si approuvé
+   - Possibilité de réservation
 
 ## Informations techniques
 
