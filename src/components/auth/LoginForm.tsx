@@ -72,16 +72,24 @@ export function LoginForm({
       try {
         console.log("Checking user profile for:", email);
         
-        // Essayer de se connecter d'abord
-        const { data: { session }, error: signInError } = await supabase.auth.getSession();
-        
+        // D'abord, essayer de se connecter
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: form.getValues("password"),
+        });
+
         if (signInError) {
-          console.error("Auth error:", signInError);
+          console.error("Sign in error:", signInError);
+          toast({
+            variant: "destructive",
+            title: "Erreur de connexion",
+            description: "Email ou mot de passe incorrect",
+          });
           return;
         }
 
-        if (!session) {
-          console.log("No session found");
+        if (!signInData.user) {
+          console.log("No user found");
           return;
         }
 
