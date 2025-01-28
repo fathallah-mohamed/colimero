@@ -70,7 +70,7 @@ export function LoginForm({
     requiredUserType,
     onVerificationNeeded: async (email: string) => {
       try {
-        // Vérifier d'abord si c'est un compte admin
+        // Vérifier si c'est un compte admin
         const { data: adminData, error: adminError } = await supabase
           .from('administrators')
           .select('id')
@@ -87,15 +87,12 @@ export function LoginForm({
           return;
         }
 
-        // Si ce n'est pas un admin, vérifier si le compte existe dans la table clients
+        // Vérifier si le compte existe dans la table clients
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .select('email_verified, status')
           .eq('email', email.trim())
           .maybeSingle();
-
-        console.log("Client data:", clientData);
-        console.log("Client error:", clientError);
 
         if (clientError) {
           console.error("Error checking client:", clientError);
@@ -107,19 +104,18 @@ export function LoginForm({
           return;
         }
 
+        // Si le compte n'existe pas, rediriger vers la création de compte
         if (!clientData) {
-          console.log("No client found for email:", email);
           toast({
-            variant: "destructive",
-            title: "Compte non trouvé",
-            description: "Aucun compte n'existe avec cet email. Veuillez créer un compte.",
+            title: "Compte inexistant",
+            description: "Ce compte n'existe pas. Veuillez créer un compte.",
           });
+          onRegister();
           return;
         }
 
         // Si le compte existe mais n'est pas vérifié, montrer le dialogue d'activation
         if (!clientData.email_verified || clientData.status !== 'active') {
-          console.log("Account needs verification, showing dialog");
           setShowVerificationDialog(true);
           form.reset({ email: form.getValues("email"), password: "" });
         }
