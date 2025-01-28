@@ -72,24 +72,20 @@ export function LoginForm({
       try {
         console.log("Checking user profile for:", email);
         
-        // 1. Vérifier d'abord si l'utilisateur existe dans auth.users
-        const { data: adminData } = await supabase
-          .from('administrators')
-          .select('id')
-          .eq('email', email.trim())
-          .maybeSingle();
+        // Vérifier d'abord si l'utilisateur existe dans l'une des tables de profil
+        const [{ data: adminData }, { data: carrierData }, { data: clientData }] = await Promise.all([
+          supabase.from('administrators').select('id').eq('email', email.trim()).maybeSingle(),
+          supabase.from('carriers').select('email_verified, status').eq('email', email.trim()).maybeSingle(),
+          supabase.from('clients').select('email_verified, status').eq('email', email.trim()).maybeSingle()
+        ]);
 
+        // Si c'est un admin, pas besoin de vérification
         if (adminData) {
           console.log("Admin account found");
-          return; // Les admins n'ont pas besoin de vérification
+          return;
         }
 
-        const { data: carrierData } = await supabase
-          .from('carriers')
-          .select('email_verified, status')
-          .eq('email', email.trim())
-          .maybeSingle();
-
+        // Si c'est un transporteur, vérifier son statut
         if (carrierData) {
           console.log("Carrier account found:", carrierData);
           if (!carrierData.email_verified || carrierData.status !== 'active') {
@@ -103,32 +99,23 @@ export function LoginForm({
           return;
         }
 
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('email_verified, status')
-          .eq('email', email.trim())
-          .maybeSingle();
-
-        if (clientError) {
-          console.error("Error checking client:", clientError);
+        // Si c'est un client, vérifier son statut
+        if (clientData) {
+          console.log("Client account found:", clientData);
+          if (!clientData.email_verified || clientData.status !== 'active') {
+            setShowVerificationDialog(true);
+            form.reset({ email: form.getValues("email"), password: "" });
+          }
           return;
         }
 
-        if (!clientData) {
-          console.log("No client profile found");
-          toast({
-            title: "Compte inexistant",
-            description: "Ce compte n'existe pas. Veuillez créer un compte.",
-          });
-          onRegister();
-          return;
-        }
-
-        console.log("Client account found:", clientData);
-        if (!clientData.email_verified || clientData.status !== 'active') {
-          setShowVerificationDialog(true);
-          form.reset({ email: form.getValues("email"), password: "" });
-        }
+        // Si aucun profil n'est trouvé
+        console.log("No profile found");
+        toast({
+          title: "Compte inexistant",
+          description: "Ce compte n'existe pas. Veuillez créer un compte.",
+        });
+        onRegister();
 
       } catch (error) {
         console.error("Error in onVerificationNeeded:", error);
