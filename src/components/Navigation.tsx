@@ -75,9 +75,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           console.log("Checking user session:", session.user);
           const userType = session.user.user_metadata?.user_type;
 
-          // Vérification spécifique pour les clients
           if (userType === 'client') {
-            console.log("Checking client verification status");
             const { data: clientData, error: clientError } = await supabase
               .from('clients')
               .select('email_verified, status')
@@ -89,12 +87,8 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
               return;
             }
 
-            console.log("Client data:", clientData);
-
-            // Si le compte n'est pas vérifié ou n'est pas actif
             if (!clientData?.email_verified || clientData?.status !== 'active') {
               console.log("Account needs verification, redirecting to activation");
-              // Se déconnecter et rediriger vers la page d'activation
               await supabase.auth.signOut();
               navigate('/activation-compte', { replace: true });
               return;
@@ -104,7 +98,6 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           // Vérification des routes protégées
           const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
           if (protectedRoutes.includes(location.pathname) && !session) {
-            console.log("Protected route access attempt without session");
             sessionStorage.setItem('returnPath', location.pathname);
             navigate('/connexion', { replace: true });
           }
