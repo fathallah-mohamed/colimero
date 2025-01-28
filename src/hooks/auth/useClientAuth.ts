@@ -76,18 +76,6 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        
-        // Check if it's an email confirmation error
-        if (signInError.message.includes("Email not confirmed")) {
-          console.log('Email not confirmed, showing verification dialog');
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
-          return;
-        }
-        
-        // For any other error
         setError("Email ou mot de passe incorrect");
         return;
       }
