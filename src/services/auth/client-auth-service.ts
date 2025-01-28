@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { AuthError } from "@supabase/supabase-js";
 
 interface AuthResult {
   success: boolean;
@@ -68,6 +69,41 @@ export const clientAuthService = {
       return {
         success: false,
         error: "Une erreur inattendue s'est produite"
+      };
+    }
+  },
+
+  async activateAccount(activationCode: string, email: string): Promise<AuthResult> {
+    try {
+      console.log('Attempting to activate account with code:', activationCode, 'for email:', email);
+
+      const { data, error } = await supabase
+        .rpc('activate_client_account', {
+          p_activation_code: activationCode
+        });
+
+      if (error) {
+        console.error('Error activating account:', error);
+        return {
+          success: false,
+          error: "Code d'activation invalide"
+        };
+      }
+
+      if (!data) {
+        return {
+          success: false,
+          error: "Code d'activation invalide ou expiré"
+        };
+      }
+
+      console.log('Account activated successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('Error in activateAccount:', error);
+      return {
+        success: false,
+        error: error instanceof AuthError ? error.message : "Une erreur est survenue lors de l'activation"
       };
     }
   }
