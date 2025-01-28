@@ -51,26 +51,26 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       setIsLoading(true);
       setError(null);
 
-      // 1. D'abord vérifier le statut du client
+      // 1. Vérifier d'abord le statut du client
       const clientStatus = await checkClientStatus(email);
       console.log('Client status check result:', clientStatus);
       
       if (!clientStatus.exists) {
+        console.log('No client account found for:', email);
         setError("Aucun compte trouvé avec cet email");
         return;
       }
 
-      // 2. Si non vérifié, afficher la dialog de vérification
+      // 2. Si le compte n'est pas vérifié ou actif, déclencher le processus de vérification
       if (!clientStatus.isVerified || clientStatus.status !== 'active') {
         console.log('Client account needs verification:', email);
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
         return;
       }
 
-      // 3. Seulement si vérifié, tenter la connexion
+      // 3. Si le compte est vérifié et actif, procéder à la connexion
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
