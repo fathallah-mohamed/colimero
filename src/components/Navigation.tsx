@@ -4,6 +4,7 @@ import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
 import MobileMenu from "@/components/navigation/MobileMenu";
 import { NavigationHeader } from "./navigation/NavigationHeader";
+import { Loader } from "lucide-react";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
@@ -15,13 +16,12 @@ export default function Navigation({
   setShowAuthDialog: externalSetShowAuthDialog 
 }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, userType, handleLogout } = useNavigation();
+  const { user, userType, handleLogout, isLoading } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -31,7 +31,6 @@ export default function Navigation({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Handle click outside mobile menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -49,6 +48,19 @@ export default function Navigation({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
+  // Fermer le menu mobile lors du changement de route
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  if (isLoading) {
+    return (
+      <div className="fixed top-0 left-0 right-0 bg-white z-50 py-4 flex items-center justify-center">
+        <Loader className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <nav className={cn(
       "fixed top-0 left-0 right-0 bg-white z-50 transition-all duration-300",
@@ -63,24 +75,24 @@ export default function Navigation({
           userType={userType}
           handleLogout={handleLogout}
           mobileButtonRef={mobileButtonRef}
+          setShowAuthDialog={externalSetShowAuthDialog}
         />
       </div>
 
-      <div 
-        ref={mobileMenuRef}
-        className={cn(
-          "block lg:hidden transition-all duration-300 ease-in-out",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        )}
-      >
-        <MobileMenu
-          isOpen={isOpen}
-          user={user}
-          userType={userType}
-          handleLogout={handleLogout}
-          setIsOpen={setIsOpen}
-        />
-      </div>
+      {isOpen && (
+        <div 
+          ref={mobileMenuRef}
+          className="block lg:hidden"
+        >
+          <MobileMenu
+            isOpen={isOpen}
+            user={user}
+            userType={userType}
+            handleLogout={handleLogout}
+            setIsOpen={setIsOpen}
+          />
+        </div>
+      )}
     </nav>
   );
 }

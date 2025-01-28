@@ -25,6 +25,8 @@ export default function MenuItems() {
           item.highlight && !isActive && "bg-primary text-white hover:bg-primary/90",
           "w-full lg:w-auto justify-start lg:justify-center"
         )}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -2 }}
         whileTap={{ y: 0 }}
       >

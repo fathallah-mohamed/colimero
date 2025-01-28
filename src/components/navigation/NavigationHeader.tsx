@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import MenuItems from "./MenuItems";
 import { AuthSection } from "./AuthSection";
@@ -12,6 +12,7 @@ interface NavigationHeaderProps {
   userType: string | null;
   handleLogout: () => void;
   mobileButtonRef: React.RefObject<HTMLButtonElement>;
+  setShowAuthDialog?: (show: boolean) => void;
 }
 
 export function NavigationHeader({
@@ -22,13 +23,8 @@ export function NavigationHeader({
   userType,
   handleLogout,
   mobileButtonRef,
+  setShowAuthDialog,
 }: NavigationHeaderProps) {
-  const navigate = useNavigate();
-
-  const handleLoginClick = () => {
-    navigate('/connexion');
-  };
-
   return (
     <div className="flex justify-between items-center">
       <motion.div 
@@ -54,7 +50,7 @@ export function NavigationHeader({
           user={user}
           userType={userType}
           handleLogout={handleLogout}
-          setShowAuthDialog={handleLoginClick}
+          setShowAuthDialog={() => setShowAuthDialog?.(true)}
         />
         
         <MobileMenuButton 
