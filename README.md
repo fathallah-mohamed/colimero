@@ -1,169 +1,69 @@
-# Colimero - Plateforme de transport France-Maghreb
+# Welcome to your Lovable project for Colimero
 
-## À propos du projet
+## Project info
 
-Colimero est une plateforme innovante qui facilite l'expédition de colis entre la France et le Maghreb. Elle met en relation des expéditeurs avec des transporteurs vérifiés, offrant une solution fiable et transparente pour le transport international de colis.
+**URL**: https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770
 
-## Fonctionnalités principales
+## How can I edit this code?
 
-### Pour les clients
-- Recherche et réservation de tournées
-- Suivi en temps réel des colis
-- Gestion des expéditions
-- Système de notification
-- Interface intuitive pour la gestion des envois
+There are several ways of editing your application.
 
-### Pour les transporteurs
-- Création et gestion des tournées
-- Optimisation des trajets
-- Gestion des réservations
-- Tableau de bord détaillé
-- Système de validation des documents
+**Use Lovable**
 
-## Architecture technique
+Simply visit the [Lovable Project](https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770) and start prompting.
 
-### Frontend
-- **Framework**: React avec Vite
-- **Language**: TypeScript
-- **UI Components**: shadcn/ui
-- **Styling**: Tailwind CSS
-- **State Management**: TanStack Query (React Query)
-- **Routing**: React Router
-- **Icons**: Lucide React
+Changes made via Lovable will be committed automatically to this repo.
 
-### Backend (Supabase)
-- **Base de données**: PostgreSQL
-- **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage
-- **API**: RESTful + Real-time subscriptions
-- **Security**: Row Level Security (RLS)
+**Use your preferred IDE**
 
-## Structure du projet
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-```
-src/
-├── components/         # Composants React réutilisables
-├── hooks/             # Custom React hooks
-├── pages/             # Pages de l'application
-├── types/             # Types TypeScript
-├── utils/             # Utilitaires
-└── integrations/      # Intégrations (Supabase, etc.)
-```
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-## Modèles de données principaux
+Follow these steps:
 
-### Tours (Tournées)
-- Informations sur les trajets
-- Capacité et disponibilité
-- Points de collecte
-- Statuts et mises à jour
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-### Bookings (Réservations)
-- Détails des colis
-- Informations expéditeur/destinataire
-- Statut de livraison
-- Numéro de suivi
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-### Carriers (Transporteurs)
-- Profil et vérifications
-- Capacités et services
-- Zones de couverture
-- Historique des livraisons
+# Step 3: Install the necessary dependencies.
+npm i
 
-## Fonctionnalités de sécurité
-
-- Authentification multi-facteurs
-- Validation des transporteurs
-- Chiffrement des données sensibles
-- Politiques RLS pour la protection des données
-- Vérification des documents d'identité
-
-## Workflow d'expédition
-
-1. **Recherche de tournée**
-   - Sélection des villes
-   - Choix des dates
-   - Filtrage par services
-
-2. **Réservation**
-   - Saisie des informations colis
-   - Détails destinataire
-   - Validation des conditions
-
-3. **Suivi**
-   - Notifications en temps réel
-   - Points de passage
-   - Statuts de livraison
-
-4. **Livraison**
-   - Confirmation de réception
-   - Évaluation du service
-   - Historique des envois
-
-## Configuration du projet
-
-### Prérequis
-- Node.js (v18+)
-- npm ou yarn
-- Compte Supabase
-
-### Installation
-
-```bash
-# Cloner le repository
-git clone <URL_DU_REPO>
-
-# Installer les dépendances
-npm install
-
-# Lancer en développement
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-### Variables d'environnement
+**Edit a file directly in GitHub**
 
-```env
-VITE_SUPABASE_URL=votre_url_supabase
-VITE_SUPABASE_ANON_KEY=votre_clé_anon
-```
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## Déploiement
+**Use GitHub Codespaces**
 
-Le projet peut être déployé via :
-1. Lovable (recommandé)
-2. Netlify
-3. Vercel
-4. GitHub Pages
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-### Via Lovable
-1. Ouvrir [Lovable](https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770)
-2. Cliquer sur Share -> Publish
+## What technologies are used for this project?
 
-### Déploiement manuel
-1. Construire le projet : `npm run build`
-2. Déployer le dossier `dist`
+This project is built with .
 
-## Contribution
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
+## How can I deploy this project?
 
-## Support
+Simply open [Lovable](https://lovable.dev/projects/8c07c2c5-2bba-4106-b598-57cb771d0770) and click on Share -> Publish.
 
-Pour toute question ou assistance :
-- Documentation : [docs.lovable.dev](https://docs.lovable.dev)
-- Discord : [Rejoindre la communauté](https://discord.gg/lovable)
-- Email : support@lovable.dev
+## I want to use a custom domain - is that possible?
 
-## License
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
-## Remerciements
-
-- L'équipe Lovable pour leur excellent framework
-- La communauté Supabase pour leur support
-- Tous les contributeurs du projet
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)

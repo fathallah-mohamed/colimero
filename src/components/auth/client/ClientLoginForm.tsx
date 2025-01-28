@@ -9,14 +9,12 @@ import { Loader2 } from "lucide-react";
 
 interface ClientLoginFormProps {
   onRegister: () => void;
-  onCarrierRegister: () => void;  // Added this prop
   onForgotPassword: () => void;
   onSuccess?: () => void;
 }
 
 export function ClientLoginForm({
   onRegister,
-  onCarrierRegister,  // Added this prop
   onForgotPassword,
   onSuccess
 }: ClientLoginFormProps) {
@@ -92,15 +90,7 @@ export function ClientLoginForm({
               onClick={onRegister}
               className="text-[#00B0F0] hover:underline"
             >
-              Créer un compte client
-            </button>
-
-            <button
-              type="button"
-              onClick={onCarrierRegister}
-              className="text-[#00B0F0] hover:underline"
-            >
-              Créer un compte transporteur
+              Créer un compte
             </button>
 
             <button

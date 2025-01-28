@@ -1,119 +1,173 @@
-import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
-import { TourTimelineDisplay } from "../../tour/shared/TourTimelineDisplay";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Eye, CreditCard, AlertOctagon } from "lucide-react";
-import { useState } from "react";
-import { SelectableCollectionPointsList } from "../../tour/SelectableCollectionPointsList";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tour } from "@/types/tour";
+import { TourMainInfo } from "./components/TourMainInfo";
+import { TourExpandedContent } from "./components/TourExpandedContent";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
-interface TourCardProps {
+interface ClientTourCardProps {
   tour: Tour;
-  type?: "public" | "private";
-  userType?: string | null;
-  TimelineComponent?: typeof TourTimelineDisplay;
 }
 
-export function ClientTourCard({ 
-  tour, 
-  type = "public",
-  userType,
-  TimelineComponent = TourTimelineDisplay
-}: TourCardProps) {
-  const [showDetails, setShowDetails] = useState(false);
-  const [selectedPoint, setSelectedPoint] = useState<string>("");
+export function ClientTourCard({ tour }: ClientTourCardProps) {
+  const [selectedPickupCity, setSelectedPickupCity] = useState<string>("");
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [showCarrierErrorDialog, setShowCarrierErrorDialog] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<any>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleBookingClick = () => {
-    if (selectedPoint) {
-      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPoint)}`);
+  useEffect(() => {
+    checkExistingRequest();
+  }, [tour.id]);
+
+  const checkExistingRequest = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: request, error } = await supabase
+      .from('approval_requests')
+      .select('*')
+      .eq('tour_id', tour.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking existing request:', error);
+      return;
+    }
+
+    setExistingRequest(request);
+  };
+
+  const handleActionClick = async () => {
+    if (!selectedPickupCity) {
+      toast({
+        variant: "destructive",
+        title: "Point de collecte requis",
+        description: "Veuillez sélectionner un point de collecte",
+      });
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      const returnPath = `/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`;
+      sessionStorage.setItem('returnPath', returnPath);
+      navigate('/connexion');
+      return;
+    }
+
+    const userType = session.user.user_metadata?.user_type;
+    if (userType === 'carrier') {
+      setShowCarrierErrorDialog(true);
+      return;
+    }
+
+    // Pour les tournées privées
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        switch (existingRequest.status) {
+          case 'pending':
+            toast({
+              title: "Demande en attente",
+              description: "Votre demande d'approbation est en cours de traitement",
+            });
+            return;
+          case 'approved':
+            navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
+            return;
+          case 'rejected':
+            toast({
+              variant: "destructive",
+              title: "Demande rejetée",
+              description: "Votre demande d'approbation a été rejetée pour cette tournée",
+            });
+            return;
+          default:
+            setShowApprovalDialog(true);
+        }
+      } else {
+        setShowApprovalDialog(true);
+      }
+    } else {
+      // Pour les tournées publiques, redirection directe vers le formulaire
+      navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
   };
 
-  // Vérifier si l'utilisateur peut réserver (client uniquement et tournée programmée)
-  const canBook = tour.status === "Programmée" && userType === "client";
-
-  const getBookingStatusMessage = () => {
-    if (userType === "carrier") {
-      return "Les transporteurs ne peuvent pas effectuer de réservations. Seuls les clients peuvent réserver des tournées.";
+  const isActionEnabled = () => {
+    if (!selectedPickupCity) return false;
+    if (tour.type === 'private') {
+      if (existingRequest) {
+        return existingRequest.status === 'approved';
+      }
+      return true;
     }
-    if (tour.status !== "Programmée") {
-      return `Cette tournée est en statut "${tour.status}" et ne peut pas être réservée`;
-    }
-    return "";
+    return true;
   };
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">
-      <TourCardHeader
-        tour={tour}
-        type={type}
-        userType={userType}
-      />
-      <div className="p-6 space-y-6">
-        <TimelineComponent 
-          status={tour.status} 
-          tourId={tour.id}
+      <div className="p-6">
+        <TourMainInfo 
+          tour={tour} 
+          isExpanded={isExpanded}
+          onExpandClick={() => setIsExpanded(!isExpanded)}
         />
 
-        <div className="space-y-4">
-          <Button
-            variant="outline"
-            className="w-full gap-2"
-            onClick={() => setShowDetails(!showDetails)}
-          >
-            <Eye className="h-4 w-4" />
-            {showDetails ? "Masquer les détails" : "Voir les détails"}
-          </Button>
+        {isExpanded && (
+          <TourExpandedContent
+            tour={tour}
+            selectedPickupCity={selectedPickupCity}
+            onPickupCitySelect={setSelectedPickupCity}
+            onActionClick={handleActionClick}
+            isActionEnabled={isActionEnabled()}
+            existingRequest={existingRequest}
+          />
+        )}
 
-          {showDetails && (
-            <div className="space-y-6 animate-in slide-in-from-top-4 duration-200">
-              <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm text-gray-500">Capacité restante</p>
-                  <p className="font-medium">{tour.remaining_capacity} kg</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Prix par kg</p>
-                  <p className="font-medium">{tour.carriers?.carrier_capacities?.[0]?.price_per_kg || 0} €</p>
-                </div>
-              </div>
+        <ApprovalRequestDialog
+          isOpen={showApprovalDialog}
+          onClose={() => setShowApprovalDialog(false)}
+          tourId={tour.id}
+          pickupCity={selectedPickupCity}
+          onSuccess={() => {
+            checkExistingRequest();
+            setShowApprovalDialog(false);
+            toast({
+              title: "Demande envoyée",
+              description: "Votre demande d'approbation a été envoyée avec succès",
+            });
+          }}
+        />
 
-              <div className="space-y-4">
-                <h3 className="font-medium text-gray-900">Points de collecte</h3>
-                <SelectableCollectionPointsList
-                  points={tour.route}
-                  selectedPoint={selectedPoint}
-                  onPointSelect={setSelectedPoint}
-                  isSelectionEnabled={canBook}
-                  tourDepartureDate={tour.departure_date}
-                />
-              </div>
-
-              {!canBook && (
-                <Alert variant="destructive" className="bg-red-50 border-red-200">
-                  <AlertOctagon className="h-4 w-4" />
-                  <AlertDescription>
-                    {getBookingStatusMessage()}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {canBook && (
-                <Button
-                  className="w-full flex items-center gap-2 bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-                  onClick={handleBookingClick}
-                  disabled={!selectedPoint}
-                >
-                  <CreditCard className="h-4 w-4" />
-                  {selectedPoint ? "Réserver sur cette tournée" : "Sélectionnez un point de collecte"}
-                </Button>
-              )}
+        <Dialog open={showCarrierErrorDialog} onOpenChange={setShowCarrierErrorDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertCircle className="h-5 w-5" />
+                Accès refusé
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Les transporteurs ne peuvent pas effectuer de réservations. Seuls les clients peuvent réserver des tournées.
+              </p>
+              <Button onClick={() => setShowCarrierErrorDialog(false)} className="w-full">
+                J'ai compris
+              </Button>
             </div>
-          )}
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </Card>
   );

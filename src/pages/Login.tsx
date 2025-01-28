@@ -1,39 +1,30 @@
 import Navigation from "@/components/Navigation";
-import { ClientLoginForm } from "@/components/auth/client/ClientLoginForm";
+import { LoginFormContainer } from "@/components/auth/login/LoginFormContainer";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
-    const checkSession = async () => {
+    const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        const userType = session.user.user_metadata?.user_type;
-        
-        if (userType === 'client') {
-          const { data: clientData } = await supabase
-            .from('clients')
-            .select('email_verified, status')
-            .eq('id', session.user.id)
-            .single();
+      if (session) {
+        const { data: clientData } = await supabase
+          .from('clients')
+          .select('email_verified')
+          .eq('id', session.user.id)
+          .single();
 
-          if (!clientData?.email_verified || clientData?.status !== 'active') {
-            navigate('/activation-compte');
-            return;
-          }
+        // Ne rediriger que si l'utilisateur est vérifié ou n'est pas un client
+        if (!clientData || clientData.email_verified) {
+          navigate('/');
         }
-        
-        navigate('/');
       }
     };
-
-    checkSession();
+    
+    checkAuth();
   }, [navigate]);
 
   const handleSuccess = () => {
@@ -44,10 +35,6 @@ export default function Login() {
     navigate('/creer-compte');
   };
 
-  const handleForgotPassword = () => {
-    navigate('/mot-de-passe-oublie');
-  };
-
   const handleCarrierRegister = () => {
     navigate('/devenir-transporteur');
   };
@@ -56,23 +43,24 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <Navigation />
       
-      {/* Header Section */}
-      <div className="pt-32 pb-20 text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Connexion à votre compte
-        </h1>
-        <p className="text-gray-600 max-w-md mx-auto">
-          Connectez-vous pour accéder à votre espace personnel et gérer vos envois
-        </p>
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-primary via-primary to-primary-light py-16 px-4 shadow-lg">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Bienvenue sur votre espace personnel
+          </h1>
+          <p className="text-lg text-white/90 max-w-2xl mx-auto">
+            Connectez-vous pour accéder à vos expéditions, suivre vos colis en temps réel et gérer vos informations personnelles.
+          </p>
+        </div>
       </div>
 
       {/* Login Form Section */}
       <div className="max-w-md mx-auto -mt-8 px-4 relative z-10 pb-16">
         <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100">
-          <ClientLoginForm
+          <LoginFormContainer
             onRegister={handleRegister}
             onCarrierRegister={handleCarrierRegister}
-            onForgotPassword={handleForgotPassword}
             onSuccess={handleSuccess}
           />
         </div>
