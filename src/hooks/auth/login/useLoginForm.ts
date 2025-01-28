@@ -27,62 +27,6 @@ export function useLoginForm({
     return email.trim().toLowerCase();
   };
 
-  const checkAdminStatus = async (email: string) => {
-    console.log('Checking admin status for:', email);
-    const { data: adminData, error: adminError } = await supabase
-      .from('administrators')
-      .select('id')
-      .eq('email', normalizeEmail(email))
-      .maybeSingle();
-
-    if (adminError) {
-      console.error("Error checking admin status:", adminError);
-      return false;
-    }
-
-    return !!adminData;
-  };
-
-  const checkCarrierStatus = async (email: string) => {
-    console.log('Checking carrier status for:', email);
-    const { data: carrierData, error: carrierError } = await supabase
-      .from('carriers')
-      .select('status, reason')
-      .eq('email', normalizeEmail(email))
-      .maybeSingle();
-
-    if (carrierError) {
-      console.error("Error checking carrier status:", carrierError);
-      return { isValid: false, error: "Une erreur est survenue lors de la vérification du compte" };
-    }
-
-    if (!carrierData) {
-      return { isValid: false, error: "Aucun compte transporteur trouvé avec cet email" };
-    }
-
-    console.log('Carrier status:', carrierData.status);
-
-    switch (carrierData.status) {
-      case 'active':
-        return { isValid: true };
-      case 'pending':
-        return { 
-          isValid: false, 
-          error: "Votre compte est en attente de validation par un administrateur. Vous recevrez un email une fois votre compte validé." 
-        };
-      case 'rejected':
-        return { 
-          isValid: false, 
-          error: carrierData.reason || "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter." 
-        };
-      default:
-        return { 
-          isValid: false, 
-          error: "Statut de compte invalide. Veuillez contacter l'administrateur." 
-        };
-    }
-  };
-
   const checkClientStatus = async (email: string) => {
     console.log('Checking client status for:', email);
     const { data: clientData, error: clientError } = await supabase
@@ -113,32 +57,6 @@ export function useLoginForm({
     return { isValid: true };
   };
 
-  const determineUserType = async (email: string) => {
-    const normalizedEmail = normalizeEmail(email);
-    
-    // Vérifier d'abord si c'est un admin
-    const isAdmin = await checkAdminStatus(normalizedEmail);
-    if (isAdmin) return 'admin';
-
-    // Vérifier ensuite si c'est un transporteur
-    const { data: carrier } = await supabase
-      .from('carriers')
-      .select('id')
-      .eq('email', normalizedEmail)
-      .maybeSingle();
-    if (carrier) return 'carrier';
-
-    // Vérifier enfin si c'est un client
-    const { data: client } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('email', normalizedEmail)
-      .maybeSingle();
-    if (client) return 'client';
-
-    return null;
-  };
-
   const handleLogin = async (email: string, password: string) => {
     try {
       console.log('Starting login process for:', email);
@@ -149,61 +67,28 @@ export function useLoginForm({
 
       const normalizedEmail = normalizeEmail(email);
 
-      // 1. Déterminer le type d'utilisateur
-      const userType = await determineUserType(normalizedEmail);
-      console.log('Determined user type:', userType);
+      // Vérifier d'abord le statut du client
+      if (requiredUserType === 'client' || !requiredUserType) {
+        const clientStatus = await checkClientStatus(normalizedEmail);
+        console.log('Client status check result:', clientStatus);
 
-      if (!userType) {
-        setError("Aucun compte trouvé avec cet email");
-        setShowErrorDialog(true);
-        return;
-      }
-
-      // 2. Vérifier si le type d'utilisateur correspond au type requis
-      if (requiredUserType && userType !== requiredUserType) {
-        setError(`Ce compte n'est pas un compte ${
-          requiredUserType === 'client' ? 'client' : 
-          requiredUserType === 'carrier' ? 'transporteur' : 
-          'administrateur'
-        }`);
-        setShowErrorDialog(true);
-        return;
-      }
-
-      // 3. Vérifier le statut selon le type d'utilisateur
-      switch (userType) {
-        case 'admin':
-          // Les admins n'ont pas besoin de vérification supplémentaire
-          break;
-
-        case 'carrier':
-          const carrierStatus = await checkCarrierStatus(normalizedEmail);
-          if (!carrierStatus.isValid) {
-            setError(carrierStatus.error);
-            setShowErrorDialog(true);
-            return;
+        if (clientStatus.needsVerification) {
+          setShowVerificationDialog(true);
+          if (onVerificationNeeded) {
+            onVerificationNeeded(normalizedEmail);
           }
-          break;
+          setError(clientStatus.error);
+          return;
+        }
 
-        case 'client':
-          const clientStatus = await checkClientStatus(normalizedEmail);
-          if (!clientStatus.isValid) {
-            if (clientStatus.needsVerification) {
-              setShowVerificationDialog(true);
-              if (onVerificationNeeded) {
-                onVerificationNeeded(normalizedEmail);
-              }
-            }
-            setError(clientStatus.error);
-            if (!clientStatus.needsVerification) {
-              setShowErrorDialog(true);
-            }
-            return;
-          }
-          break;
+        if (!clientStatus.isValid && clientStatus.error) {
+          setError(clientStatus.error);
+          setShowErrorDialog(true);
+          return;
+        }
       }
 
-      // 4. Tenter la connexion
+      // Tenter la connexion
       const result = await authService.signIn(normalizedEmail, password);
       console.log('Sign in result:', result);
 
