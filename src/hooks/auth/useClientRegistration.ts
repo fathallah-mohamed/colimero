@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import crypto from 'crypto';
 
 interface RegisterFormData {
   firstName: string;
@@ -37,14 +37,14 @@ export async function registerClient(formData: RegisterFormData) {
       email: normalizedEmail,
       password: formData.password.trim(),
       options: {
+        emailRedirectTo: `${window.location.origin}/activation`,
         data: {
-          user_type: 'client',
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address
-        },
-        emailRedirectTo: `${window.location.origin}/activation`
+          address: formData.address,
+          user_type: 'client'
+        }
       }
     });
 
@@ -72,7 +72,9 @@ export async function registerClient(formData: RegisterFormData) {
         phone_secondary: formData.phone_secondary || '',
         address: formData.address || '',
         email_verified: false,
-        status: 'pending'
+        status: 'pending',
+        activation_token: crypto.randomUUID(),
+        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
       });
 
     if (insertError) {
