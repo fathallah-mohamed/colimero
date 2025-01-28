@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import crypto from 'crypto';
+import { useToast } from "@/hooks/use-toast";
 
 interface RegisterFormData {
   firstName: string;
@@ -13,10 +13,12 @@ interface RegisterFormData {
 
 export async function registerClient(formData: RegisterFormData) {
   try {
-    const normalizedEmail = formData.email.trim().toLowerCase();
-    console.log('Starting client registration for:', normalizedEmail);
+    console.log('Starting client registration for:', formData.email);
     
-    // 1. Check if client already exists
+    // 1. Normalize email
+    const normalizedEmail = formData.email.trim().toLowerCase();
+    
+    // 2. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
       .select('email, email_verified')
@@ -31,20 +33,20 @@ export async function registerClient(formData: RegisterFormData) {
       };
     }
 
-    // 2. Create auth user first
+    // 3. Create auth user first
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: normalizedEmail,
       password: formData.password.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/activation`,
         data: {
+          user_type: 'client',
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address,
-          user_type: 'client'
-        }
+          address: formData.address
+        },
+        emailRedirectTo: `${window.location.origin}/activation`
       }
     });
 
@@ -59,7 +61,7 @@ export async function registerClient(formData: RegisterFormData) {
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Create client profile
+    // 4. Create client profile
     console.log('Creating client profile...');
     const { error: insertError } = await supabase
       .from('clients')
@@ -72,9 +74,7 @@ export async function registerClient(formData: RegisterFormData) {
         phone_secondary: formData.phone_secondary || '',
         address: formData.address || '',
         email_verified: false,
-        status: 'pending',
-        activation_token: crypto.randomUUID(),
-        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+        status: 'pending'
       });
 
     if (insertError) {
@@ -85,22 +85,6 @@ export async function registerClient(formData: RegisterFormData) {
     }
 
     console.log('Client profile created successfully');
-
-    // 4. Send activation email
-    console.log('Sending activation email...');
-    const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
-      body: {
-        email: normalizedEmail,
-        firstName: formData.firstName
-      }
-    });
-
-    if (emailError) {
-      console.error('Error sending activation email:', emailError);
-      throw emailError;
-    }
-
-    console.log('Activation email sent successfully');
 
     // 5. Force sign out to ensure email verification
     await supabase.auth.signOut();
