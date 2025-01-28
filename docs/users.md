@@ -1,46 +1,67 @@
 # Gestion des utilisateurs
 
-## Clients
+## Processus d'authentification
 
-### Inscription
-- Les clients peuvent créer un compte en fournissant leurs informations personnelles
+### Administrateurs
+- Connexion directe avec email/mot de passe
+- Aucune vérification supplémentaire requise
+- Accès immédiat au tableau de bord admin
 
-### Activation du compte
-- Un code d'activation est envoyé par email
-- Le code est valable pendant 48h
-- Le compte doit être activé pour pouvoir effectuer des réservations
+### Transporteurs
 
-### Workflow d'activation
-1. Création du compte avec email/mot de passe
-2. Génération automatique d'un code d'activation unique
-3. Envoi du code par email
-4. Saisie du code dans l'interface d'activation
-5. Vérification et activation du compte
+#### Processus d'inscription
+1. Soumission du formulaire avec :
+   - Informations personnelles
+   - Détails de l'entreprise
+   - Documents requis
+2. Statut initial : "En attente"
+3. Examen par les administrateurs
+4. Décision : Approbation ou Rejet
+
+#### États du compte
+1. **En attente**
+   - Connexion impossible
+   - Message d'attente de validation
+   - Notification par email lors de la validation
+
+2. **Rejeté**
+   - Connexion impossible
+   - Message indiquant le motif du rejet
+   - Possibilité de contacter le support
+
+3. **Actif**
+   - Connexion complète autorisée
+   - Accès au tableau de bord transporteur
+   - Gestion des tournées et réservations
+
+### Clients
+
+#### Inscription
+- Création de compte avec email/mot de passe
+- Vérification d'email obligatoire
+- Code d'activation valable 48h
+
+#### Workflow d'activation
+1. Création du compte
+2. Génération du code d'activation
+3. Envoi par email
+4. Saisie du code
+5. Activation du compte
 6. Redirection vers la connexion
 
-## Transporteurs
+#### États du compte
+1. **Non activé**
+   - Connexion limitée
+   - Popup d'activation
+   - Nouveau code sur demande
 
-### Inscription
-- Les transporteurs soumettent une demande d'inscription avec leurs informations
+2. **Activé**
+   - Connexion complète
+   - Accès aux réservations
+   - Gestion du profil
 
-### Validation
-- La demande est examinée par les administrateurs
-- Vérification des documents et informations fournis
-- Activation du compte après validation
-
-### Workflow de validation
-1. Soumission du formulaire d'inscription avec :
-   - Informations de l'entreprise (SIRET, nom, etc.)
-   - Documents légaux
-   - Capacités et services proposés
-2. Examen par les administrateurs :
-   - Vérification des documents
-   - Validation des informations légales
-   - Contrôle des capacités déclarées
-3. Décision :
-   - Approbation : Création du compte et envoi d'email de confirmation
-   - Rejet : Notification avec motif de refus
-4. Post-approbation :
-   - Accès au tableau de bord transporteur
-   - Possibilité de créer des tournées
-   - Gestion des réservations
+### Sécurité
+- Codes d'activation uniques
+- Expiration après 48h
+- Validation email obligatoire pour les clients
+- Validation administrative pour les transporteurs

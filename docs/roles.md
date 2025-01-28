@@ -14,6 +14,11 @@
 - Modification des paramètres système
 - Gestion des contenus interdits
 
+### Authentification
+- Connexion directe avec email/mot de passe
+- Pas de vérification d'email requise
+- Accès immédiat aux fonctionnalités
+
 ## Clients
 
 ### Responsabilités
@@ -27,6 +32,11 @@
 - Accès aux tournées publiques
 - Demande d'accès aux tournées privées
 
+### Authentification
+- Vérification d'email obligatoire
+- Code d'activation requis
+- Délai d'activation de 48h
+
 ## Transporteurs
 
 ### Responsabilités
@@ -39,3 +49,10 @@
 - Gestion des points de collecte
 - Acceptation/refus des réservations
 - Mise à jour des statuts de livraison
+
+### Authentification
+- Validation administrative requise
+- Trois états possibles :
+  1. En attente de validation
+  2. Rejeté
+  3. Actif (accès complet)

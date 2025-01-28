@@ -12,24 +12,40 @@ Colimero est une plateforme de gestion de transport de colis entre la France et 
 - [Profils utilisateurs](docs/profiles.md)
 - [Fonctionnalités spécifiques](docs/features.md)
 
-## Workflow d'activation des clients
+## Règles d'authentification
 
-### Tentative de connexion d'un compte non activé
-1. Le client tente de se connecter avec son email/mot de passe
-2. Le système vérifie le statut d'activation du compte
-3. Si le compte n'est pas activé :
-   - Une popup d'activation s'affiche
-   - Un nouveau code d'activation est généré et envoyé par email
-   - Le client doit saisir le code reçu pour activer son compte
-4. Une fois le code validé :
-   - Le compte est activé
-   - Le client est automatiquement connecté
-   - Redirection vers la page d'accueil
+### Administrateurs
+- Connexion directe avec email/mot de passe
+- Pas de vérification d'email requise
+- Accès complet au tableau de bord administrateur
+
+### Transporteurs
+1. **Compte en attente**
+   - Message indiquant que le compte est en attente de validation
+   - Pas de possibilité de connexion avant validation
+2. **Compte rejeté**
+   - Message indiquant le rejet de la demande
+   - Connexion impossible
+3. **Compte actif**
+   - Connexion directe avec email/mot de passe
+   - Accès au tableau de bord transporteur
+
+### Clients
+1. **Première connexion**
+   - Vérification du statut d'activation requise
+   - Code d'activation envoyé par email
+2. **Compte non activé**
+   - Popup d'activation affichée
+   - Nouveau code d'activation généré et envoyé
+3. **Compte activé**
+   - Connexion directe avec email/mot de passe
+   - Accès aux fonctionnalités de réservation
 
 ### Délais et restrictions
-- Le code d'activation est valable pendant 48h
-- En cas de code expiré, un nouveau code peut être demandé
-- Le compte doit être activé pour accéder aux fonctionnalités de réservation
+- Code d'activation valable 48h
+- Nouveau code disponible sur demande
+- Activation obligatoire pour les clients
+- Validation administrative obligatoire pour les transporteurs
 
 ## Informations techniques
 
