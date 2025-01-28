@@ -1,17 +1,12 @@
+import { BaseAuthService, AuthResult } from "./base-auth-service";
 import { supabase } from "@/integrations/supabase/client";
 
-interface AuthResult {
-  success: boolean;
-  error?: string;
-  needsValidation?: boolean;
-}
-
-export const carrierAuthService = {
+class CarrierAuthService extends BaseAuthService {
   async checkCarrierStatus(email: string) {
     console.log('Checking carrier status for:', email);
-    const { data: carrierData, error } = await supabase
+    const { data, error } = await supabase
       .from('carriers')
-      .select('email_verified, status')
+      .select('status, email_verified')
       .eq('email', email.trim())
       .maybeSingle();
 
@@ -21,26 +16,26 @@ export const carrierAuthService = {
     }
 
     return {
-      exists: !!carrierData,
-      isVerified: carrierData?.email_verified ?? false,
-      status: carrierData?.status ?? 'pending'
+      exists: !!data,
+      status: data?.status ?? 'pending',
+      isVerified: data?.email_verified ?? false
     };
-  },
+  }
 
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
-      console.log('Attempting carrier login for:', email);
+      console.log('Starting carrier sign in process for:', email);
       
-      const carrierStatus = await this.checkCarrierStatus(email);
+      const status = await this.checkCarrierStatus(email);
       
-      if (!carrierStatus.exists) {
+      if (!status.exists) {
         return {
           success: false,
           error: "Ce compte n'est pas un compte transporteur"
         };
       }
 
-      if (!carrierStatus.isVerified || carrierStatus.status !== 'active') {
+      if (status.status !== 'active') {
         return {
           success: false,
           error: "Votre compte est en attente de validation par un administrateur",
@@ -48,16 +43,16 @@ export const carrierAuthService = {
         };
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim()
-      });
+      const { data, error } = await this.signInWithEmail(email, password);
 
-      if (signInError) {
-        console.error("Carrier sign in error:", signInError);
+      if (error) {
+        return this.handleAuthError(error);
+      }
+
+      if (!data.user) {
         return {
           success: false,
-          error: "Email ou mot de passe incorrect"
+          error: "Erreur lors de la connexion"
         };
       }
 
@@ -70,4 +65,6 @@ export const carrierAuthService = {
       };
     }
   }
-};
+}
+
+export const carrierAuthService = new CarrierAuthService();

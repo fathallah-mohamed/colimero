@@ -3,75 +3,93 @@ import { adminAuthService } from "@/services/auth/admin-auth-service";
 import { carrierAuthService } from "@/services/auth/carrier-auth-service";
 import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { UserType } from "@/types/auth";
 
 interface UseAuthServiceProps {
   onSuccess?: () => void;
   onVerificationNeeded?: () => void;
+  requiredUserType?: UserType;
 }
 
-export function useAuthService({ onSuccess, onVerificationNeeded }: UseAuthServiceProps = {}) {
+export function useAuthService({ 
+  onSuccess, 
+  onVerificationNeeded,
+  requiredUserType 
+}: UseAuthServiceProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
 
-      // Essayer d'abord la connexion admin
+      // Si un type d'utilisateur est requis, on essaie uniquement ce service
+      if (requiredUserType) {
+        const service = {
+          'admin': adminAuthService,
+          'carrier': carrierAuthService,
+          'client': clientAuthService
+        }[requiredUserType];
+
+        if (!service) {
+          throw new Error(`Type d'utilisateur non supporté: ${requiredUserType}`);
+        }
+
+        const result = await service.signIn(email, password);
+        handleAuthResult(result);
+        return;
+      }
+
+      // Sinon, on essaie chaque service dans l'ordre
       const adminResult = await adminAuthService.signIn(email, password);
       if (adminResult.success) {
-        toast({
-          title: "Connexion réussie",
-          description: "Bienvenue administrateur"
-        });
-        if (onSuccess) onSuccess();
+        handleAuthResult(adminResult, 'admin');
         return;
       }
 
-      // Essayer ensuite la connexion transporteur
       const carrierResult = await carrierAuthService.signIn(email, password);
       if (carrierResult.success) {
-        toast({
-          title: "Connexion réussie",
-          description: "Bienvenue transporteur"
-        });
-        if (onSuccess) onSuccess();
-        return;
-      } else if (carrierResult.needsValidation) {
-        await supabase.auth.signOut();
-        setError(carrierResult.error);
+        handleAuthResult(carrierResult, 'carrier');
         return;
       }
 
-      // Enfin, essayer la connexion client
       const clientResult = await clientAuthService.signIn(email, password);
       if (clientResult.success) {
-        toast({
-          title: "Connexion réussie",
-          description: "Bienvenue client"
-        });
-        if (onSuccess) onSuccess();
+        handleAuthResult(clientResult, 'client');
         return;
-      } else if (clientResult.needsVerification) {
+      }
+
+      // Si aucun service n'a réussi
+      if (clientResult.needsVerification) {
+        setError(clientResult.error);
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
-        await supabase.auth.signOut();
-        setError(clientResult.error);
         return;
       }
 
-      // Si aucune connexion n'a réussi
       setError("Email ou mot de passe incorrect");
-      
+
     } catch (error) {
       console.error('Login error:', error);
       setError("Une erreur inattendue s'est produite");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAuthResult = (result: { success: boolean; error?: string }, userType?: string) => {
+    if (result.success) {
+      toast({
+        title: "Connexion réussie",
+        description: `Bienvenue ${userType || ''}`
+      });
+      if (onSuccess) onSuccess();
+    } else {
+      setError(result.error || "Une erreur est survenue");
     }
   };
 

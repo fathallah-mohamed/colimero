@@ -1,16 +1,10 @@
+import { BaseAuthService, AuthResult } from "./base-auth-service";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError } from "@supabase/supabase-js";
 
-interface AuthResult {
-  success: boolean;
-  error?: string;
-  needsVerification?: boolean;
-}
-
-export const clientAuthService = {
+class ClientAuthService extends BaseAuthService {
   async checkClientStatus(email: string) {
     console.log('Checking client status for:', email);
-    const { data: clientData, error } = await supabase
+    const { data, error } = await supabase
       .from('clients')
       .select('email_verified, status')
       .eq('email', email.trim())
@@ -22,27 +16,26 @@ export const clientAuthService = {
     }
 
     return {
-      exists: !!clientData,
-      isVerified: clientData?.email_verified ?? false,
-      status: clientData?.status ?? 'pending'
+      exists: !!data,
+      isVerified: data?.email_verified ?? false,
+      status: data?.status ?? 'pending'
     };
-  },
+  }
 
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
-      console.log('Checking client status for:', email);
+      console.log('Starting client sign in process for:', email);
       
-      const clientStatus = await this.checkClientStatus(email);
+      const status = await this.checkClientStatus(email);
       
-      if (!clientStatus.exists) {
+      if (!status.exists) {
         return {
           success: false,
           error: "Aucun compte client trouvé avec cet email"
         };
       }
 
-      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
-        console.log("Account needs verification:", email);
+      if (!status.isVerified || status.status !== 'active') {
         return {
           success: false,
           error: "Votre compte n'est pas activé. Veuillez vérifier votre email.",
@@ -50,33 +43,33 @@ export const clientAuthService = {
         };
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim()
-      });
+      const { data, error } = await this.signInWithEmail(email, password);
 
-      if (signInError) {
-        console.error("Sign in error:", signInError);
+      if (error) {
+        return this.handleAuthError(error);
+      }
+
+      if (!data.user) {
         return {
           success: false,
-          error: "Email ou mot de passe incorrect"
+          error: "Erreur lors de la connexion"
         };
       }
 
       return { success: true };
     } catch (error) {
-      console.error('Unexpected error during login:', error);
+      console.error('Unexpected error during client login:', error);
       return {
         success: false,
         error: "Une erreur inattendue s'est produite"
       };
     }
-  },
+  }
 
   async activateAccount(activationCode: string, email: string): Promise<AuthResult> {
     try {
-      console.log('Attempting to activate account with code:', activationCode, 'for email:', email);
-
+      console.log('Attempting to activate account with code:', activationCode);
+      
       const { data, error } = await supabase
         .rpc('activate_client_account', {
           p_activation_code: activationCode
@@ -90,21 +83,15 @@ export const clientAuthService = {
         };
       }
 
-      if (!data) {
-        return {
-          success: false,
-          error: "Code d'activation invalide ou expiré"
-        };
-      }
-
-      console.log('Account activated successfully');
       return { success: true };
     } catch (error) {
       console.error('Error in activateAccount:', error);
       return {
         success: false,
-        error: error instanceof AuthError ? error.message : "Une erreur est survenue lors de l'activation"
+        error: "Une erreur est survenue lors de l'activation"
       };
     }
   }
-};
+}
+
+export const clientAuthService = new ClientAuthService();

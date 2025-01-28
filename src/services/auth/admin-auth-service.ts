@@ -1,14 +1,10 @@
+import { BaseAuthService, AuthResult } from "./base-auth-service";
 import { supabase } from "@/integrations/supabase/client";
 
-interface AuthResult {
-  success: boolean;
-  error?: string;
-}
-
-export const adminAuthService = {
+class AdminAuthService extends BaseAuthService {
   async checkAdminStatus(email: string) {
     console.log('Checking admin status for:', email);
-    const { data: adminData, error } = await supabase
+    const { data, error } = await supabase
       .from('administrators')
       .select('id, email')
       .eq('email', email.trim())
@@ -20,34 +16,33 @@ export const adminAuthService = {
     }
 
     return {
-      isAdmin: !!adminData,
-      error: null
+      isAdmin: !!data
     };
-  },
+  }
 
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
-      console.log('Attempting admin login for:', email);
+      console.log('Starting admin sign in process for:', email);
       
-      const adminStatus = await this.checkAdminStatus(email);
+      const status = await this.checkAdminStatus(email);
       
-      if (!adminStatus.isAdmin) {
+      if (!status.isAdmin) {
         return {
           success: false,
           error: "Ce compte n'est pas un compte administrateur"
         };
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password.trim()
-      });
+      const { data, error } = await this.signInWithEmail(email, password);
 
-      if (signInError) {
-        console.error("Admin sign in error:", signInError);
+      if (error) {
+        return this.handleAuthError(error);
+      }
+
+      if (!data.user) {
         return {
           success: false,
-          error: "Email ou mot de passe incorrect"
+          error: "Erreur lors de la connexion"
         };
       }
 
@@ -60,4 +55,6 @@ export const adminAuthService = {
       };
     }
   }
-};
+}
+
+export const adminAuthService = new AdminAuthService();
