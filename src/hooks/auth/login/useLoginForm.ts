@@ -39,6 +39,44 @@ export function useLoginForm({
     return !!adminData;
   };
 
+  const checkCarrierStatus = async (email: string) => {
+    console.log('Checking carrier status for:', email);
+    const { data: carrierData, error: carrierError } = await supabase
+      .from('carriers')
+      .select('status')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    if (carrierError) {
+      console.error("Error checking carrier status:", carrierError);
+      return { isValid: false, error: "Une erreur est survenue lors de la vérification du compte" };
+    }
+
+    if (!carrierData) {
+      return { isValid: false, error: "Aucun compte transporteur trouvé avec cet email" };
+    }
+
+    switch (carrierData.status) {
+      case 'active':
+        return { isValid: true };
+      case 'pending':
+        return { 
+          isValid: false, 
+          error: "Votre compte est en attente de validation par un administrateur. Vous recevrez un email une fois votre compte validé." 
+        };
+      case 'rejected':
+        return { 
+          isValid: false, 
+          error: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter." 
+        };
+      default:
+        return { 
+          isValid: false, 
+          error: "Statut de compte invalide. Veuillez contacter l'administrateur." 
+        };
+    }
+  };
+
   const checkClientVerification = async (email: string) => {
     console.log('Checking client verification status for:', email);
     const { data: clientData } = await supabase
@@ -62,23 +100,34 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Vérifier d'abord si c'est un compte admin
+      // 1. Vérifier d'abord si c'est un compte admin
       const isAdmin = await checkAdminStatus(email);
       console.log('Is admin account:', isAdmin);
 
-      // Si ce n'est pas un admin et qu'on n'exige pas un type spécifique ou qu'on exige un client
-      if (!isAdmin && (!requiredUserType || requiredUserType === 'client')) {
-        const { isVerified, status } = await checkClientVerification(email);
-        console.log('Verification status:', { isVerified, status });
-        
-        if (!isVerified || status !== 'active') {
-          console.log("Account needs verification");
-          setShowVerificationDialog(true);
-          if (onVerificationNeeded) {
-            onVerificationNeeded(email);
+      if (!isAdmin) {
+        // 2. Si ce n'est pas un admin, vérifier si c'est un transporteur
+        if (requiredUserType === 'carrier') {
+          const carrierStatus = await checkCarrierStatus(email);
+          if (!carrierStatus.isValid) {
+            setError(carrierStatus.error);
+            setShowErrorDialog(true);
+            return;
           }
-          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
-          return;
+        }
+        // 3. Si ce n'est pas un transporteur ou si on exige un client
+        else if (!requiredUserType || requiredUserType === 'client') {
+          const { isVerified, status } = await checkClientVerification(email);
+          console.log('Verification status:', { isVerified, status });
+          
+          if (!isVerified || status !== 'active') {
+            console.log("Account needs verification");
+            setShowVerificationDialog(true);
+            if (onVerificationNeeded) {
+              onVerificationNeeded(email);
+            }
+            setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+            return;
+          }
         }
       }
 
