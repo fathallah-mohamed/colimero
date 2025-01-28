@@ -2,100 +2,62 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
 
 export function useNavigation() {
   const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
-    let mounted = true;
-
     const initializeAuth = async () => {
       try {
-        // First try to get the current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-          if (mounted) {
-            setUser(null);
-            setUserType(null);
-          }
-          return;
-        }
-
-        if (mounted && session?.user) {
-          setUser(session.user);
-          setUserType(session.user.user_metadata?.user_type ?? null);
-        }
-
-        // Set up auth state change listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          if (!mounted) return;
-
-          console.log("Auth state change:", event, session?.user?.id);
-
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            setUser(session?.user ?? null);
-            setUserType(session?.user?.user_metadata?.user_type ?? null);
-          } else if (event === 'SIGNED_OUT') {
-            setUser(null);
-            setUserType(null);
-            navigate('/');
-          }
-        });
-
-        return () => {
-          subscription.unsubscribe();
-        };
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        setUserType(session?.user?.user_metadata?.user_type ?? null);
       } catch (error) {
         console.error("Auth initialization error:", error);
-        if (mounted) {
-          setUser(null);
-          setUserType(null);
-        }
+      } finally {
+        setIsLoading(false);
       }
     };
 
     initializeAuth();
 
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+        setUserType(session?.user?.user_metadata?.user_type ?? null);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setUserType(null);
+      }
+    });
+
     return () => {
-      mounted = false;
+      subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   const handleLogout = async () => {
     try {
-      // First clear local state
-      setUser(null);
-      setUserType(null);
-
-      // Get current session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/');
-        return;
-      }
-
-      // Attempt to sign out
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'
+      await supabase.auth.signOut();
+      toast({
+        title: "Déconnexion réussie",
+        description: "À bientôt !",
       });
-      
-      if (error) {
-        console.error("Logout error:", error);
-        navigate('/');
-        return;
-      }
-
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
-      navigate('/');
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la déconnexion",
+      });
     }
   };
 
-  return { user, userType, handleLogout };
+  return { user, userType, handleLogout, isLoading };
 }
