@@ -27,9 +27,9 @@ export default function PlanifierTournee() {
           const currentUserType = session.user.user_metadata?.user_type;
           setUserType(currentUserType);
         }
-        setIsLoading(false);
       } catch (error) {
         console.error("Error checking session:", error);
+      } finally {
         setIsLoading(false);
       }
     };
