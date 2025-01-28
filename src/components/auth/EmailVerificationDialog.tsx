@@ -31,6 +31,8 @@ export function EmailVerificationDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting activation code:", activationCode, "for email:", email);
+    
     if (!activationCode) {
       toast({
         variant: "destructive",
@@ -40,7 +42,9 @@ export function EmailVerificationDialog({
       return;
     }
 
-    const success = await activateAccount(activationCode, email);
+    const success = await activateAccount(activationCode.trim(), email.trim());
+    console.log("Activation result:", success);
+    
     if (success) {
       toast({
         title: "Compte activé",
@@ -52,6 +56,8 @@ export function EmailVerificationDialog({
   };
 
   const handleResendEmail = async () => {
+    console.log("Requesting new activation code for email:", email);
+    
     if (!email) {
       toast({
         variant: "destructive",
@@ -61,7 +67,9 @@ export function EmailVerificationDialog({
       return;
     }
 
-    const success = await sendActivationEmail(email);
+    const success = await sendActivationEmail(email.trim());
+    console.log("Resend activation email result:", success);
+    
     if (success) {
       toast({
         title: "Email envoyé",
