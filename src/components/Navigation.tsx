@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize session and handle auth state changes
   useSessionInitializer();
 
   // Handle scroll effect
@@ -70,30 +71,6 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
           setIsLoading(false);
           return;
         }
-
-        if (session?.user) {
-          // Vérifier le statut du client si c'est un client
-          const userType = session.user.user_metadata?.user_type;
-          if (userType === 'client') {
-            const { data: clientData, error: clientError } = await supabase
-              .from('clients')
-              .select('email_verified, status')
-              .eq('id', session.user.id)
-              .single();
-
-            if (clientError) {
-              console.error("Error checking client status:", clientError);
-              return;
-            }
-
-            if (!clientData?.email_verified || clientData?.status !== 'active') {
-              console.log("Account needs verification, redirecting to activation");
-              await supabase.auth.signOut();
-              navigate('/activation-compte', { replace: true });
-              return;
-            }
-          }
-        }
         
         // Si nous sommes sur une route protégée et non authentifié
         const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
@@ -126,6 +103,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
     checkAuth();
   }, [location.pathname, navigate, toast]);
 
+  // Si en cours de chargement, afficher un état de chargement minimal
   if (isLoading) {
     return (
       <nav className={cn(
