@@ -68,6 +68,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         return;
       }
 
+      // Only attempt sign in if the client is verified and active
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -75,17 +76,19 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        let errorMessage = "Email ou mot de passe incorrect";
         
+        // Check if it's an email confirmation error
         if (signInError.message.includes("Email not confirmed")) {
           console.log('Email not confirmed, showing verification dialog');
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
-          errorMessage = "Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.";
+          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+          return;
         }
         
-        setError(errorMessage);
+        // For any other error
+        setError("Email ou mot de passe incorrect");
         return;
       }
 
