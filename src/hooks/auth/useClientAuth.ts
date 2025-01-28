@@ -80,10 +80,14 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
       if (signInError) {
         console.error('Sign in error:', signInError);
-        // Ne pas afficher le toast pour l'erreur "Email not confirmed"
-        if (signInError.message !== 'Email not confirmed') {
-          setError("Email ou mot de passe incorrect");
+        if (signInError.message === 'Email not confirmed') {
+          // Si l'email n'est pas confirmé, on déclenche la vérification sans afficher d'erreur
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          return;
         }
+        setError("Email ou mot de passe incorrect");
         return;
       }
 
