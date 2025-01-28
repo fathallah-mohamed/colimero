@@ -70,32 +70,13 @@ export function LoginForm({
     requiredUserType,
     onVerificationNeeded: async (email: string) => {
       try {
-        // Vérifier si c'est un compte admin
-        const { data: adminData, error: adminError } = await supabase
-          .from('administrators')
-          .select('id')
-          .eq('email', email.trim())
-          .maybeSingle();
-
-        if (adminError) {
-          console.error("Error checking admin status:", adminError);
-          return;
-        }
-
-        if (adminData) {
-          console.log("Admin account found, skipping verification");
-          return;
-        }
-
-        // Vérifier si le compte existe dans la table clients
-        const { data: clientData, error: clientError } = await supabase
-          .from('clients')
-          .select('email_verified, status')
-          .eq('email', email.trim())
-          .maybeSingle();
-
-        if (clientError) {
-          console.error("Error checking client:", clientError);
+        console.log("Checking user profile for:", email);
+        
+        // 1. Vérifier d'abord si l'utilisateur existe dans auth.users
+        const { data: { user }, error: authError } = await supabase.auth.admin.getUserByEmail(email);
+        
+        if (authError) {
+          console.error("Error checking auth user:", authError);
           toast({
             variant: "destructive",
             title: "Erreur",
@@ -104,8 +85,8 @@ export function LoginForm({
           return;
         }
 
-        // Si le compte n'existe pas, rediriger vers la création de compte
-        if (!clientData) {
+        if (!user) {
+          console.log("No user found in auth.users");
           toast({
             title: "Compte inexistant",
             description: "Ce compte n'existe pas. Veuillez créer un compte.",
@@ -114,11 +95,64 @@ export function LoginForm({
           return;
         }
 
-        // Si le compte existe mais n'est pas vérifié, montrer le dialogue d'activation
+        // 2. Vérifier le type de profil
+        const { data: adminData } = await supabase
+          .from('administrators')
+          .select('id')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (adminData) {
+          console.log("Admin account found");
+          return; // Les admins n'ont pas besoin de vérification
+        }
+
+        const { data: carrierData } = await supabase
+          .from('carriers')
+          .select('email_verified, status')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (carrierData) {
+          console.log("Carrier account found:", carrierData);
+          if (!carrierData.email_verified || carrierData.status !== 'active') {
+            toast({
+              variant: "destructive",
+              title: "Compte en attente",
+              description: "Votre compte transporteur est en attente de validation.",
+            });
+            setShowErrorDialog(true);
+          }
+          return;
+        }
+
+        const { data: clientData, error: clientError } = await supabase
+          .from('clients')
+          .select('email_verified, status')
+          .eq('email', email.trim())
+          .maybeSingle();
+
+        if (clientError) {
+          console.error("Error checking client:", clientError);
+          return;
+        }
+
+        if (!clientData) {
+          console.log("No client profile found");
+          toast({
+            title: "Compte inexistant",
+            description: "Ce compte n'existe pas. Veuillez créer un compte.",
+          });
+          onRegister();
+          return;
+        }
+
+        console.log("Client account found:", clientData);
         if (!clientData.email_verified || clientData.status !== 'active') {
           setShowVerificationDialog(true);
           form.reset({ email: form.getValues("email"), password: "" });
         }
+
       } catch (error) {
         console.error("Error in onVerificationNeeded:", error);
         toast({
