@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import PlanningContent from '@/components/tour/planning/PlanningContent';
+import { PlanningContent } from '@/components/tour/planning/PlanningContent';
 
 export default function PlanifierTournee() {
   const navigate = useNavigate();
@@ -38,7 +38,11 @@ export default function PlanifierTournee() {
 
   return (
     <div className="min-h-screen bg-background">
-      <PlanningContent />
+      <PlanningContent 
+        isAuthenticated={!!userType} 
+        onCreateTourClick={() => {}} 
+        onAuthClick={() => {}}
+      />
     </div>
   );
 }
