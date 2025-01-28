@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UseClientAuthProps {
@@ -10,7 +9,6 @@ export interface UseClientAuthProps {
 export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const checkClientStatus = async (email: string) => {
     try {
@@ -26,6 +24,8 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
         throw new Error("Une erreur est survenue lors de la vérification de votre compte");
       }
 
+      console.log('Client status data:', clientData);
+      
       if (!clientData) {
         return {
           isVerified: false,
@@ -47,10 +47,12 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
 
       const clientStatus = await checkClientStatus(email);
+      console.log('Client status check result:', clientStatus);
       
       if (!clientStatus.exists) {
         setError("Aucun compte trouvé avec cet email");
@@ -58,7 +60,7 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       }
 
       if (!clientStatus.isVerified || clientStatus.status !== 'active') {
-        console.log("Account needs verification:", email);
+        console.log('Client account needs verification:', email);
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
@@ -72,18 +74,15 @@ export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuth
       });
 
       if (signInError) {
-        console.error("Sign in error:", signInError);
+        console.error('Sign in error:', signInError);
         let errorMessage = "Email ou mot de passe incorrect";
         
-        if (signInError.message.includes("Invalid login credentials")) {
-          errorMessage = "Email ou mot de passe incorrect";
-        } else if (signInError.message.includes("Email not confirmed")) {
+        if (signInError.message.includes("Email not confirmed")) {
+          console.log('Email not confirmed, showing verification dialog');
           if (onVerificationNeeded) {
             onVerificationNeeded();
           }
           errorMessage = "Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.";
-        } else {
-          errorMessage = "Une erreur est survenue lors de la connexion";
         }
         
         setError(errorMessage);
