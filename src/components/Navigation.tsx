@@ -72,12 +72,9 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
         }
 
         if (session?.user) {
-          console.log("Checking user session:", session.user);
+          // Vérifier le statut du client si c'est un client
           const userType = session.user.user_metadata?.user_type;
-
-          // Vérification spécifique pour les clients
           if (userType === 'client') {
-            console.log("Checking client verification status");
             const { data: clientData, error: clientError } = await supabase
               .from('clients')
               .select('email_verified, status')
@@ -89,27 +86,31 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
               return;
             }
 
-            console.log("Client data:", clientData);
-
-            // Si le compte n'est pas vérifié ou n'est pas actif
             if (!clientData?.email_verified || clientData?.status !== 'active') {
               console.log("Account needs verification, redirecting to activation");
-              // Se déconnecter et rediriger vers la page d'activation
               await supabase.auth.signOut();
               navigate('/activation-compte', { replace: true });
               return;
             }
           }
-
-          // Vérification des routes protégées
-          const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
-          if (protectedRoutes.includes(location.pathname) && !session) {
-            console.log("Protected route access attempt without session");
-            sessionStorage.setItem('returnPath', location.pathname);
-            navigate('/connexion', { replace: true });
-          }
         }
         
+        // Si nous sommes sur une route protégée et non authentifié
+        const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
+        if (protectedRoutes.includes(location.pathname)) {
+          if (!session) {
+            console.log("No session found, redirecting to login");
+            sessionStorage.setItem('returnPath', location.pathname);
+            navigate('/connexion');
+          } else {
+            const userType = session.user.user_metadata?.user_type;
+            // Vérifier si l'utilisateur est un transporteur pour la page demandes-approbation
+            if (location.pathname === '/demandes-approbation' && userType !== 'carrier') {
+              console.log("User not carrier, redirecting to home");
+              navigate('/');
+            }
+          }
+        }
         setIsLoading(false);
       } catch (error) {
         console.error("Auth check error:", error);
