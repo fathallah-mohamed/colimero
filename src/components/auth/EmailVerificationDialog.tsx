@@ -31,8 +31,6 @@ export function EmailVerificationDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting activation code:", activationCode, "for email:", email);
-    
     if (!activationCode) {
       toast({
         variant: "destructive",
@@ -43,8 +41,6 @@ export function EmailVerificationDialog({
     }
 
     const success = await activateAccount(activationCode.trim(), email.trim());
-    console.log("Activation result:", success);
-    
     if (success) {
       toast({
         title: "Compte activé",
@@ -56,8 +52,6 @@ export function EmailVerificationDialog({
   };
 
   const handleResendEmail = async () => {
-    console.log("Requesting new activation code for email:", email);
-    
     if (!email) {
       toast({
         variant: "destructive",
@@ -68,14 +62,12 @@ export function EmailVerificationDialog({
     }
 
     const success = await sendActivationEmail(email.trim());
-    console.log("Resend activation email result:", success);
-    
     if (success) {
       toast({
         title: "Email envoyé",
         description: "Un nouveau code d'activation vous a été envoyé par email.",
       });
-      setActivationCode(""); // Reset le champ de code
+      setActivationCode("");
     }
   };
 
@@ -102,58 +94,56 @@ export function EmailVerificationDialog({
             </Alert>
           )}
 
-          <div className="space-y-4">
-            <Input
-              type="text"
-              value={activationCode}
-              onChange={(e) => setActivationCode(e.target.value)}
-              placeholder="Code d'activation"
-              className="text-center text-lg tracking-widest"
-              maxLength={6}
-              required
-            />
+          <Input
+            type="text"
+            value={activationCode}
+            onChange={(e) => setActivationCode(e.target.value)}
+            placeholder="Code d'activation"
+            className="text-center text-lg tracking-widest"
+            maxLength={6}
+            required
+          />
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading || !activationCode}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Activation en cours...
-                </>
-              ) : (
-                "Activer mon compte"
-              )}
-            </Button>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading || !activationCode}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Activation en cours...
+              </>
+            ) : (
+              "Activer mon compte"
+            )}
+          </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">ou</span>
-              </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
             </div>
-
-            <Button
-              type="button"
-              onClick={handleResendEmail}
-              variant="outline"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Envoi en cours...
-                </>
-              ) : (
-                "Recevoir un nouveau code"
-              )}
-            </Button>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">ou</span>
+            </div>
           </div>
+
+          <Button
+            type="button"
+            onClick={handleResendEmail}
+            variant="outline"
+            className="w-full"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Envoi en cours...
+              </>
+            ) : (
+              "Recevoir un nouveau code"
+            )}
+          </Button>
 
           <p className="text-sm text-gray-500 text-center">
             Le code d'activation est valable pendant 48 heures

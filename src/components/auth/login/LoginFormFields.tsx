@@ -23,9 +23,6 @@ export function LoginFormFields({
   isLoading,
   error,
   showVerificationDialog,
-  showErrorDialog,
-  onVerificationDialogClose,
-  onErrorDialogClose,
 }: LoginFormFieldsProps) {
   // Ne pas afficher l'erreur si on est en mode vérification
   const shouldShowError = error && !showVerificationDialog;
