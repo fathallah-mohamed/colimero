@@ -8,6 +8,7 @@ import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { EmailVerificationDialog } from "../EmailVerificationDialog";
+import { UserType } from "@/types/auth";
 
 const loginSchema = z.object({
   email: z.string()
@@ -23,7 +24,7 @@ interface LoginFormProps {
   onRegister: () => void;
   onCarrierRegister: () => void;
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: UserType;
   hideRegisterButton?: boolean;
 }
 
@@ -53,27 +54,14 @@ export function LoginForm({
     setShowErrorDialog,
     handleLogin,
   } = useLoginForm({ 
-    onSuccess: () => {
-      if (!showVerificationDialog) {
-        const returnPath = sessionStorage.getItem('returnPath');
-        if (returnPath) {
-          sessionStorage.removeItem('returnPath');
-          navigate(returnPath);
-        } else {
-          navigate('/');
-        }
-      }
-    }, 
+    onSuccess,
     requiredUserType,
     onVerificationNeeded: () => {
-      console.log("Verification needed, showing dialog");
-      setShowVerificationDialog(true);
       form.reset({ email: form.getValues("email"), password: "" });
     }
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    console.log("Form submitted with values:", values);
     await handleLogin(values.email, values.password);
   };
 
@@ -93,7 +81,7 @@ export function LoginForm({
         <div className="space-y-4">
           <Button
             type="submit"
-            className="w-full bg-[#00B0F0] hover:bg-[#0082b3] text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-white"
             disabled={isLoading}
           >
             {isLoading ? "Connexion..." : "Se connecter"}
@@ -113,23 +101,27 @@ export function LoginForm({
               </div>
 
               <div className="space-y-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onRegister}
-                  className="w-full"
-                >
-                  Créer un compte client
-                </Button>
+                {(!requiredUserType || requiredUserType === 'client') && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onRegister}
+                    className="w-full"
+                  >
+                    Créer un compte client
+                  </Button>
+                )}
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCarrierRegister}
-                  className="w-full"
-                >
-                  Créer un compte transporteur
-                </Button>
+                {(!requiredUserType || requiredUserType === 'carrier') && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onCarrierRegister}
+                    className="w-full"
+                  >
+                    Créer un compte transporteur
+                  </Button>
+                )}
               </div>
             </>
           )}
@@ -137,7 +129,7 @@ export function LoginForm({
           <div className="text-center">
             <button
               type="button"
-              className="text-sm text-[#00B0F0] hover:underline"
+              className="text-sm text-primary hover:text-primary/90 hover:underline transition-colors"
               onClick={onForgotPassword}
             >
               Mot de passe oublié ?

@@ -1,69 +1,109 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-interface UseClientAuthProps {
+export interface UseClientAuthProps {
   onSuccess?: () => void;
+  onVerificationNeeded?: () => void;
 }
 
-export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
+export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
+
+  const checkClientStatus = async (email: string) => {
+    try {
+      console.log('Checking client status for:', email);
+      const { data: clientData, error } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking client status:", error);
+        throw new Error("Une erreur est survenue lors de la vérification de votre compte");
+      }
+
+      // If no client found, return default values
+      if (!clientData) {
+        return {
+          isVerified: false,
+          status: 'pending',
+          exists: false
+        };
+      }
+
+      return {
+        isVerified: clientData.email_verified ?? false,
+        status: clientData.status ?? 'pending',
+        exists: true
+      };
+    } catch (error) {
+      console.error("Error in checkClientStatus:", error);
+      throw error;
+    }
+  };
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
 
-      // First, attempt login
-      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+      // First check if the client exists and their status
+      const clientStatus = await checkClientStatus(email);
+      
+      if (!clientStatus.exists) {
+        setError("Aucun compte trouvé avec cet email");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Aucun compte trouvé avec cet email"
+        });
+        return;
+      }
+
+      // Check if account is verified and active before attempting login
+      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
+        console.log("Account needs verification:", email);
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        }
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+        toast({
+          variant: "destructive",
+          title: "Compte non activé",
+          description: "Veuillez activer votre compte via le code reçu par email."
+        });
+        return;
+      }
+
+      // Only attempt login if the client exists and is verified
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
       });
 
       if (signInError) {
         console.error("Sign in error:", signInError);
-        setError("Email ou mot de passe incorrect");
+        let errorMessage = "Email ou mot de passe incorrect";
+        
+        if (signInError.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else {
+          errorMessage = "Une erreur est survenue lors de la connexion";
+        }
+        
+        setError(errorMessage);
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: errorMessage
+        });
         return;
       }
 
-      if (!authData.user) {
-        setError("Une erreur inattendue s'est produite");
-        return;
-      }
-
-      // Then check client status
-      const { data: clientData, error: clientError } = await supabase
-        .from('clients')
-        .select('email_verified, status')
-        .eq('id', authData.user.id)
-        .single();
-
-      if (clientError) {
-        console.error("Error checking client status:", clientError);
-        setError("Erreur lors de la vérification du compte");
-        // Make sure to sign out if there's an error
-        await supabase.auth.signOut();
-        return;
-      }
-
-      console.log('Client status:', clientData);
-
-      // If client is not verified or not active, redirect to activation
-      if (!clientData?.email_verified || clientData?.status !== 'active') {
-        console.log('Account needs verification, redirecting to activation page');
-        // Sign out the user since they shouldn't be logged in yet
-        await supabase.auth.signOut();
-        // Use replace instead of navigate to prevent going back
-        navigate('/activation-compte', { replace: true });
-        return;
-      }
-
-      // If everything is good, show success toast and redirect
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté"
@@ -71,15 +111,15 @@ export function useClientAuth({ onSuccess }: UseClientAuthProps = {}) {
 
       if (onSuccess) {
         onSuccess();
-      } else {
-        navigate('/');
       }
-
     } catch (error) {
-      console.error('Unexpected error during login:', error);
+      console.error('Login error:', error);
       setError("Une erreur inattendue s'est produite");
-      // Make sure to sign out if there's an error
-      await supabase.auth.signOut();
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite"
+      });
     } finally {
       setIsLoading(false);
     }

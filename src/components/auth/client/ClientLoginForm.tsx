@@ -27,12 +27,12 @@ export function ClientLoginForm({
     error,
     handleLogin,
   } = useClientAuth({
-    onSuccess
+    onSuccess,
+    onVerificationNeeded: () => setShowVerificationDialog(true)
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted with email:", email);
     await handleLogin(email, password);
   };
 
