@@ -1,5 +1,5 @@
 import Navigation from "@/components/Navigation";
-import { LoginFormContainer } from "@/components/auth/login/LoginFormContainer";
+import { ClientLoginForm } from "@/components/auth/client/ClientLoginForm";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,8 +35,8 @@ export default function Login() {
     navigate('/creer-compte');
   };
 
-  const handleCarrierRegister = () => {
-    navigate('/devenir-transporteur');
+  const handleForgotPassword = () => {
+    navigate('/mot-de-passe-oublie');
   };
 
   return (
@@ -58,9 +58,9 @@ export default function Login() {
       {/* Login Form Section */}
       <div className="max-w-md mx-auto -mt-8 px-4 relative z-10 pb-16">
         <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100">
-          <LoginFormContainer
+          <ClientLoginForm
             onRegister={handleRegister}
-            onCarrierRegister={handleCarrierRegister}
+            onForgotPassword={handleForgotPassword}
             onSuccess={handleSuccess}
           />
         </div>
