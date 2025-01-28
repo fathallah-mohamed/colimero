@@ -57,7 +57,7 @@ export function LoginFormContainer({
         onCarrierRegister={onCarrierRegister}
         onSuccess={handleLoginSuccess}
         requiredUserType={requiredUserType}
-        hideRegisterButton={requiredUserType === 'admin'}
+        hideRegisterButton={false}
       />
 
       <CustomDialog
