@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface RegisterFormData {
   firstName: string;
@@ -33,18 +32,18 @@ export async function registerClient(formData: RegisterFormData) {
       };
     }
 
-    // 3. Create auth user first
+    // 3. Create auth user with minimal metadata
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: normalizedEmail,
       password: formData.password.trim(),
       options: {
         data: {
-          user_type: 'client',
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address
+          address: formData.address,
+          user_type: 'client'
         },
         emailRedirectTo: `${window.location.origin}/activation`
       }
@@ -61,32 +60,7 @@ export async function registerClient(formData: RegisterFormData) {
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 4. Create client profile
-    console.log('Creating client profile...');
-    const { error: insertError } = await supabase
-      .from('clients')
-      .insert({
-        id: authData.user.id,
-        email: normalizedEmail,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.phone,
-        phone_secondary: formData.phone_secondary || '',
-        address: formData.address || '',
-        email_verified: false,
-        status: 'pending'
-      });
-
-    if (insertError) {
-      console.error('Error creating client profile:', insertError);
-      // Clean up auth user if profile creation fails
-      await supabase.auth.signOut();
-      throw insertError;
-    }
-
-    console.log('Client profile created successfully');
-
-    // 5. Force sign out to ensure email verification
+    // 4. Sign out to ensure email verification
     await supabase.auth.signOut();
 
     return {
@@ -97,7 +71,6 @@ export async function registerClient(formData: RegisterFormData) {
   } catch (error: any) {
     console.error("Error in registerClient:", error);
     
-    // Handle specific errors
     if (error.message?.includes('duplicate key value violates unique constraint')) {
       return {
         success: false,
