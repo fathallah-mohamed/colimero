@@ -1,5 +1,5 @@
 import { Tour } from "@/types/tour";
-import { TourCardHeader } from "./TourCardHeader";
+import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { TourTimelineDisplay } from "../../tour/shared/TourTimelineDisplay";
 import { ClientTimeline } from "../../tour/timeline/client/ClientTimeline";
 import { Card } from "@/components/ui/card";
