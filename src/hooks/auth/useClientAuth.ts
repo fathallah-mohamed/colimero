@@ -4,10 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 
 interface UseClientAuthProps {
   onVerificationNeeded?: () => void;
+  onSuccess?: () => void;
 }
 
-export function useClientAuth({ onVerificationNeeded }: UseClientAuthProps = {}) {
+export function useClientAuth({ onVerificationNeeded, onSuccess }: UseClientAuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const checkClientStatus = async (email: string) => {
@@ -34,6 +36,7 @@ export function useClientAuth({ onVerificationNeeded }: UseClientAuthProps = {})
   const handleLogin = async (email: string, password: string) => {
     console.log('Starting login process for:', email);
     setIsLoading(true);
+    setError(null);
 
     try {
       // Vérifier d'abord le statut du client
@@ -49,11 +52,7 @@ export function useClientAuth({ onVerificationNeeded }: UseClientAuthProps = {})
       }
 
       if (status !== 'active') {
-        toast({
-          variant: "destructive",
-          title: "Compte non activé",
-          description: "Votre compte n'est pas encore activé. Veuillez vérifier votre email."
-        });
+        setError("Votre compte n'est pas encore activé. Veuillez vérifier votre email.");
         return;
       }
 
@@ -72,11 +71,7 @@ export function useClientAuth({ onVerificationNeeded }: UseClientAuthProps = {})
           return;
         }
 
-        toast({
-          variant: "destructive",
-          title: "Erreur de connexion",
-          description: signInError.message
-        });
+        setError(signInError.message);
         return;
       }
 
@@ -85,13 +80,13 @@ export function useClientAuth({ onVerificationNeeded }: UseClientAuthProps = {})
         description: "Vous êtes maintenant connecté"
       });
 
+      if (onSuccess) {
+        onSuccess();
+      }
+
     } catch (error) {
       console.error('Unexpected error during login:', error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur inattendue s'est produite"
-      });
+      setError("Une erreur inattendue s'est produite");
     } finally {
       setIsLoading(false);
     }
@@ -99,6 +94,7 @@ export function useClientAuth({ onVerificationNeeded }: UseClientAuthProps = {})
 
   return {
     isLoading,
+    error,
     handleLogin
   };
 }
