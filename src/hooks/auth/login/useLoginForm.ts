@@ -24,12 +24,14 @@ export function useLoginForm({
   const { toast } = useToast();
 
   const checkClientVerification = async (email: string) => {
+    console.log('Checking client verification status for:', email);
     const { data: clientData } = await supabase
       .from('clients')
       .select('email_verified, status')
       .eq('email', email.trim())
       .maybeSingle();
 
+    console.log('Client verification data:', clientData);
     return {
       isVerified: clientData?.email_verified ?? false,
       status: clientData?.status ?? 'pending'
@@ -38,6 +40,7 @@ export function useLoginForm({
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
       setShowVerificationDialog(false);
@@ -46,9 +49,10 @@ export function useLoginForm({
       // Vérifier d'abord le statut du client
       if (!requiredUserType || requiredUserType === 'client') {
         const { isVerified, status } = await checkClientVerification(email);
+        console.log('Verification status:', { isVerified, status });
         
         if (!isVerified || status !== 'active') {
-          console.log("Account needs verification:", email);
+          console.log("Account needs verification");
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
             onVerificationNeeded();
@@ -59,6 +63,7 @@ export function useLoginForm({
       }
 
       const result = await authService.signIn(email, password, requiredUserType);
+      console.log('Sign in result:', result);
 
       if (!result.success) {
         if (result.needsVerification) {

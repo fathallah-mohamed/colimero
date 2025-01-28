@@ -47,7 +47,6 @@ export function useSessionInitializer() {
 
           try {
             if (event === 'SIGNED_IN') {
-              // Ne pas vérifier l'activation ici car c'est déjà géré dans useLoginForm
               const returnPath = sessionStorage.getItem('returnPath');
               if (returnPath) {
                 sessionStorage.removeItem('returnPath');
