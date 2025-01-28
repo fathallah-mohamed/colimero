@@ -62,19 +62,26 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
         
         if (error) {
           console.error("Session error:", error);
-          toast({
-            variant: "destructive",
-            title: "Erreur de session",
-            description: "Une erreur est survenue lors de la vérification de votre session.",
-          });
           setIsLoading(false);
           return;
         }
 
+        // Liste des routes protégées qui nécessitent une authentification
+        const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
+        
+        // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
+        if (protectedRoutes.includes(location.pathname) && !session) {
+          sessionStorage.setItem('returnPath', location.pathname);
+          navigate('/connexion');
+          setIsLoading(false);
+          return;
+        }
+
+        // Si l'utilisateur est connecté
         if (session?.user) {
-          console.log("Checking user session:", session.user);
           const userType = session.user.user_metadata?.user_type;
 
+          // Vérification spécifique pour les clients
           if (userType === 'client') {
             const { data: clientData, error: clientError } = await supabase
               .from('clients')
@@ -84,33 +91,24 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
 
             if (clientError) {
               console.error("Error checking client status:", clientError);
+              setIsLoading(false);
               return;
             }
 
-            if (!clientData?.email_verified || clientData?.status !== 'active') {
+            // Redirection vers l'activation du compte si nécessaire
+            if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
               console.log("Account needs verification, redirecting to activation");
               await supabase.auth.signOut();
               navigate('/activation-compte');
+              setIsLoading(false);
               return;
             }
-          }
-
-          // Vérification des routes protégées
-          const protectedRoutes = ['/mes-reservations', '/profile', '/demandes-approbation'];
-          if (protectedRoutes.includes(location.pathname) && !session) {
-            sessionStorage.setItem('returnPath', location.pathname);
-            navigate('/connexion');
           }
         }
         
         setIsLoading(false);
       } catch (error) {
         console.error("Auth check error:", error);
-        toast({
-          variant: "destructive",
-          title: "Erreur d'authentification",
-          description: "Une erreur est survenue lors de la vérification de votre authentification.",
-        });
         setIsLoading(false);
       }
     };
