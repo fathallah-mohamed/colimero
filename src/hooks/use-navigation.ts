@@ -13,7 +13,6 @@ export function useNavigation() {
 
     const initializeAuth = async () => {
       try {
-        // First try to get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -30,11 +29,8 @@ export function useNavigation() {
           setUserType(session.user.user_metadata?.user_type ?? null);
         }
 
-        // Set up auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (!mounted) return;
-
-          console.log("Auth state change:", event, session?.user?.id);
 
           if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             setUser(session?.user ?? null);
@@ -67,29 +63,7 @@ export function useNavigation() {
 
   const handleLogout = async () => {
     try {
-      // First clear local state
-      setUser(null);
-      setUserType(null);
-
-      // Get current session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/');
-        return;
-      }
-
-      // Attempt to sign out
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'
-      });
-      
-      if (error) {
-        console.error("Logout error:", error);
-        navigate('/');
-        return;
-      }
-
+      await supabase.auth.signOut();
       navigate('/');
     } catch (error) {
       console.error("Logout error:", error);
