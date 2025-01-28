@@ -4,13 +4,12 @@ import { CustomDialog } from "@/components/ui/custom-dialog";
 import { ForgotPasswordForm } from "../ForgotPasswordForm";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { UserType } from "@/types/auth";
 
 interface LoginFormContainerProps {
   onRegister?: () => void;
   onCarrierRegister?: () => void;
   onSuccess?: () => void;
-  requiredUserType?: UserType;
+  requiredUserType?: 'client' | 'carrier';
 }
 
 export function LoginFormContainer({
@@ -58,7 +57,7 @@ export function LoginFormContainer({
         onCarrierRegister={onCarrierRegister}
         onSuccess={handleLoginSuccess}
         requiredUserType={requiredUserType}
-        hideRegisterButton={requiredUserType === "admin"}
+        hideRegisterButton={requiredUserType === 'admin'}
       />
 
       <CustomDialog
