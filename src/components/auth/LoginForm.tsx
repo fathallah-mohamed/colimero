@@ -8,6 +8,8 @@ import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { EmailVerificationDialog } from "./EmailVerificationDialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string()
@@ -36,6 +38,7 @@ export function LoginForm({
   hideRegisterButton = false,
 }: LoginFormProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -65,7 +68,23 @@ export function LoginForm({
       }
     }, 
     requiredUserType,
-    onVerificationNeeded: () => {
+    onVerificationNeeded: async (email: string) => {
+      // Vérifier si le compte existe avant d'afficher le dialogue d'activation
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email.trim())
+        .maybeSingle();
+
+      if (!clientData) {
+        toast({
+          variant: "destructive",
+          title: "Compte non trouvé",
+          description: "Aucun compte n'existe avec cet email. Veuillez créer un compte.",
+        });
+        return;
+      }
+
       console.log("Verification needed, showing dialog");
       setShowVerificationDialog(true);
       form.reset({ email: form.getValues("email"), password: "" });
