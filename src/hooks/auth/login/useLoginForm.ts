@@ -79,6 +79,60 @@ export function useLoginForm({
     }
   };
 
+  const checkClientStatus = async (email: string) => {
+    console.log('Checking client status for:', email);
+    const { data: clientData, error: clientError } = await supabase
+      .from('clients')
+      .select('email_verified, status')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    if (clientError) {
+      console.error("Error checking client status:", clientError);
+      return { isValid: false, error: "Une erreur est survenue lors de la vérification du compte" };
+    }
+
+    if (!clientData) {
+      return { isValid: false, error: "Aucun compte client trouvé avec cet email" };
+    }
+
+    console.log('Client verification data:', clientData);
+
+    if (!clientData.email_verified || clientData.status !== 'active') {
+      return {
+        isValid: false,
+        needsVerification: true,
+        error: "Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation."
+      };
+    }
+
+    return { isValid: true };
+  };
+
+  const determineUserType = async (email: string) => {
+    // Vérifier d'abord si c'est un admin
+    const isAdmin = await checkAdminStatus(email);
+    if (isAdmin) return 'admin';
+
+    // Vérifier ensuite si c'est un transporteur
+    const { data: carrier } = await supabase
+      .from('carriers')
+      .select('id')
+      .eq('email', email.trim())
+      .maybeSingle();
+    if (carrier) return 'carrier';
+
+    // Vérifier enfin si c'est un client
+    const { data: client } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('email', email.trim())
+      .maybeSingle();
+    if (client) return 'client';
+
+    return null;
+  };
+
   const handleLogin = async (email: string, password: string) => {
     try {
       console.log('Starting login process for:', email);
@@ -87,22 +141,61 @@ export function useLoginForm({
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // 1. Vérifier d'abord si c'est un compte admin
-      const isAdmin = await checkAdminStatus(email);
-      console.log('Is admin account:', isAdmin);
+      // 1. Déterminer le type d'utilisateur
+      const userType = await determineUserType(email);
+      console.log('Determined user type:', userType);
 
-      if (!isAdmin && requiredUserType === 'carrier') {
-        // 2. Si ce n'est pas un admin et qu'on exige un transporteur, vérifier le statut
-        const carrierStatus = await checkCarrierStatus(email);
-        console.log('Carrier status check result:', carrierStatus);
-        
-        if (!carrierStatus.isValid) {
-          setError(carrierStatus.error);
-          setShowErrorDialog(true);
-          return;
-        }
+      if (!userType) {
+        setError("Aucun compte trouvé avec cet email");
+        setShowErrorDialog(true);
+        return;
       }
 
+      // 2. Vérifier si le type d'utilisateur correspond au type requis
+      if (requiredUserType && userType !== requiredUserType) {
+        setError(`Ce compte n'est pas un compte ${
+          requiredUserType === 'client' ? 'client' : 
+          requiredUserType === 'carrier' ? 'transporteur' : 
+          'administrateur'
+        }`);
+        setShowErrorDialog(true);
+        return;
+      }
+
+      // 3. Vérifier le statut selon le type d'utilisateur
+      switch (userType) {
+        case 'admin':
+          // Les admins n'ont pas besoin de vérification supplémentaire
+          break;
+
+        case 'carrier':
+          const carrierStatus = await checkCarrierStatus(email);
+          if (!carrierStatus.isValid) {
+            setError(carrierStatus.error);
+            setShowErrorDialog(true);
+            return;
+          }
+          break;
+
+        case 'client':
+          const clientStatus = await checkClientStatus(email);
+          if (!clientStatus.isValid) {
+            if (clientStatus.needsVerification) {
+              setShowVerificationDialog(true);
+              if (onVerificationNeeded) {
+                onVerificationNeeded(email);
+              }
+            }
+            setError(clientStatus.error);
+            if (!clientStatus.needsVerification) {
+              setShowErrorDialog(true);
+            }
+            return;
+          }
+          break;
+      }
+
+      // 4. Tenter la connexion
       const result = await authService.signIn(email, password);
       console.log('Sign in result:', result);
 
