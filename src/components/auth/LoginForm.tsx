@@ -73,29 +73,6 @@ export function LoginForm({
         console.log("Checking user profile for:", email);
         
         // 1. Vérifier d'abord si l'utilisateur existe dans auth.users
-        const { data: { user }, error: authError } = await supabase.auth.admin.getUserByEmail(email);
-        
-        if (authError) {
-          console.error("Error checking auth user:", authError);
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Une erreur est survenue lors de la vérification du compte.",
-          });
-          return;
-        }
-
-        if (!user) {
-          console.log("No user found in auth.users");
-          toast({
-            title: "Compte inexistant",
-            description: "Ce compte n'existe pas. Veuillez créer un compte.",
-          });
-          onRegister();
-          return;
-        }
-
-        // 2. Vérifier le type de profil
         const { data: adminData } = await supabase
           .from('administrators')
           .select('id')
