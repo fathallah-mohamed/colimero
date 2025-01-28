@@ -13,17 +13,18 @@ interface RegisterFormData {
 
 export async function registerClient(formData: RegisterFormData) {
   try {
-    console.log('Starting client registration for:', formData.email);
+    const normalizedEmail = formData.email.trim().toLowerCase();
+    console.log('Starting client registration for:', normalizedEmail);
     
     // 1. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
       .select('email, email_verified')
-      .eq('email', formData.email.trim())
+      .eq('email', normalizedEmail)
       .maybeSingle();
 
     if (existingClient) {
-      console.log('Client already exists:', formData.email);
+      console.log('Client already exists:', normalizedEmail);
       return { 
         success: false, 
         error: "Un compte existe déjà avec cet email"
@@ -33,16 +34,17 @@ export async function registerClient(formData: RegisterFormData) {
     // 2. Create auth user first
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: formData.email.trim(),
+      email: normalizedEmail,
       password: formData.password.trim(),
       options: {
         data: {
+          user_type: 'client',
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address,
-          user_type: 'client',
-        }
+          address: formData.address
+        },
+        emailRedirectTo: `${window.location.origin}/activation`
       }
     });
 
@@ -55,7 +57,7 @@ export async function registerClient(formData: RegisterFormData) {
       throw new Error("Échec de la création du compte");
     }
 
-    console.log('Auth user created successfully');
+    console.log('Auth user created successfully:', authData.user.id);
 
     // 3. Create client profile
     console.log('Creating client profile...');
@@ -63,16 +65,14 @@ export async function registerClient(formData: RegisterFormData) {
       .from('clients')
       .insert({
         id: authData.user.id,
-        email: formData.email.trim(),
+        email: normalizedEmail,
         first_name: formData.firstName,
         last_name: formData.lastName,
         phone: formData.phone,
         phone_secondary: formData.phone_secondary || '',
         address: formData.address || '',
         email_verified: false,
-        status: 'pending',
-        activation_code: null, // Le trigger générera automatiquement le code
-        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+        status: 'pending'
       });
 
     if (insertError) {
@@ -88,7 +88,7 @@ export async function registerClient(formData: RegisterFormData) {
     console.log('Sending activation email...');
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
       body: {
-        email: formData.email,
+        email: normalizedEmail,
         firstName: formData.firstName
       }
     });
@@ -101,7 +101,6 @@ export async function registerClient(formData: RegisterFormData) {
     console.log('Activation email sent successfully');
 
     // 5. Force sign out to ensure email verification
-    console.log('Signing out user...');
     await supabase.auth.signOut();
 
     return {
