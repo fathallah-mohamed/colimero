@@ -27,11 +27,23 @@ export function LoginFormFields({
   // Ne pas afficher l'erreur si on est en mode vérification
   const shouldShowError = error && !showVerificationDialog;
 
+  // Traduire les messages d'erreur courants
+  const translateError = (error: string) => {
+    switch (error) {
+      case "Invalid login credentials":
+        return "Email ou mot de passe incorrect";
+      case "Email not confirmed":
+        return "Veuillez vérifier votre email pour activer votre compte";
+      default:
+        return "Une erreur est survenue lors de la connexion";
+    }
+  };
+
   return (
     <>
       {shouldShowError && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{translateError(error)}</AlertDescription>
         </Alert>
       )}
 
