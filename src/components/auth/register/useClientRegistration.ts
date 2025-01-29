@@ -60,8 +60,9 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address
-        }
+          address: formData.address || null
+        },
+        emailRedirectTo: `${window.location.origin}/activation`
       }
     });
 
@@ -73,6 +74,8 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     if (!authData.user) {
       throw new Error("Échec de la création du compte");
     }
+
+    console.log('Auth user created successfully:', authData.user.id);
 
     // 3. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
@@ -86,11 +89,16 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
   } catch (error: any) {
     console.error("Complete error in registerClient:", error);
     
-    const errorMessage = error.message || "Une erreur est survenue lors de l'inscription";
+    if (error.message?.includes('duplicate key value violates unique constraint')) {
+      return {
+        success: false,
+        error: "Un compte existe déjà avec cet email"
+      };
+    }
     
     return {
       success: false,
-      error: errorMessage
+      error: error.message || "Une erreur est survenue lors de l'inscription"
     };
   }
 }
