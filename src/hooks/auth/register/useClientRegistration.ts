@@ -13,32 +13,44 @@ interface RegisterFormData {
 
 export async function registerClient(formData: RegisterFormData) {
   try {
-    console.log('Starting client registration for:', formData.email);
+    console.log('Starting client registration process for:', formData.email);
     
-    // 1. Normalize email
+    // 1. Normalize email and validate data
     const normalizedEmail = formData.email.trim().toLowerCase();
     
+    if (!normalizedEmail || !formData.password) {
+      console.error('Missing required fields');
+      return { 
+        success: false, 
+        error: "L'email et le mot de passe sont requis" 
+      };
+    }
+
     // 2. Check if client already exists
-    const { data: existingClient } = await supabase
+    console.log('Checking if client exists...');
+    const { data: existingClient, error: checkError } = await supabase
       .from('clients')
       .select('email, email_verified')
       .eq('email', normalizedEmail)
       .maybeSingle();
 
-    if (existingClient) {
-      console.log('Client already exists:', normalizedEmail);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Un compte existe déjà avec cet email"
-      });
-      return { 
-        success: false, 
-        error: "Un compte existe déjà avec cet email"
+    if (checkError) {
+      console.error('Error checking existing client:', checkError);
+      return {
+        success: false,
+        error: "Une erreur est survenue lors de la vérification de l'email"
       };
     }
 
-    // 3. Create auth user with minimal metadata
+    if (existingClient) {
+      console.log('Client already exists:', normalizedEmail);
+      return { 
+        success: false, 
+        error: "Un compte existe déjà avec cet email" 
+      };
+    }
+
+    // 3. Create auth user
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: normalizedEmail,
@@ -50,37 +62,45 @@ export async function registerClient(formData: RegisterFormData) {
           last_name: formData.lastName,
           phone: formData.phone,
           address: formData.address
-        },
-        emailRedirectTo: `${window.location.origin}/activation`
+        }
       }
     });
 
     if (signUpError) {
       console.error('Error creating auth user:', signUpError);
+      let errorMessage = "Une erreur est survenue lors de l'inscription";
+      
+      if (signUpError.message.includes('Password')) {
+        errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
+      } else if (signUpError.message.includes('Email')) {
+        errorMessage = "L'email n'est pas valide";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: signUpError.message || "Une erreur est survenue lors de l'inscription"
+        description: errorMessage
       });
-      throw signUpError;
+      
+      return {
+        success: false,
+        error: errorMessage
+      };
     }
 
     if (!authData.user) {
-      const error = new Error("Échec de la création du compte");
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Échec de la création du compte"
-      });
-      throw error;
+      console.error('No user data returned after signup');
+      return {
+        success: false,
+        error: "Erreur lors de la création du compte"
+      };
     }
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 4. Sign out to ensure email verification
+    // 4. Sign out to ensure email verification flow
     await supabase.auth.signOut();
 
-    // 5. Show success message
     toast({
       title: "Compte créé avec succès",
       description: "Veuillez vérifier votre email pour activer votre compte"
@@ -92,29 +112,19 @@ export async function registerClient(formData: RegisterFormData) {
     };
 
   } catch (error: any) {
-    console.error("Error in registerClient:", error);
+    console.error("Complete error in registerClient:", error);
     
-    if (error.message?.includes('duplicate key value violates unique constraint')) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Un compte existe déjà avec cet email"
-      });
-      return {
-        success: false,
-        error: "Un compte existe déjà avec cet email"
-      };
-    }
+    const errorMessage = error.message || "Une erreur est survenue lors de l'inscription";
     
     toast({
       variant: "destructive",
       title: "Erreur",
-      description: error.message || "Une erreur est survenue lors de l'inscription"
+      description: errorMessage
     });
     
     return {
       success: false,
-      error: error.message || "Une erreur est survenue lors de l'inscription"
+      error: errorMessage
     };
   }
 }
