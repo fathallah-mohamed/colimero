@@ -1,8 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./RegisterFormFields";
 import { useRegisterForm } from "./useRegisterForm";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { EmailVerificationDialog } from "../EmailVerificationDialog";
 
 interface RegisterFormProps {
   onSuccess: (type: 'new' | 'existing') => void;
@@ -13,15 +12,17 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const {
     formState,
     isLoading,
-    showVerificationDialog,
+    showSuccessDialog,
     handleFieldChange,
     handleSubmit,
-    handleCloseVerificationDialog,
+    handleCloseSuccessDialog,
   } = useRegisterForm(onSuccess);
 
   const handleLogin = () => {
     navigate("/connexion");
   };
+
+  console.log("Rendering RegisterForm with state:", formState);
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
@@ -36,9 +37,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         <RegisterFormFields
           formState={formState}
           isLoading={isLoading}
-          showSuccessDialog={false}
+          showSuccessDialog={showSuccessDialog}
           onFieldChange={handleFieldChange}
-          onCloseSuccessDialog={() => {}}
+          onCloseSuccessDialog={handleCloseSuccessDialog}
         />
 
         <div className="pt-4 space-y-4">
@@ -61,12 +62,6 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           </div>
         </div>
       </form>
-
-      <EmailVerificationDialog
-        isOpen={showVerificationDialog}
-        onClose={handleCloseVerificationDialog}
-        email={formState.email}
-      />
     </div>
   );
 }

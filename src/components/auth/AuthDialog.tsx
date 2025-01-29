@@ -1,5 +1,6 @@
 import { LoginFormContainer } from "./login/LoginFormContainer";
 import { CustomDialog } from "../ui/custom-dialog";
+import { UserType } from "@/types/auth";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -7,7 +8,7 @@ interface AuthDialogProps {
   onSuccess?: () => void;
   onRegisterClick?: () => void;
   onCarrierRegisterClick?: () => void;
-  requiredUserType?: 'client' | 'carrier';
+  requiredUserType?: UserType;
 }
 
 export default function AuthDialog({

@@ -28,11 +28,7 @@ export function ClientLoginForm({
     handleLogin,
   } = useClientAuth({
     onSuccess,
-    onVerificationNeeded: () => {
-      console.log("Showing verification dialog for:", email);
-      setShowVerificationDialog(true);
-      setPassword("");
-    }
+    onVerificationNeeded: () => setShowVerificationDialog(true)
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +39,7 @@ export function ClientLoginForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && !showVerificationDialog && (
+        {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>

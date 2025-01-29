@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   useSessionInitializer();
 
   // Handle scroll effect
-  useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
@@ -38,7 +38,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   }, []);
 
   // Handle click outside mobile menu
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isOpen &&
@@ -56,7 +56,7 @@ export default function Navigation({ showAuthDialog: externalShowAuthDialog, set
   }, [isOpen]);
 
   // Store return path for auth redirects and handle protected routes
-  useEffect(() => {
+  React.useEffect(() => {
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();

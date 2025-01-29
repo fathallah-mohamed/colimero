@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { RegisterFormState } from "./types";
 import { registerClient } from "./useClientRegistration";
-import { useToast } from "@/hooks/use-toast";
+import { RegisterFormState } from "./types";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [formState, setFormState] = useState<RegisterFormState>({
@@ -15,8 +14,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const { toast } = useToast();
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
@@ -24,59 +22,29 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Starting registration process with data:", formState);
-    
-    if (formState.password !== formState.confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const result = await registerClient(formState);
-      console.log("Registration result:", result);
-
-      if (result.success) {
-        toast({
-          title: "Compte créé avec succès",
-          description: "Veuillez activer votre compte avec le code reçu par email",
-        });
-        setShowVerificationDialog(true);
-        onSuccess('new');
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: result.error || "Une erreur est survenue lors de l'inscription",
-        });
-      }
+      await registerClient(formState);
+      setShowSuccessDialog(true);
+      onSuccess('new');
     } catch (error: any) {
       console.error("Registration error:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription",
-      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCloseVerificationDialog = () => {
-    setShowVerificationDialog(false);
+  const handleCloseSuccessDialog = () => {
+    setShowSuccessDialog(false);
   };
 
   return {
     formState,
     isLoading,
-    showVerificationDialog,
+    showSuccessDialog,
     handleFieldChange,
     handleSubmit,
-    handleCloseVerificationDialog,
+    handleCloseSuccessDialog,
   };
 }

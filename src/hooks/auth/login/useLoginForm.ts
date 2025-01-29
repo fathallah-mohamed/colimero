@@ -6,8 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface UseLoginFormProps {
   onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
-  onVerificationNeeded?: () => void;
+  requiredUserType?: UserType;
+  onVerificationNeeded?: (email: string) => void;
 }
 
 export function useLoginForm({ 
@@ -34,26 +34,6 @@ export function useLoginForm({
       setShowErrorDialog(false);
 
       const normalizedEmail = normalizeEmail(email);
-
-      // Check client status first if it's a client login attempt
-      if (!requiredUserType || requiredUserType === 'client') {
-        const { data: clientData } = await supabase
-          .from('clients')
-          .select('email_verified, status')
-          .eq('email', normalizedEmail)
-          .maybeSingle();
-
-        if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-          console.log('Client account needs verification:', email);
-          setShowVerificationDialog(true);
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
-          setIsLoading(false);
-          return { success: false, needsVerification: true };
-        }
-      }
 
       // Attempt login
       const { data: { session }, error } = await supabase.auth.signInWithPassword({

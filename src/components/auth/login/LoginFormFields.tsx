@@ -2,6 +2,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UseFormReturn } from "react-hook-form";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export interface LoginFormValues {
   email: string;
@@ -23,13 +24,13 @@ export function LoginFormFields({
   isLoading,
   error,
   showVerificationDialog,
+  showErrorDialog,
+  onVerificationDialogClose,
+  onErrorDialogClose,
 }: LoginFormFieldsProps) {
-  // Ne pas afficher l'erreur si on est en mode vérification
-  const shouldShowError = error && !showVerificationDialog;
-
   return (
     <>
-      {shouldShowError && (
+      {error && !showVerificationDialog && !showErrorDialog && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -71,6 +72,15 @@ export function LoginFormFields({
           </FormItem>
         )}
       />
+
+      <AlertDialog open={showErrorDialog} onOpenChange={onErrorDialogClose}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Erreur de connexion</AlertDialogTitle>
+            <p>{error}</p>
+          </AlertDialogHeader>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

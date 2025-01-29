@@ -15,22 +15,12 @@ class ClientAuthService extends BaseAuthService {
       throw error;
     }
 
-    // Si aucun client n'est trouvé dans la table clients
-    if (!data) {
-      console.log('No client profile found');
-      return {
-        exists: false,
-        isVerified: false,
-        status: 'pending'
-      };
-    }
-
     console.log('Client status data:', data);
 
     return {
-      exists: true,
-      isVerified: data.email_verified ?? false,
-      status: data.status ?? 'pending'
+      exists: !!data,
+      isVerified: data?.email_verified ?? false,
+      status: data?.status ?? 'pending'
     };
   }
 
@@ -41,17 +31,14 @@ class ClientAuthService extends BaseAuthService {
       const status = await this.checkClientStatus(email);
       console.log('Client status check result:', status);
       
-      // Si le client n'existe pas dans la table clients
       if (!status.exists) {
-        console.log('No client profile found');
+        console.log('No client account found');
         return {
           success: false,
-          error: "Votre compte n'est pas encore activé. Veuillez vérifier votre email.",
-          needsVerification: true
+          error: "Aucun compte client trouvé avec cet email"
         };
       }
 
-      // Vérifier si le compte est activé
       if (!status.isVerified || status.status !== 'active') {
         console.log('Client account needs verification');
         return {

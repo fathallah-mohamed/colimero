@@ -1,72 +1,106 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-interface UseClientAuthProps {
-  onVerificationNeeded?: () => void;
+export interface UseClientAuthProps {
   onSuccess?: () => void;
+  onVerificationNeeded?: () => void;
 }
 
-export function useClientAuth({ onVerificationNeeded, onSuccess }: UseClientAuthProps = {}) {
+export function useClientAuth({ onSuccess, onVerificationNeeded }: UseClientAuthProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const checkClientStatus = async (email: string) => {
-    console.log('Checking client status for:', email);
     try {
-      const { data, error } = await supabase
+      console.log('Checking client status for:', email);
+      const { data: clientData, error } = await supabase
         .from('clients')
         .select('email_verified, status')
-        .eq('email', email)
-        .single();
+        .eq('email', email.trim())
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error checking client status:", error);
+        throw new Error("Une erreur est survenue lors de la vérification de votre compte");
+      }
+
+      // If no client found, return default values
+      if (!clientData) {
+        return {
+          isVerified: false,
+          status: 'pending',
+          exists: false
+        };
+      }
 
       return {
-        isVerified: data?.email_verified ?? false,
-        status: data?.status ?? 'pending'
+        isVerified: clientData.email_verified ?? false,
+        status: clientData.status ?? 'pending',
+        exists: true
       };
     } catch (error) {
-      console.error('Error checking client status:', error);
-      return { isVerified: false, status: 'pending' };
+      console.error("Error in checkClientStatus:", error);
+      throw error;
     }
   };
 
   const handleLogin = async (email: string, password: string) => {
-    console.log('Starting login process for:', email);
-    setIsLoading(true);
-    setError(null);
-
     try {
-      // Vérifier d'abord le statut du client
-      const { isVerified, status } = await checkClientStatus(email);
-      console.log('Client status:', { isVerified, status });
+      setIsLoading(true);
+      setError(null);
 
-      if (!isVerified || status !== 'active') {
-        console.log('Account needs verification, triggering verification flow');
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
-        }
+      // First check if the client exists and their status
+      const clientStatus = await checkClientStatus(email);
+      
+      if (!clientStatus.exists) {
+        setError("Aucun compte trouvé avec cet email");
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Aucun compte trouvé avec cet email"
+        });
         return;
       }
 
+      // Check if account is verified and active before attempting login
+      if (!clientStatus.isVerified || clientStatus.status !== 'active') {
+        console.log("Account needs verification:", email);
+        if (onVerificationNeeded) {
+          onVerificationNeeded();
+        }
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+        toast({
+          variant: "destructive",
+          title: "Compte non activé",
+          description: "Veuillez activer votre compte via le code reçu par email."
+        });
+        return;
+      }
+
+      // Only attempt login if the client exists and is verified
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password
+        email: email.trim(),
+        password: password.trim()
       });
 
       if (signInError) {
-        console.error('Sign in error:', signInError);
-        // Si l'erreur est "Email not confirmed", on déclenche la vérification
-        if (signInError.message.includes('Email not confirmed')) {
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          return;
+        console.error("Sign in error:", signInError);
+        let errorMessage = "Email ou mot de passe incorrect";
+        
+        if (signInError.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou mot de passe incorrect";
+        } else {
+          errorMessage = "Une erreur est survenue lors de la connexion";
         }
-
-        setError(signInError.message);
+        
+        setError(errorMessage);
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: errorMessage
+        });
         return;
       }
 
@@ -78,10 +112,14 @@ export function useClientAuth({ onVerificationNeeded, onSuccess }: UseClientAuth
       if (onSuccess) {
         onSuccess();
       }
-
     } catch (error) {
-      console.error('Unexpected error during login:', error);
+      console.error('Login error:', error);
       setError("Une erreur inattendue s'est produite");
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur inattendue s'est produite"
+      });
     } finally {
       setIsLoading(false);
     }
