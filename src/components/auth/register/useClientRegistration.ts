@@ -61,8 +61,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           last_name: formData.lastName,
           phone: formData.phone,
           address: formData.address || null
-        },
-        emailRedirectTo: `${window.location.origin}/activation`
+        }
       }
     });
 
