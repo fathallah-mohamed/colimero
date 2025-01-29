@@ -19,14 +19,24 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
   const { toast } = useToast();
 
   const validateForm = () => {
+    if (!formState.firstName || !formState.lastName || !formState.email || !formState.phone || !formState.password) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires"
+      });
+      return false;
+    }
+
     if (formState.password !== formState.confirmPassword) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
+        description: "Les mots de passe ne correspondent pas"
       });
       return false;
     }
+
     return true;
   };
 
@@ -36,6 +46,7 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Starting registration process with data:", formState);
     
     if (!validateForm()) {
       return;
@@ -45,11 +56,16 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
 
     try {
       const result = await registerClient(formState);
+      console.log("Registration result:", result);
 
       if (result.success) {
         setShowVerificationDialog(true);
+        toast({
+          title: "Compte créé avec succès",
+          description: "Veuillez vérifier votre email pour activer votre compte",
+        });
         if (result.type) {
-          onSuccess(result.type as RegistrationType);
+          onSuccess(result.type);
         }
       } else {
         toast({

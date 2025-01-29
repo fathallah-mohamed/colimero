@@ -32,40 +32,33 @@ export async function registerClient(formData: RegisterFormData) {
       };
     }
 
-    // 3. Create auth user with minimal metadata
+    // 3. Create auth user with proper metadata
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: normalizedEmail,
       password: formData.password.trim(),
       options: {
         data: {
+          user_type: 'client',
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address,
-          user_type: 'client'
+          address: formData.address
         }
       }
     });
 
     if (signUpError) {
       console.error('Error creating auth user:', signUpError);
-      // Traduire les messages d'erreur spécifiques
       if (signUpError.message.includes('Database error saving new user')) {
         return {
           success: false,
           error: "Erreur lors de la création du compte. Veuillez réessayer."
         };
       }
-      if (signUpError.message.includes('duplicate key value')) {
-        return {
-          success: false,
-          error: "Un compte existe déjà avec cet email"
-        };
-      }
       return {
         success: false,
-        error: "Une erreur est survenue lors de l'inscription"
+        error: signUpError.message
       };
     }
 
@@ -75,18 +68,18 @@ export async function registerClient(formData: RegisterFormData) {
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 4. Sign out to ensure email verification
+    // 4. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
 
     return {
       success: true,
-      type: 'new'
+      type: 'new',
+      email: normalizedEmail
     };
 
   } catch (error: any) {
     console.error("Complete error in registerClient:", error);
     
-    // Traduire les messages d'erreur génériques
     if (error.message?.includes('duplicate key value')) {
       return {
         success: false,
