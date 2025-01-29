@@ -8,7 +8,6 @@ import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { EmailVerificationDialog } from "../EmailVerificationDialog";
-import { UserType } from "@/types/auth";
 
 const loginSchema = z.object({
   email: z.string()
@@ -24,7 +23,7 @@ interface LoginFormProps {
   onRegister: () => void;
   onCarrierRegister: () => void;
   onSuccess?: () => void;
-  requiredUserType?: UserType;
+  requiredUserType?: 'client' | 'carrier';
   hideRegisterButton?: boolean;
 }
 
@@ -54,7 +53,7 @@ export function LoginForm({
     setShowErrorDialog,
     handleLogin,
   } = useLoginForm({ 
-    onSuccess,
+    onSuccess, 
     requiredUserType,
     onVerificationNeeded: () => {
       form.reset({ email: form.getValues("email"), password: "" });

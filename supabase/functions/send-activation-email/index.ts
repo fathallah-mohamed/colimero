@@ -8,14 +8,13 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { email, resend: isResend } = await req.json()
-    console.log('Processing activation email request for:', email, 'resend:', isResend)
+    const { email, firstName } = await req.json()
+    console.log('Processing activation email request for:', email)
 
     if (!email?.trim()) {
       throw new Error('Email is required')
@@ -26,36 +25,16 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Récupérer les informations du client
+    // Récupérer le code d'activation
     const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select('first_name, activation_code')
+      .select('activation_code')
       .eq('email', email.trim())
       .single()
 
     if (clientError) {
       console.error('Error fetching client:', clientError)
       throw new Error('Client not found')
-    }
-
-    // Générer un nouveau code d'activation si nécessaire
-    if (!client.activation_code || isResend) {
-      const newCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-      const { error: updateError } = await supabase
-        .from('clients')
-        .update({
-          activation_code: newCode,
-          activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-        })
-        .eq('email', email.trim())
-
-      if (updateError) {
-        console.error('Error updating activation code:', updateError)
-        throw new Error('Failed to generate new activation code')
-      }
-
-      // Mettre à jour l'objet client avec le nouveau code
-      client.activation_code = newCode
     }
 
     // Initialiser Resend
@@ -69,7 +48,7 @@ serve(async (req) => {
       subject: 'Activez votre compte Colimero',
       html: `
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2>Bonjour ${client.first_name || ''}</h2>
+          <h2>Bonjour ${firstName || ''}</h2>
           <p>Voici votre code d'activation :</p>
           <div style="background-color: #f5f5f5; 
                      padding: 20px; 
