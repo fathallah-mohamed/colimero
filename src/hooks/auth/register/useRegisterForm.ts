@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { RegisterFormState } from "./types";
+import { RegisterFormState, RegistrationType } from "./types";
 import { registerClient } from "./useClientRegistration";
 import { useToast } from "@/hooks/use-toast";
 
-export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
+export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
   const [formState, setFormState] = useState<RegisterFormState>({
     firstName: "",
     lastName: "",
@@ -27,7 +27,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       });
       return false;
     }
-
     return true;
   };
 
@@ -50,7 +49,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       if (result.success) {
         setShowVerificationDialog(true);
         if (result.type) {
-          onSuccess(result.type);
+          onSuccess(result.type as RegistrationType);
         }
       } else {
         toast({
