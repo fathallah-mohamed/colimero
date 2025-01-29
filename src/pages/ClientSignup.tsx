@@ -8,10 +8,10 @@ export default function ClientSignup() {
   const {
     formState,
     isLoading,
-    showSuccessDialog,
+    showVerificationDialog,
     handleFieldChange,
     handleSubmit,
-    handleCloseSuccessDialog
+    handleCloseVerificationDialog
   } = useRegisterForm(() => navigate("/connexion"));
 
   const handleLogin = () => {
@@ -36,10 +36,10 @@ export default function ClientSignup() {
           onLogin={handleLogin}
           isLoading={isLoading}
           formState={formState}
-          showSuccessDialog={showSuccessDialog}
+          showSuccessDialog={showVerificationDialog}
           handleFieldChange={handleFieldChange}
           handleSubmit={handleSubmit}
-          handleCloseSuccessDialog={handleCloseSuccessDialog}
+          handleCloseSuccessDialog={handleCloseVerificationDialog}
         />
       </div>
     </div>
