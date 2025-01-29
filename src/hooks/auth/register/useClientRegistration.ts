@@ -14,46 +14,33 @@ interface RegisterFormData {
 export async function registerClient(formData: RegisterFormData) {
   try {
     const normalizedEmail = formData.email.trim().toLowerCase();
-    console.log('Starting client registration process for:', normalizedEmail);
+    console.log('Starting client registration for:', normalizedEmail);
     
-    // 1. Validate input data
-    if (!normalizedEmail || !formData.password) {
-      console.error('Missing required fields');
-      return { 
-        success: false, 
-        error: "L'email et le mot de passe sont requis" 
-      };
-    }
-
-    // 2. Check if client already exists
-    console.log('Checking if client exists...');
-    const { data: existingClient, error: checkError } = await supabase
+    // 1. Check if client already exists
+    const { data: existingClient } = await supabase
       .from('clients')
       .select('email, email_verified')
       .eq('email', normalizedEmail)
       .maybeSingle();
 
-    if (checkError) {
-      console.error('Error checking existing client:', checkError);
-      return {
-        success: false,
-        error: "Une erreur est survenue lors de la vérification de l'email"
-      };
-    }
-
     if (existingClient) {
       console.log('Client already exists:', normalizedEmail);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Un compte existe déjà avec cet email"
+      });
       return { 
         success: false, 
-        error: "Un compte existe déjà avec cet email" 
+        error: "Un compte existe déjà avec cet email"
       };
     }
 
-    // 3. Create auth user
+    // 2. Create auth user
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: normalizedEmail,
-      password: formData.password,
+      password: formData.password.trim(),
       options: {
         data: {
           user_type: 'client',
@@ -97,7 +84,7 @@ export async function registerClient(formData: RegisterFormData) {
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 4. Sign out to ensure email verification flow
+    // 3. Sign out to ensure email verification flow
     await supabase.auth.signOut();
 
     toast({
