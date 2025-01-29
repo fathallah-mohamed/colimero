@@ -25,6 +25,34 @@ export function useLoginForm({
     return email.trim().toLowerCase();
   };
 
+  const createClientProfile = async (email: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: existingClient } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (!existingClient) {
+      const { error: insertError } = await supabase
+        .from('clients')
+        .insert({
+          id: user.id,
+          email: email,
+          status: 'pending',
+          email_verified: false,
+          activation_code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+          activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+        });
+
+      if (insertError) {
+        console.error('Error creating client profile:', insertError);
+      }
+    }
+  };
+
   const handleLogin = async (email: string, password: string) => {
     try {
       console.log('Starting login process for:', email);
@@ -45,6 +73,7 @@ export function useLoginForm({
 
         if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
           console.log('Client account needs verification:', email);
+          await createClientProfile(normalizedEmail);
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
             onVerificationNeeded();
@@ -64,6 +93,7 @@ export function useLoginForm({
       if (error) {
         console.error('Login error:', error);
         if (error.message.includes('Email not confirmed')) {
+          await createClientProfile(normalizedEmail);
           setShowVerificationDialog(true);
           if (onVerificationNeeded) {
             onVerificationNeeded();
