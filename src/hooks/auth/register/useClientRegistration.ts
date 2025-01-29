@@ -62,7 +62,8 @@ export async function registerClient(formData: RegisterFormData) {
           last_name: formData.lastName,
           phone: formData.phone,
           address: formData.address
-        }
+        },
+        emailRedirectTo: `${window.location.origin}/activation`
       }
     });
 

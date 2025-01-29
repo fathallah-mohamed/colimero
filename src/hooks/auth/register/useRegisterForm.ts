@@ -18,10 +18,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const { toast } = useToast();
 
-  const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
-    setFormState((prev) => ({ ...prev, [field]: value }));
-  };
-
   const validateForm = () => {
     if (!formState.email || !formState.password) {
       toast({
@@ -51,6 +47,10 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     }
 
     return true;
+  };
+
+  const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
+    setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
