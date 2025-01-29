@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
 
 interface RegisterFormData {
   firstName: string;
@@ -13,123 +12,91 @@ interface RegisterFormData {
 
 export async function registerClient(formData: RegisterFormData) {
   try {
-    const normalizedEmail = formData.email.trim().toLowerCase();
-    console.log('Starting client registration for:', normalizedEmail);
+    console.log('Starting client registration for:', formData.email);
     
-    // 1. Check if client already exists
+    // 1. Normalize email
+    const normalizedEmail = formData.email.trim().toLowerCase();
+    
+    // 2. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
-      .select('email, email_verified, status')
+      .select('email, email_verified')
       .eq('email', normalizedEmail)
       .maybeSingle();
 
     if (existingClient) {
-      console.log('Client already exists:', existingClient);
-      
-      // If client exists but isn't verified, allow them to get a new code
-      if (!existingClient.email_verified) {
-        return { 
-          success: true,
-          type: 'existing',
-          needsVerification: true,
-          email: normalizedEmail
-        };
-      }
-      
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Un compte existe déjà avec cet email"
-      });
+      console.log('Client already exists:', normalizedEmail);
       return { 
         success: false, 
         error: "Un compte existe déjà avec cet email"
       };
     }
 
-    // 2. Create auth user
+    // 3. Create auth user with minimal metadata
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: normalizedEmail,
       password: formData.password.trim(),
       options: {
         data: {
-          user_type: 'client',
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address
+          address: formData.address,
+          user_type: 'client'
         }
       }
     });
 
     if (signUpError) {
       console.error('Error creating auth user:', signUpError);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: signUpError.message
-      });
+      // Traduire les messages d'erreur spécifiques
+      if (signUpError.message.includes('Database error saving new user')) {
+        return {
+          success: false,
+          error: "Erreur lors de la création du compte. Veuillez réessayer."
+        };
+      }
+      if (signUpError.message.includes('duplicate key value')) {
+        return {
+          success: false,
+          error: "Un compte existe déjà avec cet email"
+        };
+      }
       return {
         success: false,
-        error: signUpError.message
+        error: "Une erreur est survenue lors de l'inscription"
       };
     }
 
     if (!authData.user) {
-      console.error('No user data returned after signup');
-      return {
-        success: false,
-        error: "Erreur lors de la création du compte"
-      };
+      throw new Error("Échec de la création du compte");
     }
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Send activation email via edge function
-    const { error: emailError } = await supabase.functions.invoke(
-      'send-activation-email',
-      {
-        body: { 
-          email: normalizedEmail,
-          firstName: formData.firstName
-        }
-      }
-    );
-
-    if (emailError) {
-      console.error('Error sending activation email:', emailError);
-      // Continue anyway as the user is created
-    }
-
-    // 4. Sign out to ensure email verification flow
+    // 4. Sign out to ensure email verification
     await supabase.auth.signOut();
-
-    toast({
-      title: "Compte créé avec succès",
-      description: "Veuillez vérifier votre email pour activer votre compte"
-    });
 
     return {
       success: true,
-      type: 'new',
-      email: normalizedEmail
+      type: 'new'
     };
 
   } catch (error: any) {
     console.error("Complete error in registerClient:", error);
     
-    const errorMessage = error.message || "Une erreur est survenue lors de l'inscription";
-    
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: errorMessage
-    });
+    // Traduire les messages d'erreur génériques
+    if (error.message?.includes('duplicate key value')) {
+      return {
+        success: false,
+        error: "Un compte existe déjà avec cet email"
+      };
+    }
     
     return {
       success: false,
-      error: errorMessage
+      error: "Une erreur est survenue lors de l'inscription. Veuillez réessayer."
     };
   }
 }
