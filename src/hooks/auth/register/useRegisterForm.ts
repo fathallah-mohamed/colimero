@@ -64,7 +64,7 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
           title: "Compte créé avec succès",
           description: "Veuillez vérifier votre email pour activer votre compte",
         });
-        if (result.type) {
+        if (result.type && (result.type === 'new' || result.type === 'existing')) {
           onSuccess(result.type);
         }
       } else {
