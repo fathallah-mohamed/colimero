@@ -56,6 +56,7 @@ export function LoginForm({
     onSuccess, 
     requiredUserType,
     onVerificationNeeded: () => {
+      setShowVerificationDialog(true);
       form.reset({ email: form.getValues("email"), password: "" });
     }
   });

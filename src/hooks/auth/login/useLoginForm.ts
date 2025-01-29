@@ -63,6 +63,14 @@ export function useLoginForm({
 
       if (error) {
         console.error('Login error:', error);
+        if (error.message.includes('Email not confirmed')) {
+          setShowVerificationDialog(true);
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          setError("Votre compte n'est pas activé. Veuillez vérifier votre email pour le code d'activation.");
+          return { success: false, needsVerification: true };
+        }
         setError(error.message);
         setShowErrorDialog(true);
         return { success: false, error: error.message };
