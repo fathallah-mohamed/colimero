@@ -19,20 +19,11 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const { toast } = useToast();
 
   const validateForm = () => {
-    if (!formState.email || !formState.password) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "L'email et le mot de passe sont requis"
-      });
-      return false;
-    }
-
     if (formState.password !== formState.confirmPassword) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Les mots de passe ne correspondent pas"
+        description: "Les mots de passe ne correspondent pas",
       });
       return false;
     }
@@ -55,16 +46,16 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
     try {
       const result = await registerClient(formState);
-      console.log("Registration result:", result);
 
       if (result.success) {
         setShowVerificationDialog(true);
-        onSuccess(result.type);
+        // S'assurer que le type est soit 'new' soit 'existing'
+        onSuccess(result.type as 'new' | 'existing');
       } else {
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: result.error || "Une erreur est survenue lors de l'inscription"
+          description: result.error || "Une erreur est survenue lors de l'inscription",
         });
       }
     } catch (error: any) {
@@ -72,7 +63,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription"
+        description: error.message || "Une erreur est survenue lors de l'inscription",
       });
     } finally {
       setIsLoading(false);
