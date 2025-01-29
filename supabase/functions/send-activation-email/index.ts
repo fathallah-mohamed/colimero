@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, firstName } = await req.json()
+    const { email } = await req.json()
     console.log('Processing activation email request for:', email)
 
     if (!email?.trim()) {
@@ -28,7 +28,7 @@ serve(async (req) => {
     // Récupérer le code d'activation
     const { data: client, error: clientError } = await supabase
       .from('clients')
-      .select('activation_code')
+      .select('activation_code, first_name')
       .eq('email', email.trim())
       .single()
 
@@ -48,7 +48,7 @@ serve(async (req) => {
       subject: 'Activez votre compte Colimero',
       html: `
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2>Bonjour ${firstName || ''}</h2>
+          <h2>Bonjour ${client.first_name || ''}</h2>
           <p>Voici votre code d'activation :</p>
           <div style="background-color: #f5f5f5; 
                      padding: 20px; 
