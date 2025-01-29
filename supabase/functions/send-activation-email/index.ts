@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Resend } from "npm:resend@2.0.0"
+import { Resend } from 'https://esm.sh/resend@1.0.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,97 +9,77 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { email } = await req.json()
-    console.log('Processing activation email request for:', email)
-
-    if (!email?.trim()) {
-      throw new Error('Email is required')
-    }
-
-    const supabase = createClient(
+    const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Récupérer le code d'activation
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
-      .select('activation_code, first_name')
-      .eq('email', email.trim())
-      .single()
-
-    if (clientError) {
-      console.error('Error fetching client:', clientError)
-      throw new Error('Client not found')
+    const { email } = await req.json()
+    
+    if (!email) {
+      throw new Error('Email is required')
     }
 
-    // Initialiser Resend
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
-    console.log('Sending activation email with code:', client.activation_code)
+    // Get client data
+    const { data: clientData, error: clientError } = await supabaseClient
+      .from('clients')
+      .select('activation_code, first_name')
+      .eq('email', email)
+      .single()
 
-    // Envoyer l'email
-    const { data: emailResponse, error: emailError } = await resend.emails.send({
-      from: 'Colimero <no-reply@colimero.com>',
-      to: email.trim(),
-      subject: 'Activez votre compte Colimero',
+    if (clientError || !clientData?.activation_code) {
+      throw new Error('Client not found or no activation code')
+    }
+
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
+
+    // Send activation email
+    const { data, error: emailError } = await resend.emails.send({
+      from: 'activation@votreapp.com',
+      to: email,
+      subject: 'Activez votre compte',
       html: `
-        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2>Bonjour ${client.first_name || ''}</h2>
-          <p>Voici votre code d'activation :</p>
-          <div style="background-color: #f5f5f5; 
-                     padding: 20px; 
-                     text-align: center; 
-                     font-size: 24px; 
-                     font-weight: bold; 
-                     letter-spacing: 5px;
-                     margin: 20px 0;">
-            ${client.activation_code}
-          </div>
-          <p><strong>Ce code est valable pendant 48 heures.</strong></p>
-        </div>
-      `,
+        <h2>Bienvenue${clientData.first_name ? ` ${clientData.first_name}` : ''} !</h2>
+        <p>Merci de vous être inscrit. Pour activer votre compte, veuillez utiliser le code suivant :</p>
+        <h3 style="font-size: 24px; letter-spacing: 5px; background-color: #f0f0f0; padding: 10px; text-align: center;">
+          ${clientData.activation_code}
+        </h3>
+        <p>Ce code est valable pendant 48 heures.</p>
+      `
     })
 
     if (emailError) {
-      console.error('Error sending email:', emailError)
-      throw new Error('Failed to send activation email')
+      throw emailError
     }
 
-    console.log('Activation email sent successfully:', emailResponse)
-
-    // Enregistrer l'envoi de l'email
-    await supabase
+    // Log the email sending
+    await supabaseClient
       .from('email_logs')
       .insert({
-        email: email.trim(),
+        email,
         status: 'sent',
         email_type: 'activation'
       })
 
     return new Response(
-      JSON.stringify({ message: 'Activation email sent successfully' }),
+      JSON.stringify({ success: true }),
       { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
       }
     )
 
   } catch (error) {
-    console.error('Function error:', error)
+    console.error('Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        }, 
-        status: 400 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
       }
     )
   }

@@ -1,10 +1,9 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
-import { useAccountActivation } from "@/hooks/auth/useAccountActivation";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { VerificationDialogHeader } from "./verification/VerificationDialogHeader";
-import { VerificationForm } from "./verification/VerificationForm";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -15,68 +14,73 @@ interface EmailVerificationDialogProps {
 export function EmailVerificationDialog({
   isOpen,
   onClose,
-  email,
+  email
 }: EmailVerificationDialogProps) {
-  const [activationCode, setActivationCode] = useState("");
-  const { isLoading, error, sendActivationEmail, activateAccount } = useAccountActivation();
-  const navigate = useNavigate();
+  const [isResending, setIsResending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activationCode) {
-      toast({
-        variant: "destructive",
-        title: "Code manquant",
-        description: "Veuillez entrer le code d'activation reçu par email.",
-      });
-      return;
-    }
-
-    const success = await activateAccount(activationCode.trim(), email.trim());
-    if (success) {
-      toast({
-        title: "Compte activé",
-        description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
-      });
-      onClose();
-      navigate('/connexion');
-    }
-  };
-
   const handleResendEmail = async () => {
-    if (!email) {
-      toast({
-        variant: "destructive",
-        title: "Email manquant",
-        description: "Une erreur est survenue. Veuillez réessayer.",
-      });
-      return;
-    }
+    try {
+      setIsResending(true);
+      setError(null);
 
-    const success = await sendActivationEmail(email.trim());
-    if (success) {
+      const { error: resendError } = await supabase.functions.invoke('send-activation-email', {
+        body: { email }
+      });
+
+      if (resendError) {
+        throw resendError;
+      }
+
       toast({
         title: "Email envoyé",
-        description: "Un nouveau code d'activation vous a été envoyé par email.",
+        description: "Un nouveau code d'activation vous a été envoyé par email."
       });
-      setActivationCode("");
+
+    } catch (error) {
+      console.error('Error resending email:', error);
+      setError("Impossible d'envoyer l'email d'activation. Veuillez réessayer.");
+    } finally {
+      setIsResending(false);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
-        <VerificationDialogHeader />
-        <VerificationForm
-          email={email}
-          error={error}
-          isLoading={isLoading}
-          activationCode={activationCode}
-          onActivationCodeChange={setActivationCode}
-          onSubmit={handleSubmit}
-          onResendEmail={handleResendEmail}
-        />
+        <DialogHeader>
+          <DialogTitle>Vérification de l'email requise</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <p className="text-center text-sm text-gray-600">
+            Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail à l'adresse <span className="font-medium">{email}</span> et suivre les instructions pour activer votre compte.
+          </p>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <Button
+              onClick={handleResendEmail}
+              disabled={isResending}
+              variant="outline"
+            >
+              {isResending ? "Envoi en cours..." : "Renvoyer l'email d'activation"}
+            </Button>
+
+            <Button
+              onClick={onClose}
+              variant="ghost"
+            >
+              Fermer
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
