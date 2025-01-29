@@ -1,28 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./RegisterFormFields";
-import { useRegisterForm } from "./useRegisterForm";
-import { useNavigate } from "react-router-dom";
-import { EmailVerificationDialog } from "../EmailVerificationDialog";
+import { RegisterFormState } from "./types";
 
 interface RegisterFormProps {
-  onSuccess: (type: 'new' | 'existing') => void;
+  onLogin: () => void;
+  isLoading: boolean;
+  formState: RegisterFormState;
+  handleFieldChange: (field: keyof RegisterFormState, value: string) => void;
+  handleSubmit: (e: React.FormEvent) => void;
 }
 
-export function RegisterForm({ onSuccess }: RegisterFormProps) {
-  const navigate = useNavigate();
-  const {
-    formState,
-    isLoading,
-    showVerificationDialog,
-    handleFieldChange,
-    handleSubmit,
-    handleCloseVerificationDialog,
-  } = useRegisterForm(onSuccess);
-
-  const handleLogin = () => {
-    navigate("/connexion");
-  };
-
+export function RegisterForm({
+  onLogin,
+  isLoading,
+  formState,
+  handleFieldChange,
+  handleSubmit,
+}: RegisterFormProps) {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
       <div className="mb-6">
@@ -36,9 +30,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         <RegisterFormFields
           formState={formState}
           isLoading={isLoading}
-          showSuccessDialog={false}
           onFieldChange={handleFieldChange}
-          onCloseSuccessDialog={() => {}}
         />
 
         <div className="pt-4 space-y-4">
@@ -54,19 +46,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <button
               type="button"
               className="text-[#00B0F0] hover:underline"
-              onClick={handleLogin}
+              onClick={onLogin}
             >
               Déjà un compte ? Se connecter
             </button>
           </div>
         </div>
       </form>
-
-      <EmailVerificationDialog
-        isOpen={showVerificationDialog}
-        onClose={handleCloseVerificationDialog}
-        email={formState.email}
-      />
     </div>
   );
 }
