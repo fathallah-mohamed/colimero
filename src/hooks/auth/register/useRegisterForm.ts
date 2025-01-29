@@ -37,15 +37,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       return false;
     }
 
-    if (formState.password.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Le mot de passe doit contenir au moins 6 caractères"
-      });
-      return false;
-    }
-
     return true;
   };
 
@@ -55,11 +46,6 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Starting registration process with data:", {
-      ...formState,
-      password: "[HIDDEN]",
-      confirmPassword: "[HIDDEN]"
-    });
     
     if (!validateForm()) {
       return;
@@ -73,7 +59,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
       if (result.success) {
         setShowVerificationDialog(true);
-        onSuccess('new');
+        onSuccess(result.type);
       } else {
         toast({
           variant: "destructive",

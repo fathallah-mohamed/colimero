@@ -19,12 +19,23 @@ export async function registerClient(formData: RegisterFormData) {
     // 1. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
-      .select('email, email_verified')
+      .select('email, email_verified, status')
       .eq('email', normalizedEmail)
       .maybeSingle();
 
     if (existingClient) {
-      console.log('Client already exists:', normalizedEmail);
+      console.log('Client already exists:', existingClient);
+      
+      // If client exists but isn't verified, allow them to get a new code
+      if (!existingClient.email_verified) {
+        return { 
+          success: true,
+          type: 'existing',
+          needsVerification: true,
+          email: normalizedEmail
+        };
+      }
+      
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -54,23 +65,14 @@ export async function registerClient(formData: RegisterFormData) {
 
     if (signUpError) {
       console.error('Error creating auth user:', signUpError);
-      let errorMessage = "Une erreur est survenue lors de l'inscription";
-      
-      if (signUpError.message.includes('Password')) {
-        errorMessage = "Le mot de passe doit contenir au moins 6 caractères";
-      } else if (signUpError.message.includes('Email')) {
-        errorMessage = "L'email n'est pas valide";
-      }
-      
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: errorMessage
+        description: signUpError.message
       });
-      
       return {
         success: false,
-        error: errorMessage
+        error: signUpError.message
       };
     }
 
@@ -84,7 +86,23 @@ export async function registerClient(formData: RegisterFormData) {
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Sign out to ensure email verification flow
+    // 3. Send activation email via edge function
+    const { error: emailError } = await supabase.functions.invoke(
+      'send-activation-email',
+      {
+        body: { 
+          email: normalizedEmail,
+          firstName: formData.firstName
+        }
+      }
+    );
+
+    if (emailError) {
+      console.error('Error sending activation email:', emailError);
+      // Continue anyway as the user is created
+    }
+
+    // 4. Sign out to ensure email verification flow
     await supabase.auth.signOut();
 
     toast({
@@ -94,7 +112,8 @@ export async function registerClient(formData: RegisterFormData) {
 
     return {
       success: true,
-      type: 'new'
+      type: 'new',
+      email: normalizedEmail
     };
 
   } catch (error: any) {
