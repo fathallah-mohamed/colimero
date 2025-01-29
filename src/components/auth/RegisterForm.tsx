@@ -6,20 +6,16 @@ interface RegisterFormProps {
   onLogin: () => void;
   isLoading: boolean;
   formState: RegisterFormState;
-  showSuccessDialog: boolean;
   handleFieldChange: (field: keyof RegisterFormState, value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
-  handleCloseSuccessDialog: () => void;
 }
 
 export function RegisterForm({
   onLogin,
   isLoading,
   formState,
-  showSuccessDialog,
   handleFieldChange,
   handleSubmit,
-  handleCloseSuccessDialog,
 }: RegisterFormProps) {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
@@ -34,9 +30,9 @@ export function RegisterForm({
         <RegisterFormFields
           formState={formState}
           isLoading={isLoading}
-          showSuccessDialog={showSuccessDialog}
+          showSuccessDialog={false}
           onFieldChange={handleFieldChange}
-          onCloseSuccessDialog={handleCloseSuccessDialog}
+          onCloseSuccessDialog={() => {}}
         />
 
         <div className="pt-4 space-y-4">

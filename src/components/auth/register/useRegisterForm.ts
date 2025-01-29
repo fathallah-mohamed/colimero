@@ -2,8 +2,9 @@ import { useState } from "react";
 import { RegisterFormState } from "./types";
 import { registerClient } from "./useClientRegistration";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
-export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
+export function useRegisterForm() {
   const [formState, setFormState] = useState<RegisterFormState>({
     firstName: "",
     lastName: "",
@@ -15,8 +16,30 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const validateForm = () => {
+    if (!formState.firstName || !formState.lastName || !formState.email || !formState.phone || !formState.password) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires"
+      });
+      return false;
+    }
+
+    if (formState.password !== formState.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas"
+      });
+      return false;
+    }
+
+    return true;
+  };
 
   const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
@@ -26,12 +49,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     e.preventDefault();
     console.log("Starting registration process with data:", formState);
     
-    if (formState.password !== formState.confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-      });
+    if (!validateForm()) {
       return;
     }
 
@@ -46,8 +64,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
           title: "Compte créé avec succès",
           description: "Veuillez activer votre compte avec le code reçu par email",
         });
-        setShowVerificationDialog(true);
-        onSuccess('new');
+        navigate("/activation", { state: { email: formState.email } });
       } else {
         toast({
           variant: "destructive",
@@ -67,16 +84,10 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
     }
   };
 
-  const handleCloseVerificationDialog = () => {
-    setShowVerificationDialog(false);
-  };
-
   return {
     formState,
     isLoading,
-    showVerificationDialog,
     handleFieldChange,
     handleSubmit,
-    handleCloseVerificationDialog,
   };
 }
