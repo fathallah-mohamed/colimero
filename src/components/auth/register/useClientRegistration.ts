@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
 
 interface RegisterFormData {
   firstName: string;
@@ -11,9 +10,11 @@ interface RegisterFormData {
   password: string;
 }
 
+type RegistrationType = 'new' | 'existing';
+
 interface RegistrationResult {
   success: boolean;
-  type?: 'new' | 'existing';
+  type?: RegistrationType;
   error?: string;
   needsVerification?: boolean;
   email?: string;

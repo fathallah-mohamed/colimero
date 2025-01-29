@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { RegisterFormState } from "@/types/auth";
+import { RegisterFormState } from "./types";
 import { registerClient } from "./useClientRegistration";
 import { useToast } from "@/hooks/use-toast";
 
