@@ -49,8 +49,9 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
 
       if (result.success) {
         setShowVerificationDialog(true);
-        // S'assurer que le type est soit 'new' soit 'existing'
-        onSuccess(result.type as 'new' | 'existing');
+        if (result.type) {
+          onSuccess(result.type);
+        }
       } else {
         toast({
           variant: "destructive",

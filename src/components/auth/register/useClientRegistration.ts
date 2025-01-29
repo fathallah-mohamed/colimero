@@ -11,24 +11,38 @@ interface RegisterFormData {
   password: string;
 }
 
-export async function registerClient(formData: RegisterFormData) {
+interface RegistrationResult {
+  success: boolean;
+  type?: 'new' | 'existing';
+  error?: string;
+  needsVerification?: boolean;
+  email?: string;
+}
+
+export async function registerClient(formData: RegisterFormData): Promise<RegistrationResult> {
   try {
     console.log('Starting client registration for:', formData.email);
     
     // 1. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
-      .select('email, email_verified')
+      .select('email, email_verified, status')
       .eq('email', formData.email.trim())
       .maybeSingle();
 
     if (existingClient) {
-      console.log('Client already exists:', formData.email);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Un compte existe déjà avec cet email"
-      });
+      console.log('Client already exists:', existingClient);
+      
+      // If client exists but isn't verified, allow them to get a new code
+      if (!existingClient.email_verified) {
+        return { 
+          success: true,
+          type: 'existing',
+          needsVerification: true,
+          email: formData.email
+        };
+      }
+      
       return { 
         success: false, 
         error: "Un compte existe déjà avec cet email"
@@ -52,61 +66,30 @@ export async function registerClient(formData: RegisterFormData) {
 
     if (signUpError) {
       console.error('Error creating auth user:', signUpError);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: signUpError.message
-      });
       throw signUpError;
     }
 
     if (!authData.user) {
-      const error = new Error("Échec de la création du compte");
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Échec de la création du compte"
-      });
-      throw error;
+      throw new Error("Échec de la création du compte");
     }
 
-    // 3. Force sign out to ensure email verification
+    // 3. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
-
-    toast({
-      title: "Compte créé avec succès",
-      description: "Veuillez vérifier votre email pour activer votre compte"
-    });
 
     return {
       success: true,
-      type: 'new'
+      type: 'new',
+      email: formData.email
     };
 
   } catch (error: any) {
-    console.error("Error in registerClient:", error);
+    console.error("Complete error in registerClient:", error);
     
-    if (error.message?.includes('duplicate key value violates unique constraint')) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Un compte existe déjà avec cet email"
-      });
-      return {
-        success: false,
-        error: "Un compte existe déjà avec cet email"
-      };
-    }
-    
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: error.message || "Une erreur est survenue lors de l'inscription"
-    });
+    const errorMessage = error.message || "Une erreur est survenue lors de l'inscription";
     
     return {
       success: false,
-      error: error.message || "Une erreur est survenue lors de l'inscription"
+      error: errorMessage
     };
   }
 }
