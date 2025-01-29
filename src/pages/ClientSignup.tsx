@@ -10,7 +10,7 @@ export default function ClientSignup() {
     isLoading,
     handleFieldChange,
     handleSubmit,
-  } = useRegisterForm(() => navigate("/activation", { state: { email: formState.email } }));
+  } = useRegisterForm();
 
   const handleLogin = () => {
     navigate("/connexion");
