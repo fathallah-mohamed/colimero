@@ -13,11 +13,10 @@ interface RegisterFormData {
 
 export async function registerClient(formData: RegisterFormData) {
   try {
-    console.log('Starting client registration process for:', formData.email);
-    
-    // 1. Normalize email and validate data
     const normalizedEmail = formData.email.trim().toLowerCase();
+    console.log('Starting client registration process for:', normalizedEmail);
     
+    // 1. Validate input data
     if (!normalizedEmail || !formData.password) {
       console.error('Missing required fields');
       return { 
@@ -54,7 +53,7 @@ export async function registerClient(formData: RegisterFormData) {
     console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: normalizedEmail,
-      password: formData.password.trim(),
+      password: formData.password,
       options: {
         data: {
           user_type: 'client',
@@ -62,8 +61,7 @@ export async function registerClient(formData: RegisterFormData) {
           last_name: formData.lastName,
           phone: formData.phone,
           address: formData.address
-        },
-        emailRedirectTo: `${window.location.origin}/activation`
+        }
       }
     });
 
