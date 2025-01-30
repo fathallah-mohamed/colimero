@@ -24,6 +24,8 @@ serve(async (req) => {
       throw new Error('Email is required')
     }
 
+    console.log('Fetching client data for email:', email)
+
     // Get client data
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
@@ -31,9 +33,17 @@ serve(async (req) => {
       .eq('email', email)
       .single()
 
-    if (clientError || !clientData?.activation_code) {
-      throw new Error('Client not found or no activation code')
+    if (clientError) {
+      console.error('Error fetching client:', clientError)
+      throw new Error('Client not found')
     }
+
+    if (!clientData?.activation_code) {
+      console.error('No activation code found for client')
+      throw new Error('No activation code found')
+    }
+
+    console.log('Client data found, sending email...')
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
@@ -53,8 +63,11 @@ serve(async (req) => {
     })
 
     if (emailError) {
+      console.error('Error sending email:', emailError)
       throw emailError
     }
+
+    console.log('Email sent successfully')
 
     // Log the email sending
     await supabaseClient
@@ -74,7 +87,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Function error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
