@@ -1,4 +1,4 @@
 project_id = "dsmahpgrhjoikcxuiqrw"
 
-[global.env]
-RESEND_API_KEY = "re_"
+[api]
+enabled = true

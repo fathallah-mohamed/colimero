@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, firstName = 'Utilisateur', resend = false } = await req.json()
+    const { email, resend = false } = await req.json()
     
     if (!email) {
       throw new Error('Email is required')
@@ -27,24 +27,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get client data
-    const { data: clientData, error: clientError } = await supabaseClient
+    // Générer un nouveau code d'activation
+    const newActivationCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+    console.log('Generated new activation code:', newActivationCode)
+
+    // Mettre à jour le client avec le nouveau code
+    const { data: updateData, error: updateError } = await supabaseClient
       .from('clients')
-      .select('activation_code')
+      .update({ 
+        activation_code: newActivationCode,
+        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString() // 48 heures
+      })
       .eq('email', email)
+      .select('first_name')
       .single()
 
-    if (clientError) {
-      console.error("Error fetching client:", clientError)
-      throw new Error('Client not found')
+    if (updateError) {
+      console.error("Error updating client:", updateError)
+      throw new Error('Error updating activation code')
     }
 
-    if (!clientData?.activation_code) {
-      console.error('No activation code found for client')
-      throw new Error('No activation code found')
-    }
-
-    console.log('Client data found, sending email...')
+    console.log('Client data updated successfully')
 
     const resendClient = new Resend(Deno.env.get('RESEND_API_KEY'))
 
@@ -55,13 +58,13 @@ serve(async (req) => {
       subject: 'Activez votre compte Colimero',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1a365d; text-align: center;">Bienvenue${firstName ? ` ${firstName}` : ''} !</h2>
+          <h2 style="color: #1a365d; text-align: center;">Bienvenue${updateData?.first_name ? ` ${updateData.first_name}` : ''} !</h2>
           <p style="color: #4a5568; text-align: center;">
             Merci de vous être inscrit sur Colimero. Pour activer votre compte, veuillez utiliser le code suivant :
           </p>
           <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
             <h3 style="font-size: 24px; letter-spacing: 5px; margin: 0; color: #2d3748;">
-              ${clientData.activation_code}
+              ${newActivationCode}
             </h3>
           </div>
           <p style="color: #718096; text-align: center; font-size: 14px;">
