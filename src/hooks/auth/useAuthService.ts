@@ -20,14 +20,24 @@ export function useAuthService({
 
   const checkClientVerification = async (email: string) => {
     console.log('Checking client verification status for:', email);
-    const { data: clientData } = await supabase
-      .from('clients')
-      .select('email_verified, status')
-      .eq('email', email.trim())
-      .maybeSingle();
+    try {
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('email_verified, status')
+        .eq('email', email.trim())
+        .maybeSingle();
 
-    console.log('Client verification data:', clientData);
-    return clientData;
+      if (clientError) {
+        console.error('Error checking client status:', clientError);
+        throw clientError;
+      }
+
+      console.log('Client verification data:', clientData);
+      return clientData;
+    } catch (error) {
+      console.error('Error in checkClientVerification:', error);
+      throw error;
+    }
   };
 
   const handleLogin = async (email: string, password: string) => {
@@ -38,15 +48,20 @@ export function useAuthService({
 
       // Si c'est un client qui essaie de se connecter
       if (!requiredUserType || requiredUserType === 'client') {
-        const clientStatus = await checkClientVerification(email);
-        console.log('Client status check result:', clientStatus);
+        try {
+          const clientStatus = await checkClientVerification(email);
+          console.log('Client status check result:', clientStatus);
 
-        if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
-          console.log('Client needs verification');
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-            return;
+          if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
+            console.log('Client needs verification');
+            if (onVerificationNeeded) {
+              onVerificationNeeded();
+              return;
+            }
           }
+        } catch (error) {
+          console.error('Error checking client status:', error);
+          // Continue with login attempt even if verification check fails
         }
       }
 
@@ -58,6 +73,11 @@ export function useAuthService({
 
       if (signInError) {
         console.error('Sign in error:', signInError);
+        
+        if (signInError.message.includes('Invalid login credentials')) {
+          setError('Email ou mot de passe incorrect');
+          return;
+        }
         
         // Si l'erreur est liée à la vérification de l'email pour un client
         if (signInError.message.includes('Email not confirmed') && (!requiredUserType || requiredUserType === 'client')) {
@@ -94,7 +114,7 @@ export function useAuthService({
 
     } catch (error: any) {
       console.error("Login error:", error);
-      setError(error.message || "Une erreur est survenue");
+      setError("Une erreur est survenue lors de la connexion. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
