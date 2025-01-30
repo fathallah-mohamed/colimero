@@ -13,21 +13,13 @@ interface LoginFormFieldsProps {
   form: UseFormReturn<LoginFormValues>;
   isLoading: boolean;
   error: string | null;
-  showVerificationDialog: boolean;
-  showErrorDialog: boolean;
-  onVerificationDialogClose: () => void;
-  onErrorDialogClose: () => void;
 }
 
 export function LoginFormFields({
   form,
   isLoading,
   error,
-  showVerificationDialog,
 }: LoginFormFieldsProps) {
-  // Ne pas afficher l'erreur si on est en mode vérification
-  const shouldShowError = error && !showVerificationDialog;
-
   // Traduire les messages d'erreur courants
   const translateError = (error: string) => {
     switch (error) {
@@ -44,7 +36,7 @@ export function LoginFormFields({
 
   return (
     <div className="space-y-4">
-      {shouldShowError && (
+      {error && (
         <Alert variant="destructive" className="border-red-500">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{translateError(error)}</AlertDescription>
