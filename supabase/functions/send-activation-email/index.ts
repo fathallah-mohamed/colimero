@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email } = await req.json()
+    const { email, firstName } = await req.json()
     console.log('Processing activation email request for:', email)
 
     if (!email?.trim()) {
@@ -29,19 +29,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Récupérer les informations du client et générer un nouveau code
+    // Get client's activation code
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
-      .select('first_name, activation_code')
+      .select('activation_code')
       .eq('email', email.trim())
       .single()
 
-    if (clientError) {
+    if (clientError || !clientData?.activation_code) {
       console.error('Error fetching client:', clientError)
-      throw new Error('Client not found')
+      throw new Error('Could not retrieve activation code')
     }
 
-    console.log('Client data retrieved:', clientData)
+    console.log('Retrieved activation code for client')
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: 'Colimero <activation@colimero.com>',
@@ -49,13 +49,13 @@ serve(async (req) => {
       subject: 'Activez votre compte Colimero',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1a365d; text-align: center;">Bienvenue ${clientData?.first_name || ''}!</h2>
+          <h2 style="color: #1a365d; text-align: center;">Bienvenue ${firstName || ''}!</h2>
           <p style="color: #4a5568; text-align: center;">
             Merci de vous être inscrit sur Colimero. Pour activer votre compte, veuillez utiliser le code suivant :
           </p>
           <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
             <h3 style="font-size: 24px; letter-spacing: 5px; margin: 0; color: #2d3748;">
-              ${clientData?.activation_code}
+              ${clientData.activation_code}
             </h3>
           </div>
           <p style="color: #718096; text-align: center; font-size: 14px;">
