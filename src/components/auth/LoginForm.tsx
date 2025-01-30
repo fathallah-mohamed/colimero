@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { EmailVerificationDialog } from "./EmailVerificationDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useActivationDialog } from "@/hooks/auth/useActivationDialog";
+import { useState } from "react";
 
 const loginSchema = z.object({
   email: z.string()
