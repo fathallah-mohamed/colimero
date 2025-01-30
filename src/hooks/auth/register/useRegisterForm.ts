@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { RegisterFormState, RegistrationType } from "./types";
+import { RegisterFormState } from "./types";
 import { registerClient } from "./useClientRegistration";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
-export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
+export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [formState, setFormState] = useState<RegisterFormState>({
     firstName: "",
     lastName: "",
@@ -17,6 +18,7 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const validateForm = () => {
     if (!formState.firstName || !formState.lastName || !formState.email || !formState.phone || !formState.password) {
@@ -59,12 +61,16 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
       console.log("Registration result:", result);
 
       if (result.success) {
-        setShowVerificationDialog(true);
-        toast({
-          title: "Compte créé avec succès",
-          description: "Veuillez vérifier votre email pour activer votre compte",
-        });
-        if (result.type && (result.type === 'new' || result.type === 'existing')) {
+        if (result.needsVerification) {
+          setShowVerificationDialog(true);
+          toast({
+            title: "Compte créé avec succès",
+            description: "Veuillez vérifier votre email pour activer votre compte",
+          });
+        } else {
+          navigate('/connexion');
+        }
+        if (result.type) {
           onSuccess(result.type);
         }
       } else {
@@ -88,6 +94,7 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
 
   const handleCloseVerificationDialog = () => {
     setShowVerificationDialog(false);
+    navigate('/connexion');
   };
 
   return {
