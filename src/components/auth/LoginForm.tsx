@@ -75,7 +75,12 @@ export function LoginForm({
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    await handleLogin(values.email, values.password);
+    const result = await handleLogin(values.email, values.password);
+    
+    if (result?.needsVerification) {
+      setShowVerificationDialog(true);
+      form.reset({ email: values.email, password: "" });
+    }
   };
 
   return (
