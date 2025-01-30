@@ -48,6 +48,7 @@ export function useCarrierAuth(onSuccess?: () => void) {
     try {
       setState(prev => ({ ...prev, isLoading: true, statusMessage: null }));
 
+      // Vérifier d'abord le statut du transporteur
       const statusCheck = await checkCarrierStatus(email);
       if ('error' in statusCheck) {
         setState(prev => ({
@@ -70,36 +71,6 @@ export function useCarrierAuth(onSuccess?: () => void) {
             message: signInError.message === "Invalid login credentials"
               ? "Email ou mot de passe incorrect"
               : "Une erreur est survenue lors de la connexion"
-          }
-        }));
-        return;
-      }
-
-      const { data: finalCheck, error: finalCheckError } = await supabase
-        .from('carriers')
-        .select('status')
-        .eq('email', email)
-        .single();
-
-      if (finalCheckError || !finalCheck) {
-        await supabase.auth.signOut();
-        setState(prev => ({
-          ...prev,
-          statusMessage: {
-            type: 'destructive',
-            message: "Vous n'avez pas les autorisations nécessaires pour vous connecter en tant que transporteur."
-          }
-        }));
-        return;
-      }
-
-      if (finalCheck.status !== 'active') {
-        await supabase.auth.signOut();
-        setState(prev => ({
-          ...prev,
-          statusMessage: {
-            type: 'destructive',
-            message: "Votre compte n'est pas actif. Veuillez attendre la validation de votre compte."
           }
         }));
         return;

@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export function useCarrierRegistration(onSuccess?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleRegistration = async (values: any) => {
+  const handleSubmit = async (values: any) => {
     try {
       setIsLoading(true);
       console.log("Starting registration process...");
 
-      // 1. First create the auth user
+      // 1. First create the auth user with email confirmation disabled
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -21,7 +23,8 @@ export function useCarrierRegistration(onSuccess?: () => void) {
             first_name: values.first_name,
             last_name: values.last_name,
             company_name: values.company_name
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/connexion`
         }
       });
 
@@ -78,21 +81,22 @@ export function useCarrierRegistration(onSuccess?: () => void) {
         if (servicesError) throw servicesError;
       }
 
+      // 5. Déconnexion immédiate pour éviter l'accès
+      await supabase.auth.signOut();
+
       toast({
         title: "Inscription réussie",
-        description: "Votre demande d'inscription a été envoyée avec succès.",
+        description: "Votre demande d'inscription a été envoyée avec succès. Un administrateur examinera votre demande et vous recevrez un email de confirmation une fois votre compte approuvé.",
       });
 
-      if (onSuccess) {
-        onSuccess();
-      }
+      navigate('/connexion');
 
     } catch (error: any) {
-      console.error("Registration error:", error);
+      console.error("Error in carrier signup:", error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription",
+        description: error.message || "Une erreur est survenue lors de l'inscription.",
       });
     } finally {
       setIsLoading(false);
@@ -101,6 +105,6 @@ export function useCarrierRegistration(onSuccess?: () => void) {
 
   return {
     isLoading,
-    handleRegistration
+    handleSubmit,
   };
 }
