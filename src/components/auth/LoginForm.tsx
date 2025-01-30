@@ -69,7 +69,8 @@ export function LoginForm({
         title: "Compte non activé",
         description: "Veuillez activer votre compte en utilisant le code reçu par email.",
       });
-    }
+    },
+    requiredUserType
   });
 
   const onSubmit = async (values: LoginFormValues) => {

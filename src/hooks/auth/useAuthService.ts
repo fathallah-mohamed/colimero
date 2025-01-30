@@ -1,10 +1,7 @@
 import { useState } from "react";
-import { adminAuthService } from "@/services/auth/admin-auth-service";
-import { carrierAuthService } from "@/services/auth/carrier-auth-service";
-import { clientAuthService } from "@/services/auth/client-auth-service";
-import { useToast } from "@/hooks/use-toast";
-import { UserType } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { UserType } from "@/types/auth";
+import { useToast } from "@/hooks/use-toast";
 
 interface UseAuthServiceProps {
   onSuccess?: () => void;
@@ -39,15 +36,17 @@ export function useAuthService({
       setIsLoading(true);
       setError(null);
 
-      // Vérifier d'abord le statut pour les clients
-      const clientStatus = await checkClientVerification(email);
-      console.log('Client status check result:', clientStatus);
+      // Si c'est un client qui essaie de se connecter
+      if (!requiredUserType || requiredUserType === 'client') {
+        const clientStatus = await checkClientVerification(email);
+        console.log('Client status check result:', clientStatus);
 
-      if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
-        console.log('Client needs verification');
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
-          return;
+        if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
+          console.log('Client needs verification');
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+            return;
+          }
         }
       }
 
@@ -60,8 +59,8 @@ export function useAuthService({
       if (signInError) {
         console.error('Sign in error:', signInError);
         
-        // Si l'erreur est liée à la vérification de l'email
-        if (signInError.message.includes('Email not confirmed')) {
+        // Si l'erreur est liée à la vérification de l'email pour un client
+        if (signInError.message.includes('Email not confirmed') && (!requiredUserType || requiredUserType === 'client')) {
           if (onVerificationNeeded) {
             onVerificationNeeded();
             return;
