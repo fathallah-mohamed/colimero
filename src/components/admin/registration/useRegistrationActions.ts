@@ -4,7 +4,6 @@ import { approveCarrierRequest, rejectCarrierRequest } from "@/services/carrier-
 import { ApprovalRequest } from "../approval-requests/types";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
-// Update the type of the refetch parameter to match what react-query provides
 export function useRegistrationActions(
   refetch: (options?: RefetchOptions | undefined) => Promise<QueryObserverResult<ApprovalRequest[], Error>>
 ) {
@@ -12,10 +11,20 @@ export function useRegistrationActions(
 
   const handleApprove = async (request: ApprovalRequest) => {
     try {
+      console.log("Starting approval process for carrier:", request.carrier?.id);
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("No session");
+      
+      if (!session) {
+        console.error("No session found");
+        throw new Error("No session");
+      }
 
-      await approveCarrierRequest(request.carrier?.id || '', session.user.id);
+      if (!request.carrier?.id) {
+        console.error("No carrier ID found in request");
+        throw new Error("Invalid carrier data");
+      }
+
+      await approveCarrierRequest(request.carrier.id, session.user.id);
       
       toast({
         title: "Demande approuvée",
@@ -35,10 +44,20 @@ export function useRegistrationActions(
 
   const handleReject = async (request: ApprovalRequest) => {
     try {
+      console.log("Starting rejection process for carrier:", request.carrier?.id);
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("No session");
+      
+      if (!session) {
+        console.error("No session found");
+        throw new Error("No session");
+      }
 
-      await rejectCarrierRequest(request.carrier?.id || '', session.user.id, request.reason || '');
+      if (!request.carrier?.id) {
+        console.error("No carrier ID found in request");
+        throw new Error("Invalid carrier data");
+      }
+
+      await rejectCarrierRequest(request.carrier.id, session.user.id, request.reason || '');
 
       toast({
         title: "Demande rejetée",

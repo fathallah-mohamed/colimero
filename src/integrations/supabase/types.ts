@@ -414,6 +414,7 @@ export type Database = {
           siret: string | null
           status: string | null
           total_deliveries: number
+          updated_at: string | null
         }
         Insert: {
           address: string
@@ -439,6 +440,7 @@ export type Database = {
           siret?: string | null
           status?: string | null
           total_deliveries?: number
+          updated_at?: string | null
         }
         Update: {
           address?: string
@@ -464,6 +466,7 @@ export type Database = {
           siret?: string | null
           status?: string | null
           total_deliveries?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
