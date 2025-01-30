@@ -60,8 +60,9 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address || null
-        }
+          address: formData.address
+        },
+        emailRedirectTo: `${window.location.origin}/activation`
       }
     });
 
@@ -82,6 +83,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     return {
       success: true,
       type: 'new',
+      needsVerification: true,
       email: formData.email
     };
 

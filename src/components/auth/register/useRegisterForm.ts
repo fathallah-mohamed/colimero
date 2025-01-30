@@ -2,6 +2,7 @@ import { useState } from "react";
 import { RegisterFormState } from "./types";
 import { registerClient } from "./useClientRegistration";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [formState, setFormState] = useState<RegisterFormState>({
@@ -17,6 +18,7 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
@@ -42,12 +44,15 @@ export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
       console.log("Registration result:", result);
 
       if (result.success) {
-        toast({
-          title: "Compte créé avec succès",
-          description: "Veuillez activer votre compte avec le code reçu par email",
-        });
-        setShowVerificationDialog(true);
-        onSuccess('new');
+        if (result.needsVerification) {
+          navigate(`/activation?email=${encodeURIComponent(formState.email)}`);
+        } else {
+          toast({
+            title: "Compte créé avec succès",
+            description: "Vous pouvez maintenant vous connecter",
+          });
+          onSuccess(result.type || 'new');
+        }
       } else {
         toast({
           variant: "destructive",
