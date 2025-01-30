@@ -36,9 +36,10 @@ export function EmailVerificationDialog({
           p_email: email
         });
 
-      if (dbError || !data.success) {
-        console.error("Error generating new code:", dbError || data.message);
-        throw new Error(dbError?.message || data.message || "Erreur lors de la génération du code");
+      // Vérifier que data est un tableau et contient au moins un élément
+      if (dbError || !data?.[0]?.success) {
+        console.error("Error generating new code:", dbError || data?.[0]?.message);
+        throw new Error(dbError?.message || data?.[0]?.message || "Erreur lors de la génération du code");
       }
 
       console.log("New activation code generated successfully");
@@ -96,8 +97,9 @@ export function EmailVerificationDialog({
         throw validationError;
       }
 
-      if (!data.is_valid) {
-        setError(data.message);
+      // Vérifier que data est un tableau et contient au moins un élément
+      if (!data?.[0]?.is_valid) {
+        setError(data?.[0]?.message || "Code d'activation invalide");
         return;
       }
 
