@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Mail } from "lucide-react";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -50,11 +51,16 @@ export function EmailVerificationDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Vérification de l'email requise</DialogTitle>
+          <div className="mx-auto mb-4 bg-blue-50 p-3 rounded-full">
+            <Mail className="h-6 w-6 text-blue-500" />
+          </div>
+          <DialogTitle className="text-center text-xl">
+            Activation de votre compte
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-gray-600">
             Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail à l'adresse <span className="font-medium">{email}</span> et suivre les instructions pour activer votre compte.
           </p>
 
@@ -69,6 +75,7 @@ export function EmailVerificationDialog({
               onClick={handleResendEmail}
               disabled={isResending}
               variant="outline"
+              className="w-full"
             >
               {isResending ? "Envoi en cours..." : "Renvoyer l'email d'activation"}
             </Button>
@@ -76,10 +83,15 @@ export function EmailVerificationDialog({
             <Button
               onClick={onClose}
               variant="ghost"
+              className="w-full"
             >
               Fermer
             </Button>
           </div>
+
+          <p className="text-sm text-gray-500 text-center">
+            Si vous ne trouvez pas l'email, vérifiez votre dossier spam.
+          </p>
         </div>
       </DialogContent>
     </Dialog>

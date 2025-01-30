@@ -60,16 +60,8 @@ export function useAuthService({
               return { success: false, needsVerification: true };
             }
           }
-
-          // Si le client n'existe pas, on continue avec la connexion
-          // car il sera créé automatiquement par le trigger
-          if (!clientStatus) {
-            console.log('No client profile found, will be created by trigger');
-          }
-
         } catch (error) {
           console.error('Error checking client status:', error);
-          // On continue avec la tentative de connexion même si la vérification échoue
         }
       }
 
