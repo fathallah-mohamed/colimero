@@ -39,89 +39,65 @@ export function useAuthService({
       setIsLoading(true);
       setError(null);
 
-      // Si un type d'utilisateur est requis, vérifier d'abord le statut pour les clients
-      if (requiredUserType === 'client' || !requiredUserType) {
-        const clientStatus = await checkClientVerification(email);
-        console.log('Client status check result:', clientStatus);
+      // Vérifier d'abord le statut pour les clients
+      const clientStatus = await checkClientVerification(email);
+      console.log('Client status check result:', clientStatus);
 
-        if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
-          console.log('Client needs verification');
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          return;
-        }
-      }
-
-      // Si un type d'utilisateur est requis, on essaie uniquement ce service
-      if (requiredUserType) {
-        const service = {
-          'admin': adminAuthService,
-          'carrier': carrierAuthService,
-          'client': clientAuthService
-        }[requiredUserType];
-
-        if (!service) {
-          throw new Error(`Type d'utilisateur non supporté: ${requiredUserType}`);
-        }
-
-        const result = await service.signIn(email, password);
-        if (result.needsVerification) {
-          if (onVerificationNeeded) {
-            onVerificationNeeded();
-          }
-          return;
-        }
-        handleAuthResult(result);
-        return;
-      }
-
-      // Sinon, on essaie chaque service dans l'ordre
-      const adminResult = await adminAuthService.signIn(email, password);
-      if (adminResult.success) {
-        handleAuthResult(adminResult, 'admin');
-        return;
-      }
-
-      const carrierResult = await carrierAuthService.signIn(email, password);
-      if (carrierResult.success) {
-        handleAuthResult(carrierResult, 'carrier');
-        return;
-      }
-
-      const clientResult = await clientAuthService.signIn(email, password);
-      if (clientResult.success) {
-        handleAuthResult(clientResult, 'client');
-        return;
-      }
-
-      // Si aucun service n'a réussi
-      if (clientResult.needsVerification) {
+      if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
+        console.log('Client needs verification');
         if (onVerificationNeeded) {
           onVerificationNeeded();
+          return;
         }
+      }
+
+      // Tentative de connexion
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      if (signInError) {
+        console.error('Sign in error:', signInError);
+        
+        // Si l'erreur est liée à la vérification de l'email
+        if (signInError.message.includes('Email not confirmed')) {
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+            return;
+          }
+        }
+
+        setError(signInError.message);
         return;
       }
 
-      setError("Email ou mot de passe incorrect");
+      if (!user) {
+        throw new Error("Aucune donnée utilisateur reçue");
+      }
 
-    } catch (error) {
-      console.error('Login error:', error);
-      setError("Une erreur inattendue s'est produite");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      // Vérifier le type d'utilisateur si requis
+      const userType = user.user_metadata?.user_type;
+      if (requiredUserType && userType !== requiredUserType) {
+        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+        await supabase.auth.signOut();
+        return;
+      }
 
-  const handleAuthResult = (result: { success: boolean; error?: string }, userType?: string) => {
-    if (result.success) {
       toast({
         title: "Connexion réussie",
-        description: `Bienvenue ${userType || ''}`
+        description: "Vous êtes maintenant connecté"
       });
-      if (onSuccess) onSuccess();
-    } else {
-      setError(result.error || "Une erreur est survenue");
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setError(error.message || "Une erreur est survenue");
+    } finally {
+      setIsLoading(false);
     }
   };
 
