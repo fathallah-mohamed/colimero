@@ -9,54 +9,51 @@ interface PersonalInfoFieldsProps {
 
 export function PersonalInfoFields({ form }: PersonalInfoFieldsProps) {
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Informations personnelles</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="first_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Prénom <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Votre prénom" 
-                  {...field}
-                  onBlur={(e) => {
-                    field.onBlur();
-                    form.trigger("first_name");
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="last_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Nom <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Votre nom" 
-                  {...field}
-                  onBlur={(e) => {
-                    field.onBlur();
-                    form.trigger("last_name");
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormField
+        control={form.control}
+        name="first_name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              Prénom <span className="text-red-500">*</span>
+            </FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Votre prénom" 
+                {...field}
+                onBlur={(e) => {
+                  field.onBlur();
+                  form.trigger("first_name");
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="last_name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>
+              Nom <span className="text-red-500">*</span>
+            </FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Votre nom" 
+                {...field}
+                onBlur={(e) => {
+                  field.onBlur();
+                  form.trigger("last_name");
+                }}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }
