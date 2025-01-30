@@ -46,10 +46,10 @@ serve(async (req) => {
 
     console.log('Client data found, sending email...')
 
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
+    const resendClient = new Resend(Deno.env.get('RESEND_API_KEY'))
 
     // Send activation email
-    const { data: emailData, error: emailError } = await resend.emails.send({
+    const { data: emailData, error: emailError } = await resendClient.emails.send({
       from: 'Colimero <activation@colimero.app>',
       to: email,
       subject: 'Activez votre compte Colimero',
