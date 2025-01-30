@@ -30,21 +30,20 @@ export function EmailVerificationDialog({
       setError(null);
       console.log("Requesting new activation code for:", email);
 
-      // Générer un nouveau code d'activation
       const { data, error: dbError } = await supabase
         .rpc('generate_new_activation_code', {
           p_email: email
         });
 
-      // Vérifier que data est un tableau et contient au moins un élément
-      if (dbError || !data?.[0]?.success) {
-        console.error("Error generating new code:", dbError || data?.[0]?.message);
-        throw new Error(dbError?.message || data?.[0]?.message || "Erreur lors de la génération du code");
+      const result = data?.[0];
+      if (dbError || !result?.success) {
+        const errorMessage = dbError?.message || result?.message || "Erreur lors de la génération du code";
+        console.error("Error generating new code:", errorMessage);
+        throw new Error(errorMessage);
       }
 
       console.log("New activation code generated successfully");
 
-      // Envoyer l'email avec le nouveau code
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { 
           email,
@@ -97,9 +96,9 @@ export function EmailVerificationDialog({
         throw validationError;
       }
 
-      // Vérifier que data est un tableau et contient au moins un élément
-      if (!data?.[0]?.is_valid) {
-        setError(data?.[0]?.message || "Code d'activation invalide");
+      const result = data?.[0];
+      if (!result?.is_valid) {
+        setError(result?.message || "Code d'activation invalide");
         return;
       }
 
