@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { LoginFormFields, LoginFormValues } from "./LoginFormFields";
-import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
+import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Form } from "@/components/ui/form";
-import { useNavigate } from "react-router-dom";
-import { EmailVerificationDialog } from "../EmailVerificationDialog";
+import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
+import { LoginFormFields } from "./form/LoginFormFields";
+import { LoginFormButtons } from "./form/LoginFormButtons";
+import { LoginFormDialogs } from "./form/LoginFormDialogs";
+import { LoginFormProps, LoginFormValues } from "./types";
 
 const loginSchema = z.object({
   email: z.string()
@@ -18,15 +18,6 @@ const loginSchema = z.object({
     .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 });
 
-interface LoginFormProps {
-  onForgotPassword: () => void;
-  onRegister: () => void;
-  onCarrierRegister: () => void;
-  onSuccess?: () => void;
-  requiredUserType?: 'client' | 'carrier';
-  hideRegisterButton?: boolean;
-}
-
 export function LoginForm({
   onForgotPassword,
   onRegister,
@@ -35,7 +26,6 @@ export function LoginForm({
   requiredUserType,
   hideRegisterButton = false,
 }: LoginFormProps) {
-  const navigate = useNavigate();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -48,7 +38,9 @@ export function LoginForm({
     isLoading,
     error,
     showVerificationDialog,
+    showErrorDialog,
     setShowVerificationDialog,
+    setShowErrorDialog,
     handleLogin,
   } = useLoginForm({ 
     onSuccess, 
@@ -60,16 +52,7 @@ export function LoginForm({
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    const result = await handleLogin(values.email, values.password);
-    if (result?.success && !showVerificationDialog) {
-      const returnPath = sessionStorage.getItem('returnPath');
-      if (returnPath) {
-        sessionStorage.removeItem('returnPath');
-        navigate(returnPath);
-      } else {
-        navigate('/');
-      }
-    }
+    await handleLogin(values.email, values.password);
   };
 
   return (
@@ -81,72 +64,23 @@ export function LoginForm({
           error={error}
         />
 
-        <div className="space-y-4">
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-white"
-            disabled={isLoading}
-          >
-            {isLoading ? "Connexion..." : "Se connecter"}
-          </Button>
+        <LoginFormButtons
+          isLoading={isLoading}
+          onForgotPassword={onForgotPassword}
+          onRegister={onRegister}
+          onCarrierRegister={onCarrierRegister}
+          hideRegisterButton={hideRegisterButton}
+          requiredUserType={requiredUserType}
+        />
 
-          {!hideRegisterButton && (
-            <>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Pas encore de compte ?
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {(!requiredUserType || requiredUserType === 'client') && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onRegister}
-                    className="w-full"
-                  >
-                    Créer un compte client
-                  </Button>
-                )}
-
-                {(!requiredUserType || requiredUserType === 'carrier') && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onCarrierRegister}
-                    className="w-full"
-                  >
-                    Créer un compte transporteur
-                  </Button>
-                )}
-              </div>
-            </>
-          )}
-
-          <div className="text-center">
-            <button
-              type="button"
-              className="text-sm text-primary hover:text-primary/90 hover:underline transition-colors"
-              onClick={onForgotPassword}
-            >
-              Mot de passe oublié ?
-            </button>
-          </div>
-        </div>
-
-        {showVerificationDialog && (
-          <EmailVerificationDialog
-            isOpen={showVerificationDialog}
-            onClose={() => setShowVerificationDialog(false)}
-            email={form.getValues("email")}
-          />
-        )}
+        <LoginFormDialogs
+          showVerificationDialog={showVerificationDialog}
+          showErrorDialog={showErrorDialog}
+          error={error}
+          email={form.getValues("email")}
+          onVerificationDialogClose={() => setShowVerificationDialog(false)}
+          onErrorDialogClose={() => setShowErrorDialog(false)}
+        />
       </form>
     </Form>
   );
