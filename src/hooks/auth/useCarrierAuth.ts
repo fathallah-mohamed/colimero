@@ -16,29 +16,50 @@ export function useCarrierAuth(onSuccess?: () => void) {
     statusMessage: null,
   });
 
-  const checkCarrierStatus = async (email: string) => {
-    console.log("Checking carrier status for:", email);
-    const { data: carrierData, error: carrierError } = await supabase
+  const checkUserType = async (email: string) => {
+    // Vérifier d'abord si c'est un admin
+    const { data: adminData } = await supabase
+      .from('administrators')
+      .select('id')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    if (adminData) {
+      return { error: "Ce compte est un compte administrateur. Veuillez utiliser la connexion administrateur." };
+    }
+
+    // Vérifier si c'est un client
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    if (clientData) {
+      return { error: "Ce compte est un compte client. Veuillez utiliser la connexion client." };
+    }
+
+    // Vérifier le statut du transporteur
+    const { data: carrierData } = await supabase
       .from('carriers')
       .select('status')
       .eq('email', email.trim())
-      .single();
+      .maybeSingle();
 
-    if (carrierError && carrierError.code !== 'PGRST116') {
-      console.error("Error checking carrier status:", carrierError);
-      return { error: "Une erreur est survenue lors de la vérification de votre compte." };
+    if (!carrierData) {
+      return { error: "Aucun compte transporteur trouvé avec cet email." };
     }
 
-    if (carrierData) {
-      if (carrierData.status === 'pending') {
-        return { error: "Votre compte est en attente de validation par un administrateur. Vous recevrez un email une fois votre compte validé." };
-      }
-      if (carrierData.status === 'rejected') {
-        return { error: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter." };
-      }
-      if (carrierData.status !== 'active') {
-        return { error: "Votre compte n'est pas actif. Veuillez contacter l'administrateur." };
-      }
+    if (carrierData.status === 'pending') {
+      return { error: "Votre compte est en attente de validation par un administrateur. Vous recevrez un email une fois votre compte validé." };
+    }
+
+    if (carrierData.status === 'rejected') {
+      return { error: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter." };
+    }
+
+    if (carrierData.status !== 'active') {
+      return { error: "Votre compte n'est pas actif. Veuillez contacter l'administrateur." };
     }
 
     return { success: true };
@@ -48,16 +69,17 @@ export function useCarrierAuth(onSuccess?: () => void) {
     try {
       setState(prev => ({ ...prev, isLoading: true, statusMessage: null }));
 
-      // Vérifier d'abord le statut du transporteur
-      const statusCheck = await checkCarrierStatus(email);
-      if ('error' in statusCheck) {
+      // Vérifier d'abord le type et le statut de l'utilisateur
+      const userCheck = await checkUserType(email);
+      if ('error' in userCheck) {
         setState(prev => ({
           ...prev,
-          statusMessage: { type: 'default', message: statusCheck.error }
+          statusMessage: { type: 'destructive', message: userCheck.error }
         }));
         return;
       }
 
+      // Procéder à la connexion uniquement si la vérification est réussie
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
