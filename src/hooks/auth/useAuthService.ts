@@ -4,6 +4,7 @@ import { carrierAuthService } from "@/services/auth/carrier-auth-service";
 import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
 import { UserType } from "@/types/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UseAuthServiceProps {
   onSuccess?: () => void;
@@ -20,11 +21,37 @@ export function useAuthService({
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const checkClientVerification = async (email: string) => {
+    console.log('Checking client verification status for:', email);
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('email_verified, status')
+      .eq('email', email.trim())
+      .maybeSingle();
+
+    console.log('Client verification data:', clientData);
+    return clientData;
+  };
+
   const handleLogin = async (email: string, password: string) => {
     try {
       console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
+
+      // Si un type d'utilisateur est requis, vérifier d'abord le statut pour les clients
+      if (requiredUserType === 'client' || !requiredUserType) {
+        const clientStatus = await checkClientVerification(email);
+        console.log('Client status check result:', clientStatus);
+
+        if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
+          console.log('Client needs verification');
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          return;
+        }
+      }
 
       // Si un type d'utilisateur est requis, on essaie uniquement ce service
       if (requiredUserType) {
@@ -70,7 +97,6 @@ export function useAuthService({
 
       // Si aucun service n'a réussi
       if (clientResult.needsVerification) {
-        setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
