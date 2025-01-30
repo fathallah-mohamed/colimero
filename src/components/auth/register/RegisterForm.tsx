@@ -1,22 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./RegisterFormFields";
-import { RegisterFormState } from "./types";
+import { useRegisterForm } from "./useRegisterForm";
+import { useNavigate } from "react-router-dom";
+import { EmailVerificationDialog } from "../EmailVerificationDialog";
 
 interface RegisterFormProps {
-  onLogin: () => void;
-  isLoading: boolean;
-  formState: RegisterFormState;
-  handleFieldChange: (field: keyof RegisterFormState, value: string) => void;
-  handleSubmit: (e: React.FormEvent) => void;
+  onSuccess: (type: 'new' | 'existing') => void;
 }
 
-export function RegisterForm({
-  onLogin,
-  isLoading,
-  formState,
-  handleFieldChange,
-  handleSubmit,
-}: RegisterFormProps) {
+export function RegisterForm({ onSuccess }: RegisterFormProps) {
+  const navigate = useNavigate();
+  const {
+    formState,
+    isLoading,
+    showVerificationDialog,
+    handleFieldChange,
+    handleSubmit,
+    handleCloseVerificationDialog,
+  } = useRegisterForm(onSuccess);
+
+  const handleLogin = () => {
+    navigate("/connexion");
+  };
+
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
       <div className="mb-6">
@@ -30,7 +36,9 @@ export function RegisterForm({
         <RegisterFormFields
           formState={formState}
           isLoading={isLoading}
+          showSuccessDialog={false}
           onFieldChange={handleFieldChange}
+          onCloseSuccessDialog={() => {}}
         />
 
         <div className="pt-4 space-y-4">
@@ -46,13 +54,19 @@ export function RegisterForm({
             <button
               type="button"
               className="text-[#00B0F0] hover:underline"
-              onClick={onLogin}
+              onClick={handleLogin}
             >
               Déjà un compte ? Se connecter
             </button>
           </div>
         </div>
       </form>
+
+      <EmailVerificationDialog
+        isOpen={showVerificationDialog}
+        onClose={handleCloseVerificationDialog}
+        email={formState.email}
+      />
     </div>
   );
 }
