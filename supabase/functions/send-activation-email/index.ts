@@ -8,23 +8,24 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
-    const { email, resend = false } = await req.json()
+    const { email, resend: isResend = false } = await req.json()
     
     if (!email) {
       throw new Error('Email is required')
     }
 
-    console.log('Fetching client data for email:', email)
+    console.log('Processing activation email request for:', email)
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
 
     // Get client data
     const { data: clientData, error: clientError } = await supabaseClient
@@ -38,27 +39,6 @@ serve(async (req) => {
       throw new Error('Client not found')
     }
 
-    // If resending, generate new activation code
-    if (resend) {
-      const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const { error: updateError } = await supabaseClient
-        .from('clients')
-        .update({ 
-          activation_code: newCode,
-          activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-        })
-        .eq('email', email)
-        .select()
-        .single()
-
-      if (updateError) {
-        console.error('Error updating activation code:', updateError)
-        throw new Error('Could not generate new activation code')
-      }
-
-      clientData.activation_code = newCode
-    }
-
     if (!clientData?.activation_code) {
       console.error('No activation code found for client')
       throw new Error('No activation code found')
@@ -69,7 +49,7 @@ serve(async (req) => {
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
     // Send activation email
-    const { data, error: emailError } = await resend.emails.send({
+    const { data: emailData, error: emailError } = await resend.emails.send({
       from: 'Colimero <activation@colimero.app>',
       to: email,
       subject: 'Activez votre compte Colimero',
