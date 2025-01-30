@@ -51,9 +51,9 @@ serve(async (req) => {
 
     const resendClient = new Resend(Deno.env.get('RESEND_API_KEY'))
 
-    // Send activation email using the temporary onboarding domain
+    // Send activation email
     const { data: emailData, error: emailError } = await resendClient.emails.send({
-      from: 'Colimero <onboarding@resend.dev>',
+      from: 'Colimero <activation@colimero.app>',
       to: email,
       subject: 'Activez votre compte Colimero',
       html: `
