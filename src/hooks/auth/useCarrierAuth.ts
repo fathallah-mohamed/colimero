@@ -31,7 +31,7 @@ export function useCarrierAuth(onSuccess?: () => void) {
 
     if (carrierData) {
       if (carrierData.status === 'pending') {
-        return { error: "Votre compte est en attente de validation par Colimero. Vous recevrez un email une fois votre compte validé." };
+        return { error: "Votre compte est en attente de validation par un administrateur. Vous recevrez un email une fois votre compte validé." };
       }
       if (carrierData.status === 'rejected') {
         return { error: "Votre demande d'inscription a été rejetée. Vous ne pouvez pas vous connecter." };
@@ -75,6 +75,11 @@ export function useCarrierAuth(onSuccess?: () => void) {
         }));
         return;
       }
+
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté"
+      });
 
       if (onSuccess) {
         onSuccess();
