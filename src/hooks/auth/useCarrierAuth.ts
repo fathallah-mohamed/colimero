@@ -17,6 +17,8 @@ export function useCarrierAuth(onSuccess?: () => void) {
   });
 
   const checkUserType = async (email: string) => {
+    console.log('Checking user type for:', email);
+    
     // Vérifier d'abord si c'est un admin
     const { data: adminData } = await supabase
       .from('administrators')
@@ -42,9 +44,11 @@ export function useCarrierAuth(onSuccess?: () => void) {
     // Vérifier le statut du transporteur
     const { data: carrierData } = await supabase
       .from('carriers')
-      .select('status')
+      .select('status, id')
       .eq('email', email.trim())
       .maybeSingle();
+
+    console.log('Carrier data:', carrierData);
 
     if (!carrierData) {
       return { error: "Aucun compte transporteur trouvé avec cet email." };
@@ -62,15 +66,18 @@ export function useCarrierAuth(onSuccess?: () => void) {
       return { error: "Votre compte n'est pas actif. Veuillez contacter l'administrateur." };
     }
 
-    return { success: true };
+    return { success: true, carrierId: carrierData.id };
   };
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log('Starting login process for:', email);
       setState(prev => ({ ...prev, isLoading: true, statusMessage: null }));
 
       // Vérifier d'abord le type et le statut de l'utilisateur
       const userCheck = await checkUserType(email);
+      console.log('User check result:', userCheck);
+      
       if ('error' in userCheck) {
         setState(prev => ({
           ...prev,
@@ -80,12 +87,13 @@ export function useCarrierAuth(onSuccess?: () => void) {
       }
 
       // Procéder à la connexion uniquement si la vérification est réussie
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) {
+        console.error('Login error:', signInError);
         setState(prev => ({
           ...prev,
           statusMessage: {
@@ -93,6 +101,26 @@ export function useCarrierAuth(onSuccess?: () => void) {
             message: signInError.message === "Invalid login credentials"
               ? "Email ou mot de passe incorrect"
               : "Une erreur est survenue lors de la connexion"
+          }
+        }));
+        return;
+      }
+
+      // Vérifier à nouveau le statut après la connexion
+      const { data: carrierData } = await supabase
+        .from('carriers')
+        .select('status')
+        .eq('id', session?.user.id)
+        .single();
+
+      if (!carrierData || carrierData.status !== 'active') {
+        // Si le statut n'est pas actif, déconnecter l'utilisateur
+        await supabase.auth.signOut();
+        setState(prev => ({
+          ...prev,
+          statusMessage: {
+            type: 'destructive',
+            message: "Votre compte n'est pas actif. Veuillez contacter l'administrateur."
           }
         }));
         return;
