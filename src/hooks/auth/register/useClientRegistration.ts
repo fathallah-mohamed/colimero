@@ -51,7 +51,8 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address
+          address: formData.address,
+          email: formData.email
         },
         emailRedirectTo: `${window.location.origin}/activation`
       }
