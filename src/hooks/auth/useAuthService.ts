@@ -52,16 +52,24 @@ export function useAuthService({
           const clientStatus = await checkClientVerification(email);
           console.log('Client status check result:', clientStatus);
 
+          // Si le client existe et n'est pas vérifié/actif
           if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
             console.log('Client needs verification');
             if (onVerificationNeeded) {
               onVerificationNeeded();
-              return;
+              return { success: false, needsVerification: true };
             }
           }
+
+          // Si le client n'existe pas, on continue avec la connexion
+          // car il sera créé automatiquement par le trigger
+          if (!clientStatus) {
+            console.log('No client profile found, will be created by trigger');
+          }
+
         } catch (error) {
           console.error('Error checking client status:', error);
-          // Continue with login attempt even if verification check fails
+          // On continue avec la tentative de connexion même si la vérification échoue
         }
       }
 
@@ -76,19 +84,19 @@ export function useAuthService({
         
         if (signInError.message.includes('Invalid login credentials')) {
           setError('Email ou mot de passe incorrect');
-          return;
+          return { success: false, error: 'Email ou mot de passe incorrect' };
         }
         
         // Si l'erreur est liée à la vérification de l'email pour un client
         if (signInError.message.includes('Email not confirmed') && (!requiredUserType || requiredUserType === 'client')) {
           if (onVerificationNeeded) {
             onVerificationNeeded();
-            return;
+            return { success: false, needsVerification: true };
           }
         }
 
         setError(signInError.message);
-        return;
+        return { success: false, error: signInError.message };
       }
 
       if (!user) {
@@ -100,7 +108,7 @@ export function useAuthService({
       if (requiredUserType && userType !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         await supabase.auth.signOut();
-        return;
+        return { success: false, error: `Type de compte incorrect` };
       }
 
       toast({
@@ -112,9 +120,12 @@ export function useAuthService({
         onSuccess();
       }
 
+      return { success: true };
+
     } catch (error: any) {
       console.error("Login error:", error);
       setError("Une erreur est survenue lors de la connexion. Veuillez réessayer.");
+      return { success: false, error: "Une erreur est survenue lors de la connexion" };
     } finally {
       setIsLoading(false);
     }
