@@ -14,60 +14,48 @@ serve(async (req) => {
   }
 
   try {
-    const { email, firstName = null, resend = false } = await req.json()
-    
-    if (!email) {
+    const { email } = await req.json()
+    console.log('Processing activation email request for:', email)
+
+    if (!email?.trim()) {
       throw new Error('Email is required')
     }
 
-    console.log('Processing activation email request for:', email, 'resend:', resend)
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
+    console.log('Resend client initialized')
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Générer un nouveau code d'activation
-    const newActivationCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-    console.log('Generated new activation code:', newActivationCode)
-
-    // Mettre à jour le client avec le nouveau code
-    const { data: updateData, error: updateError } = await supabaseClient
+    // Récupérer les informations du client et générer un nouveau code
+    const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
-      .update({ 
-        activation_code: newActivationCode,
-        activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString() // 48 heures
-      })
-      .eq('email', email)
-      .select('first_name')
+      .select('first_name, activation_code')
+      .eq('email', email.trim())
       .single()
 
-    if (updateError) {
-      console.error("Error updating client:", updateError)
-      throw new Error('Error updating activation code')
+    if (clientError) {
+      console.error('Error fetching client:', clientError)
+      throw new Error('Client not found')
     }
 
-    console.log('Client data updated successfully')
+    console.log('Client data retrieved:', clientData)
 
-    const resendClient = new Resend(Deno.env.get('RESEND_API_KEY'))
-
-    // Use firstName if provided, otherwise use the one from the database
-    const displayName = firstName || updateData?.first_name || 'Utilisateur'
-
-    // Send activation email
-    const { data: emailData, error: emailError } = await resendClient.emails.send({
-      from: 'Colimero <activation@colimero.app>',
-      to: email,
+    const { data: emailData, error: emailError } = await resend.emails.send({
+      from: 'Colimero <activation@colimero.com>',
+      to: email.trim(),
       subject: 'Activez votre compte Colimero',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1a365d; text-align: center;">Bienvenue${displayName ? ` ${displayName}` : ''} !</h2>
+          <h2 style="color: #1a365d; text-align: center;">Bienvenue ${clientData?.first_name || ''}!</h2>
           <p style="color: #4a5568; text-align: center;">
             Merci de vous être inscrit sur Colimero. Pour activer votre compte, veuillez utiliser le code suivant :
           </p>
           <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
             <h3 style="font-size: 24px; letter-spacing: 5px; margin: 0; color: #2d3748;">
-              ${newActivationCode}
+              ${clientData?.activation_code}
             </h3>
           </div>
           <p style="color: #718096; text-align: center; font-size: 14px;">
@@ -82,16 +70,7 @@ serve(async (req) => {
       throw emailError
     }
 
-    console.log('Email sent successfully')
-
-    // Log the email sending
-    await supabaseClient
-      .from('email_logs')
-      .insert({
-        email,
-        status: 'sent',
-        email_type: 'activation'
-      })
+    console.log('Email sent successfully:', emailData)
 
     return new Response(
       JSON.stringify({ success: true }),
@@ -107,7 +86,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Function error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.toString()
+      }),
       { 
         headers: { 
           ...corsHeaders, 
