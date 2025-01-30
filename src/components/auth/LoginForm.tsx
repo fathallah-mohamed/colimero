@@ -40,6 +40,7 @@ export function LoginForm({
   const navigate = useNavigate();
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const { toast } = useToast();
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -62,8 +63,13 @@ export function LoginForm({
       }
     },
     onVerificationNeeded: () => {
+      console.log("Showing verification dialog for:", form.getValues("email"));
       setShowVerificationDialog(true);
       form.reset({ email: form.getValues("email"), password: "" });
+      toast({
+        title: "Compte non activé",
+        description: "Veuillez activer votre compte en utilisant le code reçu par email.",
+      });
     }
   });
 

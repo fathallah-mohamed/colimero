@@ -39,6 +39,12 @@ export function useAuthService({
         }
 
         const result = await service.signIn(email, password);
+        if (result.needsVerification) {
+          if (onVerificationNeeded) {
+            onVerificationNeeded();
+          }
+          return;
+        }
         handleAuthResult(result);
         return;
       }
@@ -64,7 +70,7 @@ export function useAuthService({
 
       // Si aucun service n'a réussi
       if (clientResult.needsVerification) {
-        setError(clientResult.error);
+        setError("Votre compte n'est pas activé. Veuillez vérifier votre email.");
         if (onVerificationNeeded) {
           onVerificationNeeded();
         }
