@@ -59,23 +59,6 @@ export function useCarrierRegistration(onSuccess?: () => void) {
         console.error("Error sending registration email:", registrationEmailError);
       }
 
-      // 3. Envoyer l'email de notification à l'admin
-      const { error: adminEmailError } = await supabase.functions.invoke(
-        'send-registration-email',
-        {
-          body: {
-            email: values.email,
-            company_name: values.company_name,
-            first_name: values.first_name,
-            last_name: values.last_name
-          }
-        }
-      );
-
-      if (adminEmailError) {
-        console.error("Error sending admin notification:", adminEmailError);
-      }
-
       toast({
         title: "Inscription réussie",
         description: "Votre demande d'inscription a été envoyée. Vous recevrez un email de confirmation.",
