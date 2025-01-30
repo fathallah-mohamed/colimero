@@ -54,14 +54,15 @@ export function useAuthService({
 
           // Si le client existe et n'est pas vérifié/actif
           if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
-            console.log('Client needs verification');
+            console.log('Client needs verification, triggering verification flow');
             if (onVerificationNeeded) {
               onVerificationNeeded();
-              return { success: false, needsVerification: true };
             }
+            return { success: false, needsVerification: true };
           }
         } catch (error) {
           console.error('Error checking client status:', error);
+          // Ne pas bloquer la connexion si la vérification échoue
         }
       }
 
@@ -79,12 +80,13 @@ export function useAuthService({
           return { success: false, error: 'Email ou mot de passe incorrect' };
         }
         
-        // Si l'erreur est liée à la vérification de l'email pour un client
-        if (signInError.message.includes('Email not confirmed') && (!requiredUserType || requiredUserType === 'client')) {
+        // Si l'erreur est liée à la vérification de l'email
+        if (signInError.message.includes('Email not confirmed')) {
+          console.log('Email not confirmed, triggering verification flow');
           if (onVerificationNeeded) {
             onVerificationNeeded();
-            return { success: false, needsVerification: true };
           }
+          return { success: false, needsVerification: true };
         }
 
         setError(signInError.message);

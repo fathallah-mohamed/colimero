@@ -9,7 +9,6 @@ import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { EmailVerificationDialog } from "./EmailVerificationDialog";
 import { useToast } from "@/hooks/use-toast";
-import { useActivationDialog } from "@/hooks/auth/useActivationDialog";
 import { useState } from "react";
 
 const loginSchema = z.object({
@@ -39,6 +38,7 @@ export function LoginForm({
   hideRegisterButton = false,
 }: LoginFormProps) {
   const navigate = useNavigate();
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const { toast } = useToast();
   
@@ -49,12 +49,6 @@ export function LoginForm({
       password: "",
     },
   });
-
-  const {
-    showVerificationDialog,
-    handleVerificationNeeded,
-    handleVerificationDialogClose
-  } = useActivationDialog(form);
 
   const { isLoading, error, handleLogin } = useAuthService({
     onSuccess: () => {
@@ -70,7 +64,7 @@ export function LoginForm({
     },
     onVerificationNeeded: () => {
       console.log("Verification needed for:", form.getValues("email"));
-      handleVerificationNeeded(form.getValues("email"));
+      setShowVerificationDialog(true);
       toast({
         title: "Compte non activé",
         description: "Veuillez activer votre compte en utilisant le code reçu par email.",
@@ -83,8 +77,12 @@ export function LoginForm({
     const result = await handleLogin(values.email, values.password);
     
     if (result?.needsVerification) {
-      handleVerificationNeeded(values.email);
+      setShowVerificationDialog(true);
     }
+  };
+
+  const handleVerificationDialogClose = () => {
+    setShowVerificationDialog(false);
   };
 
   return (
