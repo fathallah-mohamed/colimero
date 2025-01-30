@@ -8,7 +8,7 @@ import { CoverageAreaSelect } from "../CoverageAreaSelect";
 import { TermsCheckboxes } from "./TermsCheckboxes";
 import { AvatarUpload } from "./AvatarUpload";
 import { motion } from "framer-motion";
-import { User, Building2, Phone, Map, Camera } from "lucide-react";
+import { User, Building2, Phone, Map, Camera, Truck, Shield } from "lucide-react";
 
 interface FormSectionsProps {
   form: any;
