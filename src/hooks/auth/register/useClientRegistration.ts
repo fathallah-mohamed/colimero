@@ -58,6 +58,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     }
 
     // 2. Create auth user with proper metadata
+    console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
