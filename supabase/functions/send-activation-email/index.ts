@@ -14,14 +14,14 @@ serve(async (req) => {
   }
 
   try {
-    const { email, firstName } = await req.json()
-    console.log('Processing activation email request for:', email)
+    const { email, firstName, resend } = await req.json()
+    console.log('Processing activation email request for:', email, 'resend:', resend)
 
     if (!email?.trim()) {
       throw new Error('Email is required')
     }
 
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
+    const resendClient = new Resend(Deno.env.get('RESEND_API_KEY'))
     console.log('Resend client initialized')
 
     const supabaseClient = createClient(
@@ -43,15 +43,15 @@ serve(async (req) => {
 
     console.log('Retrieved activation code for client')
 
-    const { data: emailData, error: emailError } = await resend.emails.send({
+    const { data: emailData, error: emailError } = await resendClient.emails.send({
       from: 'Colimero <activation@colimero.com>',
       to: email.trim(),
-      subject: 'Activez votre compte Colimero',
+      subject: resend ? 'Nouveau code d\'activation Colimero' : 'Activez votre compte Colimero',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #1a365d; text-align: center;">Bienvenue ${firstName || ''}!</h2>
           <p style="color: #4a5568; text-align: center;">
-            Merci de vous être inscrit sur Colimero. Pour activer votre compte, veuillez utiliser le code suivant :
+            ${resend ? 'Voici votre nouveau code d\'activation' : 'Merci de vous être inscrit sur Colimero'}. Pour activer votre compte, veuillez utiliser le code suivant :
           </p>
           <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
             <h3 style="font-size: 24px; letter-spacing: 5px; margin: 0; color: #2d3748;">

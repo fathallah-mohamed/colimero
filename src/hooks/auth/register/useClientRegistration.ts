@@ -37,12 +37,18 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
         console.log('Generated new activation code for existing unverified client');
 
         // Send activation email
-        await supabase.functions.invoke('send-activation-email', {
+        const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
           body: { 
             email: formData.email.trim(),
-            firstName: formData.firstName
+            firstName: formData.firstName,
+            resend: true
           }
         });
+
+        if (emailError) {
+          console.error('Error sending activation email:', emailError);
+          throw emailError;
+        }
 
         return { 
           success: true,
@@ -85,21 +91,22 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Wait a moment for the database trigger to create the client record
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // 3. Wait for the database trigger to create the client record
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // 4. Send activation email
-    console.log('Sending activation email...');
+    console.log('Sending initial activation email...');
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
       body: { 
         email: formData.email.trim(),
-        firstName: formData.firstName
+        firstName: formData.firstName,
+        resend: false
       }
     });
 
     if (emailError) {
       console.error('Error sending activation email:', emailError);
-      // Don't throw here, we still want to return success
+      throw emailError;
     }
 
     // 5. Force sign out to ensure email verification flow
