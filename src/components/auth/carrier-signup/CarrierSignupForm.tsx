@@ -6,8 +6,8 @@ import { formSchema, type FormValues } from "./FormSchema";
 import { FormSections } from "./FormSections";
 import { useCarrierRegistration } from "@/hooks/useCarrierRegistration";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { StepIndicator } from "@/components/booking/form/steps/StepIndicator";
+import { ChevronLeft, ChevronRight, Loader2, Send } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 interface CarrierSignupFormProps {
   onSuccess?: () => void;
@@ -65,33 +65,39 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
         setCompletedSteps(prev => [...prev, currentStep]);
       }
       setCurrentStep(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrevious = () => {
     setCurrentStep(prev => Math.max(1, prev - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const progress = (currentStep / 5) * 100;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-8">
-        <StepIndicator
-          currentStep={currentStep}
-          totalSteps={5}
-          completedSteps={completedSteps}
-        />
+      <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-6">
+        <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm p-4 -mx-4 mb-6">
+          <div className="flex items-center justify-between mb-2 text-sm font-medium">
+            <span>Étape {currentStep} sur 5</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </div>
 
         <FormSections form={form} currentStep={currentStep} />
 
-        <div className="flex justify-between pt-6">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center gap-4">
           <Button
             type="button"
             variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 1 || isLoading}
-            className="flex items-center gap-2"
+            className="flex-1"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 mr-2" />
             Précédent
           </Button>
 
@@ -100,15 +106,15 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
               type="button"
               onClick={handleNext}
               disabled={isLoading}
-              className="flex items-center gap-2"
+              className="flex-1 bg-primary hover:bg-primary/90"
             >
               Suivant
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
             <Button 
               type="submit" 
-              className="button-gradient text-white py-6 text-lg font-semibold"
+              className="flex-1 bg-gradient-to-r from-primary to-primary-light text-white"
               disabled={!isValid || isLoading}
             >
               {isLoading ? (
@@ -117,11 +123,17 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
                   Envoi en cours...
                 </>
               ) : (
-                "Envoyer ma demande d'inscription"
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Envoyer ma demande
+                </>
               )}
             </Button>
           )}
         </div>
+        
+        {/* Spacer to prevent content from being hidden behind fixed buttons */}
+        <div className="h-20" />
       </form>
     </Form>
   );
