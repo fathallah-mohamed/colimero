@@ -11,27 +11,65 @@ export function useCarrierRegistration(onSuccess?: () => void) {
       setIsLoading(true);
       console.log("Starting registration process...");
 
-      const { data, error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            user_type: 'carrier',
+      // 1. Créer l'enregistrement dans la table carriers
+      const { data: carrierData, error: carrierError } = await supabase
+        .from('carriers')
+        .insert({
+          email: values.email,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          company_name: values.company_name,
+          phone: values.phone,
+          phone_secondary: values.phone_secondary || '',
+          siret: values.siret,
+          address: values.address,
+          coverage_area: values.coverage_area,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (carrierError) throw carrierError;
+
+      console.log("Carrier record created:", carrierData);
+
+      // 2. Envoyer l'email de confirmation au transporteur
+      const { error: registrationEmailError } = await supabase.functions.invoke(
+        'send-carrier-registration-email',
+        {
+          body: {
+            email: values.email,
+            company_name: values.company_name,
             first_name: values.first_name,
-            last_name: values.last_name,
-            company_name: values.company_name
+            last_name: values.last_name
           }
         }
-      });
+      );
 
-      if (error) throw error;
+      if (registrationEmailError) {
+        console.error("Error sending registration email:", registrationEmailError);
+      }
 
-      // Déconnexion immédiate après l'inscription
-      await supabase.auth.signOut();
+      // 3. Envoyer l'email de notification à l'admin
+      const { error: adminEmailError } = await supabase.functions.invoke(
+        'send-registration-email',
+        {
+          body: {
+            email: values.email,
+            company_name: values.company_name,
+            first_name: values.first_name,
+            last_name: values.last_name
+          }
+        }
+      );
+
+      if (adminEmailError) {
+        console.error("Error sending admin notification:", adminEmailError);
+      }
 
       toast({
         title: "Inscription réussie",
-        description: "Veuillez vérifier votre email pour activer votre compte.",
+        description: "Votre demande d'inscription a été envoyée. Vous recevrez un email de confirmation.",
       });
 
       if (onSuccess) {

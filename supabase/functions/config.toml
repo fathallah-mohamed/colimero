@@ -1,4 +1,4 @@
 project_id = "dsmahpgrhjoikcxuiqrw"
 
-[api]
-enabled = true
+[functions.send-carrier-registration-email]
+verify_jwt = false
