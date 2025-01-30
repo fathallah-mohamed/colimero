@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./register/RegisterFormFields";
 import { RegisterFormState } from "./register/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 
 interface RegisterFormProps {
   onLogin: () => void;
@@ -29,6 +31,15 @@ export function RegisterForm({
           Créez votre compte client pour commencer à expédier vos colis
         </p>
       </div>
+
+      {showSuccessDialog && (
+        <Alert className="mb-6 bg-green-50 border-green-200">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            Votre compte a été créé avec succès. Un email d'activation vous a été envoyé.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <RegisterFormFields

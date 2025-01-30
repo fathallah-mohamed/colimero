@@ -27,15 +27,8 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       
       // If client exists but isn't verified, allow them to get a new code
       if (!existingClient.email_verified) {
-        // Generate new activation code
-        const { data: codeData } = await supabase
-          .rpc('generate_new_activation_code', {
-            p_email: formData.email.trim()
-          });
-
-        const result = codeData?.[0];
-        console.log('Generated new activation code for existing unverified client');
-
+        console.log('Sending new activation code for unverified client');
+        
         // Send activation email
         const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
           body: { 
@@ -91,10 +84,11 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Wait for the database trigger to create the client record
+    // 3. Wait for the database trigger to create the client record and generate activation code
+    console.log('Waiting for client record creation...');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 4. Send activation email
+    // 4. Send initial activation email
     console.log('Sending initial activation email...');
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
       body: { 
@@ -108,6 +102,8 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       console.error('Error sending activation email:', emailError);
       throw emailError;
     }
+
+    console.log('Initial activation email sent successfully');
 
     // 5. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
