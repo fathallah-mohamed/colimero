@@ -11,10 +11,13 @@ export function useCarrierRegistration(onSuccess?: () => void) {
       setIsLoading(true);
       console.log("Starting registration process...");
 
+      const id = crypto.randomUUID();
+
       // 1. Créer l'enregistrement dans la table carriers
       const { data: carrierData, error: carrierError } = await supabase
         .from('carriers')
         .insert({
+          id,
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
@@ -24,7 +27,13 @@ export function useCarrierRegistration(onSuccess?: () => void) {
           siret: values.siret,
           address: values.address,
           coverage_area: values.coverage_area,
-          status: 'pending'
+          status: 'pending',
+          avatar_url: '',
+          email_verified: false,
+          company_details: {},
+          authorized_routes: ['FR_TO_TN', 'TN_TO_FR'],
+          total_deliveries: 0,
+          cities_covered: 30
         })
         .select()
         .single();
