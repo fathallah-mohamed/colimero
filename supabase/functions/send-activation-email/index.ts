@@ -15,19 +15,28 @@ serve(async (req) => {
 
   try {
     const { email, firstName, resend } = await req.json()
-    console.log('Processing activation email request for:', email, 'resend:', resend)
+    console.log('Starting activation email process for:', email, 'resend:', resend)
+
+    // Check for required API key
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY is not configured')
+      throw new Error('Email service configuration missing')
+    }
+    console.log('RESEND_API_KEY is configured')
 
     if (!email?.trim()) {
       throw new Error('Email is required')
     }
 
-    const resendClient = new Resend(Deno.env.get('RESEND_API_KEY'))
+    const resendClient = new Resend(resendApiKey)
     console.log('Resend client initialized')
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+    console.log('Supabase client initialized')
 
     // Get client's activation code
     const { data: clientData, error: clientError } = await supabaseClient
@@ -41,7 +50,7 @@ serve(async (req) => {
       throw new Error('Could not retrieve activation code')
     }
 
-    console.log('Retrieved activation code for client')
+    console.log('Retrieved activation code:', clientData.activation_code)
 
     const { data: emailData, error: emailError } = await resendClient.emails.send({
       from: 'Colimero <activation@colimero.com>',
@@ -84,7 +93,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Function error:', error)
+    console.error('Complete error in send-activation-email:', error)
     return new Response(
       JSON.stringify({ 
         error: error.message,
