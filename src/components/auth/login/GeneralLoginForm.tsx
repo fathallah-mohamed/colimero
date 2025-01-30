@@ -42,9 +42,7 @@ export function GeneralLoginForm({
     isLoading,
     error,
     showVerificationDialog,
-    showErrorDialog,
     setShowVerificationDialog,
-    setShowErrorDialog,
     handleLogin,
   } = useLoginForm({ 
     onSuccess,
@@ -65,10 +63,6 @@ export function GeneralLoginForm({
           form={form}
           isLoading={isLoading}
           error={error}
-          showVerificationDialog={showVerificationDialog}
-          showErrorDialog={showErrorDialog}
-          onVerificationDialogClose={() => setShowVerificationDialog(false)}
-          onErrorDialogClose={() => setShowErrorDialog(false)}
         />
 
         <div className="space-y-4">
