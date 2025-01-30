@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -43,7 +42,7 @@ export function LoginForm({
     setShowErrorDialog,
     handleLogin,
   } = useLoginForm({ 
-    onSuccess, 
+    onSuccess,
     requiredUserType,
     onVerificationNeeded: () => {
       setShowVerificationDialog(true);

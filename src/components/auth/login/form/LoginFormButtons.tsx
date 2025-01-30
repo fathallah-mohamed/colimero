@@ -16,7 +16,7 @@ export function LoginFormButtons({
   onRegister,
   onCarrierRegister,
   hideRegisterButton = false,
-  requiredUserType,
+  requiredUserType
 }: LoginFormButtonsProps) {
   return (
     <div className="space-y-4">
