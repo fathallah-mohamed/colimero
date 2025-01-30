@@ -62,7 +62,6 @@ export function useAuthService({
           }
         } catch (error) {
           console.error('Error checking client status:', error);
-          // Ne pas bloquer la connexion si la vérification échoue
         }
       }
 
@@ -80,7 +79,6 @@ export function useAuthService({
           return { success: false, error: 'Email ou mot de passe incorrect' };
         }
         
-        // Si l'erreur est liée à la vérification de l'email
         if (signInError.message.includes('Email not confirmed')) {
           console.log('Email not confirmed, triggering verification flow');
           if (onVerificationNeeded) {
@@ -98,17 +96,11 @@ export function useAuthService({
       }
 
       // Vérifier le type d'utilisateur si requis
-      const userType = user.user_metadata?.user_type;
-      if (requiredUserType && userType !== requiredUserType) {
+      if (requiredUserType && user.user_metadata?.user_type !== requiredUserType) {
         setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
         await supabase.auth.signOut();
         return { success: false, error: `Type de compte incorrect` };
       }
-
-      toast({
-        title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté"
-      });
 
       if (onSuccess) {
         onSuccess();
@@ -118,7 +110,7 @@ export function useAuthService({
 
     } catch (error: any) {
       console.error("Login error:", error);
-      setError("Une erreur est survenue lors de la connexion. Veuillez réessayer.");
+      setError("Une erreur est survenue lors de la connexion");
       return { success: false, error: "Une erreur est survenue lors de la connexion" };
     } finally {
       setIsLoading(false);
