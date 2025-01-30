@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { RegistrationResult } from "./types";
 
 interface RegisterFormData {
   firstName: string;
@@ -10,32 +11,39 @@ interface RegisterFormData {
   password: string;
 }
 
-export async function registerClient(formData: RegisterFormData) {
+export async function registerClient(formData: RegisterFormData): Promise<RegistrationResult> {
   try {
     console.log('Starting client registration for:', formData.email);
     
-    // 1. Normalize email
-    const normalizedEmail = formData.email.trim().toLowerCase();
-    
-    // 2. Check if client already exists
+    // 1. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
-      .select('email, email_verified')
-      .eq('email', normalizedEmail)
+      .select('email, email_verified, status')
+      .eq('email', formData.email.trim())
       .maybeSingle();
 
     if (existingClient) {
-      console.log('Client already exists:', normalizedEmail);
+      console.log('Client already exists:', existingClient);
+      
+      // If client exists but isn't verified, allow them to get a new code
+      if (!existingClient.email_verified) {
+        return { 
+          success: true,
+          type: 'existing',
+          needsVerification: true,
+          email: formData.email
+        };
+      }
+      
       return { 
         success: false, 
         error: "Un compte existe déjà avec cet email"
       };
     }
 
-    // 3. Create auth user with proper metadata
-    console.log('Creating auth user...');
+    // 2. Create auth user with proper metadata
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: normalizedEmail,
+      email: formData.email.trim(),
       password: formData.password.trim(),
       options: {
         data: {
@@ -44,22 +52,14 @@ export async function registerClient(formData: RegisterFormData) {
           last_name: formData.lastName,
           phone: formData.phone,
           address: formData.address
-        }
+        },
+        emailRedirectTo: `${window.location.origin}/activation`
       }
     });
 
     if (signUpError) {
       console.error('Error creating auth user:', signUpError);
-      if (signUpError.message.includes('Database error saving new user')) {
-        return {
-          success: false,
-          error: "Erreur lors de la création du compte. Veuillez réessayer."
-        };
-      }
-      return {
-        success: false,
-        error: signUpError.message
-      };
+      throw signUpError;
     }
 
     if (!authData.user) {
@@ -68,19 +68,20 @@ export async function registerClient(formData: RegisterFormData) {
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 4. Force sign out to ensure email verification flow
+    // 3. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
 
     return {
       success: true,
       type: 'new',
-      email: normalizedEmail
+      needsVerification: true,
+      email: formData.email
     };
 
   } catch (error: any) {
     console.error("Complete error in registerClient:", error);
     
-    if (error.message?.includes('duplicate key value')) {
+    if (error.message?.includes('duplicate key value violates unique constraint')) {
       return {
         success: false,
         error: "Un compte existe déjà avec cet email"
@@ -89,7 +90,7 @@ export async function registerClient(formData: RegisterFormData) {
     
     return {
       success: false,
-      error: "Une erreur est survenue lors de l'inscription. Veuillez réessayer."
+      error: error.message || "Une erreur est survenue lors de l'inscription"
     };
   }
 }

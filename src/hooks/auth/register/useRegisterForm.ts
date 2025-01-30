@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { RegisterFormState } from "./types";
+import { RegisterFormState, RegistrationType } from "./types";
 import { registerClient } from "./useClientRegistration";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-export function useRegisterForm(onSuccess: (type: 'new' | 'existing') => void) {
+export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
   const [formState, setFormState] = useState<RegisterFormState>({
     firstName: "",
     lastName: "",

@@ -10,3 +10,11 @@ export interface RegisterFormState {
 }
 
 export type RegistrationType = 'new' | 'existing';
+
+export interface RegistrationResult {
+  success: boolean;
+  type?: RegistrationType;
+  error?: string;
+  needsVerification?: boolean;
+  email?: string;
+}
