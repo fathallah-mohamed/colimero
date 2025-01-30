@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface ActivationFormProps {
   email?: string;
@@ -16,6 +16,7 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
     setError(null);
 
     try {
+      console.log('Attempting to activate account with code:', activationCode);
       const result = await clientAuthService.activateAccount(activationCode, email);
 
       if (!result.success) {
@@ -32,42 +34,40 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
         return;
       }
 
-      // Refresh the session after activation
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Error getting session:', sessionError);
-        throw sessionError;
-      }
-
-      if (!session) {
-        // If no session, try to sign in again
-        const { data: { session: newSession }, error: signInError } = await supabase.auth.signInWithPassword({
-          email: email,
-          password: activationCode // Use activation code as temporary password
-        });
-
-        if (signInError) {
-          console.error('Error signing in after activation:', signInError);
-          throw signInError;
-        }
-
-        if (!newSession) {
-          throw new Error('No session after activation');
-        }
-      }
-
       toast({
         title: "Compte activé",
-        description: "Votre compte a été activé avec succès",
+        description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter.",
       });
 
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error) {
+      // Rediriger vers la page de connexion
+      navigate('/connexion');
+
+    } catch (error: any) {
       console.error('Error in activation:', error);
-      setError("Une erreur est survenue lors de l'activation");
+      setError("Une erreur est survenue lors de l'activation. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!email) return;
+    
+    setIsLoading(true);
+    try {
+      const { error: resendError } = await supabase.functions.invoke('send-activation-email', {
+        body: { email }
+      });
+
+      if (resendError) throw resendError;
+
+      toast({
+        title: "Code envoyé",
+        description: "Un nouveau code d'activation vous a été envoyé par email."
+      });
+    } catch (error) {
+      console.error('Error resending code:', error);
+      setError("Impossible d'envoyer le code d'activation. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
@@ -93,13 +93,25 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
         />
       </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={isLoading || !activationCode}
-      >
-        {isLoading ? "Activation..." : "Activer mon compte"}
-      </Button>
+      <div className="space-y-2">
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading || !activationCode}
+        >
+          {isLoading ? "Activation..." : "Activer mon compte"}
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={handleResendCode}
+          disabled={isLoading}
+        >
+          Renvoyer le code
+        </Button>
+      </div>
     </form>
   );
 }

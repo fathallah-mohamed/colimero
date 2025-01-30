@@ -77,7 +77,7 @@ class ClientAuthService extends BaseAuthService {
 
       console.log('Client login successful');
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Unexpected error during client login:', error);
       return {
         success: false,
