@@ -8,6 +8,7 @@ import { useCarrierRegistration } from "@/hooks/useCarrierRegistration";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Send } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CarrierSignupFormProps {
   onSuccess?: () => void;
@@ -79,7 +80,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-6">
-        <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm p-4 -mx-4 mb-6">
+        <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm p-4 -mx-4 mb-6 rounded-t-xl">
           <div className="flex items-center justify-between mb-2 text-sm font-medium">
             <span>Étape {currentStep} sur 5</span>
             <span>{Math.round(progress)}%</span>
@@ -87,15 +88,25 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           <Progress value={progress} className="h-2" />
         </div>
 
-        <FormSections form={form} currentStep={currentStep} />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <FormSections form={form} currentStep={currentStep} />
+          </motion.div>
+        </AnimatePresence>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center gap-4">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between items-center gap-4 md:relative md:border-none md:p-0 md:mt-8">
           <Button
             type="button"
             variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 1 || isLoading}
-            className="flex-1"
+            className="flex-1 md:flex-none"
           >
             <ChevronLeft className="h-4 w-4 mr-2" />
             Précédent
@@ -106,7 +117,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
               type="button"
               onClick={handleNext}
               disabled={isLoading}
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 md:flex-none bg-primary hover:bg-primary/90"
             >
               Suivant
               <ChevronRight className="h-4 w-4 ml-2" />
@@ -114,7 +125,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
           ) : (
             <Button 
               type="submit" 
-              className="flex-1 bg-gradient-to-r from-primary to-primary-light text-white"
+              className="flex-1 md:flex-none bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
               disabled={!isValid || isLoading}
             >
               {isLoading ? (
@@ -131,9 +142,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
             </Button>
           )}
         </div>
-        
-        {/* Spacer to prevent content from being hidden behind fixed buttons */}
-        <div className="h-20" />
       </form>
     </Form>
   );
