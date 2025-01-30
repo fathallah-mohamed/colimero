@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { clientAuthService } from "@/services/auth/client-auth-service";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useVerificationEmail } from "@/hooks/auth/useVerificationEmail";
 
 interface ActivationFormProps {
   email?: string;
@@ -17,6 +18,7 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { sendVerificationEmail, isResending } = useVerificationEmail();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,23 +55,20 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
   const handleResendCode = async () => {
     if (!email) return;
     
-    setIsLoading(true);
     try {
-      const { error: resendError } = await supabase.functions.invoke('send-activation-email', {
-        body: { email }
-      });
+      const success = await sendVerificationEmail(email);
 
-      if (resendError) throw resendError;
-
-      toast({
-        title: "Code envoyé",
-        description: "Un nouveau code d'activation vous a été envoyé par email."
-      });
+      if (success) {
+        toast({
+          title: "Code envoyé",
+          description: "Un nouveau code d'activation vous a été envoyé par email."
+        });
+      } else {
+        setError("Impossible d'envoyer le code d'activation. Veuillez réessayer.");
+      }
     } catch (error) {
       console.error('Error resending code:', error);
       setError("Impossible d'envoyer le code d'activation. Veuillez réessayer.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -107,9 +106,9 @@ export function ActivationForm({ email, onSuccess }: ActivationFormProps) {
           variant="outline"
           className="w-full"
           onClick={handleResendCode}
-          disabled={isLoading}
+          disabled={isResending}
         >
-          Renvoyer le code
+          {isResending ? "Envoi en cours..." : "Renvoyer le code"}
         </Button>
       </div>
     </form>
