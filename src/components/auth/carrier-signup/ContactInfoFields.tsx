@@ -13,19 +13,25 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4">
+      <h3 className="text-lg font-medium">Informations de contact</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>
+                Email <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
                 <Input 
                   type="email" 
                   placeholder="votre@email.com" 
                   {...field} 
-                  className="h-11"
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("email");
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -37,13 +43,18 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>
+                Mot de passe <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
                 <Input 
                   type="password" 
                   placeholder="********" 
                   {...field}
-                  className="h-11"
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("password");
+                  }}
                 />
               </FormControl>
               <PasswordStrengthIndicator password={password} />
@@ -56,12 +67,17 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Téléphone principal</FormLabel>
+              <FormLabel>
+                Téléphone principal <span className="text-red-500">*</span>
+              </FormLabel>
               <FormControl>
                 <Input 
                   placeholder="+33 6 XX XX XX XX" 
                   {...field}
-                  className="h-11"
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("phone");
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -78,7 +94,10 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
                 <Input 
                   placeholder="+33 6 XX XX XX XX" 
                   {...field}
-                  className="h-11"
+                  onBlur={(e) => {
+                    field.onBlur();
+                    form.trigger("phone_secondary");
+                  }}
                 />
               </FormControl>
               <FormMessage />
