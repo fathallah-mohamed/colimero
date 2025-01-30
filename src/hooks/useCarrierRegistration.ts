@@ -11,70 +11,68 @@ export function useCarrierRegistration(onSuccess?: () => void) {
       setIsLoading(true);
       console.log("Starting registration process...");
 
-      const id = crypto.randomUUID();
+      // 1. First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            user_type: 'carrier',
+            first_name: values.first_name,
+            last_name: values.last_name,
+            company_name: values.company_name
+          }
+        }
+      });
 
-      // 1. Créer l'enregistrement dans la table carriers
-      const { data: carrierData, error: carrierError } = await supabase
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("No user data returned");
+
+      // 2. Create the carrier profile using the auth user's ID
+      const { error: carrierError } = await supabase
         .from('carriers')
         .insert({
-          id,
+          id: authData.user.id,
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
           company_name: values.company_name,
-          phone: values.phone,
-          phone_secondary: values.phone_secondary || '',
           siret: values.siret,
+          phone: values.phone,
+          phone_secondary: values.phone_secondary || "",
           address: values.address,
           coverage_area: values.coverage_area,
-          status: 'pending',
-          avatar_url: '',
-          email_verified: false,
+          avatar_url: "",
           company_details: {},
-          authorized_routes: ['FR_TO_TN', 'TN_TO_FR'],
+          authorized_routes: ["FR_TO_TN", "TN_TO_FR"],
           total_deliveries: 0,
-          cities_covered: 30
-        })
-        .select()
-        .single();
+          cities_covered: 30,
+          status: "pending"
+        });
 
       if (carrierError) throw carrierError;
 
-      console.log("Carrier record created:", carrierData);
-
-      // 2. Envoyer l'email de confirmation au transporteur
-      const { error: registrationEmailError } = await supabase.functions.invoke(
-        'send-carrier-registration-email',
-        {
+      // 3. Send confirmation emails
+      await Promise.all([
+        // Send email to carrier
+        supabase.functions.invoke('send-carrier-registration-email', {
           body: {
             email: values.email,
             company_name: values.company_name,
             first_name: values.first_name,
             last_name: values.last_name
           }
-        }
-      );
-
-      if (registrationEmailError) {
-        console.error("Error sending registration email:", registrationEmailError);
-      }
-
-      // 3. Envoyer l'email de notification à l'admin
-      const { error: adminEmailError } = await supabase.functions.invoke(
-        'send-registration-email',
-        {
+        }),
+        // Send notification to admin
+        supabase.functions.invoke('send-registration-email', {
           body: {
             email: values.email,
             company_name: values.company_name,
             first_name: values.first_name,
             last_name: values.last_name
           }
-        }
-      );
-
-      if (adminEmailError) {
-        console.error("Error sending admin notification:", adminEmailError);
-      }
+        })
+      ]);
 
       toast({
         title: "Inscription réussie",
