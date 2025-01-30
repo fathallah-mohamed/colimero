@@ -11,7 +11,7 @@ interface CarrierSignupFormProps {
 }
 
 export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps) {
-  const { isLoading, handleRegistration } = useCarrierRegistration(onSuccess);
+  const { isLoading, handleSubmit } = useCarrierRegistration(onSuccess);
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -39,7 +39,7 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <FormSections form={form} />
 
         <div className="mt-8 text-center">
