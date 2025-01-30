@@ -1,16 +1,25 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { LoginFormFieldsProps } from "../types";
+import { UseFormReturn } from "react-hook-form";
+import { LoginFormValues } from "../types";
+
+interface LoginFormFieldsProps {
+  form: UseFormReturn<LoginFormValues>;
+  isLoading: boolean;
+  error: string | null;
+  showVerificationDialog?: boolean;
+}
 
 export function LoginFormFields({
   form,
   isLoading,
-  error
+  error,
+  showVerificationDialog
 }: LoginFormFieldsProps) {
   return (
     <div className="space-y-4">
-      {error && (
+      {error && !showVerificationDialog && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
