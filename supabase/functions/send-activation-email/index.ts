@@ -18,7 +18,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { email } = await req.json()
+    const { email, resend = false } = await req.json()
     
     if (!email) {
       throw new Error('Email is required')
@@ -38,6 +38,27 @@ serve(async (req) => {
       throw new Error('Client not found')
     }
 
+    // If resending, generate new activation code
+    if (resend) {
+      const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const { error: updateError } = await supabaseClient
+        .from('clients')
+        .update({ 
+          activation_code: newCode,
+          activation_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+        })
+        .eq('email', email)
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error('Error updating activation code:', updateError)
+        throw new Error('Could not generate new activation code')
+      }
+
+      clientData.activation_code = newCode
+    }
+
     if (!clientData?.activation_code) {
       console.error('No activation code found for client')
       throw new Error('No activation code found')
@@ -49,16 +70,24 @@ serve(async (req) => {
 
     // Send activation email
     const { data, error: emailError } = await resend.emails.send({
-      from: 'activation@votreapp.com',
+      from: 'Colimero <activation@colimero.app>',
       to: email,
-      subject: 'Activez votre compte',
+      subject: 'Activez votre compte Colimero',
       html: `
-        <h2>Bienvenue${clientData.first_name ? ` ${clientData.first_name}` : ''} !</h2>
-        <p>Merci de vous être inscrit. Pour activer votre compte, veuillez utiliser le code suivant :</p>
-        <h3 style="font-size: 24px; letter-spacing: 5px; background-color: #f0f0f0; padding: 10px; text-align: center;">
-          ${clientData.activation_code}
-        </h3>
-        <p>Ce code est valable pendant 48 heures.</p>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1a365d; text-align: center;">Bienvenue${clientData.first_name ? ` ${clientData.first_name}` : ''} !</h2>
+          <p style="color: #4a5568; text-align: center;">
+            Merci de vous être inscrit sur Colimero. Pour activer votre compte, veuillez utiliser le code suivant :
+          </p>
+          <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+            <h3 style="font-size: 24px; letter-spacing: 5px; margin: 0; color: #2d3748;">
+              ${clientData.activation_code}
+            </h3>
+          </div>
+          <p style="color: #718096; text-align: center; font-size: 14px;">
+            Ce code est valable pendant 48 heures. Si vous n'avez pas demandé ce code, vous pouvez ignorer cet email.
+          </p>
+        </div>
       `
     })
 
