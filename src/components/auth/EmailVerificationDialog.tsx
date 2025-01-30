@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { clientAuthService } from "@/services/auth/client-auth-service";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -20,17 +19,31 @@ export function EmailVerificationDialog({
   email
 }: EmailVerificationDialogProps) {
   const [isResending, setIsResending] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activationCode, setActivationCode] = useState("");
-  const [isActivating, setIsActivating] = useState(false);
   const { toast } = useToast();
 
   const handleResendEmail = async () => {
     try {
       setIsResending(true);
       setError(null);
-      console.log("Resending activation email to:", email);
+      console.log("Requesting new activation code for:", email);
 
+      // Générer un nouveau code d'activation
+      const { data, error: dbError } = await supabase
+        .rpc('generate_new_activation_code', {
+          p_email: email
+        });
+
+      if (dbError || !data.success) {
+        console.error("Error generating new code:", dbError || data.message);
+        throw new Error(dbError?.message || data.message || "Erreur lors de la génération du code");
+      }
+
+      console.log("New activation code generated successfully");
+
+      // Envoyer l'email avec le nouveau code
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { 
           email,
@@ -43,14 +56,13 @@ export function EmailVerificationDialog({
         throw emailError;
       }
 
-      console.log("Activation email sent successfully");
       toast({
         title: "Email envoyé",
         description: "Un nouveau code d'activation vous a été envoyé par email."
       });
 
-    } catch (error) {
-      console.error('Error resending email:', error);
+    } catch (error: any) {
+      console.error('Error in handleResendEmail:', error);
       setError("Impossible d'envoyer l'email d'activation. Veuillez réessayer plus tard.");
       toast({
         variant: "destructive",
@@ -71,11 +83,21 @@ export function EmailVerificationDialog({
     try {
       setIsActivating(true);
       setError(null);
+      console.log("Validating activation code for:", email);
 
-      const result = await clientAuthService.activateAccount(activationCode, email);
-      
-      if (!result.success) {
-        setError(result.error || "Code d'activation invalide");
+      const { data, error: validationError } = await supabase
+        .rpc('validate_activation_code', {
+          p_email: email,
+          p_code: activationCode
+        });
+
+      if (validationError) {
+        console.error("Error validating code:", validationError);
+        throw validationError;
+      }
+
+      if (!data.is_valid) {
+        setError(data.message);
         return;
       }
 
@@ -83,11 +105,17 @@ export function EmailVerificationDialog({
         title: "Compte activé",
         description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter."
       });
+      
       onClose();
 
-    } catch (error) {
-      console.error('Error activating account:', error);
-      setError("Une erreur est survenue lors de l'activation");
+    } catch (error: any) {
+      console.error('Error in handleActivate:', error);
+      setError("Une erreur est survenue lors de l'activation. Veuillez réessayer.");
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'activation"
+      });
     } finally {
       setIsActivating(false);
     }
@@ -120,7 +148,7 @@ export function EmailVerificationDialog({
             <Input
               type="text"
               value={activationCode}
-              onChange={(e) => setActivationCode(e.target.value)}
+              onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
               placeholder="Code d'activation"
               className="text-center text-lg tracking-widest"
               maxLength={6}

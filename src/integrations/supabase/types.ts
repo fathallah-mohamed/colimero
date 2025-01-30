@@ -982,6 +982,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      generate_new_activation_code: {
+        Args: {
+          p_email: string
+        }
+        Returns: {
+          success: boolean
+          activation_code: string
+          message: string
+        }[]
+      }
       generate_random_route:
         | {
             Args: Record<PropertyKey, never>
@@ -1046,6 +1056,16 @@ export type Database = {
       update_carriers_with_random_avatars: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      validate_activation_code: {
+        Args: {
+          p_email: string
+          p_code: string
+        }
+        Returns: {
+          is_valid: boolean
+          message: string
+        }[]
       }
       validate_route_structure: {
         Args: {
