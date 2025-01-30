@@ -39,7 +39,6 @@ export function LoginForm({
 }: LoginFormProps) {
   const navigate = useNavigate();
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<LoginFormValues>({
@@ -52,7 +51,13 @@ export function LoginForm({
 
   const { isLoading, error, handleLogin } = useAuthService({
     onSuccess: () => {
-      if (!showVerificationDialog) {
+      toast({
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté"
+      });
+      if (onSuccess) {
+        onSuccess();
+      } else {
         const returnPath = sessionStorage.getItem('returnPath');
         if (returnPath) {
           sessionStorage.removeItem('returnPath');
@@ -65,6 +70,7 @@ export function LoginForm({
     onVerificationNeeded: () => {
       console.log("Verification needed for:", form.getValues("email"));
       setShowVerificationDialog(true);
+      form.reset({ email: form.getValues("email"), password: "" });
       toast({
         title: "Compte non activé",
         description: "Veuillez activer votre compte en utilisant le code reçu par email.",
@@ -75,14 +81,11 @@ export function LoginForm({
 
   const onSubmit = async (values: LoginFormValues) => {
     const result = await handleLogin(values.email, values.password);
+    console.log("Login result:", result);
     
     if (result?.needsVerification) {
       setShowVerificationDialog(true);
     }
-  };
-
-  const handleVerificationDialogClose = () => {
-    setShowVerificationDialog(false);
   };
 
   return (
@@ -92,10 +95,6 @@ export function LoginForm({
           form={form}
           isLoading={isLoading}
           error={error}
-          showVerificationDialog={showVerificationDialog}
-          showErrorDialog={showErrorDialog}
-          onVerificationDialogClose={handleVerificationDialogClose}
-          onErrorDialogClose={() => setShowErrorDialog(false)}
         />
 
         <div className="space-y-4">
@@ -160,7 +159,7 @@ export function LoginForm({
         {showVerificationDialog && (
           <EmailVerificationDialog
             isOpen={showVerificationDialog}
-            onClose={handleVerificationDialogClose}
+            onClose={() => setShowVerificationDialog(false)}
             email={form.getValues("email")}
           />
         )}

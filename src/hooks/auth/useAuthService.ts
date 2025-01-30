@@ -46,13 +46,12 @@ export function useAuthService({
       setIsLoading(true);
       setError(null);
 
-      // Si c'est un client qui essaie de se connecter
+      // Vérifier d'abord le statut du client
       if (!requiredUserType || requiredUserType === 'client') {
         try {
           const clientStatus = await checkClientVerification(email);
           console.log('Client status check result:', clientStatus);
 
-          // Si le client existe et n'est pas vérifié/actif
           if (clientStatus && (!clientStatus.email_verified || clientStatus.status !== 'active')) {
             console.log('Client needs verification, triggering verification flow');
             if (onVerificationNeeded) {

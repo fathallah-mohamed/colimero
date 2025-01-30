@@ -25,15 +25,18 @@ export function EmailVerificationDialog({
     try {
       setIsResending(true);
       setError(null);
+      console.log("Resending activation email to:", email);
 
       const { error: resendError } = await supabase.functions.invoke('send-activation-email', {
         body: { email }
       });
 
       if (resendError) {
+        console.error("Error sending activation email:", resendError);
         throw resendError;
       }
 
+      console.log("Activation email sent successfully");
       toast({
         title: "Email envoyé",
         description: "Un nouveau code d'activation vous a été envoyé par email."
