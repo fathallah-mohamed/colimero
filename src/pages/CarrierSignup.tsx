@@ -10,18 +10,18 @@ export default function CarrierSignup() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-8"
+          className="text-center mb-6"
         >
-          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Développez votre activité de transport
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-gray-600 mt-2">
             Rejoignez notre réseau de transporteurs professionnels
           </p>
         </motion.div>
@@ -31,7 +31,7 @@ export default function CarrierSignup() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8"
+          className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-100 p-4 md:p-6"
         >
           <CarrierSignupForm onSuccess={() => navigate("/")} />
         </motion.div>
