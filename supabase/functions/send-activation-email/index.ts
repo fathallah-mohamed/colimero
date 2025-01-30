@@ -14,13 +14,13 @@ serve(async (req) => {
   }
 
   try {
-    const { email, firstName = 'Utilisateur' } = await req.json()
+    const { email, firstName = 'Utilisateur', resend = false } = await req.json()
     
     if (!email) {
       throw new Error('Email is required')
     }
 
-    console.log('Processing activation email request for:', email)
+    console.log('Processing activation email request for:', email, 'resend:', resend)
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -30,7 +30,7 @@ serve(async (req) => {
     // Get client data
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
-      .select('activation_code')
+      .select('activation_code, first_name')
       .eq('email', email)
       .single()
 
