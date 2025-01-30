@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { RegistrationResult } from "./types";
 
 interface RegisterFormData {
   firstName: string;
@@ -8,16 +9,6 @@ interface RegisterFormData {
   phone_secondary?: string;
   address: string;
   password: string;
-}
-
-type RegistrationType = 'new' | 'existing';
-
-interface RegistrationResult {
-  success: boolean;
-  type?: RegistrationType;
-  error?: string;
-  needsVerification?: boolean;
-  email?: string;
 }
 
 export async function registerClient(formData: RegisterFormData): Promise<RegistrationResult> {
@@ -60,9 +51,9 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address
-        },
-        emailRedirectTo: `${window.location.origin}/activation`
+          address: formData.address,
+          email: formData.email
+        }
       }
     });
 
@@ -77,7 +68,28 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Force sign out to ensure email verification flow
+    // 3. Ensure client record is created
+    const { error: clientError } = await supabase
+      .from('clients')
+      .insert({
+        id: authData.user.id,
+        email: formData.email,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        address: formData.address,
+        status: 'pending',
+        email_verified: false
+      });
+
+    if (clientError) {
+      console.error('Error creating client record:', clientError);
+      // If client creation fails, we should handle cleanup
+      await supabase.auth.signOut();
+      throw clientError;
+    }
+
+    // 4. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
 
     return {
