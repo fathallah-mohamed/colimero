@@ -14,12 +14,15 @@ export function useVerificationEmail() {
     setIsResending(true);
 
     try {
-      const { error } = await supabase.functions.invoke('send-activation-email', {
-        body: { 
-          email: email.trim(),
-          firstName: 'Utilisateur' // Default value if firstName is not available
+      const { error } = await supabase.functions.invoke(
+        'send-activation-email',
+        {
+          body: { 
+            email: email.trim(),
+            resend: true
+          }
         }
-      });
+      );
 
       if (error) {
         console.error('Error sending activation email:', error);

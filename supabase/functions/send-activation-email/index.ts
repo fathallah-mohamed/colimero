@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, firstName, resend = false } = await req.json()
+    const { email, firstName = null, resend = false } = await req.json()
     
     if (!email) {
       throw new Error('Email is required')
@@ -51,6 +51,9 @@ serve(async (req) => {
 
     const resendClient = new Resend(Deno.env.get('RESEND_API_KEY'))
 
+    // Use firstName if provided, otherwise use the one from the database
+    const displayName = firstName || updateData?.first_name || 'Utilisateur'
+
     // Send activation email
     const { data: emailData, error: emailError } = await resendClient.emails.send({
       from: 'Colimero <activation@colimero.app>',
@@ -58,7 +61,7 @@ serve(async (req) => {
       subject: 'Activez votre compte Colimero',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1a365d; text-align: center;">Bienvenue${updateData?.first_name ? ` ${updateData.first_name}` : ''} !</h2>
+          <h2 style="color: #1a365d; text-align: center;">Bienvenue${displayName ? ` ${displayName}` : ''} !</h2>
           <p style="color: #4a5568; text-align: center;">
             Merci de vous être inscrit sur Colimero. Pour activer votre compte, veuillez utiliser le code suivant :
           </p>
