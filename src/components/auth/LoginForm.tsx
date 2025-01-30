@@ -9,7 +9,7 @@ import { Form } from "@/components/ui/form";
 import { useNavigate } from "react-router-dom";
 import { EmailVerificationDialog } from "./EmailVerificationDialog";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useActivationDialog } from "@/hooks/auth/useActivationDialog";
 
 const loginSchema = z.object({
   email: z.string()
@@ -38,7 +38,6 @@ export function LoginForm({
   hideRegisterButton = false,
 }: LoginFormProps) {
   const navigate = useNavigate();
-  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const { toast } = useToast();
   
@@ -49,6 +48,12 @@ export function LoginForm({
       password: "",
     },
   });
+
+  const {
+    showVerificationDialog,
+    handleVerificationNeeded,
+    handleVerificationDialogClose
+  } = useActivationDialog(form);
 
   const { isLoading, error, handleLogin } = useAuthService({
     onSuccess: () => {
@@ -63,9 +68,8 @@ export function LoginForm({
       }
     },
     onVerificationNeeded: () => {
-      console.log("Showing verification dialog for:", form.getValues("email"));
-      setShowVerificationDialog(true);
-      form.reset({ email: form.getValues("email"), password: "" });
+      console.log("Verification needed for:", form.getValues("email"));
+      handleVerificationNeeded(form.getValues("email"));
       toast({
         title: "Compte non activé",
         description: "Veuillez activer votre compte en utilisant le code reçu par email.",
@@ -78,8 +82,7 @@ export function LoginForm({
     const result = await handleLogin(values.email, values.password);
     
     if (result?.needsVerification) {
-      setShowVerificationDialog(true);
-      form.reset({ email: values.email, password: "" });
+      handleVerificationNeeded(values.email);
     }
   };
 
@@ -92,7 +95,7 @@ export function LoginForm({
           error={error}
           showVerificationDialog={showVerificationDialog}
           showErrorDialog={showErrorDialog}
-          onVerificationDialogClose={() => setShowVerificationDialog(false)}
+          onVerificationDialogClose={handleVerificationDialogClose}
           onErrorDialogClose={() => setShowErrorDialog(false)}
         />
 
@@ -158,7 +161,7 @@ export function LoginForm({
         {showVerificationDialog && (
           <EmailVerificationDialog
             isOpen={showVerificationDialog}
-            onClose={() => setShowVerificationDialog(false)}
+            onClose={handleVerificationDialogClose}
             email={form.getValues("email")}
           />
         )}
