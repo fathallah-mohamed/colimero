@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, resend: isResend = false } = await req.json()
+    const { email, firstName = 'Utilisateur' } = await req.json()
     
     if (!email) {
       throw new Error('Email is required')
@@ -30,7 +30,7 @@ serve(async (req) => {
     // Get client data
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
-      .select('activation_code, first_name')
+      .select('activation_code')
       .eq('email', email)
       .single()
 
@@ -55,7 +55,7 @@ serve(async (req) => {
       subject: 'Activez votre compte Colimero',
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #1a365d; text-align: center;">Bienvenue${clientData.first_name ? ` ${clientData.first_name}` : ''} !</h2>
+          <h2 style="color: #1a365d; text-align: center;">Bienvenue${firstName ? ` ${firstName}` : ''} !</h2>
           <p style="color: #4a5568; text-align: center;">
             Merci de vous être inscrit sur Colimero. Pour activer votre compte, veuillez utiliser le code suivant :
           </p>
