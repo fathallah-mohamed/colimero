@@ -39,6 +39,7 @@ export function LoginForm({
 }: LoginFormProps) {
   const navigate = useNavigate();
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<LoginFormValues>({
@@ -85,6 +86,9 @@ export function LoginForm({
           isLoading={isLoading}
           error={error}
           showVerificationDialog={showVerificationDialog}
+          showErrorDialog={showErrorDialog}
+          onVerificationDialogClose={() => setShowVerificationDialog(false)}
+          onErrorDialogClose={() => setShowErrorDialog(false)}
         />
 
         <div className="space-y-4">
