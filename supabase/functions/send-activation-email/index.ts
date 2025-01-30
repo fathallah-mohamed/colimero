@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, resend = false } = await req.json()
+    const { email, firstName, resend = false } = await req.json()
     
     if (!email) {
       throw new Error('Email is required')
