@@ -30,12 +30,12 @@ serve(async (req) => {
     // Get client data
     const { data: clientData, error: clientError } = await supabaseClient
       .from('clients')
-      .select('activation_code, first_name')
+      .select('activation_code')
       .eq('email', email)
       .single()
 
     if (clientError) {
-      console.error('Error fetching client:', clientError)
+      console.error("Error fetching client:", clientError)
       throw new Error('Client not found')
     }
 
