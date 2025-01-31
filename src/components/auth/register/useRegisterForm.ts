@@ -62,7 +62,6 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
 
       if (result.success) {
         setShowVerificationDialog(true);
-        
         if (result.type) {
           onSuccess(result.type);
         }
