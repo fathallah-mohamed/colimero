@@ -2,7 +2,6 @@ import * as z from "zod";
 
 export const formSchema = z.object({
   email: z.string().email("Email invalide"),
-  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
   phone: z.string().min(10, "Numéro de téléphone invalide"),
   phone_secondary: z.string().optional(),
   first_name: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),

@@ -2,15 +2,12 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import type { FormValues } from "./FormSchema";
-import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 
 interface ContactInfoFieldsProps {
   form: UseFormReturn<FormValues>;
 }
 
 export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
-  const password = form.watch("password");
-
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Informations de contact</h3>
@@ -34,30 +31,6 @@ export function ContactInfoFields({ form }: ContactInfoFieldsProps) {
                   }}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Mot de passe <span className="text-red-500">*</span>
-              </FormLabel>
-              <FormControl>
-                <Input 
-                  type="password" 
-                  placeholder="********" 
-                  {...field}
-                  onBlur={(e) => {
-                    field.onBlur();
-                    form.trigger("password");
-                  }}
-                />
-              </FormControl>
-              <PasswordStrengthIndicator password={password} />
               <FormMessage />
             </FormItem>
           )}

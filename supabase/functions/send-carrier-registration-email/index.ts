@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const ADMIN_EMAIL = "admin@colimero.com";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,7 @@ interface RegistrationEmailData {
   company_name: string;
   first_name: string;
   last_name: string;
+  temp_password?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -26,10 +28,11 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Email service configuration is missing");
     }
 
-    const { email, company_name, first_name, last_name }: RegistrationEmailData = await req.json();
-    console.log("Sending registration confirmation email to:", email);
+    const { email, company_name, first_name, last_name, temp_password }: RegistrationEmailData = await req.json();
+    console.log("Processing registration emails for:", email);
 
-    const res = await fetch("https://api.resend.com/emails", {
+    // 1. Email to carrier confirming registration
+    const carrierEmailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,16 +52,72 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
-    if (!res.ok) {
-      const errorData = await res.text();
-      console.error("Error response from Resend:", errorData);
-      throw new Error(`Failed to send email: ${errorData}`);
+    if (!carrierEmailResponse.ok) {
+      throw new Error("Failed to send carrier confirmation email");
     }
 
-    const data = await res.json();
-    console.log("Registration confirmation email sent successfully:", data);
+    // 2. Email to admin about new registration
+    const adminEmailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: "Colimero <no-reply@colimero.fr>",
+        to: [ADMIN_EMAIL],
+        subject: "Nouvelle demande d'inscription transporteur",
+        html: `
+          <h2>Nouvelle demande d'inscription transporteur</h2>
+          <p>Un nouveau transporteur vient de s'inscrire sur la plateforme :</p>
+          <ul>
+            <li><strong>Entreprise :</strong> ${company_name}</li>
+            <li><strong>Nom :</strong> ${last_name}</li>
+            <li><strong>Prénom :</strong> ${first_name}</li>
+            <li><strong>Email :</strong> ${email}</li>
+          </ul>
+          <p>Veuillez vous connecter à la plateforme pour examiner cette demande.</p>
+        `,
+      }),
+    });
+
+    if (!adminEmailResponse.ok) {
+      throw new Error("Failed to send admin notification email");
+    }
+
+    // 3. If temp_password is provided (approval case), send credentials email
+    if (temp_password) {
+      const credentialsEmailResponse = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: "Colimero <no-reply@colimero.fr>",
+          to: [email],
+          subject: "Vos identifiants de connexion Colimero",
+          html: `
+            <h1>Bienvenue sur Colimero !</h1>
+            <p>Votre compte transporteur a été validé. Voici vos identifiants de connexion :</p>
+            <ul>
+              <li><strong>Email :</strong> ${email}</li>
+              <li><strong>Mot de passe temporaire :</strong> ${temp_password}</li>
+            </ul>
+            <p>Pour des raisons de sécurité, vous devrez changer ce mot de passe lors de votre première connexion.</p>
+            <p>Cordialement,<br>L'équipe Colimero</p>
+          `,
+        }),
+      });
+
+      if (!credentialsEmailResponse.ok) {
+        throw new Error("Failed to send credentials email");
+      }
+    }
+
+    console.log("All registration emails sent successfully");
     
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -66,7 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("Error in send-carrier-registration-email function:", error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || "An error occurred while sending the email" 
+        error: error.message || "An error occurred while sending the emails" 
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
