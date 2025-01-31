@@ -25,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending admin notification for new carrier:", carrierEmail);
 
     const emailResponse = await resend.emails.send({
-      from: "Colimero <no-reply@colimero.fr>",
+      from: "Colimero <no-reply@colimero.com>",
       to: [adminEmail],
       subject: "Nouvelle demande d'inscription transporteur",
       html: `

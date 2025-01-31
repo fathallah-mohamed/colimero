@@ -24,12 +24,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending registration confirmation to:", email);
 
     const emailResponse = await resend.emails.send({
-      from: "Colimero <no-reply@colimero.fr>",
+      from: "Colimero <no-reply@colimero.com>",
       to: [email],
       subject: "Confirmation de votre demande d'inscription transporteur",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <img src="https://colimero.fr/logo.png" alt="Colimero Logo" style="max-width: 200px; margin: 20px 0;" />
+          <img src="https://colimero.com/logo.png" alt="Colimero Logo" style="max-width: 200px; margin: 20px 0;" />
           
           <h1 style="color: #00B0F0; margin-bottom: 20px;">Bienvenue sur Colimero !</h1>
           

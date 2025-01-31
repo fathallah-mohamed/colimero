@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Colimero <no-reply@colimero.fr>",
+        from: "Colimero <no-reply@colimero.com>",
         to: [email],
         subject: "Votre demande d'inscription a été rejetée",
         html: `
