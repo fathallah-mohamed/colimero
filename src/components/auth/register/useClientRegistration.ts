@@ -41,7 +41,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       };
     }
 
-    // 2. Create auth user with proper metadata
+    // 2. Create auth user
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
@@ -51,8 +51,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address,
-          email: formData.email
+          address: formData.address
         }
       }
     });
@@ -68,13 +67,10 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Wait for client record to be created by trigger
-    console.log('Waiting for client record creation...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // 4. Force sign out to ensure email verification flow
+    // 3. Sign out immediately to ensure clean state
     await supabase.auth.signOut();
 
+    // 4. Return success
     return {
       success: true,
       type: 'new',
