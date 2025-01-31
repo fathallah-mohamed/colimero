@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./register/RegisterFormFields";
 import { RegisterFormState } from "./register/types";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2 } from "lucide-react";
 import { EmailVerificationDialog } from "./EmailVerificationDialog";
 
 interface RegisterFormProps {
