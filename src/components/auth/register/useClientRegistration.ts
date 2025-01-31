@@ -68,26 +68,9 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Ensure client record is created
-    const { error: clientError } = await supabase
-      .from('clients')
-      .insert({
-        id: authData.user.id,
-        email: formData.email,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.phone,
-        address: formData.address,
-        status: 'pending',
-        email_verified: false
-      });
-
-    if (clientError) {
-      console.error('Error creating client record:', clientError);
-      // If client creation fails, we should handle cleanup
-      await supabase.auth.signOut();
-      throw clientError;
-    }
+    // 3. Wait for client record to be created by trigger
+    console.log('Waiting for client record creation...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // 4. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
