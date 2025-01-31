@@ -61,7 +61,6 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
       console.log("Registration result:", result);
 
       if (result.success) {
-        // Afficher immédiatement le dialogue de vérification
         setShowVerificationDialog(true);
         
         if (result.type) {
