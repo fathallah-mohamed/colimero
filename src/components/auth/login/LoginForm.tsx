@@ -7,6 +7,7 @@ import { LoginFormFields } from "./LoginFormFields";
 import { LoginFormButtons } from "./LoginFormButtons";
 import { LoginFormDialogs } from "./LoginFormDialogs";
 import { LoginFormValues } from "./LoginFormFields";
+import { useState } from "react";
 
 const loginSchema = z.object({
   email: z.string()
@@ -34,6 +35,9 @@ export function LoginForm({
   requiredUserType,
   hideRegisterButton = false,
 }: LoginFormProps) {
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
