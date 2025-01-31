@@ -1,8 +1,8 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { UseFormReturn } from "react-hook-form";
 import { AlertCircle } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
 
 export interface LoginFormValues {
   email: string;
@@ -18,28 +18,14 @@ interface LoginFormFieldsProps {
 export function LoginFormFields({
   form,
   isLoading,
-  error,
+  error
 }: LoginFormFieldsProps) {
-  // Traduire les messages d'erreur courants
-  const translateError = (error: string) => {
-    switch (error) {
-      case "Invalid login credentials":
-        return "Email ou mot de passe incorrect";
-      case "Email not confirmed":
-        return "Veuillez vérifier votre email pour activer votre compte";
-      case "Account not activated":
-        return "Votre compte n'est pas encore activé. Veuillez vérifier votre email.";
-      default:
-        return "Une erreur est survenue lors de la connexion";
-    }
-  };
-
   return (
     <div className="space-y-4">
       {error && (
-        <Alert variant="destructive" className="border-red-500">
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{translateError(error)}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 

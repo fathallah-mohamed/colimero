@@ -2,11 +2,11 @@ import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useLoginForm } from "@/hooks/auth/login/useLoginForm";
-import { LoginFormFields } from "./form/LoginFormFields";
-import { LoginFormButtons } from "./form/LoginFormButtons";
-import { LoginFormDialogs } from "./form/LoginFormDialogs";
-import { LoginFormProps, LoginFormValues } from "./types";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { LoginFormFields } from "./LoginFormFields";
+import { LoginFormButtons } from "./LoginFormButtons";
+import { LoginFormDialogs } from "./LoginFormDialogs";
+import { LoginFormValues } from "./LoginFormFields";
 
 const loginSchema = z.object({
   email: z.string()
@@ -16,6 +16,15 @@ const loginSchema = z.object({
     .min(1, "Le mot de passe est requis")
     .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 });
+
+interface LoginFormProps {
+  onForgotPassword: () => void;
+  onRegister: () => void;
+  onCarrierRegister: () => void;
+  onSuccess?: () => void;
+  requiredUserType?: 'client' | 'carrier';
+  hideRegisterButton?: boolean;
+}
 
 export function LoginForm({
   onForgotPassword,
@@ -36,12 +45,8 @@ export function LoginForm({
   const {
     isLoading,
     error,
-    showVerificationDialog,
-    showErrorDialog,
-    setShowVerificationDialog,
-    setShowErrorDialog,
-    handleLogin,
-  } = useLoginForm({ 
+    handleLogin
+  } = useAuth({ 
     onSuccess,
     requiredUserType,
     onVerificationNeeded: () => {
