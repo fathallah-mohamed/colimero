@@ -28,11 +28,43 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: "Confirmation de votre demande d'inscription transporteur",
       html: `
-        <h1>Bienvenue sur Colimero !</h1>
-        <p>Nous avons bien reçu votre demande d'inscription en tant que transporteur pour ${company_name}.</p>
-        <p>Notre équipe va examiner votre dossier dans les plus brefs délais.</p>
-        <p>Vous recevrez un email de confirmation une fois votre compte validé par notre équipe.</p>
-        <p>Cordialement,<br>L'équipe Colimero</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <img src="https://colimero.fr/logo.png" alt="Colimero Logo" style="max-width: 200px; margin: 20px 0;" />
+          
+          <h1 style="color: #00B0F0; margin-bottom: 20px;">Bienvenue sur Colimero !</h1>
+          
+          <p style="font-size: 16px; line-height: 1.5; color: #333;">
+            Nous avons bien reçu votre demande d'inscription en tant que transporteur pour <strong>${company_name}</strong>.
+          </p>
+
+          <div style="background-color: #f8f9fa; border-left: 4px solid #00B0F0; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #555;">
+              Notre équipe va examiner votre dossier dans les plus brefs délais. 
+              Vous recevrez un email de confirmation une fois votre compte validé par notre équipe.
+            </p>
+          </div>
+
+          <p style="font-size: 16px; line-height: 1.5; color: #333;">
+            En attendant, n'hésitez pas à préparer les documents suivants qui pourront vous être demandés :
+          </p>
+
+          <ul style="color: #555; line-height: 1.6;">
+            <li>Kbis de moins de 3 mois</li>
+            <li>Attestation d'assurance professionnelle</li>
+            <li>Licence de transport</li>
+          </ul>
+
+          <p style="font-size: 16px; line-height: 1.5; color: #333;">
+            Si vous avez des questions, notre équipe support est à votre disposition.
+          </p>
+
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 14px;">
+              Cordialement,<br>
+              L'équipe Colimero
+            </p>
+          </div>
+        </div>
       `,
     });
 
