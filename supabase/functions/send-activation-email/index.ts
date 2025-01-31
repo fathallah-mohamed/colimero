@@ -10,7 +10,7 @@ const corsHeaders = {
 
 interface EmailRequest {
   email: string;
-  firstName: string;
+  firstName?: string;
   activationCode: string;
   resend?: boolean;
 }
@@ -22,8 +22,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, firstName, activationCode, resend = false } = await req.json();
+    console.log('Starting send-activation-email function');
+    const requestData = await req.json();
+    console.log('Received request data:', requestData);
+
+    const { email, firstName, activationCode, resend = false } = requestData as EmailRequest;
     console.log('Sending activation email to:', email, 'with code:', activationCode);
+
+    if (!email || !activationCode) {
+      throw new Error('Missing required fields: email or activationCode');
+    }
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: 'Colimero <no-reply@colimero.com>',
