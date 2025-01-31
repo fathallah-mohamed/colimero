@@ -1,59 +1,32 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Resend } from 'https://esm.sh/resend@2.0.0'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface EmailRequest {
+  email: string;
+  firstName: string;
+  activationCode: string;
+  resend?: boolean;
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
+const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { email, firstName, resend } = await req.json()
-    console.log('Starting activation email process for:', email, 'resend:', resend)
+    const { email, firstName, activationCode, resend = false } = await req.json();
+    console.log('Sending activation email to:', email, 'with code:', activationCode);
 
-    // Check for required API key
-    const resendApiKey = Deno.env.get('RESEND_API_KEY')
-    if (!resendApiKey) {
-      console.error('RESEND_API_KEY is not configured')
-      throw new Error('Email service configuration missing')
-    }
-    console.log('RESEND_API_KEY is configured')
-
-    if (!email?.trim()) {
-      throw new Error('Email is required')
-    }
-
-    const resendClient = new Resend(resendApiKey)
-    console.log('Resend client initialized')
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-    console.log('Supabase client initialized')
-
-    // Get client's activation code
-    const { data: clientData, error: clientError } = await supabaseClient
-      .from('clients')
-      .select('activation_code')
-      .eq('email', email.trim())
-      .single()
-
-    if (clientError || !clientData?.activation_code) {
-      console.error('Error fetching client:', clientError)
-      throw new Error('Could not retrieve activation code')
-    }
-
-    console.log('Retrieved activation code:', clientData.activation_code)
-
-    const { data: emailData, error: emailError } = await resendClient.emails.send({
-      from: 'Colimero <activation@colimero.com>',
+    const { data: emailData, error: emailError } = await resend.emails.send({
+      from: 'Colimero <no-reply@colimero.com>',
       to: email.trim(),
       subject: resend ? 'Nouveau code d\'activation Colimero' : 'Activez votre compte Colimero',
       html: `
@@ -64,7 +37,7 @@ serve(async (req) => {
           </p>
           <div style="background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
             <h3 style="font-size: 24px; letter-spacing: 5px; margin: 0; color: #2d3748;">
-              ${clientData.activation_code}
+              ${activationCode}
             </h3>
           </div>
           <p style="color: #718096; text-align: center; font-size: 14px;">
@@ -72,14 +45,14 @@ serve(async (req) => {
           </p>
         </div>
       `
-    })
+    });
 
     if (emailError) {
-      console.error('Error sending email:', emailError)
-      throw emailError
+      console.error('Error sending email:', emailError);
+      throw emailError;
     }
 
-    console.log('Email sent successfully:', emailData)
+    console.log('Email sent successfully:', emailData);
 
     return new Response(
       JSON.stringify({ success: true }),
@@ -90,10 +63,10 @@ serve(async (req) => {
         },
         status: 200 
       }
-    )
+    );
 
   } catch (error) {
-    console.error('Complete error in send-activation-email:', error)
+    console.error('Complete error in send-activation-email:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message,
@@ -106,6 +79,8 @@ serve(async (req) => {
         },
         status: 400
       }
-    )
+    );
   }
-})
+};
+
+serve(handler);

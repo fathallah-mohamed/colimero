@@ -29,11 +29,23 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       if (!existingClient.email_verified) {
         console.log('Sending new activation code for unverified client');
         
+        // Generate new activation code
+        const { data: newCodeData, error: codeError } = await supabase
+          .rpc('generate_new_activation_code', {
+            p_email: formData.email.trim()
+          });
+
+        if (codeError) {
+          console.error('Error generating new code:', codeError);
+          throw codeError;
+        }
+
         // Send activation email
         const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
           body: { 
             email: formData.email.trim(),
             firstName: formData.firstName,
+            activationCode: newCodeData.activation_code,
             resend: true
           }
         });
@@ -58,7 +70,6 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     }
 
     // 2. Create auth user with proper metadata
-    console.log('Creating auth user...');
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
@@ -89,12 +100,24 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     console.log('Waiting for client record creation...');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 4. Send initial activation email
-    console.log('Sending initial activation email...');
+    // 4. Get the activation code
+    const { data: clientData, error: clientError } = await supabase
+      .from('clients')
+      .select('activation_code')
+      .eq('email', formData.email.trim())
+      .single();
+
+    if (clientError || !clientData?.activation_code) {
+      console.error('Error getting activation code:', clientError);
+      throw new Error('Impossible de récupérer le code d\'activation');
+    }
+
+    // 5. Send activation email
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
       body: { 
         email: formData.email.trim(),
         firstName: formData.firstName,
+        activationCode: clientData.activation_code,
         resend: false
       }
     });
@@ -104,9 +127,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       throw emailError;
     }
 
-    console.log('Initial activation email sent successfully');
-
-    // 5. Force sign out to ensure email verification flow
+    // 6. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
 
     return {
