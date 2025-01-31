@@ -18,7 +18,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     // 1. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
-      .select('email, email_verified, status')
+      .select('email, email_verified')
       .eq('email', formData.email.trim())
       .maybeSingle();
 
@@ -41,7 +41,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       };
     }
 
-    // 2. Create auth user with metadata
+    // 2. Create auth user
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
@@ -68,24 +68,8 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Wait for client record to be created by trigger
-    console.log('Waiting for client record creation...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // 4. Sign out to ensure email verification flow
+    // 3. Sign out immediately to ensure clean auth state
     await supabase.auth.signOut();
-
-    // 5. Verify client record was created
-    const { data: clientRecord, error: clientError } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('id', authData.user.id)
-      .single();
-
-    if (clientError || !clientRecord) {
-      console.error('Client record not found after creation:', clientError);
-      throw new Error("Erreur lors de la création du profil client");
-    }
 
     return {
       success: true,
