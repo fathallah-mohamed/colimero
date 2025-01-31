@@ -1,7 +1,7 @@
 import Navigation from "@/components/Navigation";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { useNavigate } from "react-router-dom";
-import { useRegisterForm } from "@/hooks/auth/register/useRegisterForm";
+import { useRegisterForm } from "@/components/auth/register/useRegisterForm";
 
 export default function ClientSignup() {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export default function ClientSignup() {
     handleFieldChange,
     handleSubmit,
     handleCloseVerificationDialog
-  } = useRegisterForm(() => {});
+  } = useRegisterForm(() => navigate("/connexion"));
 
   const handleLogin = () => {
     navigate("/connexion");
@@ -36,10 +36,10 @@ export default function ClientSignup() {
           onLogin={handleLogin}
           isLoading={isLoading}
           formState={formState}
-          showVerificationDialog={showVerificationDialog}
+          showSuccessDialog={showVerificationDialog}
           handleFieldChange={handleFieldChange}
           handleSubmit={handleSubmit}
-          handleCloseVerificationDialog={handleCloseVerificationDialog}
+          handleCloseSuccessDialog={handleCloseVerificationDialog}
         />
       </div>
     </div>

@@ -1,26 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { RegisterFormFields } from "./register/RegisterFormFields";
 import { RegisterFormState } from "./register/types";
-import { EmailVerificationDialog } from "./EmailVerificationDialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 
 interface RegisterFormProps {
   onLogin: () => void;
   isLoading: boolean;
   formState: RegisterFormState;
-  showVerificationDialog: boolean;
+  showSuccessDialog: boolean;
   handleFieldChange: (field: keyof RegisterFormState, value: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
-  handleCloseVerificationDialog: () => void;
+  handleCloseSuccessDialog: () => void;
 }
 
 export function RegisterForm({
   onLogin,
   isLoading,
   formState,
-  showVerificationDialog,
+  showSuccessDialog,
   handleFieldChange,
   handleSubmit,
-  handleCloseVerificationDialog,
+  handleCloseSuccessDialog,
 }: RegisterFormProps) {
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
@@ -31,13 +32,22 @@ export function RegisterForm({
         </p>
       </div>
 
+      {showSuccessDialog && (
+        <Alert className="mb-6 bg-green-50 border-green-200">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            Votre compte a été créé avec succès. Un email d'activation vous a été envoyé.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <RegisterFormFields
           formState={formState}
           isLoading={isLoading}
-          showSuccessDialog={false}
+          showSuccessDialog={showSuccessDialog}
           onFieldChange={handleFieldChange}
-          onCloseSuccessDialog={() => {}}
+          onCloseSuccessDialog={handleCloseSuccessDialog}
         />
 
         <div className="pt-4 space-y-4">
@@ -60,12 +70,6 @@ export function RegisterForm({
           </div>
         </div>
       </form>
-
-      <EmailVerificationDialog
-        isOpen={showVerificationDialog}
-        onClose={handleCloseVerificationDialog}
-        email={formState.email}
-      />
     </div>
   );
 }
