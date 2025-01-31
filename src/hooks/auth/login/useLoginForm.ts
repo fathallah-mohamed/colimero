@@ -45,7 +45,7 @@ export function useLoginForm({
             setError("Votre demande est en cours de validation. Vous recevrez un email une fois votre compte validé.");
             return { success: false };
           } else if (carrierData.status === 'rejected') {
-            setError("Email ou mot de passe incorrect");
+            setError("Votre demande d'inscription a été rejetée");
             return { success: false };
           }
         }
