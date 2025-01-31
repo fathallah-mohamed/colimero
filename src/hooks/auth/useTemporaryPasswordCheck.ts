@@ -17,6 +17,7 @@ export function useTemporaryPasswordCheck() {
           return;
         }
 
+        // Check if user is a carrier and get their status
         const { data: carrier, error } = await supabase
           .from('carriers')
           .select('password_changed, status')
@@ -33,10 +34,21 @@ export function useTemporaryPasswordCheck() {
           return;
         }
 
+        // If no carrier found or not active, don't require password change
+        if (!carrier || carrier.status !== 'active') {
+          setNeedsPasswordChange(false);
+          return;
+        }
+
         // Only require password change for active carriers who haven't changed their password
-        setNeedsPasswordChange(carrier?.status === 'active' && carrier?.password_changed === false);
+        setNeedsPasswordChange(carrier.password_changed === false);
       } catch (error) {
         console.error('Error in checkTemporaryPassword:', error);
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la vérification du mot de passe",
+        });
       } finally {
         setIsLoading(false);
       }
