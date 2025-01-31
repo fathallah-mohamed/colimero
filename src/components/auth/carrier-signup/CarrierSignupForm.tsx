@@ -18,7 +18,6 @@ export default function CarrierSignupForm({ onSuccess }: CarrierSignupFormProps)
     mode: "onChange",
     defaultValues: {
       email: "",
-      password: "",
       phone: "",
       first_name: "",
       last_name: "",
