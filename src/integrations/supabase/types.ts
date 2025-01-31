@@ -406,6 +406,7 @@ export type Database = {
           id_document: string | null
           last_name: string
           password: string | null
+          password_changed: boolean | null
           phone: string
           phone_secondary: string
           reason: string | null
@@ -432,6 +433,7 @@ export type Database = {
           id_document?: string | null
           last_name: string
           password?: string | null
+          password_changed?: boolean | null
           phone: string
           phone_secondary?: string
           reason?: string | null
@@ -458,6 +460,7 @@ export type Database = {
           id_document?: string | null
           last_name?: string
           password?: string | null
+          password_changed?: boolean | null
           phone?: string
           phone_secondary?: string
           reason?: string | null

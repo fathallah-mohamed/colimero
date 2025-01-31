@@ -1,30 +1,28 @@
+import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import AppRoutes from "./AppRoutes";
-import Navigation from "@/components/Navigation";
+import { AppRoutes } from "./AppRoutes";
+import { useTemporaryPasswordCheck } from "./hooks/auth/useTemporaryPasswordCheck";
+import { ChangeTemporaryPasswordDialog } from "./components/auth/carrier-auth/ChangeTemporaryPasswordDialog";
 import "./App.css";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000, // 1 minute
-      retry: 1,
-    },
-  },
-});
-
 function App() {
+  const { needsPasswordChange, isLoading } = useTemporaryPasswordCheck();
+
+  // Prevent rendering the app content while checking password status
+  if (isLoading) {
+    return null;
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <div className="min-h-screen pt-16">
-          <Navigation />
-          <AppRoutes />
-        </div>
-        <Toaster />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <AppRoutes />
+      <Toaster />
+      <ChangeTemporaryPasswordDialog
+        isOpen={needsPasswordChange}
+        onClose={() => {}} // Empty function as we don't want to allow closing without changing password
+      />
+    </BrowserRouter>
   );
 }
 
