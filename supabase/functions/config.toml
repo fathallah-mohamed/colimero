@@ -6,3 +6,7 @@ RESEND_API_KEY = "re_"
 [[functions]]
 name = "send-temp-password-email"
 verify_jwt = false
+
+[[functions]]
+name = "send-client-activation-emails"
+verify_jwt = false

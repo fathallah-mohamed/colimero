@@ -102,6 +102,28 @@ export function EmailVerificationDialog({
         return;
       }
 
+      // Récupérer le nom du client pour l'email
+      const { data: clientData } = await supabase
+        .from('clients')
+        .select('first_name, last_name')
+        .eq('email', email)
+        .single();
+
+      const clientName = clientData ? `${clientData.first_name} ${clientData.last_name}` : "Nouveau client";
+
+      // Envoyer les emails de confirmation
+      const { error: emailError } = await supabase.functions.invoke('send-client-activation-emails', {
+        body: { 
+          clientEmail: email,
+          clientName: clientName
+        }
+      });
+
+      if (emailError) {
+        console.error("Error sending confirmation emails:", emailError);
+        // Continue même si l'envoi des emails échoue
+      }
+
       toast({
         title: "Compte activé",
         description: "Votre compte a été activé avec succès. Vous pouvez maintenant vous connecter."
