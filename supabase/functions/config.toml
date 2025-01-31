@@ -1,8 +1,8 @@
-[functions.send-admin-notification-email]
-verify_jwt = false
+project_id = "dsmahpgrhjoikcxuiqrw"
 
-[functions.send-approval-email]
-verify_jwt = false
+[global.env]
+RESEND_API_KEY = "re_"
 
-[functions.send-reset-email]
+[[functions]]
+name = "send-temp-password-email"
 verify_jwt = false
