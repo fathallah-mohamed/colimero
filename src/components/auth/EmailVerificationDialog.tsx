@@ -1,11 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, CheckCircle2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Mail } from "lucide-react";
+import { VerificationAlert } from "./verification/VerificationAlert";
+import { VerificationInput } from "./verification/VerificationInput";
+import { VerificationButtons } from "./verification/VerificationButtons";
 
 interface EmailVerificationDialogProps {
   isOpen: boolean;
@@ -37,12 +37,8 @@ export function EmailVerificationDialog({
 
       const result = data?.[0];
       if (dbError || !result?.success) {
-        const errorMessage = dbError?.message || result?.message || "Erreur lors de la génération du code";
-        console.error("Error generating new code:", errorMessage);
-        throw new Error(errorMessage);
+        throw new Error(dbError?.message || result?.message || "Erreur lors de la génération du code");
       }
-
-      console.log("New activation code generated successfully");
 
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { 
@@ -51,10 +47,7 @@ export function EmailVerificationDialog({
         }
       });
 
-      if (emailError) {
-        console.error("Error sending activation email:", emailError);
-        throw emailError;
-      }
+      if (emailError) throw emailError;
 
       toast({
         title: "Email envoyé",
@@ -78,7 +71,6 @@ export function EmailVerificationDialog({
     try {
       setIsActivating(true);
       setError(null);
-      console.log("Validating activation code for:", email);
 
       const { data, error: validationError } = await supabase
         .rpc('validate_activation_code', {
@@ -86,10 +78,7 @@ export function EmailVerificationDialog({
           p_code: activationCode
         });
 
-      if (validationError) {
-        console.error("Error validating code:", validationError);
-        throw validationError;
-      }
+      if (validationError) throw validationError;
 
       const result = data?.[0];
       if (!result?.is_valid) {
@@ -144,56 +133,21 @@ export function EmailVerificationDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <Alert className="bg-blue-50 border-blue-200">
-            <CheckCircle2 className="h-4 w-4 text-blue-500" />
-            <AlertDescription className="text-blue-700">
-              Un email d'activation vous a été envoyé à l'adresse <span className="font-medium">{email}</span>
-            </AlertDescription>
-          </Alert>
+          <VerificationAlert email={email} error={error} />
+          
+          <VerificationInput 
+            value={activationCode}
+            onChange={setActivationCode}
+          />
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="space-y-2">
-            <Input
-              type="text"
-              value={activationCode}
-              onChange={(e) => setActivationCode(e.target.value.toUpperCase())}
-              placeholder="Code d'activation"
-              className="text-center text-lg tracking-widest"
-              maxLength={6}
-            />
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <Button
-              onClick={handleActivate}
-              disabled={isActivating || !activationCode}
-              className="w-full"
-            >
-              {isActivating ? "Activation..." : "Activer mon compte"}
-            </Button>
-
-            <Button
-              onClick={handleResendEmail}
-              disabled={isResending}
-              variant="outline"
-              className="w-full"
-            >
-              {isResending ? "Envoi en cours..." : "Renvoyer l'email d'activation"}
-            </Button>
-
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              className="w-full"
-            >
-              Fermer
-            </Button>
-          </div>
+          <VerificationButtons
+            isActivating={isActivating}
+            isResending={isResending}
+            onActivate={handleActivate}
+            onResendEmail={handleResendEmail}
+            onClose={onClose}
+            activationCode={activationCode}
+          />
 
           <p className="text-sm text-gray-500 text-center">
             Si vous ne trouvez pas l'email, vérifiez votre dossier spam.
