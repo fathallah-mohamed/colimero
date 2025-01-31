@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export function useTemporaryPasswordCheck() {
   const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const checkPasswordStatus = async () => {
+    async function checkTemporaryPassword() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -15,37 +17,33 @@ export function useTemporaryPasswordCheck() {
           return;
         }
 
-        // Check if user is a carrier and hasn't changed their password
-        const { data: carrierData, error } = await supabase
-          .from("carriers")
-          .select("password_changed, status")
-          .eq("id", user.id)
-          .single();
+        const { data: carrier, error } = await supabase
+          .from('carriers')
+          .select('password_changed, status')
+          .eq('id', user.id)
+          .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error checking carrier status:', error);
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de vérifier le statut du mot de passe",
+          });
+          return;
+        }
 
-        // Only show password change dialog for active carriers who haven't changed their password
-        setNeedsPasswordChange(
-          carrierData?.status === "active" && !carrierData?.password_changed
-        );
+        // Only require password change for active carriers who haven't changed their password
+        setNeedsPasswordChange(carrier?.status === 'active' && carrier?.password_changed === false);
       } catch (error) {
-        console.error("Error checking password status:", error);
+        console.error('Error in checkTemporaryPassword:', error);
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
-    checkPasswordStatus();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkPasswordStatus();
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+    checkTemporaryPassword();
+  }, [toast]);
 
   return { needsPasswordChange, isLoading };
 }
