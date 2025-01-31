@@ -25,11 +25,22 @@ export function ForgotPasswordForm({ onSuccess, onCancel }: ForgotPasswordFormPr
     try {
       const resetLink = `${window.location.origin}/reset-password?email=${encodeURIComponent(email.trim())}`;
       
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      // Send reset email using our Edge Function
+      const { error: emailError } = await supabase.functions.invoke('send-reset-email', {
+        body: { 
+          email: email.trim(),
+          resetLink
+        }
+      });
+
+      if (emailError) throw emailError;
+
+      // Update password in Supabase Auth
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: resetLink,
       });
 
-      if (error) throw error;
+      if (resetError) throw resetError;
 
       setShowSuccessDialog(true);
     } catch (error: any) {
