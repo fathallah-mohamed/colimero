@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { AppRoutes } from "./AppRoutes";
+import AppRoutes from "./AppRoutes";
 import { useTemporaryPasswordCheck } from "./hooks/auth/useTemporaryPasswordCheck";
 import { ChangeTemporaryPasswordDialog } from "./components/auth/carrier-auth/ChangeTemporaryPasswordDialog";
 import "./App.css";
