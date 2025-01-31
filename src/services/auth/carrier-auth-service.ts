@@ -28,6 +28,7 @@ class CarrierAuthService extends BaseAuthService {
     try {
       console.log('Starting carrier sign in process for:', email);
       
+      // Vérifier d'abord le statut du transporteur
       const status = await this.checkCarrierStatus(email);
       console.log('Carrier status check result:', status);
       
@@ -38,10 +39,11 @@ class CarrierAuthService extends BaseAuthService {
         };
       }
 
+      // Bloquer la connexion si le statut n'est pas 'active', peu importe si l'email est vérifié
       if (status.status !== 'active') {
         return {
           success: false,
-          error: "Votre compte est en attente de validation par un administrateur",
+          error: "Votre compte est en attente de validation par un administrateur. Vous recevrez un email une fois votre compte validé.",
           needsValidation: true
         };
       }
