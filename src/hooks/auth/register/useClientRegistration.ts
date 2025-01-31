@@ -108,7 +108,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Wait for the database trigger to create the client record and generate activation code
+    // 3. Wait for client record to be created by trigger
     console.log('Waiting for client record creation...');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -125,6 +125,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     }
 
     // 5. Send activation email
+    console.log('Sending activation email with code:', clientData.activation_code);
     const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
       body: { 
         email: formData.email.trim(),
