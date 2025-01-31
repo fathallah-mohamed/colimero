@@ -11,6 +11,12 @@ interface RegisterFormData {
   password: string;
 }
 
+interface ActivationCodeResult {
+  success: boolean;
+  activation_code: string;
+  message: string;
+}
+
 export async function registerClient(formData: RegisterFormData): Promise<RegistrationResult> {
   try {
     console.log('Starting client registration for:', formData.email);
@@ -27,6 +33,41 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       
       // If client exists but isn't verified, allow them to get a new code
       if (!existingClient.email_verified) {
+        console.log('Sending new activation code for unverified client');
+        
+        // Generate new activation code
+        const { data: newCodeData, error: codeError } = await supabase
+          .rpc('generate_new_activation_code', {
+            p_email: formData.email.trim()
+          });
+
+        if (codeError) {
+          console.error('Error generating new code:', codeError);
+          throw codeError;
+        }
+
+        const activationResult = newCodeData[0] as ActivationCodeResult;
+        
+        if (!activationResult.success) {
+          throw new Error(activationResult.message);
+        }
+
+        // Send activation email
+        console.log('Sending activation email for existing client');
+        const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
+          body: { 
+            email: formData.email.trim(),
+            firstName: formData.firstName,
+            activationCode: activationResult.activation_code,
+            resend: true
+          }
+        });
+
+        if (emailError) {
+          console.error('Error sending activation email:', emailError);
+          throw emailError;
+        }
+
         return { 
           success: true,
           type: 'existing',
@@ -77,7 +118,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       .from('clients')
       .select('activation_code')
       .eq('email', formData.email.trim())
-      .maybeSingle();
+      .single();
 
     if (clientError || !clientData?.activation_code) {
       console.error('Error getting activation code:', clientError);

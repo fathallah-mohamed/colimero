@@ -18,7 +18,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
     // 1. Check if client already exists
     const { data: existingClient } = await supabase
       .from('clients')
-      .select('email, email_verified')
+      .select('email, email_verified, status')
       .eq('email', formData.email.trim())
       .maybeSingle();
 
@@ -41,7 +41,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
       };
     }
 
-    // 2. Create auth user
+    // 2. Create auth user with proper metadata
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email: formData.email.trim(),
       password: formData.password.trim(),
@@ -51,9 +51,9 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          address: formData.address
-        },
-        emailRedirectTo: `${window.location.origin}/activation`
+          address: formData.address,
+          email: formData.email
+        }
       }
     });
 
@@ -68,7 +68,28 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
 
     console.log('Auth user created successfully:', authData.user.id);
 
-    // 3. Sign out immediately to ensure clean auth state
+    // 3. Ensure client record is created
+    const { error: clientError } = await supabase
+      .from('clients')
+      .insert({
+        id: authData.user.id,
+        email: formData.email,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        address: formData.address,
+        status: 'pending',
+        email_verified: false
+      });
+
+    if (clientError) {
+      console.error('Error creating client record:', clientError);
+      // If client creation fails, we should handle cleanup
+      await supabase.auth.signOut();
+      throw clientError;
+    }
+
+    // 4. Force sign out to ensure email verification flow
     await supabase.auth.signOut();
 
     return {
