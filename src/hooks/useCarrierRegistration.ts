@@ -13,6 +13,22 @@ export function useCarrierRegistration(onSuccess?: () => void) {
       setIsLoading(true);
       console.log("Starting registration process...");
 
+      // Check if email exists in any user table
+      const [{ data: clientData }, { data: carrierData }, { data: adminData }] = await Promise.all([
+        supabase.from('clients').select('id').eq('email', values.email.trim()).maybeSingle(),
+        supabase.from('carriers').select('id').eq('email', values.email.trim()).maybeSingle(),
+        supabase.from('administrators').select('id').eq('email', values.email.trim()).maybeSingle()
+      ]);
+
+      if (clientData || carrierData || adminData) {
+        toast({
+          variant: "destructive",
+          title: "Email non disponible",
+          description: "Cet email ne peut pas être utilisé pour créer un compte. Veuillez en utiliser un autre.",
+        });
+        return;
+      }
+
       // Generate a temporary password
       const tempPassword = Math.random().toString(36).slice(-12);
       console.log("Generated temporary password");
