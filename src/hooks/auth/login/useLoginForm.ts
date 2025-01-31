@@ -22,29 +22,38 @@ export function useLoginForm({
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
       setShowVerificationDialog(false);
       setShowErrorDialog(false);
 
-      // Vérifier d'abord le statut du client
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('email_verified, status')
-        .eq('email', email.trim())
-        .maybeSingle();
+      // If it's a carrier login, check carrier status first
+      if (requiredUserType === 'carrier') {
+        const { data: carrierData, error: carrierError } = await supabase
+          .from('carriers')
+          .select('status')
+          .eq('email', email.trim())
+          .maybeSingle();
 
-      if (clientData && (!clientData.email_verified || clientData.status !== 'active')) {
-        console.log('Client account needs verification:', email);
-        setShowVerificationDialog(true);
-        if (onVerificationNeeded) {
-          onVerificationNeeded();
+        if (carrierError) {
+          console.error('Error checking carrier status:', carrierError);
+          throw new Error("Une erreur est survenue");
         }
-        return { success: false, needsVerification: true };
+
+        if (carrierData) {
+          if (carrierData.status === 'pending') {
+            setError("Votre demande est en cours de validation. Vous recevrez un email une fois votre compte validé.");
+            setShowErrorDialog(true);
+            return { success: false };
+          } else if (carrierData.status === 'rejected') {
+            setError("Email ou mot de passe incorrect");
+            setShowErrorDialog(true);
+            return { success: false };
+          }
+        }
       }
 
-      // Tentative de connexion
+      // Proceed with login attempt
       const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim()
@@ -78,9 +87,9 @@ export function useLoginForm({
         return { success: false, error: "Erreur de connexion" };
       }
 
-      // Vérifier le type d'utilisateur si requis
+      // Check user type if required
       if (requiredUserType && session.user.user_metadata?.user_type !== requiredUserType) {
-        setError(`Ce compte n'est pas un compte ${requiredUserType === 'client' ? 'client' : 'transporteur'}`);
+        setError(`Email ou mot de passe incorrect`);
         setShowErrorDialog(true);
         await supabase.auth.signOut();
         return { success: false };
