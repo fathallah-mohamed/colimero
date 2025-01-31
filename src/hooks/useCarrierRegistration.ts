@@ -13,10 +13,14 @@ export function useCarrierRegistration(onSuccess?: () => void) {
       setIsLoading(true);
       console.log("Starting registration process...");
 
+      // Generate a temporary password
+      const tempPassword = Math.random().toString(36).slice(-12);
+      console.log("Generated temporary password");
+
       // 1. First create the auth user with email confirmation disabled
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
-        password: values.password,
+        password: tempPassword,
         options: {
           data: {
             user_type: 'carrier',
@@ -50,7 +54,8 @@ export function useCarrierRegistration(onSuccess?: () => void) {
           authorized_routes: ['FR_TO_TN', 'TN_TO_FR'],
           total_deliveries: 0,
           cities_covered: 30,
-          status: 'pending'
+          status: 'pending',
+          password: tempPassword // Store the temporary password for later use
         });
 
       if (carrierError) throw carrierError;
@@ -81,7 +86,30 @@ export function useCarrierRegistration(onSuccess?: () => void) {
         if (servicesError) throw servicesError;
       }
 
-      // 5. Déconnexion immédiate pour éviter l'accès
+      // 5. Send registration notification emails
+      try {
+        // Send email to carrier
+        await supabase.functions.invoke('send-carrier-registration-email', {
+          body: {
+            email: values.email,
+            company_name: values.company_name
+          }
+        });
+
+        // Send email to admin
+        await supabase.functions.invoke('send-admin-notification-email', {
+          body: {
+            carrierEmail: values.email,
+            companyName: values.company_name,
+            adminEmail: 'admin@colimero.com'
+          }
+        });
+      } catch (emailError) {
+        console.error("Error sending notification emails:", emailError);
+        // Don't throw here as the registration was successful
+      }
+
+      // 6. Déconnexion immédiate pour éviter l'accès
       await supabase.auth.signOut();
 
       toast({
