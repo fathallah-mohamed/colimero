@@ -11,6 +11,12 @@ interface RegisterFormData {
   password: string;
 }
 
+interface ActivationCodeResult {
+  success: boolean;
+  activation_code: string;
+  message: string;
+}
+
 export async function registerClient(formData: RegisterFormData): Promise<RegistrationResult> {
   try {
     console.log('Starting client registration for:', formData.email);
@@ -40,12 +46,18 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
           throw codeError;
         }
 
+        const activationResult = newCodeData[0] as ActivationCodeResult;
+        
+        if (!activationResult.success) {
+          throw new Error(activationResult.message);
+        }
+
         // Send activation email
         const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
           body: { 
             email: formData.email.trim(),
             firstName: formData.firstName,
-            activationCode: newCodeData.activation_code,
+            activationCode: activationResult.activation_code,
             resend: true
           }
         });
