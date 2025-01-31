@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Mail } from "lucide-react";
+import { Mail, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface EmailVerificationDialogProps {
@@ -64,11 +64,6 @@ export function EmailVerificationDialog({
     } catch (error: any) {
       console.error('Error in handleResendEmail:', error);
       setError("Impossible d'envoyer l'email d'activation. Veuillez réessayer plus tard.");
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'envoyer l'email d'activation. Veuillez réessayer plus tard."
-      });
     } finally {
       setIsResending(false);
     }
@@ -102,7 +97,6 @@ export function EmailVerificationDialog({
         return;
       }
 
-      // Récupérer le nom du client pour l'email
       const { data: clientData } = await supabase
         .from('clients')
         .select('first_name, last_name')
@@ -111,7 +105,6 @@ export function EmailVerificationDialog({
 
       const clientName = clientData ? `${clientData.first_name} ${clientData.last_name}` : "Nouveau client";
 
-      // Envoyer les emails de confirmation
       const { error: emailError } = await supabase.functions.invoke('send-client-activation-emails', {
         body: { 
           clientEmail: email,
@@ -121,7 +114,6 @@ export function EmailVerificationDialog({
 
       if (emailError) {
         console.error("Error sending confirmation emails:", emailError);
-        // Continue même si l'envoi des emails échoue
       }
 
       toast({
@@ -134,11 +126,6 @@ export function EmailVerificationDialog({
     } catch (error: any) {
       console.error('Error in handleActivate:', error);
       setError("Une erreur est survenue lors de l'activation. Veuillez réessayer.");
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'activation"
-      });
     } finally {
       setIsActivating(false);
     }
@@ -157,9 +144,12 @@ export function EmailVerificationDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <p className="text-center text-gray-600">
-            Votre compte n'est pas encore activé. Veuillez vérifier votre boîte mail à l'adresse <span className="font-medium">{email}</span> et saisir le code reçu ci-dessous.
-          </p>
+          <Alert className="bg-blue-50 border-blue-200">
+            <CheckCircle2 className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-700">
+              Un email d'activation vous a été envoyé à l'adresse <span className="font-medium">{email}</span>
+            </AlertDescription>
+          </Alert>
 
           {error && (
             <Alert variant="destructive">

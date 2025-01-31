@@ -61,12 +61,8 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
       console.log("Registration result:", result);
 
       if (result.success) {
+        // Afficher immédiatement le dialogue de vérification
         setShowVerificationDialog(true);
-        toast({
-          title: "Compte créé avec succès",
-          description: "Un email d'activation vous a été envoyé",
-          variant: "default"
-        });
         
         if (result.type) {
           onSuccess(result.type);
