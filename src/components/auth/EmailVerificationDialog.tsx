@@ -47,6 +47,7 @@ export function EmailVerificationDialog({
       const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
         body: { 
           email,
+          activationCode: result.activation_code,
           resend: true
         }
       });
