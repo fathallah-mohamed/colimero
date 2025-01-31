@@ -10,3 +10,7 @@ verify_jwt = false
 [[edge_functions]]
 name = "send-admin-notification-email"
 verify_jwt = false
+
+[[edge_functions]]
+name = "send-approval-email"
+verify_jwt = false
