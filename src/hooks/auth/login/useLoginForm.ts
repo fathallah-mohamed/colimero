@@ -43,11 +43,9 @@ export function useLoginForm({
         if (carrierData) {
           if (carrierData.status === 'pending') {
             setError("Votre demande est en cours de validation. Vous recevrez un email une fois votre compte validé.");
-            setShowErrorDialog(true);
             return { success: false };
           } else if (carrierData.status === 'rejected') {
             setError("Email ou mot de passe incorrect");
-            setShowErrorDialog(true);
             return { success: false };
           }
         }
@@ -64,7 +62,6 @@ export function useLoginForm({
         
         if (signInError.message.includes('Invalid login credentials')) {
           setError('Email ou mot de passe incorrect');
-          setShowErrorDialog(true);
           return { success: false, error: 'Email ou mot de passe incorrect' };
         }
 
@@ -77,20 +74,17 @@ export function useLoginForm({
         }
 
         setError(signInError.message);
-        setShowErrorDialog(true);
         return { success: false, error: signInError.message };
       }
 
       if (!session) {
         setError("Erreur de connexion");
-        setShowErrorDialog(true);
         return { success: false, error: "Erreur de connexion" };
       }
 
       // Check user type if required
       if (requiredUserType && session.user.user_metadata?.user_type !== requiredUserType) {
         setError(`Email ou mot de passe incorrect`);
-        setShowErrorDialog(true);
         await supabase.auth.signOut();
         return { success: false };
       }
@@ -104,7 +98,6 @@ export function useLoginForm({
     } catch (error: any) {
       console.error("Login error:", error);
       setError(error.message || "Une erreur est survenue");
-      setShowErrorDialog(true);
       return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
