@@ -61,13 +61,15 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
       console.log("Registration result:", result);
 
       if (result.success) {
-        // Afficher immédiatement le dialogue de vérification
-        setShowVerificationDialog(true);
-        toast({
-          title: "Compte créé avec succès",
-          description: "Un email d'activation vous a été envoyé",
-        });
-        
+        if (result.needsVerification) {
+          setShowVerificationDialog(true);
+          toast({
+            title: "Compte créé avec succès",
+            description: "Veuillez vérifier votre email pour activer votre compte",
+          });
+        } else {
+          navigate('/connexion');
+        }
         if (result.type) {
           onSuccess(result.type);
         }
@@ -75,7 +77,7 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: result.error || "Une erreur est survenue lors de l'inscription"
+          description: result.error || "Une erreur est survenue lors de l'inscription",
         });
       }
     } catch (error: any) {
@@ -83,7 +85,7 @@ export function useRegisterForm(onSuccess: (type: RegistrationType) => void) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'inscription"
+        description: error.message || "Une erreur est survenue lors de l'inscription",
       });
     } finally {
       setIsLoading(false);

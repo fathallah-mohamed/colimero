@@ -53,7 +53,7 @@ export async function registerClient(formData: RegisterFormData): Promise<Regist
         }
 
         // Send activation email
-        console.log('Sending activation email for existing client');
+        console.log('Sending activation email for existing client with code:', activationResult.activation_code);
         const { error: emailError } = await supabase.functions.invoke('send-activation-email', {
           body: { 
             email: formData.email.trim(),
