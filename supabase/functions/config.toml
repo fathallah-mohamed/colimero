@@ -1,4 +1,12 @@
 project_id = "dsmahpgrhjoikcxuiqrw"
 
-[functions.send-carrier-registration-email]
+[global.env]
+RESEND_API_KEY = "re_"
+
+[[edge_functions]]
+name = "send-carrier-registration-email"
+verify_jwt = false
+
+[[edge_functions]]
+name = "send-admin-notification-email"
 verify_jwt = false

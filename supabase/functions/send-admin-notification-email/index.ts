@@ -9,9 +9,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface RegistrationEmailData {
-  email: string;
-  company_name: string;
+interface AdminNotificationData {
+  carrierEmail: string;
+  companyName: string;
+  adminEmail: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -20,32 +21,35 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, company_name }: RegistrationEmailData = await req.json();
-    console.log("Sending registration confirmation to:", email);
+    const { carrierEmail, companyName, adminEmail }: AdminNotificationData = await req.json();
+    console.log("Sending admin notification for new carrier:", carrierEmail);
 
     const emailResponse = await resend.emails.send({
       from: "Colimero <no-reply@colimero.fr>",
-      to: [email],
-      subject: "Confirmation de votre demande d'inscription transporteur",
+      to: [adminEmail],
+      subject: "Nouvelle demande d'inscription transporteur",
       html: `
-        <h1>Bienvenue sur Colimero !</h1>
-        <p>Nous avons bien reçu votre demande d'inscription en tant que transporteur pour ${company_name}.</p>
-        <p>Notre équipe va examiner votre dossier dans les plus brefs délais.</p>
-        <p>Vous recevrez un email de confirmation une fois votre compte validé par notre équipe.</p>
+        <h1>Nouvelle demande d'inscription transporteur</h1>
+        <p>Une nouvelle demande d'inscription transporteur a été reçue :</p>
+        <ul>
+          <li><strong>Entreprise :</strong> ${companyName}</li>
+          <li><strong>Email :</strong> ${carrierEmail}</li>
+        </ul>
+        <p>Veuillez vous connecter à la plateforme pour examiner cette demande.</p>
         <p>Cordialement,<br>L'équipe Colimero</p>
       `,
     });
 
-    console.log("Carrier confirmation email sent:", emailResponse);
+    console.log("Admin notification email sent:", emailResponse);
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error) {
-    console.error("Error sending carrier confirmation email:", error);
+    console.error("Error sending admin notification email:", error);
     return new Response(
-      JSON.stringify({ error: "Failed to send carrier confirmation email" }),
+      JSON.stringify({ error: "Failed to send admin notification email" }),
       {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
