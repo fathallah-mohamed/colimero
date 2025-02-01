@@ -1,22 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigation } from "@/hooks/use-navigation";
 import { cn } from "@/lib/utils";
 import MobileMenu from "@/components/navigation/MobileMenu";
 import { useSessionInitializer } from "./navigation/SessionInitializer";
 import { NavigationHeader } from "./navigation/NavigationHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigation } from "@/hooks/use-navigation";
 
 interface NavigationProps {
   showAuthDialog?: boolean;
   setShowAuthDialog?: (show: boolean) => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ 
-  showAuthDialog: externalShowAuthDialog, 
-  setShowAuthDialog: externalSetShowAuthDialog 
-}) => {
+export default function Navigation({ showAuthDialog: externalShowAuthDialog, setShowAuthDialog: externalSetShowAuthDialog }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { user, userType, handleLogout } = useNavigation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -156,6 +153,4 @@ const Navigation: React.FC<NavigationProps> = ({
       </div>
     </nav>
   );
-};
-
-export default Navigation;
+}
