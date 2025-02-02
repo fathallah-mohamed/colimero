@@ -36,6 +36,18 @@ export function generateDeliverySlip(booking: Booking) {
   doc.setFont("helvetica", "normal");
   doc.text(booking.recipient_phone, 20, 195);
 
+  // Poids
+  doc.setFont("helvetica", "bold");
+  doc.text("POIDS:", 20, 230);
+  doc.setFont("helvetica", "normal");
+  doc.text(`${booking.weight} KG`, 20, 245);
+
+  // Type de contenu
+  doc.setFont("helvetica", "bold");
+  doc.text("CONTENU:", 20, 280);
+  doc.setFont("helvetica", "normal");
+  doc.text(booking.item_type.toUpperCase(), 20, 295);
+
   // Save the PDF
   doc.save(`bon-livraison-${booking.tracking_number}.pdf`);
 }
