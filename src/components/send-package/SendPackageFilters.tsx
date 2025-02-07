@@ -47,6 +47,8 @@ export function SendPackageFilters({
     { value: "Annulée", label: "Annulée", color: "bg-red-500" }
   ];
 
+  console.log('Current route selection:', selectedRoute);
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue={tourType} onValueChange={(value) => setTourType(value as "public" | "private")}>
@@ -89,7 +91,10 @@ export function SendPackageFilters({
             {routes.map((route) => (
               <button
                 key={route.value}
-                onClick={() => setSelectedRoute(route.value)}
+                onClick={() => {
+                  console.log('Setting route to:', route.value);
+                  setSelectedRoute(route.value);
+                }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   selectedRoute === route.value
                     ? "bg-primary text-white shadow-md scale-105"

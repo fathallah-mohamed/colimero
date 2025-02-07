@@ -83,8 +83,7 @@ export function useTourData({
       // Filtrage par pays de départ et destination
       console.log('Filtering route:', {
         departure: departureCountry,
-        destination: destinationCountry,
-        fullRoute: `${departureCountry}_TO_${destinationCountry}`
+        destination: destinationCountry
       });
 
       query = query
