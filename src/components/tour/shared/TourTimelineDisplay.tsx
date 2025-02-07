@@ -65,7 +65,7 @@ export function TourTimelineDisplay({
       <div className="flex flex-col items-center gap-4">
         {status === "Programmée" && canEdit && (
           <Button 
-            onClick={() => handleStartCollection()}
+            onClick={handleStartCollection}
             className="w-full bg-primary hover:bg-primary/90"
           >
             <Truck className="h-4 w-4 mr-2" />
@@ -75,7 +75,7 @@ export function TourTimelineDisplay({
 
         {status === "Ramassage en cours" && canEdit && (
           <Button 
-            onClick={() => handleStartTransit()}
+            onClick={handleStartTransit}
             className="w-full bg-primary hover:bg-primary/90"
           >
             <Plane className="h-4 w-4 mr-2" />
@@ -85,7 +85,7 @@ export function TourTimelineDisplay({
 
         {status === "En transit" && canEdit && (
           <Button 
-            onClick={() => handleStartDelivery()}
+            onClick={handleStartDelivery}
             className="w-full bg-primary hover:bg-primary/90"
           >
             <Package className="h-4 w-4 mr-2" />
@@ -95,36 +95,36 @@ export function TourTimelineDisplay({
 
         {status === "Livraison en cours" && canEdit && (
           <Button 
-            onClick={() => handleComplete()}
+            onClick={handleComplete}
             className="w-full bg-primary hover:bg-primary/90"
           >
             <CheckCircle className="h-4 w-4 mr-2" />
             Terminer la tournée
           </Button>
         )}
+
+        {isActive && canEdit && (
+          <div className="flex justify-end gap-3 w-full">
+            <Button
+              variant="outline"
+              onClick={onEdit}
+              className="gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Modifier la tournée
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={() => setShowCancelDialog(true)}
+              className="gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              Annuler la tournée
+            </Button>
+          </div>
+        )}
       </div>
-
-      {isActive && canEdit && (
-        <div className="flex justify-end gap-3 mt-8">
-          <Button
-            variant="outline"
-            onClick={onEdit}
-            className="gap-2"
-          >
-            <Edit className="h-4 w-4" />
-            Modifier la tournée
-          </Button>
-
-          <Button
-            variant="destructive"
-            onClick={() => setShowCancelDialog(true)}
-            className="gap-2"
-          >
-            <XCircle className="h-4 w-4" />
-            Annuler la tournée
-          </Button>
-        </div>
-      )}
 
       <CancelTourDialog 
         open={showCancelDialog}
