@@ -20,52 +20,37 @@ export function SendPackageHero() {
       </div>
 
       {/* Cards Section - Absolutely positioned */}
-      <div className="absolute left-0 right-0 bottom-0 transform translate-y-1/2 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="absolute left-0 right-0 bottom-0 transform translate-y-1/2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row gap-4 justify-center">
             {/* Card 1 */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex flex-col items-center text-center">
-                <div className="bg-gradient-to-br from-primary/10 to-primary-light/20 p-4 rounded-xl mb-6">
-                  <Package2 className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Expédition Facile
-                </h3>
-                <p className="text-gray-600">
-                  Processus d'envoi simplifié de bout en bout pour une expérience fluide
-                </p>
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3 w-full md:w-auto">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Package2 className="h-5 w-5 text-primary" />
               </div>
+              <p className="text-sm font-medium text-gray-800">
+                Expédition simplifiée
+              </p>
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex flex-col items-center text-center">
-                <div className="bg-gradient-to-br from-primary/10 to-primary-light/20 p-4 rounded-xl mb-6">
-                  <Truck className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Transporteurs Vérifiés
-                </h3>
-                <p className="text-gray-600">
-                  Un réseau de partenaires de confiance sélectionnés avec soin
-                </p>
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3 w-full md:w-auto">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Truck className="h-5 w-5 text-primary" />
               </div>
+              <p className="text-sm font-medium text-gray-800">
+                Transporteurs vérifiés
+              </p>
             </div>
 
             {/* Card 3 */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="flex flex-col items-center text-center">
-                <div className="bg-gradient-to-br from-primary/10 to-primary-light/20 p-4 rounded-xl mb-6">
-                  <Shield className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Sécurité Garantie
-                </h3>
-                <p className="text-gray-600">
-                  Protection maximale et suivi en temps réel de vos colis
-                </p>
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3 w-full md:w-auto">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Shield className="h-5 w-5 text-primary" />
               </div>
+              <p className="text-sm font-medium text-gray-800">
+                Sécurité garantie
+              </p>
             </div>
           </div>
         </div>
