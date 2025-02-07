@@ -102,29 +102,29 @@ export function TourTimelineDisplay({
             Terminer la tournée
           </Button>
         )}
-
-        {isActive && canEdit && (
-          <div className="flex justify-end gap-3 w-full">
-            <Button
-              variant="outline"
-              onClick={onEdit}
-              className="gap-2"
-            >
-              <Edit className="h-4 w-4" />
-              Modifier la tournée
-            </Button>
-
-            <Button
-              variant="destructive"
-              onClick={() => setShowCancelDialog(true)}
-              className="gap-2"
-            >
-              <XCircle className="h-4 w-4" />
-              Annuler la tournée
-            </Button>
-          </div>
-        )}
       </div>
+
+      {isActive && canEdit && (
+        <div className="flex justify-end gap-3 w-full">
+          <Button
+            variant="outline"
+            onClick={onEdit}
+            className="gap-2"
+          >
+            <Edit className="h-4 w-4" />
+            Modifier la tournée
+          </Button>
+
+          <Button
+            variant="destructive"
+            onClick={() => setShowCancelDialog(true)}
+            className="gap-2"
+          >
+            <XCircle className="h-4 w-4" />
+            Annuler la tournée
+          </Button>
+        </div>
+      )}
 
       <CancelTourDialog 
         open={showCancelDialog}
