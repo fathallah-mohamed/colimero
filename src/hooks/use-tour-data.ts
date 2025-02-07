@@ -77,8 +77,11 @@ export function useTourData({
           )
         `);
 
-      // Modification ici pour gérer correctement le filtrage par pays
-      if (departureCountry === "TN") {
+      // Correction du filtrage par pays en utilisant la route complète
+      const route = `${departureCountry}_TO_${destinationCountry}`;
+      console.log('Filtering by route:', route);
+      
+      if (route === 'TN_TO_FR') {
         query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
       } else {
         query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
