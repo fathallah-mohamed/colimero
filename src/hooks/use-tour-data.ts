@@ -77,13 +77,14 @@ export function useTourData({
           )
         `);
 
-      // Correction du filtrage par pays en utilisant la route complète
-      const route = `${departureCountry}_TO_${destinationCountry}`;
-      console.log('Filtering by route:', route);
+      // Correction du filtrage par pays
+      console.log('Current route selection:', `${departureCountry}_TO_${destinationCountry}`);
       
-      if (route === 'TN_TO_FR') {
+      if (departureCountry === 'TN' && destinationCountry === 'FR') {
+        console.log('Filtering for TN to FR route');
         query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
       } else {
+        console.log('Filtering for FR to TN route');
         query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
       }
 
@@ -107,7 +108,7 @@ export function useTourData({
         return;
       }
 
-      console.log('Fetched tours:', toursData);
+      console.log('Raw tours data:', toursData);
 
       const transformedTours = toursData?.map(tour => {
         const routeData = typeof tour.route === 'string' 
@@ -145,6 +146,7 @@ export function useTourData({
         } as Tour;
       }) || [];
 
+      console.log('Transformed tours:', transformedTours);
       setTours(transformedTours);
     } catch (error) {
       console.error('Error in fetchTours:', error);
