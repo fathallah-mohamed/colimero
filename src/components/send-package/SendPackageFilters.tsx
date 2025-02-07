@@ -30,6 +30,7 @@ export function SendPackageFilters({
 }: SendPackageFiltersProps) {
   const [openRoute, setOpenRoute] = React.useState(false);
   const [openStatus, setOpenStatus] = React.useState(false);
+  const [openType, setOpenType] = React.useState(false);
 
   React.useEffect(() => {
     if (selectedStatus === "all") {
@@ -73,11 +74,52 @@ export function SendPackageFilters({
     setOpenStatus(false);
   };
 
+  const handleTypeSelect = (type: "public" | "private") => {
+    setTourType(type);
+    setOpenType(false);
+  };
+
   return (
     <div className="space-y-4">
       {/* Version Mobile */}
       <div className="lg:hidden">
         <div className="flex flex-wrap gap-2">
+          <Sheet open={openType} onOpenChange={setOpenType}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                {tourType === "public" ? (
+                  <Globe className="h-4 w-4" />
+                ) : (
+                  <Lock className="h-4 w-4" />
+                )}
+                {tourType === "public" ? "Publique" : "Privée"}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-xl bg-white p-6">
+              <SheetHeader className="mb-6">
+                <SheetTitle className="text-xl font-semibold text-center">Type de tournée</SheetTitle>
+              </SheetHeader>
+              <div className="grid gap-3">
+                <Button
+                  variant={tourType === "public" ? "default" : "outline"}
+                  onClick={() => handleTypeSelect("public")}
+                  className="w-full h-12 text-base flex items-center gap-2 justify-center"
+                >
+                  <Globe className="h-4 w-4" />
+                  Tournées publiques
+                </Button>
+                <Button
+                  variant={tourType === "private" ? "default" : "outline"}
+                  onClick={() => handleTypeSelect("private")}
+                  className="w-full h-12 text-base flex items-center gap-2 justify-center"
+                >
+                  <Lock className="h-4 w-4" />
+                  Tournées privées
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+
           <Sheet open={openRoute} onOpenChange={setOpenRoute}>
             <SheetTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
