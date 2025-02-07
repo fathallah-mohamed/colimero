@@ -351,6 +351,72 @@ export type Database = {
           },
         ]
       }
+      carrier_registration_requests: {
+        Row: {
+          address: string
+          avatar_url: string | null
+          company_name: string
+          coverage_area: string[] | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          password: string | null
+          phone: string
+          phone_secondary: string | null
+          price_per_kg: number | null
+          reason: string | null
+          services: string[] | null
+          siret: string
+          status: string | null
+          total_capacity: number | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          avatar_url?: string | null
+          company_name: string
+          coverage_area?: string[] | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          password?: string | null
+          phone: string
+          phone_secondary?: string | null
+          price_per_kg?: number | null
+          reason?: string | null
+          services?: string[] | null
+          siret: string
+          status?: string | null
+          total_capacity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          avatar_url?: string | null
+          company_name?: string
+          coverage_area?: string[] | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          password?: string | null
+          phone?: string
+          phone_secondary?: string | null
+          price_per_kg?: number | null
+          reason?: string | null
+          services?: string[] | null
+          siret?: string
+          status?: string | null
+          total_capacity?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       carrier_services: {
         Row: {
           carrier_id: string
