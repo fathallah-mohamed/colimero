@@ -28,6 +28,9 @@ export function SendPackageFilters({
   sortBy,
   setSortBy
 }: SendPackageFiltersProps) {
+  const [openRoute, setOpenRoute] = React.useState(false);
+  const [openStatus, setOpenStatus] = React.useState(false);
+
   React.useEffect(() => {
     if (selectedStatus === "all") {
       setSelectedStatus("Programmée");
@@ -60,12 +63,22 @@ export function SendPackageFilters({
     }
   };
 
+  const handleRouteSelect = (route: string) => {
+    setSelectedRoute(route);
+    setOpenRoute(false);
+  };
+
+  const handleStatusSelect = (status: TourStatus) => {
+    setSelectedStatus(status);
+    setOpenStatus(false);
+  };
+
   return (
     <div className="space-y-4">
       {/* Version Mobile */}
       <div className="lg:hidden">
         <div className="flex flex-wrap gap-2">
-          <Sheet>
+          <Sheet open={openRoute} onOpenChange={setOpenRoute}>
             <SheetTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -79,14 +92,14 @@ export function SendPackageFilters({
               <div className="grid gap-3">
                 <Button
                   variant={selectedRoute === "FR_TO_TN" ? "default" : "outline"}
-                  onClick={() => setSelectedRoute("FR_TO_TN")}
+                  onClick={() => handleRouteSelect("FR_TO_TN")}
                   className="w-full h-12 text-base"
                 >
                   France → Tunisie
                 </Button>
                 <Button
                   variant={selectedRoute === "TN_TO_FR" ? "default" : "outline"}
-                  onClick={() => setSelectedRoute("TN_TO_FR")}
+                  onClick={() => handleRouteSelect("TN_TO_FR")}
                   className="w-full h-12 text-base"
                 >
                   Tunisie → France
@@ -95,7 +108,7 @@ export function SendPackageFilters({
             </SheetContent>
           </Sheet>
 
-          <Sheet>
+          <Sheet open={openStatus} onOpenChange={setOpenStatus}>
             <SheetTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
                 <Package2 className="h-4 w-4" />
@@ -111,7 +124,7 @@ export function SendPackageFilters({
                   <Button
                     key={status}
                     variant={selectedStatus === status ? "default" : "outline"}
-                    onClick={() => setSelectedStatus(status as TourStatus)}
+                    onClick={() => handleStatusSelect(status as TourStatus)}
                     className="w-full h-12 text-base justify-start px-4"
                   >
                     {status}
