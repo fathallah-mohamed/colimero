@@ -75,9 +75,14 @@ export function useTourData({
             terms_accepted,
             customs_declaration
           )
-        `)
-        .eq('departure_country', departureCountry)
-        .eq('destination_country', destinationCountry);
+        `);
+
+      // Modification ici pour gérer correctement le filtrage par pays
+      if (departureCountry === "TN") {
+        query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
+      } else {
+        query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
+      }
 
       if (carrierOnly && user) {
         console.log('Filtering for carrier:', user.id);
