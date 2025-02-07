@@ -2,8 +2,9 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Globe, Lock } from "lucide-react";
+import { Globe, Lock, MapPin, Clock } from "lucide-react";
 import type { TourStatus } from "@/types/tour";
+import { Badge } from "@/components/ui/badge";
 
 interface SendPackageFiltersProps {
   selectedRoute: string;
@@ -31,6 +32,20 @@ export function SendPackageFilters({
       setSelectedStatus("Programmée");
     }
   }, []);
+
+  const routes = [
+    { value: "FR_TO_TN", label: "France → Tunisie", icon: "🇫🇷 → 🇹🇳" },
+    { value: "TN_TO_FR", label: "Tunisie → France", icon: "🇹🇳 → 🇫🇷" }
+  ];
+
+  const statuses = [
+    { value: "Programmée", label: "Programmée", color: "bg-blue-500" },
+    { value: "Ramassage en cours", label: "Ramassage", color: "bg-yellow-500" },
+    { value: "En transit", label: "En transit", color: "bg-purple-500" },
+    { value: "Livraison en cours", label: "Livraison", color: "bg-green-500" },
+    { value: "Terminée", label: "Terminée", color: "bg-gray-500" },
+    { value: "Annulée", label: "Annulée", color: "bg-red-500" }
+  ];
 
   return (
     <div className="space-y-6">
@@ -63,46 +78,59 @@ export function SendPackageFilters({
         </TabsContent>
       </Tabs>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+      <div className="grid gap-6">
+        {/* Route Filter */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-gray-500" />
             Trajet
           </label>
-          <Select value={selectedRoute} onValueChange={setSelectedRoute}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un trajet" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="FR_TO_TN">France → Tunisie</SelectItem>
-              <SelectItem value="TN_TO_FR">Tunisie → France</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap gap-2">
+            {routes.map((route) => (
+              <button
+                key={route.value}
+                onClick={() => setSelectedRoute(route.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedRoute === route.value
+                    ? "bg-primary text-white shadow-md scale-105"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                <span className="mr-2">{route.icon}</span>
+                {route.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+        {/* Status Filter */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-gray-500" />
             Statut
           </label>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filtrer par statut" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="Programmée">Programmée</SelectItem>
-              <SelectItem value="Ramassage en cours">Ramassage en cours</SelectItem>
-              <SelectItem value="En transit">En transit</SelectItem>
-              <SelectItem value="Livraison en cours">Livraison en cours</SelectItem>
-              <SelectItem value="Terminée">Terminée</SelectItem>
-              <SelectItem value="Annulée">Annulée</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap gap-2">
+            {statuses.map((status) => (
+              <button
+                key={status.value}
+                onClick={() => setSelectedStatus(status.value as TourStatus)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedStatus === status.value
+                    ? "ring-2 ring-primary ring-offset-2 shadow-md scale-105"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${status.color}`} />
+                  {status.label}
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-            Trier par
-          </label>
+        {/* Sort Filter */}
+        <div className="w-full sm:w-72">
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger>
               <SelectValue placeholder="Trier par" />
