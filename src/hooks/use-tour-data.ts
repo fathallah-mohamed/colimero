@@ -77,16 +77,22 @@ export function useTourData({
           )
         `);
 
-      // Correction du filtrage par pays
-      console.log('Current route selection:', `${departureCountry}_TO_${destinationCountry}`);
-      
-      if (departureCountry === 'TN' && destinationCountry === 'FR') {
-        console.log('Filtering for TN to FR route');
-        query = query.eq('departure_country', 'TN').eq('destination_country', 'FR');
-      } else {
-        console.log('Filtering for FR to TN route');
-        query = query.eq('departure_country', 'FR').eq('destination_country', 'TN');
-      }
+      // Log la requête avant le filtrage
+      console.log('Initial query:', query);
+
+      // Filtrage par pays de départ et destination
+      console.log('Filtering route:', {
+        departure: departureCountry,
+        destination: destinationCountry,
+        fullRoute: `${departureCountry}_TO_${destinationCountry}`
+      });
+
+      query = query
+        .eq('departure_country', departureCountry)
+        .eq('destination_country', destinationCountry);
+
+      // Log après le filtrage par pays
+      console.log('Query after country filtering:', query);
 
       if (carrierOnly && user) {
         console.log('Filtering for carrier:', user.id);
