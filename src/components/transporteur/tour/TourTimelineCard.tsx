@@ -64,7 +64,7 @@ export function TourTimelineCard({
   };
 
   const isCarrier = userType === 'carrier';
-  const canEdit = isCarrier && tour.carrier_id === supabase.auth.user()?.id;
+  const canEdit = isCarrier && tour.carrier_id === supabase.auth.getSession().then(({ data }) => data.session?.user?.id);
 
   return (
     <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
@@ -104,7 +104,7 @@ export function TourTimelineCard({
                   onStatusChange={onStatusChange}
                   onBookingStatusChange={onBookingStatusChange}
                   userType={userType}
-                  canEdit={canEdit}
+                  canEdit={true}
                   variant="carrier"
                 />
 
