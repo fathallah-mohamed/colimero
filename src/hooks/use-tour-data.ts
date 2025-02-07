@@ -24,7 +24,6 @@ export function useTourData({
     try {
       setLoading(true);
       
-      // Get the current user's ID first
       const { data: { user } } = await supabase.auth.getUser();
       
       console.log('Fetching tours with filters:', { 
@@ -36,7 +35,6 @@ export function useTourData({
         userId: user?.id 
       });
 
-      // If we're in carrier mode and there's no user, return empty array
       if (carrierOnly && !user) {
         console.log('No authenticated user found for carrier mode');
         setTours([]);
@@ -81,7 +79,6 @@ export function useTourData({
         .eq('departure_country', departureCountry)
         .eq('destination_country', destinationCountry);
 
-      // Only apply carrier filter if we're in carrier mode and have a valid user
       if (carrierOnly && user) {
         console.log('Filtering for carrier:', user.id);
         query = query.eq('carrier_id', user.id);
@@ -104,7 +101,6 @@ export function useTourData({
 
       console.log('Fetched tours:', toursData);
 
-      // Transform the data to match the Tour type
       const transformedTours = toursData?.map(tour => {
         const routeData = typeof tour.route === 'string' 
           ? JSON.parse(tour.route) 

@@ -26,7 +26,6 @@ export function SendPackageFilters({
   sortBy,
   setSortBy
 }: SendPackageFiltersProps) {
-  // Définir "Programmée" comme statut par défaut lors du premier rendu
   React.useEffect(() => {
     if (selectedStatus === "all") {
       setSelectedStatus("Programmée");

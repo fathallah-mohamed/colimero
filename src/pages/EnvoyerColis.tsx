@@ -17,10 +17,14 @@ export default function EnvoyerColis() {
   const [tourType, setTourType] = useState<"public" | "private">("public");
   const [sortBy, setSortBy] = useState<string>("departure_asc");
   
+  // Extraire les pays de départ et d'arrivée du trajet sélectionné
+  const departureCountry = selectedRoute.split('_TO_')[0];
+  const destinationCountry = selectedRoute.split('_TO_')[1];
+  
   const {
     loading,
     tours,
-  } = useTours();
+  } = useTours(false);
 
   const {
     showAuthDialog,
@@ -35,7 +39,8 @@ export default function EnvoyerColis() {
   const filteredTours = tours?.filter(tour => {
     const typeMatch = tour.type === tourType;
     const statusMatch = selectedStatus === "all" || tour.status === selectedStatus;
-    return typeMatch && statusMatch;
+    const routeMatch = tour.departure_country === departureCountry && tour.destination_country === destinationCountry;
+    return typeMatch && statusMatch && routeMatch;
   });
 
   // Tri des tournées
@@ -59,7 +64,6 @@ export default function EnvoyerColis() {
       <Navigation />
       <SendPackageHero />
       
-      {/* Bloc de présentation */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/20 py-12">
         <div className="container mx-auto px-6 max-w-[1400px]">
           <div className="text-center mb-10">
