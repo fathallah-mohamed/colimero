@@ -11,7 +11,7 @@ import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { BookingStatus } from "@/types/booking";
 
 interface TourTimelineCardProps {
@@ -38,7 +38,19 @@ export function TourTimelineCard({
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkCarrierPermissions = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const isCarrier = userType === 'carrier';
+      const isOwner = session?.user?.id === tour.carrier_id;
+      setCanEdit(isCarrier && isOwner);
+    };
+
+    checkCarrierPermissions();
+  }, [userType, tour.carrier_id]);
 
   const handleBookingClick = async () => {
     if (!selectedPickupCity) return;
@@ -62,9 +74,6 @@ export function TourTimelineCard({
       navigate(`/reserver/${tour.id}?pickupCity=${encodeURIComponent(selectedPickupCity)}`);
     }
   };
-
-  const isCarrier = userType === 'carrier';
-  const canEdit = isCarrier && tour.carrier_id === supabase.auth.getSession().then(({ data }) => data.session?.user?.id);
 
   return (
     <div className="bg-white rounded-xl overflow-hidden transition-all duration-200 border border-gray-100 hover:shadow-lg shadow-md">
@@ -104,11 +113,11 @@ export function TourTimelineCard({
                   onStatusChange={onStatusChange}
                   onBookingStatusChange={onBookingStatusChange}
                   userType={userType}
-                  canEdit={true}
+                  canEdit={canEdit}
                   variant="carrier"
                 />
 
-                {!isCarrier && (
+                {!userType && (
                   <>
                     <div>
                       <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
