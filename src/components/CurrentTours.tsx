@@ -66,12 +66,17 @@ export default function CurrentTours() {
 
   const handleStatusChange = async (tourId: number, newStatus: TourStatus) => {
     try {
+      console.log("Updating tour status:", tourId, newStatus);
+      
       const { error } = await supabase
         .from('tours')
         .update({ status: newStatus })
         .eq('id', tourId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating tour status:', error);
+        throw error;
+      }
 
       await queryClient.invalidateQueries({ queryKey: ['next-tour'] });
       await queryClient.invalidateQueries({ queryKey: ['tours'] });
