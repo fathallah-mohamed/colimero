@@ -34,7 +34,6 @@ export function SendPackageFilters({
     }
   }, []);
 
-  // Fonction pour obtenir le texte du trajet sélectionné
   const getRouteDisplayText = (route: string) => {
     switch (route) {
       case "FR_TO_TN":
@@ -46,7 +45,6 @@ export function SendPackageFilters({
     }
   };
 
-  // Fonction pour obtenir le texte du tri sélectionné
   const getSortDisplayText = (sort: string) => {
     switch (sort) {
       case "departure_asc":
@@ -74,22 +72,22 @@ export function SendPackageFilters({
                 {getRouteDisplayText(selectedRoute)}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[50vh]">
-              <SheetHeader>
-                <SheetTitle>Sélectionner le trajet</SheetTitle>
+            <SheetContent side="bottom" className="rounded-t-xl bg-white p-6">
+              <SheetHeader className="mb-6">
+                <SheetTitle className="text-xl font-semibold text-center">Sélectionner le trajet</SheetTitle>
               </SheetHeader>
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-3">
                 <Button
-                  variant={selectedRoute === "FR_TO_TN" ? "default" : "ghost"}
+                  variant={selectedRoute === "FR_TO_TN" ? "default" : "outline"}
                   onClick={() => setSelectedRoute("FR_TO_TN")}
-                  className="w-full justify-start"
+                  className="w-full h-12 text-base"
                 >
                   France → Tunisie
                 </Button>
                 <Button
-                  variant={selectedRoute === "TN_TO_FR" ? "default" : "ghost"}
+                  variant={selectedRoute === "TN_TO_FR" ? "default" : "outline"}
                   onClick={() => setSelectedRoute("TN_TO_FR")}
-                  className="w-full justify-start"
+                  className="w-full h-12 text-base"
                 >
                   Tunisie → France
                 </Button>
@@ -104,17 +102,17 @@ export function SendPackageFilters({
                 {selectedStatus === "all" ? "Tous" : selectedStatus}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[70vh]">
-              <SheetHeader>
-                <SheetTitle>Filtrer par statut</SheetTitle>
+            <SheetContent side="bottom" className="rounded-t-xl bg-white p-6">
+              <SheetHeader className="mb-6">
+                <SheetTitle className="text-xl font-semibold text-center">Filtrer par statut</SheetTitle>
               </SheetHeader>
-              <div className="grid gap-4 py-4">
+              <div className="grid gap-3">
                 {["Programmée", "Ramassage en cours", "En transit", "Livraison en cours", "Terminée", "Annulée"].map((status) => (
                   <Button
                     key={status}
-                    variant={selectedStatus === status ? "default" : "ghost"}
+                    variant={selectedStatus === status ? "default" : "outline"}
                     onClick={() => setSelectedStatus(status as TourStatus)}
-                    className="w-full justify-start"
+                    className="w-full h-12 text-base justify-start px-4"
                   >
                     {status}
                   </Button>

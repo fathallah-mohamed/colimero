@@ -11,22 +11,19 @@ const advantages = [
 
 export default function Advantages() {
   return (
-    <div className="bg-secondary py-24 sm:py-32">
+    <div className="bg-secondary py-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-2xl text-center mb-8">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Pourquoi choisir Colimero ?
           </h2>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
-            Des avantages exclusifs pour une expérience de livraison optimale
-          </p>
         </div>
-        <div className="mx-auto mt-16 max-w-2xl sm:mt-20">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {advantages.map((advantage) => (
-              <div key={advantage} className="flex items-center gap-x-3">
-                <CheckCircle className="h-6 w-6 text-primary" />
-                <span className="text-gray-700">{advantage}</span>
+              <div key={advantage} className="flex items-center gap-x-2 bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <CheckCircle className="h-4 w-4 flex-shrink-0 text-primary" />
+                <span className="text-sm text-gray-700 truncate">{advantage}</span>
               </div>
             ))}
           </div>
