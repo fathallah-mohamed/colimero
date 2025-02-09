@@ -102,7 +102,7 @@ export function TourTimelineDisplay({
         )}
       </div>
 
-      {isActive && canEdit && (
+      {isActive && canEdit && variant === 'carrier' && (
         <div className="flex justify-end gap-3 mt-8">
           <Button
             variant="outline"
