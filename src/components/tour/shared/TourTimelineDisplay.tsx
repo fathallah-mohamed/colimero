@@ -1,6 +1,6 @@
 import { TourStatus } from "@/types/tour";
 import { Button } from "@/components/ui/button";
-import { Edit, Truck, Plane, Package, CheckCircle, XCircle } from "lucide-react";
+import { Truck, Plane, Package, CheckCircle, XCircle } from "lucide-react";
 import { CancelTourDialog } from "../timeline/dialogs/CancelTourDialog";
 import { PendingBookingsDialog } from "../timeline/dialogs/PendingBookingsDialog";
 import { UncollectedBookingsDialog } from "../timeline/dialogs/UncollectedBookingsDialog";
@@ -42,11 +42,11 @@ export function TourTimelineDisplay({
     handleComplete
   } = useTourStatusManagement({ 
     tourId, 
-    onStatusChange: (newStatus) => onStatusChange?.(tourId, newStatus),
+    onStatusChange: (newStatus: TourStatus) => onStatusChange?.(tourId, newStatus),
     onBookingStatusChange
   });
 
-  // If the tour is cancelled, show cancelled message
+  // Si la tournée est annulée, montrer le message d'annulation
   if (status === "Annulée") {
     return (
       <div className="flex items-center justify-center p-4 bg-red-50 rounded-lg">
@@ -102,24 +102,11 @@ export function TourTimelineDisplay({
         )}
       </div>
 
-      {isActive && canEdit && (
-        <div className="flex justify-end gap-3 mt-8">
-          <Button
-            variant="outline"
-            onClick={onEdit}
-            className="gap-2"
-          >
-            <Edit className="h-4 w-4" />
-            Modifier la tournée
-          </Button>
-
-          <CancelTourDialog 
-            open={showCancelDialog}
-            onOpenChange={setShowCancelDialog}
-            onCancel={handleCancel}
-          />
-        </div>
-      )}
+      <CancelTourDialog 
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        onCancel={handleCancel}
+      />
 
       <PendingBookingsDialog 
         open={showPendingBookingsDialog}
