@@ -42,11 +42,11 @@ export function TourTimelineDisplay({
     handleComplete
   } = useTourStatusManagement({ 
     tourId, 
-    onStatusChange,
+    onStatusChange: (newStatus) => onStatusChange?.(tourId, newStatus),
     onBookingStatusChange
   });
 
-  // Si la tournée est annulée, montrer le message d'annulation
+  // If the tour is cancelled, show cancelled message
   if (status === "Annulée") {
     return (
       <div className="flex items-center justify-center p-4 bg-red-50 rounded-lg">
@@ -106,29 +106,20 @@ export function TourTimelineDisplay({
         <div className="flex justify-end gap-3 mt-8">
           <Button
             variant="outline"
-            onClick={() => setShowCancelDialog(true)}
-            className="gap-2 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border-red-200"
-          >
-            <XCircle className="h-4 w-4" />
-            Annuler la tournée
-          </Button>
-
-          <Button
-            variant="outline"
             onClick={onEdit}
             className="gap-2"
           >
             <Edit className="h-4 w-4" />
             Modifier la tournée
           </Button>
+
+          <CancelTourDialog 
+            open={showCancelDialog}
+            onOpenChange={setShowCancelDialog}
+            onCancel={handleCancel}
+          />
         </div>
       )}
-
-      <CancelTourDialog 
-        open={showCancelDialog}
-        onOpenChange={setShowCancelDialog}
-        onCancel={handleCancel}
-      />
 
       <PendingBookingsDialog 
         open={showPendingBookingsDialog}
