@@ -1,6 +1,6 @@
 import { TourStatus } from "@/types/tour";
 import { Button } from "@/components/ui/button";
-import { Truck, Plane, Package, CheckCircle, XCircle } from "lucide-react";
+import { Edit, Truck, Plane, Package, CheckCircle, XCircle } from "lucide-react";
 import { CancelTourDialog } from "../timeline/dialogs/CancelTourDialog";
 import { PendingBookingsDialog } from "../timeline/dialogs/PendingBookingsDialog";
 import { UncollectedBookingsDialog } from "../timeline/dialogs/UncollectedBookingsDialog";
@@ -101,6 +101,28 @@ export function TourTimelineDisplay({
           </Button>
         )}
       </div>
+
+      {isActive && canEdit && variant === 'carrier' && (
+        <div className="flex justify-end gap-3 mt-8">
+          <Button
+            variant="outline"
+            onClick={() => setShowCancelDialog(true)}
+            className="gap-2 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border-red-200"
+          >
+            <XCircle className="h-4 w-4" />
+            Annuler la tournée
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={onEdit}
+            className="gap-2"
+          >
+            <Edit className="h-4 w-4" />
+            Modifier la tournée
+          </Button>
+        </div>
+      )}
 
       <CancelTourDialog 
         open={showCancelDialog}
