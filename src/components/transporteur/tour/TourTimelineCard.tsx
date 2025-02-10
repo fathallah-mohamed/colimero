@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { TourCardHeader } from "@/components/transporteur/TourCardHeader";
 import { Button } from "@/components/ui/button";
 import { Tour, TourStatus } from "@/types/tour";
@@ -11,7 +12,6 @@ import { ApprovalRequestDialog } from "@/components/tour/ApprovalRequestDialog";
 import { AccessDeniedMessage } from "@/components/tour/AccessDeniedMessage";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import type { BookingStatus } from "@/types/booking";
 
 interface TourTimelineCardProps {
@@ -38,19 +38,25 @@ export function TourTimelineCard({
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showAccessDeniedDialog, setShowAccessDeniedDialog] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [canEdit, setCanEdit] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkCarrierPermissions = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const isCarrier = userType === 'carrier';
-      const isOwner = session?.user?.id === tour.carrier_id;
-      setCanEdit(isCarrier && isOwner);
-    };
+  const isBookingEnabled = () => {
+    return selectedPickupCity && tour.status === "Programmée" && userType !== 'admin';
+  };
 
-    checkCarrierPermissions();
-  }, [userType, tour.carrier_id]);
+  const isPickupSelectionEnabled = () => {
+    return tour.status === "Programmée" && userType !== 'admin';
+  };
+
+  const getBookingButtonText = () => {
+    if (tour.status === "Annulée") return "Cette tournée a été annulée";
+    if (userType === 'admin') return "Les administrateurs ne peuvent pas effectuer de réservations";
+    if (tour.status === "Ramassage en cours") return "Cette tournée est en cours de collecte";
+    if (tour.status === "En transit") return "Cette tournée est en cours de livraison";
+    if (tour.status === "Terminée") return "Cette tournée est terminée";
+    if (!selectedPickupCity) return "Sélectionnez un point de collecte pour réserver";
+    return tour.type === 'private' ? "Demander l'approbation" : "Réserver sur cette tournée";
+  };
 
   const handleBookingClick = async () => {
     if (!selectedPickupCity) return;
@@ -110,42 +116,31 @@ export function TourTimelineCard({
                 <TourTimelineDisplay 
                   status={tour.status} 
                   tourId={tour.id}
+                  variant="client"
                   onStatusChange={onStatusChange}
                   onBookingStatusChange={onBookingStatusChange}
-                  userType={userType}
-                  canEdit={canEdit}
-                  variant="carrier"
                 />
 
-                {!userType && (
-                  <>
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
-                      <SelectableCollectionPointsList
-                        points={tour.route}
-                        selectedPoint={selectedPickupCity || ''}
-                        onPointSelect={setSelectedPickupCity}
-                        isSelectionEnabled={tour.status === "Programmée"}
-                        tourDepartureDate={tour.departure_date}
-                      />
-                    </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Points de collecte</h4>
+                  <SelectableCollectionPointsList
+                    points={tour.route}
+                    selectedPoint={selectedPickupCity || ''}
+                    onPointSelect={setSelectedPickupCity}
+                    isSelectionEnabled={isPickupSelectionEnabled()}
+                    tourDepartureDate={tour.departure_date}
+                  />
+                </div>
 
-                    <div>
-                      <Button 
-                        onClick={handleBookingClick}
-                        className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
-                        disabled={!selectedPickupCity || tour.status !== "Programmée"}
-                      >
-                        {!selectedPickupCity 
-                          ? "Sélectionnez un point de collecte pour réserver"
-                          : tour.type === 'private' 
-                            ? "Demander l'approbation" 
-                            : "Réserver sur cette tournée"
-                        }
-                      </Button>
-                    </div>
-                  </>
-                )}
+                <div>
+                  <Button 
+                    onClick={handleBookingClick}
+                    className="w-full bg-[#0FA0CE] hover:bg-[#0FA0CE]/90 text-white"
+                    disabled={!isBookingEnabled()}
+                  >
+                    {getBookingButtonText()}
+                  </Button>
+                </div>
               </div>
             </motion.div>
           )}
